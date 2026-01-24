@@ -7,8 +7,8 @@ import enum
 
 
 class UserRole(str, enum.Enum):
-    ADMIN = "admin"
-    CAREGIVER = "caregiver"
+    admin = "admin"
+    caregiver = "caregiver"
 
 
 class User(Base, TimestampMixin):
@@ -18,7 +18,7 @@ class User(Base, TimestampMixin):
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
-    role = Column(Enum(UserRole), default=UserRole.CAREGIVER, nullable=False)
+    role = Column(Enum(UserRole), default=UserRole.caregiver, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     phone = Column(String(20), nullable=True)
     
