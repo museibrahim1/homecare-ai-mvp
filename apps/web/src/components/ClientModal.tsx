@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { 
   X, User, Phone, MapPin, AlertCircle, Heart, FileText, 
-  Shield, Calendar, Save, Loader2, Trash2
+  Shield, Calendar, Save, Loader2, Trash2, Clock, History,
+  Building, CreditCard, Mail, Home
 } from 'lucide-react';
 
 interface Client {
@@ -42,10 +43,15 @@ interface Client {
   insurance_id?: string;
   medicaid_id?: string;
   medicare_id?: string;
+  billing_address?: string;
   preferred_days?: string;
   preferred_times?: string;
+  intake_date?: string;
+  discharge_date?: string;
   status?: string;
   notes?: string;
+  external_id?: string;
+  external_source?: string;
 }
 
 interface ClientModalProps {
@@ -56,7 +62,7 @@ interface ClientModalProps {
   onDelete?: (clientId: string) => Promise<void>;
 }
 
-type Tab = 'personal' | 'contact' | 'medical' | 'care' | 'insurance';
+type Tab = 'personal' | 'contact' | 'emergency' | 'medical' | 'care' | 'insurance' | 'scheduling';
 
 export default function ClientModal({ client, isOpen, onClose, onSave, onDelete }: ClientModalProps) {
   const [activeTab, setActiveTab] = useState<Tab>('personal');
@@ -117,10 +123,12 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'personal', label: 'Personal', icon: <User className="w-4 h-4" /> },
-    { id: 'contact', label: 'Contact & Emergency', icon: <Phone className="w-4 h-4" /> },
+    { id: 'contact', label: 'Contact', icon: <Phone className="w-4 h-4" /> },
+    { id: 'emergency', label: 'Emergency', icon: <AlertCircle className="w-4 h-4" /> },
     { id: 'medical', label: 'Medical', icon: <Heart className="w-4 h-4" /> },
     { id: 'care', label: 'Care Plan', icon: <FileText className="w-4 h-4" /> },
     { id: 'insurance', label: 'Insurance', icon: <Shield className="w-4 h-4" /> },
+    { id: 'scheduling', label: 'Scheduling', icon: <Calendar className="w-4 h-4" /> },
   ];
 
   const InputField = ({ label, field, type = 'text', placeholder = '', required = false }: {
@@ -200,19 +208,19 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-700 px-6">
+        <div className="flex border-b border-slate-700 px-4 overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+              className={`flex items-center gap-2 px-3 py-3 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-purple-500 text-purple-400'
                   : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
               {tab.icon}
-              {tab.label}
+              <span className="text-sm">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -220,84 +228,143 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {activeTab === 'personal' && (
-            <div className="grid grid-cols-2 gap-4">
-              <InputField label="Full Name" field="full_name" required placeholder="John Smith" />
-              <InputField label="Preferred Name" field="preferred_name" placeholder="Johnny" />
-              <InputField label="Date of Birth" field="date_of_birth" type="date" />
-              <SelectField label="Gender" field="gender" options={[
-                { value: 'male', label: 'Male' },
-                { value: 'female', label: 'Female' },
-                { value: 'other', label: 'Other' },
-              ]} />
-              <InputField label="Email" field="email" type="email" placeholder="john@example.com" />
-              <SelectField label="Status" field="status" options={[
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' },
-                { value: 'pending', label: 'Pending' },
-              ]} />
-              <div className="col-span-2">
-                <TextArea label="Notes" field="notes" placeholder="General notes about this client..." />
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="Full Name" field="full_name" required placeholder="John Smith" />
+                <InputField label="Preferred Name" field="preferred_name" placeholder="Johnny" />
+                <InputField label="Date of Birth" field="date_of_birth" type="date" />
+                <SelectField label="Gender" field="gender" options={[
+                  { value: 'male', label: 'Male' },
+                  { value: 'female', label: 'Female' },
+                  { value: 'other', label: 'Other' },
+                  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+                ]} />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <SelectField label="Status" field="status" options={[
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' },
+                  { value: 'pending', label: 'Pending' },
+                  { value: 'discharged', label: 'Discharged' },
+                ]} />
+                <InputField label="Intake Date" field="intake_date" type="date" />
+              </div>
+              <TextArea label="General Notes" field="notes" placeholder="Any general notes about this client..." rows={4} />
             </div>
           )}
 
           {activeTab === 'contact' && (
             <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Contact Information</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <InputField label="Primary Phone" field="phone" placeholder="555-1234" />
-                  <InputField label="Secondary Phone" field="phone_secondary" placeholder="555-5678" />
-                  <div className="col-span-2">
-                    <InputField label="Address" field="address" placeholder="123 Main Street" />
-                  </div>
+              <div className="flex items-center gap-2 mb-4">
+                <Phone className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Phone Numbers</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="Primary Phone" field="phone" placeholder="(555) 123-4567" />
+                <InputField label="Secondary Phone" field="phone_secondary" placeholder="(555) 987-6543" />
+              </div>
+
+              <div className="flex items-center gap-2 mb-4 mt-8">
+                <Mail className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Email</h3>
+              </div>
+              <InputField label="Email Address" field="email" type="email" placeholder="john@example.com" />
+
+              <div className="flex items-center gap-2 mb-4 mt-8">
+                <Home className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Address</h3>
+              </div>
+              <div className="space-y-4">
+                <InputField label="Street Address" field="address" placeholder="123 Main Street, Apt 4B" />
+                <div className="grid grid-cols-3 gap-4">
                   <InputField label="City" field="city" placeholder="Lincoln" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <InputField label="State" field="state" placeholder="NE" />
-                    <InputField label="ZIP Code" field="zip_code" placeholder="68501" />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-red-400" />
-                  Emergency Contact 1
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="Name" field="emergency_contact_name" placeholder="Jane Smith" />
-                  <InputField label="Phone" field="emergency_contact_phone" placeholder="555-9999" />
-                  <InputField label="Relationship" field="emergency_contact_relationship" placeholder="Daughter" />
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-orange-400" />
-                  Emergency Contact 2
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <InputField label="Name" field="emergency_contact_2_name" placeholder="Bob Smith" />
-                  <InputField label="Phone" field="emergency_contact_2_phone" placeholder="555-8888" />
-                  <InputField label="Relationship" field="emergency_contact_2_relationship" placeholder="Son" />
+                  <InputField label="State" field="state" placeholder="NE" />
+                  <InputField label="ZIP Code" field="zip_code" placeholder="68501" />
                 </div>
               </div>
             </div>
           )}
 
+          {activeTab === 'emergency' && (
+            <div className="space-y-8">
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                  <h3 className="text-lg font-semibold text-white">Primary Emergency Contact</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <InputField label="Full Name" field="emergency_contact_name" placeholder="Jane Smith" />
+                  <InputField label="Phone Number" field="emergency_contact_phone" placeholder="(555) 999-8888" />
+                  <InputField label="Relationship" field="emergency_contact_relationship" placeholder="Daughter" />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertCircle className="w-5 h-5 text-orange-400" />
+                  <h3 className="text-lg font-semibold text-white">Secondary Emergency Contact</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <InputField label="Full Name" field="emergency_contact_2_name" placeholder="Bob Smith" />
+                  <InputField label="Phone Number" field="emergency_contact_2_phone" placeholder="(555) 888-7777" />
+                  <InputField label="Relationship" field="emergency_contact_2_relationship" placeholder="Son" />
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-700/50 rounded-lg">
+                <p className="text-sm text-slate-400">
+                  <strong className="text-white">Note:</strong> Emergency contacts will be notified in case of medical emergencies or if the client cannot be reached for scheduled visits.
+                </p>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'medical' && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Heart className="w-5 h-5 text-red-400" />
+                <h3 className="text-lg font-semibold text-white">Diagnoses</h3>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <InputField label="Primary Diagnosis" field="primary_diagnosis" placeholder="Type 2 Diabetes" />
-                <InputField label="Secondary Diagnoses" field="secondary_diagnoses" placeholder="Hypertension, Arthritis" />
+                <InputField label="Secondary Diagnoses" field="secondary_diagnoses" placeholder="Hypertension, Arthritis, COPD" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Allergies</label>
+                  <textarea
+                    value={formData.allergies || ''}
+                    onChange={(e) => handleChange('allergies', e.target.value)}
+                    placeholder="Penicillin, Shellfish, Latex..."
+                    rows={2}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Current Medications</label>
+                  <textarea
+                    value={formData.medications || ''}
+                    onChange={(e) => handleChange('medications', e.target.value)}
+                    placeholder="Metformin 500mg, Lisinopril 10mg..."
+                    rows={2}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mt-6 mb-2">
+                <Building className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Primary Care Physician</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <InputField label="Allergies" field="allergies" placeholder="Penicillin, Shellfish" />
-                <InputField label="Current Medications" field="medications" placeholder="Metformin, Lisinopril" />
+                <InputField label="Physician Name" field="physician_name" placeholder="Dr. Sarah Johnson" />
+                <InputField label="Physician Phone" field="physician_phone" placeholder="(555) 000-1111" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <InputField label="Physician Name" field="physician_name" placeholder="Dr. Johnson" />
-                <InputField label="Physician Phone" field="physician_phone" placeholder="555-0000" />
+
+              <div className="flex items-center gap-2 mt-6 mb-2">
+                <History className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Physical & Cognitive Status</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <SelectField label="Mobility Status" field="mobility_status" options={[
@@ -314,12 +381,17 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                   { value: 'severe_impairment', label: 'Severe Impairment' },
                 ]} />
               </div>
-              <TextArea label="Medical Notes" field="medical_notes" placeholder="Additional medical information, history, precautions..." rows={4} />
+
+              <TextArea label="Additional Medical Notes" field="medical_notes" placeholder="Additional medical history, precautions, or important information..." rows={4} />
             </div>
           )}
 
           {activeTab === 'care' && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Care Requirements</h3>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <SelectField label="Care Level" field="care_level" options={[
                   { value: 'LOW', label: 'Low - Companionship/Light Assistance' },
@@ -330,28 +402,98 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                   { value: 'lives_alone', label: 'Lives Alone' },
                   { value: 'lives_with_spouse', label: 'Lives with Spouse' },
                   { value: 'lives_with_family', label: 'Lives with Family' },
-                  { value: 'assisted_living', label: 'Assisted Living' },
+                  { value: 'assisted_living', label: 'Assisted Living Facility' },
                   { value: 'nursing_home', label: 'Nursing Home' },
                 ]} />
               </div>
-              <TextArea label="Care Plan" field="care_plan" placeholder="Describe the care plan, goals, and daily routines..." rows={4} />
-              <TextArea label="Special Requirements" field="special_requirements" placeholder="Any special needs, preferences, or requirements..." rows={3} />
-              <div className="grid grid-cols-2 gap-4">
-                <InputField label="Preferred Days" field="preferred_days" placeholder="Mon, Wed, Fri" />
-                <InputField label="Preferred Times" field="preferred_times" placeholder="9AM - 1PM" />
-              </div>
+
+              <TextArea label="Care Plan Details" field="care_plan" placeholder="Describe the care plan, daily routines, and specific care goals..." rows={5} />
+              
+              <TextArea label="Special Requirements" field="special_requirements" placeholder="Any special needs, dietary restrictions, religious considerations, preferences..." rows={4} />
             </div>
           )}
 
           {activeTab === 'insurance' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <InputField label="Insurance Provider" field="insurance_provider" placeholder="Blue Cross Blue Shield" />
-                <InputField label="Insurance ID" field="insurance_id" placeholder="XYZ123456" />
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Primary Insurance</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <InputField label="Medicaid ID" field="medicaid_id" placeholder="MCD987654" />
-                <InputField label="Medicare ID" field="medicare_id" placeholder="MCR123456" />
+                <InputField label="Insurance Provider" field="insurance_provider" placeholder="Blue Cross Blue Shield" />
+                <InputField label="Insurance ID / Policy Number" field="insurance_id" placeholder="XYZ123456789" />
+              </div>
+
+              <div className="flex items-center gap-2 mt-6 mb-2">
+                <CreditCard className="w-5 h-5 text-green-400" />
+                <h3 className="text-lg font-semibold text-white">Government Programs</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="Medicaid ID" field="medicaid_id" placeholder="MCD987654321" />
+                <InputField label="Medicare ID" field="medicare_id" placeholder="MCR123456789" />
+              </div>
+
+              <div className="flex items-center gap-2 mt-6 mb-2">
+                <MapPin className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Billing Address</h3>
+              </div>
+              <TextArea label="Billing Address (if different from home address)" field="billing_address" placeholder="123 Billing Street, City, State ZIP" rows={2} />
+            </div>
+          )}
+
+          {activeTab === 'scheduling' && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Scheduling Preferences</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Preferred Days</label>
+                  <input
+                    type="text"
+                    value={formData.preferred_days || ''}
+                    onChange={(e) => handleChange('preferred_days', e.target.value)}
+                    placeholder="Monday, Wednesday, Friday"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Days when care visits are preferred</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Preferred Times</label>
+                  <input
+                    type="text"
+                    value={formData.preferred_times || ''}
+                    onChange={(e) => handleChange('preferred_times', e.target.value)}
+                    placeholder="9:00 AM - 1:00 PM"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Time slots when care visits are preferred</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mt-6 mb-2">
+                <Clock className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">Important Dates</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="Intake Date" field="intake_date" type="date" />
+                <InputField label="Discharge Date" field="discharge_date" type="date" />
+              </div>
+
+              <div className="flex items-center gap-2 mt-6 mb-2">
+                <Building className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-white">External System Integration</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="External ID" field="external_id" placeholder="CRM-12345" />
+                <SelectField label="External Source" field="external_source" options={[
+                  { value: 'monday', label: 'Monday.com' },
+                  { value: 'salesforce', label: 'Salesforce' },
+                  { value: 'hubspot', label: 'HubSpot' },
+                  { value: 'csv', label: 'CSV Import' },
+                  { value: 'manual', label: 'Manual Entry' },
+                ]} />
               </div>
             </div>
           )}

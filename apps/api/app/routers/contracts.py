@@ -100,3 +100,84 @@ async def create_contract(
     db.refresh(contract)
     
     return contract
+
+
+@router.post("/contracts/{contract_id}/sync-to-client", response_model=ContractResponse)
+async def sync_contract_to_client(
+    contract_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Sync contract data to client record.
+    Updates client's scheduling preferences from contract schedule.
+    """
+    contract = db.query(Contract).filter(Contract.id == contract_id).first()
+    if not contract:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+    
+    client = db.query(Client).filter(Client.id == contract.client_id).first()
+    if not client:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+    
+    # Sync schedule to client preferences
+    if contract.schedule:
+        schedule = contract.schedule
+        if "days" in schedule:
+            days = schedule["days"]
+            if isinstance(days, list):
+                client.preferred_days = ", ".join(days)
+        
+        # Build preferred times from schedule
+        times_parts = []
+        if "start_time" in schedule:
+            times_parts.append(schedule["start_time"])
+        if "end_time" in schedule:
+            times_parts.append(schedule["end_time"])
+        if times_parts:
+            client.preferred_times = " - ".join(times_parts)
+        elif "hours_per_week" in schedule:
+            client.preferred_times = f"{schedule['hours_per_week']} hours/week"
+    
+    # Sync care level from services if available
+    if contract.services:
+        high_care_services = ["skilled nursing", "wound care", "medical", "injection"]
+        moderate_care_services = ["personal care", "bathing", "dressing", "mobility"]
+        
+        has_high = any(
+            any(hs in str(s.get("name", "")).lower() for hs in high_care_services)
+            for s in contract.services
+        )
+        has_moderate = any(
+            any(ms in str(s.get("name", "")).lower() for ms in moderate_care_services)
+            for s in contract.services
+        )
+        
+        if has_high and not client.care_level:
+            client.care_level = "HIGH"
+        elif has_moderate and not client.care_level:
+            client.care_level = "MODERATE"
+    
+    db.commit()
+    db.refresh(contract)
+    
+    return contract
+
+
+@router.get("/clients/{client_id}/contracts", response_model=List[ContractResponse])
+async def get_client_contracts(
+    client_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get all contracts for a specific client."""
+    # Verify client exists
+    client = db.query(Client).filter(Client.id == client_id).first()
+    if not client:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+    
+    contracts = db.query(Contract).filter(
+        Contract.client_id == client_id
+    ).order_by(Contract.created_at.desc()).all()
+    
+    return contracts
