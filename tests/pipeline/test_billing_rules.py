@@ -68,8 +68,9 @@ class TestBillableGeneration:
         )
         
         assert len(billables) > 0
-        assert all("category" in b for b in billables)
-        assert all("minutes" in b for b in billables)
+        # BillableBlock is a dataclass, use attribute access
+        assert all(hasattr(b, "category") for b in billables)
+        assert all(hasattr(b, "minutes") for b in billables)
     
     def test_generate_default_companionship(self):
         """Test that default companionship is created when no tasks detected."""
@@ -100,10 +101,10 @@ class TestBillableGeneration:
             min_block_minutes=5,
         )
         
-        # Short blocks should be flagged
+        # Short blocks should be flagged (BillableBlock is a dataclass)
         for b in billables:
-            if b["minutes"] < 5:
-                assert b["is_flagged"] is True
+            if b.minutes < 5:
+                assert b.is_flagged is True
 
 
 class TestBlockConsolidation:
