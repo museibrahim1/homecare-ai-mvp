@@ -6,6 +6,15 @@ import { useAuth } from '@/lib/auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
+interface UploadedDocument {
+  id: string;
+  name: string;
+  type: string;
+  category: string;
+  content: string;
+  uploaded_at: string;
+}
+
 interface AgencySettings {
   name: string;
   address: string;
@@ -17,6 +26,8 @@ interface AgencySettings {
   logo: string | null;
   primary_color: string;
   secondary_color: string;
+  documents: UploadedDocument[];
+  // Derived from documents list
   contract_template: string | null;
   contract_template_name: string | null;
   contract_template_type: string | null;
@@ -33,6 +44,7 @@ const defaultAgency: AgencySettings = {
   logo: null,
   primary_color: '#1e3a8a',
   secondary_color: '#3b82f6',
+  documents: [],
   contract_template: null,
   contract_template_name: null,
   contract_template_type: null,
@@ -59,7 +71,29 @@ export default function ContractPreview({ contract, client }: ContractPreviewPro
         });
         if (response.ok) {
           const data = await response.json();
-          setAgency({ ...defaultAgency, ...data });
+          
+          // Extract contract template from documents array
+          let contractTemplate: string | null = null;
+          let contractTemplateName: string | null = null;
+          let contractTemplateType: string | null = null;
+          
+          const documents = data.documents || [];
+          const templateDoc = documents.find((doc: UploadedDocument) => doc.category === 'contract_template');
+          
+          if (templateDoc) {
+            contractTemplate = templateDoc.content;
+            contractTemplateName = templateDoc.name;
+            contractTemplateType = templateDoc.type;
+          }
+          
+          setAgency({ 
+            ...defaultAgency, 
+            ...data,
+            documents,
+            contract_template: contractTemplate,
+            contract_template_name: contractTemplateName,
+            contract_template_type: contractTemplateType,
+          });
         } else {
           // Fallback to localStorage
           const savedSettings = localStorage.getItem('agencySettings');

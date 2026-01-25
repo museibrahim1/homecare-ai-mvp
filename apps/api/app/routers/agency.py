@@ -168,7 +168,26 @@ async def update_agency_settings(
     if 'documents' in update_data:
         docs = update_data['documents']
         if docs is not None:
-            update_data['documents'] = json.dumps([d.model_dump() if hasattr(d, 'model_dump') else d for d in docs])
+            docs_list = [d.model_dump() if hasattr(d, 'model_dump') else d for d in docs]
+            update_data['documents'] = json.dumps(docs_list)
+            
+            # Also update legacy contract_template fields if a contract template is present
+            contract_template_doc = None
+            for doc in docs_list:
+                if doc.get('category') == 'contract_template':
+                    contract_template_doc = doc
+                    break
+            
+            if contract_template_doc:
+                settings.contract_template = contract_template_doc.get('content')
+                settings.contract_template_name = contract_template_doc.get('name')
+                settings.contract_template_type = contract_template_doc.get('type')
+                logger.info(f"Updated contract template: {contract_template_doc.get('name')}")
+            else:
+                # Clear legacy fields if no contract template in documents
+                settings.contract_template = None
+                settings.contract_template_name = None
+                settings.contract_template_type = None
         else:
             update_data['documents'] = '[]'
     

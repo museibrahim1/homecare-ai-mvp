@@ -187,10 +187,31 @@ export default function SettingsPage() {
         uploaded_at: new Date().toISOString(),
       };
       
+      const updatedDocs = [...agency.documents, newDoc];
+      
       setAgency(prev => ({
         ...prev,
-        documents: [...prev.documents, newDoc],
+        documents: updatedDocs,
       }));
+      
+      // Auto-save documents to API
+      try {
+        const res = await fetch(`${API_BASE}/agency`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ documents: updatedDocs }),
+        });
+        
+        if (res.ok) {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 2000);
+        }
+      } catch (err) {
+        console.error('Failed to save document:', err);
+      }
       
       // Extract company info from document
       await extractCompanyInfo(base64, selectedCategory);
