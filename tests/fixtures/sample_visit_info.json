@@ -1,0 +1,18 @@
+{
+  "description": "Sample homecare visit audio for testing",
+  "duration_seconds": 62.999,
+  "speakers": [
+    "caregiver",
+    "client"
+  ],
+  "expected_tasks": [
+    "MED_REMINDER",
+    "MEAL_PREP",
+    "VITALS"
+  ],
+  "notes": [
+    "This is synthetic audio with tone patterns, not actual speech",
+    "Use for pipeline integration testing only",
+    "ASR will not produce meaningful transcripts from this file"
+  ]
+}

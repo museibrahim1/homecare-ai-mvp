@@ -1,0 +1,182 @@
+{
+  "description": "Sample transcript fixture for testing billing and note generation (60 min visit)",
+  "visit_id": "test-visit-001",
+  "duration_ms": 3600000,
+  "segments": [
+    {
+      "id": "seg-001",
+      "start_ms": 0,
+      "end_ms": 120000,
+      "text": "Hello Mrs. Johnson, how are you feeling today? I'm here to help you with your morning routine.",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.95
+    },
+    {
+      "id": "seg-002",
+      "start_ms": 120000,
+      "end_ms": 180000,
+      "text": "Good morning! I'm doing well, thank you for coming. I've been waiting for you.",
+      "speaker": "SPEAKER_01",
+      "confidence": 0.92
+    },
+    {
+      "id": "seg-003",
+      "start_ms": 180000,
+      "end_ms": 600000,
+      "text": "Let me help you take your medication now. Here are your morning pills - the blood pressure medication and the vitamin D supplement. Let me get you some water to take these with. Make sure you swallow them one at a time.",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.94
+    },
+    {
+      "id": "seg-004",
+      "start_ms": 600000,
+      "end_ms": 720000,
+      "text": "Thank you dear, I almost forgot about taking my medication this morning. These pills are important for my health.",
+      "speaker": "SPEAKER_01",
+      "confidence": 0.91
+    },
+    {
+      "id": "seg-005",
+      "start_ms": 720000,
+      "end_ms": 1500000,
+      "text": "Now let me prepare some breakfast for you. Would you like eggs and toast today? I'll make sure the eggs are cooked just the way you like them. Let me get the pan ready and start cooking. The toast is almost done.",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.93
+    },
+    {
+      "id": "seg-006",
+      "start_ms": 1500000,
+      "end_ms": 1620000,
+      "text": "That sounds wonderful. My appetite has been good lately. I've been eating well this week.",
+      "speaker": "SPEAKER_01",
+      "confidence": 0.90
+    },
+    {
+      "id": "seg-007",
+      "start_ms": 1620000,
+      "end_ms": 1740000,
+      "text": "That's great to hear. How have you been sleeping? Are you getting enough rest at night?",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.94
+    },
+    {
+      "id": "seg-008",
+      "start_ms": 1740000,
+      "end_ms": 1860000,
+      "text": "Much better this week. I'm not as tired as before. The new sleep routine is helping.",
+      "speaker": "SPEAKER_01",
+      "confidence": 0.89
+    },
+    {
+      "id": "seg-009",
+      "start_ms": 1860000,
+      "end_ms": 2400000,
+      "text": "Excellent. Now let me check your blood pressure and take your vitals. Please sit still and relax while I put the cuff on your arm. I'm going to pump it up now. Your heart rate looks good too.",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.95
+    },
+    {
+      "id": "seg-010",
+      "start_ms": 2400000,
+      "end_ms": 2460000,
+      "text": "Of course, go ahead. I always get a little nervous during these checks.",
+      "speaker": "SPEAKER_01",
+      "confidence": 0.93
+    },
+    {
+      "id": "seg-011",
+      "start_ms": 2460000,
+      "end_ms": 2580000,
+      "text": "Your blood pressure is 120 over 80. That's perfectly normal. Your pulse is 72, which is great.",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.96
+    },
+    {
+      "id": "seg-012",
+      "start_ms": 2580000,
+      "end_ms": 2700000,
+      "text": "Oh good, I was a little worried about my blood pressure. That's a relief to hear.",
+      "speaker": "SPEAKER_01",
+      "confidence": 0.88
+    },
+    {
+      "id": "seg-013",
+      "start_ms": 2700000,
+      "end_ms": 3180000,
+      "text": "No need to worry. You're doing great. Now let me help you with a short walk around the house. Walking is good exercise and helps with circulation. Let's start in the hallway and walk to the living room.",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.94
+    },
+    {
+      "id": "seg-014",
+      "start_ms": 3180000,
+      "end_ms": 3300000,
+      "text": "That would be nice. I should get more exercise. My legs feel a bit stiff today.",
+      "speaker": "SPEAKER_01",
+      "confidence": 0.91
+    },
+    {
+      "id": "seg-015",
+      "start_ms": 3300000,
+      "end_ms": 3540000,
+      "text": "We had a good walk today. Now I'll do some light cleaning in the kitchen and vacuum the living room. Let me tidy up these dishes first.",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.93
+    },
+    {
+      "id": "seg-016",
+      "start_ms": 3540000,
+      "end_ms": 3580000,
+      "text": "Thank you so much. You're always so helpful. I really appreciate everything you do.",
+      "speaker": "SPEAKER_01",
+      "confidence": 0.90
+    },
+    {
+      "id": "seg-017",
+      "start_ms": 3580000,
+      "end_ms": 3600000,
+      "text": "You're welcome. I'll see you tomorrow at the same time. Take care and have a good day!",
+      "speaker": "SPEAKER_00",
+      "confidence": 0.95
+    }
+  ],
+  "diarization": {
+    "speakers": ["SPEAKER_00", "SPEAKER_01"],
+    "speaker_labels": {
+      "SPEAKER_00": "caregiver",
+      "SPEAKER_01": "client"
+    }
+  },
+  "expected_billables": [
+    {
+      "category": "MED_REMINDER",
+      "description": "Medication reminder",
+      "start_ms": 180000,
+      "end_ms": 720000
+    },
+    {
+      "category": "MEAL_PREP",
+      "description": "Meal preparation",
+      "start_ms": 720000,
+      "end_ms": 1620000
+    },
+    {
+      "category": "VITALS",
+      "description": "Vital signs check",
+      "start_ms": 1860000,
+      "end_ms": 2700000
+    },
+    {
+      "category": "ADL_MOBILITY",
+      "description": "Mobility assistance",
+      "start_ms": 2700000,
+      "end_ms": 3300000
+    },
+    {
+      "category": "HOUSEHOLD_LIGHT",
+      "description": "Light housekeeping",
+      "start_ms": 3300000,
+      "end_ms": 3580000
+    }
+  ]
+}
