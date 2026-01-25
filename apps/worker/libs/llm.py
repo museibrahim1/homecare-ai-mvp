@@ -1001,23 +1001,132 @@ class LLMService:
         if "contract" in prompt.lower() or "home care" in prompt.lower():
             return json.dumps({
                 "services_identified": [
-                    {"name": "Personal Care/ADL Assistance", "description": "Assistance with bathing, dressing, and grooming", "frequency": "3x/week", "priority": "High"},
-                    {"name": "Medication Management", "description": "Medication reminders and pill box organization", "frequency": "Daily", "priority": "High"},
-                    {"name": "Light Housekeeping", "description": "Laundry, dishes, light cleaning", "frequency": "2x/week", "priority": "Medium"},
-                    {"name": "Meal Preparation", "description": "Preparing nutritious meals", "frequency": "Daily", "priority": "Medium"},
+                    {"name": "Personal Care/ADL Assistance", "description": "Assistance with bathing, dressing, and grooming", "evidence": "Client needs daily assistance", "frequency": "Daily", "priority": "High"},
+                    {"name": "Medication Management", "description": "Medication reminders and pill box organization", "evidence": "Multiple medications mentioned", "frequency": "Daily", "priority": "High"},
+                    {"name": "Meal Preparation", "description": "Preparing nutritious meals", "evidence": "Difficulty cooking safely", "frequency": "Daily", "priority": "High"},
+                    {"name": "Light Housekeeping", "description": "Laundry, dishes, light cleaning", "evidence": "Unable to maintain home", "frequency": "3x/week", "priority": "Medium"},
+                    {"name": "Companion Care", "description": "Supervision and social interaction", "evidence": "Lives alone, needs monitoring", "frequency": "Daily", "priority": "High"},
                 ],
                 "client_profile": {
-                    "primary_diagnosis": "See medical records",
-                    "mobility_status": "Requires assistance",
-                    "cognitive_status": "Alert and oriented",
-                    "living_situation": "Lives at home"
+                    "age_estimate": "65+",
+                    "gender": "Not specified",
+                    "primary_diagnosis": "Chronic health condition requiring home care support",
+                    "secondary_conditions": ["Chronic condition management needed"],
+                    "medications": ["Multiple medications - see medical records"],
+                    "allergies": [],
+                    "health_rating": "Fair",
+                    "recent_hospitalizations": "Not mentioned",
+                    "fall_history": "Fall risk present",
+                    "mobility_status": "Limited mobility - uses assistive device",
+                    "cognitive_status": "Alert and oriented with mild forgetfulness",
+                    "hearing_status": "Age-appropriate",
+                    "vision_status": "Glasses for reading",
+                    "speech_status": "Normal",
+                    "continence_status": "Continent with occasional urgency",
+                    "living_situation": "Lives alone",
+                    "housing_type": "Own home"
                 },
-                "recommended_schedule": {"frequency": "Daily with longer sessions 3x/week", "total_hours_per_week": 20, "preferred_days": ["Monday", "Wednesday", "Friday", "Weekdays"], "preferred_times": "Morning"},
-                "special_requirements": ["Fall prevention protocols", "Medication compliance monitoring"],
-                "safety_concerns": [{"concern": "Fall risk", "severity": "Medium"}],
-                "eicna_assessment": {"care_need_level": "HIGH", "rationale": "Requires assistance with ADLs and home care support"},
-                "client_condition_summary": "Client requires in-home care assistance with activities of daily living.",
-                "care_plan_goals": {"short_term": ["Establish care routine"], "long_term": ["Maintain independence"]}
+                "adl_assessment": {
+                    "bathing": {"level": "Limited Assistance", "notes": "Needs help for safety"},
+                    "dressing": {"level": "Supervision", "notes": "Can do most but needs reminders"},
+                    "eating": {"level": "Independent", "notes": "Can feed self"},
+                    "toileting": {"level": "Supervision", "notes": "Needs reminders"},
+                    "transferring": {"level": "Limited Assistance", "notes": "Unsteady"},
+                    "walking": {"level": "Supervision", "notes": "Uses walker"},
+                    "adl_score": "8",
+                    "adl_summary": "Moderate assistance needed with most ADLs, especially bathing and transfers"
+                },
+                "iadl_assessment": {
+                    "light_housekeeping": {"needs_help": True, "notes": "Cannot maintain home alone"},
+                    "heavy_housework": {"needs_help": True, "notes": "Unable to do heavy tasks"},
+                    "medication_management": {"needs_help": True, "notes": "Needs reminders and organization"},
+                    "money_management": {"needs_help": False, "notes": "Manages with family help"},
+                    "transportation": {"needs_help": True, "notes": "Does not drive"},
+                    "meal_preparation": {"needs_help": True, "notes": "Safety concerns with stove"},
+                    "shopping": {"needs_help": True, "notes": "Cannot shop alone"},
+                    "telephone": {"needs_help": False, "notes": "Can use phone"},
+                    "iadl_score": "6",
+                    "iadl_summary": "Needs help with most IADLs, independent with communication and finances"
+                },
+                "mental_health_assessment": {
+                    "depression_indicators": ["Some feelings of isolation"],
+                    "anxiety_indicators": ["Worry about health"],
+                    "sleep_issues": "Occasional difficulty sleeping",
+                    "mood_status": "Generally stable with some anxiety",
+                    "behavioral_concerns": [],
+                    "substance_use": {"alcohol": "None", "tobacco": "None", "other": "None"},
+                    "mental_health_summary": "Mild anxiety related to health and living alone"
+                },
+                "safety_assessment": {
+                    "fall_risk": "Moderate - unsteady gait, uses walker",
+                    "home_hazards": ["Rugs may be trip hazard", "Bathroom needs grab bars"],
+                    "fire_safety": "Concern about cooking safety",
+                    "wandering_risk": "Low",
+                    "medication_safety": "Moderate - needs organization help",
+                    "emergency_response": "Needs medical alert system",
+                    "supervision_needs": "Needs regular check-ins, cannot be alone for extended periods",
+                    "safety_summary": "Moderate safety concerns primarily around falls and cooking"
+                },
+                "assistive_devices": {
+                    "current_devices": ["Walker", "Glasses"],
+                    "needed_devices": ["Grab bars", "Shower chair", "Medical alert"],
+                    "equipment_notes": "Would benefit from additional bathroom safety equipment"
+                },
+                "caregiver_assessment": {
+                    "primary_caregiver": "Family member (limited availability)",
+                    "caregiver_health": "Healthy but works full-time",
+                    "caregiver_stress": "Moderate - struggling to balance work and caregiving",
+                    "caregiver_availability": "Evenings and weekends only",
+                    "care_gaps": "Weekday daytime hours",
+                    "family_involvement": "Family involved but not local",
+                    "respite_needs": "Yes - needs regular respite"
+                },
+                "safety_concerns": [
+                    {"concern": "Fall risk", "evidence": "Unsteady gait, uses walker", "severity": "Medium", "recommended_intervention": "Fall prevention program, grab bars"},
+                    {"concern": "Cooking safety", "evidence": "Forgets stove is on", "severity": "High", "recommended_intervention": "Meal preparation assistance, stove safety"}
+                ],
+                "special_requirements": [
+                    {"requirement": "Medication management", "details": "Needs pill organizer and daily reminders", "category": "Medical"},
+                    {"requirement": "Fall prevention", "details": "Home safety evaluation needed", "category": "Equipment"}
+                ],
+                "recommended_schedule": {
+                    "frequency": "Daily (5-7 days per week)",
+                    "total_hours_per_week": 35,
+                    "service_hours": [
+                        {"service": "Personal Care", "need_level": "moderate", "hours_per_week": 10, "rationale": "ADL assistance needed daily"},
+                        {"service": "Meal Preparation", "need_level": "high", "hours_per_week": 10, "rationale": "Safety concern with cooking"},
+                        {"service": "Medication Management", "need_level": "moderate", "hours_per_week": 3, "rationale": "Daily reminders needed"},
+                        {"service": "Homemaker Services", "need_level": "moderate", "hours_per_week": 6, "rationale": "Cannot maintain home alone"},
+                        {"service": "Companion Care", "need_level": "moderate", "hours_per_week": 6, "rationale": "Social isolation, needs monitoring"}
+                    ],
+                    "hours_calculation": "Personal Care 10 + Meals 10 + Meds 3 + Homemaker 6 + Companion 6 = 35 hrs/week",
+                    "preferred_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                    "preferred_times": "Morning and early afternoon (8am-2pm)",
+                    "visit_duration": "4-6 hour visits recommended",
+                    "rationale": "Daily visits needed to address ADL needs, meal preparation, and safety monitoring. Longer visits on bath days."
+                },
+                "eicna_assessment": {
+                    "care_need_level": "HIGH",
+                    "score_breakdown": {
+                        "adl_factor": "ADL score 8 - moderate dependence",
+                        "iadl_factor": "IADL score 6 - significant help needed",
+                        "medical_complexity": "Multiple chronic conditions",
+                        "safety_factor": "Fall risk and cooking safety concerns",
+                        "support_factor": "Lives alone, family has limited availability"
+                    },
+                    "rationale": "HIGH care level indicated due to: ADL assistance needs (bathing, transfers), IADL limitations (meals, housekeeping), safety concerns (falls, cooking), and living alone without adequate support during daytime hours.",
+                    "risk_factors": ["Fall risk", "Lives alone", "Cooking safety", "Multiple health conditions", "Caregiver burnout"]
+                },
+                "client_condition_summary": "Client is an older adult living alone who requires daily home care assistance. They have multiple chronic health conditions requiring monitoring and medication management. ADL assessment indicates need for assistance with bathing, dressing, and transfers due to limited mobility and unsteady gait. Safety concerns include fall risk and cooking safety. The primary family caregiver is experiencing stress and has limited availability during weekday daytime hours, creating significant care gaps.",
+                "care_plan_goals": {
+                    "short_term": ["Establish consistent daily care routine", "Implement fall prevention measures", "Organize medication system", "Assess home safety and install grab bars"],
+                    "long_term": ["Maintain current level of independence", "Prevent hospitalizations", "Support safe aging in place", "Reduce caregiver burden"],
+                    "maintenance_goals": ["Continue ADL assistance", "Monitor for health changes", "Maintain safe home environment"]
+                },
+                "billing_codes": {
+                    "primary_codes": ["S9122 - Home health aide hourly", "G0156 - Home health aide per 15 min"],
+                    "code_rationale": "Personal care and homemaker services provided by home health aide"
+                }
             })
         return json.dumps({
             "subjective": "Client reports feeling well today.",
@@ -1037,14 +1146,136 @@ class LLMService:
     def analyze_transcript_for_contract(self, transcript_text: str, client_info: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analyze a care assessment transcript to extract contract-relevant information.
-        STRICTLY focused on in-home healthcare and care services only.
+        Based on Nebraska DHHS Medicaid billing and Iowa Case Management Assessment (Form 470-4694).
         Uses temperature=0 for consistent, deterministic results.
         """
         # Save original temperature and use 0 for consistent extraction
         original_temp = self.temperature
         self.temperature = 0.0  # Deterministic - same input = same output
         
-        system_prompt = """You are a HOME CARE assessment specialist. You ONLY extract information related to IN-HOME HEALTHCARE SERVICES.
+        system_prompt = """You are a HOME CARE assessment specialist trained on Nebraska DHHS Medicaid billing requirements and Iowa Case Management Comprehensive Assessment (Form 470-4694).
+
+## YOUR MISSION: EXTRACT COMPREHENSIVE CARE ASSESSMENT DATA
+
+You must extract EVERY piece of relevant information mentioned in the transcript. DO NOT leave fields as "N/A" if there is ANY indication in the conversation. Make reasonable clinical inferences when direct statements aren't available.
+
+## ASSESSMENT DOMAINS TO EXTRACT
+
+### 1. MEDICAL/PHYSICAL HEALTH (Section B of Iowa Form)
+Extract ALL mentioned:
+- **Primary diagnosis** - Main condition requiring care
+- **Secondary conditions** - ALL other conditions mentioned (IBS, diabetes, depression, anxiety, chronic pain, etc.)
+- **Health rating** - Excellent/Good/Fair/Poor based on conversation tone
+- **Respiratory needs** - Oxygen, CPAP, nebulizer, etc.
+- **Recent hospitalizations** - ER visits, overnight stays in past 6 months
+- **Falls** - History of falls, number of falls
+- **Medications** - ALL mentioned medications, dosages, compliance issues
+- **Allergies** - Any mentioned allergies
+
+### 2. SENSORY/COGNITIVE STATUS
+- **Hearing** - Any hearing aids, difficulty hearing
+- **Vision** - Glasses, difficulty seeing, blindness
+- **Speech/Communication** - Any communication difficulties
+- **Cognitive Status** - Alert/Oriented, confusion, memory issues, dementia
+
+### 3. ACTIVITIES OF DAILY LIVING (ADLs)
+For EACH ADL, determine assistance level:
+- Independent (0) - No help needed
+- Supervision (1) - Verbal cues, oversight
+- Limited Assistance (2) - Physical help sometimes
+- Extensive Assistance (3) - Weight-bearing help often
+- Total Dependence (4) - Complete assistance always
+
+| ADL | Level | Evidence |
+|-----|-------|----------|
+| Bathing | | "needs help in shower" |
+| Dressing | | "can't button shirts" |
+| Eating | | "needs feeding assistance" |
+| Toileting | | "needs bathroom reminders" |
+| Transferring | | "can't get out of bed alone" |
+| Walking/Locomotion | | "uses walker, unsteady" |
+
+**ADL Score** = Sum of all levels (0-24, higher = more dependent)
+
+### 4. INSTRUMENTAL ACTIVITIES OF DAILY LIVING (IADLs)
+For EACH IADL, determine if needs assistance (Yes=1, No=0):
+
+| IADL | Needs Help | Evidence |
+|------|------------|----------|
+| Light Housekeeping | | |
+| Heavy Housework | | |
+| Medication Management | | |
+| Money Management | | |
+| Transportation | | |
+| Meal Preparation | | |
+| Shopping/Errands | | |
+| Using Telephone | | |
+
+**IADL Score** = Sum (0-8, higher = more needs)
+
+### 5. MENTAL HEALTH/BEHAVIORAL (Section C)
+- **Depression indicators** - Feeling down, hopeless, lack of interest
+- **Anxiety** - Worry, nervousness, panic
+- **Sleep issues** - Insomnia, sleeping too much
+- **Mood swings** - Irritability, emotional changes
+- **Behavioral concerns** - Wandering, aggression, noncompliance
+- **Substance use** - Alcohol, tobacco, drugs
+
+### 6. LIVING SITUATION/SAFETY (Section D)
+- **Housing type** - Own home, apartment, assisted living
+- **Living arrangement** - Alone, with spouse, with family
+- **Home safety concerns** - Fall hazards, fire risks, accessibility
+- **Emergency response** - Medical alert, can call 911
+- **Caregiver situation** - Who helps now, caregiver stress/burnout
+
+### 7. SOCIAL/SUPPORT (Section E)
+- **Social isolation** - Lonely, limited contact with others
+- **Family involvement** - Who visits, how often
+- **Community activities** - Groups, church, senior center
+
+### 8. ASSISTIVE DEVICES/EQUIPMENT
+Check if uses or needs:
+- Walker, Cane, Wheelchair
+- Hospital bed, Lift chair
+- Grab bars, Bathing equipment
+- Hearing aids, Glasses
+- Oxygen equipment
+- Medical alert system
+- Incontinence supplies
+
+### 9. SPECIAL REQUIREMENTS
+- **Dietary needs** - Diabetic, low sodium, texture modified, tube feeding
+- **Language needs** - Interpreter, communication board
+- **Cultural/religious** - Any preferences
+- **Dementia care** - Specialized training needed
+
+## CARE NEED LEVEL DETERMINATION
+
+### HIGH CARE LEVEL - Use when ANY of these present:
+- 2+ chronic conditions mentioned
+- Depression, anxiety, or mental health concerns
+- Caregiver stress/burnout mentioned
+- ADL score >= 6 (needs help with 3+ ADLs)
+- IADL score >= 5 (needs help with 5+ IADLs)
+- Recent hospitalization or ER visits
+- Falls in past 6 months
+- Dementia or significant cognitive impairment
+- Lives alone with health problems
+- Safety concerns at home
+
+### MODERATE CARE LEVEL - Use when:
+- 1-2 chronic conditions, well-managed
+- ADL score 2-5
+- IADL score 3-4
+- Good family support available
+- No significant safety concerns
+
+### LOW CARE LEVEL - Use only when:
+- No chronic conditions or well-controlled
+- ADL score 0-1
+- IADL score 0-2
+- Strong support system
+- Independent with most activities
 
 ## STRICT SCOPE - HOME CARE SERVICES ONLY
 
@@ -1217,64 +1448,143 @@ Only use these consolidated categories:
 
 **CRITICAL: Use consolidated categories. Never bill separately for sub-tasks like dressing, grooming, or laundry.**
 
-## OUTPUT FORMAT
+## OUTPUT FORMAT - COMPREHENSIVE ASSESSMENT
 
-Return ONLY valid JSON:
+Return ONLY valid JSON with ALL fields populated based on transcript analysis:
+
 {
     "services_identified": [
         {
-            "name": "MUST be one of the 10 valid categories above",
+            "name": "Service category from valid list",
             "description": "Specific description based on client needs",
-            "evidence": "Direct quote from transcript",
+            "evidence": "Direct quote or inference from transcript",
             "frequency": "Daily/3x week/Weekly/As needed",
             "priority": "High/Medium/Low"
         }
     ],
     "client_profile": {
-        "age_estimate": "If mentioned",
-        "primary_diagnosis": "Main condition requiring home care",
-        "secondary_conditions": ["Other relevant conditions"],
-        "mobility_status": "Independent/Uses walker/Wheelchair/Bedbound",
-        "cognitive_status": "Intact/Mild impairment/Moderate dementia/Severe dementia",
-        "adl_status": "Which ADLs need assistance",
-        "living_situation": "Alone/With spouse/With family"
+        "age_estimate": "Extract or estimate from context",
+        "gender": "If mentioned",
+        "primary_diagnosis": "Main condition - MUST identify if any health condition mentioned",
+        "secondary_conditions": ["List ALL conditions mentioned: IBS, diabetes, depression, anxiety, chronic pain, etc."],
+        "medications": ["List ALL medications mentioned with dosages if known"],
+        "allergies": ["Any allergies mentioned"],
+        "health_rating": "Excellent/Good/Fair/Poor - infer from conversation",
+        "recent_hospitalizations": "Any ER visits or hospital stays mentioned",
+        "fall_history": "Number of falls if mentioned, or risk factors",
+        "mobility_status": "MUST specify: Independent/Uses cane/Uses walker/Wheelchair/Limited mobility/Bedbound",
+        "cognitive_status": "MUST specify: Alert and oriented/Mild forgetfulness/Mild cognitive impairment/Moderate dementia/Severe dementia",
+        "hearing_status": "Normal/Hearing aid/Difficulty hearing/Severe hearing loss",
+        "vision_status": "Normal/Glasses/Low vision/Legally blind",
+        "speech_status": "Normal/Difficulty communicating/Uses communication device",
+        "continence_status": "Continent/Occasional accidents/Incontinent bladder/Incontinent bowel/Catheter/Ostomy",
+        "living_situation": "MUST specify: Lives alone/With spouse/With adult child/With other family/Assisted living/Other",
+        "housing_type": "Own home/Rents apartment/Lives with family/Assisted living/Other"
+    },
+    "adl_assessment": {
+        "bathing": {"level": "Independent/Supervision/Limited Assist/Extensive Assist/Total Dependence", "notes": "specific needs"},
+        "dressing": {"level": "...", "notes": "..."},
+        "eating": {"level": "...", "notes": "..."},
+        "toileting": {"level": "...", "notes": "..."},
+        "transferring": {"level": "...", "notes": "..."},
+        "walking": {"level": "...", "notes": "..."},
+        "adl_score": "0-24 total score",
+        "adl_summary": "Summary of ADL needs"
+    },
+    "iadl_assessment": {
+        "light_housekeeping": {"needs_help": true/false, "notes": "..."},
+        "heavy_housework": {"needs_help": true/false, "notes": "..."},
+        "medication_management": {"needs_help": true/false, "notes": "..."},
+        "money_management": {"needs_help": true/false, "notes": "..."},
+        "transportation": {"needs_help": true/false, "notes": "..."},
+        "meal_preparation": {"needs_help": true/false, "notes": "..."},
+        "shopping": {"needs_help": true/false, "notes": "..."},
+        "telephone": {"needs_help": true/false, "notes": "..."},
+        "iadl_score": "0-8 total score",
+        "iadl_summary": "Summary of IADL needs"
+    },
+    "mental_health_assessment": {
+        "depression_indicators": ["List any signs: feeling down, hopeless, no interest, etc."],
+        "anxiety_indicators": ["Worry, nervousness, panic, etc."],
+        "sleep_issues": "Insomnia/Sleeping too much/None mentioned",
+        "mood_status": "Stable/Mood swings/Irritable/Anxious/Depressed",
+        "behavioral_concerns": ["Wandering, aggression, noncompliance, etc."],
+        "substance_use": {"alcohol": "None/Social/Problematic", "tobacco": "None/Current/Former", "other": "..."},
+        "mental_health_summary": "Overall mental health status"
+    },
+    "safety_assessment": {
+        "fall_risk": "Low/Moderate/High - with reasoning",
+        "home_hazards": ["List any mentioned: stairs, rugs, clutter, etc."],
+        "fire_safety": "Concerns about stove, smoking, etc.",
+        "wandering_risk": "Low/Moderate/High if dementia mentioned",
+        "medication_safety": "Risk of errors, overdose, non-compliance",
+        "emergency_response": "Can call 911/Has medical alert/Needs supervision",
+        "supervision_needs": "Can be alone/Needs check-ins/Needs constant supervision",
+        "safety_summary": "Overall safety assessment"
+    },
+    "assistive_devices": {
+        "current_devices": ["List all mentioned: walker, cane, glasses, hearing aids, etc."],
+        "needed_devices": ["Any mentioned needs"],
+        "equipment_notes": "Notes on equipment use or needs"
+    },
+    "caregiver_assessment": {
+        "primary_caregiver": "Name/relationship of main caregiver",
+        "caregiver_health": "Any health issues with caregiver",
+        "caregiver_stress": "Signs of burnout, exhaustion, stress",
+        "caregiver_availability": "When caregiver is/isn't available",
+        "care_gaps": "Times when no one is available",
+        "family_involvement": "Other family members involved",
+        "respite_needs": "Does caregiver need breaks"
     },
     "safety_concerns": [
         {
-            "concern": "Home care relevant safety issue",
-            "evidence": "Quote from transcript",
-            "severity": "High/Medium/Low"
+            "concern": "Specific safety issue",
+            "evidence": "Quote or observation from transcript",
+            "severity": "High/Medium/Low",
+            "recommended_intervention": "How to address"
         }
     ],
-    "family_involvement": {
-        "primary_caregiver": "Who provides care now",
-        "caregiver_stress": "Signs of burnout",
-        "care_gaps": "When is care not covered"
-    },
+    "special_requirements": [
+        {
+            "requirement": "Specific requirement",
+            "details": "Details and how to accommodate",
+            "category": "Dietary/Equipment/Language/Cultural/Medical/Other"
+        }
+    ],
     "recommended_schedule": {
-        "frequency": "Daily/5-7 days per week",
-        "total_hours_per_week": 37,
+        "frequency": "Daily/5-7 days per week/3-4 days per week",
+        "total_hours_per_week": 40,
         "service_hours": [
-            {"service": "Personal Care", "need_level": "moderate", "hours_per_week": 8},
-            {"service": "Meal Services", "need_level": "moderate", "hours_per_week": 12},
-            {"service": "Medication Management", "need_level": "moderate", "hours_per_week": 4},
-            {"service": "Homemaker Services", "need_level": "light", "hours_per_week": 3},
-            {"service": "Companion Care", "need_level": "moderate", "hours_per_week": 10}
+            {"service": "Personal Care", "need_level": "high/moderate/light", "hours_per_week": 14, "rationale": "Based on ADL assessment"},
+            {"service": "Meal Services", "need_level": "...", "hours_per_week": 12, "rationale": "..."}
         ],
-        "hours_calculation": "personal care 8 + meals 12 + meds 4 + homemaker 3 + companion 10 = 37 total",
+        "hours_calculation": "Show math: service1 X + service2 Y = total",
         "preferred_days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        "preferred_times": "Morning and Afternoon",
-        "rationale": "Hours based on consolidated service categories and need levels"
+        "preferred_times": "Morning preferred/Afternoon preferred/Flexible",
+        "visit_duration": "2-4 hour visits recommended",
+        "rationale": "Full explanation of schedule recommendation"
     },
-    "special_requirements": ["Dietary needs, equipment, language, dementia care training"],
     "eicna_assessment": {
-        "care_need_level": "HIGH/MODERATE/LOW - Use HIGH as default for most assessments",
-        "rationale": "Based on ADL/IADL needs and safety concerns"
+        "care_need_level": "HIGH/MODERATE/LOW",
+        "score_breakdown": {
+            "adl_factor": "ADL score X contributes to level",
+            "iadl_factor": "IADL score Y contributes to level",
+            "medical_complexity": "Number and severity of conditions",
+            "safety_factor": "Safety risks identified",
+            "support_factor": "Available support system"
+        },
+        "rationale": "Detailed explanation of why this care level was determined",
+        "risk_factors": ["List specific risk factors present"]
     },
-    "client_condition_summary": "2-3 sentence summary focused on home care needs",
+    "client_condition_summary": "3-5 sentence comprehensive summary of client's condition, needs, and care requirements. Be specific about diagnoses, functional limitations, and care needs.",
     "care_plan_goals": {
-        "short_term": ["30-day home care goals"],
-        "long_term": ["90+ day home care goals"]
+        "short_term": ["Specific 30-day goals with measurable outcomes"],
+        "long_term": ["Specific 90+ day goals with measurable outcomes"],
+        "maintenance_goals": ["Ongoing goals to prevent decline"]
+    },
+    "billing_codes": {
+        "primary_codes": ["Nebraska Medicaid codes that apply: G0156, S9122, etc."],
+        "code_rationale": "Why these codes apply"
     }
 }
 
