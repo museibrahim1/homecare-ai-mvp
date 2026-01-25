@@ -1,44 +1,89 @@
 """
 LLM Service for AI-powered text generation.
 
-Supports OpenAI GPT models for contract and note generation.
+Supports both OpenAI (GPT) and Anthropic (Claude) models.
 """
 
 import os
 import json
 import logging
 from typing import Dict, Any, List, Optional
+from enum import Enum
 
 logger = logging.getLogger(__name__)
 
-# Optional import - gracefully handle if not installed
+# Optional imports - gracefully handle if not installed
 try:
     from openai import OpenAI
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
-    logger.warning("OpenAI library not installed. LLM features will use mock responses.")
+
+try:
+    import anthropic
+    ANTHROPIC_AVAILABLE = True
+except ImportError:
+    ANTHROPIC_AVAILABLE = False
+
+
+class LLMProvider(Enum):
+    OPENAI = "openai"
+    ANTHROPIC = "anthropic"
 
 
 class LLMService:
-    """Service for LLM-powered text generation."""
+    """Service for LLM-powered text generation with multi-provider support."""
+    
+    # Model mappings
+    OPENAI_MODELS = ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"]
+    ANTHROPIC_MODELS = ["claude-sonnet-4-20250514", "claude-3-5-sonnet-20241022", "claude-3-opus-20240229", "claude-3-haiku-20240307"]
     
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        openai_api_key: Optional[str] = None,
+        anthropic_api_key: Optional[str] = None,
         model: str = "gpt-4o-mini",
         temperature: float = 0.7,
     ):
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+        self.anthropic_api_key = anthropic_api_key or os.getenv("ANTHROPIC_API_KEY")
         self.model = model
         self.temperature = temperature
-        self.client = None
         
-        if OPENAI_AVAILABLE and self.api_key:
-            self.client = OpenAI(api_key=self.api_key)
-            logger.info(f"LLM Service initialized with model: {model}")
+        # Determine provider from model name
+        self.provider = self._detect_provider(model)
+        
+        # Initialize clients
+        self.openai_client = None
+        self.anthropic_client = None
+        
+        if OPENAI_AVAILABLE and self.openai_api_key:
+            self.openai_client = OpenAI(api_key=self.openai_api_key)
+            logger.info(f"OpenAI client initialized")
+        
+        if ANTHROPIC_AVAILABLE and self.anthropic_api_key:
+            self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
+            logger.info(f"Anthropic client initialized")
+        
+        if self._get_active_client():
+            logger.info(f"LLM Service ready with model: {model} (provider: {self.provider.value})")
         else:
-            logger.warning("LLM Service running in mock mode (no API key or library)")
+            logger.warning("LLM Service running in mock mode (no API keys configured)")
+    
+    def _detect_provider(self, model: str) -> LLMProvider:
+        """Detect provider from model name."""
+        if model.startswith("claude") or model in self.ANTHROPIC_MODELS:
+            return LLMProvider.ANTHROPIC
+        return LLMProvider.OPENAI
+    
+    def _get_active_client(self):
+        """Get the active client based on provider."""
+        if self.provider == LLMProvider.ANTHROPIC and self.anthropic_client:
+            return self.anthropic_client
+        elif self.provider == LLMProvider.OPENAI and self.openai_client:
+            return self.openai_client
+        # Fallback: use whatever is available
+        return self.anthropic_client or self.openai_client
     
     def _call_llm(
         self,
@@ -46,25 +91,61 @@ class LLMService:
         user_prompt: str,
         json_response: bool = False,
     ) -> str:
-        """Make a call to the LLM."""
-        if not self.client:
-            logger.warning("LLM client not available, returning mock response")
+        """Make a call to the LLM (supports both OpenAI and Anthropic)."""
+        client = self._get_active_client()
+        
+        if not client:
+            logger.warning("No LLM client available, returning mock response")
             return self._mock_response(user_prompt)
         
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=self.temperature,
-                response_format={"type": "json_object"} if json_response else None,
-            )
-            return response.choices[0].message.content
+            if self.provider == LLMProvider.ANTHROPIC and self.anthropic_client:
+                return self._call_anthropic(system_prompt, user_prompt, json_response)
+            else:
+                return self._call_openai(system_prompt, user_prompt, json_response)
         except Exception as e:
             logger.error(f"LLM call failed: {e}")
             return self._mock_response(user_prompt)
+    
+    def _call_openai(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        json_response: bool = False,
+    ) -> str:
+        """Call OpenAI API."""
+        response = self.openai_client.chat.completions.create(
+            model=self.model if self.model in self.OPENAI_MODELS else "gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=self.temperature,
+            response_format={"type": "json_object"} if json_response else None,
+        )
+        return response.choices[0].message.content
+    
+    def _call_anthropic(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        json_response: bool = False,
+    ) -> str:
+        """Call Anthropic API."""
+        # For JSON responses, add instruction to system prompt
+        if json_response:
+            system_prompt = f"{system_prompt}\n\nIMPORTANT: Respond ONLY with valid JSON. No other text."
+        
+        response = self.anthropic_client.messages.create(
+            model=self.model if self.model in self.ANTHROPIC_MODELS else "claude-sonnet-4-20250514",
+            max_tokens=4096,
+            system=system_prompt,
+            messages=[
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=self.temperature,
+        )
+        return response.content[0].text
     
     def _mock_response(self, prompt: str) -> str:
         """Generate mock response when LLM is unavailable."""
@@ -83,7 +164,13 @@ class LLMService:
                 "special_requirements": [],
                 "summary": "Standard home care services based on visit assessment.",
             })
-        return "Mock LLM response - configure OPENAI_API_KEY for real responses."
+        return json.dumps({
+            "subjective": "Client reported feeling well during visit.",
+            "objective": "Care tasks completed as scheduled.",
+            "assessment": "Client stable, care plan appropriate.",
+            "plan": "Continue current care schedule.",
+            "narrative": "Visit completed without incident.",
+        })
     
     def analyze_transcript_for_contract(
         self,
@@ -266,7 +353,8 @@ def get_llm_service() -> LLMService:
     from config import settings
     
     return LLMService(
-        api_key=settings.openai_api_key or os.getenv("OPENAI_API_KEY"),
+        openai_api_key=settings.openai_api_key or os.getenv("OPENAI_API_KEY"),
+        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
         model=settings.llm_model or os.getenv("LLM_MODEL", "gpt-4o-mini"),
         temperature=settings.llm_temperature or float(os.getenv("LLM_TEMPERATURE", "0.7")),
     )
