@@ -187,7 +187,7 @@ export default function VisitDetailPage() {
       <Sidebar />
       
       {/* Main Content */}
-      <main className={`flex-1 p-8 transition-all duration-300 ${sidebarOpen ? 'mr-[420px]' : ''}`}>
+      <main className={`flex-1 p-8 transition-all duration-300 ${sidebarOpen ? 'mr-[560px]' : ''}`}>
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
@@ -437,27 +437,33 @@ export default function VisitDetailPage() {
         </div>
       </main>
 
-      {/* Slide-out Preview Panel - Compact */}
+      {/* Slide-out Preview Panel - Wider & Better Spaced */}
       <div
-        className={`fixed top-0 right-0 h-full w-[420px] bg-dark-800 border-l border-dark-700 shadow-xl transform transition-transform duration-300 ease-in-out z-40 flex flex-col ${
+        className={`fixed top-0 right-0 h-full w-[560px] bg-dark-850 border-l border-dark-700 shadow-2xl transform transition-transform duration-300 ease-in-out z-40 flex flex-col ${
           sidebarOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Panel Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-dark-700 bg-dark-800/95 backdrop-blur-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-white">Preview</span>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 text-primary-400" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-white">Document Preview</h3>
+              <p className="text-xs text-dark-400">Review generated content</p>
+            </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="p-1.5 hover:bg-dark-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-dark-700 rounded-lg transition-colors group"
           >
-            <X className="w-4 h-4 text-dark-400" />
+            <X className="w-5 h-5 text-dark-400 group-hover:text-white" />
           </button>
         </div>
 
-        {/* Panel Tabs */}
-        <div className="flex border-b border-dark-700 px-2 pt-2 gap-1 bg-dark-800/50">
+        {/* Panel Tabs - Better Styled */}
+        <div className="flex border-b border-dark-700 px-4 pt-3 gap-2 bg-dark-800/80">
           {panelTabs.map((tab) => {
             const TabIcon = tab.icon;
             const isActive = activePanel === tab.id;
@@ -465,17 +471,19 @@ export default function VisitDetailPage() {
               <button
                 key={tab.id}
                 onClick={() => setActivePanel(tab.id as any)}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg transition-all ${
+                className={`flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-t-xl transition-all ${
                   isActive
-                    ? 'bg-dark-700 text-white border-b-2 border-primary-500'
+                    ? 'bg-dark-700 text-white border-t-2 border-x-2 border-primary-500/50 -mb-[1px]'
                     : 'text-dark-400 hover:text-white hover:bg-dark-700/50'
                 }`}
               >
-                <TabIcon className="w-3.5 h-3.5" />
+                <TabIcon className={`w-4 h-4 ${isActive ? 'text-primary-400' : ''}`} />
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] ${
-                    isActive ? 'bg-primary-500/30 text-primary-300' : 'bg-dark-600 text-dark-400'
+                  <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                    isActive 
+                      ? 'bg-primary-500/30 text-primary-300' 
+                      : 'bg-dark-600 text-dark-400'
                   }`}>
                     {tab.count}
                   </span>
@@ -485,17 +493,21 @@ export default function VisitDetailPage() {
           })}
         </div>
 
-        {/* Panel Content */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Panel Content - With Proper Padding */}
+        <div className="flex-1 overflow-y-auto bg-dark-850">
           {activePanel === 'transcript' && (
-            <TranscriptTimeline segments={transcript} />
+            <div className="p-4">
+              <TranscriptTimeline segments={transcript} />
+            </div>
           )}
           {activePanel === 'billables' && (
-            <BillablesEditor
-              items={billables}
-              visitId={visitId}
-              onUpdate={loadVisitData}
-            />
+            <div className="p-4">
+              <BillablesEditor
+                items={billables}
+                visitId={visitId}
+                onUpdate={loadVisitData}
+              />
+            </div>
           )}
           {activePanel === 'contract' && (
             <ContractPreview contract={contract} client={visit?.client} />
