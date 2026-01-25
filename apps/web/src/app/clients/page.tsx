@@ -9,19 +9,55 @@ import {
   Phone,
   MapPin,
   AlertCircle,
-  ChevronRight
+  ChevronRight,
+  Heart,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
+import ClientModal from '@/components/ClientModal';
 
 interface Client {
   id: string;
   full_name: string;
+  preferred_name?: string;
+  date_of_birth?: string;
+  gender?: string;
   phone?: string;
+  phone_secondary?: string;
+  email?: string;
   address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
+  emergency_contact_relationship?: string;
+  emergency_contact_2_name?: string;
+  emergency_contact_2_phone?: string;
+  emergency_contact_2_relationship?: string;
+  primary_diagnosis?: string;
+  secondary_diagnoses?: string;
+  allergies?: string;
+  medications?: string;
+  physician_name?: string;
+  physician_phone?: string;
+  medical_notes?: string;
+  mobility_status?: string;
+  cognitive_status?: string;
+  living_situation?: string;
+  care_level?: string;
+  care_plan?: string;
+  special_requirements?: string;
+  insurance_provider?: string;
+  insurance_id?: string;
+  medicaid_id?: string;
+  medicare_id?: string;
+  preferred_days?: string;
+  preferred_times?: string;
+  status?: string;
+  notes?: string;
   created_at: string;
 }
 
@@ -31,6 +67,8 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -56,9 +94,72 @@ export default function ClientsPage() {
     }
   };
 
+  const handleAddClient = () => {
+    setSelectedClient(null);
+    setModalOpen(true);
+  };
+
+  const handleEditClient = (client: Client) => {
+    setSelectedClient(client);
+    setModalOpen(true);
+  };
+
+  const handleSaveClient = async (clientData: Partial<Client>) => {
+    const url = clientData.id 
+      ? `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/clients/${clientData.id}`
+      : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/clients`;
+    
+    const response = await fetch(url, {
+      method: clientData.id ? 'PUT' : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(clientData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save client');
+    }
+
+    await loadClients();
+  };
+
+  const handleDeleteClient = async (clientId: string) => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/clients/${clientId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to delete client');
+    }
+
+    await loadClients();
+  };
+
   const filteredClients = clients.filter(client =>
-    client.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+    client.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.phone?.includes(searchQuery)
   );
+
+  const activeClients = clients.filter(c => c.status === 'active' || !c.status);
+  const highCareClients = clients.filter(c => c.care_level === 'HIGH');
+
+  const getCareLevel = (level?: string) => {
+    switch (level) {
+      case 'HIGH': return { label: 'High Care', color: 'bg-red-500/20 text-red-400' };
+      case 'MODERATE': return { label: 'Moderate', color: 'bg-yellow-500/20 text-yellow-400' };
+      case 'LOW': return { label: 'Low Care', color: 'bg-green-500/20 text-green-400' };
+      default: return null;
+    }
+  };
 
   if (authLoading) {
     return (
@@ -83,25 +184,34 @@ export default function ClientsPage() {
               <h1 className="text-3xl font-bold text-white mb-2">Clients</h1>
               <p className="text-dark-300">Manage your client database</p>
             </div>
-            <button className="btn-primary flex items-center gap-2">
+            <button 
+              onClick={handleAddClient}
+              className="btn-primary flex items-center gap-2"
+            >
               <Plus className="w-5 h-5" />
               Add Client
             </button>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
               <p className="text-dark-400 text-sm mb-1">Total Clients</p>
               <p className="text-3xl font-bold text-white">{clients.length}</p>
             </div>
             <div className="card p-5">
-              <p className="text-dark-400 text-sm mb-1">Active This Month</p>
-              <p className="text-3xl font-bold text-accent-green">{clients.length}</p>
+              <p className="text-dark-400 text-sm mb-1">Active</p>
+              <p className="text-3xl font-bold text-accent-green">{activeClients.length}</p>
             </div>
             <div className="card p-5">
-              <p className="text-dark-400 text-sm mb-1">New This Week</p>
-              <p className="text-3xl font-bold text-accent-cyan">0</p>
+              <p className="text-dark-400 text-sm mb-1">High Care</p>
+              <p className="text-3xl font-bold text-red-400">{highCareClients.length}</p>
+            </div>
+            <div className="card p-5">
+              <p className="text-dark-400 text-sm mb-1">Pending</p>
+              <p className="text-3xl font-bold text-yellow-400">
+                {clients.filter(c => c.status === 'pending').length}
+              </p>
             </div>
           </div>
 
@@ -111,7 +221,7 @@ export default function ClientsPage() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
               <input
                 type="text"
-                placeholder="Search clients..."
+                placeholder="Search by name, phone, or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="input-dark w-full pl-12"
@@ -133,64 +243,96 @@ export default function ClientsPage() {
               <h3 className="text-lg font-semibold text-white mb-2">
                 {searchQuery ? 'No clients found' : 'No clients yet'}
               </h3>
-              <p className="text-dark-400">
+              <p className="text-dark-400 mb-4">
                 {searchQuery ? 'Try a different search term' : 'Add your first client to get started'}
               </p>
+              {!searchQuery && (
+                <button onClick={handleAddClient} className="btn-primary">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Client
+                </button>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredClients.map((client) => (
-                <div
-                  key={client.id}
-                  className="card card-hover p-5 cursor-pointer group"
-                >
-                  <div className="flex items-center gap-4">
-                    {/* Avatar */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">
-                        {client.full_name.charAt(0)}
-                      </span>
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-white mb-1">
-                        {client.full_name}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm text-dark-400">
-                        {client.phone && (
-                          <div className="flex items-center gap-1.5">
-                            <Phone className="w-4 h-4" />
-                            {client.phone}
-                          </div>
-                        )}
-                        {client.address && (
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4" />
-                            {client.address.split(',')[0]}
-                          </div>
-                        )}
+              {filteredClients.map((client) => {
+                const careLevel = getCareLevel(client.care_level);
+                return (
+                  <div
+                    key={client.id}
+                    onClick={() => handleEditClient(client)}
+                    className="card card-hover p-5 cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Avatar */}
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">
+                          {client.full_name.charAt(0)}
+                        </span>
                       </div>
-                    </div>
 
-                    {/* Emergency Contact */}
-                    {client.emergency_contact_name && (
-                      <div className="text-right mr-4">
-                        <div className="flex items-center gap-1.5 text-dark-400 text-sm">
-                          <AlertCircle className="w-4 h-4" />
-                          Emergency: {client.emergency_contact_name}
+                      {/* Info */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="font-semibold text-white">
+                            {client.full_name}
+                          </h3>
+                          {careLevel && (
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${careLevel.color}`}>
+                              {careLevel.label}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-dark-400">
+                          {client.phone && (
+                            <div className="flex items-center gap-1.5">
+                              <Phone className="w-4 h-4" />
+                              {client.phone}
+                            </div>
+                          )}
+                          {(client.city || client.address) && (
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="w-4 h-4" />
+                              {client.city || client.address?.split(',')[0]}
+                            </div>
+                          )}
+                          {client.primary_diagnosis && (
+                            <div className="flex items-center gap-1.5">
+                              <Heart className="w-4 h-4" />
+                              {client.primary_diagnosis}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    )}
 
-                    <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
+                      {/* Emergency Contact */}
+                      {client.emergency_contact_name && (
+                        <div className="text-right mr-4">
+                          <div className="flex items-center gap-1.5 text-dark-400 text-sm">
+                            <AlertCircle className="w-4 h-4 text-red-400" />
+                            <span className="text-dark-500">Emergency:</span> {client.emergency_contact_name}
+                          </div>
+                        </div>
+                      )}
+
+                      <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       </main>
+
+      {/* Client Modal */}
+      <ClientModal
+        client={selectedClient}
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSaveClient}
+        onDelete={handleDeleteClient}
+      />
     </div>
   );
 }
