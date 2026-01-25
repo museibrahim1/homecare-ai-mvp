@@ -25,14 +25,14 @@ import AudioPlayer from '@/components/AudioPlayer';
 import AudioUploader from '@/components/AudioUploader';
 import TranscriptTimeline from '@/components/TranscriptTimeline';
 import BillablesEditor from '@/components/BillablesEditor';
-import NotePreview from '@/components/NotePreview';
+import ContractPreview from '@/components/ContractPreview';
 
 const pipelineSteps = [
   { id: 'transcribe', key: 'transcription', label: 'Transcribe', icon: Mic },
   { id: 'diarize', key: 'diarization', label: 'Diarize', icon: Users },
   { id: 'align', key: 'alignment', label: 'Align', icon: Wand2 },
   { id: 'bill', key: 'billing', label: 'Bill', icon: DollarSign },
-  { id: 'note', key: 'note', label: 'Note', icon: FileCheck },
+  { id: 'contract', key: 'contract', label: 'Contract', icon: FileCheck },
 ];
 
 export default function VisitDetailPage() {
@@ -44,9 +44,9 @@ export default function VisitDetailPage() {
   const [visit, setVisit] = useState<Visit | null>(null);
   const [transcript, setTranscript] = useState<TranscriptSegment[]>([]);
   const [billables, setBillables] = useState<BillableItem[]>([]);
-  const [note, setNote] = useState<any>(null);
+  const [contract, setContract] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'transcript' | 'billables' | 'note'>('transcript');
+  const [activeTab, setActiveTab] = useState<'transcript' | 'billables' | 'contract'>('transcript');
   const [processingStep, setProcessingStep] = useState<string | null>(null);
   const [hasAudio, setHasAudio] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
@@ -84,8 +84,8 @@ export default function VisitDetailPage() {
       } catch (e) {}
 
       try {
-        const noteData = await api.getNote(token!, visitId);
-        setNote(noteData);
+        const contractData = await api.getContract(token!, visitId);
+        setContract(contractData);
       } catch (e) {}
     } catch (err) {
       console.error('Failed to load visit:', err);
@@ -273,7 +273,7 @@ export default function VisitDetailPage() {
             {[
               { id: 'transcript', label: 'Transcript', icon: FileText, count: transcript.length },
               { id: 'billables', label: 'Billable Items', icon: DollarSign, count: billables.length },
-              { id: 'note', label: 'Visit Note', icon: FileCheck, count: note ? 1 : 0 },
+              { id: 'contract', label: 'Contract', icon: FileCheck, count: contract ? 1 : 0 },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -309,8 +309,8 @@ export default function VisitDetailPage() {
                 onUpdate={loadVisitData}
               />
             )}
-            {activeTab === 'note' && (
-              <NotePreview note={note} visitId={visitId} onUpdate={loadVisitData} />
+            {activeTab === 'contract' && (
+              <ContractPreview contract={contract} client={visit?.client} />
             )}
           </div>
         </div>
