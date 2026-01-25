@@ -90,9 +90,10 @@ def generate_service_contract(self, visit_id: str):
             client_info=client_info,
         )
         
-        # Get care need level
+        # Get care need level and client profile early - needed for rate calculation
         eicna = assessment_data.get("eicna_assessment", {})
         care_need_level = eicna.get("care_need_level", "MODERATE")
+        client_profile = assessment_data.get("client_profile", {})
         logger.info(f"Extraction complete - Care Need Level: {care_need_level}")
         
         # =====================================================================
@@ -364,7 +365,7 @@ def generate_service_contract(self, visit_id: str):
         # =====================================================================
         logger.info(f"Updating client record with assessment data...")
         
-        client_profile = assessment_data.get("client_profile", {})
+        # client_profile was already extracted earlier for rate calculation
         
         # Update client with extracted medical/care information
         updates_made = []
