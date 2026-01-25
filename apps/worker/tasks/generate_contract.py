@@ -225,15 +225,81 @@ def generate_service_contract(self, visit_id: str):
             logger.info(f"Total from services: {weekly_hours} hrs/week")
         
         # =====================================================================
-        # RATE DETERMINATION (based on care complexity, not hours)
+        # RATE DETERMINATION (based on specific care needs)
         # =====================================================================
-        rate_map = {
-            "HIGH": 35.00,      # Complex care needs, skilled care
-            "MODERATE": 30.00,  # Moderate support needs
-            "LOW": 25.00,       # Light assistance, companionship
-        }
         
-        hourly_rate = rate_map.get(care_need_level, 30.00)
+        # Base rate by care level
+        base_rate_map = {
+            "HIGH": 28.00,      # Base for high care needs
+            "MODERATE": 24.00,  # Base for moderate needs
+            "LOW": 20.00,       # Base for light assistance
+        }
+        base_rate = base_rate_map.get(care_need_level, 24.00)
+        
+        # Rate adjustments based on specific needs
+        rate_adjustments = []
+        
+        # Check services for specialized care needs
+        service_names = [s.get('name', '').lower() if isinstance(s, dict) else str(s).lower() for s in services]
+        service_text = ' '.join(service_names)
+        
+        # Skilled nursing or medical care (+$8-10/hr)
+        if any(x in service_text for x in ['nursing', 'wound', 'catheter', 'injection', 'skilled']):
+            rate_adjustments.append(("Skilled nursing care", 10.00))
+        
+        # Dementia/Alzheimer's care (+$5/hr)
+        if any(x in service_text for x in ['dementia', 'alzheimer', 'memory', 'cognitive']):
+            rate_adjustments.append(("Dementia care specialist", 5.00))
+        
+        # Safety supervision/wandering (+$3/hr)
+        if any(x in service_text for x in ['supervision', 'wandering', 'safety monitor']):
+            rate_adjustments.append(("Safety supervision", 3.00))
+        
+        # Check client profile for additional needs
+        if client_profile:
+            cognitive = client_profile.get('cognitive_status', '').lower()
+            if any(x in cognitive for x in ['dementia', 'impair', 'confusion', 'alzheimer']):
+                if ("Dementia care specialist", 5.00) not in rate_adjustments:
+                    rate_adjustments.append(("Cognitive impairment care", 4.00))
+            
+            # Mobility challenges (+$2/hr)
+            mobility = client_profile.get('mobility_status', '').lower()
+            if any(x in mobility for x in ['wheelchair', 'bedbound', 'hoyer', 'lift', 'transfer']):
+                rate_adjustments.append(("Mobility/transfer assistance", 2.00))
+        
+        # Check special requirements
+        special_reqs = assessment_data.get('special_requirements', [])
+        for req in special_reqs:
+            req_text = str(req).lower() if isinstance(req, str) else str(req.get('requirement', '')).lower()
+            
+            # Specialized diet management (+$1/hr)
+            if any(x in req_text for x in ['diabetic', 'tube feed', 'g-tube', 'pureed', 'thickened']):
+                if not any('diet' in adj[0].lower() for adj in rate_adjustments):
+                    rate_adjustments.append(("Specialized diet management", 1.00))
+            
+            # Bilingual caregiver (+$2/hr)
+            if any(x in req_text for x in ['spanish', 'bilingual', 'interpreter', 'non-english']):
+                rate_adjustments.append(("Bilingual caregiver", 2.00))
+        
+        # Check safety concerns for high-risk factors
+        safety_concerns = assessment_data.get('safety_concerns', [])
+        high_severity_count = sum(1 for s in safety_concerns 
+                                   if isinstance(s, dict) and s.get('severity', '').lower() == 'high')
+        if high_severity_count >= 2:
+            rate_adjustments.append(("Multiple high-risk factors", 2.00))
+        
+        # Calculate final rate
+        total_adjustment = sum(adj[1] for adj in rate_adjustments)
+        hourly_rate = base_rate + total_adjustment
+        
+        # Cap at reasonable maximum
+        hourly_rate = min(hourly_rate, 55.00)  # Max $55/hr
+        
+        # Log rate breakdown
+        logger.info(f"Rate calculation: Base ${base_rate:.2f} ({care_need_level})")
+        for adj_name, adj_amount in rate_adjustments:
+            logger.info(f"  + ${adj_amount:.2f} for {adj_name}")
+        logger.info(f"  = ${hourly_rate:.2f}/hr final rate")
         
         # Ensure we have at least some hours if services were identified
         if weekly_hours == 0 and len(services) > 0:
