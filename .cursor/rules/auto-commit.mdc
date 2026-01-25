@@ -1,0 +1,36 @@
+---
+description: Auto-commit reminder to prevent data loss
+globs: **/*
+alwaysApply: true
+---
+
+# Auto-Commit Rule for AI Voice Contractor
+
+## CRITICAL: Commit Changes Frequently
+
+After making significant code changes (more than a few lines), ALWAYS commit to git to prevent data loss.
+
+### Commit Triggers
+- After creating or modifying any file
+- After completing any feature or fix
+- Before ending a session
+- Every 10-15 minutes during active development
+
+### Commit Command Pattern
+```bash
+git add -A && git commit -m "Description of changes"
+```
+
+### Why This Matters
+- Cursor chat sessions are ephemeral - code changes can be lost
+- Docker containers may have different code than local filesystem  
+- Uncommitted code costs money to regenerate
+
+### Quick Commit Messages
+- "WIP: feature-name" for work in progress
+- "Add: feature description" for new features
+- "Fix: bug description" for bug fixes
+- "Update: component/file name" for modifications
+
+## Auto-Save Script
+Run `./scripts/auto_commit.sh` to automatically commit any pending changes.
