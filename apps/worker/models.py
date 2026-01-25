@@ -112,18 +112,18 @@ class AudioAsset(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     visit_id = Column(UUID(as_uuid=True), ForeignKey("visits.id"), nullable=False)
-    file_path = Column(String(512), nullable=False)  # Also known as s3_key
-    s3_key = Column(String(512))  # Alias
+    s3_key = Column(String(512), nullable=False)
     original_filename = Column(String(255))
-    mime_type = Column(String(100))
-    content_type = Column(String(100))  # Alias
+    content_type = Column(String(100))
     file_size_bytes = Column(Integer)
     duration_ms = Column(Integer)
+    sample_rate = Column(Integer)
+    channels = Column(Integer)
     status = Column(String(50), default="uploaded")
+    speech_ratio = Column(Float)
     avg_confidence = Column(Float)
-    source = Column(String(50))
-    asset_metadata = Column(JSONB, default=dict)  # renamed from metadata (reserved)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class TranscriptSegment(Base):

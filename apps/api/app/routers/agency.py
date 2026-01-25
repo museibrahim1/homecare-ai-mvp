@@ -323,6 +323,83 @@ Extract and return the JSON object with company information."""
         return ExtractedInfo()
 
 
+def _extract_text_from_document(content: str) -> tuple[str, str]:
+    """
+    Extract text from various document formats.
+    Returns (text_content, mime_type)
+    """
+    import base64
+    import io
+    
+    text_content = ""
+    mime_type = "text/plain"
+    
+    # Check if it's a data URL
+    if content.startswith("data:"):
+        # Parse data URL: data:mime/type;base64,<data>
+        try:
+            header, b64_data = content.split(",", 1)
+            mime_type = header.split(":")[1].split(";")[0] if ":" in header else "application/octet-stream"
+            raw_bytes = base64.b64decode(b64_data)
+        except Exception as e:
+            logger.error(f"Failed to decode base64: {e}")
+            return content[:3000], mime_type
+    else:
+        # Assume it's plain text or raw base64
+        try:
+            raw_bytes = base64.b64decode(content)
+        except:
+            return content[:3000], "text/plain"
+    
+    # Handle different mime types
+    try:
+        if "pdf" in mime_type.lower():
+            # Try to extract text from PDF
+            try:
+                import pypdf
+                pdf_reader = pypdf.PdfReader(io.BytesIO(raw_bytes))
+                text_parts = []
+                for page in pdf_reader.pages[:5]:  # First 5 pages
+                    text_parts.append(page.extract_text() or "")
+                text_content = "\n".join(text_parts)
+            except ImportError:
+                # pypdf not installed, try raw decode
+                text_content = raw_bytes.decode('utf-8', errors='ignore')[:3000]
+            except Exception as e:
+                logger.error(f"PDF extraction failed: {e}")
+                text_content = raw_bytes.decode('utf-8', errors='ignore')[:3000]
+                
+        elif "word" in mime_type.lower() or "docx" in mime_type.lower() or "msword" in mime_type.lower():
+            # Try to extract text from DOCX
+            try:
+                from docx import Document
+                doc = Document(io.BytesIO(raw_bytes))
+                text_parts = []
+                for para in doc.paragraphs[:50]:  # First 50 paragraphs
+                    if para.text.strip():
+                        text_parts.append(para.text)
+                text_content = "\n".join(text_parts)
+            except ImportError:
+                text_content = raw_bytes.decode('utf-8', errors='ignore')[:3000]
+            except Exception as e:
+                logger.error(f"DOCX extraction failed: {e}")
+                text_content = raw_bytes.decode('utf-8', errors='ignore')[:3000]
+                
+        elif "image" in mime_type.lower():
+            # For images, we'll use GPT-4 Vision - return the original content
+            return content, mime_type
+            
+        else:
+            # Try to decode as text
+            text_content = raw_bytes.decode('utf-8', errors='ignore')[:4000]
+            
+    except Exception as e:
+        logger.error(f"Text extraction failed: {e}")
+        text_content = str(raw_bytes[:2000])
+    
+    return text_content, mime_type
+
+
 async def _extract_with_openai(content: str, doc_type: str, api_key: str) -> ExtractedInfo:
     """Extract company info using OpenAI."""
     try:
@@ -330,21 +407,14 @@ async def _extract_with_openai(content: str, doc_type: str, api_key: str) -> Ext
         
         client = OpenAI(api_key=api_key)
         
-        # If content is base64, try to decode the text portion
-        text_content = content
-        if content.startswith("data:"):
-            # It's a data URL, extract the base64 part
-            try:
-                import base64
-                base64_data = content.split(",")[1] if "," in content else content
-                decoded = base64.b64decode(base64_data)
-                # Try to decode as text
-                try:
-                    text_content = decoded.decode('utf-8')
-                except:
-                    text_content = str(decoded[:2000])
-            except:
-                text_content = content[:3000]
+        # Extract text from document
+        text_content, mime_type = _extract_text_from_document(content)
+        
+        logger.info(f"Extracted text ({len(text_content)} chars) from {mime_type}")
+        
+        # For images, use GPT-4 Vision
+        if "image" in mime_type.lower() and content.startswith("data:"):
+            return await _extract_with_openai_vision(content, doc_type, api_key)
         
         system_prompt = """You are an expert at extracting business information from documents.
         
@@ -389,6 +459,64 @@ Return ONLY a valid JSON object with the extracted information."""
         
     except Exception as e:
         logger.error(f"OpenAI extraction failed: {e}")
+        return ExtractedInfo()
+
+
+async def _extract_with_openai_vision(content: str, doc_type: str, api_key: str) -> ExtractedInfo:
+    """Extract company info from images using OpenAI Vision."""
+    try:
+        from openai import OpenAI
+        
+        client = OpenAI(api_key=api_key)
+        
+        system_prompt = """You are an expert at extracting business information from document images.
+        
+Look at the image and extract ALL of the following information if visible:
+- name: Company or agency name
+- address: Street address
+- city: City name
+- state: State (abbreviation or full name)
+- zip_code: ZIP or postal code
+- phone: Phone number
+- email: Email address  
+- website: Website URL
+- tax_id: Tax ID or EIN
+- license_number: Business or healthcare license number
+- npi_number: National Provider Identifier (10 digits)
+- contact_person: Primary contact name
+- contact_title: Contact's job title
+
+Return ONLY a JSON object with these field names. Use null for any field not found."""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",  # Use GPT-4o for vision
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": f"Extract company information from this {doc_type} image:"},
+                        {"type": "image_url", "image_url": {"url": content}}
+                    ]
+                }
+            ],
+            temperature=0,
+            max_tokens=1500,
+        )
+        
+        response_text = response.choices[0].message.content
+        
+        # Try to extract JSON from response
+        json_match = re.search(r'\{[^{}]*\}', response_text, re.DOTALL)
+        if json_match:
+            data = json.loads(json_match.group())
+            logger.info(f"OpenAI Vision extracted: {data}")
+            return ExtractedInfo(**{k: v for k, v in data.items() if v is not None and k in ExtractedInfo.model_fields})
+        
+        return ExtractedInfo()
+        
+    except Exception as e:
+        logger.error(f"OpenAI Vision extraction failed: {e}")
         return ExtractedInfo()
 
 
