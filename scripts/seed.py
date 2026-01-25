@@ -26,6 +26,7 @@ from app.db.session import SessionLocal
 from app.core.security import get_password_hash
 from app.models.user import User
 from app.models.client import Client
+from app.models.caregiver import Caregiver
 from app.models.visit import Visit
 
 
@@ -197,10 +198,93 @@ def seed_database():
             db.add(client)
             clients.append(client)
         
+        db.flush()
+        
+        # =============================================
+        # CAREGIVERS (Separate from Users - for assignments)
+        # =============================================
+        caregivers_records = [
+            {
+                "full_name": "Sarah Johnson",
+                "email": "sarah@homecare.ai",
+                "phone": "555-0101",
+                "certification_level": "CNA",
+                "specializations": ["dementia", "mobility"],
+                "languages": ["English", "Spanish"],
+                "can_handle_high_care": True,
+                "years_experience": 5,
+                "city": "Lincoln",
+                "state": "NE",
+            },
+            {
+                "full_name": "Michael Brown",
+                "email": "michael@homecare.ai",
+                "phone": "555-0102",
+                "certification_level": "HHA",
+                "specializations": ["diabetes", "wound care"],
+                "languages": ["English"],
+                "can_handle_high_care": True,
+                "years_experience": 8,
+                "city": "Omaha",
+                "state": "NE",
+            },
+            {
+                "full_name": "Emily Davis",
+                "email": "emily@homecare.ai",
+                "phone": "555-0103",
+                "certification_level": "CNA",
+                "specializations": ["pediatrics", "respite"],
+                "languages": ["English", "French"],
+                "can_handle_high_care": False,
+                "years_experience": 3,
+                "city": "Des Moines",
+                "state": "IA",
+            },
+            {
+                "full_name": "David Martinez",
+                "email": "david@homecare.ai",
+                "phone": "555-0104",
+                "certification_level": "RN",
+                "specializations": ["COPD", "cardiac", "high-care"],
+                "languages": ["English", "Spanish"],
+                "can_handle_high_care": True,
+                "years_experience": 10,
+                "city": "Council Bluffs",
+                "state": "IA",
+            },
+        ]
+        
+        for cg_data in caregivers_records:
+            existing = db.query(Caregiver).filter(Caregiver.email == cg_data["email"]).first()
+            if existing:
+                continue
+                
+            print(f"Creating caregiver record: {cg_data['full_name']}...")
+            caregiver = Caregiver(
+                id=uuid4(),
+                full_name=cg_data["full_name"],
+                email=cg_data["email"],
+                phone=cg_data.get("phone"),
+                certification_level=cg_data.get("certification_level"),
+                specializations=cg_data.get("specializations", []),
+                languages=cg_data.get("languages", ["English"]),
+                can_handle_high_care=cg_data.get("can_handle_high_care", False),
+                can_handle_moderate_care=True,
+                can_handle_low_care=True,
+                years_experience=cg_data.get("years_experience", 0),
+                city=cg_data.get("city"),
+                state=cg_data.get("state"),
+                status="active",
+                created_at=now,
+                updated_at=now,
+            )
+            db.add(caregiver)
+        
         db.commit()
         
         # Final counts
-        caregiver_count = db.query(User).filter(User.role == 'caregiver').count()
+        user_caregiver_count = db.query(User).filter(User.role == 'caregiver').count()
+        caregiver_count = db.query(Caregiver).count()
         client_count = db.query(Client).count()
         
         print("\n" + "="*50)
@@ -208,7 +292,8 @@ def seed_database():
         print("="*50)
         print(f"\nCreated/verified:")
         print(f"  • 1 Admin user")
-        print(f"  • {caregiver_count} Caregivers")
+        print(f"  • {user_caregiver_count} Caregiver users (for login)")
+        print(f"  • {caregiver_count} Caregiver records (for assignment)")
         print(f"  • {client_count} Clients")
         print("\nLogin credentials:")
         print("  Admin:     admin@homecare.ai / admin123")
