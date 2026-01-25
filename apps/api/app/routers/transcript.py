@@ -569,6 +569,166 @@ async def import_transcript_text(
     )
 
 
+def detect_transcript_format(content: str) -> tuple[str, str]:
+    """
+    Auto-detect the format of transcript content.
+    Returns (format_type, text_format_hint).
+    format_type: 'srt', 'vtt', 'json', 'text'
+    text_format_hint: 'dialogue', 'timestamped', 'paragraph' (only for text)
+    """
+    content = content.strip()
+    
+    # Check for JSON
+    if content.startswith('[') or content.startswith('{'):
+        try:
+            import json
+            parsed = json.loads(content)
+            if isinstance(parsed, (list, dict)):
+                return 'json', ''
+        except:
+            pass
+    
+    # Check for WebVTT
+    if content.upper().startswith('WEBVTT'):
+        return 'vtt', ''
+    
+    # Check for SRT format (numbered blocks with timestamps)
+    # SRT typically starts with "1\n00:00:..." or has multiple blocks with arrow timestamps
+    srt_pattern = r'^\d+\s*\n\d{2}:\d{2}:\d{2}[,.:]\d{3}\s*-->'
+    if re.search(srt_pattern, content, re.MULTILINE):
+        return 'srt', ''
+    
+    # Check for VTT-style timestamps without header
+    vtt_pattern = r'^\d{2}:\d{2}[:.]\d{3}\s*-->'
+    if re.search(vtt_pattern, content, re.MULTILINE):
+        return 'vtt', ''
+    
+    # Now check plain text formats
+    lines = [l.strip() for l in content.split('\n') if l.strip()]
+    
+    if not lines:
+        return 'text', 'paragraph'
+    
+    # Check for timestamped format: [00:00] or [00:00:00]
+    timestamped_pattern = r'^\[?\d{1,2}:\d{2}(?::\d{2})?\]?\s+'
+    timestamped_count = sum(1 for line in lines if re.match(timestamped_pattern, line))
+    if timestamped_count > len(lines) * 0.5:  # More than 50% have timestamps
+        return 'text', 'timestamped'
+    
+    # Check for dialogue format: "Speaker: text" or "Speaker - text"
+    dialogue_pattern = r'^[A-Za-z0-9\s]+[\s]*[:\-]\s*.+'
+    dialogue_count = sum(1 for line in lines if re.match(dialogue_pattern, line))
+    if dialogue_count > len(lines) * 0.3:  # More than 30% look like dialogue
+        return 'text', 'dialogue'
+    
+    # Default to paragraph
+    return 'text', 'paragraph'
+
+
+@router.post("/{visit_id}/transcript/import/auto")
+async def import_transcript_auto(
+    visit_id: UUID,
+    request: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Auto-detect format and import transcript.
+    
+    This endpoint automatically detects whether the content is:
+    - JSON (structured segments)
+    - SRT (SubRip subtitle format)
+    - VTT (WebVTT format)
+    - Plain text (dialogue, timestamped, or paragraph)
+    
+    Just paste or upload any transcript and we'll figure out the format.
+    """
+    content = request.get('content', '').strip()
+    replace_existing = request.get('replace_existing', True)
+    
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No content provided"
+        )
+    
+    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    
+    # Detect format
+    format_type, text_hint = detect_transcript_format(content)
+    detected_format = format_type
+    if text_hint:
+        detected_format = f"{format_type} ({text_hint})"
+    
+    logger.info(f"Auto-detected format: {detected_format} for visit {visit_id}")
+    
+    # Parse based on detected format
+    try:
+        if format_type == 'json':
+            import json
+            parsed = json.loads(content)
+            segments_data = parsed if isinstance(parsed, list) else parsed.get('segments', [parsed])
+            
+            segments = []
+            for seg in segments_data:
+                segments.append(TranscriptSegmentImport(
+                    start_ms=seg.get('start_ms', 0),
+                    end_ms=seg.get('end_ms', seg.get('start_ms', 0) + 1000),
+                    text=seg.get('text', ''),
+                    speaker_label=seg.get('speaker_label') or seg.get('speaker'),
+                    confidence=seg.get('confidence')
+                ))
+            source = TranscriptSource.IMPORT_JSON
+            
+        elif format_type == 'srt':
+            segments = parse_srt_content(content)
+            source = TranscriptSource.IMPORT_SRT
+            
+        elif format_type == 'vtt':
+            segments = parse_vtt_content(content)
+            source = TranscriptSource.IMPORT_VTT
+            
+        else:  # text
+            segments = parse_plain_text(content, text_hint or 'dialogue')
+            source = TranscriptSource.IMPORT_TEXT
+            
+    except Exception as e:
+        logger.error(f"Failed to parse transcript: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to parse transcript: {str(e)}"
+        )
+    
+    if not segments:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No valid segments found in content. Please check the format."
+        )
+    
+    # Create segments
+    count, duration_ms, word_count = create_transcript_segments(
+        db=db,
+        visit_id=visit_id,
+        segments=segments,
+        source=source,
+        replace_existing=replace_existing,
+    )
+    
+    logger.info(f"Imported {count} segments for visit {visit_id}, detected as {detected_format}")
+    
+    return {
+        "visit_id": str(visit_id),
+        "segments_imported": count,
+        "total_duration_ms": duration_ms,
+        "word_count": word_count,
+        "detected_format": detected_format,
+        "source": source.value,
+        "message": f"Successfully imported {count} segments ({word_count} words) - detected as {detected_format}"
+    }
+
+
 @router.delete("/{visit_id}/transcript")
 async def delete_transcript(
     visit_id: UUID,

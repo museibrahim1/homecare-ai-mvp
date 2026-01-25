@@ -3,9 +3,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { 
   FileText, Upload, CheckCircle, AlertCircle, X, Loader2, 
-  FileUp, ClipboardPaste, Sparkles 
+  FileUp, ClipboardPaste, Sparkles, Wand2
 } from 'lucide-react';
-import { api } from '@/lib/api';
 
 interface TranscriptImporterProps {
   visitId: string;
@@ -14,9 +13,6 @@ interface TranscriptImporterProps {
   onClose?: () => void;
 }
 
-type ImportFormat = 'text' | 'srt' | 'vtt' | 'json';
-type TextFormat = 'dialogue' | 'timestamped' | 'paragraph';
-
 export default function TranscriptImporter({ 
   visitId, 
   token, 
@@ -24,12 +20,11 @@ export default function TranscriptImporter({
   onClose 
 }: TranscriptImporterProps) {
   const [state, setState] = useState<'idle' | 'importing' | 'processing' | 'success' | 'error'>('idle');
-  const [format, setFormat] = useState<ImportFormat>('text');
-  const [textFormat, setTextFormat] = useState<TextFormat>('dialogue');
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ segments: number; words: number } | null>(null);
+  const [result, setResult] = useState<{ segments: number; words: number; format: string } | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (file: File) => {
@@ -37,22 +32,26 @@ export default function TranscriptImporter({
     reader.onload = (e) => {
       const text = e.target?.result as string;
       setContent(text);
-      
-      // Auto-detect format from file extension
-      const ext = file.name.split('.').pop()?.toLowerCase();
-      if (ext === 'srt') setFormat('srt');
-      else if (ext === 'vtt') setFormat('vtt');
-      else if (ext === 'json') setFormat('json');
-      else setFormat('text');
     };
     reader.readAsText(file);
   };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    setDragActive(false);
     if (e.dataTransfer.files.length > 0) {
       handleFileSelect(e.dataTransfer.files[0]);
     }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
   }, []);
 
   const handlePaste = useCallback(async () => {
@@ -74,51 +73,21 @@ export default function TranscriptImporter({
     setError(null);
 
     try {
-      let endpoint = '';
-      let body: any = {};
-
-      switch (format) {
-        case 'srt':
-          endpoint = `/visits/${visitId}/transcript/import/srt`;
-          body = { srt_content: content, replace_existing: true };
-          break;
-        case 'vtt':
-          endpoint = `/visits/${visitId}/transcript/import/vtt`;
-          body = { vtt_content: content, replace_existing: true };
-          break;
-        case 'json':
-          endpoint = `/visits/${visitId}/transcript/import`;
-          // Try to parse JSON to get segments array
-          try {
-            const parsed = JSON.parse(content);
-            body = { 
-              segments: Array.isArray(parsed) ? parsed : parsed.segments || [parsed],
-              source: 'import_json',
-              replace_existing: true 
-            };
-          } catch {
-            throw new Error('Invalid JSON format. Expected array of segments or {segments: [...]}');
-          }
-          break;
-        case 'text':
-        default:
-          endpoint = `/visits/${visitId}/transcript/import/text`;
-          body = { 
-            text_content: content, 
-            format_hint: textFormat,
+      // Use auto-detect endpoint - backend will figure out the format
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/visits/${visitId}/transcript/import/auto`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ 
+            content: content,
             replace_existing: true 
-          };
-          break;
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body)
-      });
+          })
+        }
+      );
 
       if (!response.ok) {
         const err = await response.json();
@@ -126,7 +95,11 @@ export default function TranscriptImporter({
       }
 
       const data = await response.json();
-      setResult({ segments: data.segments_imported, words: data.word_count });
+      setResult({ 
+        segments: data.segments_imported, 
+        words: data.word_count,
+        format: data.detected_format 
+      });
       setState('success');
       
     } catch (err: any) {
@@ -170,7 +143,7 @@ export default function TranscriptImporter({
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">Import Transcript</h3>
-            <p className="text-sm text-slate-400">From another service or file</p>
+            <p className="text-sm text-slate-400">Paste or upload - we'll detect the format automatically</p>
           </div>
         </div>
         {onClose && (
@@ -182,87 +155,30 @@ export default function TranscriptImporter({
 
       {state === 'idle' && (
         <>
-          {/* Format Selection */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-300 mb-2">Import Format</label>
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                { id: 'text', label: 'Plain Text', desc: 'Dialogue or timestamped' },
-                { id: 'srt', label: 'SRT', desc: 'Subtitle format' },
-                { id: 'vtt', label: 'WebVTT', desc: 'Web subtitle format' },
-                { id: 'json', label: 'JSON', desc: 'Structured data' },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setFormat(f.id as ImportFormat)}
-                  className={`p-3 rounded-lg border text-left transition-colors ${
-                    format === f.id
-                      ? 'border-purple-500 bg-purple-500/10 text-white'
-                      : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:border-slate-500'
-                  }`}
-                >
-                  <div className="font-medium text-sm">{f.label}</div>
-                  <div className="text-xs text-slate-400">{f.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Text Format Sub-option */}
-          {format === 'text' && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Text Format</label>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  onClick={() => setTextFormat('dialogue')}
-                  className={`p-2 rounded-lg border text-sm ${
-                    textFormat === 'dialogue' 
-                      ? 'border-purple-500 bg-purple-500/10' 
-                      : 'border-slate-600 bg-slate-700/50 hover:border-slate-500'
-                  }`}
-                >
-                  <div className="font-medium">Dialogue</div>
-                  <div className="text-xs text-slate-400">Speaker: text</div>
-                </button>
-                <button
-                  onClick={() => setTextFormat('timestamped')}
-                  className={`p-2 rounded-lg border text-sm ${
-                    textFormat === 'timestamped' 
-                      ? 'border-purple-500 bg-purple-500/10' 
-                      : 'border-slate-600 bg-slate-700/50 hover:border-slate-500'
-                  }`}
-                >
-                  <div className="font-medium">Timestamped</div>
-                  <div className="text-xs text-slate-400">[00:00] text</div>
-                </button>
-                <button
-                  onClick={() => setTextFormat('paragraph')}
-                  className={`p-2 rounded-lg border text-sm ${
-                    textFormat === 'paragraph' 
-                      ? 'border-purple-500 bg-purple-500/10' 
-                      : 'border-slate-600 bg-slate-700/50 hover:border-slate-500'
-                  }`}
-                >
-                  <div className="font-medium">Paragraph</div>
-                  <div className="text-xs text-slate-400">Continuous text</div>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Content Input */}
-          <div className="mb-4">
+          {/* Drag & Drop / Content Input */}
+          <div 
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`relative mb-4 transition-all ${
+              dragActive ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-800' : ''
+            }`}
+          >
+            {/* Action buttons */}
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-slate-300">Transcript Content</label>
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <Wand2 className="w-4 h-4 text-purple-400" />
+                <span>Auto-detects: SRT, VTT, JSON, or plain text</span>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={handlePaste}
-                  className="flex items-center gap-1 px-2 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded text-slate-300"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition-colors"
                 >
-                  <ClipboardPaste className="w-3 h-3" /> Paste
+                  <ClipboardPaste className="w-4 h-4" /> Paste
                 </button>
-                <label className="flex items-center gap-1 px-2 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded text-slate-300 cursor-pointer">
-                  <FileUp className="w-3 h-3" /> Upload File
+                <label className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 cursor-pointer transition-colors">
+                  <FileUp className="w-4 h-4" /> Upload
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -274,51 +190,41 @@ export default function TranscriptImporter({
               </div>
             </div>
             
-            <div
-              onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              className="relative"
-            >
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={
-                  format === 'text' && textFormat === 'dialogue'
-                    ? "Caregiver: Hello, how are you feeling today?\nClient: I'm doing much better, thank you."
-                    : format === 'srt'
-                    ? "1\n00:00:00,000 --> 00:00:05,000\nHello, how are you?"
-                    : format === 'json'
-                    ? '[{"start_ms": 0, "end_ms": 5000, "text": "Hello", "speaker_label": "Caregiver"}]'
-                    : "Enter transcript content..."
-                }
-                className="w-full h-48 p-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none font-mono text-sm"
-              />
-              <div className="absolute bottom-2 right-2 text-xs text-slate-500">
-                {content.length} characters
-              </div>
-            </div>
-          </div>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder={`Paste your transcript here or drag & drop a file...
 
-          {/* Example Formats */}
-          <div className="mb-4 p-3 bg-slate-700/30 rounded-lg">
-            <div className="text-xs text-slate-400 mb-1">Example {format.toUpperCase()} format:</div>
-            <code className="text-xs text-slate-300 whitespace-pre-wrap">
-              {format === 'text' && textFormat === 'dialogue' && 
-                'Caregiver: Hello, how are you feeling today?\nClient: Much better, thank you for asking.'}
-              {format === 'text' && textFormat === 'timestamped' && 
-                '[00:00] Hello, how are you feeling today?\n[00:05] Much better, thank you.'}
-              {format === 'srt' && 
-                '1\n00:00:00,000 --> 00:00:05,000\nHello, how are you?'}
-              {format === 'vtt' && 
-                'WEBVTT\n\n00:00.000 --> 00:05.000\nHello, how are you?'}
-              {format === 'json' && 
-                '[{"start_ms": 0, "end_ms": 5000, "text": "Hello", "speaker_label": "Caregiver"}]'}
-            </code>
+Examples of supported formats:
+
+• Dialogue format:
+  Caregiver: Hello, how are you feeling today?
+  Client: I'm doing much better, thank you.
+
+• Timestamped:
+  [00:00] Hello, how are you feeling?
+  [00:05] Much better, thank you.
+
+• SRT/VTT subtitle files
+
+• JSON with segments array`}
+              className="w-full h-56 p-4 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none font-mono text-sm"
+            />
+            
+            {dragActive && (
+              <div className="absolute inset-0 bg-purple-500/10 border-2 border-dashed border-purple-500 rounded-lg flex items-center justify-center">
+                <div className="text-purple-400 font-medium">Drop file here</div>
+              </div>
+            )}
+            
+            <div className="absolute bottom-3 right-3 text-xs text-slate-500">
+              {content.length > 0 ? `${content.length.toLocaleString()} characters` : ''}
+            </div>
           </div>
 
           {error && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400">
-              <AlertCircle className="w-4 h-4" />
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
           )}
@@ -338,7 +244,8 @@ export default function TranscriptImporter({
       {state === 'importing' && (
         <div className="py-8 text-center">
           <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
-          <p className="text-slate-300">Importing transcript...</p>
+          <p className="text-slate-300">Analyzing and importing transcript...</p>
+          <p className="text-sm text-slate-500 mt-1">Auto-detecting format</p>
         </div>
       )}
 
@@ -346,9 +253,14 @@ export default function TranscriptImporter({
         <div className="py-6 text-center">
           <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
           <h4 className="text-xl font-semibold text-white mb-2">Import Successful!</h4>
-          <p className="text-slate-400 mb-6">
+          <p className="text-slate-400 mb-1">
             Imported {result?.segments} segments ({result?.words} words)
           </p>
+          {result?.format && (
+            <p className="text-sm text-slate-500 mb-6">
+              Detected format: <span className="text-purple-400">{result.format}</span>
+            </p>
+          )}
           
           <div className="space-y-3">
             <button
