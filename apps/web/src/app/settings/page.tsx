@@ -125,7 +125,7 @@ export default function SettingsPage() {
 
   const loadAgencySettings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/agency/settings`, {
+      const res = await fetch(`${API_BASE}/agency`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -271,7 +271,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`${API_BASE}/agency/settings`, {
+      const res = await fetch(`${API_BASE}/agency`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

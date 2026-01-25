@@ -58,6 +58,9 @@ services:
       JWT_EXPIRATION_HOURS: 24
       DEBUG: "true"
       LOG_LEVEL: INFO
+      # LLM Configuration for document extraction
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     ports:
       - "8000:8000"
     volumes:

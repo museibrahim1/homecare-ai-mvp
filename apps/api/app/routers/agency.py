@@ -221,23 +221,24 @@ async def extract_company_info(
     Extract company information from an uploaded document using AI.
     Supports letterheads, policy documents, contracts, etc.
     """
-    try:
-        # Try to use Anthropic Claude for extraction
-        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-        openai_key = os.getenv("OPENAI_API_KEY")
-        
-        if anthropic_key:
-            return await _extract_with_claude(request.content, request.document_type, anthropic_key)
-        elif openai_key:
-            return await _extract_with_openai(request.content, request.document_type, openai_key)
-        else:
-            # Return empty - user will fill manually
-            logger.warning("No LLM API key found for document extraction")
-            return ExtractedInfo()
-            
-    except Exception as e:
-        logger.error(f"Document extraction failed: {e}")
-        return ExtractedInfo()
+    openai_key = os.getenv("OPENAI_API_KEY")
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    
+    # Try OpenAI first (more reliable), then fall back to Anthropic
+    if openai_key:
+        result = await _extract_with_openai(request.content, request.document_type, openai_key)
+        if result.name or result.address or result.phone or result.email:
+            return result
+    
+    if anthropic_key:
+        result = await _extract_with_claude(request.content, request.document_type, anthropic_key)
+        if result.name or result.address or result.phone or result.email:
+            return result
+    
+    if not openai_key and not anthropic_key:
+        logger.warning("No LLM API key found for document extraction")
+    
+    return ExtractedInfo()
 
 
 async def _extract_with_claude(content: str, doc_type: str, api_key: str) -> ExtractedInfo:
@@ -329,22 +330,62 @@ async def _extract_with_openai(content: str, doc_type: str, api_key: str) -> Ext
         
         client = OpenAI(api_key=api_key)
         
-        system_prompt = """You extract business information from documents.
-Return ONLY a JSON object with: name, address, city, state, zip_code, phone, email, website, tax_id, license_number, npi_number, contact_person, contact_title, cancellation_policy, terms_and_conditions.
-Use null for missing fields."""
+        # If content is base64, try to decode the text portion
+        text_content = content
+        if content.startswith("data:"):
+            # It's a data URL, extract the base64 part
+            try:
+                import base64
+                base64_data = content.split(",")[1] if "," in content else content
+                decoded = base64.b64decode(base64_data)
+                # Try to decode as text
+                try:
+                    text_content = decoded.decode('utf-8')
+                except:
+                    text_content = str(decoded[:2000])
+            except:
+                text_content = content[:3000]
+        
+        system_prompt = """You are an expert at extracting business information from documents.
+        
+Extract ALL of the following information if present in the document:
+- name: Company or agency name
+- address: Street address
+- city: City name
+- state: State (abbreviation or full name)
+- zip_code: ZIP or postal code
+- phone: Phone number
+- email: Email address  
+- website: Website URL
+- tax_id: Tax ID or EIN (format: XX-XXXXXXX)
+- license_number: Business or healthcare license number
+- npi_number: National Provider Identifier (10 digits)
+- contact_person: Primary contact name
+- contact_title: Contact's job title
+- cancellation_policy: Any cancellation policy text
+- terms_and_conditions: Any terms and conditions text
+
+Return a JSON object with these exact field names. Use null for any field not found."""
+
+        user_content = f"""Extract company/business information from this {doc_type} document:
+
+{text_content[:4000]}
+
+Return ONLY a valid JSON object with the extracted information."""
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Extract company info from this {doc_type} document: {content[:3000]}"}
+                {"role": "user", "content": user_content}
             ],
             temperature=0,
             response_format={"type": "json_object"},
         )
         
         data = json.loads(response.choices[0].message.content)
-        return ExtractedInfo(**{k: v for k, v in data.items() if v is not None})
+        logger.info(f"OpenAI extracted: {data}")
+        return ExtractedInfo(**{k: v for k, v in data.items() if v is not None and k in ExtractedInfo.model_fields})
         
     except Exception as e:
         logger.error(f"OpenAI extraction failed: {e}")
