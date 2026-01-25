@@ -13,7 +13,9 @@ import {
   Mic,
   Link2,
   FileText,
-  ChevronRight
+  ChevronRight,
+  Shield,
+  Building2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -32,6 +34,10 @@ const managementNavItems = [
 const systemNavItems = [
   { href: '/integrations', label: 'Integrations', icon: Link2, description: 'Connect apps' },
   { href: '/settings', label: 'Settings', icon: Settings, description: 'Agency settings' },
+];
+
+const adminNavItems = [
+  { href: '/admin/businesses', label: 'Business Approvals', icon: Building2, description: 'Review applications' },
 ];
 
 export default function Sidebar() {
@@ -135,6 +141,21 @@ export default function Sidebar() {
           </div>
           <div className="space-y-1.5">
             {systemNavItems.map((item) => (
+              <NavItem key={item.href} item={item} />
+            ))}
+          </div>
+        </div>
+
+        {/* Admin Section */}
+        <div className="mb-6">
+          <div className="px-4 py-2 mb-2">
+            <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider flex items-center gap-2">
+              <Shield className="w-3 h-3" />
+              Admin
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {adminNavItems.map((item) => (
               <NavItem key={item.href} item={item} />
             ))}
           </div>

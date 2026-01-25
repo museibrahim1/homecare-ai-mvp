@@ -2,57 +2,33 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
-  Building2, User, FileText, CheckCircle, ChevronRight, ChevronLeft,
-  Upload, AlertCircle, Shield, Loader2, Search, ExternalLink
+  Building2, 
+  User, 
+  MapPin, 
+  FileCheck, 
+  ArrowRight, 
+  ArrowLeft,
+  CheckCircle2,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-const STATES = [
-  { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
-  { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
-  { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
-  { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
-  { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
-  { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
-  { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
-  { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
-  { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
-  { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
-  { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
-  { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
-  { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
-  { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
-  { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
-  { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
-  { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }, { code: 'DC', name: 'Washington DC' },
-];
-
-const ENTITY_TYPES = [
-  { value: 'llc', label: 'LLC (Limited Liability Company)' },
-  { value: 'corporation', label: 'Corporation' },
-  { value: 's_corp', label: 'S Corporation' },
-  { value: 'partnership', label: 'Partnership' },
-  { value: 'sole_proprietorship', label: 'Sole Proprietorship' },
-  { value: 'nonprofit', label: 'Non-Profit Organization' },
-];
-
-const REQUIRED_DOCUMENTS = [
-  { type: 'business_license', label: 'Business License', description: 'State or local business license' },
-  { type: 'home_care_license', label: 'Home Care License', description: 'State home care agency license' },
-  { type: 'liability_insurance', label: 'Liability Insurance', description: 'General liability insurance certificate' },
-];
+type EntityType = 'llc' | 'corporation' | 's_corp' | 'partnership' | 'sole_proprietorship' | 'nonprofit';
 
 interface FormData {
   // Business Info
   name: string;
   dba_name: string;
-  entity_type: string;
+  entity_type: EntityType;
   state_of_incorporation: string;
   registration_number: string;
   ein: string;
-  // Contact
+  
+  // Contact Info
   address: string;
   city: string;
   state: string;
@@ -60,28 +36,75 @@ interface FormData {
   phone: string;
   email: string;
   website: string;
-  // Owner
+  
+  // Owner Info
   owner_name: string;
   owner_email: string;
   owner_password: string;
-  owner_password_confirm: string;
+  confirm_password: string;
 }
 
-interface SOSResult {
-  found: boolean;
-  business_name?: string;
-  status?: string;
-  registration_number?: string;
-  formation_date?: string;
-  entity_type?: string;
-  error?: string;
-}
+const STATES = [
+  { code: 'AL', name: 'Alabama' },
+  { code: 'AK', name: 'Alaska' },
+  { code: 'AZ', name: 'Arizona' },
+  { code: 'AR', name: 'Arkansas' },
+  { code: 'CA', name: 'California' },
+  { code: 'CO', name: 'Colorado' },
+  { code: 'CT', name: 'Connecticut' },
+  { code: 'DE', name: 'Delaware' },
+  { code: 'FL', name: 'Florida' },
+  { code: 'GA', name: 'Georgia' },
+  { code: 'HI', name: 'Hawaii' },
+  { code: 'ID', name: 'Idaho' },
+  { code: 'IL', name: 'Illinois' },
+  { code: 'IN', name: 'Indiana' },
+  { code: 'IA', name: 'Iowa' },
+  { code: 'KS', name: 'Kansas' },
+  { code: 'KY', name: 'Kentucky' },
+  { code: 'LA', name: 'Louisiana' },
+  { code: 'ME', name: 'Maine' },
+  { code: 'MD', name: 'Maryland' },
+  { code: 'MA', name: 'Massachusetts' },
+  { code: 'MI', name: 'Michigan' },
+  { code: 'MN', name: 'Minnesota' },
+  { code: 'MS', name: 'Mississippi' },
+  { code: 'MO', name: 'Missouri' },
+  { code: 'MT', name: 'Montana' },
+  { code: 'NE', name: 'Nebraska' },
+  { code: 'NV', name: 'Nevada' },
+  { code: 'NH', name: 'New Hampshire' },
+  { code: 'NJ', name: 'New Jersey' },
+  { code: 'NM', name: 'New Mexico' },
+  { code: 'NY', name: 'New York' },
+  { code: 'NC', name: 'North Carolina' },
+  { code: 'ND', name: 'North Dakota' },
+  { code: 'OH', name: 'Ohio' },
+  { code: 'OK', name: 'Oklahoma' },
+  { code: 'OR', name: 'Oregon' },
+  { code: 'PA', name: 'Pennsylvania' },
+  { code: 'RI', name: 'Rhode Island' },
+  { code: 'SC', name: 'South Carolina' },
+  { code: 'SD', name: 'South Dakota' },
+  { code: 'TN', name: 'Tennessee' },
+  { code: 'TX', name: 'Texas' },
+  { code: 'UT', name: 'Utah' },
+  { code: 'VT', name: 'Vermont' },
+  { code: 'VA', name: 'Virginia' },
+  { code: 'WA', name: 'Washington' },
+  { code: 'WV', name: 'West Virginia' },
+  { code: 'WI', name: 'Wisconsin' },
+  { code: 'WY', name: 'Wyoming' },
+];
 
-interface UploadedDoc {
-  type: string;
-  name: string;
-  id?: string;
-}
+const ENTITY_TYPES = [
+  { value: 'llc', label: 'LLC' },
+  { value: 'corporation', label: 'Corporation' },
+  { value: 's_corp', label: 'S-Corporation' },
+  { value: 'partnership', label: 'Partnership' },
+  { value: 'sole_proprietorship', label: 'Sole Proprietorship' },
+  { value: 'nonprofit', label: 'Non-Profit' },
+];
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -107,589 +130,566 @@ export default function RegisterPage() {
     owner_name: '',
     owner_email: '',
     owner_password: '',
-    owner_password_confirm: '',
+    confirm_password: '',
   });
-  
-  const [sosResult, setSosResult] = useState<SOSResult | null>(null);
-  const [sosLoading, setSosLoading] = useState(false);
-  const [uploadedDocs, setUploadedDocs] = useState<UploadedDoc[]>([]);
-  const [uploading, setUploading] = useState<string | null>(null);
 
-  const updateForm = (field: keyof FormData, value: string) => {
+  const updateField = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError(null);
   };
 
-  // Step 1: Verify with Secretary of State
-  const verifySOS = async () => {
-    if (!formData.name || !formData.state_of_incorporation) {
-      setError('Please enter business name and state');
+  const validateStep1 = () => {
+    if (!formData.name) return 'Business name is required';
+    if (!formData.state_of_incorporation) return 'State of incorporation is required';
+    if (!formData.registration_number) return 'Registration number is required';
+    return null;
+  };
+
+  const validateStep2 = () => {
+    if (!formData.address) return 'Address is required';
+    if (!formData.city) return 'City is required';
+    if (!formData.state) return 'State is required';
+    if (!formData.zip_code) return 'ZIP code is required';
+    if (!formData.phone) return 'Phone is required';
+    if (!formData.email) return 'Email is required';
+    return null;
+  };
+
+  const validateStep3 = () => {
+    if (!formData.owner_name) return 'Owner name is required';
+    if (!formData.owner_email) return 'Owner email is required';
+    if (!formData.owner_password) return 'Password is required';
+    if (formData.owner_password.length < 8) return 'Password must be at least 8 characters';
+    if (formData.owner_password !== formData.confirm_password) return 'Passwords do not match';
+    return null;
+  };
+
+  const handleNext = () => {
+    let validationError = null;
+    
+    if (step === 1) validationError = validateStep1();
+    if (step === 2) validationError = validateStep2();
+    if (step === 3) validationError = validateStep3();
+    
+    if (validationError) {
+      setError(validationError);
       return;
     }
-
-    setSosLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`${API_BASE}/auth/business/verify-sos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          business_name: formData.name,
-          state: formData.state_of_incorporation,
-          registration_number: formData.registration_number || null,
-        }),
-      });
-
-      const data = await response.json();
-      setSosResult(data);
-
-      if (data.found && data.registration_number) {
-        updateForm('registration_number', data.registration_number);
-      }
-    } catch (err) {
-      setError('Failed to verify business. You can continue with manual verification.');
-    } finally {
-      setSosLoading(false);
+    
+    if (step < 4) {
+      setStep(step + 1);
     }
   };
 
-  // Step 2: Submit registration
-  const submitRegistration = async () => {
-    // Validate
-    if (formData.owner_password !== formData.owner_password_confirm) {
-      setError('Passwords do not match');
-      return;
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+      setError(null);
     }
-    if (formData.owner_password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
+  };
 
+  const handleSubmit = async () => {
+    const validationError = validateStep3();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
-
+    
     try {
       const response = await fetch(`${API_BASE}/auth/business/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          dba_name: formData.dba_name || null,
+          entity_type: formData.entity_type,
+          state_of_incorporation: formData.state_of_incorporation,
+          registration_number: formData.registration_number,
+          ein: formData.ein || null,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zip_code: formData.zip_code,
+          phone: formData.phone,
+          email: formData.email,
+          website: formData.website || null,
+          owner_name: formData.owner_name,
+          owner_email: formData.owner_email,
+          owner_password: formData.owner_password,
+        }),
       });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.detail || 'Registration failed');
-      }
-
+      
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Registration failed');
+      }
+      
       setBusinessId(data.business_id);
-      setStep(3); // Go to document upload
+      setStep(4); // Success step
+      
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 3: Upload document
-  const uploadDocument = async (docType: string, file: File) => {
-    if (!businessId) return;
-
-    setUploading(docType);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('document_type', docType);
-
-      const response = await fetch(`${API_BASE}/auth/business/upload-document/${businessId}`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      setUploadedDocs(prev => [...prev, { type: docType, name: file.name, id: data.id }]);
-    } catch (err) {
-      setError('Failed to upload document');
-    } finally {
-      setUploading(null);
-    }
-  };
-
-  const handleFileSelect = (docType: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      uploadDocument(docType, file);
-    }
-  };
-
-  const isDocUploaded = (type: string) => uploadedDocs.some(d => d.type === type);
-  const allDocsUploaded = REQUIRED_DOCUMENTS.every(d => isDocUploaded(d.type));
+  const steps = [
+    { num: 1, label: 'Business Info', icon: Building2 },
+    { num: 2, label: 'Contact', icon: MapPin },
+    { num: 3, label: 'Account', icon: User },
+    { num: 4, label: 'Verify', icon: FileCheck },
+  ];
 
   return (
-    <div className="min-h-screen bg-dark-900 flex">
-      {/* Left Panel - Progress */}
-      <div className="hidden lg:flex w-80 bg-dark-800 border-r border-dark-700 flex-col p-8">
-        <div className="mb-12">
-          <h1 className="text-2xl font-bold text-white">Homecare AI</h1>
-          <p className="text-dark-400 mt-1">Business Registration</p>
-        </div>
-
-        <div className="space-y-6">
-          {[
-            { num: 1, title: 'Business Information', desc: 'Company details & verification' },
-            { num: 2, title: 'Owner Account', desc: 'Create admin account' },
-            { num: 3, title: 'Documents', desc: 'Upload verification docs' },
-            { num: 4, title: 'Review', desc: 'Submit for approval' },
-          ].map((s) => (
-            <div key={s.num} className="flex items-start gap-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                step > s.num ? 'bg-accent-green text-white' :
-                step === s.num ? 'bg-primary-500 text-white' :
-                'bg-dark-700 text-dark-400'
-              }`}>
-                {step > s.num ? <CheckCircle className="w-5 h-5" /> : s.num}
-              </div>
-              <div>
-                <p className={`font-medium ${step >= s.num ? 'text-white' : 'text-dark-400'}`}>{s.title}</p>
-                <p className="text-sm text-dark-500">{s.desc}</p>
-              </div>
+    <div className="min-h-screen bg-dark-900 flex flex-col">
+      {/* Header */}
+      <header className="border-b border-dark-700 bg-dark-800/50">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-white" />
             </div>
-          ))}
+            <span className="text-lg font-semibold text-white">HomeCare AI</span>
+          </Link>
+          <Link href="/login" className="text-dark-300 hover:text-white text-sm">
+            Already registered? Sign in
+          </Link>
         </div>
+      </header>
 
-        <div className="mt-auto pt-8 border-t border-dark-700">
-          <p className="text-dark-400 text-sm">Already registered?</p>
-          <button onClick={() => router.push('/login')} className="text-primary-400 hover:text-primary-300 font-medium">
-            Sign in to your account
-          </button>
+      {/* Progress Steps */}
+      <div className="bg-dark-800/30 border-b border-dark-700">
+        <div className="max-w-4xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            {steps.map((s, idx) => (
+              <div key={s.num} className="flex items-center">
+                <div className={`flex items-center gap-3 ${
+                  step >= s.num ? 'text-white' : 'text-dark-500'
+                }`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    step > s.num 
+                      ? 'bg-green-500' 
+                      : step === s.num 
+                        ? 'bg-primary-500' 
+                        : 'bg-dark-700'
+                  }`}>
+                    {step > s.num ? (
+                      <CheckCircle2 className="w-5 h-5 text-white" />
+                    ) : (
+                      <s.icon className="w-5 h-5" />
+                    )}
+                  </div>
+                  <span className="hidden sm:block font-medium">{s.label}</span>
+                </div>
+                {idx < steps.length - 1 && (
+                  <div className={`w-12 sm:w-24 h-0.5 mx-4 ${
+                    step > s.num ? 'bg-green-500' : 'bg-dark-700'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-2xl">
-          {/* Step 1: Business Info */}
-          {step === 1 && (
-            <div className="space-y-6">
+      {/* Form Content */}
+      <main className="flex-1 max-w-2xl mx-auto w-full px-6 py-10">
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+            <span className="text-red-400">{error}</span>
+          </div>
+        )}
+
+        {/* Step 1: Business Info */}
+        {step === 1 && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">Business Information</h2>
+              <p className="text-dark-400">Enter your company details as registered with the state.</p>
+            </div>
+            
+            <div className="space-y-4">
               <div>
-                <h2 className="text-2xl font-bold text-white">Business Information</h2>
-                <p className="text-dark-400 mt-1">Enter your business details for state verification</p>
+                <label className="block text-sm font-medium text-dark-300 mb-2">
+                  Legal Business Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => updateField('name', e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  placeholder="ABC Home Care Services LLC"
+                />
               </div>
-
-              {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-red-400">{error}</p>
-                </div>
-              )}
-
+              
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">
+                  DBA / Trade Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.dba_name}
+                  onChange={(e) => updateField('dba_name', e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  placeholder="ABC Care"
+                />
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm text-dark-300 mb-1">Legal Business Name *</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={e => updateForm('name', e.target.value)}
-                    className="input-dark w-full"
-                    placeholder="ABC Home Care Services LLC"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm text-dark-300 mb-1">DBA (Doing Business As)</label>
-                  <input
-                    type="text"
-                    value={formData.dba_name}
-                    onChange={e => updateForm('dba_name', e.target.value)}
-                    className="input-dark w-full"
-                    placeholder="ABC Home Care"
-                  />
-                </div>
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">Entity Type *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    Entity Type *
+                  </label>
                   <select
                     value={formData.entity_type}
-                    onChange={e => updateForm('entity_type', e.target.value)}
-                    className="input-dark w-full"
+                    onChange={(e) => updateField('entity_type', e.target.value as EntityType)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   >
-                    {ENTITY_TYPES.map(t => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
+                    {ENTITY_TYPES.map(type => (
+                      <option key={type.value} value={type.value}>{type.label}</option>
                     ))}
                   </select>
                 </div>
+                
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">State of Incorporation *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    State of Incorporation *
+                  </label>
                   <select
                     value={formData.state_of_incorporation}
-                    onChange={e => updateForm('state_of_incorporation', e.target.value)}
-                    className="input-dark w-full"
+                    onChange={(e) => updateField('state_of_incorporation', e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   >
                     <option value="">Select state...</option>
-                    {STATES.map(s => (
-                      <option key={s.code} value={s.code}>{s.name}</option>
+                    {STATES.map(state => (
+                      <option key={state.code} value={state.code}>{state.name}</option>
                     ))}
                   </select>
                 </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">State Registration Number</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    SOS Registration Number *
+                  </label>
                   <input
                     type="text"
                     value={formData.registration_number}
-                    onChange={e => updateForm('registration_number', e.target.value)}
-                    className="input-dark w-full"
-                    placeholder="Optional - helps with verification"
+                    onChange={(e) => updateField('registration_number', e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    placeholder="12345678"
                   />
+                  <p className="text-xs text-dark-500 mt-1">
+                    Find this on your state filing documents
+                  </p>
                 </div>
+                
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">EIN (Tax ID)</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    EIN / Tax ID (Optional)
+                  </label>
                   <input
                     type="text"
                     value={formData.ein}
-                    onChange={e => updateForm('ein', e.target.value)}
-                    className="input-dark w-full"
+                    onChange={(e) => updateField('ein', e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                     placeholder="XX-XXXXXXX"
                   />
                 </div>
               </div>
+            </div>
+          </div>
+        )}
 
-              {/* SOS Verification */}
-              <div className="p-4 bg-dark-800 rounded-xl border border-dark-700">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-primary-400" />
-                    <span className="font-medium text-white">State Verification</span>
-                  </div>
-                  <button
-                    onClick={verifySOS}
-                    disabled={sosLoading || !formData.name || !formData.state_of_incorporation}
-                    className="px-4 py-2 bg-primary-500/20 text-primary-400 rounded-lg hover:bg-primary-500/30 disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {sosLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Search className="w-4 h-4" />
-                    )}
-                    Verify
-                  </button>
-                </div>
-
-                {sosResult && (
-                  <div className={`p-3 rounded-lg ${sosResult.found ? 'bg-green-500/10' : 'bg-yellow-500/10'}`}>
-                    {sosResult.found ? (
-                      <div className="space-y-1">
-                        <p className="text-green-400 font-medium flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4" /> Business Verified
-                        </p>
-                        <p className="text-dark-300 text-sm">Name: {sosResult.business_name}</p>
-                        <p className="text-dark-300 text-sm">Status: {sosResult.status}</p>
-                        {sosResult.registration_number && (
-                          <p className="text-dark-300 text-sm">Reg #: {sosResult.registration_number}</p>
-                        )}
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-yellow-400 font-medium">Business Not Found</p>
-                        <p className="text-dark-400 text-sm mt-1">
-                          {sosResult.error || 'You can continue - documents will be reviewed manually.'}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+        {/* Step 2: Contact Info */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">Contact Information</h2>
+              <p className="text-dark-400">Where is your business located?</p>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">
+                  Street Address *
+                </label>
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => updateField('address', e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  placeholder="123 Main Street, Suite 100"
+                />
               </div>
-
-              <h3 className="text-lg font-medium text-white pt-4">Business Address</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm text-dark-300 mb-1">Street Address *</label>
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={e => updateForm('address', e.target.value)}
-                    className="input-dark w-full"
-                  />
-                </div>
+              
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">City *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    City *
+                  </label>
                   <input
                     type="text"
                     value={formData.city}
-                    onChange={e => updateForm('city', e.target.value)}
-                    className="input-dark w-full"
+                    onChange={(e) => updateField('city', e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    placeholder="Lincoln"
                   />
                 </div>
+                
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">State *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    State *
+                  </label>
                   <select
                     value={formData.state}
-                    onChange={e => updateForm('state', e.target.value)}
-                    className="input-dark w-full"
+                    onChange={(e) => updateField('state', e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   >
                     <option value="">Select...</option>
-                    {STATES.map(s => (
-                      <option key={s.code} value={s.code}>{s.name}</option>
+                    {STATES.map(state => (
+                      <option key={state.code} value={state.code}>{state.code}</option>
                     ))}
                   </select>
                 </div>
+                
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">ZIP Code *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    ZIP Code *
+                  </label>
                   <input
                     type="text"
                     value={formData.zip_code}
-                    onChange={e => updateForm('zip_code', e.target.value)}
-                    className="input-dark w-full"
+                    onChange={(e) => updateField('zip_code', e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    placeholder="68508"
                   />
                 </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">Phone *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    Phone Number *
+                  </label>
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={e => updateForm('phone', e.target.value)}
-                    className="input-dark w-full"
+                    onChange={(e) => updateField('phone', e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    placeholder="(555) 123-4567"
                   />
                 </div>
+                
                 <div>
-                  <label className="block text-sm text-dark-300 mb-1">Business Email *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">
+                    Business Email *
+                  </label>
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={e => updateForm('email', e.target.value)}
-                    className="input-dark w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-dark-300 mb-1">Website</label>
-                  <input
-                    type="url"
-                    value={formData.website}
-                    onChange={e => updateForm('website', e.target.value)}
-                    className="input-dark w-full"
-                    placeholder="https://"
+                    onChange={(e) => updateField('email', e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    placeholder="info@abccare.com"
                   />
                 </div>
               </div>
-
-              <div className="flex justify-end pt-4">
-                <button onClick={() => setStep(2)} className="btn-primary flex items-center gap-2">
-                  Continue <ChevronRight className="w-4 h-4" />
-                </button>
+              
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">
+                  Website (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={formData.website}
+                  onChange={(e) => updateField('website', e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  placeholder="https://www.abccare.com"
+                />
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Step 2: Owner Account */}
-          {step === 2 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white">Owner Account</h2>
-                <p className="text-dark-400 mt-1">Create the primary administrator account</p>
-              </div>
-
-              {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-red-400">{error}</p>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-dark-300 mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    value={formData.owner_name}
-                    onChange={e => updateForm('owner_name', e.target.value)}
-                    className="input-dark w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-dark-300 mb-1">Email Address *</label>
-                  <input
-                    type="email"
-                    value={formData.owner_email}
-                    onChange={e => updateForm('owner_email', e.target.value)}
-                    className="input-dark w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-dark-300 mb-1">Password *</label>
-                  <input
-                    type="password"
-                    value={formData.owner_password}
-                    onChange={e => updateForm('owner_password', e.target.value)}
-                    className="input-dark w-full"
-                    placeholder="Minimum 8 characters"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-dark-300 mb-1">Confirm Password *</label>
-                  <input
-                    type="password"
-                    value={formData.owner_password_confirm}
-                    onChange={e => updateForm('owner_password_confirm', e.target.value)}
-                    className="input-dark w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-between pt-4">
-                <button onClick={() => setStep(1)} className="btn-secondary flex items-center gap-2">
-                  <ChevronLeft className="w-4 h-4" /> Back
-                </button>
-                <button onClick={submitRegistration} disabled={loading} className="btn-primary flex items-center gap-2">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  Create Account & Continue
-                </button>
-              </div>
+        {/* Step 3: Account Info */}
+        {step === 3 && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">Create Your Account</h2>
+              <p className="text-dark-400">Set up the owner/admin account for your business.</p>
             </div>
-          )}
-
-          {/* Step 3: Document Upload */}
-          {step === 3 && (
-            <div className="space-y-6">
+            
+            <div className="space-y-4">
               <div>
-                <h2 className="text-2xl font-bold text-white">Upload Documents</h2>
-                <p className="text-dark-400 mt-1">Upload required verification documents</p>
+                <label className="block text-sm font-medium text-dark-300 mb-2">
+                  Your Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.owner_name}
+                  onChange={(e) => updateField('owner_name', e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  placeholder="John Smith"
+                />
               </div>
-
-              {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-red-400">{error}</p>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                {REQUIRED_DOCUMENTS.map(doc => {
-                  const uploaded = uploadedDocs.find(d => d.type === doc.type);
-                  const isUploading = uploading === doc.type;
-
-                  return (
-                    <div key={doc.type} className={`p-4 rounded-xl border ${
-                      uploaded ? 'bg-green-500/10 border-green-500/30' : 'bg-dark-800 border-dark-700'
-                    }`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {uploaded ? (
-                            <CheckCircle className="w-6 h-6 text-green-400" />
-                          ) : (
-                            <FileText className="w-6 h-6 text-dark-400" />
-                          )}
-                          <div>
-                            <p className="font-medium text-white">{doc.label}</p>
-                            <p className="text-sm text-dark-400">{doc.description}</p>
-                            {uploaded && (
-                              <p className="text-sm text-green-400 mt-1">{uploaded.name}</p>
-                            )}
-                          </div>
-                        </div>
-                        <label className={`px-4 py-2 rounded-lg cursor-pointer transition ${
-                          uploaded 
-                            ? 'bg-green-500/20 text-green-400' 
-                            : 'bg-primary-500/20 text-primary-400 hover:bg-primary-500/30'
-                        }`}>
-                          {isUploading ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                          ) : uploaded ? (
-                            'Replace'
-                          ) : (
-                            <span className="flex items-center gap-2">
-                              <Upload className="w-4 h-4" /> Upload
-                            </span>
-                          )}
-                          <input
-                            type="file"
-                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                            onChange={handleFileSelect(doc.type)}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="p-4 bg-dark-800 rounded-xl border border-dark-700">
-                <p className="text-dark-300 text-sm">
-                  Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB each)
+              
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">
+                  Your Email *
+                </label>
+                <input
+                  type="email"
+                  value={formData.owner_email}
+                  onChange={(e) => updateField('owner_email', e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  placeholder="john@abccare.com"
+                />
+                <p className="text-xs text-dark-500 mt-1">
+                  You'll use this email to log in
                 </p>
               </div>
-
-              <div className="flex justify-between pt-4">
-                <button onClick={() => setStep(2)} className="btn-secondary flex items-center gap-2">
-                  <ChevronLeft className="w-4 h-4" /> Back
-                </button>
-                <button 
-                  onClick={() => setStep(4)} 
-                  disabled={!allDocsUploaded}
-                  className="btn-primary flex items-center gap-2 disabled:opacity-50"
-                >
-                  Continue <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Review & Submit */}
-          {step === 4 && (
-            <div className="space-y-6">
+              
               <div>
-                <h2 className="text-2xl font-bold text-white">Registration Complete!</h2>
-                <p className="text-dark-400 mt-1">Your application has been submitted for review</p>
-              </div>
-
-              <div className="p-6 bg-green-500/10 border border-green-500/30 rounded-xl text-center">
-                <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">Application Submitted</h3>
-                <p className="text-dark-300">
-                  Our team will review your documents and verify your business registration.
-                  You will receive an email once your account is approved.
+                <label className="block text-sm font-medium text-dark-300 mb-2">
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  value={formData.owner_password}
+                  onChange={(e) => updateField('owner_password', e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  placeholder="••••••••"
+                />
+                <p className="text-xs text-dark-500 mt-1">
+                  Minimum 8 characters
                 </p>
               </div>
-
-              <div className="p-4 bg-dark-800 rounded-xl border border-dark-700">
-                <h4 className="font-medium text-white mb-3">What happens next?</h4>
-                <ul className="space-y-2 text-dark-300">
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary-400">1.</span>
-                    Our team reviews your documents (1-2 business days)
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary-400">2.</span>
-                    We verify your business with state records
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary-400">3.</span>
-                    You receive approval email with login instructions
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary-400">4.</span>
-                    Start using Homecare AI for your agency
-                  </li>
-                </ul>
-              </div>
-
-              <div className="flex justify-between pt-4">
-                <button 
-                  onClick={() => router.push(`/register/status?id=${businessId}`)}
-                  className="btn-secondary flex items-center gap-2"
-                >
-                  Check Status <ExternalLink className="w-4 h-4" />
-                </button>
-                <button onClick={() => router.push('/login')} className="btn-primary">
-                  Go to Login
-                </button>
+              
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">
+                  Confirm Password *
+                </label>
+                <input
+                  type="password"
+                  value={formData.confirm_password}
+                  onChange={(e) => updateField('confirm_password', e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  placeholder="••••••••"
+                />
               </div>
             </div>
-          )}
-        </div>
-      </div>
+            
+            <div className="p-4 bg-dark-800 border border-dark-600 rounded-lg">
+              <p className="text-sm text-dark-300">
+                By registering, you agree to our Terms of Service and Privacy Policy. 
+                Your business will be verified with state records before approval.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Success */}
+        {step === 4 && (
+          <div className="text-center space-y-6 py-10">
+            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-10 h-10 text-green-400" />
+            </div>
+            
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">Registration Submitted!</h2>
+              <p className="text-dark-400">
+                Your business registration is being processed.
+              </p>
+            </div>
+            
+            <div className="bg-dark-800 border border-dark-600 rounded-lg p-6 text-left">
+              <h3 className="font-semibold text-white mb-4">Next Steps:</h3>
+              <ol className="space-y-3 text-dark-300">
+                <li className="flex gap-3">
+                  <span className="w-6 h-6 bg-primary-500/20 text-primary-400 rounded-full flex items-center justify-center text-sm shrink-0">1</span>
+                  <span>We're verifying your business with state records</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="w-6 h-6 bg-primary-500/20 text-primary-400 rounded-full flex items-center justify-center text-sm shrink-0">2</span>
+                  <span>Upload required documents (licenses, insurance)</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="w-6 h-6 bg-primary-500/20 text-primary-400 rounded-full flex items-center justify-center text-sm shrink-0">3</span>
+                  <span>Our team will review and approve your account</span>
+                </li>
+              </ol>
+            </div>
+            
+            <div className="flex gap-4 justify-center">
+              <Link
+                href={`/verification-status/${businessId}`}
+                className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors"
+              >
+                Upload Documents
+              </Link>
+              <Link
+                href="/login"
+                className="px-6 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-medium transition-colors"
+              >
+                Go to Login
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        {step < 4 && (
+          <div className="flex justify-between mt-10">
+            <button
+              onClick={handleBack}
+              disabled={step === 1}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
+                step === 1
+                  ? 'text-dark-500 cursor-not-allowed'
+                  : 'text-white bg-dark-700 hover:bg-dark-600'
+              }`}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+            
+            {step < 3 ? (
+              <button
+                onClick={handleNext}
+                className="flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors"
+              >
+                Continue
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    Submit Registration
+                    <CheckCircle2 className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

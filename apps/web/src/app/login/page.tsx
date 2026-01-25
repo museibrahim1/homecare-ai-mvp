@@ -171,10 +171,18 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center space-y-4">
             <p className="text-dark-400 text-sm">
               Demo credentials: <span className="text-dark-200">admin@homecare.ai / admin123</span>
             </p>
+            <div className="border-t border-dark-700 pt-4">
+              <p className="text-dark-400 text-sm">
+                New to HomeCare AI?{' '}
+                <a href="/register" className="text-primary-400 hover:underline font-medium">
+                  Register your business
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>
