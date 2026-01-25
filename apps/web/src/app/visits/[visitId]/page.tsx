@@ -8,17 +8,15 @@ import {
   Download,
   CheckCircle,
   AlertCircle,
-  Clock,
   FileText,
   DollarSign,
   RefreshCw,
   Mic,
-  Wand2,
-  Users,
   FileCheck,
   X,
   ChevronRight,
-  PanelRightOpen
+  PanelRightOpen,
+  Upload
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -29,13 +27,13 @@ import AudioUploader from '@/components/AudioUploader';
 import TranscriptTimeline from '@/components/TranscriptTimeline';
 import BillablesEditor from '@/components/BillablesEditor';
 import ContractPreview from '@/components/ContractPreview';
+import TranscriptImporter from '@/components/TranscriptImporter';
 
+// Pipeline steps - diarize and align disabled for now
 const pipelineSteps = [
-  { id: 'transcribe', key: 'transcription', label: 'Transcribe', icon: Mic },
-  { id: 'diarize', key: 'diarization', label: 'Diarize', icon: Users },
-  { id: 'align', key: 'alignment', label: 'Align', icon: Wand2 },
-  { id: 'bill', key: 'billing', label: 'Bill', icon: DollarSign },
-  { id: 'contract', key: 'contract', label: 'Contract', icon: FileCheck },
+  { id: 'transcribe', key: 'transcription', label: 'Transcribe', icon: Mic, enabled: true },
+  { id: 'bill', key: 'billing', label: 'Bill', icon: DollarSign, enabled: true },
+  { id: 'contract', key: 'contract', label: 'Contract', icon: FileCheck, enabled: true },
 ];
 
 export default function VisitDetailPage() {
@@ -54,6 +52,7 @@ export default function VisitDetailPage() {
   const [processingStep, setProcessingStep] = useState<string | null>(null);
   const [hasAudio, setHasAudio] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
+  const [uploadMode, setUploadMode] = useState<'audio' | 'transcript'>('audio');
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -100,6 +99,11 @@ export default function VisitDetailPage() {
   const handleUploadComplete = () => {
     setShowUploader(false);
     setHasAudio(true);
+    loadVisitData();
+  };
+
+  const handleImportComplete = () => {
+    setShowUploader(false);
     loadVisitData();
   };
 
@@ -221,7 +225,7 @@ export default function VisitDetailPage() {
           <div className="card p-5 mb-6">
             <h3 className="text-sm font-medium text-dark-300 mb-3">Processing Pipeline</h3>
             <div className="flex gap-2">
-              {pipelineSteps.map((step) => {
+              {pipelineSteps.filter(s => s.enabled).map((step) => {
                 const status = getStepStatus(step);
                 const StepIcon = step.icon;
                 
@@ -265,27 +269,111 @@ export default function VisitDetailPage() {
             </div>
           </div>
 
-          {/* Audio Section */}
+          {/* Upload Section - Audio or Transcript */}
           <div className="mb-6">
-            {hasAudio && !showUploader ? (
+            {showUploader ? (
+              <div className="space-y-4">
+                {/* Upload Mode Tabs */}
+                <div className="flex gap-2 mb-4">
+                  <button
+                    onClick={() => setUploadMode('audio')}
+                    className={`flex-1 p-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
+                      uploadMode === 'audio' 
+                        ? 'bg-primary-500/20 border-primary-500/50 text-primary-400' 
+                        : 'bg-dark-700/50 border-dark-600 text-dark-300 hover:bg-dark-700'
+                    }`}
+                  >
+                    <Mic className="w-4 h-4" />
+                    Upload Audio
+                  </button>
+                  <button
+                    onClick={() => setUploadMode('transcript')}
+                    className={`flex-1 p-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
+                      uploadMode === 'transcript' 
+                        ? 'bg-purple-500/20 border-purple-500/50 text-purple-400' 
+                        : 'bg-dark-700/50 border-dark-600 text-dark-300 hover:bg-dark-700'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    Import Transcript
+                  </button>
+                </div>
+                
+                {uploadMode === 'audio' ? (
+                  <AudioUploader
+                    visitId={visitId}
+                    token={token!}
+                    onUploadComplete={handleUploadComplete}
+                    onClose={() => setShowUploader(false)}
+                  />
+                ) : (
+                  <TranscriptImporter
+                    visitId={visitId}
+                    token={token!}
+                    onImportComplete={handleImportComplete}
+                  />
+                )}
+                
+                <button
+                  onClick={() => setShowUploader(false)}
+                  className="w-full text-center text-dark-400 hover:text-white py-2 transition text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : hasAudio || transcript.length > 0 ? (
               <div className="card p-5">
-                <AudioPlayer visitId={visitId} />
+                {hasAudio && <AudioPlayer visitId={visitId} />}
+                {!hasAudio && transcript.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">Transcript Imported</p>
+                      <p className="text-dark-400 text-sm">{transcript.length} segments</p>
+                    </div>
+                  </div>
+                )}
+                <button
+                  onClick={() => setShowUploader(true)}
+                  className="mt-4 text-sm text-dark-400 hover:text-primary-400 transition flex items-center gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  Add more data
+                </button>
               </div>
             ) : (
-              <AudioUploader
-                visitId={visitId}
-                token={token!}
-                onUploadComplete={handleUploadComplete}
-                onClose={hasAudio ? () => setShowUploader(false) : undefined}
-              />
-            )}
-            {hasAudio && !showUploader && (
-              <button
-                onClick={() => setShowUploader(true)}
-                className="mt-3 text-sm text-dark-400 hover:text-primary-400 transition"
-              >
-                Upload additional audio
-              </button>
+              <div className="card p-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg font-medium text-white mb-2">Add Recording or Transcript</h3>
+                  <p className="text-dark-400 text-sm">Upload audio or import a transcript to get started</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => { setUploadMode('audio'); setShowUploader(true); }}
+                    className="p-5 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-primary-500 rounded-xl transition-all group"
+                  >
+                    <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:bg-primary-500/30 transition">
+                      <Mic className="w-6 h-6 text-primary-400" />
+                    </div>
+                    <h4 className="text-white font-medium text-sm mb-1">Upload Audio</h4>
+                    <p className="text-dark-400 text-xs">MP3, WAV, M4A</p>
+                  </button>
+                  
+                  <button
+                    onClick={() => { setUploadMode('transcript'); setShowUploader(true); }}
+                    className="p-5 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-purple-500 rounded-xl transition-all group"
+                  >
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:bg-purple-500/30 transition">
+                      <FileText className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <h4 className="text-white font-medium text-sm mb-1">Import Transcript</h4>
+                    <p className="text-dark-400 text-xs">SRT, VTT, TXT</p>
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
