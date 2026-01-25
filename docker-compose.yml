@@ -81,6 +81,13 @@ services:
       S3_BUCKET: homecare-audio
       ASR_MODEL_SIZE: medium
       USE_GPU: "false"
+      # LLM Configuration - set these in your .env file or export them
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-claude-sonnet-4-20250514}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.7}
+      # Hugging Face token for speaker diarization
+      HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ./apps/worker:/app
       - model_cache:/root/.cache
