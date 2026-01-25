@@ -88,27 +88,42 @@ def run_full_pipeline(self, visit_id: str):
     # =========================================================================
     logger.info(f"Phase 1: Audio processing for visit {visit_id}")
     
-    phase1_steps = [("transcription", "transcribe", transcribe_visit)]
+    # Check if we already have a transcript (imported directly)
+    has_transcript = False
+    with get_db_session() as db:
+        from models import TranscriptSegment
+        segment_count = db.query(TranscriptSegment).filter(
+            TranscriptSegment.visit_id == visit_id
+        ).count()
+        has_transcript = segment_count > 0
     
-    if not skip_diarization:
-        phase1_steps.append(("diarization", "diarize", diarize_visit))
-    else:
+    if has_transcript:
+        logger.info(f"Transcript already exists ({segment_count} segments), skipping Phase 1")
+        update_pipeline_state(visit_id, "transcription", "skipped")
         update_pipeline_state(visit_id, "diarization", "skipped")
-    
-    if use_parallel and len(phase1_steps) > 1:
-        run_steps_parallel(visit_id, phase1_steps)
     else:
-        for state_key, step_name, task_func in phase1_steps:
-            run_step(visit_id, state_key, step_name, task_func)
+        phase1_steps = [("transcription", "transcribe", transcribe_visit)]
+        
+        if not skip_diarization:
+            phase1_steps.append(("diarization", "diarize", diarize_visit))
+        else:
+            update_pipeline_state(visit_id, "diarization", "skipped")
+        
+        if use_parallel and len(phase1_steps) > 1:
+            run_steps_parallel(visit_id, phase1_steps)
+        else:
+            for state_key, step_name, task_func in phase1_steps:
+                run_step(visit_id, state_key, step_name, task_func)
     
     # =========================================================================
     # PHASE 2: Alignment (needs transcription + diarization)
     # =========================================================================
     logger.info(f"Phase 2: Alignment for visit {visit_id}")
     
-    if not skip_diarization:
+    if not skip_diarization and not has_transcript:
         run_step(visit_id, "alignment", "align", align_visit)
     else:
+        logger.info(f"Skipping alignment (diarization skipped or transcript imported)")
         update_pipeline_state(visit_id, "alignment", "skipped")
     
     # =========================================================================

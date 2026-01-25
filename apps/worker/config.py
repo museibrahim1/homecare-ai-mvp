@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     
     # Diarization
     hf_token: str = ""  # Hugging Face token for pyannote models
-    skip_diarization: bool = False  # Skip if single speaker expected
+    skip_diarization: bool = True  # Skip diarization for faster processing
     
     # LLM Configuration
     openai_api_key: str = ""
