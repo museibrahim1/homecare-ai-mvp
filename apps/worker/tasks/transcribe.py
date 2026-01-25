@@ -65,11 +65,13 @@ def transcribe_visit(self, visit_id: str):
         try:
             download_file_to_path(audio_asset.s3_key, tmp_path)
             
-            # Transcribe
+            # Transcribe (uses OpenAI API if configured, otherwise local)
             segments = transcribe_audio(
                 tmp_path,
                 model_size=settings.asr_model_size,
                 use_gpu=settings.use_gpu,
+                use_openai_api=settings.use_openai_whisper,
+                openai_api_key=settings.openai_api_key,
             )
             
             # Delete existing segments for this visit

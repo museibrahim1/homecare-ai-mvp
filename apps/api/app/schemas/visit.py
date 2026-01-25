@@ -5,12 +5,11 @@ from pydantic import BaseModel
 
 from app.schemas.client import ClientResponse
 from app.schemas.user import UserResponse
-from app.schemas.upload import UploadResponse
 
 
 class VisitBase(BaseModel):
     client_id: UUID
-    caregiver_id: UUID
+    caregiver_id: Optional[UUID] = None  # Optional - defaults to current user
     scheduled_start: Optional[datetime] = None
     scheduled_end: Optional[datetime] = None
     admin_notes: Optional[str] = None
@@ -44,7 +43,6 @@ class VisitResponse(BaseModel):
     # Nested
     client: Optional[ClientResponse] = None
     caregiver: Optional[UserResponse] = None
-    audio_assets: List[UploadResponse] = []
 
     class Config:
         from_attributes = True

@@ -1,5 +1,6 @@
 """Database session for worker."""
 
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from config import settings
@@ -22,3 +23,13 @@ def get_db() -> Session:
     except Exception:
         db.close()
         raise
+
+
+@contextmanager
+def get_db_session():
+    """Context manager for database sessions."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

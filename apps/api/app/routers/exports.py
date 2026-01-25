@@ -11,7 +11,12 @@ from app.models.visit import Visit
 from app.models.billable_item import BillableItem
 from app.models.note import Note
 from app.models.contract import Contract
-from app.services.document_generation import generate_note_docx, generate_contract_docx
+from app.services.document_generation import (
+    generate_note_pdf, 
+    generate_contract_pdf,
+    generate_note_docx,
+    generate_contract_docx
+)
 
 router = APIRouter()
 
@@ -75,13 +80,70 @@ async def export_timesheet_csv(
     )
 
 
+# ============ PDF EXPORTS (PRIMARY) ============
+
+@router.get("/visits/{visit_id}/note.pdf")
+async def export_note_pdf(
+    visit_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Export visit note as PDF."""
+    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    
+    note = db.query(Note).filter(Note.visit_id == visit_id).first()
+    if not note:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+    
+    # Generate PDF
+    pdf_bytes = generate_note_pdf(visit, note)
+    
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=visit_note_{visit_id}.pdf"},
+    )
+
+
+@router.get("/visits/{visit_id}/contract.pdf")
+async def export_contract_pdf(
+    visit_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Export service contract as PDF."""
+    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    
+    contract = db.query(Contract).filter(
+        Contract.client_id == visit.client_id
+    ).order_by(Contract.created_at.desc()).first()
+    
+    if not contract:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+    
+    # Generate PDF
+    pdf_bytes = generate_contract_pdf(visit.client, contract)
+    
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=contract_{contract.id}.pdf"},
+    )
+
+
+# ============ LEGACY DOCX EXPORTS ============
+
 @router.get("/visits/{visit_id}/note.docx")
 async def export_note_docx(
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Export visit note as DOCX."""
+    """Export visit note as DOCX (legacy format)."""
     visit = db.query(Visit).filter(Visit.id == visit_id).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
@@ -106,7 +168,7 @@ async def export_contract_docx(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Export service contract as DOCX."""
+    """Export service contract as DOCX (legacy format)."""
     visit = db.query(Visit).filter(Visit.id == visit_id).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")

@@ -8,6 +8,7 @@ from app.models.billable_item import BillableItem
 from app.models.note import Note
 from app.models.contract import Contract
 from app.models.audit_log import AuditLog
+from app.models.call import Call
 
 __all__ = [
     "User",
@@ -20,4 +21,5 @@ __all__ = [
     "Note",
     "Contract",
     "AuditLog",
+    "Call",
 ]

@@ -1,0 +1,437 @@
+"""
+Admin Router
+
+Administrative endpoints for business approval and management.
+"""
+
+import logging
+from datetime import datetime, timezone
+from typing import List, Optional
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
+
+from app.core.deps import get_db, get_current_user
+from app.models.user import User
+from app.models.business import (
+    Business, BusinessDocument, BusinessUser,
+    VerificationStatus, DocumentType
+)
+from app.schemas.business import (
+    AdminBusinessListItem, AdminBusinessDetail, AdminApprovalRequest, 
+    AdminApprovalResponse, DocumentResponse,
+    VerificationStatusEnum, EntityTypeEnum, DocumentTypeEnum, UserRoleEnum,
+    BusinessUserResponse
+)
+from app.services.document_storage import get_document_service
+from app.services.email import get_email_service
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """Ensure current user is an admin."""
+    # For now, allow any authenticated user to be admin
+    # In production, check user.role == "admin"
+    return current_user
+
+
+# =============================================================================
+# BUSINESS LISTINGS
+# =============================================================================
+
+@router.get("/businesses", response_model=List[AdminBusinessListItem])
+async def list_all_businesses(
+    status: Optional[str] = None,
+    state: Optional[str] = None,
+    search: Optional[str] = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    List all businesses with optional filtering.
+    """
+    query = db.query(Business)
+    
+    if status:
+        try:
+            status_enum = VerificationStatus(status)
+            query = query.filter(Business.verification_status == status_enum)
+        except ValueError:
+            pass
+    
+    if state:
+        query = query.filter(Business.state_of_incorporation == state.upper())
+    
+    if search:
+        query = query.filter(
+            or_(
+                Business.name.ilike(f"%{search}%"),
+                Business.email.ilike(f"%{search}%"),
+            )
+        )
+    
+    businesses = query.order_by(Business.created_at.desc()).offset(skip).limit(limit).all()
+    
+    result = []
+    for b in businesses:
+        docs_count = db.query(BusinessDocument).filter(
+            BusinessDocument.business_id == b.id
+        ).count()
+        
+        result.append(AdminBusinessListItem(
+            id=b.id,
+            name=b.name,
+            email=b.email,
+            state_of_incorporation=b.state_of_incorporation,
+            verification_status=VerificationStatusEnum(b.verification_status.value),
+            documents_count=docs_count,
+            created_at=b.created_at,
+        ))
+    
+    return result
+
+
+@router.get("/businesses/pending", response_model=List[AdminBusinessListItem])
+async def list_pending_businesses(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    List businesses pending approval.
+    """
+    businesses = db.query(Business).filter(
+        Business.verification_status.in_([
+            VerificationStatus.DOCUMENTS_SUBMITTED,
+            VerificationStatus.SOS_VERIFIED,
+        ])
+    ).order_by(Business.created_at.asc()).all()
+    
+    result = []
+    for b in businesses:
+        docs_count = db.query(BusinessDocument).filter(
+            BusinessDocument.business_id == b.id
+        ).count()
+        
+        result.append(AdminBusinessListItem(
+            id=b.id,
+            name=b.name,
+            email=b.email,
+            state_of_incorporation=b.state_of_incorporation,
+            verification_status=VerificationStatusEnum(b.verification_status.value),
+            documents_count=docs_count,
+            created_at=b.created_at,
+        ))
+    
+    return result
+
+
+@router.get("/businesses/{business_id}", response_model=AdminBusinessDetail)
+async def get_business_detail(
+    business_id: UUID,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Get detailed business information for review.
+    """
+    business = db.query(Business).filter(Business.id == business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    
+    # Get documents
+    documents = db.query(BusinessDocument).filter(
+        BusinessDocument.business_id == business_id
+    ).all()
+    
+    doc_responses = []
+    for d in documents:
+        doc_responses.append(DocumentResponse(
+            id=d.id,
+            document_type=DocumentTypeEnum(d.document_type.value),
+            file_name=d.file_name,
+            file_size=d.file_size,
+            uploaded_at=d.created_at,
+            is_verified=d.is_verified,
+            verified_at=d.verified_at,
+            expiration_date=d.expiration_date,
+        ))
+    
+    # Get owner
+    owner = db.query(BusinessUser).filter(
+        BusinessUser.business_id == business_id,
+        BusinessUser.is_owner == True,
+    ).first()
+    
+    owner_response = None
+    if owner:
+        owner_response = BusinessUserResponse(
+            id=owner.id,
+            email=owner.email,
+            full_name=owner.full_name,
+            phone=owner.phone,
+            role=UserRoleEnum(owner.role.value),
+            is_active=owner.is_active,
+            is_owner=owner.is_owner,
+            email_verified=owner.email_verified,
+            last_login=owner.last_login,
+            created_at=owner.created_at,
+        )
+    
+    return AdminBusinessDetail(
+        id=business.id,
+        name=business.name,
+        dba_name=business.dba_name,
+        entity_type=EntityTypeEnum(business.entity_type.value),
+        state_of_incorporation=business.state_of_incorporation,
+        registration_number=business.registration_number,
+        address=business.address,
+        city=business.city,
+        state=business.state,
+        zip_code=business.zip_code,
+        phone=business.phone,
+        email=business.email,
+        website=business.website,
+        verification_status=VerificationStatusEnum(business.verification_status.value),
+        sos_verification_data=business.sos_verification_data,
+        sos_verified_at=business.sos_verified_at,
+        documents=doc_responses,
+        owner=owner_response,
+        created_at=business.created_at,
+    )
+
+
+# =============================================================================
+# APPROVAL / REJECTION
+# =============================================================================
+
+@router.post("/businesses/{business_id}/approve", response_model=AdminApprovalResponse)
+async def approve_business(
+    business_id: UUID,
+    request: AdminApprovalRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Approve or reject a business registration.
+    """
+    business = db.query(Business).filter(Business.id == business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    
+    if business.verification_status == VerificationStatus.APPROVED:
+        raise HTTPException(status_code=400, detail="Business is already approved")
+    
+    # Get owner for email
+    owner = db.query(BusinessUser).filter(
+        BusinessUser.business_id == business_id,
+        BusinessUser.is_owner == True,
+    ).first()
+    
+    if request.approved:
+        business.verification_status = VerificationStatus.APPROVED
+        business.approved_at = datetime.now(timezone.utc)
+        business.approved_by = admin.id
+        business.rejection_reason = None
+        message = "Business approved successfully"
+        
+        # Mark all documents as verified
+        db.query(BusinessDocument).filter(
+            BusinessDocument.business_id == business_id
+        ).update({
+            "is_verified": True,
+            "verified_at": datetime.now(timezone.utc),
+            "verified_by": admin.id,
+        })
+        
+        # Send approval email
+        if owner:
+            email_service = get_email_service()
+            email_service.send_approval_notification(
+                to_email=owner.email,
+                business_name=business.name,
+                owner_name=owner.full_name,
+            )
+        
+    else:
+        if not request.rejection_reason:
+            raise HTTPException(
+                status_code=400, 
+                detail="Rejection reason is required"
+            )
+        
+        business.verification_status = VerificationStatus.REJECTED
+        business.rejection_reason = request.rejection_reason
+        message = "Business registration rejected"
+        
+        # Send rejection email
+        if owner:
+            email_service = get_email_service()
+            email_service.send_rejection_notification(
+                to_email=owner.email,
+                business_name=business.name,
+                owner_name=owner.full_name,
+                rejection_reason=request.rejection_reason,
+            )
+    
+    db.commit()
+    
+    return AdminApprovalResponse(
+        business_id=business.id,
+        verification_status=VerificationStatusEnum(business.verification_status.value),
+        message=message,
+    )
+
+
+@router.post("/businesses/{business_id}/suspend", response_model=AdminApprovalResponse)
+async def suspend_business(
+    business_id: UUID,
+    reason: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Suspend an approved business.
+    """
+    business = db.query(Business).filter(Business.id == business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    
+    business.verification_status = VerificationStatus.SUSPENDED
+    business.rejection_reason = reason
+    db.commit()
+    
+    # TODO: Send suspension email
+    
+    return AdminApprovalResponse(
+        business_id=business.id,
+        verification_status=VerificationStatusEnum(business.verification_status.value),
+        message="Business suspended",
+    )
+
+
+@router.post("/businesses/{business_id}/reactivate", response_model=AdminApprovalResponse)
+async def reactivate_business(
+    business_id: UUID,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Reactivate a suspended business.
+    """
+    business = db.query(Business).filter(Business.id == business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    
+    if business.verification_status != VerificationStatus.SUSPENDED:
+        raise HTTPException(status_code=400, detail="Business is not suspended")
+    
+    business.verification_status = VerificationStatus.APPROVED
+    business.rejection_reason = None
+    db.commit()
+    
+    return AdminApprovalResponse(
+        business_id=business.id,
+        verification_status=VerificationStatusEnum(business.verification_status.value),
+        message="Business reactivated",
+    )
+
+
+# =============================================================================
+# DOCUMENT MANAGEMENT
+# =============================================================================
+
+@router.get("/documents/{document_id}/download")
+async def get_document_download_url(
+    document_id: UUID,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Get a signed URL to download a document.
+    """
+    document = db.query(BusinessDocument).filter(
+        BusinessDocument.id == document_id
+    ).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    doc_service = get_document_service()
+    url = doc_service.get_download_url(document.file_path, expiration_seconds=300)
+    
+    if not url:
+        raise HTTPException(status_code=500, detail="Failed to generate download URL")
+    
+    return {"download_url": url, "expires_in": 300}
+
+
+@router.post("/documents/{document_id}/verify")
+async def verify_document(
+    document_id: UUID,
+    notes: Optional[str] = None,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Mark a document as verified.
+    """
+    document = db.query(BusinessDocument).filter(
+        BusinessDocument.id == document_id
+    ).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    document.is_verified = True
+    document.verified_at = datetime.now(timezone.utc)
+    document.verified_by = admin.id
+    document.verification_notes = notes
+    db.commit()
+    
+    return {"message": "Document verified", "document_id": str(document_id)}
+
+
+# =============================================================================
+# STATS
+# =============================================================================
+
+@router.get("/stats")
+async def get_admin_stats(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Get admin dashboard statistics.
+    """
+    total = db.query(Business).count()
+    pending = db.query(Business).filter(
+        Business.verification_status.in_([
+            VerificationStatus.PENDING,
+            VerificationStatus.SOS_VERIFIED,
+            VerificationStatus.DOCUMENTS_SUBMITTED,
+        ])
+    ).count()
+    approved = db.query(Business).filter(
+        Business.verification_status == VerificationStatus.APPROVED
+    ).count()
+    rejected = db.query(Business).filter(
+        Business.verification_status == VerificationStatus.REJECTED
+    ).count()
+    suspended = db.query(Business).filter(
+        Business.verification_status == VerificationStatus.SUSPENDED
+    ).count()
+    
+    return {
+        "total_businesses": total,
+        "pending_approval": pending,
+        "approved": approved,
+        "rejected": rejected,
+        "suspended": suspended,
+    }

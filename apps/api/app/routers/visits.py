@@ -7,7 +7,6 @@ from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
-from app.models.audio_asset import AudioAsset
 from app.schemas.visit import VisitCreate, VisitUpdate, VisitResponse, VisitListResponse
 
 router = APIRouter()
@@ -62,16 +61,22 @@ async def create_visit(
             detail="Client not found",
         )
     
+    # Use current user as caregiver if not provided
+    caregiver_id = visit_in.caregiver_id or current_user.id
+    
     # Verify caregiver exists
-    caregiver = db.query(User).filter(User.id == visit_in.caregiver_id).first()
+    caregiver = db.query(User).filter(User.id == caregiver_id).first()
     if not caregiver:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Caregiver not found",
         )
     
+    visit_data = visit_in.model_dump()
+    visit_data['caregiver_id'] = caregiver_id  # Ensure caregiver_id is set
+    
     visit = Visit(
-        **visit_in.model_dump(),
+        **visit_data,
         pipeline_state={},
     )
     db.add(visit)
@@ -90,7 +95,6 @@ async def get_visit(
     visit = db.query(Visit).options(
         joinedload(Visit.client),
         joinedload(Visit.caregiver),
-        joinedload(Visit.audio_assets),
     ).filter(Visit.id == visit_id).first()
     
     if not visit:

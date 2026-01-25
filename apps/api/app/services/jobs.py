@@ -33,6 +33,7 @@ def enqueue_task(task_name: str, **kwargs) -> str:
         "bill": "tasks.bill.generate_billables",
         "generate_note": "tasks.generate_note.generate_visit_note",
         "generate_contract": "tasks.generate_contract.generate_service_contract",
+        "full_pipeline": "tasks.full_pipeline.run_full_pipeline",
     }
     
     task_path = task_mapping.get(task_name)
@@ -54,3 +55,29 @@ def get_task_status(task_id: str) -> dict:
         "result": result.result if result.ready() else None,
         "error": str(result.result) if result.failed() else None,
     }
+
+
+def submit_call_recording_for_processing(call_id: str) -> str:
+    """
+    Submit a Twilio call recording for processing through the audio pipeline.
+    
+    This will:
+    1. Download the recording from Twilio
+    2. Create an audio asset
+    3. Run the full transcription/contract pipeline
+    
+    Args:
+        call_id: The Call record ID (UUID)
+        
+    Returns:
+        task_id: The Celery task ID for tracking
+    """
+    task_id = str(uuid.uuid4())
+    
+    celery_app.send_task(
+        "tasks.process_call_recording.process_call_recording",
+        kwargs={"call_id": call_id},
+        task_id=task_id,
+    )
+    
+    return task_id

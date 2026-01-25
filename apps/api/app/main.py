@@ -15,6 +15,13 @@ from app.routers import (
     notes,
     contracts,
     exports,
+    integrations,
+    agency,
+    template_parser,
+    caregivers,
+    business_auth,
+    admin,
+    calls,
 )
 
 app = FastAPI(
@@ -47,6 +54,13 @@ app.include_router(billing.router, prefix="/visits", tags=["Billing"])
 app.include_router(notes.router, prefix="/visits", tags=["Notes"])
 app.include_router(contracts.router, prefix="/visits", tags=["Contracts"])
 app.include_router(exports.router, prefix="/exports", tags=["Exports"])
+app.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
+app.include_router(agency.router, prefix="/agency", tags=["Agency Settings"])
+app.include_router(template_parser.router, prefix="/template", tags=["Template Parser"])
+app.include_router(caregivers.router, prefix="/caregivers", tags=["Caregivers"])
+app.include_router(business_auth.router, prefix="/auth/business", tags=["Business Auth"])
+app.include_router(admin.router, prefix="/admin", tags=["Admin"])
+app.include_router(calls.router, prefix="/calls", tags=["Calls"])
 
 
 @app.get("/", tags=["Health"])

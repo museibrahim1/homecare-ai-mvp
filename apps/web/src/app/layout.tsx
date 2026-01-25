@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Homecare AI',
-  description: 'AI Voice Analyzer for In-Home Healthcare',
+  description: 'AI-powered voice analyzer for in-home healthcare',
 };
 
 export default function RootLayout({
@@ -15,11 +15,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} bg-dark-900 text-white antialiased`}>
-        <div className="min-h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
-          {children}
-        </div>
+    <html lang="en">
+      <body className={`${inter.className} bg-dark-900 text-dark-100 min-h-screen`}>
+        {children}
       </body>
     </html>
   );

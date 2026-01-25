@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Edit2, X, FileText, User, Clock, Calendar, AlertTriangle } from 'lucide-react';
+import { Check, Edit2, X, Download } from 'lucide-react';
 import { Note } from '@/lib/types';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -16,6 +16,26 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
   const { token } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [narrative, setNarrative] = useState(note?.narrative || '');
+
+  const downloadNote = async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`http://localhost:8000/exports/visits/${visitId}/note.pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `visit_note_${visitId}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error('Failed to download note:', err);
+    }
+  };
 
   const handleSave = async () => {
     if (!token) return;
@@ -40,12 +60,9 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
 
   if (!note) {
     return (
-      <div className="p-12 text-center">
-        <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <FileText className="w-8 h-8 text-dark-400" />
-        </div>
-        <h3 className="text-lg font-semibold text-white mb-2">No visit note available</h3>
-        <p className="text-dark-400">Run the note generation pipeline to create a note</p>
+      <div className="p-8 text-center text-dark-400">
+        <p>No visit note available.</p>
+        <p className="text-sm mt-2">Run the note generation pipeline to create a note.</p>
       </div>
     );
   }
@@ -65,15 +82,22 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
           <p className="text-sm text-dark-400">Version {note.version}</p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={downloadNote}
+            className="flex items-center gap-2 px-3 py-2 bg-primary-500/20 text-primary-400 rounded-lg hover:bg-primary-500/30 transition text-sm"
+          >
+            <Download className="w-4 h-4" />
+            PDF
+          </button>
           {note.is_approved ? (
-            <span className="flex items-center gap-2 px-4 py-2 bg-accent-green/20 text-accent-green rounded-xl text-sm font-medium">
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
               <Check className="w-4 h-4" />
               Approved
             </span>
           ) : (
             <button
               onClick={handleApprove}
-              className="btn-primary"
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
             >
               Approve Note
             </button>
@@ -81,125 +105,99 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
         </div>
       </div>
 
-      {/* Visit Info Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-dark-700/50 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-dark-400 mb-1">
-            <User className="w-4 h-4" />
-            <span className="text-xs uppercase">Client</span>
-          </div>
+      {/* Visit Info */}
+      <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-dark-700/50 rounded-lg">
+        <div>
+          <p className="text-xs text-dark-400 uppercase">Client</p>
           <p className="font-medium text-white">{visitInfo.client_name || 'N/A'}</p>
         </div>
-        <div className="bg-dark-700/50 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-dark-400 mb-1">
-            <User className="w-4 h-4" />
-            <span className="text-xs uppercase">Caregiver</span>
-          </div>
+        <div>
+          <p className="text-xs text-dark-400 uppercase">Caregiver</p>
           <p className="font-medium text-white">{visitInfo.caregiver_name || 'N/A'}</p>
         </div>
-        <div className="bg-dark-700/50 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-dark-400 mb-1">
-            <Calendar className="w-4 h-4" />
-            <span className="text-xs uppercase">Date</span>
-          </div>
+        <div>
+          <p className="text-xs text-dark-400 uppercase">Date</p>
           <p className="font-medium text-white">{visitInfo.date || 'N/A'}</p>
         </div>
-        <div className="bg-dark-700/50 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-dark-400 mb-1">
-            <Clock className="w-4 h-4" />
-            <span className="text-xs uppercase">Duration</span>
-          </div>
+        <div>
+          <p className="text-xs text-dark-400 uppercase">Duration</p>
           <p className="font-medium text-white">{visitInfo.duration_minutes || 0} minutes</p>
         </div>
       </div>
 
       {/* Tasks Performed */}
       <div className="mb-6">
-        <h4 className="text-sm font-semibold text-dark-300 mb-3 uppercase tracking-wide">Tasks Performed</h4>
+        <h4 className="text-sm font-semibold text-dark-300 mb-2">Tasks Performed</h4>
         {tasks.length > 0 ? (
-          <div className="space-y-2">
+          <ul className="space-y-2">
             {tasks.map((task: any, index: number) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-dark-700/50 rounded-xl">
-                <span className="text-dark-200">{task.description}</span>
-                <span className="text-sm text-dark-400 font-mono">{task.duration_minutes}m</span>
-              </div>
+              <li key={index} className="flex items-center justify-between p-2 bg-dark-700/50 rounded">
+                <span className="text-sm text-white">{task.description}</span>
+                <span className="text-xs text-dark-400">{task.duration_minutes}m</span>
+              </li>
             ))}
-          </div>
+          </ul>
         ) : (
-          <p className="text-dark-400 bg-dark-700/50 p-4 rounded-xl">No specific tasks recorded.</p>
+          <p className="text-sm text-dark-400">No specific tasks recorded.</p>
         )}
       </div>
 
       {/* Observations */}
       <div className="mb-6">
-        <h4 className="text-sm font-semibold text-dark-300 mb-3 uppercase tracking-wide">Observations</h4>
-        <div className="bg-dark-700/50 p-4 rounded-xl">
-          <p className="text-dark-200 leading-relaxed">{observations}</p>
-        </div>
+        <h4 className="text-sm font-semibold text-dark-300 mb-2">Observations</h4>
+        <p className="text-sm text-dark-200 bg-dark-700/50 p-3 rounded">{observations}</p>
       </div>
 
       {/* Concerns */}
       <div className="mb-6">
-        <h4 className="text-sm font-semibold text-dark-300 mb-3 uppercase tracking-wide">Risks/Concerns</h4>
-        <div className={`p-4 rounded-xl ${
-          concerns !== 'None noted.' 
-            ? 'bg-accent-orange/10 border border-accent-orange/30' 
-            : 'bg-dark-700/50'
-        }`}>
-          {concerns !== 'None noted.' && (
-            <AlertTriangle className="w-5 h-5 text-accent-orange mb-2" />
-          )}
-          <p className={concerns !== 'None noted.' ? 'text-accent-orange' : 'text-dark-200'}>
-            {concerns}
-          </p>
-        </div>
+        <h4 className="text-sm font-semibold text-dark-300 mb-2">Risks/Concerns</h4>
+        <p className="text-sm text-dark-200 bg-dark-700/50 p-3 rounded">{concerns}</p>
       </div>
 
       {/* Narrative */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-dark-300 uppercase tracking-wide">Narrative Note</h4>
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-sm font-semibold text-dark-300">Narrative Note</h4>
           {!isEditing && (
             <button
               onClick={() => {
                 setNarrative(note.narrative || '');
                 setIsEditing(true);
               }}
-              className="flex items-center gap-1.5 text-sm text-primary-400 hover:text-primary-300 transition"
+              className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300"
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 className="w-3 h-3" />
               Edit
             </button>
           )}
         </div>
         
         {isEditing ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <textarea
               value={narrative}
               onChange={(e) => setNarrative(e.target.value)}
               rows={8}
-              className="input-dark w-full resize-none"
-              placeholder="Enter narrative note..."
+              className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsEditing(false)}
-                className="btn-secondary"
+                className="px-3 py-1 text-sm text-dark-300 hover:bg-dark-700 rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                className="btn-primary"
+                className="px-3 py-1 text-sm bg-primary-600 text-white rounded hover:bg-primary-700"
               >
                 Save Changes
               </button>
             </div>
           </div>
         ) : (
-          <div className="bg-dark-700/50 p-5 rounded-xl">
-            <p className="text-dark-200 whitespace-pre-wrap leading-relaxed">
+          <div className="bg-dark-700/50 p-4 rounded-lg">
+            <p className="text-sm text-dark-200 whitespace-pre-wrap">
               {note.narrative || 'No narrative note available.'}
             </p>
           </div>

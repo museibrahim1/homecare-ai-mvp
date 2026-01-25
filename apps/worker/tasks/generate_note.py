@@ -1,7 +1,7 @@
 """
 Note Generation Task
 
-Generates structured visit notes using LLM analysis of transcripts.
+Generates structured visit notes from transcript and billable data using Claude LLM.
 """
 
 import logging
@@ -10,6 +10,7 @@ from uuid import UUID
 
 from worker import app
 from db import get_db
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -17,23 +18,17 @@ logger = logging.getLogger(__name__)
 @app.task(name="tasks.generate_note.generate_visit_note", bind=True)
 def generate_visit_note(self, visit_id: str):
     """
-    Generate a visit note from transcript and billables using LLM.
-    
-    Uses LLM to:
-    1. Analyze transcript for clinical observations
-    2. Generate SOAP-style documentation
-    3. Create professional narrative suitable for medical records
+    Generate a visit note from transcript and billables using Claude.
     
     Args:
         visit_id: UUID of the visit
     """
-    logger.info(f"Starting LLM-powered note generation for visit {visit_id}")
+    logger.info(f"Starting note generation for visit {visit_id}")
     
     db = get_db()
     
     try:
         from models import Visit, TranscriptSegment, BillableItem, Note
-        from libs.note_gen import generate_structured_note, generate_narrative
         from libs.llm import get_llm_service
         
         # Get visit
@@ -61,20 +56,19 @@ def generate_visit_note(self, visit_id: str):
             BillableItem.visit_id == visit.id
         ).all()
         
-        # Prepare visit info
-        visit_info = {
-            "id": str(visit.id),
-            "client_name": visit.client.full_name if visit.client else "Unknown",
-            "caregiver_name": visit.caregiver.full_name if visit.caregiver else "Unknown",
-            "date": str(visit.actual_start or visit.scheduled_start or datetime.now()),
-            "duration_minutes": sum(b.minutes for b in billables) if billables else 0,
-        }
-        
         # Prepare transcript text
         transcript_text = "\n".join([
-            f"[{seg.start_ms // 1000}s] {seg.text}"
-            for seg in segments
-        ]) if segments else "No transcript available."
+            f"[{s.start_ms // 1000}s] {s.speaker_label or 'Speaker'}: {s.text}"
+            for s in segments
+        ]) if segments else "No transcript available"
+        
+        # Prepare visit info
+        visit_info = {
+            "client_name": visit.client.full_name if visit.client else "Unknown Client",
+            "caregiver_name": visit.caregiver.full_name if visit.caregiver else "Unknown Caregiver",
+            "date": str(visit.scheduled_start.date() if visit.scheduled_start else datetime.now().date()),
+            "scheduled_duration": f"{(visit.scheduled_end - visit.scheduled_start).seconds // 60} minutes" if visit.scheduled_start and visit.scheduled_end else "Unknown",
+        }
         
         # Prepare billable items
         billable_dicts = [
@@ -82,54 +76,37 @@ def generate_visit_note(self, visit_id: str):
                 "category": b.category,
                 "description": b.description,
                 "minutes": b.minutes,
-                "adjusted_minutes": b.adjusted_minutes,
             }
             for b in billables
         ]
         
-        # Initialize LLM service
-        llm = get_llm_service()
-        
-        # Generate LLM-powered visit note
-        logger.info("Generating visit note with LLM...")
-        llm_note = llm.generate_visit_note(transcript_text, visit_info, billable_dicts)
-        
-        # Also generate fallback structured note
-        segment_dicts = [
-            {"id": str(s.id), "start_ms": s.start_ms, "end_ms": s.end_ms, "text": s.text}
-            for s in segments
-        ]
-        fallback_structured = generate_structured_note(
-            {"id": str(visit.id), "client_name": visit_info["client_name"], 
-             "caregiver_name": visit_info["caregiver_name"],
-             "scheduled_start": visit.scheduled_start, "actual_start": visit.actual_start},
-            billable_dicts,
-            segment_dicts
+        # Use LLM to generate professional note
+        logger.info(f"Calling Claude LLM for note generation...")
+        llm_service = get_llm_service()
+        note_data = llm_service.generate_visit_note(
+            transcript_text=transcript_text,
+            visit_info=visit_info,
+            billable_items=billable_dicts,
         )
+        logger.info(f"Claude LLM note generation complete")
         
-        # Merge LLM analysis with structured data
+        # Build structured data from LLM response
         structured_data = {
             "visit_info": visit_info,
-            "tasks_performed": llm_note.get("tasks_summary", fallback_structured.get("tasks_performed", [])),
-            "soap_note": {
-                "subjective": llm_note.get("subjective", ""),
-                "objective": llm_note.get("objective", ""),
-                "assessment": llm_note.get("assessment", ""),
-                "plan": llm_note.get("plan", ""),
-            },
-            "observations": llm_note.get("objective", fallback_structured.get("observations", "")),
-            "risks_concerns": llm_note.get("safety_observations", fallback_structured.get("risks_concerns", "None noted.")),
-            "client_condition": llm_note.get("client_mood", "stable"),
-            "medications_discussed": llm_note.get("medications_discussed", []),
-            "vital_signs": llm_note.get("vital_signs_mentioned", {}),
-            "follow_up_needed": bool(llm_note.get("plan", "")),
-            "llm_generated": True,
+            "subjective": note_data.get("subjective", ""),
+            "objective": note_data.get("objective", ""),
+            "assessment": note_data.get("assessment", ""),
+            "plan": note_data.get("plan", ""),
+            "tasks_performed": note_data.get("tasks_summary", []),
+            "vital_signs": note_data.get("vital_signs", {}),
+            "client_mood": note_data.get("client_mood", ""),
+            "cognitive_status": note_data.get("cognitive_status", ""),
+            "safety_observations": note_data.get("safety_observations", ""),
+            "medications_discussed": note_data.get("medications_discussed", []),
+            "next_visit_plan": note_data.get("next_visit_plan", ""),
         }
         
-        # Use LLM narrative or generate fallback
-        narrative = llm_note.get("narrative", "")
-        if not narrative:
-            narrative = generate_narrative(fallback_structured)
+        narrative = note_data.get("narrative", "Visit completed as scheduled.")
         
         # Check if note already exists
         existing_note = db.query(Note).filter(Note.visit_id == visit.id).first()
@@ -137,6 +114,7 @@ def generate_visit_note(self, visit_id: str):
         if existing_note:
             existing_note.structured_data = structured_data
             existing_note.narrative = narrative
+            existing_note.updated_at = datetime.now(timezone.utc)
             note = existing_note
         else:
             note = Note(
@@ -153,7 +131,6 @@ def generate_visit_note(self, visit_id: str):
                 "status": "completed",
                 "started_at": visit.pipeline_state.get("note", {}).get("started_at"),
                 "finished_at": datetime.now(timezone.utc).isoformat(),
-                "llm_used": True,
             }
         }
         
@@ -164,7 +141,6 @@ def generate_visit_note(self, visit_id: str):
             "status": "success",
             "visit_id": visit_id,
             "note_id": str(note.id),
-            "llm_generated": True,
         }
         
     except Exception as e:

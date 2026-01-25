@@ -18,16 +18,27 @@ class Settings(BaseSettings):
     s3_bucket: str = "homecare-audio"
     
     # ASR Configuration
-    asr_model_size: str = "medium"
+    # Options: tiny, base, small, medium, large-v2, large-v3
+    # tiny = fastest (~10x realtime), large-v3 = most accurate
+    asr_model_size: str = "small"  # Good balance of speed/accuracy
     use_gpu: bool = False
+    
+    # Cloud ASR (OpenAI Whisper API) - Much faster! ~$0.006/minute
+    # Set to True to use OpenAI API instead of local model
+    use_openai_whisper: bool = True  # Enable cloud transcription by default
     
     # Diarization
     hf_token: str = ""  # Hugging Face token for pyannote models
+    skip_diarization: bool = False  # Skip if single speaker expected
     
-    # LLM Configuration (OpenAI)
-    openai_api_key: str = ""  # OpenAI API key for contract/note generation
-    llm_model: str = "gpt-4o-mini"  # Model to use (gpt-4o-mini, gpt-4o, gpt-4-turbo)
-    llm_temperature: float = 0.7  # Generation temperature (0.0-2.0)
+    # LLM Configuration
+    openai_api_key: str = ""
+    anthropic_api_key: str = ""
+    llm_model: str = "claude-sonnet-4-20250514"
+    llm_temperature: float = 0.7
+    
+    # Pipeline Configuration
+    parallel_pipeline: bool = True  # Run independent steps in parallel
     
     class Config:
         env_file = ".env"

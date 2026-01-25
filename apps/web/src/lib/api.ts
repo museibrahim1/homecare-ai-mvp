@@ -22,7 +22,19 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-      throw new Error(error.detail || 'Request failed');
+      // Handle different error formats from FastAPI
+      let errorMessage = 'Request failed';
+      if (typeof error.detail === 'string') {
+        errorMessage = error.detail;
+      } else if (Array.isArray(error.detail)) {
+        // Validation errors come as array
+        errorMessage = error.detail.map((e: any) => e.msg || e.message || JSON.stringify(e)).join(', ');
+      } else if (error.detail?.msg) {
+        errorMessage = error.detail.msg;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -153,10 +165,11 @@ class ApiClient {
   }
 
   // Upload
-  async uploadAudio(token: string, visitId: string, file: File) {
+  async uploadAudio(token: string, visitId: string, file: File, autoProcess: boolean = true) {
     const formData = new FormData();
     formData.append('visit_id', visitId);
     formData.append('file', file);
+    formData.append('auto_process', autoProcess ? 'true' : 'false');
 
     const response = await fetch(`${API_BASE}/uploads/audio`, {
       method: 'POST',

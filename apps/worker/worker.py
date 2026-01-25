@@ -19,6 +19,7 @@ app = Celery(
         "tasks.bill",
         "tasks.generate_note",
         "tasks.generate_contract",
+        "tasks.full_pipeline",
     ],
 )
 
