@@ -323,25 +323,40 @@ export default function VisitDetailPage() {
               </div>
             ) : hasAudio || transcript.length > 0 ? (
               <div className="card p-5">
-                {hasAudio && <AudioPlayer visitId={visitId} />}
-                {!hasAudio && transcript.length > 0 && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">Transcript Imported</p>
-                      <p className="text-dark-400 text-sm">{transcript.length} segments</p>
-                    </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    {hasAudio && <AudioPlayer visitId={visitId} />}
+                    {!hasAudio && transcript.length > 0 && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-purple-400" />
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">Transcript Imported</p>
+                          <p className="text-dark-400 text-sm">{transcript.length} segments</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-                <button
-                  onClick={() => setShowUploader(true)}
-                  className="mt-4 text-sm text-dark-400 hover:text-primary-400 transition flex items-center gap-2"
-                >
-                  <Upload className="w-4 h-4" />
-                  Add more data
-                </button>
+                  
+                  {/* Always visible upload buttons */}
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => { setUploadMode('audio'); setShowUploader(true); }}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary-500/20 hover:bg-primary-500/30 border border-primary-500/30 hover:border-primary-500/50 rounded-lg transition-all text-primary-400 text-sm font-medium"
+                    >
+                      <Mic className="w-4 h-4" />
+                      Upload Audio
+                    </button>
+                    <button
+                      onClick={() => { setUploadMode('transcript'); setShowUploader(true); }}
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 hover:border-purple-500/50 rounded-lg transition-all text-purple-400 text-sm font-medium"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Import Transcript
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="card p-6">
