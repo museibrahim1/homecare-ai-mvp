@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
+import { Mic, Waves, Shield, Zap } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,30 +31,97 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h1 className="text-center text-3xl font-bold text-gray-900">
-            Homecare AI
-          </h1>
-          <h2 className="mt-2 text-center text-xl text-gray-600">
-            Admin Dashboard
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-500">
-            Sign in to manage visits and review documentation
+    <div className="min-h-screen flex">
+      {/* Left Panel - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-dark-800 via-dark-900 to-dark-950 p-12 flex-col justify-between relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent-cyan/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
+              <Mic className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white">Homecare AI</h1>
+          </div>
+          <p className="text-dark-300 text-lg mt-4">
+            AI-Powered Voice Analysis for Healthcare
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
+        <div className="relative z-10 space-y-8">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Waves className="w-6 h-6 text-primary-400" />
             </div>
-          )}
-
-          <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <h3 className="text-white font-semibold mb-1">Speech to Text</h3>
+              <p className="text-dark-300 text-sm">
+                Advanced transcription with speaker diarization for accurate visit documentation
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-accent-green/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Zap className="w-6 h-6 text-accent-green" />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-1">Auto Billing</h3>
+              <p className="text-dark-300 text-sm">
+                Automatically extract billable hours from caregiver conversations
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-accent-purple/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Shield className="w-6 h-6 text-accent-purple" />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-1">HIPAA Compliant</h3>
+              <p className="text-dark-300 text-sm">
+                Secure processing with enterprise-grade data protection
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10">
+          <p className="text-dark-400 text-sm">
+            © 2024 Homecare AI. All rights reserved.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Panel - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-dark-900">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
+              <Mic className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white">Homecare AI</h1>
+          </div>
+
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-white mb-2">Welcome back</h2>
+            <p className="text-dark-300">Sign in to your admin dashboard</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-dark-200 mb-2">
                 Email address
               </label>
               <input
@@ -63,13 +131,13 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="input-dark w-full"
                 placeholder="admin@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-dark-200 mb-2">
                 Password
               </label>
               <input
@@ -79,20 +147,36 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="input-dark w-full"
                 placeholder="••••••••"
               />
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                'Sign in'
+              )}
+            </button>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-dark-400 text-sm">
+              Demo credentials: <span className="text-dark-200">admin@homecare.ai / admin123</span>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
