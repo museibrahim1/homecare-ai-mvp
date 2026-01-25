@@ -25,6 +25,13 @@ class TranscriptSegment(Base, TimestampMixin):
     # Confidence
     confidence = Column(Float, nullable=True)
     
+    # Source tracking - where did this transcript come from?
+    # Values: "whisper", "whisper_api", "import_json", "import_srt", "import_vtt", "import_text", "external_api"
+    source = Column(String(50), nullable=True, default="whisper")
+    
+    # External reference - for imported transcripts, store original ID/reference
+    external_reference = Column(String(255), nullable=True)
+    
     # Word-level timing (optional, for precise highlighting)
     # words = Column(JSONB, nullable=True)  # [{"word": "hello", "start": 0, "end": 500}, ...]
     

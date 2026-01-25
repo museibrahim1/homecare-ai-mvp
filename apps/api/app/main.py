@@ -21,7 +21,7 @@ from app.routers import (
     caregivers,
     business_auth,
     admin,
-    calls,
+    # calls,  # Twilio integration disabled for MVP - re-enable when needed
 )
 
 app = FastAPI(
@@ -60,7 +60,7 @@ app.include_router(template_parser.router, prefix="/template", tags=["Template P
 app.include_router(caregivers.router, prefix="/caregivers", tags=["Caregivers"])
 app.include_router(business_auth.router, prefix="/auth/business", tags=["Business Auth"])
 app.include_router(admin.router, prefix="/admin", tags=["Admin"])
-app.include_router(calls.router, prefix="/calls", tags=["Calls"])
+# app.include_router(calls.router, prefix="/calls", tags=["Calls"])  # Twilio disabled for MVP
 
 
 @app.get("/", tags=["Health"])

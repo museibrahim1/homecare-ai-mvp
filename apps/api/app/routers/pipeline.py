@@ -1,13 +1,81 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
+from app.models.transcript_segment import TranscriptSegment
 from app.services.jobs import enqueue_task
 
 router = APIRouter()
+
+
+@router.post("/visits/{visit_id}/process-transcript")
+async def process_transcript_only(
+    visit_id: UUID,
+    generate_note: bool = Query(True, description="Generate visit note from transcript"),
+    generate_contract: bool = Query(True, description="Generate service contract"),
+    generate_billing: bool = Query(True, description="Extract billable items"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Process an imported transcript (skip audio transcription/diarization).
+    
+    Use this after importing a transcript to generate billing, notes, and contracts.
+    This is useful when you have a transcript from another source and don't need
+    to re-transcribe audio.
+    """
+    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    
+    # Check if transcript exists
+    segment_count = db.query(TranscriptSegment).filter(
+        TranscriptSegment.visit_id == visit_id
+    ).count()
+    
+    if segment_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No transcript found. Import or upload audio first."
+        )
+    
+    tasks_queued = []
+    pipeline_state = visit.pipeline_state or {}
+    
+    # Mark transcription as completed (since we have segments)
+    if pipeline_state.get("transcription", {}).get("status") != "completed":
+        pipeline_state["transcription"] = {"status": "completed", "source": "imported"}
+    
+    # Queue billing task
+    if generate_billing:
+        task_id = enqueue_task("bill", visit_id=str(visit_id))
+        pipeline_state["billing"] = {"status": "queued", "task_id": task_id}
+        tasks_queued.append("billing")
+    
+    # Queue note generation (depends on billing)
+    if generate_note:
+        task_id = enqueue_task("generate_note", visit_id=str(visit_id))
+        pipeline_state["note"] = {"status": "queued", "task_id": task_id}
+        tasks_queued.append("note")
+    
+    # Queue contract generation
+    if generate_contract:
+        task_id = enqueue_task("generate_contract", visit_id=str(visit_id))
+        pipeline_state["contract"] = {"status": "queued", "task_id": task_id}
+        tasks_queued.append("contract")
+    
+    visit.pipeline_state = pipeline_state
+    db.commit()
+    
+    return {
+        "message": f"Processing transcript ({segment_count} segments)",
+        "tasks_queued": tasks_queued,
+        "pipeline_state": pipeline_state
+    }
 
 
 @router.post("/visits/{visit_id}/transcribe")

@@ -9,12 +9,15 @@ import {
   Clock,
   ChevronRight,
   Check,
-  Mic
+  Mic,
+  FileText,
+  Upload
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import AudioUploader from '@/components/AudioUploader';
+import TranscriptImporter from '@/components/TranscriptImporter';
 import { format } from 'date-fns';
 
 interface Client {
@@ -22,13 +25,15 @@ interface Client {
   full_name: string;
 }
 
-type Step = 'details' | 'audio' | 'complete';
+type Step = 'details' | 'source' | 'audio' | 'transcript' | 'complete';
+type SourceType = 'audio' | 'transcript';
 
 export default function NewVisitPage() {
   const router = useRouter();
   const { token, user, isLoading: authLoading } = useAuth();
   
   const [step, setStep] = useState<Step>('details');
+  const [sourceType, setSourceType] = useState<SourceType>('audio');
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +94,7 @@ export default function NewVisitPage() {
       });
       
       setCreatedVisit(visit);
-      setStep('audio');
+      setStep('source');
     } catch (err: any) {
       setError(err.message || 'Failed to create visit');
     } finally {
@@ -106,8 +111,20 @@ export default function NewVisitPage() {
     }, 2000);
   };
 
-  const handleSkipAudio = () => {
+  const handleImportComplete = () => {
+    setStep('complete');
+    setTimeout(() => {
+      router.push(`/visits/${createdVisit.id}`);
+    }, 2000);
+  };
+
+  const handleSkipSource = () => {
     router.push(`/visits/${createdVisit.id}`);
+  };
+
+  const handleSelectSource = (source: SourceType) => {
+    setSourceType(source);
+    setStep(source === 'audio' ? 'audio' : 'transcript');
   };
 
   if (authLoading) {
@@ -144,13 +161,14 @@ export default function NewVisitPage() {
           <div className="flex items-center gap-4 mb-8">
             {[
               { id: 'details', label: 'Visit Details', icon: Calendar },
-              { id: 'audio', label: 'Upload Audio', icon: Mic },
+              { id: 'source', label: 'Add Data', icon: Upload },
               { id: 'complete', label: 'Complete', icon: Check },
             ].map((s, index) => {
-              const isActive = s.id === step;
+              const isActive = s.id === step || 
+                (s.id === 'source' && (step === 'audio' || step === 'transcript'));
               const isCompleted = 
-                (s.id === 'details' && (step === 'audio' || step === 'complete')) ||
-                (s.id === 'audio' && step === 'complete');
+                (s.id === 'details' && step !== 'details') ||
+                (s.id === 'source' && step === 'complete');
               
               return (
                 <div key={s.id} className="flex items-center gap-3">
@@ -286,6 +304,51 @@ export default function NewVisitPage() {
             </div>
           )}
 
+          {step === 'source' && createdVisit && (
+            <div className="card p-6">
+              <h2 className="text-lg font-semibold text-white mb-2">Add Recording or Transcript</h2>
+              <p className="text-dark-400 text-sm mb-6">
+                Choose how to add data for this visit. You can upload an audio recording 
+                or import a transcript from another service.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <button
+                  onClick={() => handleSelectSource('audio')}
+                  className="p-6 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-primary-500 rounded-xl transition-all group"
+                >
+                  <div className="w-14 h-14 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:bg-primary-500/30 transition">
+                    <Mic className="w-7 h-7 text-primary-400" />
+                  </div>
+                  <h3 className="text-white font-medium mb-1">Upload Audio</h3>
+                  <p className="text-dark-400 text-sm">
+                    MP3, WAV, M4A files. We'll transcribe and process automatically.
+                  </p>
+                </button>
+                
+                <button
+                  onClick={() => handleSelectSource('transcript')}
+                  className="p-6 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-purple-500 rounded-xl transition-all group"
+                >
+                  <div className="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:bg-purple-500/30 transition">
+                    <FileText className="w-7 h-7 text-purple-400" />
+                  </div>
+                  <h3 className="text-white font-medium mb-1">Import Transcript</h3>
+                  <p className="text-dark-400 text-sm">
+                    Already have a transcript? Import from SRT, VTT, or plain text.
+                  </p>
+                </button>
+              </div>
+              
+              <button
+                onClick={handleSkipSource}
+                className="w-full text-center text-dark-400 hover:text-white py-2 transition text-sm"
+              >
+                Skip for now - add data later
+              </button>
+            </div>
+          )}
+
           {step === 'audio' && createdVisit && (
             <div className="space-y-4">
               <AudioUploader
@@ -294,12 +357,47 @@ export default function NewVisitPage() {
                 onUploadComplete={handleUploadComplete}
               />
               
-              <button
-                onClick={handleSkipAudio}
-                className="w-full text-center text-dark-400 hover:text-white py-2 transition"
-              >
-                Skip for now - upload later
-              </button>
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => setStep('source')}
+                  className="text-dark-400 hover:text-white py-2 transition text-sm"
+                >
+                  ← Back
+                </button>
+                <span className="text-dark-600">|</span>
+                <button
+                  onClick={handleSkipSource}
+                  className="text-dark-400 hover:text-white py-2 transition text-sm"
+                >
+                  Skip for now
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 'transcript' && createdVisit && (
+            <div className="space-y-4">
+              <TranscriptImporter
+                visitId={createdVisit.id}
+                token={token!}
+                onImportComplete={handleImportComplete}
+              />
+              
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => setStep('source')}
+                  className="text-dark-400 hover:text-white py-2 transition text-sm"
+                >
+                  ← Back
+                </button>
+                <span className="text-dark-600">|</span>
+                <button
+                  onClick={handleSkipSource}
+                  className="text-dark-400 hover:text-white py-2 transition text-sm"
+                >
+                  Skip for now
+                </button>
+              </div>
             </div>
           )}
 
@@ -310,7 +408,7 @@ export default function NewVisitPage() {
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Visit Created!</h2>
               <p className="text-dark-400 mb-6">
-                Your audio is uploaded and ready for processing. Redirecting to visit...
+                Your {sourceType === 'audio' ? 'audio is uploaded' : 'transcript is imported'} and ready for processing. Redirecting to visit...
               </p>
               <div className="flex items-center justify-center gap-2 text-dark-400">
                 <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
