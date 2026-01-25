@@ -367,81 +367,185 @@ def generate_service_contract(self, visit_id: str):
         client_profile = assessment_data.get("client_profile", {})
         
         # Update client with extracted medical/care information
-        if client_profile.get("primary_diagnosis"):
-            client.primary_diagnosis = client_profile.get("primary_diagnosis")
+        updates_made = []
         
+        # Primary diagnosis
+        if client_profile.get("primary_diagnosis") and client_profile["primary_diagnosis"] not in ["N/A", "Not specified", "See medical records"]:
+            client.primary_diagnosis = client_profile["primary_diagnosis"]
+            updates_made.append("primary_diagnosis")
+        
+        # Secondary conditions
         if client_profile.get("secondary_conditions"):
-            conditions = client_profile.get("secondary_conditions")
+            conditions = client_profile["secondary_conditions"]
             if isinstance(conditions, list):
-                client.secondary_diagnoses = ", ".join(conditions)
-            else:
+                conditions = [c for c in conditions if c and c not in ["N/A", "None"]]
+                if conditions:
+                    client.secondary_diagnoses = ", ".join(conditions)
+                    updates_made.append("secondary_diagnoses")
+            elif conditions and conditions not in ["N/A", "None"]:
                 client.secondary_diagnoses = str(conditions)
+                updates_made.append("secondary_diagnoses")
         
-        if client_profile.get("mobility_status"):
-            client.mobility_status = client_profile.get("mobility_status")
+        # Medications
+        if client_profile.get("medications"):
+            meds = client_profile["medications"]
+            if isinstance(meds, list):
+                meds = [m for m in meds if m and m not in ["N/A", "None", "See medical records"]]
+                if meds:
+                    client.medications = ", ".join(meds)
+                    updates_made.append("medications")
+            elif meds and meds not in ["N/A", "None"]:
+                client.medications = str(meds)
+                updates_made.append("medications")
         
-        if client_profile.get("cognitive_status"):
-            client.cognitive_status = client_profile.get("cognitive_status")
+        # Allergies
+        if client_profile.get("allergies"):
+            allergies = client_profile["allergies"]
+            if isinstance(allergies, list):
+                allergies = [a for a in allergies if a and a not in ["N/A", "None", "NKDA"]]
+                if allergies:
+                    client.allergies = ", ".join(allergies)
+                    updates_made.append("allergies")
+            elif allergies and allergies not in ["N/A", "None", "NKDA"]:
+                client.allergies = str(allergies)
+                updates_made.append("allergies")
         
-        if client_profile.get("living_situation"):
-            client.living_situation = client_profile.get("living_situation")
+        # Mobility status
+        if client_profile.get("mobility_status") and client_profile["mobility_status"] not in ["N/A", "Not specified"]:
+            client.mobility_status = client_profile["mobility_status"]
+            updates_made.append("mobility_status")
         
-        # Update care level
+        # Cognitive status
+        if client_profile.get("cognitive_status") and client_profile["cognitive_status"] not in ["N/A", "Not specified"]:
+            client.cognitive_status = client_profile["cognitive_status"]
+            updates_made.append("cognitive_status")
+        
+        # Living situation
+        if client_profile.get("living_situation") and client_profile["living_situation"] not in ["N/A", "Not specified"]:
+            client.living_situation = client_profile["living_situation"]
+            updates_made.append("living_situation")
+        
+        # Care level (always update)
         client.care_level = care_need_level
+        updates_made.append("care_level")
         
-        # Update special requirements
+        # Special requirements - comprehensive
         special_reqs = assessment_data.get("special_requirements", [])
         if special_reqs:
             if isinstance(special_reqs, list):
-                # Handle list of objects or strings
                 reqs_text = []
                 for req in special_reqs:
                     if isinstance(req, dict):
-                        reqs_text.append(req.get("name") or req.get("requirement") or str(req))
-                    else:
-                        reqs_text.append(str(req))
-                client.special_requirements = "\n".join(reqs_text)
-            else:
+                        req_name = req.get("requirement") or req.get("name") or ""
+                        req_details = req.get("details", "")
+                        req_category = req.get("category", "")
+                        if req_name:
+                            line = f"• {req_name}"
+                            if req_details:
+                                line += f": {req_details}"
+                            if req_category:
+                                line += f" [{req_category}]"
+                            reqs_text.append(line)
+                    elif req and str(req) not in ["N/A", "None"]:
+                        reqs_text.append(f"• {req}")
+                if reqs_text:
+                    client.special_requirements = "\n".join(reqs_text)
+                    updates_made.append("special_requirements")
+            elif special_reqs and str(special_reqs) not in ["N/A", "None"]:
                 client.special_requirements = str(special_reqs)
+                updates_made.append("special_requirements")
         
-        # Update schedule preferences
+        # Schedule preferences
         if schedule.get("preferred_days"):
-            days = schedule.get("preferred_days")
+            days = schedule["preferred_days"]
             if isinstance(days, list):
-                day_strs = []
-                for d in days:
-                    if isinstance(d, dict):
-                        day_strs.append(d.get("day", str(d)))
-                    else:
-                        day_strs.append(str(d))
-                client.preferred_days = ", ".join(day_strs)
-            else:
+                day_strs = [d if isinstance(d, str) else d.get("day", str(d)) for d in days]
+                if day_strs:
+                    client.preferred_days = ", ".join(day_strs)
+                    updates_made.append("preferred_days")
+            elif days:
                 client.preferred_days = str(days)
+                updates_made.append("preferred_days")
         
-        if schedule.get("preferred_times"):
-            client.preferred_times = schedule.get("preferred_times")
+        if schedule.get("preferred_times") and schedule["preferred_times"] not in ["N/A", "Flexible"]:
+            client.preferred_times = schedule["preferred_times"]
+            updates_made.append("preferred_times")
         
-        # Update medical notes with assessment summary
+        # Build comprehensive medical notes from assessment
+        notes_parts = []
+        
+        # Assessment summary
         condition_summary = assessment_data.get("client_condition_summary", "")
-        if condition_summary:
-            existing_notes = client.medical_notes or ""
-            assessment_note = f"\n\n--- Assessment {datetime.now(timezone.utc).strftime('%Y-%m-%d')} ---\n{condition_summary}"
-            client.medical_notes = existing_notes + assessment_note
+        if condition_summary and condition_summary not in ["N/A", ""]:
+            notes_parts.append(f"ASSESSMENT SUMMARY:\n{condition_summary}")
         
-        # Update care plan goals
+        # ADL Assessment
+        adl_data = assessment_data.get("adl_assessment", {})
+        if adl_data and adl_data.get("adl_summary"):
+            notes_parts.append(f"ADL STATUS: {adl_data['adl_summary']}")
+            if adl_data.get("adl_score"):
+                notes_parts.append(f"ADL Score: {adl_data['adl_score']}")
+        
+        # IADL Assessment
+        iadl_data = assessment_data.get("iadl_assessment", {})
+        if iadl_data and iadl_data.get("iadl_summary"):
+            notes_parts.append(f"IADL STATUS: {iadl_data['iadl_summary']}")
+            if iadl_data.get("iadl_score"):
+                notes_parts.append(f"IADL Score: {iadl_data['iadl_score']}")
+        
+        # Safety assessment
+        safety_data = assessment_data.get("safety_assessment", {})
+        if safety_data and safety_data.get("safety_summary"):
+            notes_parts.append(f"SAFETY: {safety_data['safety_summary']}")
+        
+        # Mental health
+        mental_data = assessment_data.get("mental_health_assessment", {})
+        if mental_data and mental_data.get("mental_health_summary"):
+            notes_parts.append(f"MENTAL HEALTH: {mental_data['mental_health_summary']}")
+        
+        # Caregiver assessment
+        caregiver_data = assessment_data.get("caregiver_assessment", {})
+        if caregiver_data:
+            caregiver_notes = []
+            if caregiver_data.get("primary_caregiver"):
+                caregiver_notes.append(f"Primary caregiver: {caregiver_data['primary_caregiver']}")
+            if caregiver_data.get("caregiver_stress"):
+                caregiver_notes.append(f"Caregiver stress: {caregiver_data['caregiver_stress']}")
+            if caregiver_data.get("care_gaps"):
+                caregiver_notes.append(f"Care gaps: {caregiver_data['care_gaps']}")
+            if caregiver_notes:
+                notes_parts.append("CAREGIVER:\n" + "\n".join(caregiver_notes))
+        
+        # Add to medical notes
+        if notes_parts:
+            assessment_date = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+            new_notes = f"\n\n{'='*50}\nASSESSMENT DATE: {assessment_date}\n{'='*50}\n\n"
+            new_notes += "\n\n".join(notes_parts)
+            
+            existing_notes = client.medical_notes or ""
+            client.medical_notes = existing_notes + new_notes
+            updates_made.append("medical_notes")
+        
+        # Care plan goals
         care_goals = assessment_data.get("care_plan_goals", {})
         if care_goals:
             short_term = care_goals.get("short_term", [])
             long_term = care_goals.get("long_term", [])
-            care_plan_text = ""
+            maintenance = care_goals.get("maintenance_goals", [])
+            
+            care_plan_parts = []
             if short_term:
-                care_plan_text += "Short-term Goals:\n" + "\n".join(f"• {g}" for g in short_term)
+                care_plan_parts.append("SHORT-TERM GOALS (30 days):\n" + "\n".join(f"• {g}" for g in short_term if g))
             if long_term:
-                care_plan_text += "\n\nLong-term Goals:\n" + "\n".join(f"• {g}" for g in long_term)
-            if care_plan_text:
-                client.care_plan = care_plan_text
+                care_plan_parts.append("LONG-TERM GOALS (90+ days):\n" + "\n".join(f"• {g}" for g in long_term if g))
+            if maintenance:
+                care_plan_parts.append("MAINTENANCE GOALS:\n" + "\n".join(f"• {g}" for g in maintenance if g))
+            
+            if care_plan_parts:
+                client.care_plan = "\n\n".join(care_plan_parts)
+                updates_made.append("care_plan")
         
-        logger.info(f"Client {client.full_name} updated with care level: {care_need_level}")
+        logger.info(f"Client {client.full_name} updated - fields: {', '.join(updates_made)}")
         
         # =====================================================================
         # STEP 5: Find Best Matching Caregiver
