@@ -1,34 +1,60 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { useEffect, useState } from 'react';
 
 interface AuthState {
   token: string | null;
   user: any | null;
-  isLoading: boolean;
   setToken: (token: string | null) => void;
   setUser: (user: any | null) => void;
   logout: () => void;
 }
 
-export const useAuth = create<AuthState>()(
+const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
       user: null,
-      isLoading: false,
-      setToken: (token) => set({ token, isLoading: false }),
+      setToken: (token) => set({ token }),
       setUser: (user) => set({ user }),
       logout: () => set({ token: null, user: null }),
     }),
     {
       name: 'homecare-auth',
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.isLoading = false;
-        }
-      },
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );
+
+// Hook that handles hydration properly
+export function useAuth() {
+  const store = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    // Wait for zustand to hydrate from localStorage
+    const unsubFinishHydration = useAuthStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+      setIsLoading(false);
+    });
+
+    // Check if already hydrated
+    if (useAuthStore.persist.hasHydrated()) {
+      setHydrated(true);
+      setIsLoading(false);
+    }
+
+    return () => {
+      unsubFinishHydration();
+    };
+  }, []);
+
+  return {
+    ...store,
+    isLoading,
+    hydrated,
+  };
+}
