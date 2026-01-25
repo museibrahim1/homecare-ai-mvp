@@ -15,7 +15,9 @@ import {
   Mic,
   Wand2,
   Users,
-  FileCheck
+  FileCheck,
+  X,
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -46,7 +48,8 @@ export default function VisitDetailPage() {
   const [billables, setBillables] = useState<BillableItem[]>([]);
   const [contract, setContract] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'transcript' | 'billables' | 'contract'>('transcript');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarContent, setSidebarContent] = useState<'transcript' | 'billables' | 'contract' | null>(null);
   const [processingStep, setProcessingStep] = useState<string | null>(null);
   const [hasAudio, setHasAudio] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
@@ -100,6 +103,16 @@ export default function VisitDetailPage() {
     loadVisitData();
   };
 
+  const openSidebar = (content: 'transcript' | 'billables' | 'contract') => {
+    setSidebarContent(content);
+    setSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+    setTimeout(() => setSidebarContent(null), 300); // Clear content after animation
+  };
+
   const runPipelineStep = async (step: string) => {
     if (!token || !visitId) return;
     
@@ -141,6 +154,24 @@ export default function VisitDetailPage() {
     return 'pending';
   };
 
+  const getSidebarTitle = () => {
+    switch (sidebarContent) {
+      case 'transcript': return 'Transcript';
+      case 'billables': return 'Billable Items';
+      case 'contract': return 'Contract';
+      default: return '';
+    }
+  };
+
+  const getSidebarIcon = () => {
+    switch (sidebarContent) {
+      case 'transcript': return FileText;
+      case 'billables': return DollarSign;
+      case 'contract': return FileCheck;
+      default: return FileText;
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
@@ -165,11 +196,13 @@ export default function VisitDetailPage() {
     );
   }
 
+  const SidebarIcon = getSidebarIcon();
+
   return (
     <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 relative">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
@@ -268,53 +301,126 @@ export default function VisitDetailPage() {
             )}
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-2 mb-6">
-            {[
-              { id: 'transcript', label: 'Transcript', icon: FileText, count: transcript.length },
-              { id: 'billables', label: 'Billable Items', icon: DollarSign, count: billables.length },
-              { id: 'contract', label: 'Contract', icon: FileCheck, count: contract ? 1 : 0 },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-primary-500 text-white shadow-glow'
-                    : 'bg-dark-700/50 text-dark-300 hover:bg-dark-700 hover:text-white'
-                }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                {tab.label}
-                {tab.count > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${
-                    activeTab === tab.id ? 'bg-white/20' : 'bg-dark-600'
-                  }`}>
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+          {/* Preview Buttons - Click to open sidebar */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <button
+              onClick={() => openSidebar('transcript')}
+              className={`card p-6 text-left hover:bg-dark-700/50 transition-all duration-300 group ${
+                sidebarContent === 'transcript' && sidebarOpen ? 'ring-2 ring-primary-500 bg-dark-700/50' : ''
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-white">Transcript</h3>
+                    <p className="text-sm text-dark-400">{transcript.length} segments</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 transition-colors" />
+              </div>
+            </button>
 
-          {/* Tab Content */}
-          <div className="card">
-            {activeTab === 'transcript' && (
-              <TranscriptTimeline segments={transcript} />
-            )}
-            {activeTab === 'billables' && (
-              <BillablesEditor
-                items={billables}
-                visitId={visitId}
-                onUpdate={loadVisitData}
-              />
-            )}
-            {activeTab === 'contract' && (
-              <ContractPreview contract={contract} client={visit?.client} />
-            )}
+            <button
+              onClick={() => openSidebar('billables')}
+              className={`card p-6 text-left hover:bg-dark-700/50 transition-all duration-300 group ${
+                sidebarContent === 'billables' && sidebarOpen ? 'ring-2 ring-primary-500 bg-dark-700/50' : ''
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-white">Billable Items</h3>
+                    <p className="text-sm text-dark-400">{billables.length} items</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 transition-colors" />
+              </div>
+            </button>
+
+            <button
+              onClick={() => openSidebar('contract')}
+              className={`card p-6 text-left hover:bg-dark-700/50 transition-all duration-300 group ${
+                sidebarContent === 'contract' && sidebarOpen ? 'ring-2 ring-primary-500 bg-dark-700/50' : ''
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                    <FileCheck className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-white">Contract</h3>
+                    <p className="text-sm text-dark-400">{contract ? 'Generated' : 'Not generated'}</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 transition-colors" />
+              </div>
+            </button>
           </div>
         </div>
       </main>
+
+      {/* Slide-out Sidebar Panel */}
+      <div
+        className={`fixed inset-y-0 right-0 w-[600px] bg-dark-800 border-l border-dark-700 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
+          sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-6 border-b border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+              sidebarContent === 'transcript' ? 'bg-blue-500/20' :
+              sidebarContent === 'billables' ? 'bg-green-500/20' :
+              'bg-purple-500/20'
+            }`}>
+              <SidebarIcon className={`w-5 h-5 ${
+                sidebarContent === 'transcript' ? 'text-blue-400' :
+                sidebarContent === 'billables' ? 'text-green-400' :
+                'text-purple-400'
+              }`} />
+            </div>
+            <h2 className="text-xl font-semibold text-white">{getSidebarTitle()}</h2>
+          </div>
+          <button
+            onClick={closeSidebar}
+            className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5 text-dark-400" />
+          </button>
+        </div>
+
+        {/* Sidebar Content */}
+        <div className="overflow-y-auto h-[calc(100vh-88px)]">
+          {sidebarContent === 'transcript' && (
+            <TranscriptTimeline segments={transcript} />
+          )}
+          {sidebarContent === 'billables' && (
+            <BillablesEditor
+              items={billables}
+              visitId={visitId}
+              onUpdate={loadVisitData}
+            />
+          )}
+          {sidebarContent === 'contract' && (
+            <ContractPreview contract={contract} client={visit?.client} />
+          )}
+        </div>
+      </div>
+
+      {/* Overlay when sidebar is open */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+          onClick={closeSidebar}
+        />
+      )}
     </div>
   );
 }
