@@ -15,12 +15,27 @@ import {
   Image,
   FileText,
   X,
-  Loader2
+  Loader2,
+  Sparkles,
+  File,
+  FileCheck,
+  AlertCircle,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+interface UploadedDocument {
+  id: string;
+  name: string;
+  type: string;
+  category: 'contract_template' | 'policy' | 'procedure' | 'letterhead' | 'other';
+  content: string;
+  uploaded_at: string;
+}
 
 interface AgencySettings {
   id?: string;
@@ -35,15 +50,19 @@ interface AgencySettings {
   logo: string | null;
   primary_color: string;
   secondary_color: string;
-  contract_template: string | null;
-  contract_template_name: string | null;
-  contract_template_type: string | null;
+  documents: UploadedDocument[];
   cancellation_policy: string;
   terms_and_conditions: string;
+  // Extracted from documents
+  tax_id: string;
+  license_number: string;
+  npi_number: string;
+  contact_person: string;
+  contact_title: string;
 }
 
 const defaultAgency: AgencySettings = {
-  name: 'Home Care Services Agency',
+  name: '',
   address: '',
   city: '',
   state: '',
@@ -54,27 +73,43 @@ const defaultAgency: AgencySettings = {
   logo: null,
   primary_color: '#1e3a8a',
   secondary_color: '#3b82f6',
-  contract_template: null,
-  contract_template_name: null,
-  contract_template_type: null,
+  documents: [],
   cancellation_policy: '',
   terms_and_conditions: '',
+  tax_id: '',
+  license_number: '',
+  npi_number: '',
+  contact_person: '',
+  contact_title: '',
 };
+
+const documentCategories = [
+  { id: 'contract_template', label: 'Contract Template', icon: FileCheck },
+  { id: 'policy', label: 'Policy Document', icon: FileText },
+  { id: 'procedure', label: 'Procedure Manual', icon: File },
+  { id: 'letterhead', label: 'Letterhead / Branding', icon: Image },
+  { id: 'other', label: 'Other Document', icon: File },
+];
 
 export default function SettingsPage() {
   const router = useRouter();
   const { token, isLoading: authLoading } = useAuth();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agency' | 'notifications' | 'security'>('agency');
+  const [activeTab, setActiveTab] = useState<'agency' | 'documents' | 'profile' | 'notifications' | 'security'>('agency');
   
   // Agency settings state
   const [agency, setAgency] = useState<AgencySettings>(defaultAgency);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [templateName, setTemplateName] = useState<string | null>(null);
+  const [extracting, setExtracting] = useState(false);
+  const [extractionMessage, setExtractionMessage] = useState<string | null>(null);
+  
+  // Document upload state
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('contract_template');
   
   const logoInputRef = useRef<HTMLInputElement>(null);
-  const templateInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -95,12 +130,9 @@ export default function SettingsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setAgency(data);
+        setAgency({ ...defaultAgency, ...data, documents: data.documents || [] });
         if (data.logo) {
           setLogoPreview(data.logo);
-        }
-        if (data.contract_template_name) {
-          setTemplateName(data.contract_template_name);
         }
       }
     } catch (err) {
@@ -108,7 +140,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
@@ -118,50 +150,122 @@ export default function SettingsPage() {
     }
     
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const base64 = e.target?.result as string;
       setLogoPreview(base64);
       setAgency(prev => ({ ...prev, logo: base64 }));
+      
+      // Try to extract company info from logo/letterhead
+      if (file.type.includes('image')) {
+        await extractCompanyInfo(base64, 'letterhead');
+      }
     };
     reader.readAsDataURL(file);
   };
 
-  const handleTemplateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Template must be under 10MB');
+    if (file.size > 25 * 1024 * 1024) {
+      alert('Document must be under 25MB');
       return;
     }
     
+    setUploadingDoc(true);
+    
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const base64 = e.target?.result as string;
-      setTemplateName(file.name);
-      setAgency(prev => ({ 
-        ...prev, 
-        contract_template: base64,
-        contract_template_name: file.name,
-        contract_template_type: file.type,
+      
+      const newDoc: UploadedDocument = {
+        id: Date.now().toString(),
+        name: file.name,
+        type: file.type,
+        category: selectedCategory as any,
+        content: base64,
+        uploaded_at: new Date().toISOString(),
+      };
+      
+      setAgency(prev => ({
+        ...prev,
+        documents: [...prev.documents, newDoc],
       }));
+      
+      // Extract company info from document
+      await extractCompanyInfo(base64, selectedCategory);
+      
+      setUploadingDoc(false);
     };
     reader.readAsDataURL(file);
+    
+    // Reset file input
+    if (docInputRef.current) {
+      docInputRef.current.value = '';
+    }
+  };
+
+  const extractCompanyInfo = async (content: string, docType: string) => {
+    setExtracting(true);
+    setExtractionMessage('AI is analyzing document for company information...');
+    
+    try {
+      const res = await fetch(`${API_BASE}/agency/extract-info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content, document_type: docType }),
+      });
+      
+      if (res.ok) {
+        const extracted = await res.json();
+        
+        // Only update fields that were extracted and are currently empty
+        setAgency(prev => ({
+          ...prev,
+          name: extracted.name || prev.name,
+          address: extracted.address || prev.address,
+          city: extracted.city || prev.city,
+          state: extracted.state || prev.state,
+          zip_code: extracted.zip_code || prev.zip_code,
+          phone: extracted.phone || prev.phone,
+          email: extracted.email || prev.email,
+          website: extracted.website || prev.website,
+          tax_id: extracted.tax_id || prev.tax_id,
+          license_number: extracted.license_number || prev.license_number,
+          npi_number: extracted.npi_number || prev.npi_number,
+          contact_person: extracted.contact_person || prev.contact_person,
+          contact_title: extracted.contact_title || prev.contact_title,
+          cancellation_policy: extracted.cancellation_policy || prev.cancellation_policy,
+          terms_and_conditions: extracted.terms_and_conditions || prev.terms_and_conditions,
+        }));
+        
+        setExtractionMessage('✓ Company information extracted and auto-filled!');
+        setTimeout(() => setExtractionMessage(null), 3000);
+      } else {
+        setExtractionMessage('Could not extract info - please fill manually');
+        setTimeout(() => setExtractionMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error('Extraction failed:', err);
+      setExtractionMessage(null);
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const removeDocument = (docId: string) => {
+    setAgency(prev => ({
+      ...prev,
+      documents: prev.documents.filter(d => d.id !== docId),
+    }));
   };
 
   const removeLogo = () => {
     setLogoPreview(null);
     setAgency(prev => ({ ...prev, logo: null }));
-  };
-
-  const removeTemplate = () => {
-    setTemplateName(null);
-    setAgency(prev => ({ 
-      ...prev, 
-      contract_template: null,
-      contract_template_name: null,
-      contract_template_type: null,
-    }));
   };
 
   const handleSave = async () => {
@@ -202,7 +306,8 @@ export default function SettingsPage() {
   }
 
   const tabs = [
-    { id: 'agency', label: 'Agency / Business', icon: Building2 },
+    { id: 'agency', label: 'Company Info', icon: Building2 },
+    { id: 'documents', label: 'Documents', icon: FileText },
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Shield },
@@ -218,7 +323,7 @@ export default function SettingsPage() {
           <div className="flex justify-between items-start mb-8">
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-              <p className="text-dark-300">Manage your account and agency settings</p>
+              <p className="text-dark-300">Manage your company and account settings</p>
             </div>
             <button 
               onClick={handleSave}
@@ -236,15 +341,33 @@ export default function SettingsPage() {
             </button>
           </div>
 
+          {/* AI Extraction Status */}
+          {extractionMessage && (
+            <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
+              extractionMessage.includes('✓') 
+                ? 'bg-accent-green/10 border border-accent-green/30' 
+                : 'bg-primary-500/10 border border-primary-500/30'
+            }`}>
+              {extracting ? (
+                <Loader2 className="w-5 h-5 text-primary-400 animate-spin" />
+              ) : (
+                <Sparkles className="w-5 h-5 text-accent-green" />
+              )}
+              <span className={extractionMessage.includes('✓') ? 'text-accent-green' : 'text-primary-400'}>
+                {extractionMessage}
+              </span>
+            </div>
+          )}
+
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-dark-700 pb-4">
+          <div className="flex gap-2 mb-6 border-b border-dark-700 pb-4 overflow-x-auto">
             {tabs.map((tab) => {
               const TabIcon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-primary-500/20 text-primary-400'
                       : 'text-dark-400 hover:text-white hover:bg-dark-700/50'
@@ -257,9 +380,40 @@ export default function SettingsPage() {
             })}
           </div>
 
-          {/* Agency Settings Tab */}
+          {/* Company Info Tab */}
           {activeTab === 'agency' && (
             <div className="space-y-6">
+              {/* Quick Upload for Auto-Fill */}
+              <div className="card p-6 bg-gradient-to-r from-primary-500/10 to-purple-500/10 border-primary-500/30">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-6 h-6 text-primary-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-white font-semibold mb-1">Auto-Fill Company Info</h3>
+                    <p className="text-dark-300 text-sm mb-3">
+                      Upload any document with your company letterhead, and AI will extract your business information automatically.
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => docInputRef.current?.click()}
+                        className="btn-primary text-sm flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Upload Document to Extract
+                      </button>
+                      <input
+                        ref={docInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                        onChange={handleDocumentUpload}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Logo Upload */}
               <div className="card p-6">
                 <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -300,20 +454,12 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <p className="text-dark-300 text-sm mb-3">
-                      Upload your company logo. This will appear on contracts and documents.
+                    <p className="text-dark-300 text-sm mb-2">
+                      Upload your company logo. This will appear on contracts, invoices, and documents.
                     </p>
                     <p className="text-dark-500 text-xs">
-                      Recommended: PNG or SVG, at least 200x200px. Max 5MB.
+                      PNG, JPG, or SVG. At least 200x200px. Max 5MB.
                     </p>
-                    {!logoPreview && (
-                      <button
-                        onClick={() => logoInputRef.current?.click()}
-                        className="mt-3 btn-secondary text-sm"
-                      >
-                        Choose File
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -342,7 +488,7 @@ export default function SettingsPage() {
                       value={agency.address}
                       onChange={(e) => setAgency(prev => ({ ...prev, address: e.target.value }))}
                       className="input-dark w-full"
-                      placeholder="123 Main Street"
+                      placeholder="123 Main Street, Suite 100"
                     />
                   </div>
                   <div>
@@ -410,59 +556,68 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Contract Template */}
+              {/* Business Identifiers */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary-400" />
-                  Contract Template
-                </h2>
-                <p className="text-dark-300 text-sm mb-4">
-                  Upload a DOCX template for contracts. The AI will auto-fill client and service details.
-                </p>
-                
-                {templateName ? (
-                  <div className="flex items-center justify-between p-4 bg-dark-700 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-purple-400" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">{templateName}</p>
-                        <p className="text-dark-400 text-sm">Contract template</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => templateInputRef.current?.click()}
-                        className="btn-secondary text-sm"
-                      >
-                        Replace
-                      </button>
-                      <button
-                        onClick={removeTemplate}
-                        className="p-2 hover:bg-red-500/20 rounded-lg transition"
-                      >
-                        <X className="w-4 h-4 text-red-400" />
-                      </button>
-                    </div>
+                <h2 className="text-lg font-semibold text-white mb-4">Business Identifiers</h2>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-dark-300 text-sm mb-1">Tax ID / EIN</label>
+                    <input
+                      type="text"
+                      value={agency.tax_id}
+                      onChange={(e) => setAgency(prev => ({ ...prev, tax_id: e.target.value }))}
+                      className="input-dark w-full"
+                      placeholder="XX-XXXXXXX"
+                    />
                   </div>
-                ) : (
-                  <div
-                    onClick={() => templateInputRef.current?.click()}
-                    className="border-2 border-dashed border-dark-600 hover:border-primary-500 rounded-xl p-8 text-center cursor-pointer transition"
-                  >
-                    <Upload className="w-10 h-10 text-dark-500 mx-auto mb-3" />
-                    <p className="text-white font-medium mb-1">Upload Contract Template</p>
-                    <p className="text-dark-400 text-sm">DOCX files only • Max 10MB</p>
+                  <div>
+                    <label className="block text-dark-300 text-sm mb-1">License Number</label>
+                    <input
+                      type="text"
+                      value={agency.license_number}
+                      onChange={(e) => setAgency(prev => ({ ...prev, license_number: e.target.value }))}
+                      className="input-dark w-full"
+                      placeholder="License #"
+                    />
                   </div>
-                )}
-                <input
-                  ref={templateInputRef}
-                  type="file"
-                  accept=".docx,.doc"
-                  onChange={handleTemplateUpload}
-                  className="hidden"
-                />
+                  <div>
+                    <label className="block text-dark-300 text-sm mb-1">NPI Number</label>
+                    <input
+                      type="text"
+                      value={agency.npi_number}
+                      onChange={(e) => setAgency(prev => ({ ...prev, npi_number: e.target.value }))}
+                      className="input-dark w-full"
+                      placeholder="NPI #"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Person */}
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Primary Contact</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-dark-300 text-sm mb-1">Contact Name</label>
+                    <input
+                      type="text"
+                      value={agency.contact_person}
+                      onChange={(e) => setAgency(prev => ({ ...prev, contact_person: e.target.value }))}
+                      className="input-dark w-full"
+                      placeholder="John Smith"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-dark-300 text-sm mb-1">Title / Position</label>
+                    <input
+                      type="text"
+                      value={agency.contact_title}
+                      onChange={(e) => setAgency(prev => ({ ...prev, contact_title: e.target.value }))}
+                      className="input-dark w-full"
+                      placeholder="Administrator"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Brand Colors */}
@@ -505,10 +660,127 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Documents Tab */}
+          {activeTab === 'documents' && (
+            <div className="space-y-6">
+              {/* Upload New Document */}
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Upload className="w-5 h-5 text-primary-400" />
+                  Upload Documents
+                </h2>
+                <p className="text-dark-300 text-sm mb-4">
+                  Upload your policies, procedures, contract templates, and other business documents. 
+                  AI will extract relevant information to auto-fill forms.
+                </p>
+                
+                {/* Category Selection */}
+                <div className="mb-4">
+                  <label className="block text-dark-300 text-sm mb-2">Document Category</label>
+                  <div className="flex flex-wrap gap-2">
+                    {documentCategories.map((cat) => {
+                      const CatIcon = cat.icon;
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                            selectedCategory === cat.id
+                              ? 'bg-primary-500/20 text-primary-400 border border-primary-500/50'
+                              : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-dark-500'
+                          }`}
+                        >
+                          <CatIcon className="w-4 h-4" />
+                          {cat.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                {/* Upload Area */}
+                <div
+                  onClick={() => docInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                    uploadingDoc 
+                      ? 'border-primary-500/50 bg-primary-500/5' 
+                      : 'border-dark-600 hover:border-primary-500 bg-dark-700/30'
+                  }`}
+                >
+                  {uploadingDoc ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="w-10 h-10 text-primary-400 animate-spin" />
+                      <p className="text-primary-400 font-medium">Uploading & analyzing...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-10 h-10 text-dark-500 mx-auto mb-3" />
+                      <p className="text-white font-medium mb-1">Click to upload document</p>
+                      <p className="text-dark-400 text-sm">PDF, DOCX, DOC, PNG, JPG • Max 25MB</p>
+                    </>
+                  )}
+                </div>
+                <input
+                  ref={docInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.rtf"
+                  onChange={handleDocumentUpload}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Uploaded Documents List */}
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Uploaded Documents</h2>
+                
+                {agency.documents.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="w-12 h-12 text-dark-600 mx-auto mb-3" />
+                    <p className="text-dark-400">No documents uploaded yet</p>
+                    <p className="text-dark-500 text-sm">Upload policies, procedures, and templates above</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {agency.documents.map((doc) => {
+                      const category = documentCategories.find(c => c.id === doc.category);
+                      const CatIcon = category?.icon || File;
+                      
+                      return (
+                        <div 
+                          key={doc.id}
+                          className="flex items-center justify-between p-4 bg-dark-700/50 rounded-xl border border-dark-600"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                              <CatIcon className="w-5 h-5 text-primary-400" />
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">{doc.name}</p>
+                              <p className="text-dark-400 text-sm">{category?.label} • Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => removeDocument(doc.id)}
+                            className="p-2 hover:bg-red-500/20 rounded-lg transition"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-400" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               {/* Default Policies */}
               <div className="card p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Default Policies</h2>
+                <p className="text-dark-400 text-sm mb-4">
+                  These will be used as defaults when generating contracts. You can also upload policy documents above for more detailed extraction.
+                </p>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-dark-300 text-sm mb-2">Cancellation Policy</label>
@@ -570,6 +842,7 @@ export default function SettingsPage() {
                   { label: 'Visit Reminders', value: true },
                   { label: 'Weekly Summary', value: false },
                   { label: 'New Client Alerts', value: true },
+                  { label: 'Contract Expiration Alerts', value: true },
                 ].map((setting, i) => (
                   <div key={i} className="flex items-center justify-between py-3 border-b border-dark-600/50 last:border-0">
                     <span className="text-dark-200">{setting.label}</span>

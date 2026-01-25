@@ -5,7 +5,7 @@ Stores agency-wide settings including branding, templates, and contact info.
 """
 
 import uuid
-from sqlalchemy import Column, String, Text, LargeBinary
+from sqlalchemy import Column, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from app.db.base import Base, TimestampMixin
 
@@ -25,12 +25,24 @@ class AgencySettings(Base, TimestampMixin):
     email = Column(String(255))
     website = Column(String(255))
     
+    # Business Identifiers
+    tax_id = Column(String(50))  # EIN / Tax ID
+    license_number = Column(String(100))
+    npi_number = Column(String(20))  # National Provider Identifier
+    
+    # Primary Contact
+    contact_person = Column(String(255))
+    contact_title = Column(String(100))
+    
     # Branding
     logo = Column(Text)  # Base64 encoded
     primary_color = Column(String(20), default="#1e3a8a")
     secondary_color = Column(String(20), default="#3b82f6")
     
-    # Contract Template
+    # Documents Storage (JSON array of uploaded documents)
+    documents = Column(Text)  # JSON array of document objects
+    
+    # Legacy fields (kept for backward compatibility)
     contract_template = Column(Text)  # Base64 encoded file
     contract_template_name = Column(String(255))
     contract_template_type = Column(String(100))  # mime type
