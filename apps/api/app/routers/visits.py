@@ -7,6 +7,7 @@ from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
+from app.models.audio_asset import AudioAsset
 from app.schemas.visit import VisitCreate, VisitUpdate, VisitResponse, VisitListResponse
 
 router = APIRouter()
@@ -89,6 +90,7 @@ async def get_visit(
     visit = db.query(Visit).options(
         joinedload(Visit.client),
         joinedload(Visit.caregiver),
+        joinedload(Visit.audio_assets),
     ).filter(Visit.id == visit_id).first()
     
     if not visit:

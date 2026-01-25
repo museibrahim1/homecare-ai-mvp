@@ -124,7 +124,10 @@ export default function VisitsPage() {
               <h1 className="text-3xl font-bold text-white mb-2">Visits</h1>
               <p className="text-dark-300">Review and manage caregiver visits</p>
             </div>
-            <button className="btn-primary flex items-center gap-2">
+            <button 
+              onClick={() => router.push('/visits/new')}
+              className="btn-primary flex items-center gap-2"
+            >
               <Plus className="w-5 h-5" />
               New Visit
             </button>

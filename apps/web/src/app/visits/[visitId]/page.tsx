@@ -22,6 +22,7 @@ import { api } from '@/lib/api';
 import { Visit, TranscriptSegment, BillableItem } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 import AudioPlayer from '@/components/AudioPlayer';
+import AudioUploader from '@/components/AudioUploader';
 import TranscriptTimeline from '@/components/TranscriptTimeline';
 import BillablesEditor from '@/components/BillablesEditor';
 import NotePreview from '@/components/NotePreview';
@@ -47,6 +48,8 @@ export default function VisitDetailPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'transcript' | 'billables' | 'note'>('transcript');
   const [processingStep, setProcessingStep] = useState<string | null>(null);
+  const [hasAudio, setHasAudio] = useState(false);
+  const [showUploader, setShowUploader] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -65,6 +68,10 @@ export default function VisitDetailPage() {
       setLoading(true);
       const visitData = await api.getVisit(token!, visitId);
       setVisit(visitData);
+      
+      // Check if visit has audio
+      const audioExists = visitData.audio_assets && visitData.audio_assets.length > 0;
+      setHasAudio(audioExists);
 
       try {
         const transcriptData = await api.getTranscript(token!, visitId);
@@ -85,6 +92,12 @@ export default function VisitDetailPage() {
     } finally {
       setLoading(false);
     }
+  };
+  
+  const handleUploadComplete = () => {
+    setShowUploader(false);
+    setHasAudio(true);
+    loadVisitData();
   };
 
   const runPipelineStep = async (step: string) => {
@@ -231,9 +244,28 @@ export default function VisitDetailPage() {
             </div>
           </div>
 
-          {/* Audio Player */}
-          <div className="card p-6 mb-6">
-            <AudioPlayer visitId={visitId} />
+          {/* Audio Section */}
+          <div className="mb-6">
+            {hasAudio && !showUploader ? (
+              <div className="card p-6">
+                <AudioPlayer visitId={visitId} />
+              </div>
+            ) : (
+              <AudioUploader
+                visitId={visitId}
+                token={token!}
+                onUploadComplete={handleUploadComplete}
+                onClose={hasAudio ? () => setShowUploader(false) : undefined}
+              />
+            )}
+            {hasAudio && !showUploader && (
+              <button
+                onClick={() => setShowUploader(true)}
+                className="mt-3 text-sm text-dark-400 hover:text-primary-400 transition"
+              >
+                Upload additional audio
+              </button>
+            )}
           </div>
 
           {/* Tabs */}

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.schemas.client import ClientResponse
 from app.schemas.user import UserResponse
+from app.schemas.upload import UploadResponse
 
 
 class VisitBase(BaseModel):
@@ -43,6 +44,7 @@ class VisitResponse(BaseModel):
     # Nested
     client: Optional[ClientResponse] = None
     caregiver: Optional[UserResponse] = None
+    audio_assets: List[UploadResponse] = []
 
     class Config:
         from_attributes = True
