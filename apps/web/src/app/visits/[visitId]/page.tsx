@@ -17,7 +17,8 @@ import {
   Users,
   FileCheck,
   X,
-  ChevronRight
+  ChevronRight,
+  PanelRightOpen
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -49,7 +50,7 @@ export default function VisitDetailPage() {
   const [contract, setContract] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarContent, setSidebarContent] = useState<'transcript' | 'billables' | 'contract' | null>(null);
+  const [activePanel, setActivePanel] = useState<'transcript' | 'billables' | 'contract'>('transcript');
   const [processingStep, setProcessingStep] = useState<string | null>(null);
   const [hasAudio, setHasAudio] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
@@ -72,7 +73,6 @@ export default function VisitDetailPage() {
       const visitData = await api.getVisit(token!, visitId);
       setVisit(visitData);
       
-      // Check if visit has audio
       const audioExists = visitData.audio_assets && visitData.audio_assets.length > 0;
       setHasAudio(audioExists);
 
@@ -103,14 +103,8 @@ export default function VisitDetailPage() {
     loadVisitData();
   };
 
-  const openSidebar = (content: 'transcript' | 'billables' | 'contract') => {
-    setSidebarContent(content);
-    setSidebarOpen(true);
-  };
-
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-    setTimeout(() => setSidebarContent(null), 300); // Clear content after animation
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   const runPipelineStep = async (step: string) => {
@@ -154,24 +148,6 @@ export default function VisitDetailPage() {
     return 'pending';
   };
 
-  const getSidebarTitle = () => {
-    switch (sidebarContent) {
-      case 'transcript': return 'Transcript';
-      case 'billables': return 'Billable Items';
-      case 'contract': return 'Contract';
-      default: return '';
-    }
-  };
-
-  const getSidebarIcon = () => {
-    switch (sidebarContent) {
-      case 'transcript': return FileText;
-      case 'billables': return DollarSign;
-      case 'contract': return FileCheck;
-      default: return FileText;
-    }
-  };
-
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
@@ -196,14 +172,19 @@ export default function VisitDetailPage() {
     );
   }
 
-  const SidebarIcon = getSidebarIcon();
+  const panelTabs = [
+    { id: 'transcript', label: 'Transcript', icon: FileText, count: transcript.length, color: 'blue' },
+    { id: 'billables', label: 'Billables', icon: DollarSign, count: billables.length, color: 'green' },
+    { id: 'contract', label: 'Contract', icon: FileCheck, count: contract ? 1 : 0, color: 'purple' },
+  ];
 
   return (
     <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       
-      <main className="flex-1 p-8 relative">
-        <div className="max-w-6xl mx-auto">
+      {/* Main Content */}
+      <main className={`flex-1 p-8 transition-all duration-300 ${sidebarOpen ? 'mr-[420px]' : ''}`}>
+        <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
             <button
@@ -223,6 +204,13 @@ export default function VisitDetailPage() {
                 }
               </p>
             </div>
+            <button 
+              onClick={toggleSidebar}
+              className={`p-2.5 rounded-xl transition-colors ${sidebarOpen ? 'bg-primary-500 text-white' : 'hover:bg-dark-700 text-dark-300'}`}
+              title="Toggle Preview Panel"
+            >
+              <PanelRightOpen className="w-5 h-5" />
+            </button>
             <button className="btn-secondary flex items-center gap-2">
               <Download className="w-5 h-5" />
               Export
@@ -230,10 +218,10 @@ export default function VisitDetailPage() {
           </div>
 
           {/* Pipeline Steps */}
-          <div className="card p-6 mb-6">
-            <h3 className="text-sm font-medium text-dark-300 mb-4">Processing Pipeline</h3>
-            <div className="flex gap-3">
-              {pipelineSteps.map((step, index) => {
+          <div className="card p-5 mb-6">
+            <h3 className="text-sm font-medium text-dark-300 mb-3">Processing Pipeline</h3>
+            <div className="flex gap-2">
+              {pipelineSteps.map((step) => {
                 const status = getStepStatus(step);
                 const StepIcon = step.icon;
                 
@@ -242,7 +230,7 @@ export default function VisitDetailPage() {
                     key={step.id}
                     onClick={() => runPipelineStep(step.id)}
                     disabled={processingStep !== null}
-                    className={`flex-1 p-4 rounded-xl border transition-all duration-300 disabled:opacity-50 ${
+                    className={`flex-1 p-3 rounded-lg border transition-all duration-300 disabled:opacity-50 ${
                       status === 'completed'
                         ? 'bg-accent-green/10 border-accent-green/30 hover:bg-accent-green/20'
                         : status === 'processing'
@@ -252,17 +240,17 @@ export default function VisitDetailPage() {
                         : 'bg-dark-700/50 border-dark-600 hover:bg-dark-700 hover:border-dark-500'
                     }`}
                   >
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="flex flex-col items-center gap-1.5">
                       {status === 'processing' ? (
-                        <RefreshCw className="w-6 h-6 text-primary-400 animate-spin" />
+                        <RefreshCw className="w-5 h-5 text-primary-400 animate-spin" />
                       ) : status === 'completed' ? (
-                        <CheckCircle className="w-6 h-6 text-accent-green" />
+                        <CheckCircle className="w-5 h-5 text-accent-green" />
                       ) : status === 'failed' ? (
-                        <AlertCircle className="w-6 h-6 text-red-400" />
+                        <AlertCircle className="w-5 h-5 text-red-400" />
                       ) : (
-                        <StepIcon className="w-6 h-6 text-dark-400" />
+                        <StepIcon className="w-5 h-5 text-dark-400" />
                       )}
-                      <span className={`text-sm font-medium ${
+                      <span className={`text-xs font-medium ${
                         status === 'completed' ? 'text-accent-green' :
                         status === 'processing' ? 'text-primary-400' :
                         status === 'failed' ? 'text-red-400' :
@@ -280,7 +268,7 @@ export default function VisitDetailPage() {
           {/* Audio Section */}
           <div className="mb-6">
             {hasAudio && !showUploader ? (
-              <div className="card p-6">
+              <div className="card p-5">
                 <AudioPlayer visitId={visitId} />
               </div>
             ) : (
@@ -301,126 +289,116 @@ export default function VisitDetailPage() {
             )}
           </div>
 
-          {/* Preview Buttons - Click to open sidebar */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <button
-              onClick={() => openSidebar('transcript')}
-              className={`card p-6 text-left hover:bg-dark-700/50 transition-all duration-300 group ${
-                sidebarContent === 'transcript' && sidebarOpen ? 'ring-2 ring-primary-500 bg-dark-700/50' : ''
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-blue-400" />
+          {/* Quick Stats Cards */}
+          <div className="grid grid-cols-3 gap-4">
+            {panelTabs.map((tab) => {
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActivePanel(tab.id as any);
+                    setSidebarOpen(true);
+                  }}
+                  className={`card p-4 text-left hover:bg-dark-700/50 transition-all duration-200 group ${
+                    activePanel === tab.id && sidebarOpen ? 'ring-2 ring-primary-500/50 bg-dark-700/30' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                      tab.color === 'blue' ? 'bg-blue-500/20' :
+                      tab.color === 'green' ? 'bg-green-500/20' :
+                      'bg-purple-500/20'
+                    }`}>
+                      <TabIcon className={`w-4 h-4 ${
+                        tab.color === 'blue' ? 'text-blue-400' :
+                        tab.color === 'green' ? 'text-green-400' :
+                        'text-purple-400'
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-white">{tab.label}</h3>
+                      <p className="text-xs text-dark-400">
+                        {tab.id === 'contract' 
+                          ? (contract ? 'Generated' : 'Pending')
+                          : `${tab.count} ${tab.id === 'transcript' ? 'segments' : 'items'}`
+                        }
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
                   </div>
-                  <div>
-                    <h3 className="font-medium text-white">Transcript</h3>
-                    <p className="text-sm text-dark-400">{transcript.length} segments</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 transition-colors" />
-              </div>
-            </button>
-
-            <button
-              onClick={() => openSidebar('billables')}
-              className={`card p-6 text-left hover:bg-dark-700/50 transition-all duration-300 group ${
-                sidebarContent === 'billables' && sidebarOpen ? 'ring-2 ring-primary-500 bg-dark-700/50' : ''
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-green-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-white">Billable Items</h3>
-                    <p className="text-sm text-dark-400">{billables.length} items</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 transition-colors" />
-              </div>
-            </button>
-
-            <button
-              onClick={() => openSidebar('contract')}
-              className={`card p-6 text-left hover:bg-dark-700/50 transition-all duration-300 group ${
-                sidebarContent === 'contract' && sidebarOpen ? 'ring-2 ring-primary-500 bg-dark-700/50' : ''
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                    <FileCheck className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-white">Contract</h3>
-                    <p className="text-sm text-dark-400">{contract ? 'Generated' : 'Not generated'}</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 transition-colors" />
-              </div>
-            </button>
+                </button>
+              );
+            })}
           </div>
         </div>
       </main>
 
-      {/* Slide-out Sidebar Panel */}
+      {/* Slide-out Preview Panel - Compact */}
       <div
-        className={`fixed inset-y-0 right-0 w-[600px] bg-dark-800 border-l border-dark-700 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-0 right-0 h-full w-[420px] bg-dark-800 border-l border-dark-700 shadow-xl transform transition-transform duration-300 ease-in-out z-40 flex flex-col ${
           sidebarOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-6 border-b border-dark-700">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              sidebarContent === 'transcript' ? 'bg-blue-500/20' :
-              sidebarContent === 'billables' ? 'bg-green-500/20' :
-              'bg-purple-500/20'
-            }`}>
-              <SidebarIcon className={`w-5 h-5 ${
-                sidebarContent === 'transcript' ? 'text-blue-400' :
-                sidebarContent === 'billables' ? 'text-green-400' :
-                'text-purple-400'
-              }`} />
-            </div>
-            <h2 className="text-xl font-semibold text-white">{getSidebarTitle()}</h2>
+        {/* Panel Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-dark-700 bg-dark-800/95 backdrop-blur-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-white">Preview</span>
           </div>
           <button
-            onClick={closeSidebar}
-            className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+            onClick={() => setSidebarOpen(false)}
+            className="p-1.5 hover:bg-dark-700 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-dark-400" />
+            <X className="w-4 h-4 text-dark-400" />
           </button>
         </div>
 
-        {/* Sidebar Content */}
-        <div className="overflow-y-auto h-[calc(100vh-88px)]">
-          {sidebarContent === 'transcript' && (
+        {/* Panel Tabs */}
+        <div className="flex border-b border-dark-700 px-2 pt-2 gap-1 bg-dark-800/50">
+          {panelTabs.map((tab) => {
+            const TabIcon = tab.icon;
+            const isActive = activePanel === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActivePanel(tab.id as any)}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg transition-all ${
+                  isActive
+                    ? 'bg-dark-700 text-white border-b-2 border-primary-500'
+                    : 'text-dark-400 hover:text-white hover:bg-dark-700/50'
+                }`}
+              >
+                <TabIcon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+                {tab.count > 0 && (
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                    isActive ? 'bg-primary-500/30 text-primary-300' : 'bg-dark-600 text-dark-400'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Panel Content */}
+        <div className="flex-1 overflow-y-auto">
+          {activePanel === 'transcript' && (
             <TranscriptTimeline segments={transcript} />
           )}
-          {sidebarContent === 'billables' && (
+          {activePanel === 'billables' && (
             <BillablesEditor
               items={billables}
               visitId={visitId}
               onUpdate={loadVisitData}
             />
           )}
-          {sidebarContent === 'contract' && (
+          {activePanel === 'contract' && (
             <ContractPreview contract={contract} client={visit?.client} />
           )}
         </div>
       </div>
-
-      {/* Overlay when sidebar is open */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
-          onClick={closeSidebar}
-        />
-      )}
     </div>
   );
 }
