@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     # Diarization
     hf_token: str = ""  # Hugging Face token for pyannote models
     
+    # LLM Configuration (OpenAI)
+    openai_api_key: str = ""  # OpenAI API key for contract/note generation
+    llm_model: str = "gpt-4o-mini"  # Model to use (gpt-4o-mini, gpt-4o, gpt-4-turbo)
+    llm_temperature: float = 0.7  # Generation temperature (0.0-2.0)
+    
     class Config:
         env_file = ".env"
         case_sensitive = False
