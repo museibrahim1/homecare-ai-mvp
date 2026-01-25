@@ -105,6 +105,8 @@ def seed_database():
         # =============================================
         # CLIENTS
         # =============================================
+        # NOTE: care_level is intentionally NOT pre-assigned
+        # Care levels should be determined through proper assessment, not assumed
         clients_data = [
             {
                 "full_name": "Maria Garcia",
@@ -116,10 +118,7 @@ def seed_database():
                 "zip_code": "68501",
                 "emergency_contact_name": "Carlos Garcia",
                 "emergency_contact_phone": "555-1002",
-                "primary_diagnosis": "Type 2 Diabetes",
-                "medical_notes": "Requires daily blood sugar monitoring. Takes insulin.",
-                "care_plan": "Daily visits for medication management and meal preparation.",
-                "care_level": "MODERATE",
+                # Medical info to be filled during intake assessment
             },
             {
                 "full_name": "James Wilson",
@@ -131,10 +130,6 @@ def seed_database():
                 "zip_code": "68102",
                 "emergency_contact_name": "Linda Wilson",
                 "emergency_contact_phone": "555-2002",
-                "primary_diagnosis": "Post-stroke recovery",
-                "medical_notes": "Limited mobility on left side. Uses walker.",
-                "care_plan": "Physical therapy exercises, personal care assistance.",
-                "care_level": "HIGH",
             },
             {
                 "full_name": "Dorothy Chen",
@@ -146,10 +141,6 @@ def seed_database():
                 "zip_code": "50301",
                 "emergency_contact_name": "Michael Chen",
                 "emergency_contact_phone": "555-3002",
-                "primary_diagnosis": "Alzheimer's (early stage)",
-                "medical_notes": "Memory lapses, needs reminders for daily activities.",
-                "care_plan": "Companionship, meal prep, medication reminders.",
-                "care_level": "MODERATE",
             },
             {
                 "full_name": "William Thompson",
@@ -161,10 +152,6 @@ def seed_database():
                 "zip_code": "51501",
                 "emergency_contact_name": "Susan Thompson",
                 "emergency_contact_phone": "555-4002",
-                "primary_diagnosis": "COPD",
-                "medical_notes": "Uses oxygen therapy. Avoid strenuous activities.",
-                "care_plan": "Respiratory monitoring, light housekeeping, errands.",
-                "care_level": "HIGH",
             },
         ]
         
@@ -176,6 +163,8 @@ def seed_database():
                 continue
                 
             print(f"Creating client: {cl_data['full_name']}...")
+            # Note: Medical info (diagnosis, care_level, care_plan) should be 
+            # filled during intake assessment, not pre-assumed
             client = Client(
                 id=uuid4(),
                 full_name=cl_data["full_name"],
@@ -187,10 +176,9 @@ def seed_database():
                 zip_code=cl_data.get("zip_code"),
                 emergency_contact_name=cl_data.get("emergency_contact_name"),
                 emergency_contact_phone=cl_data.get("emergency_contact_phone"),
-                primary_diagnosis=cl_data.get("primary_diagnosis"),
-                medical_notes=cl_data.get("medical_notes"),
-                care_plan=cl_data.get("care_plan"),
-                care_level=cl_data.get("care_level"),
+                # care_level intentionally left blank - should be assessed
+                # primary_diagnosis intentionally left blank - should be assessed
+                # care_plan intentionally left blank - should be assessed
                 status="active",
                 created_at=now,
                 updated_at=now,
