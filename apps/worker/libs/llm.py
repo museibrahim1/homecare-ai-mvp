@@ -1243,11 +1243,79 @@ Check if uses or needs:
 - Medical alert system
 - Incontinence supplies
 
-### 9. SPECIAL REQUIREMENTS
-- **Dietary needs** - Diabetic, low sodium, texture modified, tube feeding
-- **Language needs** - Interpreter, communication board
-- **Cultural/religious** - Any preferences
-- **Dementia care** - Specialized training needed
+### 9. SPECIAL REQUIREMENTS - EXTRACT ALL OF THESE
+
+**Always identify and document these from the transcript:**
+
+**DIETARY REQUIREMENTS:**
+- Diabetic diet (blood sugar monitoring, carb counting)
+- Low sodium/heart healthy diet
+- Texture modified (pureed, mechanical soft, thickened liquids)
+- Food allergies or intolerances
+- Cultural/religious dietary restrictions (kosher, halal, vegetarian)
+- Tube feeding or supplements
+- Weight management needs
+
+**EQUIPMENT REQUIREMENTS:**
+- Grab bars needed (bathroom, hallways)
+- Shower chair or bench needed
+- Hospital bed needed
+- Wheelchair or walker adaptations
+- Lift equipment (Hoyer lift, transfer belt)
+- Medical alert system needed
+- Oxygen equipment
+- Incontinence supplies
+
+**LANGUAGE/COMMUNICATION:**
+- Non-English language preference
+- Hearing impairment accommodations
+- Vision impairment accommodations
+- Communication board or device needs
+
+**CAREGIVER REQUIREMENTS:**
+- Same-gender caregiver preference
+- Dementia care training required
+- Specific skills needed (wound care, catheter care)
+- Personality preferences (quiet, talkative)
+
+### 10. SAFETY CONCERNS - DOCUMENT ALL RISKS
+
+**Always assess and document these:**
+
+**FALL RISK FACTORS:**
+- Unsteady gait or balance problems
+- Uses walker, cane, or wheelchair
+- History of falls (how many, when)
+- Medications that cause dizziness
+- Vision impairment
+- Environmental hazards (rugs, clutter, poor lighting)
+- Transfer difficulties
+
+**MEDICATION SAFETY:**
+- Multiple medications (polypharmacy)
+- Confusion about medications
+- History of missed doses
+- Self-administration ability
+- Medication side effects
+
+**COGNITIVE/BEHAVIORAL SAFETY:**
+- Wandering or elopement risk
+- Leaving stove/appliances on
+- Poor judgment about safety
+- Impulsive behaviors
+- Sundowning (evening confusion)
+
+**HOME ENVIRONMENT:**
+- Fire hazards
+- Accessibility barriers
+- Emergency response capability
+- Smoke/CO detectors
+- Phone accessibility
+
+**SUPERVISION NEEDS:**
+- Can be left alone? For how long?
+- Night supervision needed?
+- Constant vs intermittent supervision
 
 ## CARE NEED LEVEL DETERMINATION
 
@@ -1385,66 +1453,58 @@ Only use these service categories:
 
 Calculate weekly hours using CONSOLIDATED service categories. Do NOT bill separately for tasks that are part of a larger service.
 
-### BILLABLE SERVICE CATEGORIES
+### BILLABLE SERVICE CATEGORIES - USE REALISTIC HOURS
 
-Only use these consolidated categories:
+**CRITICAL: Use these EXACT consolidated categories with REASONABLE hours.**
+Most clients need 10-25 hours/week total. Only severe cases need 30+ hours.
 
-| Service Category | What's Included | Light | Moderate | High |
-|-----------------|-----------------|-------|----------|------|
-| **Personal Care** | Bathing, dressing, grooming, oral care, hair care | 4 hrs | 8 hrs | 14 hrs |
-| **Toileting/Incontinence** | Toileting assistance, incontinence care, catheter care | 3 hrs | 6 hrs | 12 hrs |
-| **Meal Services** | Meal preparation, cooking, feeding assistance, nutrition | 6 hrs | 12 hrs | 18 hrs |
-| **Medication Management** | Reminders, organizing, monitoring compliance | 2 hrs | 4 hrs | 7 hrs |
-| **Homemaker Services** | Housekeeping, laundry, dishes, organizing, errands | 3 hrs | 6 hrs | 10 hrs |
-| **Companion Care** | Companionship, conversation, activities, emotional support | 4 hrs | 10 hrs | 20 hrs |
-| **Safety Supervision** | Monitoring, fall prevention, wandering prevention, dementia care | 6 hrs | 15 hrs | 30 hrs |
-| **Mobility Assistance** | Transfers, walking, wheelchair, exercises | 2 hrs | 5 hrs | 10 hrs |
-| **Transportation** | Doctor appointments, errands, shopping escort | 2 hrs | 4 hrs | 6 hrs |
-| **Respite Care** | Caregiver relief, extended coverage | 6 hrs | 12 hrs | 24 hrs |
-| **Skilled Nursing** | Wound care, injections, medical procedures | 2 hrs | 5 hrs | 10 hrs |
+| Service Category | What's Included | Light (1-2x/wk) | Moderate (3-5x/wk) | High (daily) |
+|-----------------|-----------------|-----------------|-------------------|--------------|
+| **Personal Care** | ALL bathing, dressing, grooming, hygiene tasks | 2 hrs | 4 hrs | 7 hrs |
+| **Meal Services** | ALL cooking, meal prep, feeding, nutrition | 3 hrs | 5 hrs | 8 hrs |
+| **Medication Management** | Reminders, pill organization, monitoring | 1 hr | 2 hrs | 3 hrs |
+| **Homemaker Services** | ALL housekeeping, laundry, dishes, errands | 2 hrs | 4 hrs | 6 hrs |
+| **Companion Care** | Conversation, activities, emotional support | 2 hrs | 4 hrs | 8 hrs |
+| **Safety Monitoring** | Fall prevention, supervision, dementia care | 2 hrs | 5 hrs | 10 hrs |
+| **Mobility Assistance** | Transfers, walking, wheelchair, exercises | 1 hr | 2 hrs | 4 hrs |
+| **Transportation** | Doctor appointments, errands escort | 1 hr | 2 hrs | 3 hrs |
 
-### CONSOLIDATION RULES - IMPORTANT
+### STRICT CONSOLIDATION RULES
 
-**DO NOT bill separately for:**
-- Dressing (part of Personal Care)
-- Grooming (part of Personal Care)
-- Oral hygiene (part of Personal Care)
-- Feeding assistance (part of Meal Services)
-- Laundry (part of Homemaker Services)
-- Light housekeeping (part of Homemaker Services)
+**MUST COMBINE - Never bill separately:**
+- Bathing + Dressing + Grooming + Oral care + Shaving = **ONE Personal Care entry**
+- Cooking + Feeding + Meal prep + Nutrition monitoring = **ONE Meal Services entry**  
+- Cleaning + Laundry + Dishes + Organizing + Errands = **ONE Homemaker Services entry**
+- Fall prevention + Wandering + Dementia monitoring = **ONE Safety Monitoring entry**
 
-**Example:** If transcript mentions "bathing, dressing, and grooming" → Bill as ONE "Personal Care" service, NOT three separate services.
+**WRONG:** 5 separate services for bathing, dressing, grooming, hair care, oral hygiene
+**RIGHT:** 1 Personal Care service covering ALL hygiene tasks
 
-### HOW TO DETERMINE NEED LEVEL
+### TYPICAL WEEKLY HOURS BY CARE LEVEL
 
-**Light:** Occasional help, mostly independent (1-2x/week)
-**Moderate:** Regular help, needs consistent support (3-5x/week)  
-**High:** Extensive help, heavily dependent (daily or multiple times daily)
+| Care Level | Typical Total | Max Reasonable |
+|------------|---------------|----------------|
+| LOW | 8-12 hrs/week | 15 hrs |
+| MODERATE | 12-20 hrs/week | 25 hrs |
+| HIGH | 20-35 hrs/week | 45 hrs |
 
-### EXAMPLE CALCULATIONS
+### EXAMPLE: MODERATE CARE CLIENT (18 hrs/week)
+- Personal Care (moderate): 4 hrs
+- Meal Services (moderate): 5 hrs  
+- Medication (moderate): 2 hrs
+- Homemaker (moderate): 4 hrs
+- Companion (light): 2 hrs
+- Safety Monitoring (light): 1 hr
+**TOTAL: 18 hours/week** ✓ REASONABLE
 
-**Example 1: Moderate care client**
-- Personal Care (moderate): 8 hrs
-- Meal Services (moderate): 12 hrs
-- Medication (moderate): 4 hrs
-- Homemaker (light): 3 hrs
-- Companion (moderate): 10 hrs
-**TOTAL: 37 hours/week**
-
-**Example 2: High care client with dementia**
-- Personal Care (high): 14 hrs
-- Toileting (high): 12 hrs
-- Meal Services (high): 18 hrs
-- Medication (high): 7 hrs
-- Safety Supervision (high): 30 hrs
-**TOTAL: 81 hours/week**
-
-**Example 3: Light care - companionship focus**
-- Meal Services (light): 6 hrs
-- Medication (light): 2 hrs
-- Homemaker (moderate): 6 hrs
-- Companion (moderate): 10 hrs
-**TOTAL: 24 hours/week**
+### EXAMPLE: HIGH CARE CLIENT (28 hrs/week)
+- Personal Care (high): 7 hrs
+- Meal Services (high): 8 hrs
+- Medication (high): 3 hrs
+- Homemaker (moderate): 4 hrs
+- Safety Monitoring (moderate): 5 hrs
+- Mobility (light): 1 hr
+**TOTAL: 28 hours/week** ✓ REASONABLE
 
 **CRITICAL: Use consolidated categories. Never bill separately for sub-tasks like dressing, grooming, or laundry.**
 
@@ -1538,17 +1598,39 @@ Return ONLY valid JSON with ALL fields populated based on transcript analysis:
     },
     "safety_concerns": [
         {
-            "concern": "Specific safety issue",
-            "evidence": "Quote or observation from transcript",
-            "severity": "High/Medium/Low",
-            "recommended_intervention": "How to address"
+            "concern": "Fall risk due to limited mobility",
+            "evidence": "Uses walker, unsteady gait mentioned",
+            "severity": "High",
+            "recommended_intervention": "Ensure clear pathways, grab bars, non-slip mats, gait belt for transfers"
+        },
+        {
+            "concern": "Medication errors",
+            "evidence": "Multiple medications, confusion about timing",
+            "severity": "Medium",
+            "recommended_intervention": "Use pill organizer, set up medication reminders, monitor for compliance"
+        },
+        {
+            "concern": "Cooking/fire safety",
+            "evidence": "Has left stove on, forgets to turn off burners",
+            "severity": "High",
+            "recommended_intervention": "Supervise cooking, consider microwave meals, stove safety knobs"
         }
     ],
     "special_requirements": [
         {
-            "requirement": "Specific requirement",
-            "details": "Details and how to accommodate",
-            "category": "Dietary/Equipment/Language/Cultural/Medical/Other"
+            "requirement": "Diabetic diet management",
+            "details": "Blood sugar monitoring, carb counting, no added sugars",
+            "category": "Dietary"
+        },
+        {
+            "requirement": "Grab bars in bathroom",
+            "details": "Install grab bars by toilet and in shower for safety",
+            "category": "Equipment"
+        },
+        {
+            "requirement": "Spanish-speaking caregiver preferred",
+            "details": "Client more comfortable communicating in Spanish",
+            "category": "Language"
         }
     ],
     "recommended_schedule": {
