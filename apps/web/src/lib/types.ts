@@ -47,6 +47,7 @@ export interface TranscriptSegment {
   end_ms: number;
   text: string;
   speaker_label?: string;
+  speaker?: string;  // Alias for speaker_label for compatibility
   confidence?: number;
   created_at: string;
 }
