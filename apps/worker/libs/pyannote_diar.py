@@ -25,6 +25,7 @@ def diarize_audio(
     num_speakers: Optional[int] = None,
     min_speakers: int = 1,
     max_speakers: int = 4,
+    audio_url: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Perform speaker diarization on audio file.
@@ -33,12 +34,13 @@ def diarize_audio(
     to local pyannote.audio models with HF_TOKEN.
     
     Args:
-        audio_path: Path to the audio file
+        audio_path: Path to the audio file (local or S3 key)
         hf_token: Hugging Face token for local pyannote.audio models
         pyannote_api_key: API key for hosted pyannote.ai service
         num_speakers: Exact number of speakers (if known)
         min_speakers: Minimum number of speakers
         max_speakers: Maximum number of speakers
+        audio_url: Public URL to the audio file (for pyannote.ai API)
     
     Returns:
         List of speaker turns with timing information
@@ -50,7 +52,7 @@ def diarize_audio(
     if api_key:
         try:
             return _diarize_with_api(
-                audio_path, api_key, num_speakers, min_speakers, max_speakers
+                audio_path, api_key, num_speakers, min_speakers, max_speakers, audio_url
             )
         except Exception as e:
             logger.warning(f"pyannote.ai API failed: {e}, trying local models")
@@ -76,56 +78,125 @@ def _diarize_with_api(
     num_speakers: Optional[int] = None,
     min_speakers: int = 1,
     max_speakers: int = 4,
+    audio_url: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Use pyannote.ai hosted API for diarization.
+    
+    The API requires a URL to the audio file. If audio_url is not provided,
+    we'll try to construct one from the S3/MinIO storage.
     """
     logger.info(f"Using pyannote.ai API for diarization")
     
     # Prepare the request
     headers = {
         "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
     }
     
-    # Build parameters
-    params = {}
-    if num_speakers:
-        params["num_speakers"] = num_speakers
-    else:
-        params["min_speakers"] = min_speakers
-        params["max_speakers"] = max_speakers
+    # Build request body
+    body: Dict[str, Any] = {}
     
-    # Upload audio file
-    with open(audio_path, "rb") as f:
-        files = {"audio": f}
-        
-        logger.info(f"Sending audio to pyannote.ai API...")
-        response = requests.post(
-            PYANNOTE_API_URL,
-            headers=headers,
-            files=files,
-            data=params,
-            timeout=300,  # 5 minute timeout for long audio
-        )
+    # Get audio URL - either provided or construct from S3
+    if audio_url:
+        body["url"] = audio_url
+    else:
+        # Try to get public URL from S3/MinIO
+        s3_url = _get_s3_public_url(audio_path)
+        if s3_url:
+            body["url"] = s3_url
+        else:
+            raise Exception("pyannote.ai API requires a public URL for the audio file")
+    
+    # Add speaker configuration
+    if num_speakers:
+        body["numSpeakers"] = num_speakers
+    else:
+        body["minSpeakers"] = min_speakers
+        body["maxSpeakers"] = max_speakers
+    
+    logger.info(f"Sending request to pyannote.ai API with URL: {body.get('url', 'N/A')[:50]}...")
+    
+    response = requests.post(
+        PYANNOTE_API_URL,
+        headers=headers,
+        json=body,
+        timeout=300,  # 5 minute timeout for long audio
+    )
     
     if response.status_code != 200:
         raise Exception(f"pyannote.ai API error: {response.status_code} - {response.text}")
     
     # Parse response
     result_data = response.json()
+    logger.info(f"pyannote.ai API response: {json.dumps(result_data)[:500]}")
     
     # Convert API response to our format
+    # The API returns diarization in the "output" field
     result = []
-    for segment in result_data.get("output", {}).get("diarization", []):
+    diarization_data = result_data.get("output", result_data.get("diarization", []))
+    
+    if isinstance(diarization_data, dict):
+        diarization_data = diarization_data.get("diarization", [])
+    
+    for segment in diarization_data:
         result.append({
             "speaker": segment.get("speaker", "SPEAKER_00"),
-            "start_ms": int(segment.get("start", 0) * 1000),
-            "end_ms": int(segment.get("end", 0) * 1000),
+            "start_ms": int(float(segment.get("start", 0)) * 1000),
+            "end_ms": int(float(segment.get("end", 0)) * 1000),
             "confidence": segment.get("confidence"),
         })
     
     logger.info(f"pyannote.ai API diarization complete: {len(result)} turns")
     return result
+
+
+def _get_s3_public_url(audio_path: str) -> Optional[str]:
+    """
+    Get a public/presigned URL for an audio file from S3/MinIO.
+    """
+    try:
+        import boto3
+        from botocore.config import Config
+        
+        s3_endpoint = os.getenv("S3_ENDPOINT_URL", "http://localhost:9000")
+        s3_access_key = os.getenv("S3_ACCESS_KEY", "minio")
+        s3_secret_key = os.getenv("S3_SECRET_KEY", "minio12345")
+        s3_bucket = os.getenv("S3_BUCKET", "homecare-audio")
+        
+        # Extract the S3 key from the path
+        # audio_path might be like "/tmp/audio.wav" or "visits/123/audio.wav"
+        if audio_path.startswith("/tmp/"):
+            # This is a local temp file, we need to upload it first
+            logger.info("Audio is local file, cannot get S3 URL")
+            return None
+        
+        s3_key = audio_path
+        if s3_key.startswith(f"s3://{s3_bucket}/"):
+            s3_key = s3_key[len(f"s3://{s3_bucket}/"):]
+        
+        # Create S3 client
+        s3_client = boto3.client(
+            "s3",
+            endpoint_url=s3_endpoint,
+            aws_access_key_id=s3_access_key,
+            aws_secret_access_key=s3_secret_key,
+            config=Config(signature_version="s3v4"),
+        )
+        
+        # Generate presigned URL (valid for 1 hour)
+        url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": s3_bucket, "Key": s3_key},
+            ExpiresIn=3600,
+        )
+        
+        logger.info(f"Generated presigned URL for {s3_key}")
+        return url
+        
+    except Exception as e:
+        logger.warning(f"Could not generate S3 URL: {e}")
+        return None
 
 
 def _diarize_with_local_models(
