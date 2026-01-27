@@ -71,7 +71,7 @@ def seeded_db(db_session):
         email="admin@homecare.ai",
         hashed_password=get_password_hash("admin123"),
         full_name="Admin User",
-        role=UserRole.ADMIN,
+        role=UserRole.admin,  # lowercase enum value
         is_active=True,
     )
     db_session.add(admin)
