@@ -91,10 +91,11 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-claude-sonnet-4-20250514}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.7}
-      # Hugging Face token for speaker diarization
+      # Speaker diarization - pyannote.ai API (preferred) or HF token
+      PYANNOTE_API_KEY: ${PYANNOTE_API_KEY:-}
       HF_TOKEN: ${HF_TOKEN:-}
       # Pipeline optimization settings
-      SKIP_DIARIZATION: ${SKIP_DIARIZATION:-true}
+      SKIP_DIARIZATION: ${SKIP_DIARIZATION:-false}
       PARALLEL_PIPELINE: ${PARALLEL_PIPELINE:-true}
     volumes:
       - ./apps/worker:/app
