@@ -13,10 +13,8 @@ import {
   Loader2,
   Users,
   ChevronRight,
-  CheckCircle,
-  AlertCircle,
-  FileCheck,
-  Activity,
+  ChevronDown,
+  X,
   RefreshCw
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
@@ -24,75 +22,17 @@ import Sidebar from '@/components/Sidebar';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-// Types
-interface ServiceSummary {
-  category: string;
-  label: string;
-  total_mentions: number;
-  clients_count: number;
-  description: string;
-}
-
-interface WeeklyReport {
-  period_start: string;
-  period_end: string;
-  total_assessments: number;
-  total_clients: number;
-  total_services: number;
-  services_by_category: ServiceSummary[];
-  assessments: any[];
-  generated_at: string;
-}
-
-interface MonthlyReport {
-  month: string;
-  year: number;
-  total_assessments: number;
-  completed_assessments: number;
-  pending_assessments: number;
-  total_contracts_generated: number;
-  total_clients_served: number;
-  new_clients: number;
-  services_breakdown: any[];
-  weekly_trend: any[];
-  summary: string;
-  generated_at: string;
-}
-
-interface BillingReport {
-  period: string;
-  total_assessments: number;
-  total_services_identified: number;
-  services_by_type: any[];
-  client_billing: any[];
-  summary: string;
-  generated_at: string;
-}
-
-interface ClientActivityReport {
-  total_clients: number;
-  active_clients: number;
-  clients_with_contracts: number;
-  clients_pending: number;
-  clients: any[];
-  summary: string;
-  generated_at: string;
-}
-
-type ReportType = 'timesheet' | 'monthly' | 'billing' | 'activity';
+type ReportType = 'timesheet' | 'monthly' | 'billing' | 'activity' | null;
 
 export default function ReportsPage() {
   const router = useRouter();
   const { token, isLoading: authLoading } = useAuth();
-  const [activeReport, setActiveReport] = useState<ReportType>('timesheet');
+  const [expandedReport, setExpandedReport] = useState<ReportType>(null);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   
   // Report data
-  const [weeklyReport, setWeeklyReport] = useState<WeeklyReport | null>(null);
-  const [monthlyReport, setMonthlyReport] = useState<MonthlyReport | null>(null);
-  const [billingReport, setBillingReport] = useState<BillingReport | null>(null);
-  const [activityReport, setActivityReport] = useState<ClientActivityReport | null>(null);
+  const [reportData, setReportData] = useState<any>(null);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -100,18 +40,13 @@ export default function ReportsPage() {
     }
   }, [token, authLoading, router]);
 
-  useEffect(() => {
-    if (token) {
-      loadReport(activeReport);
-    }
-  }, [token, activeReport]);
-
   const loadReport = async (type: ReportType) => {
-    if (!token) return;
+    if (!token || !type) return;
     setLoading(true);
+    setReportData(null);
     
     try {
-      const endpoints: Record<ReportType, string> = {
+      const endpoints: Record<string, string> = {
         timesheet: '/reports/timesheet',
         monthly: '/reports/monthly-summary',
         billing: '/reports/billing',
@@ -124,20 +59,7 @@ export default function ReportsPage() {
       
       if (response.ok) {
         const data = await response.json();
-        switch (type) {
-          case 'timesheet':
-            setWeeklyReport(data);
-            break;
-          case 'monthly':
-            setMonthlyReport(data);
-            break;
-          case 'billing':
-            setBillingReport(data);
-            break;
-          case 'activity':
-            setActivityReport(data);
-            break;
-        }
+        setReportData(data);
       }
     } catch (err) {
       console.error('Failed to load report:', err);
@@ -146,7 +68,17 @@ export default function ReportsPage() {
     }
   };
 
-  const handleDownload = async (type: ReportType) => {
+  const handleCardClick = (type: ReportType) => {
+    if (expandedReport === type) {
+      setExpandedReport(null);
+      setReportData(null);
+    } else {
+      setExpandedReport(type);
+      loadReport(type);
+    }
+  };
+
+  const handleDownload = async (type: string) => {
     if (!token) return;
     setDownloading(true);
     
@@ -196,313 +128,253 @@ export default function ReportsPage() {
     );
   }
 
-  const reportTabs = [
-    { id: 'timesheet' as ReportType, label: 'Weekly Timesheet', icon: Clock, color: 'primary' },
-    { id: 'monthly' as ReportType, label: 'Monthly Summary', icon: Calendar, color: 'green' },
-    { id: 'billing' as ReportType, label: 'Billing Report', icon: DollarSign, color: 'orange' },
-    { id: 'activity' as ReportType, label: 'Client Activity', icon: Users, color: 'cyan' },
+  const reportTypes = [
+    {
+      id: 'timesheet' as ReportType,
+      title: 'Weekly Timesheet',
+      description: 'Export billable hours for the past week',
+      icon: Clock,
+      color: 'primary',
+    },
+    {
+      id: 'monthly' as ReportType,
+      title: 'Monthly Summary',
+      description: 'Overview of visits and services by month',
+      icon: Calendar,
+      color: 'green',
+    },
+    {
+      id: 'billing' as ReportType,
+      title: 'Billing Report',
+      description: 'Detailed breakdown of billable items',
+      icon: DollarSign,
+      color: 'orange',
+    },
+    {
+      id: 'activity' as ReportType,
+      title: 'Client Activity',
+      description: 'Visit history per client',
+      icon: Users,
+      color: 'cyan',
+    },
   ];
 
   const getServiceColor = (type: string) => {
     const colors: Record<string, string> = {
-      'Personal Care': 'bg-blue-500/20 text-blue-400',
-      'Medication': 'bg-orange-500/20 text-orange-400',
-      'Health Monitoring': 'bg-red-500/20 text-red-400',
-      'Nutrition': 'bg-green-500/20 text-green-400',
-      'Mobility': 'bg-cyan-500/20 text-cyan-400',
-      'Homemaking': 'bg-purple-500/20 text-purple-400',
-      'Companionship': 'bg-pink-500/20 text-pink-400',
-      'Safety': 'bg-yellow-500/20 text-yellow-400',
+      'Personal Care': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+      'Medication': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+      'Health Monitoring': 'bg-red-500/20 text-red-400 border-red-500/30',
+      'Nutrition': 'bg-green-500/20 text-green-400 border-green-500/30',
+      'Mobility': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+      'Homemaking': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+      'Companionship': 'bg-pink-500/20 text-pink-400 border-pink-500/30',
+      'Safety': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
     };
-    return colors[type] || 'bg-dark-600 text-dark-300';
+    return colors[type] || 'bg-dark-600 text-dark-300 border-dark-500';
   };
 
-  return (
-    <div className="flex min-h-screen bg-dark-900">
-      <Sidebar />
-      
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-8">
+  // Render expanded content based on report type
+  const renderReportContent = () => {
+    if (loading) {
+      return (
+        <div className="p-8 text-center">
+          <Loader2 className="w-8 h-8 text-primary-400 animate-spin mx-auto mb-3" />
+          <p className="text-dark-400">Loading report data...</p>
+        </div>
+      );
+    }
+
+    if (!reportData) {
+      return (
+        <div className="p-8 text-center">
+          <p className="text-dark-400">No data available</p>
+        </div>
+      );
+    }
+
+    switch (expandedReport) {
+      case 'timesheet':
+        return (
+          <div className="p-6 space-y-6">
+            {/* Summary Row */}
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Period</p>
+                <p className="text-white font-medium text-sm">
+                  {new Date(reportData.period_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(reportData.period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </p>
+              </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Assessments</p>
+                <p className="text-2xl font-bold text-primary-400">{reportData.total_assessments}</p>
+              </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Clients</p>
+                <p className="text-2xl font-bold text-accent-green">{reportData.total_clients}</p>
+              </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Services</p>
+                <p className="text-2xl font-bold text-accent-cyan">{reportData.total_services}</p>
+              </div>
+            </div>
+
+            {/* Services by Category */}
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Reports</h1>
-              <p className="text-dark-300">Analytics and insights from your assessments</p>
+              <h4 className="text-white font-medium mb-3">Services Breakdown</h4>
+              <div className="grid grid-cols-2 gap-3">
+                {reportData.services_by_category?.map((service: any, i: number) => (
+                  <div key={i} className={`rounded-xl p-4 border ${getServiceColor(service.description)}`}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium">{service.label}</p>
+                        <p className="text-xs opacity-70">{service.description}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-bold">{service.total_mentions}</p>
+                        <p className="text-xs opacity-70">{service.clients_count} clients</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <button
-              onClick={() => loadReport(activeReport)}
-              disabled={loading}
-              className="btn-secondary flex items-center gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+
+            {/* Assessments List */}
+            {reportData.assessments?.length > 0 && (
+              <div>
+                <h4 className="text-white font-medium mb-3">Recent Assessments</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {reportData.assessments.map((a: any, i: number) => (
+                    <div 
+                      key={i} 
+                      onClick={() => router.push(`/visits/${a.id}`)}
+                      className="flex items-center justify-between p-3 bg-dark-700/30 rounded-lg cursor-pointer hover:bg-dark-700/50 transition"
+                    >
+                      <div>
+                        <p className="text-white text-sm font-medium">{a.client_name}</p>
+                        <p className="text-dark-400 text-xs">{a.date} • {a.services_count} services</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-dark-500" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+        );
 
-          {/* Report Type Tabs */}
-          <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-            {reportTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeReport === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveReport(tab.id)}
-                  className={`flex items-center gap-3 px-5 py-3 rounded-xl transition-all whitespace-nowrap ${
-                    isActive 
-                      ? `bg-accent-${tab.color}/20 text-accent-${tab.color} border border-accent-${tab.color}/30` 
-                      : 'bg-dark-800 text-dark-300 hover:bg-dark-700 border border-dark-700'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Loading State */}
-          {loading && (
-            <div className="card p-12 text-center">
-              <Loader2 className="w-10 h-10 text-primary-400 animate-spin mx-auto mb-4" />
-              <p className="text-dark-300">Loading report data...</p>
+      case 'monthly':
+        return (
+          <div className="p-6 space-y-6">
+            {/* Month Header */}
+            <div className="bg-gradient-to-r from-accent-green/10 to-primary-500/10 rounded-xl p-4 border border-accent-green/20">
+              <h4 className="text-white font-bold text-lg">{reportData.month} {reportData.year}</h4>
+              <p className="text-dark-300 text-sm mt-1">{reportData.summary}</p>
             </div>
-          )}
 
-          {/* Weekly Timesheet Report */}
-          {!loading && activeReport === 'timesheet' && weeklyReport && (
-            <div className="space-y-6">
-              {/* Summary Cards */}
-              <div className="grid grid-cols-4 gap-4">
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Period</p>
-                  <p className="text-lg font-bold text-white">
-                    {new Date(weeklyReport.period_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(weeklyReport.period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Assessments</p>
-                  <p className="text-3xl font-bold text-primary-400">{weeklyReport.total_assessments}</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Clients</p>
-                  <p className="text-3xl font-bold text-accent-green">{weeklyReport.total_clients}</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Services Identified</p>
-                  <p className="text-3xl font-bold text-accent-cyan">{weeklyReport.total_services}</p>
-                </div>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Assessments</p>
+                <p className="text-xl font-bold text-white">{reportData.total_assessments}</p>
+                <p className="text-xs text-accent-green">{reportData.completed_assessments} done</p>
               </div>
-
-              {/* Services Breakdown */}
-              <div className="card p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">Services Breakdown</h3>
-                  <button
-                    onClick={() => handleDownload('timesheet')}
-                    disabled={downloading}
-                    className="btn-secondary text-sm flex items-center gap-2"
-                  >
-                    {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                    Export CSV
-                  </button>
-                </div>
-                {weeklyReport.services_by_category.length === 0 ? (
-                  <p className="text-dark-400 text-center py-8">No services identified this week</p>
-                ) : (
-                  <div className="space-y-3">
-                    {weeklyReport.services_by_category.map((service, i) => (
-                      <div key={i} className="flex items-center gap-4 p-4 bg-dark-700/30 rounded-xl">
-                        <div className={`px-3 py-1.5 rounded-lg text-sm font-medium ${getServiceColor(service.description)}`}>
-                          {service.description}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-white font-medium">{service.label}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-white font-bold">{service.total_mentions}</p>
-                          <p className="text-dark-400 text-xs">{service.clients_count} client{service.clients_count !== 1 ? 's' : ''}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Clients</p>
+                <p className="text-xl font-bold text-accent-cyan">{reportData.total_clients_served}</p>
+                <p className="text-xs text-accent-green">+{reportData.new_clients} new</p>
               </div>
-
-              {/* Recent Assessments */}
-              <div className="card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">This Week's Assessments</h3>
-                {weeklyReport.assessments.length === 0 ? (
-                  <p className="text-dark-400 text-center py-8">No assessments this week</p>
-                ) : (
-                  <div className="space-y-2">
-                    {weeklyReport.assessments.map((assessment, i) => (
-                      <div 
-                        key={i} 
-                        onClick={() => router.push(`/visits/${assessment.id}`)}
-                        className="flex items-center gap-4 p-4 bg-dark-700/30 rounded-xl cursor-pointer hover:bg-dark-700/50 transition"
-                      >
-                        <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-primary-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-white font-medium">{assessment.client_name}</p>
-                          <p className="text-dark-400 text-sm">{assessment.date}</p>
-                        </div>
-                        <div className="flex gap-2 flex-wrap justify-end max-w-xs">
-                          {assessment.services.slice(0, 3).map((s: string, j: number) => (
-                            <span key={j} className="px-2 py-1 bg-dark-600 rounded text-xs text-dark-300">{s}</span>
-                          ))}
-                          {assessment.services.length > 3 && (
-                            <span className="text-dark-500 text-xs">+{assessment.services.length - 3} more</span>
-                          )}
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-dark-500" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Contracts</p>
+                <p className="text-xl font-bold text-accent-purple">{reportData.total_contracts_generated}</p>
+              </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Pending</p>
+                <p className="text-xl font-bold text-yellow-400">{reportData.pending_assessments}</p>
               </div>
             </div>
-          )}
 
-          {/* Monthly Summary Report */}
-          {!loading && activeReport === 'monthly' && monthlyReport && (
-            <div className="space-y-6">
-              {/* Month Header */}
-              <div className="card p-6 bg-gradient-to-r from-accent-green/10 to-primary-500/10 border-accent-green/30">
-                <h2 className="text-2xl font-bold text-white mb-2">{monthlyReport.month} {monthlyReport.year}</h2>
-                <p className="text-dark-300">{monthlyReport.summary}</p>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-4 gap-4">
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Total Assessments</p>
-                  <p className="text-3xl font-bold text-white">{monthlyReport.total_assessments}</p>
-                  <div className="flex gap-2 mt-2">
-                    <span className="text-accent-green text-xs">{monthlyReport.completed_assessments} completed</span>
-                    <span className="text-dark-500 text-xs">•</span>
-                    <span className="text-yellow-400 text-xs">{monthlyReport.pending_assessments} pending</span>
-                  </div>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Clients Served</p>
-                  <p className="text-3xl font-bold text-accent-cyan">{monthlyReport.total_clients_served}</p>
-                  <p className="text-accent-green text-xs mt-2">+{monthlyReport.new_clients} new this month</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Contracts Generated</p>
-                  <p className="text-3xl font-bold text-accent-purple">{monthlyReport.total_contracts_generated}</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Weekly Average</p>
-                  <p className="text-3xl font-bold text-primary-400">
-                    {monthlyReport.weekly_trend.length > 0 
-                      ? Math.round(monthlyReport.weekly_trend.reduce((a, w) => a + w.assessments, 0) / monthlyReport.weekly_trend.length)
-                      : 0
-                    }
-                  </p>
-                  <p className="text-dark-500 text-xs mt-2">assessments/week</p>
-                </div>
-              </div>
-
-              {/* Services Breakdown */}
-              <div className="card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Services Breakdown</h3>
-                {monthlyReport.services_breakdown.length === 0 ? (
-                  <p className="text-dark-400 text-center py-8">No services data available</p>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    {monthlyReport.services_breakdown.map((svc, i) => (
-                      <div key={i} className="p-4 bg-dark-700/30 rounded-xl">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getServiceColor(svc.type)}`}>
-                            {svc.type}
-                          </span>
-                          <span className="text-white font-bold">{svc.count}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {svc.services.slice(0, 4).map((s: string, j: number) => (
-                            <span key={j} className="text-xs text-dark-400">{s}{j < Math.min(svc.services.length, 4) - 1 ? ',' : ''}</span>
-                          ))}
-                        </div>
+            {/* Services Breakdown */}
+            {reportData.services_breakdown?.length > 0 && (
+              <div>
+                <h4 className="text-white font-medium mb-3">Services by Type</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {reportData.services_breakdown.map((svc: any, i: number) => (
+                    <div key={i} className={`rounded-xl p-4 border ${getServiceColor(svc.type)}`}>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium">{svc.type}</span>
+                        <span className="text-lg font-bold">{svc.count}</span>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <div className="flex flex-wrap gap-1">
+                        {svc.services?.slice(0, 3).map((s: string, j: number) => (
+                          <span key={j} className="text-xs opacity-70">{s}{j < 2 ? ',' : ''}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {/* Weekly Trend */}
-              <div className="card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Weekly Trend</h3>
-                <div className="grid grid-cols-4 gap-4">
-                  {monthlyReport.weekly_trend.map((week, i) => (
-                    <div key={i} className="p-4 bg-dark-700/30 rounded-xl text-center">
-                      <p className="text-dark-400 text-sm">{week.week}</p>
-                      <p className="text-2xl font-bold text-white mt-1">{week.assessments}</p>
+            {/* Weekly Trend */}
+            {reportData.weekly_trend?.length > 0 && (
+              <div>
+                <h4 className="text-white font-medium mb-3">Weekly Trend</h4>
+                <div className="grid grid-cols-4 gap-3">
+                  {reportData.weekly_trend.map((week: any, i: number) => (
+                    <div key={i} className="bg-dark-700/50 rounded-xl p-3 text-center">
+                      <p className="text-dark-400 text-xs">{week.week}</p>
+                      <p className="text-xl font-bold text-white">{week.assessments}</p>
                       <p className="text-dark-500 text-xs">{week.start_date}</p>
                     </div>
                   ))}
                 </div>
               </div>
+            )}
+          </div>
+        );
+
+      case 'billing':
+        return (
+          <div className="p-6 space-y-6">
+            {/* Summary */}
+            <div className="bg-gradient-to-r from-accent-orange/10 to-yellow-500/10 rounded-xl p-4 border border-accent-orange/20">
+              <h4 className="text-white font-bold">{reportData.period}</h4>
+              <p className="text-dark-300 text-sm mt-1">{reportData.summary}</p>
             </div>
-          )}
 
-          {/* Billing Report */}
-          {!loading && activeReport === 'billing' && billingReport && (
-            <div className="space-y-6">
-              {/* Summary */}
-              <div className="card p-6 bg-gradient-to-r from-accent-orange/10 to-yellow-500/10 border-accent-orange/30">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold text-white mb-2">Billing Summary</h2>
-                    <p className="text-dark-300">{billingReport.summary}</p>
-                  </div>
-                  <button
-                    onClick={() => handleDownload('billing')}
-                    disabled={downloading}
-                    className="btn-primary flex items-center gap-2"
-                  >
-                    {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                    Export CSV
-                  </button>
-                </div>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Assessments</p>
+                <p className="text-2xl font-bold text-primary-400">{reportData.total_assessments}</p>
               </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Period</p>
-                  <p className="text-xl font-bold text-white">{billingReport.period}</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Total Assessments</p>
-                  <p className="text-3xl font-bold text-primary-400">{billingReport.total_assessments}</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Services Identified</p>
-                  <p className="text-3xl font-bold text-accent-orange">{billingReport.total_services_identified}</p>
-                </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Services Found</p>
+                <p className="text-2xl font-bold text-accent-orange">{reportData.total_services_identified}</p>
               </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Categories</p>
+                <p className="text-2xl font-bold text-accent-cyan">{reportData.services_by_type?.length || 0}</p>
+              </div>
+            </div>
 
-              {/* Services by Type */}
-              <div className="card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Services by Type</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {billingReport.services_by_type.map((svc, i) => (
-                    <div key={i} className="p-4 bg-dark-700/30 rounded-xl">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getServiceColor(svc.type)}`}>
-                          {svc.type}
-                        </span>
-                        <span className="text-white font-bold">{svc.total} total</span>
+            {/* Services by Type */}
+            {reportData.services_by_type?.length > 0 && (
+              <div>
+                <h4 className="text-white font-medium mb-3">Services by Type</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {reportData.services_by_type.map((svc: any, i: number) => (
+                    <div key={i} className={`rounded-xl p-4 border ${getServiceColor(svc.type)}`}>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium">{svc.type}</span>
+                        <span className="font-bold">{svc.total}</span>
                       </div>
                       <div className="space-y-1">
-                        {svc.services.slice(0, 3).map((s: any, j: number) => (
-                          <div key={j} className="flex justify-between text-sm">
-                            <span className="text-dark-300">{s.name}</span>
-                            <span className="text-dark-400">{s.count}</span>
+                        {svc.services?.slice(0, 3).map((s: any, j: number) => (
+                          <div key={j} className="flex justify-between text-xs opacity-70">
+                            <span>{s.name}</span>
+                            <span>{s.count}</span>
                           </div>
                         ))}
                       </div>
@@ -510,118 +382,95 @@ export default function ReportsPage() {
                   ))}
                 </div>
               </div>
+            )}
 
-              {/* Client Billing */}
-              <div className="card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Client Billing Details</h3>
-                <div className="space-y-3">
-                  {billingReport.client_billing.map((client, i) => (
-                    <div key={i} className="p-4 bg-dark-700/30 rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-accent-orange/20 rounded-xl flex items-center justify-center">
-                            <DollarSign className="w-5 h-5 text-accent-orange" />
-                          </div>
-                          <div>
-                            <p className="text-white font-medium">{client.client_name}</p>
-                            <p className="text-dark-400 text-sm">{client.assessment_date}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            client.contract_status === 'Generated' 
-                              ? 'bg-accent-green/20 text-accent-green' 
-                              : 'bg-yellow-500/20 text-yellow-400'
-                          }`}>
-                            {client.contract_status}
-                          </span>
-                          {client.estimated_weekly && (
-                            <div className="text-right">
-                              <p className="text-white font-bold">${client.estimated_weekly.toFixed(0)}/wk</p>
-                              <p className="text-dark-400 text-xs">${client.estimated_monthly?.toFixed(0)}/mo</p>
-                            </div>
-                          )}
-                        </div>
+            {/* Client Billing */}
+            {reportData.client_billing?.length > 0 && (
+              <div>
+                <h4 className="text-white font-medium mb-3">Client Billing</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {reportData.client_billing.map((client: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-dark-700/30 rounded-lg">
+                      <div>
+                        <p className="text-white text-sm font-medium">{client.client_name}</p>
+                        <p className="text-dark-400 text-xs">{client.assessment_date} • {client.total_services} services</p>
                       </div>
-                      <div className="flex gap-2 flex-wrap mt-2">
-                        {client.services.slice(0, 5).map((s: any, j: number) => (
-                          <span key={j} className={`px-2 py-1 rounded text-xs ${getServiceColor(s.type)}`}>
-                            {s.category}
-                          </span>
-                        ))}
-                        {client.services.length > 5 && (
-                          <span className="text-dark-500 text-xs">+{client.services.length - 5} more</span>
+                      <div className="text-right">
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          client.contract_status === 'Generated' 
+                            ? 'bg-accent-green/20 text-accent-green' 
+                            : 'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {client.contract_status}
+                        </span>
+                        {client.estimated_weekly && (
+                          <p className="text-white text-sm font-medium mt-1">${client.estimated_weekly.toFixed(0)}/wk</p>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
+            )}
+          </div>
+        );
+
+      case 'activity':
+        return (
+          <div className="p-6 space-y-6">
+            {/* Summary */}
+            <div className="bg-gradient-to-r from-accent-cyan/10 to-primary-500/10 rounded-xl p-4 border border-accent-cyan/20">
+              <h4 className="text-white font-bold">Client Overview</h4>
+              <p className="text-dark-300 text-sm mt-1">{reportData.summary}</p>
             </div>
-          )}
 
-          {/* Client Activity Report */}
-          {!loading && activeReport === 'activity' && activityReport && (
-            <div className="space-y-6">
-              {/* Summary */}
-              <div className="card p-6 bg-gradient-to-r from-accent-cyan/10 to-primary-500/10 border-accent-cyan/30">
-                <h2 className="text-xl font-bold text-white mb-2">Client Activity Overview</h2>
-                <p className="text-dark-300">{activityReport.summary}</p>
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Total</p>
+                <p className="text-xl font-bold text-white">{reportData.total_clients}</p>
               </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-4 gap-4">
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Total Clients</p>
-                  <p className="text-3xl font-bold text-white">{activityReport.total_clients}</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Active</p>
-                  <p className="text-3xl font-bold text-accent-green">{activityReport.active_clients}</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">With Contracts</p>
-                  <p className="text-3xl font-bold text-accent-cyan">{activityReport.clients_with_contracts}</p>
-                </div>
-                <div className="card p-5">
-                  <p className="text-dark-400 text-sm mb-1">Pending</p>
-                  <p className="text-3xl font-bold text-yellow-400">{activityReport.clients_pending}</p>
-                </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Active</p>
+                <p className="text-xl font-bold text-accent-green">{reportData.active_clients}</p>
               </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">With Contracts</p>
+                <p className="text-xl font-bold text-accent-cyan">{reportData.clients_with_contracts}</p>
+              </div>
+              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
+                <p className="text-dark-400 text-xs mb-1">Pending</p>
+                <p className="text-xl font-bold text-yellow-400">{reportData.clients_pending}</p>
+              </div>
+            </div>
 
-              {/* Client List */}
-              <div className="card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">All Clients</h3>
-                <div className="space-y-3">
-                  {activityReport.clients.map((client, i) => (
+            {/* Client List */}
+            {reportData.clients?.length > 0 && (
+              <div>
+                <h4 className="text-white font-medium mb-3">All Clients</h4>
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {reportData.clients.map((client: any, i: number) => (
                     <div 
                       key={i} 
                       onClick={() => router.push('/clients')}
-                      className="p-4 bg-dark-700/30 rounded-xl cursor-pointer hover:bg-dark-700/50 transition"
+                      className="p-3 bg-dark-700/30 rounded-lg cursor-pointer hover:bg-dark-700/50 transition"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">
-                              {client.client_name.charAt(0)}
-                            </span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                            <span className="text-primary-400 font-bold text-sm">{client.client_name.charAt(0)}</span>
                           </div>
                           <div>
-                            <p className="text-white font-medium">{client.client_name}</p>
-                            <div className="flex items-center gap-2 text-sm text-dark-400">
-                              <span>{client.total_assessments} assessment{client.total_assessments !== 1 ? 's' : ''}</span>
-                              {client.last_assessment_date && (
-                                <>
-                                  <span>•</span>
-                                  <span>Last: {client.last_assessment_date}</span>
-                                </>
-                              )}
-                            </div>
+                            <p className="text-white text-sm font-medium">{client.client_name}</p>
+                            <p className="text-dark-400 text-xs">
+                              {client.total_assessments} assessments
+                              {client.last_assessment_date && ` • Last: ${client.last_assessment_date}`}
+                            </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           {client.care_level && (
-                            <span className={`px-2 py-1 rounded text-xs ${
+                            <span className={`px-2 py-0.5 rounded text-xs ${
                               client.care_level === 'HIGH' ? 'bg-red-500/20 text-red-400' :
                               client.care_level === 'MODERATE' ? 'bg-yellow-500/20 text-yellow-400' :
                               'bg-green-500/20 text-green-400'
@@ -629,20 +478,19 @@ export default function ReportsPage() {
                               {client.care_level}
                             </span>
                           )}
-                          <span className={`px-2 py-1 rounded text-xs ${
+                          <span className={`px-2 py-0.5 rounded text-xs ${
                             client.contract_status === 'Active' 
                               ? 'bg-accent-green/20 text-accent-green' 
                               : 'bg-dark-600 text-dark-400'
                           }`}>
                             {client.contract_status}
                           </span>
-                          <ChevronRight className="w-5 h-5 text-dark-500" />
                         </div>
                       </div>
-                      {client.services_identified.length > 0 && (
-                        <div className="flex gap-2 flex-wrap mt-3 ml-16">
-                          {client.services_identified.map((s: string, j: number) => (
-                            <span key={j} className="px-2 py-1 bg-dark-600 rounded text-xs text-dark-300">{s}</span>
+                      {client.services_identified?.length > 0 && (
+                        <div className="flex gap-1 flex-wrap mt-2 ml-11">
+                          {client.services_identified.slice(0, 4).map((s: string, j: number) => (
+                            <span key={j} className="px-2 py-0.5 bg-dark-600 rounded text-xs text-dark-300">{s}</span>
                           ))}
                         </div>
                       )}
@@ -650,22 +498,133 @@ export default function ReportsPage() {
                   ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        );
 
-          {/* Empty State */}
-          {!loading && (
-            (activeReport === 'timesheet' && !weeklyReport) ||
-            (activeReport === 'monthly' && !monthlyReport) ||
-            (activeReport === 'billing' && !billingReport) ||
-            (activeReport === 'activity' && !activityReport)
-          ) && (
-            <div className="card p-12 text-center">
-              <BarChart3 className="w-12 h-12 text-dark-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-white mb-2">No Data Available</h3>
-              <p className="text-dark-400">Complete some assessments to generate report data</p>
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-dark-900">
+      <Sidebar />
+      
+      <main className="flex-1 p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">Reports</h1>
+              <p className="text-dark-300">Generate and export reports</p>
             </div>
-          )}
+          </div>
+
+          {/* Stats Overview */}
+          <div className="grid grid-cols-4 gap-4 mb-8">
+            <div className="card p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-primary-400" />
+                </div>
+                <span className="text-dark-400 text-sm">This Week</span>
+              </div>
+              <p className="text-2xl font-bold text-white">--</p>
+              <p className="text-sm text-dark-400">assessments</p>
+            </div>
+            <div className="card p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-accent-green/20 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-accent-green" />
+                </div>
+                <span className="text-dark-400 text-sm">Services</span>
+              </div>
+              <p className="text-2xl font-bold text-white">--</p>
+              <p className="text-sm text-dark-400">identified</p>
+            </div>
+            <div className="card p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-accent-cyan/20 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-accent-cyan" />
+                </div>
+                <span className="text-dark-400 text-sm">Contracts</span>
+              </div>
+              <p className="text-2xl font-bold text-white">--</p>
+              <p className="text-sm text-dark-400">generated</p>
+            </div>
+            <div className="card p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-accent-purple/20 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-accent-purple" />
+                </div>
+                <span className="text-dark-400 text-sm">Clients</span>
+              </div>
+              <p className="text-2xl font-bold text-white">--</p>
+              <p className="text-sm text-dark-400">active</p>
+            </div>
+          </div>
+
+          {/* Report Types - Clickable Cards */}
+          <h2 className="text-xl font-semibold text-white mb-4">Generate Reports</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {reportTypes.map((report) => {
+              const isExpanded = expandedReport === report.id;
+              return (
+                <div 
+                  key={report.id} 
+                  className={`card overflow-hidden transition-all duration-300 ${
+                    isExpanded ? 'col-span-2' : ''
+                  }`}
+                >
+                  {/* Card Header - Always visible */}
+                  <div 
+                    onClick={() => handleCardClick(report.id)}
+                    className="p-6 cursor-pointer group hover:bg-dark-700/30 transition"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 bg-accent-${report.color}/20 rounded-xl flex items-center justify-center`}>
+                        <report.icon className={`w-6 h-6 text-accent-${report.color}`} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-white mb-1">{report.title}</h3>
+                        <p className="text-dark-400 text-sm">{report.description}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {isExpanded && (report.id === 'timesheet' || report.id === 'billing') && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownload(report.id!);
+                            }}
+                            disabled={downloading}
+                            className="btn-secondary py-2 px-3 text-sm flex items-center gap-2"
+                          >
+                            {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                            CSV
+                          </button>
+                        )}
+                        <div className={`p-2 rounded-lg transition ${isExpanded ? 'bg-primary-500/20' : 'group-hover:bg-dark-700'}`}>
+                          {isExpanded ? (
+                            <ChevronDown className="w-5 h-5 text-primary-400" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-white" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expanded Content */}
+                  {isExpanded && (
+                    <div className="border-t border-dark-700">
+                      {renderReportContent()}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </main>
     </div>
