@@ -33,12 +33,43 @@ export default function ReportsPage() {
   
   // Report data
   const [reportData, setReportData] = useState<any>(null);
+  
+  // Overview stats
+  const [overviewStats, setOverviewStats] = useState<{
+    assessments_this_week: number;
+    services_identified: number;
+    contracts_generated: number;
+    active_clients: number;
+  } | null>(null);
 
+  // Auth check and load stats
   useEffect(() => {
     if (!authLoading && !token) {
       router.push('/login');
     }
   }, [token, authLoading, router]);
+  
+  // Load overview stats when authenticated
+  useEffect(() => {
+    if (token) {
+      loadOverviewStats();
+    }
+  }, [token]);
+  
+  const loadOverviewStats = async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${API_BASE}/reports/overview`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setOverviewStats(data);
+      }
+    } catch (err) {
+      console.error('Failed to load overview stats:', err);
+    }
+  };
 
   const loadReport = async (type: ReportType) => {
     if (!token || !type) return;
@@ -530,7 +561,9 @@ export default function ReportsPage() {
                 </div>
                 <span className="text-dark-400 text-sm">This Week</span>
               </div>
-              <p className="text-2xl font-bold text-white">--</p>
+              <p className="text-2xl font-bold text-white">
+                {overviewStats?.assessments_this_week ?? '--'}
+              </p>
               <p className="text-sm text-dark-400">assessments</p>
             </div>
             <div className="card p-5">
@@ -540,7 +573,9 @@ export default function ReportsPage() {
                 </div>
                 <span className="text-dark-400 text-sm">Services</span>
               </div>
-              <p className="text-2xl font-bold text-white">--</p>
+              <p className="text-2xl font-bold text-white">
+                {overviewStats?.services_identified ?? '--'}
+              </p>
               <p className="text-sm text-dark-400">identified</p>
             </div>
             <div className="card p-5">
@@ -550,7 +585,9 @@ export default function ReportsPage() {
                 </div>
                 <span className="text-dark-400 text-sm">Contracts</span>
               </div>
-              <p className="text-2xl font-bold text-white">--</p>
+              <p className="text-2xl font-bold text-white">
+                {overviewStats?.contracts_generated ?? '--'}
+              </p>
               <p className="text-sm text-dark-400">generated</p>
             </div>
             <div className="card p-5">
@@ -560,7 +597,9 @@ export default function ReportsPage() {
                 </div>
                 <span className="text-dark-400 text-sm">Clients</span>
               </div>
-              <p className="text-2xl font-bold text-white">--</p>
+              <p className="text-2xl font-bold text-white">
+                {overviewStats?.active_clients ?? '--'}
+              </p>
               <p className="text-sm text-dark-400">active</p>
             </div>
           </div>

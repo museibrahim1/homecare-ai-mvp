@@ -135,6 +135,48 @@ SERVICE_TYPES = {
 }
 
 
+# ============ Overview Stats ============
+
+class OverviewStats(BaseModel):
+    assessments_this_week: int
+    services_identified: int
+    contracts_generated: int
+    active_clients: int
+    
+@router.get("/overview")
+async def get_overview_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get quick overview stats for the reports dashboard.
+    """
+    now = datetime.utcnow()
+    week_start = now - timedelta(days=now.weekday())
+    week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Assessments this week
+    assessments_this_week = db.query(func.count(Visit.id)).filter(
+        Visit.created_at >= week_start
+    ).scalar() or 0
+    
+    # Total services identified (all billable items)
+    services_identified = db.query(func.count(BillableItem.id)).scalar() or 0
+    
+    # Contracts generated
+    contracts_generated = db.query(func.count(Contract.id)).scalar() or 0
+    
+    # Active clients (clients with at least one visit)
+    active_clients = db.query(func.count(func.distinct(Visit.client_id))).scalar() or 0
+    
+    return {
+        "assessments_this_week": assessments_this_week,
+        "services_identified": services_identified,
+        "contracts_generated": contracts_generated,
+        "active_clients": active_clients,
+    }
+
+
 # ============ Weekly Timesheet Report ============
 
 @router.get("/timesheet", response_model=WeeklyTimesheetReport)
