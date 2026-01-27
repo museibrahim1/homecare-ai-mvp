@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   CheckCircle, Clock, XCircle, AlertCircle, FileText, 
@@ -60,7 +60,7 @@ const STATUS_CONFIG: Record<string, { icon: any; color: string; label: string; m
   },
 };
 
-export default function RegistrationStatusPage() {
+function StatusContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const businessId = searchParams.get('id');
@@ -254,5 +254,17 @@ export default function RegistrationStatusPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegistrationStatusPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+      </div>
+    }>
+      <StatusContent />
+    </Suspense>
   );
 }

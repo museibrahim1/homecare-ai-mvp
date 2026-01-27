@@ -17,18 +17,24 @@ from app.core.security import get_password_hash
 from app.models.user import User, UserRole
 
 
-# Test database URL (in-memory SQLite for fast tests)
-TEST_DATABASE_URL = "sqlite:///:memory:"
+# Use PostgreSQL from environment (CI) or fallback to SQLite for local dev
+# Note: SQLite doesn't support JSONB, so PostgreSQL is required for full tests
+TEST_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///:memory:")
 
 
 @pytest.fixture(scope="function")
 def db_engine():
     """Create test database engine."""
-    engine = create_engine(
-        TEST_DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
+    if TEST_DATABASE_URL.startswith("sqlite"):
+        engine = create_engine(
+            TEST_DATABASE_URL,
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+    else:
+        # PostgreSQL for CI - use psycopg driver
+        engine = create_engine(TEST_DATABASE_URL)
+    
     Base.metadata.create_all(bind=engine)
     yield engine
     Base.metadata.drop_all(bind=engine)
