@@ -45,20 +45,31 @@ def diarize_audio(
     Returns:
         List of speaker turns with timing information
     """
-    # Get API key from parameter or environment
+    # Get tokens from parameters or environment
     api_key = pyannote_api_key or os.getenv("PYANNOTE_API_KEY")
+    hf_token = hf_token or os.getenv("HF_TOKEN")
     
-    # Try pyannote.ai API first (easier, no local GPU needed)
-    if api_key:
+    # For local files, prefer local models (HF_TOKEN) since pyannote.ai API needs public URLs
+    is_local_file = audio_path.startswith("/") or audio_path.startswith("./")
+    
+    # Try local models first for local files (works without public URL)
+    if hf_token and is_local_file and not audio_url:
+        try:
+            logger.info("Using local pyannote.audio models for local file")
+            return _diarize_with_local_models(
+                audio_path, hf_token, num_speakers, min_speakers, max_speakers
+            )
+        except Exception as e:
+            logger.warning(f"Local diarization failed: {e}, trying API")
+    
+    # Try pyannote.ai API if we have a public URL
+    if api_key and audio_url:
         try:
             return _diarize_with_api(
                 audio_path, api_key, num_speakers, min_speakers, max_speakers, audio_url
             )
         except Exception as e:
             logger.warning(f"pyannote.ai API failed: {e}, trying local models")
-    
-    # Fall back to local pyannote.audio models
-    hf_token = hf_token or os.getenv("HF_TOKEN")
     if hf_token:
         try:
             return _diarize_with_local_models(
