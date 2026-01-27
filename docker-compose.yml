@@ -82,8 +82,10 @@ services:
       S3_ACCESS_KEY: minio
       S3_SECRET_KEY: minio12345
       S3_BUCKET: homecare-audio
-      ASR_MODEL_SIZE: medium
+      ASR_MODEL_SIZE: small
       USE_GPU: "false"
+      # Enable OpenAI Whisper API for fast transcription
+      USE_OPENAI_WHISPER: "true"
       # LLM Configuration - set these in your .env file or export them
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
@@ -91,6 +93,9 @@ services:
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.7}
       # Hugging Face token for speaker diarization
       HF_TOKEN: ${HF_TOKEN:-}
+      # Pipeline optimization settings
+      SKIP_DIARIZATION: ${SKIP_DIARIZATION:-true}
+      PARALLEL_PIPELINE: ${PARALLEL_PIPELINE:-true}
     volumes:
       - ./apps/worker:/app
       - model_cache:/root/.cache

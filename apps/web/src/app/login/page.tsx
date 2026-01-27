@@ -48,7 +48,7 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold text-white">Homecare AI</h1>
           </div>
           <p className="text-dark-300 text-lg mt-4">
-            AI-Powered Voice Analysis for Healthcare
+            Turn care assessments into proposal-ready contracts
           </p>
         </div>
 
@@ -58,9 +58,9 @@ export default function LoginPage() {
               <Waves className="w-6 h-6 text-primary-400" />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Speech to Text</h3>
+              <h3 className="text-white font-semibold mb-1">Care Assessment Capture</h3>
               <p className="text-dark-300 text-sm">
-                Advanced transcription with speaker diarization for accurate visit documentation
+                Convert intake calls or transcripts into structured assessment signals
               </p>
             </div>
           </div>
@@ -70,9 +70,9 @@ export default function LoginPage() {
               <Zap className="w-6 h-6 text-accent-green" />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Auto Billing</h3>
+              <h3 className="text-white font-semibold mb-1">Proposal-Ready Contracts</h3>
               <p className="text-dark-300 text-sm">
-                Automatically extract billable hours from caregiver conversations
+                Generate service contracts faster with AI-assisted drafting and templates
               </p>
             </div>
           </div>
@@ -82,9 +82,9 @@ export default function LoginPage() {
               <Shield className="w-6 h-6 text-accent-purple" />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">HIPAA Compliant</h3>
+              <h3 className="text-white font-semibold mb-1">Human-in-the-Loop Review</h3>
               <p className="text-dark-300 text-sm">
-                Secure processing with enterprise-grade data protection
+                Review, edit, approve, and export contracts (plus notes/billing when needed)
               </p>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function LoginPage() {
 
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Welcome back</h2>
-            <p className="text-dark-300">Sign in to your admin dashboard</p>
+            <p className="text-dark-300">Sign in to generate contracts from care assessments</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -179,7 +179,7 @@ export default function LoginPage() {
               <p className="text-dark-400 text-sm">
                 New to HomeCare AI?{' '}
                 <a href="/register" className="text-primary-400 hover:underline font-medium">
-                  Register your business
+                  Register your agency
                 </a>
               </p>
             </div>

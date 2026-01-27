@@ -565,7 +565,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
                 <div className="p-4 bg-slate-700/50 rounded-lg text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Star className="w-5 h-5 text-yellow-400" />
-                    <span className="text-2xl font-bold text-white">{formData.rating?.toFixed(1) || '5.0'}</span>
+                    <span className="text-2xl font-bold text-white">{formData.rating ? Number(formData.rating).toFixed(1) : '5.0'}</span>
                   </div>
                   <p className="text-sm text-slate-400">Average Rating</p>
                 </div>

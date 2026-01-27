@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { format } from 'date-fns';
 import { 
@@ -16,7 +16,12 @@ import {
   X,
   ChevronRight,
   PanelRightOpen,
-  Upload
+  Upload,
+  Sparkles,
+  FileSpreadsheet,
+  File,
+  ChevronDown,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -28,6 +33,8 @@ import TranscriptTimeline from '@/components/TranscriptTimeline';
 import BillablesEditor from '@/components/BillablesEditor';
 import ContractPreview from '@/components/ContractPreview';
 import TranscriptImporter from '@/components/TranscriptImporter';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 // Pipeline steps - diarize and align disabled for now
 const pipelineSteps = [
@@ -53,6 +60,20 @@ export default function VisitDetailPage() {
   const [hasAudio, setHasAudio] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
   const [uploadMode, setUploadMode] = useState<'audio' | 'transcript'>('audio');
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [generatingProposal, setGeneratingProposal] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -144,6 +165,107 @@ export default function VisitDetailPage() {
     return visit.pipeline_state[key];
   };
 
+  // Export functions
+  const handleExport = async (type: 'contract' | 'timesheet' | 'note') => {
+    if (!token || !visitId) return;
+    
+    const endpoints: Record<string, string> = {
+      contract: `/exports/visits/${visitId}/contract.pdf`,
+      timesheet: `/exports/visits/${visitId}/timesheet.csv`,
+      note: `/exports/visits/${visitId}/note.pdf`,
+    };
+    
+    try {
+      const response = await fetch(`${API_BASE}${endpoints[type]}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        alert(errorData.detail || `Failed to export ${type}`);
+        return;
+      }
+      
+      // Create download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = type === 'timesheet' 
+        ? `timesheet_${visitId}.csv`
+        : type === 'contract' 
+        ? `contract_${visitId}.pdf`
+        : `note_${visitId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      console.error(`Export ${type} failed:`, err);
+      alert(`Failed to export ${type}`);
+    }
+    
+    setShowExportMenu(false);
+  };
+
+  // Generate Proposal - runs all necessary pipeline steps
+  const handleGenerateProposal = async () => {
+    if (!token || !visitId) return;
+    
+    // Check if we have a transcript
+    if (transcript.length === 0) {
+      alert('Please upload audio or import a transcript first');
+      return;
+    }
+    
+    setGeneratingProposal(true);
+    
+    try {
+      // Run billing step if not completed
+      const billingStatus = getPipelineStatus('billing');
+      if (!billingStatus || billingStatus.status !== 'completed') {
+        setProcessingStep('bill');
+        await api.runPipelineStep(token, visitId, 'bill');
+        
+        // Wait for completion
+        for (let i = 0; i < 30; i++) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          const status = await api.getPipelineStatus(token, visitId);
+          if (status.pipeline_state.billing?.status === 'completed' || 
+              status.pipeline_state.billing?.status === 'failed') {
+            break;
+          }
+        }
+      }
+      
+      // Run contract generation
+      setProcessingStep('contract');
+      await api.runPipelineStep(token, visitId, 'contract');
+      
+      // Wait for contract completion
+      for (let i = 0; i < 60; i++) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const status = await api.getPipelineStatus(token, visitId);
+        if (status.pipeline_state.contract?.status === 'completed' || 
+            status.pipeline_state.contract?.status === 'failed') {
+          break;
+        }
+      }
+      
+      // Reload data and open contract panel
+      await loadVisitData();
+      setActivePanel('contract');
+      setSidebarOpen(true);
+      
+    } catch (err) {
+      console.error('Generate proposal failed:', err);
+      alert('Failed to generate proposal. Please try again.');
+    } finally {
+      setGeneratingProposal(false);
+      setProcessingStep(null);
+    }
+  };
+
   const getStepStatus = (step: typeof pipelineSteps[0]) => {
     const status = getPipelineStatus(step.key);
     if (processingStep === step.id) return 'processing';
@@ -208,6 +330,27 @@ export default function VisitDetailPage() {
                 }
               </p>
             </div>
+            {/* Generate Proposal CTA */}
+            {transcript.length > 0 && !contract && (
+              <button
+                onClick={handleGenerateProposal}
+                disabled={generatingProposal || processingStep !== null}
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-accent-cyan text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-500/25"
+              >
+                {generatingProposal ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    Generate Proposal
+                  </>
+                )}
+              </button>
+            )}
+            
             <button 
               onClick={toggleSidebar}
               className={`p-2.5 rounded-xl transition-colors ${sidebarOpen ? 'bg-primary-500 text-white' : 'hover:bg-dark-700 text-dark-300'}`}
@@ -215,10 +358,66 @@ export default function VisitDetailPage() {
             >
               <PanelRightOpen className="w-5 h-5" />
             </button>
-            <button className="btn-secondary flex items-center gap-2">
-              <Download className="w-5 h-5" />
-              Export
-            </button>
+            
+            {/* Export Dropdown */}
+            <div className="relative" ref={exportMenuRef}>
+              <button 
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="btn-secondary flex items-center gap-2"
+              >
+                <Download className="w-5 h-5" />
+                Export
+                <ChevronDown className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {showExportMenu && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-dark-800 border border-dark-600 rounded-xl shadow-xl z-50 overflow-hidden">
+                  <div className="p-2">
+                    <button
+                      onClick={() => handleExport('contract')}
+                      disabled={!contract}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                        <File className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Contract PDF</p>
+                        <p className="text-xs text-dark-400">Service agreement</p>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleExport('timesheet')}
+                      disabled={billables.length === 0}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                        <FileSpreadsheet className="w-4 h-4 text-green-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Timesheet CSV</p>
+                        <p className="text-xs text-dark-400">Billable hours</p>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleExport('note')}
+                      disabled={!visit?.pipeline_state?.note?.status}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <FileText className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Visit Note PDF</p>
+                        <p className="text-xs text-dark-400">Care documentation</p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Pipeline Steps */}
@@ -510,7 +709,12 @@ export default function VisitDetailPage() {
             </div>
           )}
           {activePanel === 'contract' && (
-            <ContractPreview contract={contract} client={visit?.client} />
+            <ContractPreview 
+              contract={contract} 
+              client={visit?.client}
+              visitId={visitId}
+              onContractUpdate={setContract}
+            />
           )}
         </div>
       </div>

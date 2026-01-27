@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Homecare AI',
-  description: 'AI-powered voice analyzer for in-home healthcare',
+  description: 'Turn care assessments into proposal-ready service contracts',
 };
 
 export default function RootLayout({

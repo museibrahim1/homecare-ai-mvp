@@ -154,14 +154,14 @@ export default function NewVisitPage() {
               Back to Visits
             </button>
             <h1 className="text-3xl font-bold text-white mb-2">New Visit</h1>
-            <p className="text-dark-300">Create a visit and upload audio recording</p>
+            <p className="text-dark-300">Create an assessment and add an intake call or transcript</p>
           </div>
 
           {/* Progress Steps */}
           <div className="flex items-center gap-4 mb-8">
             {[
-              { id: 'details', label: 'Visit Details', icon: Calendar },
-              { id: 'source', label: 'Add Data', icon: Upload },
+              { id: 'details', label: 'Assessment Details', icon: Calendar },
+              { id: 'source', label: 'Add Intake Data', icon: Upload },
               { id: 'complete', label: 'Complete', icon: Check },
             ].map((s, index) => {
               const isActive = s.id === step || 
@@ -201,7 +201,7 @@ export default function NewVisitPage() {
           {/* Step Content */}
           {step === 'details' && (
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-white mb-6">Visit Details</h2>
+              <h2 className="text-lg font-semibold text-white mb-6">Assessment Details</h2>
               
               <div className="space-y-5">
                 {/* Client Selection */}
@@ -295,7 +295,7 @@ export default function NewVisitPage() {
                     </span>
                   ) : (
                     <span className="flex items-center justify-center gap-2">
-                      Continue to Upload
+                      Continue to Add Data
                       <ChevronRight className="w-4 h-4" />
                     </span>
                   )}
@@ -306,9 +306,9 @@ export default function NewVisitPage() {
 
           {step === 'source' && createdVisit && (
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-white mb-2">Add Recording or Transcript</h2>
+              <h2 className="text-lg font-semibold text-white mb-2">Add Intake Recording or Transcript</h2>
               <p className="text-dark-400 text-sm mb-6">
-                Choose how to add data for this visit. You can upload an audio recording 
+                Choose how to add data for this assessment. Upload an audio recording
                 or import a transcript from another service.
               </p>
               
@@ -322,7 +322,7 @@ export default function NewVisitPage() {
                   </div>
                   <h3 className="text-white font-medium mb-1">Upload Audio</h3>
                   <p className="text-dark-400 text-sm">
-                    MP3, WAV, M4A files. We'll transcribe and process automatically.
+                    MP3, WAV, M4A files. We'll transcribe and generate a contract draft.
                   </p>
                 </button>
                 
@@ -335,7 +335,7 @@ export default function NewVisitPage() {
                   </div>
                   <h3 className="text-white font-medium mb-1">Import Transcript</h3>
                   <p className="text-dark-400 text-sm">
-                    Already have a transcript? Import from SRT, VTT, or plain text.
+                    Already have a transcript? Import SRT, VTT, or plain text to generate a contract.
                   </p>
                 </button>
               </div>

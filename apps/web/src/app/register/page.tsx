@@ -311,7 +311,7 @@ export default function RegisterPage() {
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">Business Information</h2>
-              <p className="text-dark-400">Enter your company details as registered with the state.</p>
+              <p className="text-dark-400">Register your agency so you can generate proposal-ready contracts from care assessments.</p>
             </div>
             
             <div className="space-y-4">
@@ -605,7 +605,7 @@ export default function RegisterPage() {
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">Registration Submitted!</h2>
               <p className="text-dark-400">
-                Your business registration is being processed.
+                Your agency registration is being processed.
               </p>
             </div>
             

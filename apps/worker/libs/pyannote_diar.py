@@ -36,7 +36,7 @@ def diarize_audio(
         
         logger.info(f"Loading pyannote diarization pipeline")
         
-        # Load pre-trained pipeline
+        # Load pre-trained pipeline with Hugging Face authentication
         pipeline = Pipeline.from_pretrained(
             "pyannote/speaker-diarization-3.1",
             use_auth_token=hf_token,

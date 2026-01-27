@@ -69,15 +69,15 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-            <p className="text-dark-300">Welcome back! Here's your overview.</p>
+            <p className="text-dark-300">Care assessments in, proposal-ready contracts out.</p>
           </div>
 
           <div className="grid grid-cols-4 gap-4 mb-8">
             {[
-              { label: 'Total Visits', value: stats.totalVisits, icon: Calendar, color: 'primary' },
-              { label: 'Pending Review', value: stats.pendingReview, icon: AlertCircle, color: 'orange' },
+              { label: 'Total Assessments', value: stats.totalVisits, icon: Calendar, color: 'primary' },
+              { label: 'Pending Proposals', value: stats.pendingReview, icon: AlertCircle, color: 'orange' },
               { label: 'Total Clients', value: stats.totalClients, icon: Users, color: 'green' },
-              { label: 'Hours This Week', value: stats.hoursThisWeek, icon: Clock, color: 'cyan' },
+              { label: 'Assessments This Week', value: stats.hoursThisWeek, icon: Clock, color: 'cyan' },
             ].map((stat, i) => (
               <div key={i} className="card p-5">
                 <div className="flex items-center gap-3 mb-3">
@@ -94,7 +94,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-3 gap-6">
             <div className="col-span-2 card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-white">Recent Visits</h2>
+                <h2 className="text-lg font-semibold text-white">Recent Assessments</h2>
                 <button onClick={() => router.push('/visits')} className="text-primary-400 text-sm hover:text-primary-300 flex items-center gap-1">
                   View all <ChevronRight className="w-4 h-4" />
                 </button>
@@ -104,7 +104,7 @@ export default function DashboardPage() {
                   <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto" />
                 </div>
               ) : recentVisits.length === 0 ? (
-                <div className="text-center py-8 text-dark-400">No visits yet</div>
+                <div className="text-center py-8 text-dark-400">No assessments yet</div>
               ) : (
                 <div className="space-y-3">
                   {recentVisits.map((visit) => (
@@ -129,9 +129,9 @@ export default function DashboardPage() {
               <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 {[
-                  { label: 'New Visit', desc: 'Create a new visit', icon: Calendar, href: '/visits/new', color: 'primary' },
+                  { label: 'New Assessment', desc: 'Start a new intake/visit', icon: Calendar, href: '/visits/new', color: 'primary' },
                   { label: 'Add Client', desc: 'Register new client', icon: Users, href: '/clients', color: 'green' },
-                  { label: 'Export Report', desc: 'Download reports', icon: TrendingUp, href: '/reports', color: 'cyan' },
+                  { label: 'Export Proposals', desc: 'Download contracts/PDFs', icon: TrendingUp, href: '/reports', color: 'cyan' },
                 ].map((action, i) => (
                   <button key={i} onClick={() => router.push(action.href)} className="w-full p-4 bg-dark-700/50 hover:bg-dark-700 rounded-xl text-left transition group">
                     <div className="flex items-center gap-3">

@@ -1,15 +1,16 @@
-# Homecare AI MVP
+# Homecare AI (AI Voice Contractor)
 
-An AI-powered voice analyzer for in-home healthcare agencies that processes caregiver-client conversations to generate billable hours and service documentation.
+An AI-powered care assessment engine for in-home healthcare agencies that turns intake/visit conversations (audio or transcripts) into **proposal-ready service contracts**—so agencies can send accurate contracts and pricing faster.
 
 ## Features
 
-- **Audio Upload & Storage**: Secure audio file storage with MinIO (S3-compatible)
-- **Speech-to-Text**: Transcription with timestamps using faster-whisper
-- **Speaker Diarization**: Identify caregiver vs client using pyannote.audio
-- **Billable Hours Engine**: Rules-based extraction of billable time blocks
-- **Document Generation**: Auto-generate visit notes and service contracts
-- **Admin Review UI**: Web interface for reviewing and approving documentation
+- **Care Assessment → Contract Generation (Primary)**: Extract care needs and service details and generate a **proposal-ready service contract**
+- **Contract Templates**: Generate contract documents from templates (`templates/contracts/`)
+- **Admin Review UI**: Review/edit/approve contracts and supporting artifacts in the web app
+- **Audio Upload & Storage**: Store recordings in MinIO (S3-compatible)
+- **Speech-to-Text**: Timestamped transcription (OpenAI Whisper API or local faster-whisper)
+- **Speaker Diarization (Optional)**: Identify who spoke when (pyannote.audio), can be skipped for speed
+- **Supporting Outputs**: Rules-based billable blocks and AI-generated visit notes
 
 ## Tech Stack
 
@@ -59,7 +60,15 @@ An AI-powered voice analyzer for in-home healthcare agencies that processes care
    - `POST /pipeline/visits/{visit_id}/note`
    - `POST /pipeline/visits/{visit_id}/contract`
 6. **Review**: Use the admin UI to review and approve
-7. **Export**: Download timesheets, notes, and contracts
+7. **Export**: Download the contract/proposal and supporting exports (PDF/CSV)
+
+## Contract-First Workflow (Recommended)
+
+1. Create a client and an assessment visit (intake call).
+2. Upload audio (or import a transcript).
+3. Run the pipeline through contract generation.
+4. Review/edit the generated contract details.
+5. Export the contract PDF and send as a proposal.
 
 ## Project Structure
 

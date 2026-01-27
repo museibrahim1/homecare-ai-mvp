@@ -22,7 +22,7 @@ import { useAuth } from '@/lib/auth';
 // Main navigation items grouped by category
 const mainNavItems = [
   { href: '/', label: 'Dashboard', icon: Home, description: 'Overview & stats' },
-  { href: '/visits', label: 'Visits', icon: Calendar, description: 'Care visits' },
+  { href: '/visits', label: 'Assessments', icon: Calendar, description: 'Intakes & visits' },
   { href: '/clients', label: 'Clients', icon: Users, description: 'Client records' },
 ];
 
@@ -97,7 +97,7 @@ export default function Sidebar() {
           </div>
           <div>
             <span className="text-xl font-bold text-white block">Homecare AI</span>
-            <span className="text-xs text-dark-400">Care Management</span>
+            <span className="text-xs text-dark-400">Contracts & proposals</span>
           </div>
         </Link>
       </div>
