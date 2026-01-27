@@ -21,6 +21,7 @@ from app.routers import (
     caregivers,
     business_auth,
     admin,
+    reports,
     # calls,  # Twilio integration disabled for MVP - re-enable when needed
 )
 
@@ -54,6 +55,7 @@ app.include_router(billing.router, prefix="/visits", tags=["Billing"])
 app.include_router(notes.router, prefix="/visits", tags=["Notes"])
 app.include_router(contracts.router, prefix="/visits", tags=["Contracts"])
 app.include_router(exports.router, prefix="/exports", tags=["Exports"])
+app.include_router(reports.router, prefix="/reports", tags=["Reports"])
 app.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
 app.include_router(agency.router, prefix="/agency", tags=["Agency Settings"])
 app.include_router(template_parser.router, prefix="/template", tags=["Template Parser"])
