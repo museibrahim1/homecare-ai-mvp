@@ -3,6 +3,8 @@ LLM Service for AI-powered text generation.
 
 Supports both OpenAI (GPT) and Anthropic (Claude) models.
 Enhanced with homecare/care assessment domain knowledge.
+
+Business rules can be customized in llm_rules.py
 """
 
 import os
@@ -10,6 +12,22 @@ import json
 import logging
 from typing import Dict, Any, List, Optional
 from enum import Enum
+
+# Import customizable rules
+try:
+    from libs.llm_rules import (
+        get_rules_for_prompt,
+        HOURLY_RATES,
+        SERVICE_CATEGORIES,
+        HIGH_CARE_INDICATORS,
+        CONTRACT_RULES,
+        NOTE_RULES,
+        AGENCY_INFO,
+        EXCLUDED_SERVICES,
+    )
+    RULES_LOADED = True
+except ImportError:
+    RULES_LOADED = False
 
 logger = logging.getLogger(__name__)
 
@@ -1672,6 +1690,10 @@ Return ONLY valid JSON with ALL fields populated based on transcript analysis:
 
 CRITICAL: Only include services from the 10 valid home care categories. 
 Ignore any discussion of services outside home care scope."""
+
+        # Inject custom business rules if loaded
+        if RULES_LOADED:
+            system_prompt += "\n\n" + get_rules_for_prompt()
 
         user_prompt = f"""## CLIENT
 Name: {client_info.get('full_name', 'Unknown')}
