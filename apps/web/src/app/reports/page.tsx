@@ -567,7 +567,7 @@ export default function ReportsPage() {
 
           {/* Report Types - Clickable Cards */}
           <h2 className="text-xl font-semibold text-white mb-4">Generate Reports</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mb-8">
             {reportTypes.map((report) => {
               const isExpanded = expandedReport === report.id;
               return (
@@ -624,6 +624,64 @@ export default function ReportsPage() {
                 </div>
               );
             })}
+          </div>
+
+          {/* Weekly Activity Chart */}
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Weekly Activity</h3>
+              <select className="bg-dark-700 border border-dark-600 rounded-lg px-3 py-1.5 text-sm text-white">
+                <option>Last 7 days</option>
+                <option>Last 14 days</option>
+                <option>Last 30 days</option>
+              </select>
+            </div>
+            <div className="h-64 flex items-end justify-between gap-2 px-4">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
+                const heights = [65, 45, 80, 55, 90, 30, 40];
+                return (
+                  <div key={day} className="flex-1 flex flex-col items-center gap-2">
+                    <div className="w-full relative">
+                      <div 
+                        className="w-full bg-gradient-to-t from-primary-500/80 to-primary-400/40 rounded-t-lg transition-all duration-500 hover:from-primary-400/90 hover:to-primary-300/50"
+                        style={{ height: `${heights[i] * 2}px` }}
+                      />
+                    </div>
+                    <span className="text-dark-400 text-xs">{day}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-dark-700">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-primary-500 rounded" />
+                <span className="text-dark-400 text-sm">Assessments Completed</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity Feed */}
+          <div className="card p-6 mt-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+            <div className="space-y-3">
+              {[
+                { action: 'Assessment completed', client: 'New Client', time: '2 hours ago', icon: FileText, color: 'primary' },
+                { action: 'Contract generated', client: 'Demo Client', time: '5 hours ago', icon: FileText, color: 'green' },
+                { action: 'Billing report exported', client: 'System', time: '1 day ago', icon: Download, color: 'orange' },
+                { action: 'New client added', client: 'John Smith', time: '2 days ago', icon: Users, color: 'cyan' },
+              ].map((activity, i) => (
+                <div key={i} className="flex items-center gap-4 p-3 bg-dark-700/30 rounded-lg">
+                  <div className={`w-10 h-10 bg-accent-${activity.color}/20 rounded-xl flex items-center justify-center`}>
+                    <activity.icon className={`w-5 h-5 text-accent-${activity.color}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white text-sm">{activity.action}</p>
+                    <p className="text-dark-400 text-xs">{activity.client}</p>
+                  </div>
+                  <span className="text-dark-500 text-xs">{activity.time}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>
