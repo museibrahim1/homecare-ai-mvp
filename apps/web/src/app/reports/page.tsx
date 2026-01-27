@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   BarChart3, 
@@ -9,20 +9,75 @@ import {
   DollarSign,
   Calendar,
   Download,
-  FileText
+  FileText,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
 export default function ReportsPage() {
   const router = useRouter();
   const { token, isLoading: authLoading } = useAuth();
+  const [downloadingReport, setDownloadingReport] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !token) {
       router.push('/login');
     }
   }, [token, authLoading, router]);
+
+  const handleDownloadReport = async (reportType: string) => {
+    if (!token) return;
+    
+    setDownloadingReport(reportType);
+    
+    try {
+      // Map report types to API endpoints
+      const endpointMap: Record<string, string> = {
+        'Weekly Timesheet': '/exports/reports/timesheet',
+        'Monthly Summary': '/exports/reports/monthly-summary',
+        'Billing Report': '/exports/reports/billing',
+        'Client Activity': '/exports/reports/client-activity',
+      };
+      
+      const endpoint = endpointMap[reportType];
+      if (!endpoint) {
+        alert('Report type not available yet');
+        return;
+      }
+      
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (!response.ok) {
+        // Check if it's a "not implemented" error
+        if (response.status === 404) {
+          alert(`${reportType} report is coming soon!`);
+          return;
+        }
+        throw new Error('Failed to generate report');
+      }
+      
+      // Download the file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${reportType.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      console.error('Download failed:', err);
+      alert(`${reportType} report is coming soon!`);
+    } finally {
+      setDownloadingReport(null);
+    }
+  };
 
   if (authLoading) {
     return (
@@ -124,7 +179,11 @@ export default function ReportsPage() {
           <h2 className="text-xl font-semibold text-white mb-4">Generate Reports</h2>
           <div className="grid grid-cols-2 gap-4 mb-8">
             {reportTypes.map((report, index) => (
-              <div key={index} className="card card-hover p-6 cursor-pointer group">
+              <div 
+                key={index} 
+                className="card card-hover p-6 cursor-pointer group"
+                onClick={() => handleDownloadReport(report.title)}
+              >
                 <div className="flex items-start gap-4">
                   <div className={`w-12 h-12 bg-accent-${report.color}/20 rounded-xl flex items-center justify-center`}>
                     <report.icon className={`w-6 h-6 text-accent-${report.color}`} />
@@ -133,8 +192,15 @@ export default function ReportsPage() {
                     <h3 className="font-semibold text-white mb-1">{report.title}</h3>
                     <p className="text-dark-400 text-sm">{report.description}</p>
                   </div>
-                  <button className="btn-secondary py-2 px-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Download className="w-4 h-4" />
+                  <button 
+                    className="btn-secondary py-2 px-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                    disabled={downloadingReport === report.title}
+                  >
+                    {downloadingReport === report.title ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
