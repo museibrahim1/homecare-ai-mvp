@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -33,10 +34,24 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS middleware
+# CORS middleware - allow frontend origins
+# Get additional origins from environment (comma-separated)
+cors_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    # Railway deployments
+    "https://web-production-11611.up.railway.app",
+    "https://helcarai.up.railway.app",  # Custom domain placeholder
+]
+
+# Add any custom origins from environment
+extra_origins = os.getenv("CORS_ORIGINS", "")
+if extra_origins:
+    cors_origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -63,6 +78,73 @@ app.include_router(caregivers.router, prefix="/caregivers", tags=["Caregivers"])
 app.include_router(business_auth.router, prefix="/auth/business", tags=["Business Auth"])
 app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 # app.include_router(calls.router, prefix="/calls", tags=["Calls"])  # Twilio disabled for MVP
+
+
+@app.on_event("startup")
+async def seed_database():
+    """Create default admin user and test data if database is empty."""
+    from app.db.session import SessionLocal
+    from app.models.user import User, UserRole
+    from app.models.client import Client
+    from app.models.caregiver import Caregiver
+    from app.core.security import get_password_hash
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    db = SessionLocal()
+    
+    try:
+        # Check if any users exist
+        user_count = db.query(User).count()
+        if user_count == 0:
+            logger.info("No users found, seeding database with admin user...")
+            
+            # Create admin user
+            admin = User(
+                email="admin@homecare.ai",
+                hashed_password=get_password_hash("admin123"),
+                full_name="Admin User",
+                role=UserRole.admin,
+                is_active=True,
+            )
+            db.add(admin)
+            db.commit()
+            logger.info("Admin user created: admin@homecare.ai / admin123")
+            
+            # Create sample client
+            client = Client(
+                full_name="Jane Smith",
+                date_of_birth="1945-03-15",
+                address="123 Oak Street, Lincoln, NE 68502",
+                phone="402-555-0101",
+                emergency_contact_name="John Smith",
+                emergency_contact_phone="402-555-0102",
+                notes="Requires assistance with daily activities.",
+            )
+            db.add(client)
+            
+            # Create sample caregiver
+            caregiver = Caregiver(
+                full_name="Sarah Johnson",
+                email="sarah@homecare.ai",
+                phone="402-555-0201",
+                certifications=["CNA", "CPR", "First Aid"],
+                hourly_rate=25.00,
+                status="active",
+                rating=4.8,
+            )
+            db.add(caregiver)
+            
+            db.commit()
+            logger.info("Sample client and caregiver created")
+        else:
+            logger.info(f"Database already has {user_count} users, skipping seed")
+            
+    except Exception as e:
+        logger.error(f"Error seeding database: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
 
 @app.get("/", tags=["Health"])
