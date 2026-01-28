@@ -46,7 +46,7 @@ class TestClientCreate:
             "/clients",
             json={"full_name": "Test Client"},
         )
-        assert response.status_code == 403
+        assert response.status_code == 401  # No auth = Unauthorized
 
 
 class TestClientList:

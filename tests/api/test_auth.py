@@ -37,4 +37,4 @@ def test_get_me(client: TestClient, auth_headers):
 def test_get_me_unauthorized(client: TestClient):
     """Test getting current user without auth."""
     response = client.get("/auth/me")
-    assert response.status_code == 403  # No authorization header
+    assert response.status_code == 401  # No authorization header = Unauthorized

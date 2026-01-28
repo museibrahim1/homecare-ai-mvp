@@ -100,7 +100,7 @@ class TestVisitCreate:
                 "caregiver_id": test_caregiver["id"],
             },
         )
-        assert response.status_code == 403
+        assert response.status_code == 401  # No auth = Unauthorized
 
 
 class TestVisitList:
