@@ -88,6 +88,37 @@ const STATUS_LABELS: Record<string, string> = {
 export default function AdminApprovalsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  // Check if user is platform admin
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+      try {
+        const response = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const user = await response.json();
+          // Only platform admins (email ending in @homecare.ai) can access
+          if (user.role === 'admin' && user.email.endsWith('@homecare.ai')) {
+            setIsAuthorized(true);
+          } else {
+            router.push('/visits');
+          }
+        } else {
+          router.push('/login');
+        }
+      } catch {
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [selectedBusiness, setSelectedBusiness] = useState<BusinessDetail | null>(null);
@@ -231,9 +262,29 @@ export default function AdminApprovalsPage() {
     fetchBusinesses();
   }, [filter]);
 
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-dark-900 p-8">
       <div className="max-w-7xl mx-auto">
+        {/* HIPAA Notice */}
+        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-blue-400 font-medium">Platform Admin Access</p>
+            <p className="text-blue-300/70 text-sm mt-1">
+              This dashboard shows business registration data only. Client/patient data is not accessible 
+              from this view in compliance with HIPAA regulations. Each business manages their own client data.
+            </p>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>

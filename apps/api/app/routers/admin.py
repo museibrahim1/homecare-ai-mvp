@@ -26,17 +26,33 @@ from app.schemas.business import (
     BusinessUserResponse
 )
 from app.services.document_storage import get_document_service
-from app.services.email import get_email_service
+from app.services.email import email_service
+from app.models.user import UserRole
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
-def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    """Ensure current user is an admin."""
-    # For now, allow any authenticated user to be admin
-    # In production, check user.role == "admin"
+def require_platform_admin(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Ensure current user is a PLATFORM admin (not a business admin).
+    Platform admins can approve businesses but CANNOT see client data (HIPAA).
+    """
+    if current_user.role != UserRole.admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Platform admin access required"
+        )
+    # Check if this is a platform admin (not associated with a business)
+    # Platform admins have email ending in @homecare.ai or are in admin list
+    if not current_user.email.endswith("@homecare.ai"):
+        # Could also check against a list of platform admin emails in settings
+        logger.warning(f"Non-platform user {current_user.email} attempted admin access")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Platform admin access required"
+        )
     return current_user
 
 
@@ -52,7 +68,7 @@ async def list_all_businesses(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     List all businesses with optional filtering.
@@ -101,7 +117,7 @@ async def list_all_businesses(
 @router.get("/businesses/pending", response_model=List[AdminBusinessListItem])
 async def list_pending_businesses(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     List businesses pending approval.
@@ -136,7 +152,7 @@ async def list_pending_businesses(
 async def get_business_detail(
     business_id: UUID,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     Get detailed business information for review.
@@ -216,7 +232,7 @@ async def approve_business(
     business_id: UUID,
     request: AdminApprovalRequest,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     Approve or reject a business registration.
@@ -252,11 +268,11 @@ async def approve_business(
         
         # Send approval email
         if owner:
-            email_service = get_email_service()
-            email_service.send_approval_notification(
-                to_email=owner.email,
+            login_url = "https://web-production-11611.up.railway.app/login"
+            email_service.send_business_approved(
+                business_email=owner.email,
                 business_name=business.name,
-                owner_name=owner.full_name,
+                login_url=login_url,
             )
         
     else:
@@ -272,12 +288,10 @@ async def approve_business(
         
         # Send rejection email
         if owner:
-            email_service = get_email_service()
-            email_service.send_rejection_notification(
-                to_email=owner.email,
+            email_service.send_business_rejected(
+                business_email=owner.email,
                 business_name=business.name,
-                owner_name=owner.full_name,
-                rejection_reason=request.rejection_reason,
+                reason=request.rejection_reason,
             )
     
     db.commit()
@@ -294,7 +308,7 @@ async def suspend_business(
     business_id: UUID,
     reason: str,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     Suspend an approved business.
@@ -320,7 +334,7 @@ async def suspend_business(
 async def reactivate_business(
     business_id: UUID,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     Reactivate a suspended business.
@@ -351,7 +365,7 @@ async def reactivate_business(
 async def get_document_download_url(
     document_id: UUID,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     Get a signed URL to download a document.
@@ -377,7 +391,7 @@ async def verify_document(
     document_id: UUID,
     notes: Optional[str] = None,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     Mark a document as verified.
@@ -405,7 +419,7 @@ async def verify_document(
 @router.get("/stats")
 async def get_admin_stats(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_platform_admin),
 ):
     """
     Get admin dashboard statistics.
