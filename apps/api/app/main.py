@@ -174,23 +174,29 @@ async def seed_database():
             caregivers = [
                 Caregiver(
                     full_name="Sarah Johnson",
+                    preferred_name="Sarah",
                     email="sarah@homecare.ai",
                     phone="402-555-0301",
                     certifications=["CNA", "CPR", "First Aid"],
-                    hourly_rate=25.00,
+                    certification_level="CNA",
                     status="active",
                     rating=4.8,
-                    bio="Experienced caregiver with 5 years in home health.",
+                    years_experience=5,
+                    can_handle_high_care=True,
+                    notes="Experienced caregiver with 5 years in home health.",
                 ),
                 Caregiver(
                     full_name="Michael Chen",
+                    preferred_name="Mike",
                     email="michael@homecare.ai",
                     phone="402-555-0302",
                     certifications=["RN", "CPR", "Wound Care"],
-                    hourly_rate=35.00,
+                    certification_level="RN",
                     status="active",
                     rating=4.9,
-                    bio="Registered nurse specializing in geriatric care.",
+                    years_experience=8,
+                    can_handle_high_care=True,
+                    notes="Registered nurse specializing in geriatric care.",
                 ),
             ]
             for caregiver in caregivers:
