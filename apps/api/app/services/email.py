@@ -200,3 +200,8 @@ class EmailService:
 
 # Singleton instance
 email_service = EmailService()
+
+
+def get_email_service() -> EmailService:
+    """Get the email service singleton."""
+    return email_service
