@@ -19,7 +19,8 @@ import {
   CreditCard,
   AlertTriangle,
   Ticket,
-  Activity
+  Activity,
+  DollarSign
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -43,7 +44,8 @@ const systemNavItems = [
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: BarChart3, description: 'Platform overview' },
   { href: '/admin/approvals', label: 'Approvals', icon: Building2, description: 'Review applications' },
-  { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard, description: 'Billing & plans' },
+  { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard, description: 'Active subs' },
+  { href: '/admin/billing', label: 'Stripe Config', icon: DollarSign, description: 'Price IDs' },
   { href: '/admin/compliance', label: 'Compliance', icon: AlertTriangle, description: 'License tracking' },
   { href: '/admin/support', label: 'Support', icon: Ticket, description: 'Help tickets' },
   { href: '/admin/audit', label: 'Audit Logs', icon: FileText, description: 'Activity tracking' },

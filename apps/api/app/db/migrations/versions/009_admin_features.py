@@ -27,6 +27,12 @@ def upgrade() -> None:
         sa.Column('monthly_price', sa.Numeric(10, 2), default=0),
         sa.Column('annual_price', sa.Numeric(10, 2), default=0),
         sa.Column('setup_fee', sa.Numeric(10, 2), default=0),
+        # Stripe integration
+        sa.Column('stripe_product_id', sa.String(255)),
+        sa.Column('stripe_price_id_monthly', sa.String(255)),
+        sa.Column('stripe_price_id_annual', sa.String(255)),
+        sa.Column('stripe_price_id_setup', sa.String(255)),
+        # Limits
         sa.Column('max_users', sa.Integer, default=1),
         sa.Column('max_clients', sa.Integer, default=10),
         sa.Column('max_visits_per_month', sa.Integer, default=50),

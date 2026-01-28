@@ -24,6 +24,7 @@ from app.routers import (
     admin,
     admin_platform,
     reports,
+    stripe_billing,
     # calls,  # Twilio integration disabled for MVP - re-enable when needed
 )
 
@@ -79,6 +80,7 @@ app.include_router(caregivers.router, prefix="/caregivers", tags=["Caregivers"])
 app.include_router(business_auth.router, prefix="/auth/business", tags=["Business Auth"])
 app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 app.include_router(admin_platform.router, prefix="/platform", tags=["Platform Admin"])
+app.include_router(stripe_billing.router, prefix="/billing", tags=["Billing"])
 # app.include_router(calls.router, prefix="/calls", tags=["Calls"])  # Twilio disabled for MVP
 
 

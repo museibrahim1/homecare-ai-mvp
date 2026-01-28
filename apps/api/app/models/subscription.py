@@ -43,6 +43,17 @@ class Plan(Base):
     annual_price = Column(Numeric(10, 2), default=0)  # Annual = 10 months (2 months free)
     setup_fee = Column(Numeric(10, 2), default=0)  # One-time setup fee
     
+    # Stripe Integration
+    # Product ID (represents the plan in Stripe)
+    stripe_product_id = Column(String(255))  # prod_xxxxx
+    
+    # Price IDs for recurring subscription
+    stripe_price_id_monthly = Column(String(255))  # price_xxxxx (monthly recurring)
+    stripe_price_id_annual = Column(String(255))   # price_xxxxx (annual recurring)
+    
+    # Setup fee as one-time price
+    stripe_price_id_setup = Column(String(255))    # price_xxxxx (one-time setup fee)
+    
     # Limits
     max_users = Column(Integer, default=1)
     max_clients = Column(Integer, default=10)
