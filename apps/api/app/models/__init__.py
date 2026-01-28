@@ -9,6 +9,8 @@ from app.models.note import Note
 from app.models.contract import Contract
 from app.models.audit_log import AuditLog
 from app.models.call import Call
+from app.models.subscription import Plan, Subscription, Invoice
+from app.models.support_ticket import SupportTicket, TicketResponse
 
 __all__ = [
     "User",
@@ -22,4 +24,9 @@ __all__ = [
     "Contract",
     "AuditLog",
     "Call",
+    "Plan",
+    "Subscription",
+    "Invoice",
+    "SupportTicket",
+    "TicketResponse",
 ]

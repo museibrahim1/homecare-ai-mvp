@@ -105,6 +105,7 @@ class Business(Base, TimestampMixin):
     # Relationships
     users = relationship("BusinessUser", back_populates="business", cascade="all, delete-orphan")
     documents = relationship("BusinessDocument", back_populates="business", cascade="all, delete-orphan")
+    subscription = relationship("Subscription", back_populates="business", uselist=False)
     
     def __repr__(self):
         return f"<Business {self.name} ({self.verification_status.value})>"

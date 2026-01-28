@@ -15,7 +15,11 @@ import {
   FileText,
   ChevronRight,
   Shield,
-  Building2
+  Building2,
+  CreditCard,
+  AlertTriangle,
+  Ticket,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -37,7 +41,14 @@ const systemNavItems = [
 ];
 
 const adminNavItems = [
-  { href: '/admin/businesses', label: 'Business Approvals', icon: Building2, description: 'Review applications' },
+  { href: '/admin', label: 'Dashboard', icon: BarChart3, description: 'Platform overview' },
+  { href: '/admin/approvals', label: 'Approvals', icon: Building2, description: 'Review applications' },
+  { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard, description: 'Billing & plans' },
+  { href: '/admin/compliance', label: 'Compliance', icon: AlertTriangle, description: 'License tracking' },
+  { href: '/admin/support', label: 'Support', icon: Ticket, description: 'Help tickets' },
+  { href: '/admin/audit', label: 'Audit Logs', icon: FileText, description: 'Activity tracking' },
+  { href: '/admin/users', label: 'Platform Users', icon: UserCheck, description: 'Admin accounts' },
+  { href: '/admin/system', label: 'System Health', icon: Activity, description: 'Infrastructure' },
 ];
 
 export default function Sidebar() {
