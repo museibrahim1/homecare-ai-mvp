@@ -1,7 +1,7 @@
 """Add admin features: subscriptions, support tickets
 
 Revision ID: 009
-Revises: 008
+Revises: 008_client_extended_columns
 Create Date: 2025-01-25
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers
 revision = '009'
-down_revision = '008'
+down_revision = '008_client_extended_columns'
 branch_labels = None
 depends_on = None
 

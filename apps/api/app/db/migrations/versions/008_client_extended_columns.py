@@ -18,69 +18,72 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Add missing columns to clients table
+    # This migration may run against databases that already have some of these
+    # columns (e.g., created via an older init.sql). Use Postgres IF NOT EXISTS
+    # so the migration is safe to re-run.
+
+    def add_col(sql: str) -> None:
+        op.execute(sa.text(f"ALTER TABLE clients ADD COLUMN IF NOT EXISTS {sql}"))
+
     # Basic Information
-    op.add_column('clients', sa.Column('preferred_name', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('gender', sa.String(20), nullable=True))
-    
+    add_col("preferred_name VARCHAR(100)")
+    add_col("gender VARCHAR(20)")
+
     # Contact Information
-    op.add_column('clients', sa.Column('phone_secondary', sa.String(20), nullable=True))
-    op.add_column('clients', sa.Column('email', sa.String(255), nullable=True))
-    op.add_column('clients', sa.Column('city', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('state', sa.String(50), nullable=True))
-    op.add_column('clients', sa.Column('zip_code', sa.String(20), nullable=True))
-    
+    add_col("phone_secondary VARCHAR(20)")
+    add_col("email VARCHAR(255)")
+    add_col("city VARCHAR(100)")
+    add_col("state VARCHAR(50)")
+    add_col("zip_code VARCHAR(20)")
+
     # Emergency Contacts
-    op.add_column('clients', sa.Column('emergency_contact_relationship', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('emergency_contact_2_name', sa.String(255), nullable=True))
-    op.add_column('clients', sa.Column('emergency_contact_2_phone', sa.String(20), nullable=True))
-    op.add_column('clients', sa.Column('emergency_contact_2_relationship', sa.String(100), nullable=True))
-    
+    add_col("emergency_contact_relationship VARCHAR(100)")
+    add_col("emergency_contact_2_name VARCHAR(255)")
+    add_col("emergency_contact_2_phone VARCHAR(20)")
+    add_col("emergency_contact_2_relationship VARCHAR(100)")
+
     # Medical Information
-    op.add_column('clients', sa.Column('primary_diagnosis', sa.String(255), nullable=True))
-    op.add_column('clients', sa.Column('secondary_diagnoses', sa.Text(), nullable=True))
-    op.add_column('clients', sa.Column('allergies', sa.Text(), nullable=True))
-    op.add_column('clients', sa.Column('medications', sa.Text(), nullable=True))
-    op.add_column('clients', sa.Column('physician_name', sa.String(255), nullable=True))
-    op.add_column('clients', sa.Column('physician_phone', sa.String(20), nullable=True))
-    
+    add_col("primary_diagnosis VARCHAR(255)")
+    add_col("secondary_diagnoses TEXT")
+    add_col("allergies TEXT")
+    add_col("medications TEXT")
+    add_col("physician_name VARCHAR(255)")
+    add_col("physician_phone VARCHAR(20)")
+
     # Care Information
-    op.add_column('clients', sa.Column('mobility_status', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('cognitive_status', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('living_situation', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('care_level', sa.String(50), nullable=True))
-    op.add_column('clients', sa.Column('special_requirements', sa.Text(), nullable=True))
-    
+    add_col("mobility_status VARCHAR(100)")
+    add_col("cognitive_status VARCHAR(100)")
+    add_col("living_situation VARCHAR(100)")
+    add_col("care_level VARCHAR(50)")
+    add_col("special_requirements TEXT")
+
     # Insurance & Billing
-    op.add_column('clients', sa.Column('insurance_provider', sa.String(255), nullable=True))
-    op.add_column('clients', sa.Column('insurance_id', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('medicaid_id', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('medicare_id', sa.String(100), nullable=True))
-    op.add_column('clients', sa.Column('billing_address', sa.Text(), nullable=True))
-    
+    add_col("insurance_provider VARCHAR(255)")
+    add_col("insurance_id VARCHAR(100)")
+    add_col("medicaid_id VARCHAR(100)")
+    add_col("medicare_id VARCHAR(100)")
+    add_col("billing_address TEXT")
+
     # Scheduling Preferences
-    op.add_column('clients', sa.Column('preferred_days', sa.String(255), nullable=True))
-    op.add_column('clients', sa.Column('preferred_times', sa.String(255), nullable=True))
-    
+    add_col("preferred_days VARCHAR(255)")
+    add_col("preferred_times VARCHAR(255)")
+
     # Status
-    op.add_column('clients', sa.Column('status', sa.String(50), nullable=True, server_default='active'))
-    op.add_column('clients', sa.Column('intake_date', sa.Date(), nullable=True))
-    op.add_column('clients', sa.Column('discharge_date', sa.Date(), nullable=True))
-    
-    # Notes (already exists in some versions, use try/except)
-    try:
-        op.add_column('clients', sa.Column('notes', sa.Text(), nullable=True))
-    except Exception:
-        pass  # Column may already exist
-    
+    add_col("status VARCHAR(50) DEFAULT 'active'")
+    add_col("intake_date DATE")
+    add_col("discharge_date DATE")
+
+    # Notes
+    add_col("notes TEXT")
+
     # External System Integration
-    op.add_column('clients', sa.Column('external_id', sa.String(255), nullable=True))
-    op.add_column('clients', sa.Column('external_source', sa.String(100), nullable=True))
-    
-    # Create indexes
-    op.create_index('ix_clients_external', 'clients', ['external_source', 'external_id'])
-    op.create_index('ix_clients_email', 'clients', ['email'])
-    op.create_index('ix_clients_status', 'clients', ['status'])
+    add_col("external_id VARCHAR(255)")
+    add_col("external_source VARCHAR(100)")
+
+    # Indexes
+    op.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_clients_external ON clients (external_source, external_id)"))
+    op.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_clients_email ON clients (email)"))
+    op.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_clients_status ON clients (status)"))
 
 
 def downgrade() -> None:

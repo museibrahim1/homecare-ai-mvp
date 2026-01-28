@@ -35,8 +35,11 @@ def db_engine():
         # PostgreSQL for CI - use psycopg driver
         engine = create_engine(TEST_DATABASE_URL)
     
+    # Drop all tables first to ensure clean state
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield engine
+    # Clean up after test
     Base.metadata.drop_all(bind=engine)
 
 
