@@ -2,13 +2,16 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'apps', 'api'))
+
+# Set env var to disable seeding in tests BEFORE importing app
+os.environ["TESTING"] = "1"
 
 from app.main import app
 from app.db.base import Base
@@ -35,8 +38,14 @@ def db_engine():
         # PostgreSQL for CI - use psycopg driver
         engine = create_engine(TEST_DATABASE_URL)
     
-    # Drop all tables first to ensure clean state
-    Base.metadata.drop_all(bind=engine)
+    # Drop all tables first to ensure clean state (with cascade for foreign keys)
+    with engine.connect() as conn:
+        # Disable foreign key checks and truncate in PostgreSQL
+        if not TEST_DATABASE_URL.startswith("sqlite"):
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
+            conn.commit()
+    
     Base.metadata.create_all(bind=engine)
     yield engine
     # Clean up after test

@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 
 from app.core.security import get_password_hash
 from app.db.session import SessionLocal
+from app.models.business import Business  # noqa: F401 (ensure mapper registry is fully configured)
 from app.models.client import Client
 from app.models.user import User, UserRole
 

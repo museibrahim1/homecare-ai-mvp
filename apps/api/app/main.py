@@ -41,6 +41,9 @@ app = FastAPI(
 cors_origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    # Local dev (when 3000 is occupied)
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
     # Railway deployments
     "https://web-production-11611.up.railway.app",
     "https://helcarai.up.railway.app",  # Custom domain placeholder
@@ -87,6 +90,10 @@ app.include_router(stripe_billing.router, prefix="/billing", tags=["Billing"])
 @app.on_event("startup")
 async def seed_database():
     """Create default admin user and test data if database is empty."""
+    # Skip seeding during tests
+    if os.getenv("TESTING"):
+        return
+    
     from app.db.session import SessionLocal
     from app.models.user import User, UserRole
     from app.models.client import Client
