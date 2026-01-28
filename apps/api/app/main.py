@@ -88,18 +88,17 @@ async def seed_database():
     from app.models.client import Client
     from app.models.caregiver import Caregiver
     from app.core.security import get_password_hash
+    from datetime import date
     import logging
     
     logger = logging.getLogger(__name__)
     db = SessionLocal()
     
     try:
-        # Check if any users exist
-        user_count = db.query(User).count()
-        if user_count == 0:
-            logger.info("No users found, seeding database with admin user...")
-            
-            # Create admin user
+        # Check if admin user exists
+        admin_exists = db.query(User).filter(User.email == "admin@homecare.ai").first()
+        if not admin_exists:
+            logger.info("Creating admin user...")
             admin = User(
                 email="admin@homecare.ai",
                 hashed_password=get_password_hash("admin123"),
@@ -110,35 +109,96 @@ async def seed_database():
             db.add(admin)
             db.commit()
             logger.info("Admin user created: admin@homecare.ai / admin123")
+        
+        # Check if any clients exist
+        client_count = db.query(Client).count()
+        if client_count == 0:
+            logger.info("No clients found, creating sample clients...")
             
-            # Create sample client
-            client = Client(
-                full_name="Jane Smith",
-                date_of_birth="1945-03-15",
-                address="123 Oak Street, Lincoln, NE 68502",
-                phone="402-555-0101",
-                emergency_contact_name="John Smith",
-                emergency_contact_phone="402-555-0102",
-                notes="Requires assistance with daily activities.",
-            )
-            db.add(client)
-            
-            # Create sample caregiver
-            caregiver = Caregiver(
-                full_name="Sarah Johnson",
-                email="sarah@homecare.ai",
-                phone="402-555-0201",
-                certifications=["CNA", "CPR", "First Aid"],
-                hourly_rate=25.00,
-                status="active",
-                rating=4.8,
-            )
-            db.add(caregiver)
-            
+            clients = [
+                Client(
+                    full_name="Jane Smith",
+                    preferred_name="Jane",
+                    date_of_birth=date(1945, 3, 15),
+                    gender="Female",
+                    phone="402-555-0101",
+                    email="jane.smith@email.com",
+                    address="123 Oak Street",
+                    city="Lincoln",
+                    state="NE",
+                    zip_code="68502",
+                    emergency_contact_name="John Smith",
+                    emergency_contact_phone="402-555-0102",
+                    emergency_contact_relationship="Son",
+                    primary_diagnosis="Mild Dementia",
+                    mobility_status="Walker",
+                    cognitive_status="Mild impairment",
+                    living_situation="Alone",
+                    care_level="MODERATE",
+                    status="active",
+                    notes="Requires assistance with daily activities. Prefers morning visits.",
+                ),
+                Client(
+                    full_name="Robert Johnson",
+                    preferred_name="Bob",
+                    date_of_birth=date(1938, 7, 22),
+                    gender="Male",
+                    phone="402-555-0201",
+                    email="robert.j@email.com",
+                    address="456 Maple Avenue",
+                    city="Omaha",
+                    state="NE",
+                    zip_code="68104",
+                    emergency_contact_name="Mary Johnson",
+                    emergency_contact_phone="402-555-0202",
+                    emergency_contact_relationship="Wife",
+                    primary_diagnosis="Parkinson's Disease",
+                    mobility_status="Wheelchair",
+                    cognitive_status="Intact",
+                    living_situation="With spouse",
+                    care_level="HIGH",
+                    status="active",
+                    notes="Needs help with transfers. Enjoys conversation.",
+                ),
+            ]
+            for client in clients:
+                db.add(client)
             db.commit()
-            logger.info("Sample client and caregiver created")
-        else:
-            logger.info(f"Database already has {user_count} users, skipping seed")
+            logger.info(f"Created {len(clients)} sample clients")
+        
+        # Check if any caregivers exist
+        caregiver_count = db.query(Caregiver).count()
+        if caregiver_count == 0:
+            logger.info("No caregivers found, creating sample caregivers...")
+            
+            caregivers = [
+                Caregiver(
+                    full_name="Sarah Johnson",
+                    email="sarah@homecare.ai",
+                    phone="402-555-0301",
+                    certifications=["CNA", "CPR", "First Aid"],
+                    hourly_rate=25.00,
+                    status="active",
+                    rating=4.8,
+                    bio="Experienced caregiver with 5 years in home health.",
+                ),
+                Caregiver(
+                    full_name="Michael Chen",
+                    email="michael@homecare.ai",
+                    phone="402-555-0302",
+                    certifications=["RN", "CPR", "Wound Care"],
+                    hourly_rate=35.00,
+                    status="active",
+                    rating=4.9,
+                    bio="Registered nurse specializing in geriatric care.",
+                ),
+            ]
+            for caregiver in caregivers:
+                db.add(caregiver)
+            db.commit()
+            logger.info(f"Created {len(caregivers)} sample caregivers")
+            
+        logger.info("Database seeding complete")
             
     except Exception as e:
         logger.error(f"Error seeding database: {e}")
