@@ -294,17 +294,20 @@ async def list_plans(
     admin: User = Depends(require_platform_admin),
 ):
     """List all subscription plans."""
-    plans = db.query(Plan).filter(Plan.is_active == True).all()
+    plans = db.query(Plan).filter(Plan.is_active == True).order_by(Plan.monthly_price).all()
     return [
         {
             "id": str(p.id),
             "name": p.name,
             "tier": p.tier.value,
-            "monthly_price": float(p.monthly_price),
-            "annual_price": float(p.annual_price),
+            "monthly_price": float(p.monthly_price) if p.monthly_price else 0,
+            "annual_price": float(p.annual_price) if p.annual_price else 0,
+            "setup_fee": float(p.setup_fee) if p.setup_fee else 0,
             "max_users": p.max_users,
             "max_clients": p.max_clients,
             "max_visits_per_month": p.max_visits_per_month,
+            "is_contact_sales": p.is_contact_sales or False,
+            "features": p.features,
         }
         for p in plans
     ]

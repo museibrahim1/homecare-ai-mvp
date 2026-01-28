@@ -26,11 +26,13 @@ def upgrade() -> None:
         sa.Column('description', sa.Text),
         sa.Column('monthly_price', sa.Numeric(10, 2), default=0),
         sa.Column('annual_price', sa.Numeric(10, 2), default=0),
+        sa.Column('setup_fee', sa.Numeric(10, 2), default=0),
         sa.Column('max_users', sa.Integer, default=1),
         sa.Column('max_clients', sa.Integer, default=10),
         sa.Column('max_visits_per_month', sa.Integer, default=50),
         sa.Column('max_storage_gb', sa.Integer, default=1),
         sa.Column('features', sa.Text),
+        sa.Column('is_contact_sales', sa.Boolean, default=False),
         sa.Column('is_active', sa.Boolean, default=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
@@ -116,14 +118,16 @@ def upgrade() -> None:
     )
     op.create_index('ix_ticket_responses_ticket', 'ticket_responses', ['ticket_id'])
     
-    # Seed default plans
+    # Seed default plans - Business pricing model
     op.execute("""
-        INSERT INTO plans (id, name, tier, description, monthly_price, annual_price, max_users, max_clients, max_visits_per_month, max_storage_gb, is_active)
+        INSERT INTO plans (id, name, tier, description, monthly_price, annual_price, setup_fee, max_users, max_clients, max_visits_per_month, max_storage_gb, is_active, is_contact_sales, features)
         VALUES 
-        (gen_random_uuid(), 'Free', 'free', 'Get started with basic features', 0, 0, 1, 10, 25, 1, true),
-        (gen_random_uuid(), 'Starter', 'starter', 'For small agencies', 49, 490, 3, 50, 100, 5, true),
-        (gen_random_uuid(), 'Professional', 'professional', 'For growing agencies', 149, 1490, 10, 200, 500, 20, true),
-        (gen_random_uuid(), 'Enterprise', 'enterprise', 'For large organizations', 499, 4990, 50, 1000, 5000, 100, true)
+        (gen_random_uuid(), 'Growth', 'starter', 'Built for growing home healthcare agencies', 899, 8091, 1500, 5, 500, 9999, 50, true, false, 
+         '["Unlimited assessments & transcripts", "AI billable extraction", "Automatic contract generation", "Care documentation exports", "Billing-ready reports", "Up to 5 admin users", "Secure cloud workspace", "Fast onboarding"]'),
+        (gen_random_uuid(), 'Pro', 'professional', 'For multi-location and high-volume teams', 1499, 13491, 2500, 9999, 9999, 9999, 500, true, false,
+         '["Everything in Growth", "Unlimited users", "Multi-location management", "Advanced analytics", "Custom templates", "Integrations & API", "Priority support", "Dedicated onboarding"]'),
+        (gen_random_uuid(), 'Enterprise', 'enterprise', 'Custom solutions for large organizations', 0, 0, 0, 9999, 9999, 9999, 9999, true, true,
+         '["Everything in Pro", "Custom integrations", "Dedicated account manager", "SLA guarantees", "Custom contracts", "On-premise option", "White-label available"]')
     """)
 
 

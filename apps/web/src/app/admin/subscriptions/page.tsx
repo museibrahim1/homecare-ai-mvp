@@ -15,9 +15,11 @@ interface Plan {
   tier: string;
   monthly_price: number;
   annual_price: number;
+  setup_fee: number;
   max_users: number;
   max_clients: number;
   max_visits_per_month: number;
+  is_contact_sales: boolean;
 }
 
 interface Subscription {
@@ -158,20 +160,32 @@ export default function SubscriptionsPage() {
         </div>
 
         {/* Plans Overview */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-6 mb-8">
           {plans.map(plan => (
-            <div key={plan.id} className="p-5 bg-dark-800 rounded-xl border border-dark-700">
+            <div key={plan.id} className={`p-6 rounded-xl border ${
+              plan.name === 'Pro' ? 'bg-primary-500/10 border-primary-500/30' : 'bg-dark-800 border-dark-700'
+            }`}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className={`font-bold ${TIER_COLORS[plan.tier]}`}>{plan.name}</h3>
-                <span className="text-xs bg-dark-700 px-2 py-1 rounded text-dark-400">{plan.tier}</span>
+                <h3 className={`font-bold text-lg ${TIER_COLORS[plan.tier]}`}>{plan.name}</h3>
+                {plan.name === 'Pro' && (
+                  <span className="text-xs bg-primary-500 px-2 py-1 rounded text-white">Popular</span>
+                )}
               </div>
-              <p className="text-2xl font-bold text-white mb-2">
-                ${plan.monthly_price}<span className="text-sm text-dark-400">/mo</span>
-              </p>
-              <div className="space-y-1 text-xs text-dark-400">
-                <p>{plan.max_users} users</p>
-                <p>{plan.max_clients} clients</p>
-                <p>{plan.max_visits_per_month} visits/mo</p>
+              {plan.is_contact_sales ? (
+                <p className="text-2xl font-bold text-white mb-2">Contact Sales</p>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold text-white mb-1">
+                    ${plan.monthly_price.toLocaleString()}<span className="text-sm text-dark-400 font-normal">/mo</span>
+                  </p>
+                  <p className="text-dark-500 text-sm mb-3">
+                    ${plan.setup_fee.toLocaleString()} setup fee
+                  </p>
+                </>
+              )}
+              <div className="pt-3 border-t border-dark-700 space-y-1 text-sm text-dark-400">
+                <p>{plan.max_users >= 9999 ? 'Unlimited' : plan.max_users} users</p>
+                <p>Annual: ${Math.round(plan.annual_price / 12).toLocaleString()}/mo (save 10%)</p>
               </div>
             </div>
           ))}

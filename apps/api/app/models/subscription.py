@@ -40,7 +40,8 @@ class Plan(Base):
     
     # Pricing
     monthly_price = Column(Numeric(10, 2), default=0)
-    annual_price = Column(Numeric(10, 2), default=0)
+    annual_price = Column(Numeric(10, 2), default=0)  # Annual = 10 months (2 months free)
+    setup_fee = Column(Numeric(10, 2), default=0)  # One-time setup fee
     
     # Limits
     max_users = Column(Integer, default=1)
@@ -49,7 +50,8 @@ class Plan(Base):
     max_storage_gb = Column(Integer, default=1)
     
     # Features
-    features = Column(Text)  # JSON list of feature flags
+    features = Column(Text)  # JSON list of feature strings
+    is_contact_sales = Column(Boolean, default=False)  # True for Enterprise
     
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
