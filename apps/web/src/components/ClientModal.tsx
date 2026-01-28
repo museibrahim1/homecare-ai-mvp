@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 interface Client {
   id?: string;

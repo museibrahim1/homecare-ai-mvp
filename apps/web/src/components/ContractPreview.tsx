@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { FileSignature, Printer, FileText, RefreshCw, AlertCircle, Edit3, Save, X, Check, Download } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 interface UploadedDocument {
   id: string;

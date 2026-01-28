@@ -25,7 +25,7 @@ import { api } from '@/lib/api';
 import { Visit } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 // Sample transcript for demo - formatted as dialogue text
 const SAMPLE_TRANSCRIPT_TEXT = `Caregiver: Hello Mrs. Johnson, how are you feeling today? I'm here to help you with your morning routine and assess your care needs for home care services.

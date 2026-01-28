@@ -34,7 +34,7 @@ import BillablesEditor from '@/components/BillablesEditor';
 import ContractPreview from '@/components/ContractPreview';
 import TranscriptImporter from '@/components/TranscriptImporter';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 // Pipeline steps - diarize and align disabled for now
 const pipelineSteps = [

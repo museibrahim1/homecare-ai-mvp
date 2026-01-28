@@ -18,6 +18,8 @@ import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import ClientModal from '@/components/ClientModal';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
 interface Client {
   id: string;
   full_name: string;
@@ -106,8 +108,8 @@ export default function ClientsPage() {
 
   const handleSaveClient = async (clientData: Partial<Client>) => {
     const url = clientData.id 
-      ? `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/clients/${clientData.id}`
-      : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/clients`;
+      ? `${API_BASE}/clients/${clientData.id}`
+      : `${API_BASE}/clients`;
     
     const response = await fetch(url, {
       method: clientData.id ? 'PUT' : 'POST',
@@ -127,7 +129,7 @@ export default function ClientsPage() {
 
   const handleDeleteClient = async (clientId: string) => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/clients/${clientId}`,
+      `${API_BASE}/clients/${clientId}`,
       {
         method: 'DELETE',
         headers: {

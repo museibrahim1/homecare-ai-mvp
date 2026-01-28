@@ -6,6 +6,8 @@ import {
   FileUp, ClipboardPaste, Sparkles, Wand2
 } from 'lucide-react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
 interface TranscriptImporterProps {
   visitId: string;
   token: string;
@@ -75,7 +77,7 @@ export default function TranscriptImporter({
     try {
       // Use auto-detect endpoint - backend will figure out the format
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/visits/${visitId}/transcript/import/auto`,
+        `${API_BASE}/visits/${visitId}/transcript/import/auto`,
         {
           method: 'POST',
           headers: {
@@ -112,7 +114,7 @@ export default function TranscriptImporter({
     setProcessing(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/pipeline/visits/${visitId}/process-transcript?generate_note=true&generate_billing=true&generate_contract=true`,
+        `${API_BASE}/pipeline/visits/${visitId}/process-transcript?generate_note=true&generate_billing=true&generate_contract=true`,
         {
           method: 'POST',
           headers: {
