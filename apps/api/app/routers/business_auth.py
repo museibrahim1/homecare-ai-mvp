@@ -123,10 +123,12 @@ async def register_business(
         )
     
     # Create business
+    # Use lowercase entity_type value to match PostgreSQL enum
+    entity_type_value = registration.entity_type.value.lower() if hasattr(registration.entity_type, 'value') else registration.entity_type.lower()
     business = Business(
         name=registration.name,
         dba_name=registration.dba_name,
-        entity_type=EntityType(registration.entity_type.value),
+        entity_type=entity_type_value,
         state_of_incorporation=registration.state_of_incorporation.upper(),
         registration_number=registration.registration_number,
         ein=registration.ein,  # TODO: Encrypt this

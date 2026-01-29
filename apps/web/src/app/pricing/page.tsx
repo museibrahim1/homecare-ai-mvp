@@ -12,64 +12,64 @@ export default function PricingPage() {
 
   const plans = [
     {
-      name: 'Growth',
-      description: 'Built for growing home healthcare agencies',
-      monthlyPrice: 899,
-      annualPrice: 8091, // ~10% off
-      setupFee: 1500,
+      name: 'Starter',
+      description: 'For small agencies getting organized fast',
+      monthlyPrice: 295,
+      annualPrice: 3009, // ~15% off
+      setupFee: null,
       features: [
-        'Unlimited assessments & transcripts',
-        'AI billable extraction',
-        'Automatic contract generation',
-        'Care documentation exports',
-        'Billing-ready reports',
-        'Up to 5 admin users',
-        'Secure cloud workspace',
-        'Fast onboarding',
+        '25 generated contracts / month',
+        'Up to 50 clients in CRM',
+        'Up to 25 caregivers in CRM',
+        '3 team seats included',
+        'Assessment intake + transcript import/upload',
+        'AI billables extraction',
+        'Contract templates + PDF exports',
+        'Basic reports',
       ],
       highlighted: false,
+      cta: 'Get Started',
+      href: '/register?plan=starter',
+    },
+    {
+      name: 'Growth',
+      description: 'For growing teams running consistent assessments',
+      monthlyPrice: 495,
+      annualPrice: 5049, // ~15% off
+      setupFee: null,
+      features: [
+        '100 generated contracts / month',
+        'Up to 200 clients in CRM',
+        'Up to 100 caregivers in CRM',
+        '10 team seats included',
+        'Everything in Starter, plus:',
+        'Advanced contract templates',
+        'Exports: contract PDF + timesheet CSV',
+        'Priority support',
+      ],
+      highlighted: true,
       cta: 'Get Started',
       href: '/register?plan=growth',
     },
     {
       name: 'Pro',
-      description: 'For multi-location and high-volume teams',
-      monthlyPrice: 1499,
-      annualPrice: 13491, // ~10% off
-      setupFee: 2500,
-      features: [
-        'Everything in Growth, plus:',
-        'Unlimited users',
-        'Multi-location management',
-        'Advanced analytics',
-        'Custom templates',
-        'Integrations & API',
-        'Priority support',
-        'Dedicated onboarding',
-      ],
-      highlighted: true,
-      cta: 'Get Started',
-      href: '/register?plan=pro',
-    },
-    {
-      name: 'Enterprise',
-      description: 'Custom solutions for large organizations',
-      monthlyPrice: null,
-      annualPrice: null,
+      description: 'For high-volume teams that need scale and control',
+      monthlyPrice: 895,
+      annualPrice: 9129, // ~15% off
       setupFee: null,
       features: [
-        'Everything in Pro, plus:',
-        'Custom integrations',
-        'Dedicated account manager',
-        'SLA guarantees',
-        'Custom contracts',
-        'On-premise option',
-        'White-label available',
-        'Volume discounts',
+        '300 generated contracts / month',
+        'Up to 1,000 clients in CRM',
+        'Up to 500 caregivers in CRM',
+        'Unlimited team seats',
+        'Everything in Growth, plus:',
+        'Multi-location management',
+        'Advanced analytics',
+        'Integrations & API',
       ],
       highlighted: false,
-      cta: 'Contact Sales',
-      href: '/contact?inquiry=enterprise',
+      cta: 'Get Started',
+      href: '/register?plan=pro',
     },
   ];
 
@@ -140,7 +140,7 @@ export default function PricingPage() {
             >
               Annual
               <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
-                Save 10%
+                Save 15%
               </span>
             </button>
           </div>
@@ -202,9 +202,7 @@ export default function PricingPage() {
                   className={`block w-full py-3 px-4 rounded-xl font-medium text-center transition mb-8 ${
                     plan.highlighted
                       ? 'bg-primary-500 text-white hover:bg-primary-600'
-                      : plan.name === 'Enterprise'
-                        ? 'bg-dark-700 text-white hover:bg-dark-600 border border-dark-600'
-                        : 'bg-dark-700 text-white hover:bg-dark-600'
+                      : 'bg-dark-700 text-white hover:bg-dark-600'
                   }`}
                 >
                   {plan.cta}
@@ -277,10 +275,10 @@ export default function PricingPage() {
           </h2>
           <div className="space-y-6">
             <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
-              <h3 className="text-white font-semibold mb-2">What's included in the setup fee?</h3>
+              <h3 className="text-white font-semibold mb-2">Do you charge a setup fee?</h3>
               <p className="text-dark-400">
-                The setup fee covers account configuration, custom template setup, data migration assistance, 
-                team training sessions, and dedicated onboarding support to ensure you're up and running quickly.
+                No setup fee for standard onboarding. If you want white-glove onboarding (template customization,
+                workflow setup, and team training), we offer optional onboarding packages.
               </p>
             </div>
             <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
@@ -291,17 +289,17 @@ export default function PricingPage() {
               </p>
             </div>
             <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
-              <h3 className="text-white font-semibold mb-2">What payment methods do you accept?</h3>
+              <h3 className="text-white font-semibold mb-2">How do limits work (contracts, clients, caregivers, seats)?</h3>
               <p className="text-dark-400">
-                We accept all major credit cards, ACH transfers, and can invoice for annual plans. 
-                Enterprise customers can arrange custom payment terms.
+                Each plan includes monthly generated contracts plus CRM limits for clients, caregivers, and team seats.
+                If you outgrow a limit, you can upgrade any time.
               </p>
             </div>
             <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
               <h3 className="text-white font-semibold mb-2">Is there a free trial?</h3>
               <p className="text-dark-400">
-                We offer a personalized demo and pilot program for qualified agencies. 
-                Contact our sales team to learn more about trying Homecare AI risk-free.
+                We offer a guided demo and pilot program for qualified agencies.
+                Start with Starter, or contact us if you want a pilot workflow configured for your team.
               </p>
             </div>
           </div>
