@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -31,7 +33,7 @@ export default function PlatformUsersPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       if (!token) {
         router.push('/login');
         return;
@@ -58,7 +60,7 @@ export default function PlatformUsersPage() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     try {
       const response = await fetch(`${API_BASE}/platform/users`, {
@@ -83,7 +85,7 @@ export default function PlatformUsersPage() {
     
     setInviteLoading(true);
     setInviteError('');
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     try {
       const response = await fetch(`${API_BASE}/platform/users`, {
@@ -115,7 +117,7 @@ export default function PlatformUsersPage() {
   };
 
   const deactivateUser = async (userId: string) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     try {
       await fetch(`${API_BASE}/platform/users/${userId}/deactivate`, {
         method: 'PUT',

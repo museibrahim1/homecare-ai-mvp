@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
@@ -93,7 +95,7 @@ export default function AdminApprovalsPage() {
   // Check if user is platform admin
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       if (!token) {
         router.push('/login');
         return;
@@ -131,7 +133,7 @@ export default function AdminApprovalsPage() {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       const response = await fetch(`${API_BASE}/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -147,7 +149,7 @@ export default function AdminApprovalsPage() {
   const fetchBusinesses = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       let url = `${API_BASE}/admin/businesses`;
       if (filter === 'pending') {
         url = `${API_BASE}/admin/businesses/pending`;
@@ -175,7 +177,7 @@ export default function AdminApprovalsPage() {
   const fetchBusinessDetail = async (id: string) => {
     setDetailLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       const response = await fetch(`${API_BASE}/admin/businesses/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -194,7 +196,7 @@ export default function AdminApprovalsPage() {
     if (!selectedBusiness) return;
     setActionLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       const response = await fetch(`${API_BASE}/admin/businesses/${selectedBusiness.id}/approve`, {
         method: 'POST',
         headers: { 
@@ -219,7 +221,7 @@ export default function AdminApprovalsPage() {
     if (!selectedBusiness || !rejectionReason) return;
     setActionLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       const response = await fetch(`${API_BASE}/admin/businesses/${selectedBusiness.id}/approve`, {
         method: 'POST',
         headers: { 
@@ -244,7 +246,7 @@ export default function AdminApprovalsPage() {
 
   const downloadDocument = async (docId: string) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       const response = await fetch(`${API_BASE}/admin/documents/${docId}/download`, {
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -29,6 +29,20 @@ const useAuthStore = create<AuthState>()(
 );
 
 // Hook that handles hydration properly
+// Helper to get token directly from localStorage (for non-hook contexts)
+export function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const data = localStorage.getItem('homecare-auth');
+    if (!data) return null;
+    const parsed = JSON.parse(data);
+    return parsed?.state?.token || null;
+  } catch {
+    return null;
+  }
+}
+
+// Hook that handles hydration properly
 export function useAuth() {
   const store = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);

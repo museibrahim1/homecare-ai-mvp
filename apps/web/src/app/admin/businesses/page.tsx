@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
@@ -58,7 +60,7 @@ export default function AdminBusinessesPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = useCallback(async () => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     
     try {
       // Load stats

@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -60,7 +62,7 @@ export default function SubscriptionsPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       if (!token) {
         router.push('/login');
         return;
@@ -87,7 +89,7 @@ export default function SubscriptionsPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
@@ -111,7 +113,7 @@ export default function SubscriptionsPage() {
 
   const updateSubscriptionStatus = async (id: string, status: string) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       await fetch(`${API_BASE}/platform/subscriptions/${id}/status?new_status=${status}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },

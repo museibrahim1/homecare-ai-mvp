@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -48,7 +50,7 @@ export default function BillingConfigPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       if (!token) {
         router.push('/login');
         return;
@@ -75,7 +77,7 @@ export default function BillingConfigPage() {
 
   const fetchPlans = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     try {
       const response = await fetch(`${API_BASE}/platform/subscriptions/plans`, {
@@ -92,7 +94,7 @@ export default function BillingConfigPage() {
   };
 
   const fetchPlanStripeConfig = async (planId: string) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     try {
       const response = await fetch(`${API_BASE}/billing/plans/${planId}/stripe`, {
@@ -117,7 +119,7 @@ export default function BillingConfigPage() {
     if (!selectedPlan) return;
     
     setSaving(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     try {
       const response = await fetch(`${API_BASE}/billing/plans/${selectedPlan.plan_id}/stripe`, {

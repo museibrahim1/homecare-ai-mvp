@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -103,7 +105,7 @@ export default function BusinessDetailPage() {
   const [rejectionReason, setRejectionReason] = useState('');
 
   const loadBusiness = useCallback(async () => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     
     try {
       const response = await fetch(`${API_BASE}/admin/businesses/${businessId}`, {
@@ -128,7 +130,7 @@ export default function BusinessDetailPage() {
     if (!confirm('Are you sure you want to approve this business?')) return;
     
     setActionLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     
     try {
       const response = await fetch(`${API_BASE}/admin/businesses/${businessId}/approve`, {
@@ -158,7 +160,7 @@ export default function BusinessDetailPage() {
     }
     
     setActionLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     
     try {
       const response = await fetch(`${API_BASE}/admin/businesses/${businessId}/approve`, {
@@ -183,7 +185,7 @@ export default function BusinessDetailPage() {
   };
 
   const handleDownloadDocument = async (documentId: string) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     
     try {
       const response = await fetch(`${API_BASE}/admin/documents/${documentId}/download`, {

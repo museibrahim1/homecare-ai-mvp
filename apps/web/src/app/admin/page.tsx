@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -59,7 +61,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       if (!token) {
         router.push('/login');
         return;
@@ -88,7 +90,7 @@ export default function AdminDashboardPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     const headers = { Authorization: `Bearer ${token}` };
 
     try {

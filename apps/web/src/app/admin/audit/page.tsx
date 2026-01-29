@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -42,7 +44,7 @@ export default function AuditLogsPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       if (!token) {
         router.push('/login');
         return;
@@ -69,7 +71,7 @@ export default function AuditLogsPage() {
   }, [router]);
 
   const fetchActions = async () => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     try {
       const response = await fetch(`${API_BASE}/platform/audit-logs/actions`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -84,7 +86,7 @@ export default function AuditLogsPage() {
 
   const fetchLogs = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     
     let url = `${API_BASE}/platform/audit-logs?skip=${page * pageSize}&limit=${pageSize}`;
     if (filter.action) url += `&action=${filter.action}`;

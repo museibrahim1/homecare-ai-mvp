@@ -21,15 +21,23 @@ export default function LoginPage() {
 
     try {
       const response = await api.login(email, password);
-      setToken(response.access_token);
       
       // Fetch user data to determine role/permissions
+      let userData = null;
       try {
-        const userData = await api.getMe(response.access_token);
-        setUser(userData);
+        userData = await api.getMe(response.access_token);
       } catch (userErr) {
         console.error('Failed to fetch user data:', userErr);
       }
+      
+      // Set token and user data
+      setToken(response.access_token);
+      if (userData) {
+        setUser(userData);
+      }
+      
+      // Small delay to ensure localStorage is updated before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       router.push('/visits');
     } catch (err: any) {

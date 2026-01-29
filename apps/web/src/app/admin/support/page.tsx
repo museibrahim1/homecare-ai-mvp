@@ -1,5 +1,7 @@
 'use client';
 
+import { getStoredToken } from '@/lib/auth';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -72,7 +74,7 @@ export default function SupportTicketsPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       if (!token) {
         router.push('/login');
         return;
@@ -99,7 +101,7 @@ export default function SupportTicketsPage() {
 
   const fetchTickets = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     
     let url = `${API_BASE}/platform/support/tickets`;
     const params = [];
@@ -123,7 +125,7 @@ export default function SupportTicketsPage() {
 
   const fetchTicketDetail = async (id: string) => {
     setDetailLoading(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     try {
       const response = await fetch(`${API_BASE}/platform/support/tickets/${id}`, {
@@ -143,7 +145,7 @@ export default function SupportTicketsPage() {
     if (!selectedTicket || !responseText.trim()) return;
     
     setSendingResponse(true);
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     try {
       const response = await fetch(`${API_BASE}/platform/support/tickets/${selectedTicket.id}/respond`, {
@@ -169,7 +171,7 @@ export default function SupportTicketsPage() {
 
   const updateStatus = async (status: string) => {
     if (!selectedTicket) return;
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     try {
       await fetch(`${API_BASE}/platform/support/tickets/${selectedTicket.id}/status?new_status=${status}`, {
