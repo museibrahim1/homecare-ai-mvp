@@ -4,10 +4,14 @@ WORKDIR /app
 
 # Install dependencies
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production || npm install
+RUN npm ci || npm install
 
 # Copy source
 COPY . .
+
+# Build args for environment variables needed at build time
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # Build for production
 ENV NEXT_TELEMETRY_DISABLED=1
