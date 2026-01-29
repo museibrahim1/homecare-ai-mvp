@@ -185,10 +185,9 @@ async def register_business(
     
     # Send registration confirmation email
     email_service = get_email_service()
-    email_service.send_registration_confirmation(
-        to_email=registration.owner_email,
+    email_service.send_business_registration_received(
+        business_email=registration.owner_email,
         business_name=registration.name,
-        business_id=str(business.id),
     )
     
     return BusinessRegistrationResponse(
