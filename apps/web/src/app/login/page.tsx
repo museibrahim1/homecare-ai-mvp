@@ -8,7 +8,7 @@ import { Mic, Waves, Shield, Zap } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setToken } = useAuth();
+  const { setToken, setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,6 +22,15 @@ export default function LoginPage() {
     try {
       const response = await api.login(email, password);
       setToken(response.access_token);
+      
+      // Fetch user data to determine role/permissions
+      try {
+        const userData = await api.getMe(response.access_token);
+        setUser(userData);
+      } catch (userErr) {
+        console.error('Failed to fetch user data:', userErr);
+      }
+      
       router.push('/visits');
     } catch (err: any) {
       setError(err.message || 'Login failed');
