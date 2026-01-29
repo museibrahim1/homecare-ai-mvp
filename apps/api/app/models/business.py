@@ -121,7 +121,7 @@ class BusinessDocument(Base, TimestampMixin):
     business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id", ondelete="CASCADE"), nullable=False)
     
     # Document Info
-    document_type = Column(SQLEnum(DocumentType), nullable=False)
+    document_type = Column(String(50), nullable=False)  # Use String to match PostgreSQL enum
     file_name = Column(String(255), nullable=False)
     file_path = Column(String(500), nullable=False)  # Path in MinIO
     file_size = Column(String(50))
@@ -162,8 +162,8 @@ class BusinessUser(Base, TimestampMixin):
     # Authentication
     password_hash = Column(String(255), nullable=False)
     
-    # Role & Status
-    role = Column(SQLEnum(UserRole), default=UserRole.STAFF)
+    # Role & Status - use String to match PostgreSQL enum lowercase values
+    role = Column(String(50), default='staff')
     is_active = Column(Boolean, default=True)
     is_owner = Column(Boolean, default=False)  # Primary account owner
     
@@ -188,4 +188,4 @@ class BusinessUser(Base, TimestampMixin):
     @property
     def is_admin(self):
         """Check if user has admin privileges"""
-        return self.role in [UserRole.OWNER, UserRole.ADMIN]
+        return self.role in ['owner', 'admin']

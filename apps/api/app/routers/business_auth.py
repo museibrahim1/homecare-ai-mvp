@@ -39,11 +39,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Required documents for verification
+# Required documents for verification (use lowercase strings to match PostgreSQL enum)
 REQUIRED_DOCUMENTS = [
-    DocumentType.BUSINESS_LICENSE,
-    DocumentType.HOME_CARE_LICENSE,
-    DocumentType.LIABILITY_INSURANCE,
+    'business_license',
+    'home_care_license',
+    'liability_insurance',
 ]
 
 
@@ -81,7 +81,7 @@ def get_current_business_user(
         if user.business.verification_status != 'approved':
             raise HTTPException(
                 status_code=403, 
-                detail=f"Business not approved. Status: {user.business.verification_status.value}"
+                detail=f"Business not approved. Status: {user.business.verification_status}"
             )
         
         return user
@@ -150,7 +150,7 @@ async def register_business(
         email=registration.owner_email,
         full_name=registration.owner_name,
         password_hash=hash_password(registration.owner_password),
-        role=UserRole.OWNER,
+        role='owner',  # Use lowercase string to match PostgreSQL enum
         is_owner=True,
         email_verification_token=secrets.token_urlsafe(32),
     )
@@ -193,7 +193,7 @@ async def register_business(
     
     return BusinessRegistrationResponse(
         business_id=business.id,
-        verification_status=VerificationStatusEnum(business.verification_status.value),
+        verification_status=VerificationStatusEnum(business.verification_status),
         message="Registration submitted successfully",
         next_steps=next_steps,
     )
@@ -296,7 +296,7 @@ async def upload_document(
     
     return DocumentResponse(
         id=document.id,
-        document_type=DocumentTypeEnum(document.document_type.value),
+        document_type=DocumentTypeEnum(document.document_type),
         file_name=document.file_name,
         file_size=document.file_size,
         uploaded_at=document.created_at,
@@ -339,7 +339,7 @@ async def get_registration_status(
     return BusinessStatusResponse(
         business_id=business.id,
         business_name=business.name,
-        verification_status=VerificationStatusEnum(business.verification_status.value),
+        verification_status=VerificationStatusEnum(business.verification_status),
         sos_verified=business.sos_verified_at is not None,
         documents_submitted=docs_submitted,
         documents_verified=docs_verified,
@@ -418,7 +418,7 @@ async def login(
             email=user.email,
             full_name=user.full_name,
             phone=user.phone,
-            role=UserRoleEnum(user.role.value),
+            role=UserRoleEnum(user.role),
             is_active=user.is_active,
             is_owner=user.is_owner,
             email_verified=user.email_verified,
@@ -429,7 +429,7 @@ async def login(
             id=business.id,
             name=business.name,
             dba_name=business.dba_name,
-            entity_type=EntityTypeEnum(business.entity_type.value),
+            entity_type=EntityTypeEnum(business.entity_type),
             state_of_incorporation=business.state_of_incorporation,
             registration_number=business.registration_number,
             ein_last_4=ein_last_4,
@@ -440,7 +440,7 @@ async def login(
             phone=business.phone,
             email=business.email,
             website=business.website,
-            verification_status=VerificationStatusEnum(business.verification_status.value),
+            verification_status=VerificationStatusEnum(business.verification_status),
             sos_verified_at=business.sos_verified_at,
             approved_at=business.approved_at,
             logo_url=business.logo_url,
