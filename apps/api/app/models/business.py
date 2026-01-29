@@ -8,7 +8,7 @@ Replaces the simple user model with a full business entity system.
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Text, Boolean, Date, DateTime, ForeignKey, Enum as SQLEnum
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID, JSONB, ENUM as PGEnum
 from sqlalchemy.orm import relationship
 import enum
 
@@ -69,7 +69,8 @@ class Business(Base, TimestampMixin):
     # Business Identity
     name = Column(String(255), nullable=False)
     dba_name = Column(String(255))  # Doing Business As
-    entity_type = Column(SQLEnum(EntityType), default=EntityType.LLC)
+    # Use String to match PostgreSQL enum lowercase values
+    entity_type = Column(String(50), default='llc')
     
     # State Registration
     state_of_incorporation = Column(String(2), nullable=False)  # State code (NE, IA, etc.)
@@ -85,11 +86,8 @@ class Business(Base, TimestampMixin):
     email = Column(String(255), nullable=False, unique=True)
     website = Column(String(255))
     
-    # Verification Status
-    verification_status = Column(
-        SQLEnum(VerificationStatus), 
-        default=VerificationStatus.PENDING
-    )
+    # Verification Status - use String to match PostgreSQL enum lowercase values
+    verification_status = Column(String(50), default='pending')
     sos_verification_data = Column(JSONB)  # Raw response from SOS API
     sos_verified_at = Column(DateTime(timezone=True))
     

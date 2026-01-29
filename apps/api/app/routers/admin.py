@@ -124,8 +124,8 @@ async def list_pending_businesses(
     """
     businesses = db.query(Business).filter(
         Business.verification_status.in_([
-            VerificationStatus.DOCUMENTS_SUBMITTED,
-            VerificationStatus.SOS_VERIFIED,
+            'documents_submitted',
+            'sos_verified',
         ])
     ).order_by(Business.created_at.asc()).all()
     
@@ -241,7 +241,7 @@ async def approve_business(
     if not business:
         raise HTTPException(status_code=404, detail="Business not found")
     
-    if business.verification_status == VerificationStatus.APPROVED:
+    if business.verification_status == 'approved':
         raise HTTPException(status_code=400, detail="Business is already approved")
     
     # Get owner for email
@@ -251,7 +251,7 @@ async def approve_business(
     ).first()
     
     if request.approved:
-        business.verification_status = VerificationStatus.APPROVED
+        business.verification_status = 'approved'
         business.approved_at = datetime.now(timezone.utc)
         business.approved_by = admin.id
         business.rejection_reason = None
@@ -282,7 +282,7 @@ async def approve_business(
                 detail="Rejection reason is required"
             )
         
-        business.verification_status = VerificationStatus.REJECTED
+        business.verification_status = 'rejected'
         business.rejection_reason = request.rejection_reason
         message = "Business registration rejected"
         
@@ -317,7 +317,7 @@ async def suspend_business(
     if not business:
         raise HTTPException(status_code=404, detail="Business not found")
     
-    business.verification_status = VerificationStatus.SUSPENDED
+    business.verification_status = 'suspended'
     business.rejection_reason = reason
     db.commit()
     
@@ -343,10 +343,10 @@ async def reactivate_business(
     if not business:
         raise HTTPException(status_code=404, detail="Business not found")
     
-    if business.verification_status != VerificationStatus.SUSPENDED:
+    if business.verification_status != 'suspended':
         raise HTTPException(status_code=400, detail="Business is not suspended")
     
-    business.verification_status = VerificationStatus.APPROVED
+    business.verification_status = 'approved'
     business.rejection_reason = None
     db.commit()
     
@@ -427,19 +427,19 @@ async def get_admin_stats(
     total = db.query(Business).count()
     pending = db.query(Business).filter(
         Business.verification_status.in_([
-            VerificationStatus.PENDING,
-            VerificationStatus.SOS_VERIFIED,
-            VerificationStatus.DOCUMENTS_SUBMITTED,
+            'pending',
+            'sos_verified',
+            'documents_submitted',
         ])
     ).count()
     approved = db.query(Business).filter(
-        Business.verification_status == VerificationStatus.APPROVED
+        Business.verification_status == 'approved'
     ).count()
     rejected = db.query(Business).filter(
-        Business.verification_status == VerificationStatus.REJECTED
+        Business.verification_status == 'rejected'
     ).count()
     suspended = db.query(Business).filter(
-        Business.verification_status == VerificationStatus.SUSPENDED
+        Business.verification_status == 'suspended'
     ).count()
     
     return {

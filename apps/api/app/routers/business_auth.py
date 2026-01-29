@@ -78,7 +78,7 @@ def get_current_business_user(
             raise HTTPException(status_code=401, detail="User not found or inactive")
         
         # Check if business is approved
-        if user.business.verification_status != VerificationStatus.APPROVED:
+        if user.business.verification_status != 'approved':
             raise HTTPException(
                 status_code=403, 
                 detail=f"Business not approved. Status: {user.business.verification_status.value}"
@@ -139,7 +139,7 @@ async def register_business(
         phone=registration.phone,
         email=registration.email,
         website=registration.website,
-        verification_status=VerificationStatus.PENDING,
+        verification_status='pending',  # Use lowercase string to match PostgreSQL enum
     )
     db.add(business)
     db.flush()  # Get the ID
@@ -167,7 +167,7 @@ async def register_business(
     if sos_result.get("found"):
         business.sos_verification_data = sos_result
         business.sos_verified_at = datetime.now(timezone.utc)
-        business.verification_status = VerificationStatus.SOS_VERIFIED
+        business.verification_status = 'sos_verified'
         next_steps = [
             "Your business has been verified with the Secretary of State.",
             "Please upload the required documents to complete verification.",
@@ -236,7 +236,7 @@ async def upload_document(
     if not business:
         raise HTTPException(status_code=404, detail="Business not found")
     
-    if business.verification_status == VerificationStatus.APPROVED:
+    if business.verification_status == 'approved':
         raise HTTPException(status_code=400, detail="Business already approved")
     
     # Validate document type
@@ -289,7 +289,7 @@ async def upload_document(
     existing_types.add(doc_type)
     
     if all(req in existing_types for req in REQUIRED_DOCUMENTS):
-        business.verification_status = VerificationStatus.DOCUMENTS_SUBMITTED
+        business.verification_status = 'documents_submitted'
     
     db.commit()
     db.refresh(document)
@@ -331,9 +331,9 @@ async def get_registration_status(
     
     # Estimate review time
     estimated_time = None
-    if business.verification_status == VerificationStatus.DOCUMENTS_SUBMITTED:
+    if business.verification_status == 'documents_submitted':
         estimated_time = "1-2 business days"
-    elif business.verification_status == VerificationStatus.PENDING:
+    elif business.verification_status == 'pending':
         estimated_time = "Upload documents to proceed"
     
     return BusinessStatusResponse(
@@ -376,18 +376,18 @@ async def login(
     
     # Check business status
     business = user.business
-    if business.verification_status != VerificationStatus.APPROVED:
-        if business.verification_status == VerificationStatus.PENDING:
+    if business.verification_status != 'approved':
+        if business.verification_status == 'pending':
             raise HTTPException(
                 status_code=403,
                 detail="Business registration is pending. Please complete verification."
             )
-        elif business.verification_status == VerificationStatus.REJECTED:
+        elif business.verification_status == 'rejected':
             raise HTTPException(
                 status_code=403,
                 detail=f"Business registration was rejected: {business.rejection_reason or 'Contact support'}"
             )
-        elif business.verification_status == VerificationStatus.SUSPENDED:
+        elif business.verification_status == 'suspended':
             raise HTTPException(
                 status_code=403,
                 detail="Business account is suspended. Contact support."

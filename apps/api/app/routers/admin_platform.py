@@ -169,13 +169,13 @@ async def get_platform_overview(
     # Business stats
     total_businesses = db.query(Business).count()
     active_businesses = db.query(Business).filter(
-        Business.verification_status == VerificationStatus.APPROVED
+        Business.verification_status == 'approved'
     ).count()
     pending_approvals = db.query(Business).filter(
         Business.verification_status.in_([
-            VerificationStatus.PENDING,
-            VerificationStatus.SOS_VERIFIED,
-            VerificationStatus.DOCUMENTS_SUBMITTED,
+            'pending',
+            'sos_verified',
+            'documents_submitted',
         ])
     ).count()
     
@@ -923,7 +923,7 @@ async def send_announcement(
     admin: User = Depends(require_platform_admin),
 ):
     """Send announcement to businesses."""
-    query = db.query(Business).filter(Business.verification_status == VerificationStatus.APPROVED)
+    query = db.query(Business).filter(Business.verification_status == 'approved')
     
     if target == "trial":
         # Would filter by subscription status
