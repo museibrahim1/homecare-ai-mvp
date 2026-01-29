@@ -7,10 +7,22 @@ import {
   BarChart3, Zap, Shield, Clock, Headphones, Star
 } from 'lucide-react';
 
+interface PricingPlan {
+  name: string;
+  description: string;
+  monthlyPrice: number | null;
+  annualPrice: number | null;
+  setupFee: number | null;
+  features: string[];
+  highlighted: boolean;
+  cta: string;
+  href: string;
+}
+
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
-  const plans = [
+  const plans: PricingPlan[] = [
     {
       name: 'Starter',
       description: 'For small agencies getting organized fast',
@@ -73,13 +85,13 @@ export default function PricingPage() {
     },
   ];
 
-  const getPrice = (plan: typeof plans[0]) => {
-    if (plan.monthlyPrice === null) return null;
+  const getPrice = (plan: PricingPlan): number | null => {
+    if (plan.monthlyPrice === null || plan.annualPrice === null) return null;
     return billingCycle === 'monthly' ? plan.monthlyPrice : Math.round(plan.annualPrice / 12);
   };
 
-  const getAnnualSavings = (plan: typeof plans[0]) => {
-    if (plan.monthlyPrice === null) return 0;
+  const getAnnualSavings = (plan: PricingPlan): number => {
+    if (plan.monthlyPrice === null || plan.annualPrice === null) return 0;
     return (plan.monthlyPrice * 12) - plan.annualPrice;
   };
 
