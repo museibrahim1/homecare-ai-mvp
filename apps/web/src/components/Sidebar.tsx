@@ -56,7 +56,13 @@ const adminNavItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { logout, user, hydrated } = useAuth();
+
+  // Debug: log user data to understand why admin section might not show
+  if (typeof window !== 'undefined' && hydrated) {
+    console.log('[Sidebar] User data:', JSON.stringify(user));
+    console.log('[Sidebar] Admin check:', user?.role === 'admin', user?.email?.endsWith('@homecare.ai'));
+  }
 
   const handleLogout = () => {
     logout();
