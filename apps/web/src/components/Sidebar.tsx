@@ -59,9 +59,8 @@ export default function Sidebar() {
   const { logout, user, hydrated } = useAuth();
 
   // Debug: log user data to understand why admin section might not show
-  if (typeof window !== 'undefined' && hydrated) {
-    console.log('[Sidebar] User data:', JSON.stringify(user));
-    console.log('[Sidebar] Admin check:', user?.role === 'admin', user?.email?.endsWith('@homecare.ai'));
+  if (typeof window !== 'undefined' && hydrated && user) {
+    console.log('[Sidebar] User role:', user.role, '| Is admin:', user.role === 'admin');
   }
 
   const handleLogout = () => {
@@ -166,7 +165,7 @@ export default function Sidebar() {
         </div>
 
         {/* Admin Section - Only visible to platform admins */}
-        {user?.role === 'admin' && user?.email?.endsWith('@homecare.ai') && (
+        {user?.role === 'admin' && (
           <div className="mb-6">
             <div className="px-4 py-2 mb-2">
               <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider flex items-center gap-2">
