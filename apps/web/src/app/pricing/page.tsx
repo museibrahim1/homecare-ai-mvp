@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  Check, Mic, ArrowRight, Building2, Users, FileText,
-  BarChart3, Zap, Shield, Clock, Headphones, Star
+  Check, X, Mic, ArrowRight, Building2, Users, 
+  Zap, Shield, Headphones, HelpCircle
 } from 'lucide-react';
 
 interface PricingPlan {
@@ -13,7 +13,6 @@ interface PricingPlan {
   monthlyPrice: number | null;
   annualPrice: number | null;
   setupFee: number | null;
-  features: string[];
   highlighted: boolean;
   cta: string;
   href: string;
@@ -25,63 +24,43 @@ export default function PricingPage() {
   const plans: PricingPlan[] = [
     {
       name: 'Starter',
-      description: 'For small agencies getting organized fast',
+      description: 'For small agencies getting organized',
       monthlyPrice: 295,
-      annualPrice: 3009, // ~15% off
+      annualPrice: 3009,
       setupFee: null,
-      features: [
-        '25 generated contracts / month',
-        'Up to 50 clients in CRM',
-        'Up to 25 caregivers in CRM',
-        '3 team seats included',
-        'Assessment intake + transcript import/upload',
-        'AI billables extraction',
-        'Contract templates + PDF exports',
-        'Basic reports',
-      ],
       highlighted: false,
       cta: 'Get Started',
       href: '/register?plan=starter',
     },
     {
       name: 'Growth',
-      description: 'For growing teams running consistent assessments',
+      description: 'For growing teams',
       monthlyPrice: 495,
-      annualPrice: 5049, // ~15% off
+      annualPrice: 5049,
       setupFee: null,
-      features: [
-        '100 generated contracts / month',
-        'Up to 200 clients in CRM',
-        'Up to 100 caregivers in CRM',
-        '10 team seats included',
-        'Everything in Starter, plus:',
-        'Advanced contract templates',
-        'Exports: contract PDF + timesheet CSV',
-        'Priority support',
-      ],
       highlighted: true,
       cta: 'Get Started',
       href: '/register?plan=growth',
     },
     {
       name: 'Pro',
-      description: 'For high-volume teams that need scale and control',
+      description: 'For high-volume teams',
       monthlyPrice: 895,
-      annualPrice: 9129, // ~15% off
+      annualPrice: 9129,
       setupFee: null,
-      features: [
-        '300 generated contracts / month',
-        'Up to 1,000 clients in CRM',
-        'Up to 500 caregivers in CRM',
-        'Unlimited team seats',
-        'Everything in Growth, plus:',
-        'Multi-location management',
-        'Advanced analytics',
-        'Integrations & API',
-      ],
       highlighted: false,
       cta: 'Get Started',
       href: '/register?plan=pro',
+    },
+    {
+      name: 'Enterprise',
+      description: 'Custom solutions',
+      monthlyPrice: null,
+      annualPrice: null,
+      setupFee: null,
+      highlighted: false,
+      cta: 'Contact Sales',
+      href: '/contact?plan=enterprise',
     },
   ];
 
@@ -93,6 +72,55 @@ export default function PricingPage() {
   const getAnnualSavings = (plan: PricingPlan): number => {
     if (plan.monthlyPrice === null || plan.annualPrice === null) return 0;
     return (plan.monthlyPrice * 12) - plan.annualPrice;
+  };
+
+  // Feature comparison data
+  const featureCategories = [
+    {
+      name: 'Core Features',
+      features: [
+        { name: 'Generated contracts / month', values: ['25', '100', '300', 'Unlimited'] },
+        { name: 'Clients in CRM', values: ['50', '200', '1,000', 'Unlimited'] },
+        { name: 'Caregivers in CRM', values: ['25', '100', '500', 'Unlimited'] },
+        { name: 'Team seats', values: ['3', '10', 'Unlimited', 'Unlimited'] },
+        { name: 'Assessment intake', values: [true, true, true, true] },
+        { name: 'Transcript import/upload', values: [true, true, true, true] },
+        { name: 'AI billables extraction', values: [true, true, true, true] },
+        { name: 'Contract templates', values: ['Basic', 'Advanced', 'Advanced', 'Custom'] },
+        { name: 'PDF exports', values: [true, true, true, true] },
+      ],
+    },
+    {
+      name: 'Advanced',
+      features: [
+        { name: 'Timesheet CSV exports', values: [false, true, true, true] },
+        { name: 'Multi-location management', values: [false, false, true, true] },
+        { name: 'Advanced analytics', values: [false, false, true, true] },
+        { name: 'Integrations & API', values: [false, false, true, true] },
+        { name: 'Custom templates', values: [false, false, false, true] },
+      ],
+    },
+    {
+      name: 'Support',
+      features: [
+        { name: 'Email support', values: [true, true, true, true] },
+        { name: 'Priority support', values: [false, true, true, true] },
+        { name: 'Dedicated success manager', values: [false, false, false, true] },
+        { name: 'Custom onboarding', values: [false, false, false, true] },
+        { name: 'SLA guarantee', values: [false, false, false, true] },
+      ],
+    },
+  ];
+
+  const renderFeatureValue = (value: boolean | string) => {
+    if (typeof value === 'boolean') {
+      return value ? (
+        <Check className="w-5 h-5 text-green-400 mx-auto" />
+      ) : (
+        <X className="w-5 h-5 text-dark-500 mx-auto" />
+      );
+    }
+    return <span className="text-white text-sm">{value}</span>;
   };
 
   return (
@@ -108,11 +136,11 @@ export default function PricingPage() {
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-dark-300 hover:text-white transition">
-              Sign In
+              Log in
             </Link>
             <Link
               href="/register"
-              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
+              className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition"
             >
               Get Started
             </Link>
@@ -120,21 +148,21 @@ export default function PricingPage() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="py-20 px-6">
+      {/* Hero Section */}
+      <section className="py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Simple, Transparent Pricing
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Simple, transparent pricing
           </h1>
-          <p className="text-xl text-dark-300 mb-8">
-            Costs less than one part-time admin and pays for itself within the first month.
+          <p className="text-xl text-dark-400 mb-8">
+            Choose the plan that fits your agency. All plans include a 14-day free trial.
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-4 p-1.5 bg-dark-800 rounded-xl mb-12">
+          <div className="inline-flex items-center gap-3 bg-dark-800 p-1.5 rounded-xl mb-4">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`px-6 py-2.5 rounded-lg font-medium transition ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                 billingCycle === 'monthly'
                   ? 'bg-primary-500 text-white'
                   : 'text-dark-400 hover:text-white'
@@ -144,218 +172,350 @@ export default function PricingPage() {
             </button>
             <button
               onClick={() => setBillingCycle('annual')}
-              className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                 billingCycle === 'annual'
                   ? 'bg-primary-500 text-white'
                   : 'text-dark-400 hover:text-white'
               }`}
             >
               Annual
-              <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
+              <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
                 Save 15%
               </span>
             </button>
           </div>
         </div>
+      </section>
 
-        {/* Pricing Cards */}
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-          {plans.map((plan) => {
-            const price = getPrice(plan);
-            const savings = getAnnualSavings(plan);
-            
-            return (
-              <div
-                key={plan.name}
-                className={`relative p-8 rounded-2xl border ${
-                  plan.highlighted
-                    ? 'bg-gradient-to-b from-primary-500/10 to-dark-800 border-primary-500/50'
-                    : 'bg-dark-800 border-dark-700'
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="px-4 py-1.5 bg-primary-500 text-white text-sm font-medium rounded-full flex items-center gap-1.5">
-                      <Star className="w-4 h-4" />
-                      Most Popular
-                    </span>
-                  </div>
-                )}
+      {/* Pricing Cards */}
+      <section className="px-6 pb-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {plans.map((plan) => {
+              const price = getPrice(plan);
+              const savings = getAnnualSavings(plan);
 
-                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                <p className="text-dark-400 text-sm mb-6">{plan.description}</p>
-
-                {price !== null ? (
-                  <div className="mb-6">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-white">${price.toLocaleString()}</span>
-                      <span className="text-dark-400">/month</span>
-                    </div>
-                    {billingCycle === 'annual' && savings > 0 && (
-                      <p className="text-green-400 text-sm mt-1">
-                        Save ${savings.toLocaleString()}/year
-                      </p>
-                    )}
-                    {plan.setupFee && (
-                      <p className="text-dark-500 text-sm mt-2">
-                        ${plan.setupFee.toLocaleString()} one-time setup
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="mb-6">
-                    <span className="text-3xl font-bold text-white">Custom</span>
-                    <p className="text-dark-400 text-sm mt-1">Tailored to your needs</p>
-                  </div>
-                )}
-
-                <Link
-                  href={plan.href}
-                  className={`block w-full py-3 px-4 rounded-xl font-medium text-center transition mb-8 ${
+              return (
+                <div
+                  key={plan.name}
+                  className={`relative rounded-2xl p-6 ${
                     plan.highlighted
-                      ? 'bg-primary-500 text-white hover:bg-primary-600'
-                      : 'bg-dark-700 text-white hover:bg-dark-600'
+                      ? 'bg-gradient-to-b from-primary-500/20 to-dark-800 border-2 border-primary-500'
+                      : 'bg-dark-800 border border-dark-700'
                   }`}
                 >
-                  {plan.cta}
-                  <ArrowRight className="inline-block w-4 h-4 ml-2" />
-                </Link>
-
-                <ul className="space-y-3">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
-                        i === 0 && plan.name !== 'Growth' ? 'text-primary-400' : 'text-green-400'
-                      }`} />
-                      <span className={`text-sm ${
-                        i === 0 && plan.name !== 'Growth' ? 'text-primary-400 font-medium' : 'text-dark-300'
-                      }`}>
-                        {feature}
+                  {plan.highlighted && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-primary-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                        Most Popular
                       </span>
-                    </li>
+                    </div>
+                  )}
+
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
+                    <p className="text-dark-400 text-sm">{plan.description}</p>
+                  </div>
+
+                  <div className="text-center mb-6">
+                    {price !== null ? (
+                      <>
+                        <div className="flex items-baseline justify-center gap-1">
+                          <span className="text-4xl font-bold text-white">
+                            ${price.toLocaleString()}
+                          </span>
+                          <span className="text-dark-400">/mo</span>
+                        </div>
+                        {billingCycle === 'annual' && savings > 0 && (
+                          <p className="text-green-400 text-sm mt-1">
+                            Save ${savings.toLocaleString()}/year
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-3xl font-bold text-white">Custom</div>
+                    )}
+                  </div>
+
+                  <Link
+                    href={plan.href}
+                    className={`block w-full py-3 rounded-xl font-medium text-center transition ${
+                      plan.highlighted
+                        ? 'bg-primary-500 text-white hover:bg-primary-600'
+                        : 'bg-dark-700 text-white hover:bg-dark-600'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Comparison Table */}
+      <section className="py-16 px-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-white text-center mb-4">
+            Compare plans
+          </h2>
+          <p className="text-dark-400 text-center mb-12">
+            Find the perfect plan for your agency
+          </p>
+
+          {/* Desktop Table */}
+          <div className="hidden lg:block overflow-hidden rounded-2xl border border-dark-700 bg-dark-800">
+            {/* Table Header */}
+            <div className="grid grid-cols-5 bg-dark-850 border-b border-dark-700">
+              <div className="p-6">
+                <span className="text-dark-400 text-sm font-medium">Features</span>
+              </div>
+              {plans.map((plan) => (
+                <div
+                  key={plan.name}
+                  className={`p-6 text-center ${
+                    plan.highlighted ? 'bg-primary-500/10' : ''
+                  }`}
+                >
+                  <h4 className="text-white font-semibold">{plan.name}</h4>
+                  {getPrice(plan) !== null ? (
+                    <p className="text-dark-400 text-sm">
+                      ${getPrice(plan)?.toLocaleString()}/mo
+                    </p>
+                  ) : (
+                    <p className="text-dark-400 text-sm">Custom</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Feature Rows */}
+            {featureCategories.map((category) => (
+              <div key={category.name}>
+                {/* Category Header */}
+                <div className="grid grid-cols-5 bg-dark-800/50 border-b border-dark-700/50">
+                  <div className="col-span-5 px-6 py-3">
+                    <span className="text-primary-400 text-sm font-semibold uppercase tracking-wider">
+                      {category.name}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Features */}
+                {category.features.map((feature, idx) => (
+                  <div
+                    key={feature.name}
+                    className={`grid grid-cols-5 border-b border-dark-700/30 ${
+                      idx % 2 === 0 ? 'bg-dark-800' : 'bg-dark-800/50'
+                    }`}
+                  >
+                    <div className="p-4 flex items-center">
+                      <span className="text-dark-300 text-sm">{feature.name}</span>
+                    </div>
+                    {feature.values.map((value, planIdx) => (
+                      <div
+                        key={planIdx}
+                        className={`p-4 text-center flex items-center justify-center ${
+                          plans[planIdx].highlighted ? 'bg-primary-500/5' : ''
+                        }`}
+                      >
+                        {renderFeatureValue(value)}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* CTA Row */}
+            <div className="grid grid-cols-5 border-t border-dark-700">
+              <div className="p-6"></div>
+              {plans.map((plan) => (
+                <div
+                  key={plan.name}
+                  className={`p-6 text-center ${
+                    plan.highlighted ? 'bg-primary-500/10' : ''
+                  }`}
+                >
+                  <Link
+                    href={plan.href}
+                    className={`inline-block px-6 py-2.5 rounded-xl font-medium text-sm transition ${
+                      plan.highlighted
+                        ? 'bg-primary-500 text-white hover:bg-primary-600'
+                        : 'bg-dark-700 text-white hover:bg-dark-600'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Feature Cards */}
+          <div className="lg:hidden space-y-6">
+            {plans.map((plan, planIdx) => (
+              <div
+                key={plan.name}
+                className={`rounded-2xl overflow-hidden ${
+                  plan.highlighted
+                    ? 'border-2 border-primary-500'
+                    : 'border border-dark-700'
+                }`}
+              >
+                <div className={`p-6 ${plan.highlighted ? 'bg-primary-500/20' : 'bg-dark-800'}`}>
+                  <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
+                  {getPrice(plan) !== null ? (
+                    <p className="text-2xl font-bold text-white">
+                      ${getPrice(plan)?.toLocaleString()}
+                      <span className="text-dark-400 text-base font-normal">/mo</span>
+                    </p>
+                  ) : (
+                    <p className="text-2xl font-bold text-white">Custom pricing</p>
+                  )}
+                </div>
+
+                <div className="bg-dark-800 p-6 space-y-4">
+                  {featureCategories.map((category) => (
+                    <div key={category.name}>
+                      <h4 className="text-primary-400 text-xs font-semibold uppercase tracking-wider mb-3">
+                        {category.name}
+                      </h4>
+                      <ul className="space-y-2">
+                        {category.features.map((feature) => {
+                          const value = feature.values[planIdx];
+                          if (value === false) return null;
+                          return (
+                            <li key={feature.name} className="flex items-center gap-3">
+                              <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
+                              <span className="text-dark-300 text-sm">
+                                {feature.name}
+                                {typeof value === 'string' && value !== 'true' && (
+                                  <span className="text-white ml-1">({value})</span>
+                                )}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
-      {/* Value Prop */}
-      <section className="py-20 px-6 bg-dark-800/50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-12">
-            Why agencies choose Homecare AI
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-14 h-14 bg-primary-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-7 h-7 text-primary-400" />
+                  <Link
+                    href={plan.href}
+                    className={`block w-full py-3 rounded-xl font-medium text-center transition mt-6 ${
+                      plan.highlighted
+                        ? 'bg-primary-500 text-white hover:bg-primary-600'
+                        : 'bg-dark-700 text-white hover:bg-dark-600'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                </div>
               </div>
-              <h3 className="text-white font-semibold mb-2">Save 20+ hours/week</h3>
-              <p className="text-dark-400 text-sm">
-                Automate assessments, billing, and documentation
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-14 h-14 bg-green-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <BarChart3 className="w-7 h-7 text-green-400" />
-              </div>
-              <h3 className="text-white font-semibold mb-2">Increase revenue</h3>
-              <p className="text-dark-400 text-sm">
-                AI captures billable items you might miss
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-7 h-7 text-blue-400" />
-              </div>
-              <h3 className="text-white font-semibold mb-2">HIPAA compliant</h3>
-              <p className="text-dark-400 text-sm">
-                Enterprise-grade security and compliance
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 px-6">
+      {/* FAQ Section */}
+      <section className="py-16 px-6 bg-dark-800/50">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Frequently Asked Questions
+          <h2 className="text-3xl font-bold text-white text-center mb-4">
+            Questions & Answers
           </h2>
-          <div className="space-y-6">
-            <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
-              <h3 className="text-white font-semibold mb-2">Do you charge a setup fee?</h3>
-              <p className="text-dark-400">
-                No setup fee for standard onboarding. If you want white-glove onboarding (template customization,
-                workflow setup, and team training), we offer optional onboarding packages.
-              </p>
-            </div>
-            <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
-              <h3 className="text-white font-semibold mb-2">Can I switch plans later?</h3>
-              <p className="text-dark-400">
-                Yes! You can upgrade or downgrade your plan at any time. Upgrades take effect immediately, 
-                and downgrades apply at the start of your next billing cycle.
-              </p>
-            </div>
-            <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
-              <h3 className="text-white font-semibold mb-2">How do limits work (contracts, clients, caregivers, seats)?</h3>
-              <p className="text-dark-400">
-                Each plan includes monthly generated contracts plus CRM limits for clients, caregivers, and team seats.
-                If you outgrow a limit, you can upgrade any time.
-              </p>
-            </div>
-            <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
-              <h3 className="text-white font-semibold mb-2">Is there a free trial?</h3>
-              <p className="text-dark-400">
-                We offer a guided demo and pilot program for qualified agencies.
-                Start with Starter, or contact us if you want a pilot workflow configured for your team.
-              </p>
-            </div>
+          <p className="text-dark-400 text-center mb-12">
+            Everything you need to know about Homecare AI
+          </p>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: 'Is there a free trial?',
+                a: 'Yes! All plans include a 14-day free trial. No credit card required to start.',
+              },
+              {
+                q: 'Can I switch plans at any time?',
+                a: 'Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect immediately.',
+              },
+              {
+                q: 'What happens if I exceed my limits?',
+                a: "We'll notify you when you're approaching your limits. You can upgrade anytime or we can discuss custom options.",
+              },
+              {
+                q: 'Is my data secure?',
+                a: 'Yes. We use bank-level encryption, are HIPAA compliant, and never share your data with third parties.',
+              },
+              {
+                q: 'Can I cancel anytime?',
+                a: 'Yes, you can cancel your subscription at any time. No long-term contracts or cancellation fees.',
+              },
+            ].map((faq, idx) => (
+              <details
+                key={idx}
+                className="group bg-dark-800 rounded-xl border border-dark-700 overflow-hidden"
+              >
+                <summary className="flex items-center justify-between p-5 cursor-pointer list-none">
+                  <span className="text-white font-medium">{faq.q}</span>
+                  <HelpCircle className="w-5 h-5 text-dark-400 group-open:text-primary-400 transition" />
+                </summary>
+                <div className="px-5 pb-5 text-dark-400">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-dark-400 mb-4">Still have questions?</p>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-medium"
+            >
+              Talk to our team <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 px-6 bg-gradient-to-b from-primary-500/10 to-dark-900">
+      {/* Footer CTA */}
+      <section className="py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">
+          <h2 className="text-3xl font-bold text-white mb-4">
             Ready to transform your agency?
           </h2>
-          <p className="text-xl text-dark-300 mb-8">
-            Join hundreds of home healthcare agencies saving time and increasing revenue.
+          <p className="text-dark-400 mb-8">
+            Join hundreds of home healthcare agencies using Homecare AI to streamline their operations.
           </p>
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/register"
-              className="px-8 py-4 bg-primary-500 text-white rounded-xl font-medium hover:bg-primary-600 transition flex items-center gap-2"
+              className="inline-flex items-center gap-2 bg-primary-500 text-white px-8 py-3 rounded-xl font-medium hover:bg-primary-600 transition"
             >
-              Start Free Trial
-              <ArrowRight className="w-5 h-5" />
+              Start free trial <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/contact"
-              className="px-8 py-4 bg-dark-800 text-white rounded-xl font-medium hover:bg-dark-700 transition border border-dark-700"
+              className="inline-flex items-center gap-2 text-dark-300 hover:text-white transition"
             >
-              Talk to Sales
+              Schedule a demo
             </Link>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-dark-700">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-              <Mic className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-white font-semibold">Homecare AI</span>
+      <footer className="border-t border-dark-700/50 py-8 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-dark-400 text-sm">
+            <Shield className="w-4 h-4" />
+            <span>HIPAA Compliant</span>
+            <span className="mx-2">•</span>
+            <span>SOC 2 Type II</span>
           </div>
           <p className="text-dark-500 text-sm">
-            © {new Date().getFullYear()} Homecare AI. All rights reserved.
+            © 2024 Homecare AI. All rights reserved.
           </p>
         </div>
       </footer>
