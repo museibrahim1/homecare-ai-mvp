@@ -1,6 +1,6 @@
 'use client';
 
-import { getStoredToken } from '@/lib/auth';
+import { getStoredToken, useAuth } from '@/lib/auth';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';

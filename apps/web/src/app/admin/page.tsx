@@ -1,6 +1,6 @@
 'use client';
 
-import { getStoredToken } from '@/lib/auth';
+import { getStoredToken, useAuth } from '@/lib/auth';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -52,6 +52,7 @@ interface SystemHealth {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const { token, user, isLoading: authLoading, hydrated } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [stats, setStats] = useState<PlatformStats | null>(null);
@@ -60,19 +61,28 @@ export default function AdminDashboardPage() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
 
   useEffect(() => {
+    // Wait for auth to hydrate before checking
+    if (!hydrated || authLoading) return;
+    
     const checkAuth = async () => {
-      const token = getStoredToken();
       if (!token) {
         router.push('/login');
         return;
       }
+      // Use stored user data if available, otherwise fetch
+      if (user?.role === 'admin' && user?.email?.endsWith('@homecare.ai')) {
+        setIsAuthorized(true);
+        fetchData();
+        return;
+      }
+      // Fallback: fetch user data
       try {
         const response = await fetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.ok) {
-          const user = await response.json();
-          if (user.role === 'admin' && user.email.endsWith('@homecare.ai')) {
+          const userData = await response.json();
+          if (userData.role === 'admin' && userData.email.endsWith('@homecare.ai')) {
             setIsAuthorized(true);
             fetchData();
           } else {
@@ -86,7 +96,7 @@ export default function AdminDashboardPage() {
       }
     };
     checkAuth();
-  }, [router]);
+  }, [token, user, hydrated, authLoading, router]);
 
   const fetchData = async () => {
     setLoading(true);
