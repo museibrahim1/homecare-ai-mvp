@@ -97,7 +97,19 @@ export default function RegisterPage() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.detail || 'Registration failed');
+        // Handle different error formats from FastAPI
+        let errorMessage = 'Registration failed';
+        if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (Array.isArray(data.detail)) {
+          // Validation errors come as array of objects
+          errorMessage = data.detail.map((e: any) => e.msg || e.message || JSON.stringify(e)).join(', ');
+        } else if (data.detail?.msg) {
+          errorMessage = data.detail.msg;
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+        throw new Error(errorMessage);
       }
       
       setSuccess(true);
@@ -108,7 +120,8 @@ export default function RegisterPage() {
       }, 2000);
       
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+      const message = typeof err === 'string' ? err : (err?.message || 'Registration failed. Please try again.');
+      setError(message);
     } finally {
       setLoading(false);
     }
