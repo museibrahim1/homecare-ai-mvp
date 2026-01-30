@@ -26,7 +26,7 @@ import { useAuth } from '@/lib/auth';
 
 // Main navigation items grouped by category
 const mainNavItems = [
-  { href: '/', label: 'Dashboard', icon: Home, description: 'Overview & stats' },
+  { href: '/dashboard', label: 'Dashboard', icon: Home, description: 'Overview & stats' },
   { href: '/visits', label: 'Assessments', icon: Calendar, description: 'Intakes & visits' },
   { href: '/clients', label: 'Clients', icon: Users, description: 'Client records' },
 ];
@@ -71,7 +71,7 @@ export default function Sidebar() {
 
   const NavItem = ({ item }: { item: typeof mainNavItems[0] }) => {
     const isActive = pathname === item.href || 
-      (item.href !== '/' && pathname.startsWith(item.href));
+      (item.href !== '/dashboard' && pathname.startsWith(item.href));
     
     return (
       <Link
@@ -110,7 +110,7 @@ export default function Sidebar() {
     <aside className="w-72 bg-dark-800/80 backdrop-blur-md border-r border-dark-700/50 flex flex-col min-h-screen">
       {/* Logo */}
       <div className="px-6 py-6">
-        <Link href="/" className="flex items-center gap-4">
+        <Link href="/dashboard" className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
             <Mic className="w-6 h-6 text-white" />
           </div>

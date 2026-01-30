@@ -42,7 +42,7 @@ export default function LoginPage() {
       // Small delay to ensure localStorage is updated before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      router.push('/visits');
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
