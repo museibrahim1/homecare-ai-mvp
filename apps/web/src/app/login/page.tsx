@@ -152,7 +152,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input-dark w-full"
-                placeholder="admin@example.com"
+                placeholder="you@company.com"
               />
             </div>
 
@@ -191,18 +191,13 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 text-center space-y-4">
+          <div className="mt-8 text-center">
             <p className="text-dark-400 text-sm">
-              Demo credentials: <span className="text-dark-200">admin@homecare.ai / admin123</span>
+              New to HomeCare AI?{' '}
+              <a href="/register" className="text-primary-400 hover:underline font-medium">
+                Register your agency
+              </a>
             </p>
-            <div className="border-t border-dark-700 pt-4">
-              <p className="text-dark-400 text-sm">
-                New to HomeCare AI?{' '}
-                <a href="/register" className="text-primary-400 hover:underline font-medium">
-                  Register your agency
-                </a>
-              </p>
-            </div>
           </div>
         </div>
       </div>
