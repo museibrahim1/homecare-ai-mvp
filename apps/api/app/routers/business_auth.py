@@ -164,22 +164,19 @@ async def register_business(
         registration_number=registration.registration_number,
     )
     
+    # Auto-approve for MVP - skip verification workflow
+    # TODO: Re-enable verification for production
+    business.verification_status = 'approved'
+    business.approved_at = datetime.now(timezone.utc)
+    
     if sos_result.get("found"):
         business.sos_verification_data = sos_result
         business.sos_verified_at = datetime.now(timezone.utc)
-        business.verification_status = 'sos_verified'
-        next_steps = [
-            "Your business has been verified with the Secretary of State.",
-            "Please upload the required documents to complete verification.",
-            "Required: Business License, Home Care License, Liability Insurance"
-        ]
-    else:
-        business.sos_verification_data = sos_result
-        next_steps = [
-            "We could not automatically verify your business with state records.",
-            "Please upload your documents for manual review.",
-            "Required: Business License, Home Care License, Liability Insurance, Articles of Incorporation"
-        ]
+    
+    next_steps = [
+        "Your account is ready! You can now log in.",
+        "Go to the login page and use your email and password.",
+    ]
     
     db.commit()
     

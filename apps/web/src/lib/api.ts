@@ -42,10 +42,29 @@ class ApiClient {
 
   // Auth
   async login(email: string, password: string) {
-    return this.request<{ access_token: string; token_type: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    // Try regular auth first
+    try {
+      return await this.request<{ access_token: string; token_type: string }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+    } catch (regularError: any) {
+      // If regular auth fails, try business auth
+      try {
+        const businessResponse = await this.request<{ access_token: string; token_type: string; user: any; business: any }>('/auth/business/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        });
+        // Return in same format as regular auth
+        return {
+          access_token: businessResponse.access_token,
+          token_type: businessResponse.token_type,
+        };
+      } catch (businessError: any) {
+        // Both failed - throw the more specific error
+        throw new Error(regularError.message || businessError.message || 'Invalid email or password');
+      }
+    }
   }
 
   async getMe(token: string) {

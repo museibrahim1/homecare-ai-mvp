@@ -24,7 +24,10 @@ class EmailService:
     
     def __init__(self):
         self.api_key = os.getenv("RESEND_API_KEY")
-        self.from_email = os.getenv("EMAIL_FROM", "Homecare AI <noreply@homecare.ai>")
+        # Use Resend's default sender if custom domain not verified
+        # To use custom domain: verify it at https://resend.com/domains
+        custom_from = os.getenv("EMAIL_FROM")
+        self.from_email = custom_from if custom_from else "Homecare AI <onboarding@resend.dev>"
         self.support_email = os.getenv("SUPPORT_EMAIL", "support@homecare.ai")
         
         if self.api_key and RESEND_AVAILABLE:
@@ -84,17 +87,44 @@ class EmailService:
     # ==================== Business Emails ====================
     
     def send_business_registration_received(self, business_email: str, business_name: str):
-        """Send confirmation that registration was received."""
-        subject = "Registration Received - Homecare AI"
+        """Send welcome email after registration."""
+        subject = "Welcome to Homecare AI!"
         html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #6366f1;">Registration Received</h1>
-            <p>Hello {business_name},</p>
-            <p>Thank you for registering with Homecare AI. We have received your application and it is currently under review.</p>
-            <p>Our team will verify your business information and you will receive an email once your account has been approved.</p>
-            <p>This process typically takes 1-2 business days.</p>
-            <br>
-            <p>Best regards,<br>The Homecare AI Team</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #6366f1; margin-bottom: 10px;">Welcome to Homecare AI!</h1>
+                <p style="color: #666; font-size: 16px;">Your account is ready to use</p>
+            </div>
+            
+            <p>Hello <strong>{business_name}</strong>,</p>
+            
+            <p>Thank you for joining Homecare AI! Your account has been created and is ready to use.</p>
+            
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #333; margin-top: 0;">Getting Started:</h3>
+                <ol style="color: #555; line-height: 1.8;">
+                    <li><strong>Upload an Assessment</strong> - Record or upload a care assessment conversation</li>
+                    <li><strong>AI Processing</strong> - We'll transcribe and analyze the assessment</li>
+                    <li><strong>Generate Contract</strong> - Get a proposal-ready service contract</li>
+                </ol>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://web-production-11611.up.railway.app/login" 
+                   style="background-color: #6366f1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                    Log In to Your Dashboard
+                </a>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">
+                Questions? Reply to this email or contact our support team.
+            </p>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="color: #999; font-size: 12px; text-align: center;">
+                © 2026 Homecare AI. All rights reserved.
+            </p>
         </div>
         """
         return self.send_email(business_email, subject, html)
