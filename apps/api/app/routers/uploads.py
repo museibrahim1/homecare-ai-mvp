@@ -74,9 +74,14 @@ async def upload_audio(
     # Update visit status
     visit.status = "in_progress"
     
-    # If auto_process is enabled, start the full pipeline
+    # Commit the audio asset first (before queuing the pipeline)
+    db.commit()
+    db.refresh(audio_asset)
+    
+    # If auto_process is enabled, start the full pipeline AFTER commit
+    task_id = None
     if auto_process and auto_process.lower() == "true":
-        # Queue the full pipeline task
+        # Queue the full pipeline task (audio asset now exists in DB)
         task_id = enqueue_task("full_pipeline", visit_id=str(visit_id))
         
         # Update pipeline state
@@ -89,9 +94,7 @@ async def upload_audio(
             "note": {"status": "pending"},
             "contract": {"status": "pending"},
         }
-    
-    db.commit()
-    db.refresh(audio_asset)
+        db.commit()
     
     log_action(db, current_user.id, "audio_uploaded", "audio_asset", audio_asset.id)
     
