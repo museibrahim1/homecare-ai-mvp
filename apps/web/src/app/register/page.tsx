@@ -64,8 +64,8 @@ export default function RegisterPage() {
       setError('Password is required');
       return;
     }
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
       return;
     }
     
@@ -81,15 +81,15 @@ export default function RegisterPage() {
           owner_name: formData.owner_name,
           owner_email: formData.email,
           owner_password: formData.password,
-          phone: formData.phone || null,
+          phone: formData.phone || '000-000-0000',
           // Default values for simplified signup
           entity_type: 'llc',
           state_of_incorporation: 'CA',
           registration_number: 'PENDING',
-          address: '',
-          city: '',
-          state: '',
-          zip_code: '',
+          address: 'TBD',
+          city: 'TBD',
+          state: 'CA',
+          zip_code: '00000',
           email: formData.email,
         }),
       });
@@ -273,7 +273,7 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                 />
               </div>
-              <p className="text-xs text-dark-500 mt-1.5">Minimum 6 characters</p>
+              <p className="text-xs text-dark-500 mt-1.5">Minimum 8 characters</p>
             </div>
 
             <div>
