@@ -47,9 +47,9 @@ const clientsNavItems = [
   { href: '/policies', label: 'Policies & Renewals', icon: RefreshCw, description: 'Care agreements' },
 ];
 
-// Communication
+// Communication (Messages disabled for now)
 const communicationNavItems = [
-  { href: '/messages', label: 'Messages', icon: MessageSquare, description: 'Client comms' },
+  // { href: '/messages', label: 'Messages', icon: MessageSquare, description: 'Client comms' },
   { href: '/team-chat', label: 'Team Chat', icon: MessagesSquare, description: 'Internal chat' },
 ];
 
