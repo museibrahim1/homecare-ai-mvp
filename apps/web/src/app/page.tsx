@@ -71,23 +71,30 @@ const TESTIMONIALS = [
 const PRICING = [
   {
     name: 'Starter',
-    price: 49,
-    description: 'Perfect for small agencies',
-    features: ['Up to 25 clients', '50 assessments/month', 'Contract generation', 'Email support'],
+    price: 295,
+    description: 'For small agencies getting organized',
+    features: ['25 contracts/month', '50 clients in CRM', '25 caregivers', '3 team seats', 'Email support'],
     popular: false,
   },
   {
-    name: 'Professional',
-    price: 99,
-    description: 'Most popular for growing agencies',
-    features: ['Up to 100 clients', 'Unlimited assessments', 'Advanced reporting', 'Priority support', 'Custom templates'],
+    name: 'Growth',
+    price: 495,
+    description: 'For growing teams',
+    features: ['100 contracts/month', '200 clients in CRM', '100 caregivers', '10 team seats', 'Priority support'],
     popular: true,
   },
   {
+    name: 'Pro',
+    price: 895,
+    description: 'For high-volume teams',
+    features: ['300 contracts/month', '1,000 clients in CRM', '500 caregivers', 'Unlimited seats', 'Advanced analytics'],
+    popular: false,
+  },
+  {
     name: 'Enterprise',
-    price: 249,
-    description: 'For large multi-location agencies',
-    features: ['Unlimited clients', 'Unlimited assessments', 'API access', 'Dedicated account manager', 'Custom integrations'],
+    price: null,
+    description: 'Custom solutions',
+    features: ['Unlimited everything', 'Custom templates', 'Dedicated success manager', 'API access', 'SLA guarantee'],
     popular: false,
   },
 ];
@@ -339,11 +346,11 @@ export default function LandingPage() {
             <p className="text-xl text-dark-400">Start free, upgrade as you grow</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {PRICING.map((plan, i) => (
               <div 
                 key={i} 
-                className={`card p-8 relative ${plan.popular ? 'border-primary-500 ring-2 ring-primary-500/20' : ''}`}
+                className={`card p-6 relative ${plan.popular ? 'border-primary-500 ring-2 ring-primary-500/20' : ''}`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary-500 rounded-full text-sm font-medium text-white">
@@ -353,26 +360,32 @@ export default function LandingPage() {
                 <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
                 <p className="text-dark-400 text-sm mb-6">{plan.description}</p>
                 <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-bold text-white">${plan.price}</span>
-                  <span className="text-dark-400">/month</span>
+                  {plan.price ? (
+                    <>
+                      <span className="text-4xl font-bold text-white">${plan.price}</span>
+                      <span className="text-dark-400">/mo</span>
+                    </>
+                  ) : (
+                    <span className="text-3xl font-bold text-white">Custom</span>
+                  )}
                 </div>
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-3 text-dark-300">
+                    <li key={j} className="flex items-center gap-3 text-dark-300 text-sm">
                       <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <Link 
-                  href="/register"
+                  href={plan.price ? `/register?plan=${plan.name.toLowerCase()}` : '/contact?plan=enterprise'}
                   className={`block text-center py-3 rounded-xl font-medium transition ${
                     plan.popular 
                       ? 'btn-primary' 
                       : 'bg-dark-700 text-white hover:bg-dark-600'
                   }`}
                 >
-                  Get Started
+                  {plan.price ? 'Get Started' : 'Contact Sales'}
                 </Link>
               </div>
             ))}
