@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, Enum
+from sqlalchemy import Column, String, Boolean, Enum, DateTime, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.base import Base, TimestampMixin
@@ -21,6 +21,12 @@ class User(Base, TimestampMixin):
     role = Column(Enum(UserRole), default=UserRole.caregiver, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     phone = Column(String(20), nullable=True)
+    
+    # Google Calendar Integration
+    google_calendar_connected = Column(Boolean, default=False, nullable=False)
+    google_calendar_access_token = Column(Text, nullable=True)
+    google_calendar_refresh_token = Column(Text, nullable=True)
+    google_calendar_token_expiry = Column(DateTime(timezone=True), nullable=True)
     
     # Relationships
     visits_as_caregiver = relationship("Visit", back_populates="caregiver", foreign_keys="Visit.caregiver_id")

@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     debug: bool = True
     log_level: str = "INFO"
     
+    # Google Calendar
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    
     class Config:
         env_file = ".env"
         case_sensitive = False

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
-import { CalendarDays, Plus, Clock, MapPin, User, X, Link2, Check, AlertCircle } from 'lucide-react';
+import { CalendarDays, Plus, Clock, MapPin, User, X, Link2, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
 
 type Appointment = {
   id: number;
@@ -40,13 +42,18 @@ const initialAppointments: Appointment[] = [
   { id: 4, title: 'Home Safety Check', client: 'James Wilson', date: '2026-01-30', time: '16:00', duration: '1 hour', location: '789 Elm Blvd', type: 'visit', notes: '' },
 ];
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 export default function SchedulePage() {
+  const { token } = useAuth();
+  const searchParams = useSearchParams();
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
   const [newAppointment, setNewAppointment] = useState({
     title: '',
     client: '',
@@ -58,13 +65,89 @@ export default function SchedulePage() {
     notes: '',
   });
 
-  // Check if Google Calendar is connected
+  // Check Google Calendar connection status
   useEffect(() => {
-    const connected = localStorage.getItem('googleCalendarConnected') === 'true';
-    setGoogleConnected(connected);
-  }, []);
+    const checkGoogleStatus = async () => {
+      if (!token) {
+        setCheckingStatus(false);
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_URL}/calendar/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setGoogleConnected(data.connected);
+        }
+      } catch (error) {
+        console.error('Failed to check Google status:', error);
+      }
+      setCheckingStatus(false);
+    };
+
+    checkGoogleStatus();
+  }, [token]);
+
+  // Handle OAuth callback
+  useEffect(() => {
+    const code = searchParams.get('code');
+    const error = searchParams.get('error');
+    
+    if (error) {
+      alert('Failed to connect Google Calendar: ' + error);
+      return;
+    }
+    
+    if (code && token) {
+      // Exchange code for tokens via our API
+      const connectGoogle = async () => {
+        setSyncing(true);
+        try {
+          const response = await fetch(`${API_URL}/calendar/connect`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              code,
+              redirect_uri: `${window.location.origin}/schedule`,
+            }),
+          });
+          
+          if (response.ok) {
+            setGoogleConnected(true);
+            // Clear the code from URL
+            window.history.replaceState({}, '', '/schedule');
+          } else {
+            const data = await response.json();
+            alert('Failed to connect: ' + (data.detail || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Failed to connect Google:', error);
+          alert('Failed to connect Google Calendar');
+        }
+        setSyncing(false);
+      };
+      
+      connectGoogle();
+    }
+  }, [searchParams, token]);
 
   const todayAppointments = appointments.filter(apt => apt.date === selectedDate.toISOString().split('T')[0]);
+
+  const getDurationMinutes = (duration: string): number => {
+    if (duration.includes('1.5')) return 90;
+    if (duration.includes('2')) return 120;
+    if (duration.includes('45')) return 45;
+    if (duration.includes('30')) return 30;
+    return 60; // Default 1 hour
+  };
 
   const handleAddAppointment = async () => {
     if (!newAppointment.title || !newAppointment.client) return;
@@ -75,14 +158,35 @@ export default function SchedulePage() {
     };
 
     // If Google Calendar is connected, sync the event
-    if (googleConnected) {
+    if (googleConnected && token) {
       setSyncing(true);
       try {
-        // Simulate API call to create Google Calendar event
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        appointment.googleEventId = `google_${Date.now()}`;
+        const startDateTime = `${newAppointment.date}T${newAppointment.time}:00`;
+        const durationMinutes = getDurationMinutes(newAppointment.duration);
+        const startDate = new Date(startDateTime);
+        const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+        
+        const response = await fetch(`${API_URL}/calendar/events`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: `${newAppointment.title} - ${newAppointment.client}`,
+            description: newAppointment.notes,
+            start_time: startDate.toISOString(),
+            end_time: endDate.toISOString(),
+            location: newAppointment.location,
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          appointment.googleEventId = data.event_id;
+        }
       } catch (error) {
-        console.error('Failed to sync with Google Calendar');
+        console.error('Failed to sync with Google Calendar:', error);
       }
       setSyncing(false);
     }
@@ -102,36 +206,61 @@ export default function SchedulePage() {
   };
 
   const handleConnectGoogle = () => {
-    // In production, this would redirect to Google OAuth
-    // For now, simulate connection
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     
     if (!clientId) {
-      // Simulate connection for demo
-      localStorage.setItem('googleCalendarConnected', 'true');
-      setGoogleConnected(true);
-      setShowConnectModal(false);
+      alert('Google Calendar is not configured. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID to environment variables.');
       return;
     }
 
-    // Real OAuth flow
-    const redirectUri = `${window.location.origin}/api/auth/google/callback`;
+    // OAuth flow - redirect to Google
+    const redirectUri = `${window.location.origin}/schedule`;
     const scope = 'https://www.googleapis.com/auth/calendar';
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
     
     window.location.href = authUrl;
   };
 
-  const handleDisconnectGoogle = () => {
-    localStorage.removeItem('googleCalendarConnected');
-    localStorage.removeItem('googleCalendarToken');
-    setGoogleConnected(false);
+  const handleDisconnectGoogle = async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/calendar/disconnect`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        setGoogleConnected(false);
+      }
+    } catch (error) {
+      console.error('Failed to disconnect:', error);
+    }
+    setShowConnectModal(false);
   };
 
   const handleSyncNow = async () => {
+    if (!token) return;
+    
     setSyncing(true);
-    // Simulate syncing
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Fetch events from Google Calendar
+      const response = await fetch(`${API_URL}/calendar/events`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Synced events:', data.events);
+        // In a full implementation, you'd merge these with local appointments
+      }
+    } catch (error) {
+      console.error('Sync failed:', error);
+    }
     setSyncing(false);
   };
 
@@ -142,14 +271,14 @@ export default function SchedulePage() {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
-    const days = [];
+    const calendarDays = [];
     for (let i = 0; i < firstDay; i++) {
-      days.push(null);
+      calendarDays.push(null);
     }
     for (let i = 1; i <= daysInMonth; i++) {
-      days.push(i);
+      calendarDays.push(i);
     }
-    return days;
+    return calendarDays;
   };
 
   return (
@@ -165,13 +294,20 @@ export default function SchedulePage() {
           <div className="flex gap-3">
             <button 
               onClick={() => setShowConnectModal(true)}
+              disabled={checkingStatus}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
                 googleConnected 
                   ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
                   : 'bg-dark-800 border border-dark-700 text-dark-300 hover:text-white'
               }`}
             >
-              {googleConnected ? <Check className="w-5 h-5" /> : <Link2 className="w-5 h-5" />}
+              {checkingStatus ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : googleConnected ? (
+                <Check className="w-5 h-5" />
+              ) : (
+                <Link2 className="w-5 h-5" />
+              )}
               {googleConnected ? 'Google Connected' : 'Connect Google'}
             </button>
             <button 
@@ -199,8 +335,9 @@ export default function SchedulePage() {
             <button 
               onClick={handleSyncNow}
               disabled={syncing}
-              className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
+              {syncing && <Loader2 className="w-4 h-4 animate-spin" />}
               {syncing ? 'Syncing...' : 'Sync Now'}
             </button>
           </div>
@@ -456,8 +593,9 @@ export default function SchedulePage() {
                 <button
                   onClick={handleAddAppointment}
                   disabled={syncing}
-                  className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
+                  {syncing && <Loader2 className="w-4 h-4 animate-spin" />}
                   {syncing ? 'Creating...' : 'Create Appointment'}
                 </button>
               </div>
