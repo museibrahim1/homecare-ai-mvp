@@ -102,53 +102,60 @@ const PRICING = [
   },
 ];
 
+// Demo steps data
+const DEMO_STEPS = [
+  {
+    title: 'Step 1: Record Assessment',
+    description: 'Caregiver records the client intake assessment using voice',
+    duration: 5000,
+  },
+  {
+    title: 'Step 2: AI Transcription',
+    description: 'Our AI transcribes and identifies speakers automatically',
+    duration: 4000,
+  },
+  {
+    title: 'Step 3: Extract Care Needs',
+    description: 'AI extracts services, schedule, and billable items',
+    duration: 4000,
+  },
+  {
+    title: 'Step 4: Generate Contract',
+    description: 'Professional contract is generated instantly',
+    duration: 5000,
+  },
+];
+
 // Demo Modal Component
 function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
 
-  const steps = [
-    {
-      title: 'Step 1: Record Assessment',
-      description: 'Caregiver records the client intake assessment using voice',
-      duration: 5000,
-    },
-    {
-      title: 'Step 2: AI Transcription',
-      description: 'Our AI transcribes and identifies speakers automatically',
-      duration: 4000,
-    },
-    {
-      title: 'Step 3: Extract Care Needs',
-      description: 'AI extracts services, schedule, and billable items',
-      duration: 4000,
-    },
-    {
-      title: 'Step 4: Generate Contract',
-      description: 'Professional contract is generated instantly',
-      duration: 5000,
-    },
-  ];
-
+  // Reset state when modal opens/closes
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
       setCurrentStep(0);
       setProgress(0);
       setIsPlaying(true);
-      return;
     }
+  }, [isOpen]);
 
-    if (!isPlaying) return;
+  // Animation timer
+  useEffect(() => {
+    if (!isOpen || !isPlaying) return;
+    
+    // Safety check
+    if (currentStep >= DEMO_STEPS.length) return;
 
-    const stepDuration = steps[currentStep].duration;
+    const stepDuration = DEMO_STEPS[currentStep].duration;
     const interval = 50;
     const increment = (interval / stepDuration) * 100;
 
     const timer = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
-          if (currentStep < steps.length - 1) {
+          if (currentStep < DEMO_STEPS.length - 1) {
             setCurrentStep(s => s + 1);
             return 0;
           } else {
@@ -164,7 +171,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   }, [isOpen, isPlaying, currentStep]);
 
   const handleSkip = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < DEMO_STEPS.length - 1) {
       setCurrentStep(s => s + 1);
       setProgress(0);
     }
@@ -203,7 +210,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
         <div className="p-6">
           {/* Step indicator */}
           <div className="flex items-center gap-2 mb-6">
-            {steps.map((step, i) => (
+            {DEMO_STEPS.map((step, i) => (
               <div key={i} className="flex-1">
                 <div className={`h-1 rounded-full transition-all ${
                   i < currentStep ? 'bg-green-500' : 
@@ -222,8 +229,8 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 
           {/* Current step title */}
           <div className="text-center mb-6">
-            <h4 className="text-xl font-bold text-white mb-2">{steps[currentStep].title}</h4>
-            <p className="text-dark-400">{steps[currentStep].description}</p>
+            <h4 className="text-xl font-bold text-white mb-2">{DEMO_STEPS[currentStep]?.title}</h4>
+            <p className="text-dark-400">{DEMO_STEPS[currentStep]?.description}</p>
           </div>
 
           {/* Demo visualization */}
@@ -389,10 +396,10 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
           {/* Controls */}
           <div className="flex items-center justify-between mt-6">
             <div className="text-sm text-dark-400">
-              Step {currentStep + 1} of {steps.length}
+              Step {currentStep + 1} of {DEMO_STEPS.length}
             </div>
             <div className="flex items-center gap-3">
-              {!isPlaying && currentStep === steps.length - 1 ? (
+              {!isPlaying && currentStep === DEMO_STEPS.length - 1 ? (
                 <button 
                   onClick={handleRestart}
                   className="px-4 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition"
