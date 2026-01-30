@@ -51,7 +51,7 @@ def seed_database():
             print(f"Found {caregiver_count} caregivers, {client_count} clients. Adding missing data...")
         
         # =============================================
-        # ADMIN USER
+        # ADMIN USER (Platform Admin)
         # =============================================
         if not existing_admin:
             print("Creating admin user...")
@@ -66,6 +66,26 @@ def seed_database():
                 updated_at=now,
             )
             db.add(admin)
+            db.flush()
+        
+        # =============================================
+        # DEMO AGENCY USER (For demos - no admin access)
+        # =============================================
+        demo_agency_email = "demo@agency.com"
+        existing_demo = db.query(User).filter(User.email == demo_agency_email).first()
+        if not existing_demo:
+            print("Creating demo agency user...")
+            demo_user = User(
+                id=uuid4(),
+                email=demo_agency_email,
+                hashed_password=get_password_hash("demo1234"),
+                full_name="Demo Agency",
+                role="owner",  # Agency owner role - no platform admin access
+                is_active=True,
+                created_at=now,
+                updated_at=now,
+            )
+            db.add(demo_user)
             db.flush()
         
         # =============================================
@@ -279,14 +299,15 @@ def seed_database():
         print("✅ Database seeded successfully!")
         print("="*50)
         print(f"\nCreated/verified:")
-        print(f"  • 1 Admin user")
+        print(f"  • 1 Admin user (platform admin)")
+        print(f"  • 1 Demo agency user")
         print(f"  • {user_caregiver_count} Caregiver users (for login)")
         print(f"  • {caregiver_count} Caregiver records (for assignment)")
         print(f"  • {client_count} Clients")
         print("\nLogin credentials:")
-        print("  Admin:     admin@homecare.ai / admin123")
-        print("  Caregiver: sarah@homecare.ai / password123")
-        print("             (or michael@, emily@, david@homecare.ai)")
+        print("  Platform Admin: admin@homecare.ai / admin123")
+        print("  Demo Agency:    demo@agency.com / demo1234")
+        print("  Caregiver:      sarah@homecare.ai / password123")
         print("="*50)
         
     except Exception as e:
