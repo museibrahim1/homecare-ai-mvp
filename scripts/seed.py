@@ -37,7 +37,7 @@ def seed_database():
     
     try:
         # Check if admin already exists
-        existing_admin = db.query(User).filter(User.email == "admin@homecare.ai").first()
+        existing_admin = db.query(User).filter(User.email == "museibrahim@palmtai.com").first()
         if existing_admin:
             print("Admin user already exists. Checking for missing data...")
             
@@ -53,13 +53,15 @@ def seed_database():
         # =============================================
         # ADMIN USER (Platform Admin)
         # =============================================
+        admin_email = "museibrahim@palmtai.com"
+        existing_admin = db.query(User).filter(User.email == admin_email).first()
         if not existing_admin:
             print("Creating admin user...")
             admin = User(
                 id=uuid4(),
-                email="admin@homecare.ai",
-                hashed_password=get_password_hash("admin123"),
-                full_name="Admin User",
+                email=admin_email,
+                hashed_password=get_password_hash("HomeHealthCareAi13"),
+                full_name="Musa Ibrahim",
                 role="admin",
                 is_active=True,
                 created_at=now,
@@ -305,7 +307,7 @@ def seed_database():
         print(f"  • {caregiver_count} Caregiver records (for assignment)")
         print(f"  • {client_count} Clients")
         print("\nLogin credentials:")
-        print("  Platform Admin: admin@homecare.ai / admin123")
+        print("  Platform Admin: museibrahim@palmtai.com / [your password]")
         print("  Demo Agency:    demo@agency.com / demo1234")
         print("  Caregiver:      sarah@homecare.ai / password123")
         print("="*50)
