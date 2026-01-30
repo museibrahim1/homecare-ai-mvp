@@ -11,6 +11,17 @@ import {
   AlertCircle,
   ChevronRight,
   Heart,
+  LayoutGrid,
+  List,
+  BarChart3,
+  Zap,
+  Link2,
+  X,
+  Mail,
+  User,
+  Loader2,
+  Filter,
+  MoreHorizontal,
   Activity
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
@@ -63,13 +74,260 @@ interface Client {
   created_at: string;
 }
 
+type ViewMode = 'table' | 'pipeline' | 'forecast';
+
+// Status configuration with colors
+const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
+  intake: { label: 'Awaiting Intake', color: 'text-orange-400', bgColor: 'bg-orange-500/20', borderColor: 'border-l-orange-500' },
+  assessment: { label: 'Assessment', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20', borderColor: 'border-l-yellow-500' },
+  pending: { label: 'Pending', color: 'text-blue-400', bgColor: 'bg-blue-500/20', borderColor: 'border-l-blue-500' },
+  active: { label: 'Active', color: 'text-green-400', bgColor: 'bg-green-500/20', borderColor: 'border-l-green-500' },
+  assigned: { label: 'Assigned', color: 'text-teal-400', bgColor: 'bg-teal-500/20', borderColor: 'border-l-teal-500' },
+  follow_up: { label: 'Follow-up', color: 'text-purple-400', bgColor: 'bg-purple-500/20', borderColor: 'border-l-purple-500' },
+  inactive: { label: 'Inactive', color: 'text-slate-400', bgColor: 'bg-slate-500/20', borderColor: 'border-l-slate-500' },
+  discharged: { label: 'Discharged', color: 'text-red-400', bgColor: 'bg-red-500/20', borderColor: 'border-l-red-500' },
+};
+
+const CARE_SPECIALTY_OPTIONS = [
+  'General Care',
+  'Dementia Care',
+  'Post-Surgery',
+  'Cardiac Care',
+  'Diabetes Management',
+  'Hospice Support',
+  'Physical Therapy',
+  'Wound Care',
+  'Respiratory Care',
+];
+
+const PRIORITY_OPTIONS = [
+  { value: 'low', label: 'Low', color: 'text-green-400' },
+  { value: 'medium', label: 'Medium', color: 'text-yellow-400' },
+  { value: 'high', label: 'High', color: 'text-orange-400' },
+  { value: 'urgent', label: 'Urgent', color: 'text-red-400' },
+];
+
+// Quick Add Modal Component
+function QuickAddModal({ 
+  isOpen, 
+  onClose, 
+  onSave 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void;
+  onSave: (data: Partial<Client>) => Promise<void>;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    care_level: '',
+    status: 'intake',
+    primary_diagnosis: '',
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.full_name.trim()) return;
+    
+    setLoading(true);
+    try {
+      await onSave(formData);
+      setFormData({ full_name: '', email: '', phone: '', care_level: '', status: 'intake', primary_diagnosis: '' });
+      onClose();
+    } catch (err) {
+      console.error('Failed to save:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-end p-4">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      
+      <div className="relative bg-dark-800 rounded-2xl w-full max-w-md shadow-2xl border border-dark-600 mt-20 mr-4">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-dark-600">
+          <h3 className="text-lg font-semibold text-white">Request form</h3>
+          <button onClick={onClose} className="text-dark-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Name</label>
+            <input
+              type="text"
+              value={formData.full_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+              className="input-dark"
+              placeholder="John Smith"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Email</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              className="input-dark"
+              placeholder="john@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Priority</label>
+            <select
+              value={formData.care_level}
+              onChange={(e) => setFormData(prev => ({ ...prev, care_level: e.target.value }))}
+              className="input-dark"
+            >
+              <option value="">Select priority...</option>
+              <option value="LOW">Low</option>
+              <option value="MODERATE">Medium</option>
+              <option value="HIGH">High</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Phone</label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              className="input-dark"
+              placeholder="+1 555 123 4567"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Care specialty</label>
+            <select
+              value={formData.primary_diagnosis}
+              onChange={(e) => setFormData(prev => ({ ...prev, primary_diagnosis: e.target.value }))}
+              className="input-dark"
+            >
+              <option value="">Select specialty...</option>
+              {CARE_SPECIALTY_OPTIONS.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="pt-4">
+            <button
+              type="submit"
+              disabled={loading || !formData.full_name.trim()}
+              className="w-full btn-primary flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  Add Client
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Avatar component with initials or image
+function ClientAvatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const colors = [
+    'from-blue-500 to-cyan-500',
+    'from-purple-500 to-pink-500',
+    'from-green-500 to-emerald-500',
+    'from-orange-500 to-red-500',
+    'from-indigo-500 to-purple-500',
+    'from-teal-500 to-green-500',
+  ];
+  const colorIndex = name.charCodeAt(0) % colors.length;
+  
+  const sizeClasses = {
+    sm: 'w-8 h-8 text-xs',
+    md: 'w-10 h-10 text-sm',
+    lg: 'w-12 h-12 text-base',
+  };
+  
+  return (
+    <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${colors[colorIndex]} flex items-center justify-center font-semibold text-white`}>
+      {initials}
+    </div>
+  );
+}
+
+// Status Badge Component
+function StatusBadge({ status }: { status: string }) {
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG.active;
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}>
+      {config.label}
+    </span>
+  );
+}
+
+// Grouped Client Row Component
+function ClientRow({ 
+  client, 
+  onClick 
+}: { 
+  client: Client; 
+  onClick: () => void;
+}) {
+  const status = client.status || 'active';
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG.active;
+  
+  return (
+    <div
+      onClick={onClick}
+      className={`flex items-center gap-4 px-4 py-3 bg-dark-800/50 hover:bg-dark-700/80 cursor-pointer transition-all border-l-4 ${config.borderColor} group`}
+    >
+      <ClientAvatar name={client.full_name} />
+      
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-white truncate">{client.full_name}</p>
+      </div>
+      
+      <StatusBadge status={status} />
+      
+      <div className="w-32 text-sm text-dark-300">
+        {client.phone || '-'}
+      </div>
+      
+      <div className="w-36 text-sm text-dark-300 truncate">
+        {client.primary_diagnosis || 'General Care'}
+      </div>
+      
+      <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
+    </div>
+  );
+}
+
 export default function ClientsPage() {
   const router = useRouter();
   const { token, isLoading: authLoading } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [modalOpen, setModalOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   useEffect(() => {
@@ -151,17 +409,15 @@ export default function ClientsPage() {
     client.phone?.includes(searchQuery)
   );
 
-  const activeClients = clients.filter(c => c.status === 'active' || !c.status);
-  const highCareClients = clients.filter(c => c.care_level === 'HIGH');
+  // Group clients by status for pipeline view
+  const intakeClients = filteredClients.filter(c => c.status === 'intake' || c.status === 'assessment' || c.status === 'pending');
+  const assignedClients = filteredClients.filter(c => c.status === 'assigned' || c.status === 'active' || !c.status);
+  const followUpClients = filteredClients.filter(c => c.status === 'follow_up');
 
-  const getCareLevel = (level?: string) => {
-    switch (level) {
-      case 'HIGH': return { label: 'High Care', color: 'bg-red-500/20 text-red-400' };
-      case 'MODERATE': return { label: 'Moderate', color: 'bg-yellow-500/20 text-yellow-400' };
-      case 'LOW': return { label: 'Low Care', color: 'bg-green-500/20 text-green-400' };
-      default: return null;
-    }
-  };
+  // Stats
+  const activeCount = clients.filter(c => c.status === 'active' || !c.status).length;
+  const intakeCount = clients.filter(c => c.status === 'intake' || c.status === 'pending').length;
+  const highCareCount = clients.filter(c => c.care_level === 'HIGH').length;
 
   if (authLoading) {
     return (
@@ -179,161 +435,424 @@ export default function ClientsPage() {
       <Sidebar />
       
       <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Clients</h1>
-              <p className="text-dark-300">Manage your client database</p>
+              <h1 className="text-3xl font-bold text-white mb-1">Clients</h1>
+              <p className="text-dark-400">Manage your client pipeline</p>
             </div>
-            <button 
-              onClick={handleAddClient}
-              className="btn-primary flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Add Client
-            </button>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
-            <div className="card p-5">
-              <p className="text-dark-400 text-sm mb-1">Total Clients</p>
-              <p className="text-3xl font-bold text-white">{clients.length}</p>
-            </div>
-            <div className="card p-5">
-              <p className="text-dark-400 text-sm mb-1">Active</p>
-              <p className="text-3xl font-bold text-accent-green">{activeClients.length}</p>
-            </div>
-            <div className="card p-5">
-              <p className="text-dark-400 text-sm mb-1">High Care</p>
-              <p className="text-3xl font-bold text-red-400">{highCareClients.length}</p>
-            </div>
-            <div className="card p-5">
-              <p className="text-dark-400 text-sm mb-1">Pending</p>
-              <p className="text-3xl font-bold text-yellow-400">
-                {clients.filter(c => c.status === 'pending').length}
-              </p>
+            <div className="flex items-center gap-3">
+              <button className="btn-secondary flex items-center gap-2 text-sm">
+                <Link2 className="w-4 h-4" />
+                Integrate
+              </button>
+              <button className="btn-secondary flex items-center gap-2 text-sm">
+                <Zap className="w-4 h-4" />
+                Automate / 2
+              </button>
+              <button className="p-2 text-dark-400 hover:text-white">
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
             </div>
           </div>
 
-          {/* Search */}
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
-              <input
-                type="text"
-                placeholder="Search by name, phone, or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-dark w-full pl-12"
-              />
+          {/* View Tabs & Search */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-1 bg-dark-800/50 rounded-xl p-1">
+              <button
+                onClick={() => setViewMode('table')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  viewMode === 'table' 
+                    ? 'bg-dark-700 text-white' 
+                    : 'text-dark-400 hover:text-white'
+                }`}
+              >
+                <List className="w-4 h-4" />
+                Main table
+              </button>
+              <button
+                onClick={() => setViewMode('pipeline')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  viewMode === 'pipeline' 
+                    ? 'bg-dark-700 text-white' 
+                    : 'text-dark-400 hover:text-white'
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                Pipeline
+              </button>
+              <button
+                onClick={() => setViewMode('forecast')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  viewMode === 'forecast' 
+                    ? 'bg-dark-700 text-white' 
+                    : 'text-dark-400 hover:text-white'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                Forecast
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-dark-400 hover:text-white">
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400" />
+                <input
+                  type="text"
+                  placeholder="Search clients..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 pl-10 pr-4 py-2 bg-dark-800 border border-dark-600 rounded-xl text-white text-sm placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                />
+              </div>
+              <button className="p-2 bg-dark-800 border border-dark-600 rounded-xl text-dark-400 hover:text-white">
+                <Filter className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setQuickAddOpen(true)}
+                className="btn-primary flex items-center gap-2 py-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Client
+              </button>
             </div>
           </div>
 
-          {/* Clients List */}
+          {/* Main Content */}
           {loading ? (
             <div className="card p-12 text-center">
               <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="text-dark-400">Loading clients...</p>
             </div>
-          ) : filteredClients.length === 0 ? (
-            <div className="card p-12 text-center">
-              <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-dark-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
-                {searchQuery ? 'No clients found' : 'No clients yet'}
-              </h3>
-              <p className="text-dark-400 mb-4">
-                {searchQuery ? 'Try a different search term' : 'Add your first client to get started'}
-              </p>
-              {!searchQuery && (
-                <button onClick={handleAddClient} className="btn-primary">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Client
-                </button>
+          ) : viewMode === 'table' ? (
+            /* Table View - Grouped by Status */
+            <div className="space-y-8">
+              {/* Intake Queue Section */}
+              {intakeClients.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-lg font-semibold text-teal-400">Intake queue</h2>
+                    <span className="text-sm text-dark-400">({intakeClients.length})</span>
+                  </div>
+                  
+                  {/* Table Header */}
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                    <div className="w-10" />
+                    <div className="flex-1">Client</div>
+                    <div className="w-28">Visit status</div>
+                    <div className="w-32">Phone</div>
+                    <div className="w-36">Care specialty</div>
+                    <div className="w-4" />
+                  </div>
+
+                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                    {intakeClients.map((client) => (
+                      <ClientRow 
+                        key={client.id} 
+                        client={client} 
+                        onClick={() => handleEditClient(client)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Assigned to Care Team Section */}
+              {assignedClients.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-lg font-semibold text-teal-400">Assigned to care team</h2>
+                    <span className="text-sm text-dark-400">({assignedClients.length})</span>
+                  </div>
+                  
+                  {/* Table Header */}
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                    <div className="w-10" />
+                    <div className="flex-1">Client</div>
+                    <div className="w-28">Visit status</div>
+                    <div className="w-32">Phone</div>
+                    <div className="w-36">Care specialty</div>
+                    <div className="w-4" />
+                  </div>
+
+                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                    {assignedClients.map((client) => (
+                      <ClientRow 
+                        key={client.id} 
+                        client={client} 
+                        onClick={() => handleEditClient(client)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Follow-up Section */}
+              {followUpClients.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-lg font-semibold text-purple-400">Follow-up required</h2>
+                    <span className="text-sm text-dark-400">({followUpClients.length})</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                    <div className="w-10" />
+                    <div className="flex-1">Client</div>
+                    <div className="w-28">Visit status</div>
+                    <div className="w-32">Phone</div>
+                    <div className="w-36">Care specialty</div>
+                    <div className="w-4" />
+                  </div>
+
+                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                    {followUpClients.map((client) => (
+                      <ClientRow 
+                        key={client.id} 
+                        client={client} 
+                        onClick={() => handleEditClient(client)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {filteredClients.length === 0 && (
+                <div className="card p-12 text-center">
+                  <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-dark-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    {searchQuery ? 'No clients found' : 'No clients yet'}
+                  </h3>
+                  <p className="text-dark-400 mb-4">
+                    {searchQuery ? 'Try a different search term' : 'Add your first client to get started'}
+                  </p>
+                  {!searchQuery && (
+                    <button onClick={() => setQuickAddOpen(true)} className="btn-primary">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Client
+                    </button>
+                  )}
+                </div>
               )}
             </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredClients.map((client) => {
-                const careLevel = getCareLevel(client.care_level);
-                return (
-                  <div
-                    key={client.id}
-                    onClick={() => handleEditClient(client)}
-                    className="card card-hover p-5 cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-4">
-                      {/* Avatar */}
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">
-                          {client.full_name.charAt(0)}
-                        </span>
+          ) : viewMode === 'pipeline' ? (
+            /* Pipeline / Kanban View */
+            <div className="grid grid-cols-4 gap-4">
+              {/* Intake Column */}
+              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
+                <div className="p-4 border-b border-dark-700 bg-orange-500/10">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-orange-400">Intake</h3>
+                    <span className="text-sm text-dark-400">{intakeClients.length}</span>
+                  </div>
+                </div>
+                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                  {intakeClients.map(client => (
+                    <div 
+                      key={client.id}
+                      onClick={() => handleEditClient(client)}
+                      className="p-3 bg-dark-800 rounded-xl border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <ClientAvatar name={client.full_name} size="sm" />
+                        <p className="font-medium text-white text-sm truncate">{client.full_name}</p>
                       </div>
-
-                      {/* Info */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <h3 className="font-semibold text-white">
-                            {client.full_name}
-                          </h3>
-                          {careLevel && (
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${careLevel.color}`}>
-                              {careLevel.label}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-dark-400">
-                          {client.phone && (
-                            <div className="flex items-center gap-1.5">
-                              <Phone className="w-4 h-4" />
-                              {client.phone}
-                            </div>
-                          )}
-                          {(client.city || client.address) && (
-                            <div className="flex items-center gap-1.5">
-                              <MapPin className="w-4 h-4" />
-                              {client.city || client.address?.split(',')[0]}
-                            </div>
-                          )}
-                          {client.primary_diagnosis && (
-                            <div className="flex items-center gap-1.5">
-                              <Heart className="w-4 h-4" />
-                              {client.primary_diagnosis}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Emergency Contact */}
-                      {client.emergency_contact_name && (
-                        <div className="text-right mr-4">
-                          <div className="flex items-center gap-1.5 text-dark-400 text-sm">
-                            <AlertCircle className="w-4 h-4 text-red-400" />
-                            <span className="text-dark-500">Emergency:</span> {client.emergency_contact_name}
-                          </div>
-                        </div>
+                      {client.phone && (
+                        <p className="text-xs text-dark-400">{client.phone}</p>
                       )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                      <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
+              {/* Assessment Column */}
+              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
+                <div className="p-4 border-b border-dark-700 bg-yellow-500/10">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-yellow-400">Assessment</h3>
+                    <span className="text-sm text-dark-400">
+                      {filteredClients.filter(c => c.status === 'assessment').length}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                  {filteredClients.filter(c => c.status === 'assessment').map(client => (
+                    <div 
+                      key={client.id}
+                      onClick={() => handleEditClient(client)}
+                      className="p-3 bg-dark-800 rounded-xl border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <ClientAvatar name={client.full_name} size="sm" />
+                        <p className="font-medium text-white text-sm truncate">{client.full_name}</p>
+                      </div>
+                      {client.phone && (
+                        <p className="text-xs text-dark-400">{client.phone}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active Column */}
+              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
+                <div className="p-4 border-b border-dark-700 bg-green-500/10">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-green-400">Active</h3>
+                    <span className="text-sm text-dark-400">{assignedClients.length}</span>
+                  </div>
+                </div>
+                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                  {assignedClients.map(client => (
+                    <div 
+                      key={client.id}
+                      onClick={() => handleEditClient(client)}
+                      className="p-3 bg-dark-800 rounded-xl border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <ClientAvatar name={client.full_name} size="sm" />
+                        <p className="font-medium text-white text-sm truncate">{client.full_name}</p>
+                      </div>
+                      {client.phone && (
+                        <p className="text-xs text-dark-400">{client.phone}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Follow-up Column */}
+              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
+                <div className="p-4 border-b border-dark-700 bg-purple-500/10">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-purple-400">Follow-up</h3>
+                    <span className="text-sm text-dark-400">{followUpClients.length}</span>
+                  </div>
+                </div>
+                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                  {followUpClients.map(client => (
+                    <div 
+                      key={client.id}
+                      onClick={() => handleEditClient(client)}
+                      className="p-3 bg-dark-800 rounded-xl border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <ClientAvatar name={client.full_name} size="sm" />
+                        <p className="font-medium text-white text-sm truncate">{client.full_name}</p>
+                      </div>
+                      {client.phone && (
+                        <p className="text-xs text-dark-400">{client.phone}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Forecast View */
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-4">
+                <div className="card p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                      <Users className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-dark-400">Total Clients</p>
+                      <p className="text-2xl font-bold text-white">{clients.length}</p>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+
+                <div className="card p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-dark-400">Active</p>
+                      <p className="text-2xl font-bold text-green-400">{activeCount}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                      <AlertCircle className="w-5 h-5 text-orange-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-dark-400">In Intake</p>
+                      <p className="text-2xl font-bold text-orange-400">{intakeCount}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-red-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-dark-400">High Care</p>
+                      <p className="text-2xl font-bold text-red-400">{highCareCount}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Simple Chart Placeholder */}
+              <div className="card p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Client Pipeline Forecast</h3>
+                <div className="h-64 flex items-end justify-around gap-4">
+                  {['Intake', 'Assessment', 'Active', 'Follow-up'].map((stage, i) => {
+                    const heights = [intakeCount, 
+                      clients.filter(c => c.status === 'assessment').length || 1,
+                      activeCount,
+                      followUpClients.length || 1
+                    ];
+                    const maxHeight = Math.max(...heights, 1);
+                    const height = (heights[i] / maxHeight) * 100;
+                    const colors = ['bg-orange-500', 'bg-yellow-500', 'bg-green-500', 'bg-purple-500'];
+                    
+                    return (
+                      <div key={stage} className="flex flex-col items-center gap-2 flex-1">
+                        <div 
+                          className={`w-full max-w-[80px] ${colors[i]} rounded-t-lg transition-all duration-500`}
+                          style={{ height: `${Math.max(height, 10)}%` }}
+                        />
+                        <span className="text-sm text-dark-400">{stage}</span>
+                        <span className="text-lg font-bold text-white">{heights[i]}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
         </div>
       </main>
 
-      {/* Client Modal */}
+      {/* Full Client Modal */}
       <ClientModal
         client={selectedClient}
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleSaveClient}
         onDelete={handleDeleteClient}
+      />
+
+      {/* Quick Add Modal */}
+      <QuickAddModal
+        isOpen={quickAddOpen}
+        onClose={() => setQuickAddOpen(false)}
+        onSave={handleSaveClient}
       />
     </div>
   );
