@@ -2,8 +2,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import Optional
 import io
 import csv
+import base64
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
@@ -17,6 +20,15 @@ from app.services.document_generation import (
     generate_note_docx,
     generate_contract_docx
 )
+from app.services.email import get_email_service
+
+
+class EmailContractRequest(BaseModel):
+    recipient_email: str
+    recipient_name: Optional[str] = None
+    subject: Optional[str] = None
+    message: Optional[str] = None
+    cc_email: Optional[str] = None
 
 router = APIRouter()
 
@@ -188,3 +200,184 @@ async def export_contract_docx(
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         headers={"Content-Disposition": f"attachment; filename=contract_{contract.id}.docx"},
     )
+
+
+# ============ EMAIL EXPORTS ============
+
+@router.post("/visits/{visit_id}/email-contract")
+async def email_contract(
+    visit_id: UUID,
+    email_request: EmailContractRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Email the contract PDF to a recipient."""
+    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    
+    contract = db.query(Contract).filter(
+        Contract.client_id == visit.client_id
+    ).order_by(Contract.created_at.desc()).first()
+    
+    if not contract:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+    
+    # Generate PDF
+    pdf_bytes = generate_contract_pdf(visit.client, contract)
+    
+    # Prepare email
+    email_service = get_email_service()
+    
+    client_name = visit.client.full_name if visit.client else "Client"
+    recipient_name = email_request.recipient_name or client_name
+    
+    subject = email_request.subject or f"Service Agreement - {client_name}"
+    
+    # Build email HTML
+    custom_message = email_request.message or ""
+    message_html = f"<p>{custom_message.replace(chr(10), '<br>')}</p>" if custom_message else ""
+    
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #6366f1; margin-bottom: 20px;">Service Agreement</h2>
+        
+        <p>Dear {recipient_name},</p>
+        
+        {message_html if message_html else "<p>Please find attached the service agreement for your review.</p>"}
+        
+        <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #666;">
+                <strong>Client:</strong> {client_name}<br>
+                <strong>Document:</strong> Home Care Service Agreement (PDF attached)
+            </p>
+        </div>
+        
+        <p>Please review the document carefully. If you have any questions or need clarification on any terms, feel free to reply to this email.</p>
+        
+        <p>To proceed, please:</p>
+        <ol style="color: #555;">
+            <li>Review all terms and conditions</li>
+            <li>Sign the document</li>
+            <li>Return a signed copy to us</li>
+        </ol>
+        
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        
+        <p style="color: #999; font-size: 12px;">
+            This email was sent from Homecare AI on behalf of your care provider.
+        </p>
+    </div>
+    """
+    
+    # Prepare attachment
+    attachments = [{
+        "filename": f"Service_Agreement_{client_name.replace(' ', '_')}.pdf",
+        "content": base64.b64encode(pdf_bytes).decode('utf-8'),
+    }]
+    
+    # Send email
+    recipients = [email_request.recipient_email]
+    if email_request.cc_email:
+        recipients.append(email_request.cc_email)
+    
+    success = email_service.send_email(
+        to=recipients,
+        subject=subject,
+        html=html,
+        attachments=attachments,
+        reply_to=current_user.email,
+    )
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send email. Please check your email configuration."
+        )
+    
+    return {
+        "success": True,
+        "message": f"Contract sent to {email_request.recipient_email}",
+        "recipient": email_request.recipient_email,
+    }
+
+
+@router.post("/visits/{visit_id}/email-note")
+async def email_note(
+    visit_id: UUID,
+    email_request: EmailContractRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Email the visit note PDF to a recipient."""
+    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    
+    note = db.query(Note).filter(Note.visit_id == visit_id).first()
+    if not note:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+    
+    # Generate PDF
+    pdf_bytes = generate_note_pdf(visit, note)
+    
+    # Prepare email
+    email_service = get_email_service()
+    
+    client_name = visit.client.full_name if visit.client else "Client"
+    recipient_name = email_request.recipient_name or client_name
+    
+    subject = email_request.subject or f"Visit Note - {client_name}"
+    
+    custom_message = email_request.message or ""
+    message_html = f"<p>{custom_message.replace(chr(10), '<br>')}</p>" if custom_message else ""
+    
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #6366f1; margin-bottom: 20px;">Visit Note</h2>
+        
+        <p>Dear {recipient_name},</p>
+        
+        {message_html if message_html else "<p>Please find attached the visit note for your records.</p>"}
+        
+        <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #666;">
+                <strong>Client:</strong> {client_name}<br>
+                <strong>Document:</strong> Visit Note (PDF attached)
+            </p>
+        </div>
+        
+        <p style="color: #999; font-size: 12px;">
+            This email was sent from Homecare AI on behalf of your care provider.
+        </p>
+    </div>
+    """
+    
+    attachments = [{
+        "filename": f"Visit_Note_{client_name.replace(' ', '_')}.pdf",
+        "content": base64.b64encode(pdf_bytes).decode('utf-8'),
+    }]
+    
+    recipients = [email_request.recipient_email]
+    if email_request.cc_email:
+        recipients.append(email_request.cc_email)
+    
+    success = email_service.send_email(
+        to=recipients,
+        subject=subject,
+        html=html,
+        attachments=attachments,
+        reply_to=current_user.email,
+    )
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send email. Please check your email configuration."
+        )
+    
+    return {
+        "success": True,
+        "message": f"Visit note sent to {email_request.recipient_email}",
+        "recipient": email_request.recipient_email,
+    }

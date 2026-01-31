@@ -45,6 +45,7 @@ class EmailService:
         html: str,
         text: Optional[str] = None,
         reply_to: Optional[str] = None,
+        attachments: Optional[List[dict]] = None,
     ) -> bool:
         """
         Send an email via Resend.
@@ -55,6 +56,7 @@ class EmailService:
             html: HTML body
             text: Plain text body (optional)
             reply_to: Reply-to address (optional)
+            attachments: List of attachments, each with 'filename' and 'content' (base64 or bytes)
         
         Returns:
             True if sent successfully, False otherwise
@@ -75,6 +77,8 @@ class EmailService:
                 params["text"] = text
             if reply_to:
                 params["reply_to"] = reply_to
+            if attachments:
+                params["attachments"] = attachments
             
             response = resend.Emails.send(params)
             logger.info(f"Email sent to {to}: {subject}")

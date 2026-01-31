@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { FileSignature, Printer, FileText, RefreshCw, AlertCircle, Edit3, Save, X, Check, Download } from 'lucide-react';
+import { FileSignature, Printer, FileText, RefreshCw, AlertCircle, Edit3, Save, X, Check, Download, Mail, Send, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -68,6 +68,18 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
   // Editable contract data
   const [editData, setEditData] = useState<any>({});
+  
+  // Email modal state
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailForm, setEmailForm] = useState({
+    recipient_email: '',
+    recipient_name: '',
+    subject: '',
+    message: '',
+    cc_email: '',
+  });
 
   useEffect(() => {
     const loadAgencySettings = async () => {
@@ -475,6 +487,53 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     }
   };
 
+  const handleOpenEmailModal = () => {
+    // Pre-fill form with client info
+    setEmailForm({
+      recipient_email: client?.email || '',
+      recipient_name: client?.full_name || '',
+      subject: `Service Agreement - ${client?.full_name || 'Client'}`,
+      message: '',
+      cc_email: '',
+    });
+    setEmailSent(false);
+    setShowEmailModal(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!visitId || !token || !emailForm.recipient_email) return;
+    
+    setEmailSending(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`${API_BASE}/exports/visits/${visitId}/email-contract`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(emailForm),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || 'Failed to send email');
+      }
+
+      setEmailSent(true);
+      setTimeout(() => {
+        setShowEmailModal(false);
+        setEmailSent(false);
+      }, 2000);
+      
+    } catch (err: any) {
+      setError(err.message || 'Failed to send email. Please try again.');
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
   const getContractData = () => {
     const schedule = contract?.schedule || {};
     const services = contract?.services || [];
@@ -591,6 +650,13 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               >
                 <RefreshCw className="w-4 h-4" />
                 Regenerate
+              </button>
+              <button 
+                onClick={handleOpenEmailModal} 
+                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+              >
+                <Mail className="w-4 h-4" />
+                Email
               </button>
               <button 
                 onClick={handlePrint} 
@@ -984,6 +1050,144 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           </div>
         </div>
       </div>
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-800 rounded-xl border border-dark-700 w-full max-w-lg overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-dark-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Email Contract</h3>
+                  <p className="text-xs text-dark-400">Send the contract PDF as an attachment</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowEmailModal(false)}
+                className="p-2 hover:bg-dark-700 rounded-lg transition"
+              >
+                <X className="w-5 h-5 text-dark-400" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 space-y-4">
+              {emailSent ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Check className="w-8 h-8 text-green-400" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-white mb-2">Email Sent!</h4>
+                  <p className="text-dark-400">The contract has been sent successfully.</p>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-dark-400 text-sm mb-1.5">Recipient Email *</label>
+                    <input
+                      type="email"
+                      value={emailForm.recipient_email}
+                      onChange={(e) => setEmailForm({ ...emailForm, recipient_email: e.target.value })}
+                      placeholder="client@email.com"
+                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-dark-400 text-sm mb-1.5">Recipient Name</label>
+                    <input
+                      type="text"
+                      value={emailForm.recipient_name}
+                      onChange={(e) => setEmailForm({ ...emailForm, recipient_name: e.target.value })}
+                      placeholder="John Smith"
+                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-dark-400 text-sm mb-1.5">CC Email (optional)</label>
+                    <input
+                      type="email"
+                      value={emailForm.cc_email}
+                      onChange={(e) => setEmailForm({ ...emailForm, cc_email: e.target.value })}
+                      placeholder="copy@email.com"
+                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-dark-400 text-sm mb-1.5">Subject</label>
+                    <input
+                      type="text"
+                      value={emailForm.subject}
+                      onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                      placeholder="Service Agreement"
+                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-dark-400 text-sm mb-1.5">Personal Message (optional)</label>
+                    <textarea
+                      value={emailForm.message}
+                      onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                      rows={3}
+                      placeholder="Add a personal note to accompany the contract..."
+                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500 resize-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 p-3 bg-dark-700/50 rounded-lg">
+                    <FileText className="w-5 h-5 text-purple-400" />
+                    <span className="text-dark-300 text-sm">Service_Agreement_{(client?.full_name || 'Client').replace(/ /g, '_')}.pdf</span>
+                    <span className="text-dark-500 text-xs ml-auto">Attached</span>
+                  </div>
+
+                  {error && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      {error}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            {!emailSent && (
+              <div className="flex justify-end gap-3 p-4 border-t border-dark-700">
+                <button
+                  onClick={() => setShowEmailModal(false)}
+                  className="px-4 py-2 bg-dark-700 text-dark-300 rounded-lg hover:bg-dark-600 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendEmail}
+                  disabled={emailSending || !emailForm.recipient_email}
+                  className="flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                >
+                  {emailSending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Email
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
