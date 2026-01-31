@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 // Formspree form ID for support tickets
-const FORMSPREE_SUPPORT_ID = process.env.NEXT_PUBLIC_FORMSPREE_SUPPORT_ID || 'mvgkzpqr';
+const FORMSPREE_SUPPORT_ID = process.env.NEXT_PUBLIC_FORMSPREE_SUPPORT_ID || 'xaqbwpzy';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
