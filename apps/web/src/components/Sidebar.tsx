@@ -28,7 +28,8 @@ import {
   FolderOpen,
   UserCog,
   Eye,
-  RefreshCw
+  RefreshCw,
+  HelpCircle
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -57,6 +58,7 @@ const communicationNavItems = [
 const resourcesNavItems = [
   { href: '/documents', label: 'Documents', icon: FolderOpen, description: 'Files & contracts' },
   { href: '/reports', label: 'Reports', icon: BarChart3, description: 'Analytics' },
+  { href: '/help', label: 'Help & Support', icon: HelpCircle, description: 'Get help' },
 ];
 
 // Agency Admin

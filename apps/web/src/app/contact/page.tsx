@@ -8,7 +8,8 @@ import {
   Loader2, CheckCircle, ArrowLeft
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+// Formspree form ID - get yours at https://formspree.io
+const FORMSPREE_CONTACT_ID = process.env.NEXT_PUBLIC_FORMSPREE_CONTACT_ID || 'xwpkgpbw';
 
 function ContactForm() {
   const searchParams = useSearchParams();
@@ -32,12 +33,32 @@ function ContactForm() {
     setError('');
 
     try {
-      // For now, we'll just simulate a submission
-      // In production, this would hit an API endpoint
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setSubmitted(true);
-    } catch (err) {
-      setError('Failed to submit. Please try again or email us directly.');
+      // Submit to Formspree
+      const response = await fetch(`https://formspree.io/f/${FORMSPREE_CONTACT_ID}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          phone: formData.phone,
+          inquiry_type: formData.inquiry_type,
+          message: formData.message,
+          _subject: `[${formData.inquiry_type.toUpperCase()}] Contact from ${formData.company}`,
+        }),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to submit');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit. Please try again or email us directly.');
     } finally {
       setLoading(false);
     }
