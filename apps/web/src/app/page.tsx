@@ -93,13 +93,6 @@ const PRICING = [
     features: ['300 contracts/month', '1,000 clients in CRM', '500 caregivers', 'Unlimited seats', 'Advanced analytics'],
     popular: false,
   },
-  {
-    name: 'Enterprise',
-    price: null,
-    description: 'Custom solutions',
-    features: ['Unlimited everything', 'Custom templates', 'Dedicated success manager', 'API access', 'SLA guarantee'],
-    popular: false,
-  },
 ];
 
 // Demo steps data
@@ -711,7 +704,7 @@ export default function LandingPage() {
             <p className="text-xl text-dark-400">Start free, upgrade as you grow</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {PRICING.map((plan, i) => (
               <div 
                 key={i} 
