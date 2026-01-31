@@ -52,16 +52,6 @@ export default function PricingPage() {
       cta: 'Get Started',
       href: '/register?plan=pro',
     },
-    {
-      name: 'Enterprise',
-      description: 'Custom solutions',
-      monthlyPrice: null,
-      annualPrice: null,
-      setupFee: null,
-      highlighted: false,
-      cta: 'Contact Sales',
-      href: '/contact?plan=enterprise',
-    },
   ];
 
   const getPrice = (plan: PricingPlan): number | null => {
@@ -79,35 +69,35 @@ export default function PricingPage() {
     {
       name: 'Core Features',
       features: [
-        { name: 'Generated contracts / month', values: ['25', '100', '300', 'Unlimited'] },
-        { name: 'Clients in CRM', values: ['50', '200', '1,000', 'Unlimited'] },
-        { name: 'Caregivers in CRM', values: ['25', '100', '500', 'Unlimited'] },
-        { name: 'Team seats', values: ['3', '10', 'Unlimited', 'Unlimited'] },
-        { name: 'Assessment intake', values: [true, true, true, true] },
-        { name: 'Transcript import/upload', values: [true, true, true, true] },
-        { name: 'AI billables extraction', values: [true, true, true, true] },
-        { name: 'Contract templates', values: ['Basic', 'Advanced', 'Advanced', 'Custom'] },
-        { name: 'PDF exports', values: [true, true, true, true] },
+        { name: 'Generated contracts / month', values: ['25', '100', '300'] },
+        { name: 'Clients in CRM', values: ['50', '200', '1,000'] },
+        { name: 'Caregivers in CRM', values: ['25', '100', '500'] },
+        { name: 'Team seats', values: ['3', '10', 'Unlimited'] },
+        { name: 'Assessment intake', values: [true, true, true] },
+        { name: 'Transcript import/upload', values: [true, true, true] },
+        { name: 'AI billables extraction', values: [true, true, true] },
+        { name: 'Contract templates', values: ['Basic', 'Advanced', 'Advanced'] },
+        { name: 'PDF exports', values: [true, true, true] },
       ],
     },
     {
       name: 'Advanced',
       features: [
-        { name: 'Timesheet CSV exports', values: [false, true, true, true] },
-        { name: 'Multi-location management', values: [false, false, true, true] },
-        { name: 'Advanced analytics', values: [false, false, true, true] },
-        { name: 'Integrations & API', values: [false, false, true, true] },
-        { name: 'Custom templates', values: [false, false, false, true] },
+        { name: 'Timesheet CSV exports', values: [false, true, true] },
+        { name: 'Multi-location management', values: [false, false, true] },
+        { name: 'Advanced analytics', values: [false, false, true] },
+        { name: 'Integrations & API', values: [false, false, true] },
+        { name: 'Custom templates', values: [false, false, true] },
       ],
     },
     {
       name: 'Support',
       features: [
-        { name: 'Email support', values: [true, true, true, true] },
-        { name: 'Priority support', values: [false, true, true, true] },
-        { name: 'Dedicated success manager', values: [false, false, false, true] },
-        { name: 'Custom onboarding', values: [false, false, false, true] },
-        { name: 'SLA guarantee', values: [false, false, false, true] },
+        { name: 'Email support', values: [true, true, true] },
+        { name: 'Priority support', values: [false, true, true] },
+        { name: 'Dedicated success manager', values: [false, false, true] },
+        { name: 'Custom onboarding', values: [false, false, true] },
+        { name: 'SLA guarantee', values: [false, false, true] },
       ],
     },
   ];
@@ -190,7 +180,7 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <section className="px-6 pb-8">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((plan) => {
               const price = getPrice(plan);
               const savings = getAnnualSavings(plan);
@@ -267,7 +257,7 @@ export default function PricingPage() {
           {/* Desktop Table */}
           <div className="hidden lg:block overflow-hidden rounded-2xl border border-dark-700 bg-dark-800">
             {/* Table Header */}
-            <div className="grid grid-cols-5 bg-dark-850 border-b border-dark-700">
+            <div className="grid grid-cols-4 bg-dark-850 border-b border-dark-700">
               <div className="p-6">
                 <span className="text-dark-400 text-sm font-medium">Features</span>
               </div>
@@ -294,8 +284,8 @@ export default function PricingPage() {
             {featureCategories.map((category) => (
               <div key={category.name}>
                 {/* Category Header */}
-                <div className="grid grid-cols-5 bg-dark-800/50 border-b border-dark-700/50">
-                  <div className="col-span-5 px-6 py-3">
+                <div className="grid grid-cols-4 bg-dark-800/50 border-b border-dark-700/50">
+                  <div className="col-span-4 px-6 py-3">
                     <span className="text-primary-400 text-sm font-semibold uppercase tracking-wider">
                       {category.name}
                     </span>
@@ -306,7 +296,7 @@ export default function PricingPage() {
                 {category.features.map((feature, idx) => (
                   <div
                     key={feature.name}
-                    className={`grid grid-cols-5 border-b border-dark-700/30 ${
+                    className={`grid grid-cols-4 border-b border-dark-700/30 ${
                       idx % 2 === 0 ? 'bg-dark-800' : 'bg-dark-800/50'
                     }`}
                   >
@@ -329,7 +319,7 @@ export default function PricingPage() {
             ))}
 
             {/* CTA Row */}
-            <div className="grid grid-cols-5 border-t border-dark-700">
+            <div className="grid grid-cols-4 border-t border-dark-700">
               <div className="p-6"></div>
               {plans.map((plan) => (
                 <div
