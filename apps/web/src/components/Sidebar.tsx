@@ -104,13 +104,13 @@ export default function Sidebar() {
     return (
       <Link
         href={item.href}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${
           isActive 
             ? 'bg-primary-500/15 text-white border border-primary-500/30' 
             : 'text-dark-300 hover:bg-dark-700/50 hover:text-white border border-transparent'
         }`}
       >
-        <div className={`w-8 h-8 min-w-[32px] flex-shrink-0 rounded-lg flex items-center justify-center transition-colors ${
+        <div className={`w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center ${
           isActive 
             ? 'bg-primary-500/20' 
             : 'bg-dark-700/50 group-hover:bg-dark-600/50'
@@ -119,25 +119,25 @@ export default function Sidebar() {
             isActive ? 'text-primary-400' : 'text-dark-400 group-hover:text-white'
           }`} />
         </div>
-        <span className={`font-medium text-sm flex-1 ${isActive ? 'text-white' : ''}`}>
+        <span className={`font-medium text-sm truncate ${isActive ? 'text-white' : ''}`}>
           {item.label}
         </span>
         {isActive && (
-          <ChevronRight className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
+          <ChevronRight className="w-3.5 h-3.5 text-primary-400 flex-shrink-0 ml-auto" />
         )}
       </Link>
     );
   };
 
   return (
-    <aside className="w-72 bg-dark-800/80 backdrop-blur-md border-r border-dark-700/50 flex flex-col min-h-screen">
+    <aside className="w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col min-h-screen flex-shrink-0">
       {/* Logo */}
       <div className="px-6 py-6">
         <Link href="/dashboard" className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+          <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
             <Mic className="w-6 h-6 text-white" />
           </div>
-          <div>
+          <div className="min-w-0">
             <span className="text-xl font-bold text-white block">Homecare AI</span>
             <span className="text-xs text-dark-400">Contracts & proposals</span>
           </div>
@@ -145,7 +145,7 @@ export default function Sidebar() {
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-4 pb-4 overflow-y-auto">
+      <nav className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden">
         {/* Sales Section */}
         <div className="mb-5">
           <div className="px-4 py-2 mb-2">
