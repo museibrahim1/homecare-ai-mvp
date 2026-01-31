@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { MessagesSquare, Hash, Users, Plus, Send, AtSign, Mail, Inbox, Check, Loader2, RefreshCw, X, Star, Paperclip, Reply } from 'lucide-react';
+import { MessagesSquare, Hash, Users, Plus, Send, AtSign, Mail, Inbox, Check, Loader2, RefreshCw, X, Star, Paperclip, Reply, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
