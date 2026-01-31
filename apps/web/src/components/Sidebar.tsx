@@ -110,7 +110,7 @@ export default function Sidebar() {
             : 'text-dark-300 hover:bg-dark-700/50 hover:text-white border border-transparent'
         }`}
       >
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+        <div className={`w-8 h-8 min-w-[32px] flex-shrink-0 rounded-lg flex items-center justify-center transition-colors ${
           isActive 
             ? 'bg-primary-500/20' 
             : 'bg-dark-700/50 group-hover:bg-dark-600/50'
@@ -119,11 +119,11 @@ export default function Sidebar() {
             isActive ? 'text-primary-400' : 'text-dark-400 group-hover:text-white'
           }`} />
         </div>
-        <span className={`font-medium text-sm ${isActive ? 'text-white' : ''}`}>
+        <span className={`font-medium text-sm flex-1 ${isActive ? 'text-white' : ''}`}>
           {item.label}
         </span>
         {isActive && (
-          <ChevronRight className="w-3.5 h-3.5 text-primary-400 ml-auto" />
+          <ChevronRight className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
         )}
       </Link>
     );
