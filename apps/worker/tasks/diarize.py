@@ -15,7 +15,7 @@ from worker import app
 from db import get_db
 from storage import download_file_to_path, get_presigned_url
 from config import settings
-from libs.pyannote_diar import diarize_audio
+from libs.pyannote_diar import diarize_audio, identify_speakers_with_voiceprints
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +321,42 @@ def diarize_visit(self, visit_id: str):
             # Align diarization with transcript segments
             aligned_count = align_diarization_with_transcript(db, visit.id, turns)
             
-            # Use COMBINED analysis for speaker names + billables (single Claude call)
+            # =====================================================================
+            # VOICEPRINT IDENTIFICATION - Try to identify staff members by voice
+            # =====================================================================
+            from models import User
+            
+            # Fetch all users with voiceprints
+            users_with_voiceprints = db.query(User).filter(
+                User.voiceprint.isnot(None),
+                User.is_active == True
+            ).all()
+            
+            voiceprint_speaker_names = {}
+            
+            if users_with_voiceprints and audio_url:
+                logger.info(f"Attempting voiceprint identification with {len(users_with_voiceprints)} voiceprints")
+                
+                # Build voiceprints list for API
+                voiceprints_list = [
+                    {"label": user.full_name, "voiceprint": user.voiceprint}
+                    for user in users_with_voiceprints
+                ]
+                
+                # Try to identify speakers by voice
+                voiceprint_speaker_names = identify_speakers_with_voiceprints(
+                    audio_url=audio_url,
+                    voiceprints=voiceprints_list,
+                )
+                
+                if voiceprint_speaker_names:
+                    logger.info(f"Voiceprint identification found: {voiceprint_speaker_names}")
+                    # Update segments with voiceprint-identified names
+                    update_speaker_names(db, visit.id, voiceprint_speaker_names)
+            
+            # =====================================================================
+            # CLAUDE ANALYSIS - For remaining speakers + billables extraction
+            # =====================================================================
             from libs.transcript_analysis import analyze_transcript_combined
             from models import TranscriptSegment
             
@@ -332,14 +367,26 @@ def diarize_visit(self, visit_id: str):
             ).order_by(TranscriptSegment.start_ms).all()
             
             segment_dicts = [{"speaker_label": s.speaker_label, "text": s.text, "start_ms": s.start_ms} for s in segments]
-            unique_speakers = list(set(s.speaker_label for s in segments))
+            
+            # Find speakers NOT already identified by voiceprint
+            current_labels = list(set(s.speaker_label for s in segments))
+            unidentified_speakers = [
+                label for label in current_labels 
+                if label.startswith("SPEAKER_") and label not in voiceprint_speaker_names
+            ]
             
             # Single Claude call for both speaker names AND services
-            speaker_names, services = analyze_transcript_combined(segment_dicts, unique_speakers)
+            speaker_names, services = analyze_transcript_combined(segment_dicts, unidentified_speakers)
             
-            # Update speaker names
+            # Update speaker names for remaining unidentified speakers
             if speaker_names:
-                update_speaker_names(db, visit.id, speaker_names)
+                # Don't overwrite voiceprint-identified names
+                names_to_update = {
+                    k: v for k, v in speaker_names.items() 
+                    if k not in voiceprint_speaker_names
+                }
+                if names_to_update:
+                    update_speaker_names(db, visit.id, names_to_update)
             
             # Store services in pipeline state for billing step to use (avoids second Claude call)
             # Update pipeline state - use identified names if available

@@ -21,7 +21,11 @@ import {
   FileCheck,
   AlertCircle,
   Plus,
-  Trash2
+  Trash2,
+  Mic,
+  Square,
+  Play,
+  Volume2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
@@ -96,7 +100,18 @@ export default function SettingsPage() {
   const { token, isLoading: authLoading } = useAuth();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'agency' | 'documents' | 'profile' | 'notifications' | 'security'>('agency');
+  const [activeTab, setActiveTab] = useState<'agency' | 'documents' | 'profile' | 'voiceprint' | 'notifications' | 'security'>('agency');
+  
+  // Voiceprint state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [hasVoiceprint, setHasVoiceprint] = useState(false);
+  const [voiceprintCreatedAt, setVoiceprintCreatedAt] = useState<string | null>(null);
+  const [uploadingVoiceprint, setUploadingVoiceprint] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Agency settings state
   const [agency, setAgency] = useState<AgencySettings>(defaultAgency);
@@ -120,8 +135,131 @@ export default function SettingsPage() {
   useEffect(() => {
     if (token) {
       loadAgencySettings();
+      loadVoiceprintStatus();
     }
   }, [token]);
+
+  // Load voiceprint status
+  const loadVoiceprintStatus = async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${API_BASE}/voiceprint/status`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setHasVoiceprint(data.has_voiceprint);
+        setVoiceprintCreatedAt(data.created_at);
+      }
+    } catch (error) {
+      console.error('Failed to load voiceprint status:', error);
+    }
+  };
+
+  // Start recording
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        setAudioBlob(blob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      // Update recording time every second
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => {
+          if (prev >= 30) {
+            stopRecording();
+            return 30;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+      alert('Could not access microphone. Please allow microphone access.');
+    }
+  };
+
+  // Stop recording
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+      }
+    }
+  };
+
+  // Upload voiceprint
+  const uploadVoiceprint = async () => {
+    if (!audioBlob || !token) return;
+
+    setUploadingVoiceprint(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'voice_sample.wav');
+
+      const response = await fetch(`${API_BASE}/voiceprint/create`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setHasVoiceprint(true);
+        setVoiceprintCreatedAt(data.created_at);
+        setAudioBlob(null);
+        alert('Voice ID created successfully! Your voice will now be automatically identified in assessments.');
+      } else {
+        const error = await response.json();
+        alert(`Failed to create Voice ID: ${error.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Failed to upload voiceprint:', error);
+      alert('Failed to create Voice ID. Please try again.');
+    } finally {
+      setUploadingVoiceprint(false);
+    }
+  };
+
+  // Delete voiceprint
+  const deleteVoiceprint = async () => {
+    if (!token) return;
+    if (!confirm('Are you sure you want to delete your Voice ID?')) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/voiceprint/delete`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        setHasVoiceprint(false);
+        setVoiceprintCreatedAt(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete voiceprint:', error);
+    }
+  };
 
   const loadAgencySettings = async () => {
     try {
@@ -330,6 +468,7 @@ export default function SettingsPage() {
     { id: 'agency', label: 'Company Info', icon: Building2 },
     { id: 'documents', label: 'Documents', icon: FileText },
     { id: 'profile', label: 'Profile', icon: User },
+    { id: 'voiceprint', label: 'Voice ID', icon: Volume2 },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Shield },
   ];
@@ -845,6 +984,170 @@ export default function SettingsPage() {
                 <div>
                   <label className="block text-dark-300 text-sm mb-1">Phone</label>
                   <input type="tel" placeholder="+1 (555) 000-0000" className="input-dark w-full" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Voice ID Tab */}
+          {activeTab === 'voiceprint' && (
+            <div className="space-y-6">
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                  <Volume2 className="w-5 h-5 text-primary-400" />
+                  Voice Identification
+                </h2>
+                <p className="text-dark-400 text-sm mb-6">
+                  Record a voice sample so the system can automatically identify you as the assessor in recordings.
+                  This helps distinguish between you and clients during assessments.
+                </p>
+
+                {hasVoiceprint ? (
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                        <Check className="w-6 h-6 text-green-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-medium">Voice ID Active</h3>
+                        <p className="text-dark-400 text-sm">
+                          Created: {voiceprintCreatedAt ? new Date(voiceprintCreatedAt).toLocaleDateString() : 'Unknown'}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-green-300 text-sm mb-4">
+                      Your voice will be automatically identified in assessment recordings.
+                    </p>
+                    <button
+                      onClick={deleteVoiceprint}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors text-sm"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete Voice ID
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Recording Instructions */}
+                    <div className="bg-dark-700/50 rounded-xl p-4">
+                      <h3 className="text-white font-medium mb-2">Recording Tips:</h3>
+                      <ul className="text-dark-300 text-sm space-y-1">
+                        <li>• Find a quiet place without background noise</li>
+                        <li>• Speak clearly at your normal pace</li>
+                        <li>• Record for at least 10 seconds (max 30 seconds)</li>
+                        <li>• You can say anything - introduce yourself or read some text</li>
+                      </ul>
+                    </div>
+
+                    {/* Recording Interface */}
+                    <div className="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                      {!audioBlob ? (
+                        <div className="text-center">
+                          <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4 transition-all ${
+                            isRecording 
+                              ? 'bg-red-500 animate-pulse' 
+                              : 'bg-primary-500/20 hover:bg-primary-500/30'
+                          }`}>
+                            {isRecording ? (
+                              <div className="text-center">
+                                <Square className="w-8 h-8 text-white" />
+                              </div>
+                            ) : (
+                              <Mic className="w-10 h-10 text-primary-400" />
+                            )}
+                          </div>
+
+                          {isRecording && (
+                            <div className="mb-4">
+                              <p className="text-white text-2xl font-mono">{recordingTime}s / 30s</p>
+                              <div className="w-48 mx-auto h-2 bg-dark-600 rounded-full mt-2 overflow-hidden">
+                                <div 
+                                  className="h-full bg-red-500 transition-all duration-1000"
+                                  style={{ width: `${(recordingTime / 30) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          <button
+                            onClick={isRecording ? stopRecording : startRecording}
+                            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                              isRecording
+                                ? 'bg-red-500 hover:bg-red-600 text-white'
+                                : 'bg-primary-500 hover:bg-primary-600 text-white'
+                            }`}
+                          >
+                            {isRecording ? 'Stop Recording' : 'Start Recording'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <div className="w-24 h-24 mx-auto bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+                            <Check className="w-10 h-10 text-green-400" />
+                          </div>
+                          <p className="text-white mb-2">Recording Complete!</p>
+                          <p className="text-dark-400 text-sm mb-6">{recordingTime} seconds recorded</p>
+                          
+                          <div className="flex gap-3 justify-center">
+                            <button
+                              onClick={() => {
+                                setAudioBlob(null);
+                                setRecordingTime(0);
+                              }}
+                              className="px-4 py-2 bg-dark-600 hover:bg-dark-500 text-white rounded-lg transition-colors"
+                            >
+                              Record Again
+                            </button>
+                            <button
+                              onClick={uploadVoiceprint}
+                              disabled={uploadingVoiceprint}
+                              className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+                            >
+                              {uploadingVoiceprint ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Creating Voice ID...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="w-4 h-4" />
+                                  Create Voice ID
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* How it works */}
+              <div className="card p-6">
+                <h3 className="text-white font-medium mb-4">How Voice ID Works</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-dark-700/50 rounded-lg p-4">
+                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center mb-3">
+                      <Mic className="w-5 h-5 text-primary-400" />
+                    </div>
+                    <h4 className="text-white text-sm font-medium mb-1">1. Record Sample</h4>
+                    <p className="text-dark-400 text-xs">Create a short voice sample that captures your unique voice</p>
+                  </div>
+                  <div className="bg-dark-700/50 rounded-lg p-4">
+                    <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mb-3">
+                      <Database className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <h4 className="text-white text-sm font-medium mb-1">2. Voice Analysis</h4>
+                    <p className="text-dark-400 text-xs">AI creates a unique voiceprint from your recording</p>
+                  </div>
+                  <div className="bg-dark-700/50 rounded-lg p-4">
+                    <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mb-3">
+                      <Check className="w-5 h-5 text-green-400" />
+                    </div>
+                    <h4 className="text-white text-sm font-medium mb-1">3. Auto-Identify</h4>
+                    <p className="text-dark-400 text-xs">Your voice is automatically identified in future assessments</p>
+                  </div>
                 </div>
               </div>
             </div>

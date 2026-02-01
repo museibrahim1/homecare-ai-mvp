@@ -28,6 +28,7 @@ from app.routers import (
     calendar,
     drive,
     gmail,
+    voiceprint,
     # calls,  # Twilio integration disabled for MVP - re-enable when needed
 )
 
@@ -88,6 +89,7 @@ app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 app.include_router(admin_platform.router, prefix="/platform", tags=["Platform Admin"])
 app.include_router(stripe_billing.router, prefix="/billing", tags=["Billing"])
 app.include_router(calendar.router, prefix="/calendar", tags=["Google Calendar"])
+app.include_router(voiceprint.router, prefix="/voiceprint", tags=["Voiceprint"])
 app.include_router(drive.router, prefix="/drive", tags=["Google Drive"])
 app.include_router(gmail.router, prefix="/gmail", tags=["Gmail"])
 # app.include_router(calls.router, prefix="/calls", tags=["Calls"])  # Twilio disabled for MVP

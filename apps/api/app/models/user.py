@@ -28,6 +28,10 @@ class User(Base, TimestampMixin):
     google_calendar_refresh_token = Column(Text, nullable=True)
     google_calendar_token_expiry = Column(DateTime(timezone=True), nullable=True)
     
+    # Voiceprint for speaker identification
+    voiceprint = Column(Text, nullable=True)  # Base64-encoded voiceprint from pyannote
+    voiceprint_created_at = Column(DateTime(timezone=True), nullable=True)
+    
     # Relationships
     visits_as_caregiver = relationship("Visit", back_populates="caregiver", foreign_keys="Visit.caregiver_id")
     audit_logs = relationship("AuditLog", back_populates="user")

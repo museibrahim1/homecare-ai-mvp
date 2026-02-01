@@ -308,3 +308,100 @@ def _mock_diarization(audio_path: str) -> List[Dict[str, Any]]:
         {"speaker": "SPEAKER_01", "start_ms": 36000, "end_ms": 42000, "confidence": None},
         {"speaker": "SPEAKER_00", "start_ms": 43000, "end_ms": 50000, "confidence": None},
     ]
+
+
+def identify_speakers_with_voiceprints(
+    audio_url: str,
+    voiceprints: List[Dict[str, str]],
+    api_key: Optional[str] = None,
+) -> Dict[str, str]:
+    """
+    Identify speakers in audio using stored voiceprints.
+    
+    Args:
+        audio_url: Public URL to the audio file
+        voiceprints: List of dicts with 'label' and 'voiceprint' keys
+                    e.g., [{"label": "John Smith", "voiceprint": "base64..."}]
+        api_key: pyannote.ai API key (or use PYANNOTE_API_KEY env var)
+    
+    Returns:
+        Dict mapping generic speaker labels to identified names
+        e.g., {"SPEAKER_00": "John Smith", "SPEAKER_01": "Unknown"}
+    """
+    api_key = api_key or os.getenv("PYANNOTE_API_KEY")
+    
+    if not api_key or not voiceprints:
+        logger.info("No API key or voiceprints - skipping speaker identification")
+        return {}
+    
+    logger.info(f"Identifying speakers with {len(voiceprints)} voiceprints")
+    
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    
+    body = {
+        "url": audio_url,
+        "voiceprints": voiceprints,
+        "matching": {
+            "threshold": 50,  # Only match if 50%+ confidence
+            "exclusive": True,  # One voiceprint per speaker
+        }
+    }
+    
+    try:
+        response = requests.post(
+            "https://api.pyannote.ai/v1/identify",
+            headers=headers,
+            json=body,
+            timeout=60,
+        )
+        
+        if response.status_code not in [200, 201]:
+            logger.warning(f"Identification API error: {response.status_code} - {response.text}")
+            return {}
+        
+        result_data = response.json()
+        job_id = result_data.get("jobId")
+        status = result_data.get("status", "")
+        
+        # Poll for async job completion
+        if job_id and status in ["created", "processing"]:
+            import time
+            poll_url = f"https://api.pyannote.ai/v1/jobs/{job_id}"
+            
+            for _ in range(60):  # Max 5 minutes
+                time.sleep(5)
+                poll_response = requests.get(poll_url, headers=headers, timeout=30)
+                
+                if poll_response.status_code == 200:
+                    poll_data = poll_response.json()
+                    if poll_data.get("status") == "succeeded":
+                        result_data = poll_data
+                        break
+                    elif poll_data.get("status") == "failed":
+                        logger.warning("Identification job failed")
+                        return {}
+        
+        # Parse identification results
+        output = result_data.get("output", {})
+        voiceprint_matches = output.get("voiceprints", [])
+        
+        speaker_names = {}
+        for match in voiceprint_matches:
+            speaker_label = match.get("speaker")
+            matched_name = match.get("match")
+            confidence = match.get("confidence", {})
+            
+            if speaker_label and matched_name:
+                # Get confidence score for the match
+                conf_score = confidence.get(matched_name, 0)
+                logger.info(f"Speaker {speaker_label} identified as {matched_name} ({conf_score}% confidence)")
+                speaker_names[speaker_label] = matched_name
+        
+        return speaker_names
+        
+    except Exception as e:
+        logger.error(f"Speaker identification failed: {e}")
+        return {}

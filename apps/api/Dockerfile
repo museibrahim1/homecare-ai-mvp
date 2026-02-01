@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v3 - Fixed import paths for restart endpoint
+# Version: 2026-02-01-v4 - Added voiceprint endpoints for speaker identification
 FROM python:3.11-slim
 
 WORKDIR /app

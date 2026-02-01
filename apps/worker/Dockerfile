@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v15 - Increased billables extraction limits, auto client status update
+# Version: 2026-02-01-v16 - Added voiceprint identification during diarization
 WORKDIR /app
 
 # Install system dependencies for audio processing
