@@ -166,11 +166,12 @@ export default function VisitDetailPage() {
   };
 
   // Export functions
-  const handleExport = async (type: 'contract' | 'timesheet' | 'note') => {
+  const handleExport = async (type: 'contract' | 'contract-template' | 'timesheet' | 'note') => {
     if (!token || !visitId) return;
     
     const endpoints: Record<string, string> = {
       contract: `/exports/visits/${visitId}/contract.pdf`,
+      'contract-template': `/exports/visits/${visitId}/contract-template.docx`,
       timesheet: `/exports/visits/${visitId}/timesheet.csv`,
       note: `/exports/visits/${visitId}/note.pdf`,
     };
@@ -191,11 +192,19 @@ export default function VisitDetailPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = type === 'timesheet' 
-        ? `timesheet_${visitId}.csv`
-        : type === 'contract' 
-        ? `contract_${visitId}.pdf`
-        : `note_${visitId}.pdf`;
+      
+      const clientName = visit?.client?.full_name?.replace(/ /g, '_') || 'Client';
+      
+      if (type === 'timesheet') {
+        a.download = `timesheet_${visitId}.csv`;
+      } else if (type === 'contract-template') {
+        a.download = `Contract_${clientName}.docx`;
+      } else if (type === 'contract') {
+        a.download = `contract_${visitId}.pdf`;
+      } else {
+        a.download = `note_${visitId}.pdf`;
+      }
+      
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -374,6 +383,20 @@ export default function VisitDetailPage() {
                 <div className="absolute right-0 top-full mt-2 w-56 bg-dark-800 border border-dark-600 rounded-xl shadow-xl z-50 overflow-hidden">
                   <div className="p-2">
                     <button
+                      onClick={() => handleExport('contract-template')}
+                      disabled={!contract}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                        <FileCheck className="w-4 h-4 text-primary-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Contract (Your Template)</p>
+                        <p className="text-xs text-dark-400">Uses your uploaded template</p>
+                      </div>
+                    </button>
+                    
+                    <button
                       onClick={() => handleExport('contract')}
                       disabled={!contract}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -383,7 +406,7 @@ export default function VisitDetailPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-white">Contract PDF</p>
-                        <p className="text-xs text-dark-400">Service agreement</p>
+                        <p className="text-xs text-dark-400">Default format</p>
                       </div>
                     </button>
                     

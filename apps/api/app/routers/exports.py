@@ -14,11 +14,13 @@ from app.models.visit import Visit
 from app.models.billable_item import BillableItem
 from app.models.note import Note
 from app.models.contract import Contract
+from app.models.agency_settings import AgencySettings
 from app.services.document_generation import (
     generate_note_pdf, 
     generate_contract_pdf,
     generate_note_docx,
-    generate_contract_docx
+    generate_contract_docx,
+    generate_contract_from_uploaded_template,
 )
 from app.services.email import get_email_service
 
@@ -137,13 +139,94 @@ async def export_contract_pdf(
     if not contract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
     
-    # Generate PDF
+    # Generate PDF (default method)
     pdf_bytes = generate_contract_pdf(visit.client, contract)
     
     return StreamingResponse(
         iter([pdf_bytes]),
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=contract_{contract.id}.pdf"},
+    )
+
+
+@router.get("/visits/{visit_id}/contract-template.docx")
+async def export_contract_from_template(
+    visit_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Export contract using the uploaded agency template.
+    Falls back to default DOCX if no template is uploaded.
+    """
+    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    
+    contract = db.query(Contract).filter(
+        Contract.client_id == visit.client_id
+    ).order_by(Contract.created_at.desc()).first()
+    
+    if not contract:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+    
+    # Get agency settings to check for uploaded template
+    agency_settings = db.query(AgencySettings).filter(
+        AgencySettings.settings_key == "default"
+    ).first()
+    
+    # Check for uploaded template in documents array
+    template_base64 = None
+    if agency_settings and agency_settings.documents:
+        import json
+        try:
+            documents = json.loads(agency_settings.documents) if isinstance(agency_settings.documents, str) else agency_settings.documents
+            for doc in documents:
+                if doc.get('category') == 'contract_template' and doc.get('content'):
+                    template_base64 = doc['content']
+                    # Remove data URL prefix if present
+                    if ',' in template_base64:
+                        template_base64 = template_base64.split(',')[1]
+                    break
+        except:
+            pass
+    
+    # Also check legacy template field
+    if not template_base64 and agency_settings and agency_settings.contract_template:
+        template_base64 = agency_settings.contract_template
+        if ',' in template_base64:
+            template_base64 = template_base64.split(',')[1]
+    
+    if template_base64:
+        # Use the uploaded template
+        try:
+            docx_bytes = generate_contract_from_uploaded_template(
+                client=visit.client,
+                contract=contract,
+                template_base64=template_base64,
+                agency_settings=agency_settings
+            )
+            
+            client_name = (visit.client.full_name or 'Client').replace(' ', '_')
+            filename = f"Contract_{client_name}.docx"
+            
+            return StreamingResponse(
+                iter([docx_bytes]),
+                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                headers={"Content-Disposition": f"attachment; filename={filename}"},
+            )
+        except Exception as e:
+            # If template filling fails, fall back to default
+            import logging
+            logging.error(f"Template filling failed: {e}")
+    
+    # Fall back to default DOCX generation
+    docx_bytes = generate_contract_docx(visit.client, contract)
+    
+    return StreamingResponse(
+        iter([docx_bytes]),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename=contract_{contract.id}.docx"},
     )
 
 
