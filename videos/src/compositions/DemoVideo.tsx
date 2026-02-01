@@ -757,69 +757,76 @@ const SceneAudio: React.FC<SceneAudioProps> = ({ scene, from }) => {
   );
 };
 
+// ============ SCENE TIMING CONFIGURATION ============
+// Audio durations (with buffer): scene-01=4.5s, scene-02=7s, scene-03=5.5s, 
+// scene-04=6.5s, scene-05=5.5s, scene-06=5s, scene-07=6.5s, scene-08=5s, scene-09=5s
+const SCENE_TIMING = {
+  scene1: { from: 0, duration: 135 },        // 4.5s (audio: 4.0s)
+  scene2: { from: 135, duration: 210 },      // 7.0s (audio: 6.4s)
+  scene3: { from: 345, duration: 165 },      // 5.5s (audio: 5.0s)
+  scene4: { from: 510, duration: 195 },      // 6.5s (audio: 5.9s)
+  scene5: { from: 705, duration: 165 },      // 5.5s (audio: 4.8s)
+  scene6: { from: 870, duration: 150 },      // 5.0s (audio: 4.5s)
+  scene7: { from: 1020, duration: 195 },     // 6.5s (audio: 5.7s)
+  scene8: { from: 1215, duration: 150 },     // 5.0s (audio: 4.4s)
+  scene9: { from: 1365, duration: 150 },     // 5.0s (audio: 4.4s)
+  total: 1515,                               // 50.5 seconds total
+};
+
 // ============ MAIN DEMO VIDEO ============
 export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: colors.dark }}>
-      {/* Audio tracks - scene-synced segments */}
+      {/* Audio tracks - scene-synced segments with proper durations */}
       {showAudio && (
         <>
-          {/* Scene 1: Intro (0-4s) */}
-          <Sequence from={0} durationInFrames={120}>
+          <Sequence from={SCENE_TIMING.scene1.from} durationInFrames={SCENE_TIMING.scene1.duration}>
             <Audio src={staticFile("segments/scene-01.mp3")} volume={1} />
           </Sequence>
-          {/* Scene 2: Core Features (4-9s) */}
-          <Sequence from={120} durationInFrames={150}>
+          <Sequence from={SCENE_TIMING.scene2.from} durationInFrames={SCENE_TIMING.scene2.duration}>
             <Audio src={staticFile("segments/scene-02.mp3")} volume={1} />
           </Sequence>
-          {/* Scene 3: Pipeline (9-15s) */}
-          <Sequence from={270} durationInFrames={180}>
+          <Sequence from={SCENE_TIMING.scene3.from} durationInFrames={SCENE_TIMING.scene3.duration}>
             <Audio src={staticFile("segments/scene-03.mp3")} volume={1} />
           </Sequence>
-          {/* Scene 4: Assessments (15-21s) */}
-          <Sequence from={450} durationInFrames={180}>
+          <Sequence from={SCENE_TIMING.scene4.from} durationInFrames={SCENE_TIMING.scene4.duration}>
             <Audio src={staticFile("segments/scene-04.mp3")} volume={1} />
           </Sequence>
-          {/* Scene 5: Visit Detail (21-27s) */}
-          <Sequence from={630} durationInFrames={180}>
+          <Sequence from={SCENE_TIMING.scene5.from} durationInFrames={SCENE_TIMING.scene5.duration}>
             <Audio src={staticFile("segments/scene-05.mp3")} volume={1} />
           </Sequence>
-          {/* Scene 6: Contract (27-33s) */}
-          <Sequence from={810} durationInFrames={180}>
+          <Sequence from={SCENE_TIMING.scene6.from} durationInFrames={SCENE_TIMING.scene6.duration}>
             <Audio src={staticFile("segments/scene-06.mp3")} volume={1} />
           </Sequence>
-          {/* Scene 7: Clients (33-39s) */}
-          <Sequence from={990} durationInFrames={180}>
+          <Sequence from={SCENE_TIMING.scene7.from} durationInFrames={SCENE_TIMING.scene7.duration}>
             <Audio src={staticFile("segments/scene-07.mp3")} volume={1} />
           </Sequence>
-          {/* Scene 8: Reports (39-45s) */}
-          <Sequence from={1170} durationInFrames={180}>
+          <Sequence from={SCENE_TIMING.scene8.from} durationInFrames={SCENE_TIMING.scene8.duration}>
             <Audio src={staticFile("segments/scene-08.mp3")} volume={1} />
           </Sequence>
-          {/* Scene 9: CTA (45-50s) */}
-          <Sequence from={1350} durationInFrames={150}>
+          <Sequence from={SCENE_TIMING.scene9.from} durationInFrames={SCENE_TIMING.scene9.duration}>
             <Audio src={staticFile("segments/scene-09.mp3")} volume={1} />
           </Sequence>
         </>
       )}
 
-      {/* Scene 1: Intro (0-4 seconds) */}
-      <Sequence from={0} durationInFrames={120}>
+      {/* Scene 1: Intro (0-4.5s) */}
+      <Sequence from={SCENE_TIMING.scene1.from} durationInFrames={SCENE_TIMING.scene1.duration}>
         <IntroScene />
       </Sequence>
 
-      {/* Scene 2: Core Features (4-9 seconds) */}
-      <Sequence from={120} durationInFrames={150}>
+      {/* Scene 2: Core Features (4.5-11.5s) */}
+      <Sequence from={SCENE_TIMING.scene2.from} durationInFrames={SCENE_TIMING.scene2.duration}>
         <CoreFeaturesScene />
       </Sequence>
 
-      {/* Scene 3: Pipeline (9-15 seconds) */}
-      <Sequence from={270} durationInFrames={180}>
+      {/* Scene 3: Pipeline (11.5-17s) */}
+      <Sequence from={SCENE_TIMING.scene3.from} durationInFrames={SCENE_TIMING.scene3.duration}>
         <PipelineScene />
       </Sequence>
 
-      {/* Scene 4: Assessments Dashboard (15-21 seconds) */}
-      <Sequence from={450} durationInFrames={180}>
+      {/* Scene 4: Assessments Dashboard (17-23.5s) */}
+      <Sequence from={SCENE_TIMING.scene4.from} durationInFrames={SCENE_TIMING.scene4.duration}>
         <ScreenshotScene
           title="Assessments Dashboard"
           subtitle="Your command center for care assessments"
@@ -833,8 +840,8 @@ export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
         />
       </Sequence>
 
-      {/* Scene 5: Visit Detail (21-27 seconds) */}
-      <Sequence from={630} durationInFrames={180}>
+      {/* Scene 5: Visit Detail (23.5-29s) */}
+      <Sequence from={SCENE_TIMING.scene5.from} durationInFrames={SCENE_TIMING.scene5.duration}>
         <ScreenshotScene
           title="AI Processing Pipeline"
           subtitle="Watch AI process your recordings in real-time"
@@ -848,8 +855,8 @@ export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
         />
       </Sequence>
 
-      {/* Scene 6: Contract Preview (27-33 seconds) */}
-      <Sequence from={810} durationInFrames={180}>
+      {/* Scene 6: Contract Preview (29-34s) */}
+      <Sequence from={SCENE_TIMING.scene6.from} durationInFrames={SCENE_TIMING.scene6.duration}>
         <ScreenshotScene
           title="Contract Generation"
           subtitle="AI-generated, human-approved"
@@ -863,8 +870,8 @@ export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
         />
       </Sequence>
 
-      {/* Scene 7: Clients (33-39 seconds) */}
-      <Sequence from={990} durationInFrames={180}>
+      {/* Scene 7: Clients (34-40.5s) */}
+      <Sequence from={SCENE_TIMING.scene7.from} durationInFrames={SCENE_TIMING.scene7.duration}>
         <ScreenshotScene
           title="Client Management"
           subtitle="All client information at your fingertips"
@@ -878,8 +885,8 @@ export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
         />
       </Sequence>
 
-      {/* Scene 8: Reports (39-45 seconds) */}
-      <Sequence from={1170} durationInFrames={180}>
+      {/* Scene 8: Reports (40.5-45.5s) */}
+      <Sequence from={SCENE_TIMING.scene8.from} durationInFrames={SCENE_TIMING.scene8.duration}>
         <ScreenshotScene
           title="Reports & Analytics"
           subtitle="Data-driven insights for your agency"
@@ -893,8 +900,8 @@ export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
         />
       </Sequence>
 
-      {/* Scene 9: CTA (45-50 seconds) */}
-      <Sequence from={1350} durationInFrames={150}>
+      {/* Scene 9: CTA (45.5-50.5s) */}
+      <Sequence from={SCENE_TIMING.scene9.from} durationInFrames={SCENE_TIMING.scene9.duration}>
         <CTAScene />
       </Sequence>
     </AbsoluteFill>

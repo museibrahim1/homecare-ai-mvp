@@ -17,11 +17,11 @@ export const RemotionRoot: React.FC = () => {
         }}
       />
 
-      {/* Main Demo Video - 50 seconds total */}
+      {/* Main Demo Video - 50.5 seconds total */}
       <Composition
         id="DemoVideo"
         component={DemoVideo}
-        durationInFrames={1500}
+        durationInFrames={1515}
         fps={30}
         width={1920}
         height={1080}
@@ -34,7 +34,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="DemoVideoWithAudio"
         component={DemoVideo}
-        durationInFrames={1500}
+        durationInFrames={1515}
         fps={30}
         width={1920}
         height={1080}
