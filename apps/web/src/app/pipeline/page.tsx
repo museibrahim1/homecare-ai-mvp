@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { Target, Plus, DollarSign, Clock, CheckCircle, X, User, Phone, Mail, RefreshCw, FileText } from 'lucide-react';
+import { Target, Plus, DollarSign, Clock, CheckCircle, X, User, Phone, Mail, RefreshCw, FileText, GripVertical } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
@@ -38,6 +38,54 @@ export default function PipelinePage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [newDeal, setNewDeal] = useState({ name: '', email: '', phone: '', value: '', stage: 'intake', notes: '' });
+  
+  // Drag and drop state
+  const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null);
+
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, deal: Deal) => {
+    setDraggedDeal(deal);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', deal.id);
+    // Add visual feedback
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5';
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    setDraggedDeal(null);
+    setDragOverStage(null);
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '1';
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent, stageId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverStage(stageId);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only reset if leaving the column entirely
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+      setDragOverStage(null);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetStageId: string) => {
+    e.preventDefault();
+    setDragOverStage(null);
+    
+    if (draggedDeal && draggedDeal.stage !== targetStageId) {
+      // Update the stage
+      await handleUpdateStage(draggedDeal, targetStageId);
+    }
+    setDraggedDeal(null);
+  };
 
   useEffect(() => {
     if (!authLoading && token) {
@@ -240,7 +288,9 @@ export default function PipelinePage() {
 
         {/* Stage Legend */}
         <div className="bg-dark-800/30 rounded-xl p-4 border border-dark-700/50 mb-6">
-          <h3 className="text-sm font-medium text-dark-400 mb-3">Client Journey: Click on a client card to change their stage</h3>
+          <h3 className="text-sm font-medium text-dark-400 mb-3">
+            Client Journey: <span className="text-primary-400">Drag and drop</span> clients between stages, or click to edit
+          </h3>
           <div className="flex items-center gap-2 flex-wrap">
             {stages.map((stage, idx) => (
               <div key={stage.id} className="flex items-center gap-2">
@@ -259,7 +309,16 @@ export default function PipelinePage() {
         <div className="flex gap-4 overflow-x-auto pb-4">
           {stages.map(stage => (
             <div key={stage.id} className="flex-shrink-0 w-72">
-              <div className="bg-dark-800/30 rounded-xl p-4 border border-dark-700/50">
+              <div 
+                className={`bg-dark-800/30 rounded-xl p-4 border-2 transition-all min-h-[400px] ${
+                  dragOverStage === stage.id 
+                    ? 'border-primary-500 bg-primary-500/10' 
+                    : 'border-dark-700/50'
+                }`}
+                onDragOver={(e) => handleDragOver(e, stage.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, stage.id)}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${stage.color}`} />
@@ -282,13 +341,21 @@ export default function PipelinePage() {
                     return (
                     <div
                       key={deal.id}
-                      className="bg-dark-800 border border-dark-700/50 rounded-lg p-4 hover:border-primary-500/30 transition-colors"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, deal)}
+                      onDragEnd={handleDragEnd}
+                      className={`bg-dark-800 border border-dark-700/50 rounded-lg p-4 hover:border-primary-500/30 transition-all cursor-grab active:cursor-grabbing group ${
+                        draggedDeal?.id === deal.id ? 'opacity-50 scale-95' : ''
+                      }`}
                     >
                       <div 
                         onClick={() => handleDealClick(deal)}
                         className="cursor-pointer"
                       >
-                        <h3 className="font-medium text-white mb-2">{deal.name}</h3>
+                        <div className="flex items-start gap-2">
+                          <GripVertical className="w-4 h-4 text-dark-500 group-hover:text-dark-300 flex-shrink-0 mt-0.5" />
+                          <h3 className="font-medium text-white mb-2 flex-1">{deal.name}</h3>
+                        </div>
                         <div className="flex items-center justify-between">
                           <span className="text-green-400 font-medium">${deal.value.toLocaleString()}/mo</span>
                           <span className="text-xs text-dark-500">{deal.daysInStage}d</span>

@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v5 - Added Voice ID (voiceprint) feature for speaker identification
+# Version: 2026-02-01-v6 - Added drag-and-drop to pipeline for client stage management
 FROM node:20-alpine
 
 WORKDIR /app

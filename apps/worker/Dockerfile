@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v16 - Added voiceprint identification during diarization
+# Version: 2026-02-01-v17 - Contract generation now sets status to 'proposal' instead of 'active'
 WORKDIR /app
 
 # Install system dependencies for audio processing
