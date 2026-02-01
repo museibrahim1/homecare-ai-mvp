@@ -138,6 +138,13 @@ class ApiClient {
     return this.request<any>(`/visits/${visitId}/note`, {}, token);
   }
 
+  // Restart Assessment
+  async restartAssessment(token: string, visitId: string) {
+    return this.request<any>(`/visits/${visitId}/restart`, {
+      method: 'POST',
+    }, token);
+  }
+
   async updateNote(token: string, visitId: string, data: any) {
     return this.request<any>(
       `/visits/${visitId}/note`,

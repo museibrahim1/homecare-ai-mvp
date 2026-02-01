@@ -7,6 +7,10 @@ from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
+from app.models.transcript import TranscriptSegment
+from app.models.billable import BillableItem
+from app.models.note import Note
+from app.models.contract import Contract
 from app.schemas.visit import VisitCreate, VisitUpdate, VisitResponse, VisitListResponse
 
 router = APIRouter()
@@ -145,3 +149,68 @@ async def delete_visit(
     
     db.delete(visit)
     db.commit()
+
+
+@router.post("/{visit_id}/restart")
+async def restart_assessment(
+    visit_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Restart an assessment by clearing all generated data.
+    
+    This deletes:
+    - All transcript segments
+    - All billable items
+    - Generated notes
+    - Generated contract
+    - Resets pipeline state
+    """
+    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    if not visit:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Visit not found",
+        )
+    
+    # Delete transcript segments
+    deleted_segments = db.query(TranscriptSegment).filter(
+        TranscriptSegment.visit_id == visit_id
+    ).delete()
+    
+    # Delete billable items
+    deleted_billables = db.query(BillableItem).filter(
+        BillableItem.visit_id == visit_id
+    ).delete()
+    
+    # Delete notes
+    deleted_notes = db.query(Note).filter(
+        Note.visit_id == visit_id
+    ).delete()
+    
+    # Delete contracts associated with the visit's client
+    if visit.client_id:
+        deleted_contracts = db.query(Contract).filter(
+            Contract.client_id == visit.client_id
+        ).delete()
+    else:
+        deleted_contracts = 0
+    
+    # Reset pipeline state
+    visit.pipeline_state = {}
+    visit.status = "pending"
+    visit.audio_url = None
+    
+    db.commit()
+    
+    return {
+        "status": "success",
+        "message": "Assessment restarted successfully",
+        "deleted": {
+            "transcript_segments": deleted_segments,
+            "billable_items": deleted_billables,
+            "notes": deleted_notes,
+            "contracts": deleted_contracts,
+        }
+    }

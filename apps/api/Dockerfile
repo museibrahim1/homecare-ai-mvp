@@ -1,3 +1,4 @@
+# Version: 2026-02-01-v1 - Added restart assessment endpoint
 FROM python:3.11-slim
 
 WORKDIR /app

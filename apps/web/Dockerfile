@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v3 - Assessment flow improvements, pipeline real data
+# Version: 2026-02-01-v4 - Added Restart Assessment button
 FROM node:20-alpine
 
 WORKDIR /app

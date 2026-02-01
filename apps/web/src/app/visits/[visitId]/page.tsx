@@ -23,7 +23,8 @@ import {
   ChevronDown,
   Loader2,
   Users,
-  ClipboardList
+  ClipboardList,
+  RotateCcw
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -67,6 +68,8 @@ export default function VisitDetailPage() {
   const [uploadMode, setUploadMode] = useState<'audio' | 'transcript'>('audio');
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [generatingProposal, setGeneratingProposal] = useState(false);
+  const [showRestartModal, setShowRestartModal] = useState(false);
+  const [restarting, setRestarting] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
   // Close export menu when clicking outside
@@ -173,6 +176,33 @@ export default function VisitDetailPage() {
   const getPipelineStatus = (key: string) => {
     if (!visit?.pipeline_state) return null;
     return visit.pipeline_state[key];
+  };
+
+  // Restart assessment - clear all data
+  const handleRestartAssessment = async () => {
+    if (!token || !visitId) return;
+    
+    setRestarting(true);
+    try {
+      await api.restartAssessment(token, visitId);
+      
+      // Clear local state
+      setTranscript([]);
+      setBillables([]);
+      setContract(null);
+      setNote(null);
+      setHasAudio(false);
+      
+      // Reload visit data
+      await loadVisitData();
+      
+      setShowRestartModal(false);
+    } catch (error) {
+      console.error('Failed to restart assessment:', error);
+      alert('Failed to restart assessment. Please try again.');
+    } finally {
+      setRestarting(false);
+    }
   };
 
   // Export functions
@@ -381,6 +411,18 @@ export default function VisitDetailPage() {
               >
                 <PanelRightOpen className="w-5 h-5" />
               </button>
+              
+              {/* Restart Button */}
+              {(transcript.length > 0 || billables.length > 0 || contract || note) && (
+                <button 
+                  onClick={() => setShowRestartModal(true)}
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors text-sm"
+                  title="Restart Assessment"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span className="hidden sm:inline">Restart</span>
+                </button>
+              )}
               
               {/* Export Dropdown */}
               <div className="relative" ref={exportMenuRef}>
@@ -860,6 +902,62 @@ export default function VisitDetailPage() {
         </div>
       </div>
       </>
+      )}
+
+      {/* Restart Assessment Confirmation Modal */}
+      {showRestartModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
+                <RotateCcw className="w-6 h-6 text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Restart Assessment</h2>
+                <p className="text-dark-400 text-sm">This action cannot be undone</p>
+              </div>
+            </div>
+            
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
+              <p className="text-red-300 text-sm">
+                This will permanently delete:
+              </p>
+              <ul className="mt-2 space-y-1 text-red-400 text-sm">
+                {transcript.length > 0 && <li>• {transcript.length} transcript segments</li>}
+                {billables.length > 0 && <li>• {billables.length} billable items</li>}
+                {note && <li>• Generated visit notes</li>}
+                {contract && <li>• Generated contract</li>}
+              </ul>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowRestartModal(false)}
+                disabled={restarting}
+                className="flex-1 px-4 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRestartAssessment}
+                disabled={restarting}
+                className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {restarting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Restarting...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="w-4 h-4" />
+                    Restart
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
