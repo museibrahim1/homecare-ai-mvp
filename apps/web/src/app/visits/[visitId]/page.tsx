@@ -21,7 +21,8 @@ import {
   FileSpreadsheet,
   File,
   ChevronDown,
-  Loader2
+  Loader2,
+  Users
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -36,9 +37,10 @@ import TranscriptImporter from '@/components/TranscriptImporter';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-// Pipeline steps - diarize and align disabled for now
+// Pipeline steps
 const pipelineSteps = [
   { id: 'transcribe', key: 'transcription', label: 'Transcribe', icon: Mic, enabled: true },
+  { id: 'diarize', key: 'diarization', label: 'Diarize', icon: Users, enabled: true },
   { id: 'bill', key: 'billing', label: 'Bill', icon: DollarSign, enabled: true },
   { id: 'contract', key: 'contract', label: 'Contract', icon: FileCheck, enabled: true },
 ];
