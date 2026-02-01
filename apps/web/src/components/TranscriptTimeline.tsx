@@ -51,7 +51,7 @@ export default function TranscriptTimeline({
   }
 
   return (
-    <div className="p-6 max-h-[600px] overflow-y-auto">
+    <div className="p-4 sm:p-6 h-full overflow-y-auto">
       <div className="space-y-4">
         {segments.map((segment, index) => {
           const isActive = currentTimeMs !== undefined && 

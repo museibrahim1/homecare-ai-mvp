@@ -731,15 +731,15 @@ export default function VisitDetailPage() {
           })}
         </div>
 
-        {/* Panel Content - With Proper Padding */}
-        <div className="flex-1 overflow-y-auto bg-dark-850">
+        {/* Panel Content - Fill remaining height */}
+        <div className="flex-1 min-h-0 overflow-hidden bg-dark-850 flex flex-col">
           {activePanel === 'transcript' && (
-            <div className="p-4">
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <TranscriptTimeline segments={transcript} />
             </div>
           )}
           {activePanel === 'billables' && (
-            <div className="p-4">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4">
               <BillablesEditor
                 items={billables}
                 visitId={visitId}
@@ -748,12 +748,14 @@ export default function VisitDetailPage() {
             </div>
           )}
           {activePanel === 'contract' && (
-            <ContractPreview 
-              contract={contract} 
-              client={visit?.client}
-              visitId={visitId}
-              onContractUpdate={setContract}
-            />
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ContractPreview 
+                contract={contract} 
+                client={visit?.client}
+                visitId={visitId}
+                onContractUpdate={setContract}
+              />
+            </div>
           )}
         </div>
       </div>
