@@ -320,7 +320,7 @@ export default function VisitDetailPage() {
   const panelTabs = [
     { id: 'transcript', label: 'Transcript', icon: FileText, count: transcript.length, color: 'blue' },
     { id: 'billables', label: 'Billables', icon: DollarSign, count: billables.length, color: 'green' },
-    { id: 'notes', label: 'Notes', icon: ClipboardList, count: note ? 1 : 0, color: 'amber' },
+    { id: 'notes', label: 'Notes', icon: ClipboardList, count: note && note.id ? 1 : 0, color: 'amber' },
     { id: 'contract', label: 'Contract', icon: FileCheck, count: contract ? 1 : 0, color: 'purple' },
   ];
 
@@ -758,38 +758,42 @@ export default function VisitDetailPage() {
           )}
           {activePanel === 'notes' && (
             <div className="flex-1 min-h-0 overflow-y-auto p-4">
-              {note ? (
+              {note && note.id ? (
                 <div className="space-y-6">
                   {/* SOAP Notes */}
                   <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
                     <h3 className="text-lg font-semibold text-white mb-4">Visit Notes (SOAP)</h3>
                     
-                    {note.structured_data?.subjective && (
+                    {note.structured_data && note.structured_data.subjective && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-amber-400 mb-1">Subjective</h4>
                         <p className="text-dark-200 text-sm">{note.structured_data.subjective}</p>
                       </div>
                     )}
                     
-                    {note.structured_data?.objective && (
+                    {note.structured_data && note.structured_data.objective && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-blue-400 mb-1">Objective</h4>
                         <p className="text-dark-200 text-sm">{note.structured_data.objective}</p>
                       </div>
                     )}
                     
-                    {note.structured_data?.assessment && (
+                    {note.structured_data && note.structured_data.assessment && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-green-400 mb-1">Assessment</h4>
                         <p className="text-dark-200 text-sm">{note.structured_data.assessment}</p>
                       </div>
                     )}
                     
-                    {note.structured_data?.plan && (
+                    {note.structured_data && note.structured_data.plan && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-purple-400 mb-1">Plan</h4>
                         <p className="text-dark-200 text-sm">{note.structured_data.plan}</p>
                       </div>
+                    )}
+                    
+                    {(!note.structured_data || (!note.structured_data.subjective && !note.structured_data.objective && !note.structured_data.assessment && !note.structured_data.plan)) && (
+                      <p className="text-dark-400 text-sm">No SOAP data available</p>
                     )}
                   </div>
                   
@@ -802,12 +806,12 @@ export default function VisitDetailPage() {
                   )}
                   
                   {/* Tasks Performed */}
-                  {note.structured_data?.tasks_performed?.length > 0 && (
+                  {note.structured_data && Array.isArray(note.structured_data.tasks_performed) && note.structured_data.tasks_performed.length > 0 && (
                     <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
                       <h3 className="text-lg font-semibold text-white mb-2">Tasks Performed</h3>
                       <ul className="list-disc list-inside text-dark-200 text-sm space-y-1">
                         {note.structured_data.tasks_performed.map((task: string, i: number) => (
-                          <li key={i}>{task}</li>
+                          <li key={i}>{typeof task === 'string' ? task : JSON.stringify(task)}</li>
                         ))}
                       </ul>
                     </div>
