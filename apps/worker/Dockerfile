@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v4 - Debug logging for pyannote API
+# Version: 2026-02-01-v5 - Removed minSpeakers/maxSpeakers - let API auto-detect
 WORKDIR /app
 
 # Install system dependencies for audio processing

@@ -110,18 +110,13 @@ def _diarize_with_api(
         else:
             raise Exception("pyannote.ai API requires a public URL for the audio file")
     
-    # Add speaker configuration
-    # Note: minSpeakers/maxSpeakers require model "precision-2"
+    # Speaker configuration - only add if numSpeakers is explicitly set
+    # The default API works without speaker params and auto-detects
     if num_speakers:
         body["numSpeakers"] = num_speakers
-        body["model"] = "precision-2"
-    else:
-        body["minSpeakers"] = min_speakers
-        body["maxSpeakers"] = max_speakers
-        body["model"] = "precision-2"
     
     logger.info(f"Sending request to pyannote.ai API with URL: {body.get('url', 'N/A')[:50]}...")
-    logger.info(f"Request body (without URL): model={body.get('model')}, minSpeakers={body.get('minSpeakers')}, maxSpeakers={body.get('maxSpeakers')}, numSpeakers={body.get('numSpeakers')}")
+    logger.info(f"PYANNOTE_V5: Request body keys: {list(body.keys())}")
     
     response = requests.post(
         PYANNOTE_API_URL,
