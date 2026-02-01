@@ -22,7 +22,8 @@ import {
   File,
   ChevronDown,
   Loader2,
-  Users
+  Users,
+  ClipboardList
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -42,6 +43,7 @@ const pipelineSteps = [
   { id: 'transcribe', key: 'transcription', label: 'Transcribe', icon: Mic, enabled: true },
   { id: 'diarize', key: 'diarization', label: 'Diarize', icon: Users, enabled: true },
   { id: 'bill', key: 'billing', label: 'Bill', icon: DollarSign, enabled: true },
+  { id: 'note', key: 'note', label: 'Notes', icon: ClipboardList, enabled: true },
   { id: 'contract', key: 'contract', label: 'Contract', icon: FileCheck, enabled: true },
 ];
 
@@ -55,9 +57,10 @@ export default function VisitDetailPage() {
   const [transcript, setTranscript] = useState<TranscriptSegment[]>([]);
   const [billables, setBillables] = useState<BillableItem[]>([]);
   const [contract, setContract] = useState<any>(null);
+  const [note, setNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activePanel, setActivePanel] = useState<'transcript' | 'billables' | 'contract'>('transcript');
+  const [activePanel, setActivePanel] = useState<'transcript' | 'billables' | 'notes' | 'contract'>('transcript');
   const [processingStep, setProcessingStep] = useState<string | null>(null);
   const [hasAudio, setHasAudio] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
@@ -111,6 +114,11 @@ export default function VisitDetailPage() {
       try {
         const contractData = await api.getContract(token!, visitId);
         setContract(contractData);
+      } catch (e) {}
+
+      try {
+        const noteData = await api.getNote(token!, visitId);
+        setNote(noteData);
       } catch (e) {}
     } catch (err) {
       console.error('Failed to load visit:', err);
@@ -312,6 +320,7 @@ export default function VisitDetailPage() {
   const panelTabs = [
     { id: 'transcript', label: 'Transcript', icon: FileText, count: transcript.length, color: 'blue' },
     { id: 'billables', label: 'Billables', icon: DollarSign, count: billables.length, color: 'green' },
+    { id: 'notes', label: 'Notes', icon: ClipboardList, count: note ? 1 : 0, color: 'amber' },
     { id: 'contract', label: 'Contract', icon: FileCheck, count: contract ? 1 : 0, color: 'purple' },
   ];
 
@@ -745,6 +754,72 @@ export default function VisitDetailPage() {
                 visitId={visitId}
                 onUpdate={loadVisitData}
               />
+            </div>
+          )}
+          {activePanel === 'notes' && (
+            <div className="flex-1 min-h-0 overflow-y-auto p-4">
+              {note ? (
+                <div className="space-y-6">
+                  {/* SOAP Notes */}
+                  <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
+                    <h3 className="text-lg font-semibold text-white mb-4">Visit Notes (SOAP)</h3>
+                    
+                    {note.structured_data?.subjective && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-amber-400 mb-1">Subjective</h4>
+                        <p className="text-dark-200 text-sm">{note.structured_data.subjective}</p>
+                      </div>
+                    )}
+                    
+                    {note.structured_data?.objective && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-blue-400 mb-1">Objective</h4>
+                        <p className="text-dark-200 text-sm">{note.structured_data.objective}</p>
+                      </div>
+                    )}
+                    
+                    {note.structured_data?.assessment && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-green-400 mb-1">Assessment</h4>
+                        <p className="text-dark-200 text-sm">{note.structured_data.assessment}</p>
+                      </div>
+                    )}
+                    
+                    {note.structured_data?.plan && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-purple-400 mb-1">Plan</h4>
+                        <p className="text-dark-200 text-sm">{note.structured_data.plan}</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Narrative */}
+                  {note.narrative && (
+                    <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
+                      <h3 className="text-lg font-semibold text-white mb-2">Narrative Summary</h3>
+                      <p className="text-dark-200 text-sm whitespace-pre-wrap">{note.narrative}</p>
+                    </div>
+                  )}
+                  
+                  {/* Tasks Performed */}
+                  {note.structured_data?.tasks_performed?.length > 0 && (
+                    <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
+                      <h3 className="text-lg font-semibold text-white mb-2">Tasks Performed</h3>
+                      <ul className="list-disc list-inside text-dark-200 text-sm space-y-1">
+                        {note.structured_data.tasks_performed.map((task: string, i: number) => (
+                          <li key={i}>{task}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-dark-400">
+                  <ClipboardList className="w-12 h-12 mb-4 opacity-50" />
+                  <p>No notes generated yet</p>
+                  <p className="text-sm">Click the "Notes" button in the pipeline to generate</p>
+                </div>
+              )}
             </div>
           )}
           {activePanel === 'contract' && (

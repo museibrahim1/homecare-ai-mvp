@@ -154,6 +154,11 @@ class ApiClient {
     return this.request<any>(`/visits/${visitId}/contract`, {}, token);
   }
 
+  // Notes
+  async getNote(token: string, visitId: string) {
+    return this.request<any>(`/visits/${visitId}/note`, {}, token);
+  }
+
   // Pipeline
   async runPipelineStep(token: string, visitId: string, step: string) {
     return this.request<any>(

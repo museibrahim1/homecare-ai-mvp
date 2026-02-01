@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v13 - OPTIMIZED: Combined Claude call for speakers+billables
+# Version: 2026-02-01-v14 - Added Notes button + combined Claude optimization
 WORKDIR /app
 
 # Install system dependencies for audio processing
