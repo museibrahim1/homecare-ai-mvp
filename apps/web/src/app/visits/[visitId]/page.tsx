@@ -320,66 +320,69 @@ export default function VisitDetailPage() {
       <Sidebar />
       
       {/* Main Content */}
-      <main className={`flex-1 p-8 transition-all duration-300 ${sidebarOpen ? 'mr-[560px]' : ''}`}>
+      <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300 ${sidebarOpen ? 'lg:mr-[560px] md:mr-[400px]' : ''}`}>
         <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
             <button
               onClick={() => router.push('/visits')}
-              className="p-2.5 hover:bg-dark-700 rounded-xl transition-colors"
+              className="p-2 sm:p-2.5 hover:bg-dark-700 rounded-xl transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-dark-300" />
             </button>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-white">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold text-white truncate">
                 {visit.client?.full_name || 'Unknown Client'}
               </h1>
-              <p className="text-dark-400">
+              <p className="text-dark-400 text-sm sm:text-base truncate">
                 {visit.scheduled_start 
                   ? format(new Date(visit.scheduled_start), 'EEEE, MMMM d, yyyy • h:mm a')
                   : 'Not scheduled'
                 }
               </p>
             </div>
-            {/* Generate Proposal CTA */}
-            {transcript.length > 0 && !contract && (
-              <button
-                onClick={handleGenerateProposal}
-                disabled={generatingProposal || processingStep !== null}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-accent-cyan text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-500/25"
-              >
-                {generatingProposal ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Generate Proposal
-                  </>
-                )}
-              </button>
-            )}
             
-            <button 
-              onClick={toggleSidebar}
-              className={`p-2.5 rounded-xl transition-colors ${sidebarOpen ? 'bg-primary-500 text-white' : 'hover:bg-dark-700 text-dark-300'}`}
-              title="Toggle Preview Panel"
-            >
-              <PanelRightOpen className="w-5 h-5" />
-            </button>
-            
-            {/* Export Dropdown */}
-            <div className="relative" ref={exportMenuRef}>
+            {/* Action buttons - wrap on small screens */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* Generate Proposal CTA */}
+              {transcript.length > 0 && !contract && (
+                <button
+                  onClick={handleGenerateProposal}
+                  disabled={generatingProposal || processingStep !== null}
+                  className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary-500 to-accent-cyan text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-500/25 text-sm sm:text-base"
+                >
+                  {generatingProposal ? (
+                    <>
+                      <Loader2 className="w-4 sm:w-5 h-4 sm:h-5 animate-spin" />
+                      <span className="hidden sm:inline">Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 sm:w-5 h-4 sm:h-5" />
+                      <span className="hidden sm:inline">Generate Proposal</span>
+                    </>
+                  )}
+                </button>
+              )}
+              
               <button 
-                onClick={() => setShowExportMenu(!showExportMenu)}
-                className="btn-secondary flex items-center gap-2"
+                onClick={toggleSidebar}
+                className={`p-2 sm:p-2.5 rounded-xl transition-colors ${sidebarOpen ? 'bg-primary-500 text-white' : 'hover:bg-dark-700 text-dark-300'}`}
+                title="Toggle Preview Panel"
               >
-                <Download className="w-5 h-5" />
-                Export
-                <ChevronDown className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+                <PanelRightOpen className="w-5 h-5" />
               </button>
+              
+              {/* Export Dropdown */}
+              <div className="relative" ref={exportMenuRef}>
+                <button 
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="btn-secondary flex items-center gap-1 sm:gap-2 text-sm sm:text-base px-2 sm:px-4"
+                >
+                  <Download className="w-4 sm:w-5 h-4 sm:h-5" />
+                  <span className="hidden sm:inline">Export</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+                </button>
               
               {showExportMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-dark-800 border border-dark-600 rounded-xl shadow-xl z-50 overflow-hidden">
@@ -443,12 +446,13 @@ export default function VisitDetailPage() {
                 </div>
               )}
             </div>
+            </div>
           </div>
 
           {/* Pipeline Steps */}
-          <div className="card p-5 mb-6">
+          <div className="card p-3 sm:p-5 mb-6">
             <h3 className="text-sm font-medium text-dark-300 mb-3">Processing Pipeline</h3>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 sm:flex gap-2">
               {pipelineSteps.filter(s => s.enabled).map((step) => {
                 const status = getStepStatus(step);
                 const StepIcon = step.icon;
@@ -617,7 +621,7 @@ export default function VisitDetailPage() {
           </div>
 
           {/* Quick Stats Cards */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {panelTabs.map((tab) => {
               const TabIcon = tab.icon;
               return (
@@ -661,11 +665,17 @@ export default function VisitDetailPage() {
         </div>
       </main>
 
-      {/* Slide-out Preview Panel - Wider & Better Spaced */}
+      {/* Slide-out Preview Panel - Responsive Width */}
       {sidebarOpen && (
-      <div
-        className="fixed top-0 right-0 h-full w-[560px] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
-      >
+      <>
+        {/* Mobile overlay backdrop */}
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+        <div
+          className="fixed top-0 right-0 h-full w-full sm:w-[85vw] md:w-[400px] lg:w-[560px] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
+        >
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
           <div className="flex items-center gap-3">
@@ -747,6 +757,7 @@ export default function VisitDetailPage() {
           )}
         </div>
       </div>
+      </>
       )}
     </div>
   );

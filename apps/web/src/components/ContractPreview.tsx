@@ -598,9 +598,9 @@ export default function ContractPreview({ contract, client, visitId, onContractU
   const data = getContractData();
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Header Controls */}
-      <div className="flex items-center justify-between p-4 border-b border-dark-700 bg-dark-800 print:hidden">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4 border-b border-dark-700 bg-dark-800 print:hidden flex-shrink-0">
         <div className="flex items-center gap-3">
           {agency.contract_template_name && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-lg">
@@ -615,23 +615,23 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             </div>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {editMode ? (
             <>
               <button 
                 onClick={() => setEditMode(false)} 
-                className="flex items-center gap-2 px-3 py-2 bg-dark-700 text-dark-300 rounded-lg hover:bg-dark-600 transition text-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-dark-700 text-dark-300 rounded-lg hover:bg-dark-600 transition text-xs sm:text-sm"
                 disabled={saving}
               >
-                <X className="w-4 h-4" />
-                Cancel
+                <X className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                <span className="hidden sm:inline">Cancel</span>
               </button>
               <button 
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-sm disabled:opacity-50"
+                className="flex items-center gap-1.5 px-2 sm:px-4 py-1.5 sm:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-xs sm:text-sm disabled:opacity-50"
               >
-                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {saving ? <RefreshCw className="w-3.5 sm:w-4 h-3.5 sm:h-4 animate-spin" /> : <Save className="w-3.5 sm:w-4 h-3.5 sm:h-4" />}
                 {saving ? 'Saving...' : 'Save'}
               </button>
             </>
@@ -639,31 +639,31 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             <>
               <button 
                 onClick={() => setEditMode(true)} 
-                className="flex items-center gap-2 px-3 py-2 bg-dark-700 text-dark-200 rounded-lg hover:bg-dark-600 transition text-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-dark-700 text-dark-200 rounded-lg hover:bg-dark-600 transition text-xs sm:text-sm"
               >
-                <Edit3 className="w-4 h-4" />
-                Edit
+                <Edit3 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                <span className="hidden sm:inline">Edit</span>
               </button>
               <button 
                 onClick={handleRegenerate} 
-                className="flex items-center gap-2 px-3 py-2 bg-dark-700 text-dark-200 rounded-lg hover:bg-dark-600 transition text-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-dark-700 text-dark-200 rounded-lg hover:bg-dark-600 transition text-xs sm:text-sm"
               >
-                <RefreshCw className="w-4 h-4" />
-                Regenerate
+                <RefreshCw className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                <span className="hidden sm:inline">Regenerate</span>
               </button>
               <button 
                 onClick={handleOpenEmailModal} 
-                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-xs sm:text-sm"
               >
-                <Mail className="w-4 h-4" />
-                Email
+                <Mail className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                <span className="hidden sm:inline">Email</span>
               </button>
               <button 
                 onClick={handlePrint} 
-                className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition text-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-4 py-1.5 sm:py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition text-xs sm:text-sm"
               >
-                <Printer className="w-4 h-4" />
-                Print
+                <Printer className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                <span className="hidden sm:inline">Print</span>
               </button>
             </>
           )}
@@ -678,7 +678,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       )}
 
       {/* Contract Content */}
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 sm:p-4">
         <div 
           ref={printRef}
           className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto"
