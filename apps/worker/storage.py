@@ -34,6 +34,30 @@ def download_file_to_path(key: str, local_path: str):
     return local_path
 
 
+def get_presigned_url(key: str, expires_in: int = 3600) -> str:
+    """
+    Generate a presigned URL for an S3/MinIO object.
+    
+    Args:
+        key: The S3 key of the object
+        expires_in: URL expiration time in seconds (default 1 hour)
+        
+    Returns:
+        Presigned URL string
+    """
+    client = get_s3_client()
+    try:
+        url = client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": settings.s3_bucket, "Key": key},
+            ExpiresIn=expires_in,
+        )
+        return url
+    except ClientError as e:
+        print(f"Error generating presigned URL: {e}")
+        return None
+
+
 def upload_audio_file(
     audio_data: bytes,
     filename: str,

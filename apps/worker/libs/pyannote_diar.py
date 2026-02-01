@@ -49,29 +49,20 @@ def diarize_audio(
     api_key = pyannote_api_key or os.getenv("PYANNOTE_API_KEY")
     hf_token = hf_token or os.getenv("HF_TOKEN")
     
-    # For local files, prefer local models (HF_TOKEN) since pyannote.ai API needs public URLs
-    is_local_file = audio_path.startswith("/") or audio_path.startswith("./")
-    
-    # Try local models first for local files (works without public URL)
-    if hf_token and is_local_file and not audio_url:
-        try:
-            logger.info("Using local pyannote.audio models for local file")
-            return _diarize_with_local_models(
-                audio_path, hf_token, num_speakers, min_speakers, max_speakers
-            )
-        except Exception as e:
-            logger.warning(f"Local diarization failed: {e}, trying API")
-    
-    # Try pyannote.ai API if we have a public URL
+    # Prefer pyannote.ai API if we have both API key and URL (faster, no GPU needed)
     if api_key and audio_url:
         try:
+            logger.info("Using pyannote.ai API for diarization (preferred)")
             return _diarize_with_api(
                 audio_path, api_key, num_speakers, min_speakers, max_speakers, audio_url
             )
         except Exception as e:
             logger.warning(f"pyannote.ai API failed: {e}, trying local models")
+    
+    # Try local models as fallback
     if hf_token:
         try:
+            logger.info("Using local pyannote.audio models")
             return _diarize_with_local_models(
                 audio_path, hf_token, num_speakers, min_speakers, max_speakers
             )

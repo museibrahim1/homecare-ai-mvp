@@ -12,7 +12,7 @@ from uuid import UUID
 
 from worker import app
 from db import get_db
-from storage import download_file_to_path
+from storage import download_file_to_path, get_presigned_url
 from config import settings
 from libs.pyannote_diar import diarize_audio
 
@@ -64,8 +64,18 @@ def diarize_visit(self, visit_id: str):
         try:
             download_file_to_path(audio_asset.s3_key, tmp_path)
             
-            # Perform diarization
-            turns = diarize_audio(tmp_path, hf_token=settings.hf_token)
+            # Generate presigned URL for pyannote.ai API
+            audio_url = get_presigned_url(audio_asset.s3_key, expires_in=3600)
+            logger.info(f"Generated presigned URL for diarization API")
+            
+            # Perform diarization - pass both local path and URL
+            # API will use URL, local models will use path
+            turns = diarize_audio(
+                tmp_path, 
+                hf_token=settings.hf_token,
+                pyannote_api_key=os.getenv("PYANNOTE_API_KEY"),
+                audio_url=audio_url
+            )
             
             # Delete existing turns for this visit
             db.query(DiarizationTurn).filter(
