@@ -130,9 +130,9 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col min-h-screen flex-shrink-0 z-50 relative">
+    <aside className="w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col h-screen flex-shrink-0 sticky top-0 left-0 z-50">
       {/* Logo */}
-      <div className="px-6 py-6">
+      <div className="px-6 py-6 flex-shrink-0">
         <Link href="/dashboard" className="flex items-center gap-4">
           <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
             <Mic className="w-6 h-6 text-white" />
@@ -145,7 +145,7 @@ export default function Sidebar() {
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
         {/* Sales Section */}
         <div className="mb-5">
           <div className="px-4 py-2 mb-2">
@@ -235,7 +235,7 @@ export default function Sidebar() {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-dark-700/50 bg-dark-800/50">
+      <div className="p-4 border-t border-dark-700/50 bg-dark-800/50 flex-shrink-0">
         <div className="flex items-center gap-4 px-3 py-3 mb-3 bg-dark-700/30 rounded-xl">
           <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center shadow-md">
             <span className="text-white font-bold text-lg">
