@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v3 - Added model=precision-2 for pyannote API
+# Version: 2026-02-01-v4 - Debug logging for pyannote API
 WORKDIR /app
 
 # Install system dependencies for audio processing

@@ -121,6 +121,7 @@ def _diarize_with_api(
         body["model"] = "precision-2"
     
     logger.info(f"Sending request to pyannote.ai API with URL: {body.get('url', 'N/A')[:50]}...")
+    logger.info(f"Request body (without URL): model={body.get('model')}, minSpeakers={body.get('minSpeakers')}, maxSpeakers={body.get('maxSpeakers')}, numSpeakers={body.get('numSpeakers')}")
     
     response = requests.post(
         PYANNOTE_API_URL,
