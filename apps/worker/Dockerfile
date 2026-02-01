@@ -18,3 +18,4 @@ COPY . .
 
 # Run Celery worker
 CMD ["celery", "-A", "worker", "worker", "--loglevel=info", "--concurrency=2"]
+# Trigger rebuild Sat Jan 31 23:08:21 CST 2026
