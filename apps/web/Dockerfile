@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v1 - Added Notes button to pipeline
+# Version: 2026-02-01-v2 - Fixed duplicate getNote, force fresh build
 FROM node:20-alpine
 
 WORKDIR /app
