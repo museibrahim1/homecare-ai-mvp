@@ -78,9 +78,10 @@ type ViewMode = 'table' | 'pipeline' | 'forecast';
 
 // Status configuration with colors
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
-  intake: { label: 'Awaiting Intake', color: 'text-orange-400', bgColor: 'bg-orange-500/20', borderColor: 'border-l-orange-500' },
-  assessment: { label: 'Assessment', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20', borderColor: 'border-l-yellow-500' },
-  pending: { label: 'Pending', color: 'text-blue-400', bgColor: 'bg-blue-500/20', borderColor: 'border-l-blue-500' },
+  intake: { label: 'Intake', color: 'text-blue-400', bgColor: 'bg-blue-500/20', borderColor: 'border-l-blue-500' },
+  assessment: { label: 'Assessment', color: 'text-purple-400', bgColor: 'bg-purple-500/20', borderColor: 'border-l-purple-500' },
+  pending: { label: 'Pending', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20', borderColor: 'border-l-yellow-500' },
+  proposal: { label: 'Proposal Sent', color: 'text-orange-400', bgColor: 'bg-orange-500/20', borderColor: 'border-l-orange-500' },
   active: { label: 'Active', color: 'text-green-400', bgColor: 'bg-green-500/20', borderColor: 'border-l-green-500' },
   assigned: { label: 'Assigned', color: 'text-teal-400', bgColor: 'bg-teal-500/20', borderColor: 'border-l-teal-500' },
   follow_up: { label: 'Follow-up', color: 'text-purple-400', bgColor: 'bg-purple-500/20', borderColor: 'border-l-purple-500' },
@@ -427,8 +428,9 @@ export default function ClientsPage() {
 
   // Group clients by status for pipeline view
   const intakeClients = filteredClients.filter(c => c.status === 'intake' || c.status === 'assessment' || c.status === 'pending');
-  const assignedClients = filteredClients.filter(c => c.status === 'assigned' || c.status === 'active' || !c.status);
-  const followUpClients = filteredClients.filter(c => c.status === 'follow_up');
+  const proposalClients = filteredClients.filter(c => c.status === 'proposal' || c.status === 'pending_review');
+  const assignedClients = filteredClients.filter(c => c.status === 'assigned' || c.status === 'active' || (!c.status && !['intake', 'assessment', 'pending', 'proposal', 'pending_review', 'follow_up', 'review'].includes(c.status || '')));
+  const followUpClients = filteredClients.filter(c => c.status === 'follow_up' || c.status === 'review');
 
   // Stats
   const activeCount = clients.filter(c => c.status === 'active' || !c.status).length;
@@ -583,11 +585,41 @@ export default function ClientsPage() {
                 </div>
               )}
 
+              {/* Proposal Sent Section */}
+              {proposalClients.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-lg font-semibold text-orange-400">Awaiting signature</h2>
+                    <span className="text-sm text-dark-400">({proposalClients.length})</span>
+                  </div>
+                  
+                  {/* Table Header */}
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                    <div className="w-10" />
+                    <div className="flex-1">Client</div>
+                    <div className="w-28">Visit status</div>
+                    <div className="w-32">Phone</div>
+                    <div className="w-36">Care specialty</div>
+                    <div className="w-4" />
+                  </div>
+
+                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                    {proposalClients.map((client) => (
+                      <ClientRow 
+                        key={client.id} 
+                        client={client} 
+                        onClick={() => handleEditClient(client)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Assigned to Care Team Section */}
               {assignedClients.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-teal-400">Assigned to care team</h2>
+                    <h2 className="text-lg font-semibold text-green-400">Active clients</h2>
                     <span className="text-sm text-dark-400">({assignedClients.length})</span>
                   </div>
                   
@@ -665,28 +697,28 @@ export default function ClientsPage() {
             </div>
           ) : viewMode === 'pipeline' ? (
             /* Pipeline / Kanban View */
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-5 gap-3">
               {/* Intake Column */}
               <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-4 border-b border-dark-700 bg-orange-500/10">
+                <div className="p-3 border-b border-dark-700 bg-blue-500/10">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-orange-400">Intake</h3>
-                    <span className="text-sm text-dark-400">{intakeClients.length}</span>
+                    <h3 className="font-semibold text-blue-400 text-sm">Intake</h3>
+                    <span className="text-xs text-dark-400">{intakeClients.length}</span>
                   </div>
                 </div>
-                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
                   {intakeClients.map(client => (
                     <div 
                       key={client.id}
                       onClick={() => handleEditClient(client)}
-                      className="p-3 bg-dark-800 rounded-xl border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
                     >
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-2 mb-1">
                         <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-sm truncate">{client.full_name}</p>
+                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
                       </div>
                       {client.phone && (
-                        <p className="text-xs text-dark-400">{client.phone}</p>
+                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
                       )}
                     </div>
                   ))}
@@ -695,27 +727,54 @@ export default function ClientsPage() {
 
               {/* Assessment Column */}
               <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-4 border-b border-dark-700 bg-yellow-500/10">
+                <div className="p-3 border-b border-dark-700 bg-purple-500/10">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-yellow-400">Assessment</h3>
-                    <span className="text-sm text-dark-400">
+                    <h3 className="font-semibold text-purple-400 text-sm">Assessment</h3>
+                    <span className="text-xs text-dark-400">
                       {filteredClients.filter(c => c.status === 'assessment').length}
                     </span>
                   </div>
                 </div>
-                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
                   {filteredClients.filter(c => c.status === 'assessment').map(client => (
                     <div 
                       key={client.id}
                       onClick={() => handleEditClient(client)}
-                      className="p-3 bg-dark-800 rounded-xl border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
                     >
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-2 mb-1">
                         <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-sm truncate">{client.full_name}</p>
+                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
                       </div>
                       {client.phone && (
-                        <p className="text-xs text-dark-400">{client.phone}</p>
+                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Proposal Column */}
+              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
+                <div className="p-3 border-b border-dark-700 bg-orange-500/10">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-orange-400 text-sm">Proposal</h3>
+                    <span className="text-xs text-dark-400">{proposalClients.length}</span>
+                  </div>
+                </div>
+                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
+                  {proposalClients.map(client => (
+                    <div 
+                      key={client.id}
+                      onClick={() => handleEditClient(client)}
+                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <ClientAvatar name={client.full_name} size="sm" />
+                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
+                      </div>
+                      {client.phone && (
+                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
                       )}
                     </div>
                   ))}
@@ -724,25 +783,25 @@ export default function ClientsPage() {
 
               {/* Active Column */}
               <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-4 border-b border-dark-700 bg-green-500/10">
+                <div className="p-3 border-b border-dark-700 bg-green-500/10">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-green-400">Active</h3>
-                    <span className="text-sm text-dark-400">{assignedClients.length}</span>
+                    <h3 className="font-semibold text-green-400 text-sm">Active</h3>
+                    <span className="text-xs text-dark-400">{assignedClients.length}</span>
                   </div>
                 </div>
-                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
                   {assignedClients.map(client => (
                     <div 
                       key={client.id}
                       onClick={() => handleEditClient(client)}
-                      className="p-3 bg-dark-800 rounded-xl border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
                     >
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-2 mb-1">
                         <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-sm truncate">{client.full_name}</p>
+                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
                       </div>
                       {client.phone && (
-                        <p className="text-xs text-dark-400">{client.phone}</p>
+                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
                       )}
                     </div>
                   ))}
@@ -751,25 +810,25 @@ export default function ClientsPage() {
 
               {/* Follow-up Column */}
               <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-4 border-b border-dark-700 bg-purple-500/10">
+                <div className="p-3 border-b border-dark-700 bg-yellow-500/10">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-purple-400">Follow-up</h3>
-                    <span className="text-sm text-dark-400">{followUpClients.length}</span>
+                    <h3 className="font-semibold text-yellow-400 text-sm">Follow-up</h3>
+                    <span className="text-xs text-dark-400">{followUpClients.length}</span>
                   </div>
                 </div>
-                <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
                   {followUpClients.map(client => (
                     <div 
                       key={client.id}
                       onClick={() => handleEditClient(client)}
-                      className="p-3 bg-dark-800 rounded-xl border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
+                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
                     >
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-2 mb-1">
                         <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-sm truncate">{client.full_name}</p>
+                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
                       </div>
                       {client.phone && (
-                        <p className="text-xs text-dark-400">{client.phone}</p>
+                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
                       )}
                     </div>
                   ))}
