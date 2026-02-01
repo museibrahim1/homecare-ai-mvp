@@ -1,4 +1,4 @@
-# Version: v6 - Fixed email contract, business signup creates linked User
+# Version: v7 - Fixed User model for business signup (added company_name, flexible role)
 FROM python:3.11-slim
 
 WORKDIR /app

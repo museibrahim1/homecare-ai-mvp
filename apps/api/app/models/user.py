@@ -9,6 +9,7 @@ import enum
 class UserRole(str, enum.Enum):
     admin = "admin"
     caregiver = "caregiver"
+    user = "user"  # For business owners
 
 
 class User(Base, TimestampMixin):
@@ -18,9 +19,10 @@ class User(Base, TimestampMixin):
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
-    role = Column(Enum(UserRole), default=UserRole.caregiver, nullable=False)
+    role = Column(String(50), default='caregiver', nullable=False)  # String to be flexible
     is_active = Column(Boolean, default=True, nullable=False)
     phone = Column(String(20), nullable=True)
+    company_name = Column(String(255), nullable=True)  # For business owners
     
     # Google Calendar Integration
     google_calendar_connected = Column(Boolean, default=False, nullable=False)
