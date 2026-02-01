@@ -38,14 +38,15 @@ def identify_speaker_names(db, visit_id: UUID) -> dict:
         Dict mapping generic labels (SPEAKER_00) to names (Dr. Smith)
     """
     from models import TranscriptSegment
+    from typing import Dict
     import anthropic
     import os
     
-    # Get transcript segments with speaker labels
+    # Get ALL transcript segments with speaker labels to find all speakers
     segments = db.query(TranscriptSegment).filter(
         TranscriptSegment.visit_id == visit_id,
         TranscriptSegment.speaker_label.isnot(None)
-    ).order_by(TranscriptSegment.start_ms).limit(100).all()  # First 100 segments for more context
+    ).order_by(TranscriptSegment.start_ms).all()  # Get ALL segments to find all speakers
     
     if not segments:
         return {}
@@ -54,12 +55,28 @@ def identify_speaker_names(db, visit_id: UUID) -> dict:
     unique_speakers = list(set(seg.speaker_label for seg in segments))
     logger.info(f"Found {len(unique_speakers)} unique speakers: {unique_speakers}")
     
-    # Build transcript excerpt with speaker labels
-    transcript_lines = []
+    # Build transcript excerpt - include first 50 segments from each speaker for context
+    speaker_segments: Dict[str, List] = {}
     for seg in segments:
+        speaker = seg.speaker_label
+        if speaker not in speaker_segments:
+            speaker_segments[speaker] = []
+        if len(speaker_segments[speaker]) < 50:  # First 50 segments per speaker
+            speaker_segments[speaker].append(seg)
+    
+    # Combine segments chronologically for context
+    all_segments = []
+    for speaker_segs in speaker_segments.values():
+        all_segments.extend(speaker_segs)
+    all_segments.sort(key=lambda s: s.start_ms)
+    
+    # Build transcript text from combined segments (limit to ~150 total)
+    transcript_lines = []
+    for seg in all_segments[:150]:
         transcript_lines.append(f"[{seg.speaker_label}]: {seg.text}")
     
     transcript_text = "\n".join(transcript_lines)
+    logger.info(f"Built transcript with {len(transcript_lines)} lines from {len(unique_speakers)} speakers")
     
     # Use Claude to identify names
     api_key = os.getenv("ANTHROPIC_API_KEY")

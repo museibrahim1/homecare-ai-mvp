@@ -163,59 +163,79 @@ def consolidate_blocks(blocks: List[BillableBlock], min_gap_ms: int = 120000) ->
     return consolidated
 
 
-def analyze_transcript_with_llm(
+def analyze_transcript_with_claude(
     segments: List[Dict[str, Any]],
-    llm_client: Optional[Any] = None
 ) -> List[Dict[str, Any]]:
     """
-    Use LLM to analyze transcript and extract billable services.
-    Falls back to rule-based if LLM unavailable.
+    Use Claude to analyze transcript and extract ALL billable services comprehensively.
     """
-    if not llm_client:
+    import anthropic
+    import os
+    
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        logger.warning("No ANTHROPIC_API_KEY, skipping LLM billables analysis")
         return []
     
     # Combine segments into full transcript
     full_text = "\n".join([
         f"[{s.get('speaker_label', 'Speaker')}]: {s.get('text', '')}"
-        for s in segments
+        for s in segments[:150]  # First 150 segments for context
     ])
     
-    prompt = f"""Analyze this home care assessment conversation and identify all billable care services mentioned.
+    prompt = f"""Analyze this home care assessment conversation and extract EVERY care service, task, or need mentioned.
+
+Be EXTREMELY thorough - extract EVERYTHING the client or family mentions needing help with, including:
+- Personal care needs (bathing, dressing, grooming, toileting, hygiene)
+- Medication management and reminders
+- Health monitoring (vitals, blood pressure, glucose, etc.)
+- Meal preparation, cooking, nutrition, feeding assistance
+- Mobility assistance, transfers, walking, fall prevention
+- Housekeeping, cleaning, laundry, bed making
+- Transportation and errands
+- Companionship, emotional support, supervision
+- Pain management, wound care, medical needs
+- Cognitive support, dementia care, memory issues
+- Any other care needs mentioned
 
 TRANSCRIPT:
 {full_text}
 
-For each service identified, provide:
-1. category: One of [ADL_HYGIENE, ADL_DRESSING, ADL_GROOMING, MED_REMINDER, VITALS, MEAL_PREP, MEAL_ASSIST, ADL_MOBILITY, MOBILITY_ASSIST, EXERCISE, HOUSEHOLD_LIGHT, HOUSEHOLD_LAUNDRY, COMPANIONSHIP, SUPERVISION]
-2. description: Brief description of the specific service
-3. evidence: The exact quote from transcript that mentions this need
-4. estimated_minutes_per_visit: Estimated time for this service per visit
-5. frequency: How often needed (daily, weekly, etc.)
-6. priority: HIGH, MEDIUM, or LOW based on client's expressed needs
+For EACH service/task mentioned, provide:
+1. category: Choose the best fit from [PERSONAL_CARE, MEDICATION, HEALTH_MONITORING, MEALS, MOBILITY, HOUSEKEEPING, TRANSPORTATION, COMPANIONSHIP, SUPERVISION, MEDICAL_CARE, COGNITIVE_SUPPORT, OTHER]
+2. task: Specific task or need (e.g., "Bathing assistance", "Blood pressure monitoring", "Prepare diabetic meals")
+3. evidence: The exact quote from transcript mentioning this need
+4. priority: HIGH/MEDIUM/LOW based on urgency expressed
+5. frequency: How often mentioned or needed (if stated)
 
-Return as JSON array. Be thorough - identify ALL services mentioned, including:
-- Personal care (bathing, dressing, grooming, toileting)
-- Medication management
-- Vital signs monitoring
-- Meal preparation and feeding assistance
-- Mobility and transfer assistance
-- Housekeeping and laundry
-- Companionship and supervision
+Return as JSON array. Extract EVERY task - do not limit or summarize. Each mention of a different task should be a separate item.
 
 JSON:"""
 
     try:
-        response = llm_client.generate(prompt, max_tokens=2000)
+        client = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=4000,
+            messages=[{"role": "user", "content": prompt}]
+        )
         
-        # Parse JSON from response
-        json_match = re.search(r'\[[\s\S]*\]', response)
-        if json_match:
-            services = json.loads(json_match.group())
-            return services
+        response_text = response.content[0].text.strip()
+        
+        # Handle markdown code blocks
+        if "```" in response_text:
+            json_match = re.search(r'```(?:json)?\s*([\s\S]*?)```', response_text)
+            if json_match:
+                response_text = json_match.group(1).strip()
+        
+        # Parse JSON
+        services = json.loads(response_text)
+        logger.info(f"Claude extracted {len(services)} billable services")
+        return services
+        
     except Exception as e:
-        logger.warning(f"LLM analysis failed: {e}")
-    
-    return []
+        logger.warning(f"Claude billables analysis failed: {e}")
+        return []
 
 
 def generate_billables_from_transcript(
@@ -223,22 +243,24 @@ def generate_billables_from_transcript(
     visit_start_ms: int,
     visit_end_ms: int,
     min_block_minutes: int = 5,
-    use_llm: bool = False,
+    use_llm: bool = True,  # Default to using Claude
     llm_client: Optional[Any] = None,
 ) -> List[Dict[str, Any]]:
     """
-    Generate billable items from transcript segments.
+    Generate billable items from transcript segments using Claude AI.
     
-    Extracts and categorizes care services mentioned in the transcript.
-    Does NOT calculate time - just identifies and lists services with evidence.
+    Extracts and categorizes ALL care services mentioned in the transcript.
+    Groups tasks by category and prices by category.
     
     Returns list of dicts for JSON serialization.
     """
-    logger.info(f"Generating billables from {len(segments)} segments")
+    logger.info(f"Generating billables from {len(segments)} segments using Claude")
     
-    segment_services: Dict[str, List[Dict]] = {}  # Track services by category
+    # Use Claude to extract all services
+    claude_services = analyze_transcript_with_claude(segments)
     
-    # Process each segment to find mentioned services
+    # Also run rules-based detection as backup
+    segment_services: Dict[str, List[Dict]] = {}
     for segment in segments:
         text = segment.get("text", "")
         start_ms = segment.get("start_ms", 0)
@@ -269,51 +291,109 @@ def generate_billables_from_transcript(
                 "service_type": service_type,
             })
     
-    # Create billable items from detected services
+    # Map Claude categories to our categories
+    category_mapping = {
+        "PERSONAL_CARE": "Personal Care",
+        "MEDICATION": "Medication Management", 
+        "HEALTH_MONITORING": "Health Monitoring",
+        "MEALS": "Nutrition",
+        "MOBILITY": "Mobility",
+        "HOUSEKEEPING": "Homemaking",
+        "TRANSPORTATION": "Transportation",
+        "COMPANIONSHIP": "Companionship",
+        "SUPERVISION": "Supervision",
+        "MEDICAL_CARE": "Medical Care",
+        "COGNITIVE_SUPPORT": "Cognitive Support",
+        "OTHER": "Other Services",
+    }
+    
+    category_rates = {
+        "Personal Care": 28.00,
+        "Medication Management": 28.00,
+        "Health Monitoring": 30.00,
+        "Nutrition": 24.00,
+        "Mobility": 28.00,
+        "Homemaking": 22.00,
+        "Transportation": 20.00,
+        "Companionship": 22.00,
+        "Supervision": 24.00,
+        "Medical Care": 35.00,
+        "Cognitive Support": 30.00,
+        "Other Services": 25.00,
+    }
+    
+    # Group Claude services by category with all tasks listed
+    category_tasks: Dict[str, List[Dict]] = {}
+    
+    for service in claude_services:
+        cat = service.get("category", "OTHER")
+        category_name = category_mapping.get(cat, cat)
+        
+        if category_name not in category_tasks:
+            category_tasks[category_name] = []
+        
+        category_tasks[category_name].append({
+            "task": service.get("task", "Care service"),
+            "evidence": service.get("evidence", ""),
+            "priority": service.get("priority", "MEDIUM"),
+            "frequency": service.get("frequency", "As needed"),
+        })
+    
+    # Create result with categories containing task lists
     result = []
-    service_order = ["Personal Care", "Medication Management", "Health Monitoring", "Nutrition", "Mobility", "Homemaking", "Companionship", "Supervision"]
     
-    # Sort categories by service type
-    sorted_categories = sorted(
-        segment_services.keys(),
-        key=lambda c: (
-            service_order.index(segment_services[c][0]["service_type"]) 
-            if segment_services[c] and segment_services[c][0]["service_type"] in service_order 
-            else 99
-        )
-    )
-    
-    for category in sorted_categories:
-        detections = segment_services[category]
-        if not detections:
-            continue
+    for category_name, tasks in category_tasks.items():
+        # Build task list description
+        task_list = [t["task"] for t in tasks]
+        evidence_list = [{"text": t["evidence"], "task": t["task"], "priority": t["priority"]} for t in tasks]
         
-        # Collect all evidence for this service
-        all_evidence = [d["evidence"] for d in detections]
-        
-        # Get category info
-        cat_info = CATEGORY_INFO.get(category, {"label": category, "default_rate": 25.00, "color": "gray"})
-        
-        # Create item dict - NO time calculations
         item = {
-            "code": category,
-            "category": category,
-            "description": detections[0]["description"],
-            "start_ms": min(d["start_ms"] for d in detections),
-            "end_ms": max(d["end_ms"] for d in detections),
-            "minutes": 0,  # Not calculating time per service
-            "evidence": all_evidence,
-            "service_type": detections[0]["service_type"],
+            "code": category_name.upper().replace(" ", "_"),
+            "category": category_name,
+            "description": f"{category_name}: {len(tasks)} tasks identified",
+            "start_ms": visit_start_ms,
+            "end_ms": visit_end_ms,
+            "minutes": 0,
+            "evidence": evidence_list,
+            "service_type": category_name,
             "rate_type": "hourly",
-            "label": cat_info.get("label", category),
-            "default_rate": cat_info.get("default_rate", 25.00),
-            "color": cat_info.get("color", "gray"),
-            "mention_count": len(all_evidence),
-            "is_flagged": len(all_evidence) == 1,
-            "flag_reason": "Single mention - verify service is needed" if len(all_evidence) == 1 else None,
+            "label": category_name,
+            "default_rate": category_rates.get(category_name, 25.00),
+            "color": "blue",
+            "task_count": len(tasks),
+            "tasks": task_list,
+            "is_flagged": False,
+            "flag_reason": None,
         }
         result.append(item)
     
-    logger.info(f"Generated {len(result)} billable service items")
+    # Add any rules-based detections not found by Claude
+    for category, detections in segment_services.items():
+        service_type = detections[0]["service_type"] if detections else category
+        if service_type not in category_tasks:
+            cat_info = CATEGORY_INFO.get(category, {"label": category, "default_rate": 25.00})
+            all_evidence = [d["evidence"] for d in detections]
+            
+            item = {
+                "code": category,
+                "category": service_type,
+                "description": detections[0]["description"] if detections else category,
+                "start_ms": min(d["start_ms"] for d in detections),
+                "end_ms": max(d["end_ms"] for d in detections),
+                "minutes": 0,
+                "evidence": all_evidence,
+                "service_type": service_type,
+                "rate_type": "hourly",
+                "label": cat_info.get("label", category),
+                "default_rate": cat_info.get("default_rate", 25.00),
+                "color": "gray",
+                "task_count": len(all_evidence),
+                "tasks": [detections[0]["description"]] if detections else [],
+                "is_flagged": True,
+                "flag_reason": "Detected by rules only - verify needed",
+            }
+            result.append(item)
+    
+    logger.info(f"Generated {len(result)} billable categories with {sum(item.get('task_count', 0) for item in result)} total tasks")
     
     return result

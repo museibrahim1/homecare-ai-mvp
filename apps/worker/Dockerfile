@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v11 - Identify ALL speakers including 3rd speaker
+# Version: 2026-02-01-v12 - Claude billables extraction + all speakers detection
 WORKDIR /app
 
 # Install system dependencies for audio processing
