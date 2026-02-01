@@ -7,8 +7,8 @@ from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
-from app.models.transcript import TranscriptSegment
-from app.models.billable import BillableItem
+from app.models.transcript_segment import TranscriptSegment
+from app.models.billable_item import BillableItem
 from app.models.note import Note
 from app.models.contract import Contract
 from app.schemas.visit import VisitCreate, VisitUpdate, VisitResponse, VisitListResponse

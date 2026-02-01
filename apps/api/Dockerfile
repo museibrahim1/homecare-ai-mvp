@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v2 - Force rebuild for restart assessment endpoint
+# Version: 2026-02-01-v3 - Fixed import paths for restart endpoint
 FROM python:3.11-slim
 
 WORKDIR /app
