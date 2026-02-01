@@ -758,26 +758,28 @@ const SceneAudio: React.FC<SceneAudioProps> = ({ scene, from }) => {
 };
 
 // ============ SCENE TIMING CONFIGURATION ============
-// Audio durations (with buffer): scene-01=4.5s, scene-02=7s, scene-03=5.5s, 
-// scene-04=6.5s, scene-05=5.5s, scene-06=5s, scene-07=6.5s, scene-08=5s, scene-09=5s
+// 12 scenes with CRM features - Total: 72 seconds
 const SCENE_TIMING = {
-  scene1: { from: 0, duration: 135 },        // 4.5s (audio: 4.0s)
-  scene2: { from: 135, duration: 210 },      // 7.0s (audio: 6.4s)
-  scene3: { from: 345, duration: 165 },      // 5.5s (audio: 5.0s)
-  scene4: { from: 510, duration: 195 },      // 6.5s (audio: 5.9s)
-  scene5: { from: 705, duration: 165 },      // 5.5s (audio: 4.8s)
-  scene6: { from: 870, duration: 150 },      // 5.0s (audio: 4.5s)
-  scene7: { from: 1020, duration: 195 },     // 6.5s (audio: 5.7s)
-  scene8: { from: 1215, duration: 150 },     // 5.0s (audio: 4.4s)
-  scene9: { from: 1365, duration: 150 },     // 5.0s (audio: 4.4s)
-  total: 1515,                               // 50.5 seconds total
+  scene1:  { from: 0,    duration: 150 },    // Intro (5s, audio: 4.0s)
+  scene2:  { from: 150,  duration: 210 },    // Core Features (7s, audio: 6.0s)
+  scene3:  { from: 360,  duration: 165 },    // AI Pipeline (5.5s, audio: 4.7s)
+  scene4:  { from: 525,  duration: 195 },    // Dashboard (6.5s, audio: 5.8s)
+  scene5:  { from: 720,  duration: 195 },    // Assessments (6.5s, audio: 5.7s)
+  scene6:  { from: 915,  duration: 165 },    // Visit Detail (5.5s, audio: 4.9s)
+  scene7:  { from: 1080, duration: 165 },    // Contract (5.5s, audio: 4.5s)
+  scene8:  { from: 1245, duration: 195 },    // Clients CRM (6.5s, audio: 5.6s)
+  scene9:  { from: 1440, duration: 210 },    // Pipeline Board (7s, audio: 6.0s)
+  scene10: { from: 1650, duration: 195 },    // Voice ID (6.5s, audio: 5.6s)
+  scene11: { from: 1845, duration: 150 },    // Reports (5s, audio: 4.2s)
+  scene12: { from: 1995, duration: 165 },    // CTA (5.5s, audio: 4.4s)
+  total: 2160,                               // 72 seconds total
 };
 
 // ============ MAIN DEMO VIDEO ============
 export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: colors.dark }}>
-      {/* Audio tracks - scene-synced segments with proper durations */}
+      {/* Audio tracks - 12 scene-synced segments */}
       {showAudio && (
         <>
           <Sequence from={SCENE_TIMING.scene1.from} durationInFrames={SCENE_TIMING.scene1.duration}>
@@ -807,101 +809,155 @@ export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
           <Sequence from={SCENE_TIMING.scene9.from} durationInFrames={SCENE_TIMING.scene9.duration}>
             <Audio src={staticFile("segments/scene-09.mp3")} volume={1} />
           </Sequence>
+          <Sequence from={SCENE_TIMING.scene10.from} durationInFrames={SCENE_TIMING.scene10.duration}>
+            <Audio src={staticFile("segments/scene-10.mp3")} volume={1} />
+          </Sequence>
+          <Sequence from={SCENE_TIMING.scene11.from} durationInFrames={SCENE_TIMING.scene11.duration}>
+            <Audio src={staticFile("segments/scene-11.mp3")} volume={1} />
+          </Sequence>
+          <Sequence from={SCENE_TIMING.scene12.from} durationInFrames={SCENE_TIMING.scene12.duration}>
+            <Audio src={staticFile("segments/scene-12.mp3")} volume={1} />
+          </Sequence>
         </>
       )}
 
-      {/* Scene 1: Intro (0-4.5s) */}
+      {/* Scene 1: Intro */}
       <Sequence from={SCENE_TIMING.scene1.from} durationInFrames={SCENE_TIMING.scene1.duration}>
         <IntroScene />
       </Sequence>
 
-      {/* Scene 2: Core Features (4.5-11.5s) */}
+      {/* Scene 2: Core Features */}
       <Sequence from={SCENE_TIMING.scene2.from} durationInFrames={SCENE_TIMING.scene2.duration}>
         <CoreFeaturesScene />
       </Sequence>
 
-      {/* Scene 3: Pipeline (11.5-17s) */}
+      {/* Scene 3: AI Pipeline Steps */}
       <Sequence from={SCENE_TIMING.scene3.from} durationInFrames={SCENE_TIMING.scene3.duration}>
         <PipelineScene />
       </Sequence>
 
-      {/* Scene 4: Assessments Dashboard (17-23.5s) */}
+      {/* Scene 4: Dashboard Overview */}
       <Sequence from={SCENE_TIMING.scene4.from} durationInFrames={SCENE_TIMING.scene4.duration}>
         <ScreenshotScene
-          title="Assessments Dashboard"
-          subtitle="Your command center for care assessments"
+          title="Dashboard"
+          subtitle="Everything at a glance"
+          screenshotPath="screenshots/08-dashboard.png"
+          bullets={[
+            "Active clients overview",
+            "Pending assessments count",
+            "Recent activity feed",
+            "Quick action buttons",
+          ]}
+        />
+      </Sequence>
+
+      {/* Scene 5: Assessments */}
+      <Sequence from={SCENE_TIMING.scene5.from} durationInFrames={SCENE_TIMING.scene5.duration}>
+        <ScreenshotScene
+          title="Assessments"
+          subtitle="Your command center"
           screenshotPath="screenshots/02-assessments.png"
           bullets={[
-            "Track all assessments in one place",
+            "Track all assessments",
             "Color-coded status badges",
-            "Quick search and filtering",
+            "Search and filter",
             "One-click to view details",
           ]}
         />
       </Sequence>
 
-      {/* Scene 5: Visit Detail (23.5-29s) */}
-      <Sequence from={SCENE_TIMING.scene5.from} durationInFrames={SCENE_TIMING.scene5.duration}>
+      {/* Scene 6: Visit Detail / Pipeline */}
+      <Sequence from={SCENE_TIMING.scene6.from} durationInFrames={SCENE_TIMING.scene6.duration}>
         <ScreenshotScene
-          title="AI Processing Pipeline"
-          subtitle="Watch AI process your recordings in real-time"
+          title="AI Processing"
+          subtitle="Real-time pipeline execution"
           screenshotPath="screenshots/03-visit-detail.png"
           bullets={[
-            "One-click pipeline execution",
-            "Real-time progress tracking",
-            "Automatic service extraction",
-            "Instant contract generation",
+            "One-click processing",
+            "Real-time progress",
+            "Automatic extraction",
+            "Instant results",
           ]}
         />
       </Sequence>
 
-      {/* Scene 6: Contract Preview (29-34s) */}
-      <Sequence from={SCENE_TIMING.scene6.from} durationInFrames={SCENE_TIMING.scene6.duration}>
+      {/* Scene 7: Contract Preview */}
+      <Sequence from={SCENE_TIMING.scene7.from} durationInFrames={SCENE_TIMING.scene7.duration}>
         <ScreenshotScene
           title="Contract Generation"
           subtitle="AI-generated, human-approved"
           screenshotPath="screenshots/04-contract-preview.png"
           bullets={[
             "Proposal-ready contracts",
-            "Edit any section manually",
+            "Edit any section",
             "Regenerate with changes",
-            "Export to PDF instantly",
+            "Export to PDF",
           ]}
         />
       </Sequence>
 
-      {/* Scene 7: Clients (34-40.5s) */}
-      <Sequence from={SCENE_TIMING.scene7.from} durationInFrames={SCENE_TIMING.scene7.duration}>
+      {/* Scene 8: Clients CRM */}
+      <Sequence from={SCENE_TIMING.scene8.from} durationInFrames={SCENE_TIMING.scene8.duration}>
         <ScreenshotScene
           title="Client Management"
-          subtitle="All client information at your fingertips"
+          subtitle="Complete CRM for care"
           screenshotPath="screenshots/05-clients.png"
           bullets={[
             "Complete client profiles",
             "Care level indicators",
-            "Medical conditions tracking",
-            "Emergency contacts on file",
+            "Medical history tracking",
+            "Emergency contacts",
           ]}
         />
       </Sequence>
 
-      {/* Scene 8: Reports (40.5-45.5s) */}
-      <Sequence from={SCENE_TIMING.scene8.from} durationInFrames={SCENE_TIMING.scene8.duration}>
+      {/* Scene 9: Pipeline Board (CRM) */}
+      <Sequence from={SCENE_TIMING.scene9.from} durationInFrames={SCENE_TIMING.scene9.duration}>
+        <ScreenshotScene
+          title="Sales Pipeline"
+          subtitle="Visualize your client journey"
+          screenshotPath="screenshots/09-pipeline.png"
+          bullets={[
+            "Kanban-style board",
+            "Intake to Active stages",
+            "Drag and drop updates",
+            "Revenue tracking",
+          ]}
+        />
+      </Sequence>
+
+      {/* Scene 10: Voice ID */}
+      <Sequence from={SCENE_TIMING.scene10.from} durationInFrames={SCENE_TIMING.scene10.duration}>
+        <ScreenshotScene
+          title="Voice Identification"
+          subtitle="Know who's speaking"
+          screenshotPath="screenshots/10-voice-id.png"
+          bullets={[
+            "Staff voice enrollment",
+            "Automatic recognition",
+            "No verbal introductions",
+            "Unique voiceprints",
+          ]}
+        />
+      </Sequence>
+
+      {/* Scene 11: Reports */}
+      <Sequence from={SCENE_TIMING.scene11.from} durationInFrames={SCENE_TIMING.scene11.duration}>
         <ScreenshotScene
           title="Reports & Analytics"
-          subtitle="Data-driven insights for your agency"
+          subtitle="Data-driven insights"
           screenshotPath="screenshots/06-reports.png"
           bullets={[
-            "Weekly timesheets for payroll",
-            "Monthly activity summaries",
+            "Weekly timesheets",
+            "Monthly summaries",
             "Billing reconciliation",
-            "One-click CSV exports",
+            "One-click exports",
           ]}
         />
       </Sequence>
 
-      {/* Scene 9: CTA (45.5-50.5s) */}
-      <Sequence from={SCENE_TIMING.scene9.from} durationInFrames={SCENE_TIMING.scene9.duration}>
+      {/* Scene 12: CTA */}
+      <Sequence from={SCENE_TIMING.scene12.from} durationInFrames={SCENE_TIMING.scene12.duration}>
         <CTAScene />
       </Sequence>
     </AbsoluteFill>

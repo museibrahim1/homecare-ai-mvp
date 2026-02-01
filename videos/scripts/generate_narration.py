@@ -34,32 +34,41 @@ except ImportError:
 # Scene-by-scene narration with timing targets
 # Each scene has: (start_sec, end_sec, text)
 SCENE_NARRATIONS = [
-    # Scene 1: Intro (0-4 seconds) - 4 sec
+    # Scene 1: Intro - 4 sec
     (0, 4, "Introducing Homecare AI. The AI-powered care assessment engine."),
     
-    # Scene 2: Core Features (4-9 seconds) - 5 sec
-    (4, 9, "Upload recordings. AI transcribes with speaker identification. Then generates contracts automatically."),
+    # Scene 2: Core Features - 7 sec
+    (4, 11, "Upload recordings. AI transcribes with speaker identification. Then generates contracts automatically."),
     
-    # Scene 3: Pipeline (9-15 seconds) - 6 sec
-    (9, 15, "Three simple steps. Transcribe. Bill. Contract. What took hours now takes minutes."),
+    # Scene 3: AI Pipeline Steps - 5.5 sec
+    (11, 16.5, "Three simple steps. Transcribe. Bill. Contract. What took hours now takes minutes."),
     
-    # Scene 4: Assessments (15-21 seconds) - 6 sec
-    (15, 21, "Your command center. Track every assessment with color-coded status badges and instant search."),
+    # Scene 4: Dashboard - 5 sec
+    (16.5, 21.5, "Your dashboard shows everything at a glance. Active clients, pending assessments, and recent activity."),
     
-    # Scene 5: Visit Detail (21-27 seconds) - 6 sec
-    (21, 27, "Watch AI process recordings in real-time. One click runs the entire pipeline."),
+    # Scene 5: Assessments - 5.5 sec
+    (21.5, 27, "Track every assessment with color-coded status badges. Search, filter, and manage with ease."),
     
-    # Scene 6: Contract Preview (27-33 seconds) - 6 sec
-    (27, 33, "AI-generated contracts. Human-approved. Edit, regenerate, or export to PDF."),
+    # Scene 6: Visit Detail - 5 sec
+    (27, 32, "Watch AI process recordings in real-time. One click runs the entire pipeline."),
     
-    # Scene 7: Clients (33-39 seconds) - 6 sec
-    (33, 39, "Complete client profiles. Care levels. Medical history. Emergency contacts. All in one place."),
+    # Scene 7: Contract Preview - 5 sec
+    (32, 37, "AI-generated contracts. Human-approved. Edit, regenerate, or export to PDF."),
     
-    # Scene 8: Reports (39-45 seconds) - 6 sec
-    (39, 45, "Generate reports for payroll and billing. Export to CSV with one click."),
+    # Scene 8: Clients CRM - 5.5 sec
+    (37, 42.5, "Complete client profiles. Care levels. Medical history. Emergency contacts. All in one place."),
     
-    # Scene 9: CTA (45-50 seconds) - 5 sec
-    (45, 50, "Ready to save hours on every assessment? Start your free trial today."),
+    # Scene 9: Pipeline Board - 6 sec
+    (42.5, 48.5, "Your sales pipeline visualized. Track clients from intake to active. Drag and drop to update status."),
+    
+    # Scene 10: Voice ID - 5.5 sec
+    (48.5, 54, "Voice identification technology. Staff record once, AI recognizes them in every recording."),
+    
+    # Scene 11: Reports - 5 sec
+    (54, 59, "Generate reports for payroll and billing. Export to CSV with one click."),
+    
+    # Scene 12: CTA - 5 sec
+    (59, 64, "Ready to save hours on every assessment? Start your free trial today."),
 ]
 
 # Full narration (combined, for single-file generation)
@@ -69,13 +78,19 @@ Upload recordings. AI transcribes with speaker identification. Then generates co
 
 Three simple steps. Transcribe. Bill. Contract. What took hours now takes minutes.
 
-Your command center. Track every assessment with color-coded status badges and instant search.
+Your dashboard shows everything at a glance. Active clients, pending assessments, and recent activity.
+
+Track every assessment with color-coded status badges. Search, filter, and manage with ease.
 
 Watch AI process recordings in real-time. One click runs the entire pipeline.
 
 AI-generated contracts. Human-approved. Edit, regenerate, or export to PDF.
 
 Complete client profiles. Care levels. Medical history. Emergency contacts. All in one place.
+
+Your sales pipeline visualized. Track clients from intake to active. Drag and drop to update status.
+
+Voice identification technology. Staff record once, AI recognizes them in every recording.
 
 Generate reports for payroll and billing. Export to CSV with one click.
 
