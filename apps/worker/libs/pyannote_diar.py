@@ -122,15 +122,49 @@ def _diarize_with_api(
         PYANNOTE_API_URL,
         headers=headers,
         json=body,
-        timeout=300,  # 5 minute timeout for long audio
+        timeout=60,
     )
     
-    if response.status_code != 200:
+    if response.status_code != 200 and response.status_code != 201:
         raise Exception(f"pyannote.ai API error: {response.status_code} - {response.text}")
     
-    # Parse response
+    # Parse response - may be async job
     result_data = response.json()
-    logger.info(f"pyannote.ai API response: {json.dumps(result_data)[:500]}")
+    logger.info(f"pyannote.ai API initial response: {json.dumps(result_data)[:500]}")
+    
+    # Check if this is an async job (status: created/processing)
+    job_id = result_data.get("jobId")
+    status = result_data.get("status", "")
+    
+    if job_id and status in ["created", "processing"]:
+        # Poll for job completion
+        logger.info(f"pyannote.ai job created: {job_id}, polling for results...")
+        poll_url = f"https://api.pyannote.ai/v1/jobs/{job_id}"
+        max_polls = 60  # Max 5 minutes (60 * 5 seconds)
+        poll_interval = 5
+        
+        for i in range(max_polls):
+            import time
+            time.sleep(poll_interval)
+            
+            poll_response = requests.get(poll_url, headers=headers, timeout=30)
+            if poll_response.status_code != 200:
+                logger.warning(f"Poll request failed: {poll_response.status_code}")
+                continue
+            
+            poll_data = poll_response.json()
+            poll_status = poll_data.get("status", "")
+            logger.info(f"pyannote.ai job {job_id} poll {i+1}: status={poll_status}")
+            
+            if poll_status == "succeeded":
+                result_data = poll_data
+                break
+            elif poll_status == "failed":
+                error_msg = poll_data.get("error", "Unknown error")
+                raise Exception(f"pyannote.ai job failed: {error_msg}")
+            # Continue polling for "created" or "processing" status
+        else:
+            raise Exception(f"pyannote.ai job timed out after {max_polls * poll_interval} seconds")
     
     # Convert API response to our format
     # The API returns diarization in the "output" field
@@ -139,6 +173,8 @@ def _diarize_with_api(
     
     if isinstance(diarization_data, dict):
         diarization_data = diarization_data.get("diarization", [])
+    
+    logger.info(f"pyannote.ai diarization_data type: {type(diarization_data)}, content: {str(diarization_data)[:500]}")
     
     for segment in diarization_data:
         result.append({
