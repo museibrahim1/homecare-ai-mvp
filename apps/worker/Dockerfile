@@ -1,5 +1,6 @@
 FROM python:3.11-slim
 
+# Version: 2026-02-01-v2 - API diarization with presigned URLs
 WORKDIR /app
 
 # Install system dependencies for audio processing
