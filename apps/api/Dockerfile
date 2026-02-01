@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v4 - Added voiceprint endpoints for speaker identification
+# Version: 2026-02-01-v5 - Added voiceprint migration for database columns
 FROM python:3.11-slim
 
 WORKDIR /app
