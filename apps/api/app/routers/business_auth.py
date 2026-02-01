@@ -22,6 +22,7 @@ from app.models.business import (
     Business, BusinessDocument, BusinessUser,
     VerificationStatus, EntityType, DocumentType, UserRole
 )
+from app.models.user import User  # For creating linked user account
 from app.schemas.business import (
     BusinessRegistrationStep1, SOSVerificationRequest, SOSVerificationResponse,
     DocumentUploadRequest, DocumentResponse, BusinessRegistrationResponse,
@@ -112,7 +113,7 @@ async def register_business(
             detail="A business with this email already exists"
         )
     
-    # Check if owner email already exists
+    # Check if owner email already exists in BusinessUser
     existing_user = db.query(BusinessUser).filter(
         BusinessUser.email == registration.owner_email
     ).first()
@@ -120,6 +121,16 @@ async def register_business(
         raise HTTPException(
             status_code=400,
             detail="A user with this email already exists"
+        )
+    
+    # Check if email already exists in regular User table
+    existing_regular_user = db.query(User).filter(
+        User.email == registration.owner_email
+    ).first()
+    if existing_regular_user:
+        raise HTTPException(
+            status_code=400,
+            detail="An account with this email already exists"
         )
     
     # Create business
@@ -144,7 +155,7 @@ async def register_business(
     db.add(business)
     db.flush()  # Get the ID
     
-    # Create owner user
+    # Create owner user (BusinessUser for business management)
     owner = BusinessUser(
         business_id=business.id,
         email=registration.owner_email,
@@ -155,6 +166,20 @@ async def register_business(
         email_verification_token=secrets.token_urlsafe(32),
     )
     db.add(owner)
+    db.flush()  # Get the owner ID
+    
+    # Also create a regular User record for app functionality
+    # This allows the user to use all app features (clients, visits, etc.)
+    regular_user = User(
+        id=owner.id,  # Use same ID so token works for both
+        email=registration.owner_email,
+        full_name=registration.owner_name,
+        hashed_password=hash_password(registration.owner_password),
+        company_name=registration.name,
+        role='user',
+        is_active=True,
+    )
+    db.add(regular_user)
     
     # Attempt SOS verification
     sos_service = get_sos_service()

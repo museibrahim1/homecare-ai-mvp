@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v5 - Added voiceprint migration for database columns
+# Version: v6 - Fixed email contract, business signup creates linked User
 FROM python:3.11-slim
 
 WORKDIR /app

@@ -11,6 +11,7 @@ import base64
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
+from app.models.client import Client
 from app.models.billable_item import BillableItem
 from app.models.note import Note
 from app.models.contract import Contract
@@ -386,24 +387,40 @@ async def email_contract(
     current_user: User = Depends(get_current_user),
 ):
     """Email the contract PDF to a recipient."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    # Get visit with user scoping
+    visit = db.query(Visit).filter(
+        Visit.id == visit_id,
+        Visit.user_id == current_user.id
+    ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
     
+    if not visit.client_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Visit has no associated client")
+    
+    # Explicitly load the client
+    client = db.query(Client).filter(Client.id == visit.client_id).first()
+    if not client:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+    
+    # Get the contract for this client
     contract = db.query(Contract).filter(
         Contract.client_id == visit.client_id
     ).order_by(Contract.created_at.desc()).first()
     
     if not contract:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="No contract found. Please generate a contract first by running the assessment pipeline."
+        )
     
     # Generate PDF
-    pdf_bytes = generate_contract_pdf(visit.client, contract)
+    pdf_bytes = generate_contract_pdf(client, contract)
     
     # Prepare email
     email_service = get_email_service()
     
-    client_name = visit.client.full_name if visit.client else "Client"
+    client_name = client.full_name
     recipient_name = email_request.recipient_name or client_name
     
     subject = email_request.subject or f"Service Agreement - {client_name}"
@@ -484,13 +501,20 @@ async def email_note(
     current_user: User = Depends(get_current_user),
 ):
     """Email the visit note PDF to a recipient."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    visit = db.query(Visit).filter(
+        Visit.id == visit_id,
+        Visit.user_id == current_user.id
+    ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
     
+    # Load the client
+    client = db.query(Client).filter(Client.id == visit.client_id).first() if visit.client_id else None
+    client_name = client.full_name if client else "Client"
+    
     note = db.query(Note).filter(Note.visit_id == visit_id).first()
     if not note:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found. Please generate a note first.")
     
     # Generate PDF
     pdf_bytes = generate_note_pdf(visit, note)
@@ -498,7 +522,6 @@ async def email_note(
     # Prepare email
     email_service = get_email_service()
     
-    client_name = visit.client.full_name if visit.client else "Client"
     recipient_name = email_request.recipient_name or client_name
     
     subject = email_request.subject or f"Visit Note - {client_name}"
