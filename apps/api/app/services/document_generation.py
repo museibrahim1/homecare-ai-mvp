@@ -500,15 +500,21 @@ def get_custom_styles():
         borderPadding=4,
     ))
     
-    # Body text
-    styles.add(ParagraphStyle(
-        name='BodyText',
-        parent=styles['Normal'],
-        fontSize=10,
-        alignment=TA_JUSTIFY,
-        spaceAfter=6,
-        leading=14
-    ))
+    # Body text - modify existing instead of adding
+    if 'BodyText' in styles.byName:
+        styles['BodyText'].fontSize = 10
+        styles['BodyText'].alignment = TA_JUSTIFY
+        styles['BodyText'].spaceAfter = 6
+        styles['BodyText'].leading = 14
+    else:
+        styles.add(ParagraphStyle(
+            name='BodyText',
+            parent=styles['Normal'],
+            fontSize=10,
+            alignment=TA_JUSTIFY,
+            spaceAfter=6,
+            leading=14
+        ))
     
     # Bullet item
     styles.add(ParagraphStyle(
