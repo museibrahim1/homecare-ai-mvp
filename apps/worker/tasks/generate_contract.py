@@ -549,6 +549,14 @@ def generate_service_contract(self, visit_id: str):
         logger.info(f"Client {client.full_name} updated - fields: {', '.join(updates_made)}")
         
         # =====================================================================
+        # Auto-update client status to "active" after assessment
+        # =====================================================================
+        if client.status in ["intake", "assessment", "pending", None, ""]:
+            old_status = client.status or "none"
+            client.status = "active"
+            logger.info(f"Client status updated: {old_status} -> active")
+        
+        # =====================================================================
         # STEP 5: Find Best Matching Caregiver
         # =====================================================================
         logger.info(f"Finding best caregiver match for care level: {care_need_level}")

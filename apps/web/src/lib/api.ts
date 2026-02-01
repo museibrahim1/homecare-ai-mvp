@@ -183,6 +183,13 @@ class ApiClient {
     }, token);
   }
 
+  async updateClient(token: string, clientId: string, data: any) {
+    return this.request<any>(`/clients/${clientId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }, token);
+  }
+
   // Upload
   async uploadAudio(token: string, visitId: string, file: File, autoProcess: boolean = true) {
     const formData = new FormData();

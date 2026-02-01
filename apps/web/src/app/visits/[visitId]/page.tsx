@@ -809,9 +809,30 @@ export default function VisitDetailPage() {
                   {note.structured_data && Array.isArray(note.structured_data.tasks_performed) && note.structured_data.tasks_performed.length > 0 && (
                     <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
                       <h3 className="text-lg font-semibold text-white mb-2">Tasks Performed</h3>
-                      <ul className="list-disc list-inside text-dark-200 text-sm space-y-1">
-                        {note.structured_data.tasks_performed.map((task: string, i: number) => (
-                          <li key={i}>{typeof task === 'string' ? task : JSON.stringify(task)}</li>
+                      <ul className="space-y-3">
+                        {note.structured_data.tasks_performed.map((task: any, i: number) => (
+                          <li key={i} className="bg-dark-700/50 rounded-lg p-3">
+                            {typeof task === 'string' ? (
+                              <p className="text-dark-200 text-sm">{task}</p>
+                            ) : (
+                              <div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="font-medium text-white">{task.task || 'Task'}</span>
+                                  {task.duration_minutes && (
+                                    <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">
+                                      {task.duration_minutes} min
+                                    </span>
+                                  )}
+                                </div>
+                                {task.details && (
+                                  <p className="text-dark-300 text-sm mt-1">{task.details}</p>
+                                )}
+                                {task.client_response && (
+                                  <p className="text-dark-400 text-xs mt-1 italic">Client: {task.client_response}</p>
+                                )}
+                              </div>
+                            )}
+                          </li>
                         ))}
                       </ul>
                     </div>

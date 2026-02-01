@@ -329,6 +329,22 @@ export default function ClientsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [showAutomationsModal, setShowAutomationsModal] = useState(false);
+  
+  // Client automations
+  const [automations, setAutomations] = useState([
+    { id: 1, name: 'Auto-assign caregiver by specialty', description: 'Automatically match caregivers based on client care needs', enabled: true, trigger: 'New client added' },
+    { id: 2, name: 'Follow-up reminder', description: 'Send reminder when client needs follow-up assessment', enabled: true, trigger: 'Status changes to follow-up' },
+    { id: 3, name: 'Care plan review alert', description: 'Alert team when care plan needs review (every 90 days)', enabled: false, trigger: '90 days since last review' },
+    { id: 4, name: 'Birthday notification', description: 'Send birthday wishes to clients', enabled: false, trigger: 'Client birthday' },
+    { id: 5, name: 'Status change notification', description: 'Notify team when client status changes', enabled: false, trigger: 'Status change' },
+  ]);
+
+  const toggleAutomation = (id: number) => {
+    setAutomations(automations.map(a => 
+      a.id === id ? { ...a, enabled: !a.enabled } : a
+    ));
+  };
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -443,13 +459,19 @@ export default function ClientsPage() {
               <p className="text-dark-400">Manage your client pipeline</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="btn-secondary flex items-center gap-2 text-sm">
+              <button 
+                onClick={() => router.push('/integrations')}
+                className="btn-secondary flex items-center gap-2 text-sm"
+              >
                 <Link2 className="w-4 h-4" />
                 Integrate
               </button>
-              <button className="btn-secondary flex items-center gap-2 text-sm">
+              <button 
+                onClick={() => setShowAutomationsModal(true)}
+                className="btn-secondary flex items-center gap-2 text-sm"
+              >
                 <Zap className="w-4 h-4" />
-                Automate / 2
+                Automate / {automations.filter(a => a.enabled).length}
               </button>
               <button className="p-2 text-dark-400 hover:text-white">
                 <MoreHorizontal className="w-5 h-5" />
@@ -854,6 +876,76 @@ export default function ClientsPage() {
         onClose={() => setQuickAddOpen(false)}
         onSave={handleSaveClient}
       />
+
+      {/* Automations Modal */}
+      {showAutomationsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-800 border border-dark-700 rounded-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-dark-700">
+              <div>
+                <h2 className="text-xl font-bold text-white">Client Automations</h2>
+                <p className="text-dark-400 text-sm mt-1">Manage workflow automations for client management</p>
+              </div>
+              <button 
+                onClick={() => setShowAutomationsModal(false)} 
+                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-dark-400" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {automations.map((automation) => (
+                <div 
+                  key={automation.id}
+                  className={`p-4 rounded-xl border transition-colors ${
+                    automation.enabled 
+                      ? 'bg-primary-500/10 border-primary-500/30' 
+                      : 'bg-dark-700/50 border-dark-600'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Zap className={`w-4 h-4 ${automation.enabled ? 'text-primary-400' : 'text-dark-400'}`} />
+                        <h3 className="font-medium text-white">{automation.name}</h3>
+                      </div>
+                      <p className="text-dark-400 text-sm mt-1">{automation.description}</p>
+                      <p className="text-dark-500 text-xs mt-2">Trigger: {automation.trigger}</p>
+                    </div>
+                    <button
+                      onClick={() => toggleAutomation(automation.id)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        automation.enabled ? 'bg-primary-500' : 'bg-dark-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          automation.enabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="p-6 border-t border-dark-700 bg-dark-800/50">
+              <div className="flex items-center justify-between">
+                <p className="text-dark-400 text-sm">
+                  {automations.filter(a => a.enabled).length} of {automations.length} automations active
+                </p>
+                <button
+                  onClick={() => setShowAutomationsModal(false)}
+                  className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

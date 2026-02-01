@@ -37,7 +37,7 @@ def analyze_transcript_combined(
     
     # Build transcript text
     transcript_lines = []
-    for seg in segments[:150]:  # First 150 segments for context
+    for seg in segments[:300]:  # Increased to 300 segments for more comprehensive extraction
         speaker = seg.get("speaker_label", "Speaker")
         text = seg.get("text", "")
         transcript_lines.append(f"[{speaker}]: {text}")
@@ -94,7 +94,7 @@ JSON:"""
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
             model="claude-3-haiku-20240307",
-            max_tokens=4000,
+            max_tokens=8000,  # Increased for more comprehensive extraction
             messages=[{"role": "user", "content": prompt}]
         )
         

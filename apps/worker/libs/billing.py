@@ -180,7 +180,7 @@ def analyze_transcript_with_claude(
     # Combine segments into full transcript
     full_text = "\n".join([
         f"[{s.get('speaker_label', 'Speaker')}]: {s.get('text', '')}"
-        for s in segments[:150]  # First 150 segments for context
+        for s in segments[:300]  # Increased to 300 segments for more comprehensive extraction
     ])
     
     prompt = f"""Analyze this home care assessment conversation and extract EVERY care service, task, or need mentioned.
@@ -216,7 +216,7 @@ JSON:"""
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
             model="claude-3-haiku-20240307",
-            max_tokens=4000,
+            max_tokens=8000,  # Increased for more comprehensive extraction
             messages=[{"role": "user", "content": prompt}]
         )
         

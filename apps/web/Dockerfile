@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v2 - Fixed duplicate getNote, force fresh build
+# Version: 2026-02-01-v3 - Assessment flow improvements, pipeline real data
 FROM node:20-alpine
 
 WORKDIR /app
