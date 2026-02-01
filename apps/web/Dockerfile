@@ -1,4 +1,4 @@
-# Version: v8 - Added in-app audio recording
+# Version: v9 - Added team management
 FROM node:20-alpine
 
 WORKDIR /app

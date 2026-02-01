@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Settings,
   User,
+  Users,
   Bell,
   Shield,
   Database,
@@ -25,7 +26,10 @@ import {
   Mic,
   Square,
   Play,
-  Volume2
+  Volume2,
+  UserPlus,
+  Mail,
+  MoreVertical
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
@@ -100,7 +104,18 @@ export default function SettingsPage() {
   const { token, isLoading: authLoading } = useAuth();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'agency' | 'documents' | 'profile' | 'voiceprint' | 'notifications' | 'security'>('agency');
+  const [activeTab, setActiveTab] = useState<'agency' | 'documents' | 'profile' | 'voiceprint' | 'team' | 'notifications' | 'security'>('agency');
+  
+  // Team state
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [loadingTeam, setLoadingTeam] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteRole, setInviteRole] = useState('caregiver');
+  const [inviting, setInviting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
   
   // Voiceprint state
   const [isRecording, setIsRecording] = useState(false);
@@ -469,9 +484,95 @@ export default function SettingsPage() {
     { id: 'documents', label: 'Documents', icon: FileText },
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'voiceprint', label: 'Voice ID', icon: Volume2 },
+    { id: 'team', label: 'Team', icon: Users },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Shield },
   ];
+  
+  // Load team members
+  const loadTeamMembers = async () => {
+    if (!token) return;
+    setLoadingTeam(true);
+    try {
+      const response = await fetch(`${API_BASE}/auth/business/team`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTeamMembers(data);
+      }
+    } catch (err) {
+      console.error('Failed to load team:', err);
+    } finally {
+      setLoadingTeam(false);
+    }
+  };
+  
+  // Invite team member
+  const handleInvite = async () => {
+    if (!token || !inviteEmail || !inviteName) return;
+    setInviting(true);
+    setInviteError(null);
+    setInviteSuccess(null);
+    
+    try {
+      const response = await fetch(`${API_BASE}/auth/business/team/invite?email=${encodeURIComponent(inviteEmail)}&full_name=${encodeURIComponent(inviteName)}&role=${inviteRole}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Failed to send invitation');
+      }
+      
+      setInviteSuccess(`Invitation sent to ${inviteEmail}. Temporary password: ${data.temp_password}`);
+      setInviteEmail('');
+      setInviteName('');
+      loadTeamMembers();
+      
+      // Auto-close modal after 5 seconds
+      setTimeout(() => {
+        setShowInviteModal(false);
+        setInviteSuccess(null);
+      }, 5000);
+      
+    } catch (err: any) {
+      setInviteError(err.message || 'Failed to send invitation');
+    } finally {
+      setInviting(false);
+    }
+  };
+  
+  // Update team member
+  const handleUpdateMember = async (memberId: string, updates: { role?: string; is_active?: boolean }) => {
+    if (!token) return;
+    
+    try {
+      const params = new URLSearchParams();
+      if (updates.role) params.set('role', updates.role);
+      if (updates.is_active !== undefined) params.set('is_active', String(updates.is_active));
+      
+      const response = await fetch(`${API_BASE}/auth/business/team/${memberId}?${params}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (response.ok) {
+        loadTeamMembers();
+      }
+    } catch (err) {
+      console.error('Failed to update member:', err);
+    }
+  };
+  
+  // Load team when tab changes
+  useEffect(() => {
+    if (activeTab === 'team') {
+      loadTeamMembers();
+    }
+  }, [activeTab, token]);
 
   return (
     <div className="flex min-h-screen bg-dark-900">
@@ -1149,6 +1250,186 @@ export default function SettingsPage() {
                     <p className="text-dark-400 text-xs">Your voice is automatically identified in future assessments</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Team Tab */}
+          {activeTab === 'team' && (
+            <div className="space-y-6">
+              {/* Team Header */}
+              <div className="card p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <Users className="w-5 h-5 text-primary-400" />
+                      Team Members
+                    </h2>
+                    <p className="text-dark-400 text-sm mt-1">Manage your team and their permissions</p>
+                  </div>
+                  <button
+                    onClick={() => setShowInviteModal(true)}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Invite Member
+                  </button>
+                </div>
+                
+                {/* Team List */}
+                {loadingTeam ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 text-primary-400 animate-spin" />
+                  </div>
+                ) : teamMembers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-dark-600 mx-auto mb-3" />
+                    <p className="text-dark-400">No team members yet</p>
+                    <p className="text-dark-500 text-sm">Invite your first team member to get started</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-dark-700/50">
+                    {teamMembers.map((member) => (
+                      <div key={member.id} className="py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-primary-500/20 rounded-full flex items-center justify-center">
+                            <span className="text-primary-400 font-medium">
+                              {member.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{member.full_name}</p>
+                            <p className="text-dark-400 text-sm">{member.email}</p>
+                          </div>
+                          {member.voiceprint_created && (
+                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
+                              Voice ID Active
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <select
+                            value={member.role}
+                            onChange={(e) => handleUpdateMember(member.id, { role: e.target.value })}
+                            className="bg-dark-700 border border-dark-600 rounded-lg px-3 py-1.5 text-sm text-white"
+                          >
+                            <option value="user">Owner</option>
+                            <option value="admin">Admin</option>
+                            <option value="caregiver">Caregiver</option>
+                          </select>
+                          <button
+                            onClick={() => handleUpdateMember(member.id, { is_active: !member.is_active })}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+                              member.is_active 
+                                ? 'bg-green-500/20 text-green-400' 
+                                : 'bg-red-500/20 text-red-400'
+                            }`}
+                          >
+                            {member.is_active ? 'Active' : 'Inactive'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Voice ID Setup Tip */}
+              <div className="card p-6 border border-primary-500/20 bg-primary-500/5">
+                <div className="flex gap-4">
+                  <Volume2 className="w-6 h-6 text-primary-400 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-white font-medium mb-1">Voice ID for Team Members</h3>
+                    <p className="text-dark-400 text-sm">
+                      Each team member can set up their Voice ID in Settings &gt; Voice ID. This allows the system 
+                      to automatically identify who is speaking during assessments.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Invite Modal */}
+          {showInviteModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-dark-800 rounded-2xl p-6 w-full max-w-md border border-dark-700">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <UserPlus className="w-5 h-5 text-primary-400" />
+                    Invite Team Member
+                  </h3>
+                  <button onClick={() => { setShowInviteModal(false); setInviteError(null); setInviteSuccess(null); }} className="p-2 hover:bg-dark-700 rounded-lg">
+                    <X className="w-5 h-5 text-dark-400" />
+                  </button>
+                </div>
+                
+                {inviteSuccess ? (
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4">
+                    <p className="text-green-400 text-sm">{inviteSuccess}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-dark-300 mb-2">Full Name *</label>
+                      <input
+                        type="text"
+                        value={inviteName}
+                        onChange={(e) => setInviteName(e.target.value)}
+                        className="input-dark w-full"
+                        placeholder="John Smith"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-dark-300 mb-2">Email Address *</label>
+                      <input
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        className="input-dark w-full"
+                        placeholder="john@company.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-dark-300 mb-2">Role</label>
+                      <select
+                        value={inviteRole}
+                        onChange={(e) => setInviteRole(e.target.value)}
+                        className="input-dark w-full"
+                      >
+                        <option value="caregiver">Caregiver</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                    
+                    {inviteError && (
+                      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+                        <p className="text-red-400 text-sm">{inviteError}</p>
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        onClick={() => setShowInviteModal(false)}
+                        className="btn-secondary flex-1"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleInvite}
+                        disabled={inviting || !inviteEmail || !inviteName}
+                        className="btn-primary flex-1 flex items-center justify-center gap-2"
+                      >
+                        {inviting ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Mail className="w-4 h-4" />
+                        )}
+                        Send Invite
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

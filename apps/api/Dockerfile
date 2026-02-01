@@ -1,4 +1,4 @@
-# Version: v8 - Added email notifications for status changes
+# Version: v9 - Added team management endpoints
 FROM python:3.11-slim
 
 WORKDIR /app

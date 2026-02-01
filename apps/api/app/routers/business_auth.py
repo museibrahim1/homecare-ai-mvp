@@ -544,12 +544,179 @@ async def update_business_profile(
 # AUTHENTICATED - Team Management
 # =============================================================================
 
+from app.core.deps import get_current_user as get_current_api_user
+
+@router.get("/team")
+async def list_team_members(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+):
+    """List all team members (users in the same company)."""
+    # Get all users with the same company name
+    team_members = db.query(User).filter(
+        User.company_name == current_user.company_name,
+        User.company_name.isnot(None),
+        User.company_name != ""
+    ).all()
+    
+    return [{
+        "id": str(member.id),
+        "email": member.email,
+        "full_name": member.full_name,
+        "role": member.role,
+        "phone": member.phone,
+        "is_active": member.is_active,
+        "voiceprint_created": member.voiceprint is not None,
+        "created_at": member.created_at.isoformat() if member.created_at else None,
+    } for member in team_members]
+
+
+@router.post("/team/invite")
+async def invite_team_member(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+    email: str = None,
+    full_name: str = None,
+    role: str = "caregiver",
+):
+    """Invite a new team member."""
+    if not email or not full_name:
+        raise HTTPException(status_code=400, detail="Email and full_name are required")
+    
+    # Check if user already exists
+    existing = db.query(User).filter(User.email == email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="A user with this email already exists")
+    
+    # Generate temporary password
+    temp_password = secrets.token_urlsafe(12)
+    
+    # Create the new user
+    new_user = User(
+        email=email,
+        full_name=full_name,
+        hashed_password=hash_password(temp_password),
+        company_name=current_user.company_name,
+        role=role,
+        is_active=True,
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # Send invitation email
+    try:
+        email_service = get_email_service()
+        email_service.send_email(
+            to=email,
+            subject=f"You've been invited to join {current_user.company_name} on Homecare AI",
+            html=f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #6366f1;">You've Been Invited!</h2>
+                <p>Hi {full_name},</p>
+                <p>{current_user.full_name} has invited you to join <strong>{current_user.company_name}</strong> on Homecare AI.</p>
+                
+                <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                    <p style="margin: 0 0 10px 0;"><strong>Your login credentials:</strong></p>
+                    <p style="margin: 0 0 5px 0;">Email: {email}</p>
+                    <p style="margin: 0;">Temporary Password: {temp_password}</p>
+                </div>
+                
+                <p style="color: #dc2626; font-size: 14px;">Please change your password after your first login.</p>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="https://app.homecare.ai/login" 
+                       style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                        Login Now
+                    </a>
+                </div>
+            </div>
+            """
+        )
+    except Exception as e:
+        logger.warning(f"Failed to send invitation email: {e}")
+    
+    return {
+        "id": str(new_user.id),
+        "email": new_user.email,
+        "full_name": new_user.full_name,
+        "role": new_user.role,
+        "message": f"Invitation sent to {email}",
+        "temp_password": temp_password,  # Return for display (remove in production)
+    }
+
+
+@router.put("/team/{user_id}")
+async def update_team_member(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+    role: str = None,
+    is_active: bool = None,
+):
+    """Update a team member's role or status."""
+    member = db.query(User).filter(User.id == user_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check same company
+    if member.company_name != current_user.company_name:
+        raise HTTPException(status_code=403, detail="Not authorized to modify this user")
+    
+    # Can't deactivate yourself
+    if is_active is False and member.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot deactivate your own account")
+    
+    if role is not None:
+        member.role = role
+    if is_active is not None:
+        member.is_active = is_active
+    
+    db.commit()
+    db.refresh(member)
+    
+    return {
+        "id": str(member.id),
+        "email": member.email,
+        "full_name": member.full_name,
+        "role": member.role,
+        "is_active": member.is_active,
+    }
+
+
+@router.delete("/team/{user_id}")
+async def remove_team_member(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+):
+    """Remove a team member (soft delete - deactivate)."""
+    member = db.query(User).filter(User.id == user_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check same company
+    if member.company_name != current_user.company_name:
+        raise HTTPException(status_code=403, detail="Not authorized to modify this user")
+    
+    # Can't remove yourself
+    if member.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot remove your own account")
+    
+    # Soft delete - deactivate
+    member.is_active = False
+    db.commit()
+    
+    return {"message": f"User {member.email} has been deactivated"}
+
+
+# Legacy endpoints (keeping for backwards compatibility)
 @router.get("/users", response_model=List[BusinessUserResponse])
 async def list_business_users(
     db: Session = Depends(get_db),
 ):
-    """List all users in the business."""
-    raise HTTPException(status_code=501, detail="Requires authentication")
+    """List all users in the business. (Legacy - use /team instead)"""
+    raise HTTPException(status_code=501, detail="Use /auth/business/team endpoint instead")
 
 
 @router.post("/users", response_model=BusinessUserInviteResponse)
@@ -557,8 +724,8 @@ async def invite_user(
     user_data: BusinessUserCreate,
     db: Session = Depends(get_db),
 ):
-    """Invite a new user to the business."""
-    raise HTTPException(status_code=501, detail="Requires authentication")
+    """Invite a new user to the business. (Legacy - use /team/invite instead)"""
+    raise HTTPException(status_code=501, detail="Use /auth/business/team/invite endpoint instead")
 
 
 @router.delete("/users/{user_id}")
