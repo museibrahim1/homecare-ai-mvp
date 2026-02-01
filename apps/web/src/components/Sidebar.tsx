@@ -130,7 +130,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col min-h-screen flex-shrink-0">
+    <aside className="w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col min-h-screen flex-shrink-0 z-50 relative">
       {/* Logo */}
       <div className="px-6 py-6">
         <Link href="/dashboard" className="flex items-center gap-4">
