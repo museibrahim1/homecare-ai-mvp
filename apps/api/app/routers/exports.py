@@ -268,6 +268,26 @@ async def export_contract_from_template(
             detail="No contract template uploaded. Please go to Settings > Documents and upload a Contract Template, then click Save Changes."
         )
     
+    # Debug: Check what type of file this actually is
+    try:
+        import base64
+        decoded_bytes = base64.b64decode(template_base64)
+        first_bytes = decoded_bytes[:20]
+        logger.info(f"Template first 20 bytes (hex): {first_bytes.hex()}")
+        logger.info(f"Template size: {len(decoded_bytes)} bytes")
+        
+        # Check file signatures
+        if decoded_bytes[:4] == b'PK\x03\x04':
+            logger.info("File signature: ZIP/DOCX (correct)")
+        elif decoded_bytes[:4] == b'%PDF':
+            logger.error("File signature: PDF (WRONG - user uploaded PDF, not DOCX)")
+        elif decoded_bytes[:8] == b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1':
+            logger.error("File signature: Old DOC format (need DOCX)")
+        else:
+            logger.warning(f"Unknown file signature: {decoded_bytes[:8]}")
+    except Exception as e:
+        logger.error(f"Failed to decode template: {e}")
+    
     if template_base64:
         # Use the uploaded template
         try:
