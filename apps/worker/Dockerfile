@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v10 - Improved speaker alignment using midpoint matching
+# Version: 2026-02-01-v11 - Identify ALL speakers including 3rd speaker
 WORKDIR /app
 
 # Install system dependencies for audio processing

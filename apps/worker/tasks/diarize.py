@@ -45,10 +45,14 @@ def identify_speaker_names(db, visit_id: UUID) -> dict:
     segments = db.query(TranscriptSegment).filter(
         TranscriptSegment.visit_id == visit_id,
         TranscriptSegment.speaker_label.isnot(None)
-    ).order_by(TranscriptSegment.start_ms).limit(50).all()  # First 50 segments
+    ).order_by(TranscriptSegment.start_ms).limit(100).all()  # First 100 segments for more context
     
     if not segments:
         return {}
+    
+    # Find all unique speaker labels
+    unique_speakers = list(set(seg.speaker_label for seg in segments))
+    logger.info(f"Found {len(unique_speakers)} unique speakers: {unique_speakers}")
     
     # Build transcript excerpt with speaker labels
     transcript_lines = []
@@ -66,6 +70,9 @@ def identify_speaker_names(db, visit_id: UUID) -> dict:
     try:
         client = anthropic.Anthropic(api_key=api_key)
         
+        # Include list of speakers that need identification
+        speakers_list = ", ".join(unique_speakers)
+        
         response = client.messages.create(
             model="claude-3-haiku-20240307",
             max_tokens=500,
@@ -73,18 +80,24 @@ def identify_speaker_names(db, visit_id: UUID) -> dict:
                 "role": "user",
                 "content": f"""Analyze this transcript and identify the EXACT NAMES of each speaker.
 
+The following speakers need to be identified: {speakers_list}
+
 Look for:
-- Self-introductions: "I'm Dr. Drostman", "My name is Sarah", "I'm Mrs. Smith"
+- Self-introductions: "I'm Dr. Drostman", "My name is Sarah", "I'm Mrs. Smith", "Hi, I'm Davis"
 - How others address them: "Hello Dr. Jones", "Thank you, Mary"
 - Name mentions in context
+- Family relationships mentioned (husband, wife, caregiver, etc.)
 
 Transcript:
 {transcript_text}
 
-IMPORTANT: Use the EXACT names spoken in the transcript (e.g., "Dr. Drostman", "Mrs. Smith", "Davis"). 
-Only fall back to roles like "Doctor" or "Patient" if NO name is ever mentioned for that speaker.
+IMPORTANT: 
+1. You MUST provide a name for EVERY speaker: {speakers_list}
+2. Use the EXACT names spoken in the transcript (e.g., "Dr. Drostman", "Mrs. Smith", "Davis")
+3. If someone introduces themselves (like "I'm Davis"), use that name
+4. Only fall back to roles like "Doctor", "Patient", "Husband" if NO name is ever mentioned for that speaker
 
-Return ONLY a JSON object mapping speaker labels to their exact names.
+Return ONLY a JSON object mapping ALL speaker labels to their names.
 
 Example output format:
 {{"SPEAKER_00": "Dr. Drostman", "SPEAKER_01": "Mrs. Smith", "SPEAKER_02": "Davis"}}
