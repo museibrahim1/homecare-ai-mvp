@@ -142,8 +142,8 @@ def align_diarization_with_transcript(db, visit_id: UUID, turns: List[dict]) -> 
     """
     Align diarization turns with transcript segments.
     
-    For each transcript segment, find the diarization turn that 
-    overlaps most and assign the speaker label.
+    Uses the midpoint of each segment to find which speaker was active,
+    which is more accurate for dialogue where speakers alternate quickly.
     
     Args:
         db: Database session
@@ -159,6 +159,9 @@ def align_diarization_with_transcript(db, visit_id: UUID, turns: List[dict]) -> 
         logger.info(f"No diarization turns to align for visit {visit_id}")
         return 0
     
+    # Sort turns by start time for efficient lookup
+    sorted_turns = sorted(turns, key=lambda t: t["start_ms"])
+    
     # Get all transcript segments for this visit
     segments = db.query(TranscriptSegment).filter(
         TranscriptSegment.visit_id == visit_id
@@ -171,24 +174,34 @@ def align_diarization_with_transcript(db, visit_id: UUID, turns: List[dict]) -> 
     aligned_count = 0
     
     for segment in segments:
-        best_overlap = 0
+        # Use the midpoint of the segment to find the active speaker
+        midpoint = (segment.start_ms + segment.end_ms) // 2
         best_speaker = None
         
-        # Find the turn with maximum overlap
-        for turn in turns:
-            overlap = calculate_overlap(
-                segment.start_ms, 
-                segment.end_ms,
-                turn["start_ms"],
-                turn["end_ms"]
-            )
-            
-            if overlap > best_overlap:
-                best_overlap = overlap
+        # Find the turn that contains the midpoint
+        for turn in sorted_turns:
+            if turn["start_ms"] <= midpoint <= turn["end_ms"]:
                 best_speaker = turn["speaker"]
+                break
         
-        # Assign speaker label if we found an overlapping turn
-        if best_speaker and best_overlap > 0:
+        # If no turn contains midpoint, find the closest turn
+        if not best_speaker:
+            min_distance = float('inf')
+            for turn in sorted_turns:
+                # Distance to turn's time range
+                if midpoint < turn["start_ms"]:
+                    distance = turn["start_ms"] - midpoint
+                elif midpoint > turn["end_ms"]:
+                    distance = midpoint - turn["end_ms"]
+                else:
+                    distance = 0
+                
+                if distance < min_distance:
+                    min_distance = distance
+                    best_speaker = turn["speaker"]
+        
+        # Assign speaker label if we found a speaker
+        if best_speaker:
             segment.speaker_label = best_speaker
             aligned_count += 1
     

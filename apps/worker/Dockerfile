@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v9 - Use exact speaker names from introductions
+# Version: 2026-02-01-v10 - Improved speaker alignment using midpoint matching
 WORKDIR /app
 
 # Install system dependencies for audio processing
