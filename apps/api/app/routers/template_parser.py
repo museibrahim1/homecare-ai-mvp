@@ -315,3 +315,133 @@ Extract the agency/company information and return as JSON."""
     
     # Return empty if all else fails
     return ExtractedAgencyInfo()
+
+
+@router.get("/placeholders")
+async def get_template_placeholders_docs():
+    """
+    Return documentation of available template placeholders.
+    """
+    return {
+        "description": "Use these placeholders in your DOCX template. Supported formats: {key}, {{key}}, [key], [[key]]",
+        "categories": {
+            "dates": {
+                "description": "Date placeholders",
+                "placeholders": {
+                    "date": "Today's date (e.g., January 29, 2026)",
+                    "contract_date": "Contract date",
+                    "effective_date": "Effective date",
+                    "today": "Today's date",
+                    "current_date": "Current date",
+                }
+            },
+            "agency": {
+                "description": "Agency/Provider information",
+                "placeholders": {
+                    "agency_name": "Agency name",
+                    "agency": "Agency name (alias)",
+                    "company_name": "Company name",
+                    "provider_name": "Provider name",
+                    "agency_address": "Full agency address",
+                    "agency_street": "Street address",
+                    "agency_city": "City",
+                    "agency_state": "State",
+                    "agency_zip": "ZIP code",
+                    "agency_phone": "Phone number",
+                    "agency_email": "Email address",
+                }
+            },
+            "client": {
+                "description": "Client/Patient information",
+                "placeholders": {
+                    "client_name": "Client's full name",
+                    "client": "Client's name (alias)",
+                    "patient_name": "Patient name (alias)",
+                    "client_first_name": "First name",
+                    "client_last_name": "Last name",
+                    "client_address": "Full address",
+                    "client_city": "City",
+                    "client_state": "State",
+                    "client_zip": "ZIP code",
+                    "client_phone": "Phone number",
+                    "client_email": "Email address",
+                    "date_of_birth": "Date of birth",
+                    "dob": "Date of birth (alias)",
+                    "emergency_contact": "Emergency contact name",
+                    "emergency_phone": "Emergency contact phone",
+                }
+            },
+            "care_assessment": {
+                "description": "Care assessment data",
+                "placeholders": {
+                    "care_level": "Care need level",
+                    "primary_diagnosis": "Primary diagnosis",
+                    "mobility_status": "Mobility status",
+                    "cognitive_status": "Cognitive status",
+                    "living_situation": "Living situation",
+                }
+            },
+            "services": {
+                "description": "Service information",
+                "placeholders": {
+                    "services": "Formatted list of services",
+                    "services_list": "Formatted list of services (alias)",
+                }
+            },
+            "schedule": {
+                "description": "Schedule information",
+                "placeholders": {
+                    "schedule_days": "Days of service",
+                    "days": "Days (alias)",
+                    "preferred_days": "Preferred days",
+                    "schedule_time": "Preferred time",
+                    "time": "Time (alias)",
+                    "frequency": "Service frequency",
+                    "weekly_hours": "Hours per week",
+                }
+            },
+            "rates": {
+                "description": "Billing rates",
+                "placeholders": {
+                    "hourly_rate": "Hourly rate with $ (e.g., $35.00)",
+                    "hourly_rate_value": "Hourly rate number only (e.g., 35.00)",
+                    "rate": "Hourly rate with $",
+                    "weekly_cost": "Weekly cost estimate",
+                    "monthly_cost": "Monthly cost estimate",
+                    "weekday_rate": "Weekday rate (number)",
+                    "weekend_rate": "Weekend rate (+25%)",
+                    "holiday_rate": "Holiday rate (+50%)",
+                }
+            },
+            "requirements": {
+                "description": "Special requirements and safety",
+                "placeholders": {
+                    "special_requirements": "Special requirements list",
+                    "requirements": "Requirements (alias)",
+                    "safety_concerns": "Safety concerns list",
+                    "safety": "Safety (alias)",
+                }
+            },
+            "contract": {
+                "description": "Contract metadata",
+                "placeholders": {
+                    "contract_id": "Contract UUID",
+                }
+            },
+        },
+        "label_auto_fill": {
+            "description": "The system also auto-fills fields that follow a 'Label:' pattern",
+            "examples": [
+                "Name: ___________ → Auto-filled with client name",
+                "Address: ________ → Auto-filled with client address",
+                "Phone: __________ → Auto-filled with client phone",
+                "Hourly Rate: ____ → Auto-filled with rate",
+            ]
+        },
+        "tips": [
+            "Use simple formatting - complex tables may not fill correctly",
+            "Test with a sample client to verify placeholders work",
+            "Use DOCX format - DOC, PDF, and other formats are not supported",
+            "All placeholders are case-insensitive",
+        ]
+    }
