@@ -598,7 +598,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
   const data = getContractData();
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col min-h-full">
       {/* Header Controls */}
       <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4 border-b border-dark-700 bg-dark-800 print:hidden flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -678,7 +678,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       )}
 
       {/* Contract Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 sm:p-4">
+      <div className="flex-1 p-3 sm:p-4">
         <div 
           ref={printRef}
           className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto"

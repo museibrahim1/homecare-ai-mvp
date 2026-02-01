@@ -732,7 +732,7 @@ export default function VisitDetailPage() {
         </div>
 
         {/* Panel Content - Fill remaining height */}
-        <div className="flex-1 min-h-0 overflow-hidden bg-dark-850 flex flex-col">
+        <div className="flex-1 min-h-0 bg-dark-850 flex flex-col overflow-hidden">
           {activePanel === 'transcript' && (
             <div className="flex-1 min-h-0 overflow-y-auto">
               <TranscriptTimeline segments={transcript} />
@@ -748,7 +748,7 @@ export default function VisitDetailPage() {
             </div>
           )}
           {activePanel === 'contract' && (
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
               <ContractPreview 
                 contract={contract} 
                 client={visit?.client}
