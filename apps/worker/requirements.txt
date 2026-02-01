@@ -1,3 +1,4 @@
+# Force rebuild v6 - pyannote fix
 # Celery and Redis
 celery[redis]>=5.3.0
 redis>=5.0.0
