@@ -192,7 +192,7 @@ class E2ETest:
                 timeout=10
             )
             
-            if resp.status_code == 200:
+            if resp.status_code in [200, 201]:
                 data = resp.json()
                 self.client_id = data.get("id")
                 log_success(f"Client created: {self.client_id}")
@@ -220,7 +220,7 @@ class E2ETest:
                 timeout=10
             )
             
-            if resp.status_code == 200:
+            if resp.status_code in [200, 201]:
                 data = resp.json()
                 self.visit_id = data.get("id")
                 log_success(f"Visit created: {self.visit_id}")
@@ -254,7 +254,7 @@ class E2ETest:
             resp = requests.post(
                 f"{self.api_url}/visits/{self.visit_id}/transcript/import/text",
                 headers={"Authorization": f"Bearer {self.token}"},
-                json={"text": sample_transcript},
+                json={"text_content": sample_transcript},
                 timeout=30
             )
             
