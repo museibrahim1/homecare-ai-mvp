@@ -35,6 +35,57 @@ class EmailContractRequest(BaseModel):
 router = APIRouter()
 
 
+@router.get("/template-status")
+async def get_template_status(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Check if a contract template is uploaded and ready to use."""
+    import json
+    
+    agency_settings = db.query(AgencySettings).filter(
+        AgencySettings.settings_key == "default"
+    ).first()
+    
+    result = {
+        "has_settings": agency_settings is not None,
+        "has_template": False,
+        "template_name": None,
+        "template_type": None,
+        "documents_count": 0,
+        "documents": []
+    }
+    
+    if agency_settings:
+        # Check documents array
+        if agency_settings.documents:
+            try:
+                documents = json.loads(agency_settings.documents) if isinstance(agency_settings.documents, str) else agency_settings.documents
+                result["documents_count"] = len(documents)
+                result["documents"] = [
+                    {"name": d.get("name"), "category": d.get("category"), "has_content": bool(d.get("content"))}
+                    for d in documents
+                ]
+                
+                for doc in documents:
+                    if doc.get('category') == 'contract_template' and doc.get('content'):
+                        result["has_template"] = True
+                        result["template_name"] = doc.get("name")
+                        result["template_type"] = doc.get("type")
+                        break
+            except Exception as e:
+                result["error"] = str(e)
+        
+        # Check legacy field
+        if not result["has_template"] and agency_settings.contract_template:
+            result["has_template"] = True
+            result["template_name"] = agency_settings.contract_template_name
+            result["template_type"] = agency_settings.contract_template_type
+            result["source"] = "legacy_field"
+    
+    return result
+
+
 @router.get("/visits/{visit_id}/timesheet.csv")
 async def export_timesheet_csv(
     visit_id: UUID,
@@ -159,6 +210,9 @@ async def export_contract_from_template(
     Export contract using the uploaded agency template.
     Falls back to default DOCX if no template is uploaded.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     visit = db.query(Visit).filter(Visit.id == visit_id).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
@@ -175,27 +229,44 @@ async def export_contract_from_template(
         AgencySettings.settings_key == "default"
     ).first()
     
+    logger.info(f"Agency settings found: {agency_settings is not None}")
+    
     # Check for uploaded template in documents array
     template_base64 = None
+    template_name = None
+    
     if agency_settings and agency_settings.documents:
         import json
         try:
             documents = json.loads(agency_settings.documents) if isinstance(agency_settings.documents, str) else agency_settings.documents
+            logger.info(f"Found {len(documents)} documents in agency settings")
             for doc in documents:
+                logger.info(f"Document: category={doc.get('category')}, name={doc.get('name')}, has_content={bool(doc.get('content'))}")
                 if doc.get('category') == 'contract_template' and doc.get('content'):
                     template_base64 = doc['content']
+                    template_name = doc.get('name', 'template')
                     # Remove data URL prefix if present
                     if ',' in template_base64:
                         template_base64 = template_base64.split(',')[1]
+                    logger.info(f"Using template from documents: {template_name}")
                     break
-        except:
-            pass
+        except Exception as e:
+            logger.error(f"Failed to parse documents: {e}")
     
     # Also check legacy template field
     if not template_base64 and agency_settings and agency_settings.contract_template:
         template_base64 = agency_settings.contract_template
+        template_name = agency_settings.contract_template_name or "legacy_template"
         if ',' in template_base64:
             template_base64 = template_base64.split(',')[1]
+        logger.info(f"Using legacy template: {template_name}")
+    
+    if not template_base64:
+        logger.warning("No template found - returning error to user")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="No contract template uploaded. Please go to Settings > Documents and upload a Contract Template, then click Save Changes."
+        )
     
     if template_base64:
         # Use the uploaded template
