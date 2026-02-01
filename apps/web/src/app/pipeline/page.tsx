@@ -238,6 +238,23 @@ export default function PipelinePage() {
           </div>
         </div>
 
+        {/* Stage Legend */}
+        <div className="bg-dark-800/30 rounded-xl p-4 border border-dark-700/50 mb-6">
+          <h3 className="text-sm font-medium text-dark-400 mb-3">Client Journey: Click on a client card to change their stage</h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            {stages.map((stage, idx) => (
+              <div key={stage.id} className="flex items-center gap-2">
+                <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${stage.color}`}>
+                  {stage.name}
+                </div>
+                {idx < stages.length - 1 && (
+                  <span className="text-dark-500">→</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Kanban Board */}
         <div className="flex gap-4 overflow-x-auto pb-4">
           {stages.map(stage => (
@@ -256,25 +273,61 @@ export default function PipelinePage() {
                   ${getStageValue(stage.id).toLocaleString()} total
                 </div>
                 <div className="space-y-3">
-                  {getDealsForStage(stage.id).map(deal => (
+                  {getDealsForStage(stage.id).map(deal => {
+                    // Find next stage for quick-advance button
+                    const currentStageIdx = stages.findIndex(s => s.id === stage.id);
+                    const nextStage = stages[currentStageIdx + 1];
+                    const prevStage = stages[currentStageIdx - 1];
+                    
+                    return (
                     <div
                       key={deal.id}
-                      onClick={() => handleDealClick(deal)}
-                      className="bg-dark-800 border border-dark-700/50 rounded-lg p-4 hover:border-primary-500/30 transition-colors cursor-pointer"
+                      className="bg-dark-800 border border-dark-700/50 rounded-lg p-4 hover:border-primary-500/30 transition-colors"
                     >
-                      <h3 className="font-medium text-white mb-2">{deal.name}</h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-green-400 font-medium">${deal.value.toLocaleString()}/mo</span>
-                        <span className="text-xs text-dark-500">{deal.daysInStage}d</span>
-                      </div>
-                      {deal.hasContract && (
-                        <div className="mt-2 flex items-center gap-1 text-xs text-primary-400">
-                          <FileText className="w-3 h-3" />
-                          Contract Ready
+                      <div 
+                        onClick={() => handleDealClick(deal)}
+                        className="cursor-pointer"
+                      >
+                        <h3 className="font-medium text-white mb-2">{deal.name}</h3>
+                        <div className="flex items-center justify-between">
+                          <span className="text-green-400 font-medium">${deal.value.toLocaleString()}/mo</span>
+                          <span className="text-xs text-dark-500">{deal.daysInStage}d</span>
                         </div>
-                      )}
+                        {deal.hasContract && (
+                          <div className="mt-2 flex items-center gap-1 text-xs text-primary-400">
+                            <FileText className="w-3 h-3" />
+                            Contract Ready
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Quick Stage Move Buttons */}
+                      <div className="flex gap-1 mt-3 pt-3 border-t border-dark-700/50">
+                        {prevStage && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleUpdateStage(deal, prevStage.id); }}
+                            className="flex-1 px-2 py-1.5 text-xs bg-dark-700/50 hover:bg-dark-600 text-dark-300 rounded transition-colors"
+                            title={`Move to ${prevStage.name}`}
+                          >
+                            ← {prevStage.name.split(' ')[0]}
+                          </button>
+                        )}
+                        {nextStage && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleUpdateStage(deal, nextStage.id); }}
+                            className={`flex-1 px-2 py-1.5 text-xs rounded transition-colors ${
+                              nextStage.id === 'active' 
+                                ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400' 
+                                : 'bg-primary-500/20 hover:bg-primary-500/30 text-primary-400'
+                            }`}
+                            title={`Move to ${nextStage.name}`}
+                          >
+                            {nextStage.name.split(' ')[0]} →
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  ))}
+                  );})}
                   {getDealsForStage(stage.id).length === 0 && (
                     <div className="text-center py-8 text-dark-500 text-sm">
                       No clients in this stage
