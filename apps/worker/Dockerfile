@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v7 - Poll pyannote.ai async job for completion
+# Version: 2026-02-01-v8 - AI-powered speaker name identification from transcript
 WORKDIR /app
 
 # Install system dependencies for audio processing

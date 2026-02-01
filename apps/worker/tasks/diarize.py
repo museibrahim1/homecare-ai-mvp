@@ -27,6 +27,109 @@ def calculate_overlap(seg_start: int, seg_end: int, turn_start: int, turn_end: i
     return max(0, overlap_end - overlap_start)
 
 
+def identify_speaker_names(db, visit_id: UUID) -> dict:
+    """
+    Use AI to identify speaker names from transcript content.
+    
+    Analyzes the transcript for introductions like "I'm Dr. Smith" or 
+    "My name is John" and maps them to speaker labels.
+    
+    Returns:
+        Dict mapping generic labels (SPEAKER_00) to names (Dr. Smith)
+    """
+    from models import TranscriptSegment
+    import anthropic
+    import os
+    
+    # Get transcript segments with speaker labels
+    segments = db.query(TranscriptSegment).filter(
+        TranscriptSegment.visit_id == visit_id,
+        TranscriptSegment.speaker_label.isnot(None)
+    ).order_by(TranscriptSegment.start_ms).limit(50).all()  # First 50 segments
+    
+    if not segments:
+        return {}
+    
+    # Build transcript excerpt with speaker labels
+    transcript_lines = []
+    for seg in segments:
+        transcript_lines.append(f"[{seg.speaker_label}]: {seg.text}")
+    
+    transcript_text = "\n".join(transcript_lines)
+    
+    # Use Claude to identify names
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        logger.warning("No ANTHROPIC_API_KEY set, skipping speaker name identification")
+        return {}
+    
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        
+        response = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=500,
+            messages=[{
+                "role": "user",
+                "content": f"""Analyze this transcript and identify the names of each speaker based on introductions or how they're addressed.
+
+Transcript:
+{transcript_text}
+
+Return ONLY a JSON object mapping speaker labels to names. If a speaker's name cannot be determined, use a descriptive role like "Patient", "Doctor", "Caregiver", "Family Member", etc.
+
+Example output format:
+{{"SPEAKER_00": "Dr. Smith", "SPEAKER_01": "Mrs. Johnson", "SPEAKER_02": "Family Member"}}
+
+JSON response:"""
+            }]
+        )
+        
+        # Parse the JSON response
+        import json
+        response_text = response.content[0].text.strip()
+        
+        # Handle potential markdown code blocks
+        if response_text.startswith("```"):
+            response_text = response_text.split("```")[1]
+            if response_text.startswith("json"):
+                response_text = response_text[4:]
+            response_text = response_text.strip()
+        
+        speaker_names = json.loads(response_text)
+        logger.info(f"Identified speaker names: {speaker_names}")
+        return speaker_names
+        
+    except Exception as e:
+        logger.warning(f"Failed to identify speaker names: {e}")
+        return {}
+
+
+def update_speaker_names(db, visit_id: UUID, speaker_names: dict) -> int:
+    """
+    Update transcript segments with identified speaker names.
+    """
+    from models import TranscriptSegment
+    
+    if not speaker_names:
+        return 0
+    
+    updated = 0
+    segments = db.query(TranscriptSegment).filter(
+        TranscriptSegment.visit_id == visit_id,
+        TranscriptSegment.speaker_label.isnot(None)
+    ).all()
+    
+    for segment in segments:
+        if segment.speaker_label in speaker_names:
+            segment.speaker_label = speaker_names[segment.speaker_label]
+            updated += 1
+    
+    db.commit()
+    logger.info(f"Updated {updated} segments with speaker names")
+    return updated
+
+
 def align_diarization_with_transcript(db, visit_id: UUID, turns: List[dict]) -> int:
     """
     Align diarization turns with transcript segments.
@@ -167,8 +270,15 @@ def diarize_visit(self, visit_id: str):
             # Align diarization with transcript segments
             aligned_count = align_diarization_with_transcript(db, visit.id, turns)
             
-            # Update pipeline state
+            # Identify speaker names from transcript content
+            speaker_names = identify_speaker_names(db, visit.id)
+            if speaker_names:
+                update_speaker_names(db, visit.id, speaker_names)
+            
+            # Update pipeline state - use identified names if available
             speakers = list(set(t["speaker"] for t in turns))
+            if speaker_names:
+                speakers = list(speaker_names.values())
             visit.pipeline_state = {
                 **visit.pipeline_state,
                 "diarization": {
