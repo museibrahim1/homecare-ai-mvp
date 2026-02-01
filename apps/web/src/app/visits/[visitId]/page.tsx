@@ -637,10 +637,9 @@ export default function VisitDetailPage() {
       </main>
 
       {/* Slide-out Preview Panel - Wider & Better Spaced */}
+      {sidebarOpen && (
       <div
-        className={`fixed top-0 right-0 h-full w-[560px] bg-dark-850 border-l border-dark-700 shadow-2xl transform transition-transform duration-300 ease-in-out z-40 flex flex-col ${
-          sidebarOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className="fixed top-0 right-0 h-full w-[560px] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
       >
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
@@ -661,19 +660,24 @@ export default function VisitDetailPage() {
           </button>
         </div>
 
-        {/* Panel Tabs - Better Styled */}
-        <div className="flex border-b border-dark-700 px-4 pt-3 gap-2 bg-dark-800/80">
+        {/* Panel Tabs */}
+        <div className="flex border-b border-dark-700 px-4 pt-3 gap-2 bg-dark-800">
           {panelTabs.map((tab) => {
             const TabIcon = tab.icon;
             const isActive = activePanel === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => setActivePanel(tab.id as any)}
-                className={`flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-t-xl transition-all ${
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActivePanel(tab.id as any);
+                }}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg cursor-pointer select-none ${
                   isActive
-                    ? 'bg-dark-700 text-white border-t-2 border-x-2 border-primary-500/50 -mb-[1px]'
-                    : 'text-dark-400 hover:text-white hover:bg-dark-700/50'
+                    ? 'bg-primary-500/20 text-white border border-primary-500/30'
+                    : 'text-dark-400 hover:text-white hover:bg-dark-700/50 border border-transparent'
                 }`}
               >
                 <TabIcon className={`w-4 h-4 ${isActive ? 'text-primary-400' : ''}`} />
@@ -718,6 +722,7 @@ export default function VisitDetailPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

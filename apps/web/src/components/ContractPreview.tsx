@@ -1053,8 +1053,14 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
       {/* Email Modal */}
       {showEmailModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-dark-800 rounded-xl border border-dark-700 w-full max-w-lg overflow-hidden">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowEmailModal(false)}
+        >
+          <div 
+            className="bg-dark-800 rounded-xl border border-dark-700 w-full max-w-lg overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-dark-700">
               <div className="flex items-center gap-3">
