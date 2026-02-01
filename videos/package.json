@@ -1,0 +1,25 @@
+{
+  "name": "ai-voice-contractor-videos",
+  "version": "1.0.0",
+  "description": "Video generation for AI Voice Contractor",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render",
+    "render": "remotion render",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.416",
+    "@remotion/player": "4.0.416",
+    "@remotion/zod-types": "4.0.416",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.416",
+    "zod": "3.22.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.3"
+  }
+}

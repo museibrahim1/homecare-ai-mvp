@@ -1,0 +1,196 @@
+# Remotion Video Skills for Claude in Cursor
+
+## Overview
+This rule teaches Claude how to create professional videos using Remotion in this workspace.
+The videos folder contains a complete Remotion setup for programmatic video generation.
+
+## When This Rule Applies
+- When user asks to create, edit, or render videos
+- When user mentions "video", "animation", "remotion", or "render"
+- When working in the /videos directory
+
+## Remotion Core Concepts
+
+### Project Structure
+```
+videos/
+├── src/
+│   ├── index.ts          # Entry point (registerRoot)
+│   ├── Root.tsx          # Composition registration
+│   └── compositions/     # Video components
+├── remotion.config.ts    # Configuration
+└── package.json          # Dependencies
+```
+
+### Key Components
+
+1. **Composition** - Defines a video with dimensions, duration, fps
+2. **AbsoluteFill** - Full-screen container (use for backgrounds)
+3. **Sequence** - Time-based sequencing of elements
+4. **useCurrentFrame()** - Get current frame number
+5. **useVideoConfig()** - Get fps, width, height, durationInFrames
+
+### Animation APIs
+
+#### interpolate() - Linear animation
+```tsx
+import { interpolate, useCurrentFrame } from "remotion";
+
+const frame = useCurrentFrame();
+const opacity = interpolate(frame, [0, 30], [0, 1], {
+  extrapolateRight: "clamp",
+});
+```
+
+#### spring() - Physics-based animation
+```tsx
+import { spring, useCurrentFrame, useVideoConfig } from "remotion";
+
+const frame = useCurrentFrame();
+const { fps } = useVideoConfig();
+
+const scale = spring({
+  frame,
+  fps,
+  config: {
+    damping: 100,
+    stiffness: 200,
+    mass: 0.5,
+  },
+});
+```
+
+### Common Patterns
+
+#### Fade In Effect
+```tsx
+const opacity = interpolate(frame, [0, 30], [0, 1], {
+  extrapolateRight: "clamp",
+});
+```
+
+#### Slide In from Left
+```tsx
+const translateX = interpolate(frame, [0, 30], [-100, 0], {
+  extrapolateRight: "clamp",
+});
+// style: transform: `translateX(${translateX}%)`
+```
+
+#### Staggered Animations
+```tsx
+const items = ["Item 1", "Item 2", "Item 3"];
+{items.map((item, i) => {
+  const delay = i * 10; // 10 frames between each
+  const itemOpacity = interpolate(
+    frame,
+    [delay, delay + 20],
+    [0, 1],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+  return <div style={{ opacity: itemOpacity }}>{item}</div>;
+})}
+```
+
+#### Sequence Multiple Scenes
+```tsx
+import { Sequence } from "remotion";
+
+<AbsoluteFill>
+  <Sequence from={0} durationInFrames={60}>
+    <Scene1 />
+  </Sequence>
+  <Sequence from={60} durationInFrames={60}>
+    <Scene2 />
+  </Sequence>
+</AbsoluteFill>
+```
+
+### Best Practices
+
+1. **Always use extrapolateRight: "clamp"** to prevent values from exceeding bounds
+2. **Use AbsoluteFill** as the root container in compositions
+3. **Define props with TypeScript types** for type safety
+4. **Keep compositions pure** - no side effects in render
+5. **Use spring() for natural motion** (buttons, cards, UI elements)
+6. **Use interpolate() for precise control** (progress bars, timers)
+
+### Video Dimensions
+
+| Type | Width | Height | FPS |
+|------|-------|--------|-----|
+| YouTube/Standard | 1920 | 1080 | 30 |
+| Instagram Post | 1080 | 1080 | 30 |
+| Instagram Story | 1080 | 1920 | 30 |
+| TikTok | 1080 | 1920 | 30 |
+| Twitter | 1280 | 720 | 30 |
+
+### Adding a New Video Composition
+
+1. Create component in `videos/src/compositions/YourVideo.tsx`
+2. Register in `videos/src/Root.tsx`:
+```tsx
+<Composition
+  id="YourVideo"
+  component={YourVideo}
+  durationInFrames={150}  // 5 seconds at 30fps
+  fps={30}
+  width={1920}
+  height={1080}
+  defaultProps={{ /* your props */ }}
+/>
+```
+
+### Commands
+
+```bash
+# Start development studio (preview in browser)
+cd videos && npm run dev
+
+# Render a video
+cd videos && npx remotion render YourCompositionId out/video.mp4
+
+# Render with custom props
+cd videos && npx remotion render YourCompositionId out/video.mp4 --props='{"text":"Custom"}'
+```
+
+### Audio Support
+
+```tsx
+import { Audio, staticFile } from "remotion";
+
+// Place audio files in videos/public/
+<Audio src={staticFile("music.mp3")} volume={0.5} />
+```
+
+### Images
+
+```tsx
+import { Img, staticFile } from "remotion";
+
+// Place images in videos/public/
+<Img src={staticFile("logo.png")} style={{ width: 200 }} />
+```
+
+### Video Embedding
+
+```tsx
+import { OffthreadVideo, staticFile } from "remotion";
+
+<OffthreadVideo src={staticFile("background.mp4")} />
+```
+
+## Workflow for Creating Videos
+
+1. User describes what video they want
+2. Create component in `videos/src/compositions/`
+3. Register composition in `videos/src/Root.tsx`
+4. Tell user to run `cd videos && npm run dev` to preview
+5. When ready, render with `npx remotion render CompositionId output.mp4`
+
+## Example Prompts to Handle
+
+- "Create a video with text that fades in" → Create FadeInText composition
+- "Make a countdown timer video" → Create Countdown composition
+- "Create a logo animation" → Create LogoAnimation composition with spring()
+- "Make a text animation where words fly in" → Create FlyingWords composition with staggered animations
