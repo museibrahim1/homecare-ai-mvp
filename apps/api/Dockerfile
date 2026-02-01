@@ -1,4 +1,4 @@
-# Version: v7 - Fixed User model for business signup (added company_name, flexible role)
+# Version: v8 - Added email notifications for status changes
 FROM python:3.11-slim
 
 WORKDIR /app

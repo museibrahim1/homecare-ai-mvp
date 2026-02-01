@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v17 - Contract generation now sets status to 'proposal' instead of 'active'
+# Version: v18 - Added email notifications for contract generation
 WORKDIR /app
 
 # Install system dependencies for audio processing

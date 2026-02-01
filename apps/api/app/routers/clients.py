@@ -1,12 +1,13 @@
 from typing import List
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.client import Client
 from app.schemas.client import ClientCreate, ClientUpdate, ClientResponse
+from app.services.email import get_email_service
 
 router = APIRouter()
 
@@ -57,6 +58,7 @@ async def get_client(
 async def update_client(
     client_id: UUID,
     client_in: ClientUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -68,12 +70,29 @@ async def update_client(
             detail="Client not found",
         )
     
+    # Track status change for notification
+    old_status = client.status
+    
     update_data = client_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(client, field, value)
     
     db.commit()
     db.refresh(client)
+    
+    # Send notification if status changed
+    new_status = client.status
+    if old_status != new_status and new_status:
+        email_service = get_email_service()
+        background_tasks.add_task(
+            email_service.send_client_status_change,
+            user_email=current_user.email,
+            client_name=client.full_name,
+            old_status=old_status or "none",
+            new_status=new_status,
+            changed_by=current_user.full_name,
+        )
+    
     return client
 
 

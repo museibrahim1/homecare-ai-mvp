@@ -230,6 +230,176 @@ class EmailService:
             html,
             reply_to=user_email
         )
+    
+    # ==================== Client/Visit Notifications ====================
+    
+    def send_client_status_change(
+        self, 
+        user_email: str, 
+        client_name: str, 
+        old_status: str, 
+        new_status: str,
+        changed_by: str = "System"
+    ):
+        """Notify when a client's status changes."""
+        status_colors = {
+            "intake": "#3B82F6",  # blue
+            "assessment": "#8B5CF6",  # purple
+            "proposal": "#F97316",  # orange
+            "active": "#22C55E",  # green
+            "follow_up": "#EAB308",  # yellow
+        }
+        new_color = status_colors.get(new_status.lower(), "#6B7280")
+        
+        subject = f"Client Status Updated: {client_name}"
+        html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #374151; margin-bottom: 5px;">Client Status Changed</h2>
+            </div>
+            
+            <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <p style="margin: 0 0 10px 0;"><strong>Client:</strong> {client_name}</p>
+                <p style="margin: 0;">
+                    <strong>Status:</strong> 
+                    <span style="text-decoration: line-through; color: #9CA3AF;">{old_status.replace('_', ' ').title()}</span>
+                    →
+                    <span style="background: {new_color}; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold;">
+                        {new_status.replace('_', ' ').title()}
+                    </span>
+                </p>
+            </div>
+            
+            <p style="color: #6B7280; font-size: 14px;">Changed by: {changed_by}</p>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="https://app.homecare.ai/clients" 
+                   style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                    View Client
+                </a>
+            </div>
+        </div>
+        """
+        return self.send_email(user_email, subject, html)
+    
+    def send_assessment_complete(
+        self,
+        user_email: str,
+        client_name: str,
+        visit_id: str,
+        billables_count: int = 0,
+        note_generated: bool = True,
+        contract_generated: bool = True,
+    ):
+        """Notify when an assessment pipeline completes."""
+        subject = f"Assessment Complete: {client_name}"
+        
+        checkmark = "✓"
+        items_html = ""
+        if billables_count > 0:
+            items_html += f'<p style="color: #22C55E;">{checkmark} {billables_count} billable items extracted</p>'
+        if note_generated:
+            items_html += f'<p style="color: #22C55E;">{checkmark} SOAP note generated</p>'
+        if contract_generated:
+            items_html += f'<p style="color: #22C55E;">{checkmark} Service contract created</p>'
+        
+        html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">🎉</div>
+                <h2 style="color: #374151; margin-bottom: 5px;">Assessment Complete!</h2>
+                <p style="color: #6B7280;">AI processing finished for {client_name}</p>
+            </div>
+            
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="color: #166534; margin-top: 0;">What's Ready:</h3>
+                {items_html}
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="https://app.homecare.ai/visits/{visit_id}" 
+                   style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                    Review Results
+                </a>
+            </div>
+        </div>
+        """
+        return self.send_email(user_email, subject, html)
+    
+    def send_contract_ready(
+        self,
+        user_email: str,
+        client_name: str,
+        client_email: str,
+        weekly_cost: str,
+        visit_id: str,
+    ):
+        """Notify when a contract is ready to send."""
+        subject = f"Contract Ready for {client_name}"
+        html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">📄</div>
+                <h2 style="color: #374151; margin-bottom: 5px;">Contract Ready to Send</h2>
+            </div>
+            
+            <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <p style="margin: 0 0 10px 0;"><strong>Client:</strong> {client_name}</p>
+                <p style="margin: 0 0 10px 0;"><strong>Email:</strong> {client_email}</p>
+                <p style="margin: 0;"><strong>Estimated Weekly:</strong> {weekly_cost}</p>
+            </div>
+            
+            <p style="color: #6B7280; font-size: 14px;">
+                The service agreement is ready for your review. You can preview it, make edits, 
+                and send it directly to the client for signature.
+            </p>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="https://app.homecare.ai/visits/{visit_id}" 
+                   style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                    Review & Send Contract
+                </a>
+            </div>
+        </div>
+        """
+        return self.send_email(user_email, subject, html)
+    
+    def send_follow_up_reminder(
+        self,
+        user_email: str,
+        client_name: str,
+        client_id: str,
+        days_since_last_visit: int,
+    ):
+        """Send reminder for client follow-up."""
+        subject = f"Follow-up Reminder: {client_name}"
+        html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">⏰</div>
+                <h2 style="color: #374151; margin-bottom: 5px;">Follow-up Reminder</h2>
+            </div>
+            
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <p style="margin: 0 0 10px 0;"><strong>Client:</strong> {client_name}</p>
+                <p style="margin: 0; color: #92400e;">
+                    <strong>{days_since_last_visit} days</strong> since last visit
+                </p>
+            </div>
+            
+            <p style="color: #6B7280; font-size: 14px;">
+                It's time to schedule a follow-up assessment for this client.
+            </p>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="https://app.homecare.ai/visits/new?client={client_id}" 
+                   style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                    Schedule Assessment
+                </a>
+            </div>
+        </div>
+        """
+        return self.send_email(user_email, subject, html)
 
 
 # Singleton instance
