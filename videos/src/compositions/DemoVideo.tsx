@@ -739,13 +739,68 @@ const FileTextIcon = () => (
   </svg>
 );
 
+// ============ SCENE AUDIO COMPONENT ============
+type SceneAudioProps = {
+  scene: number;
+  from: number;
+};
+
+const SceneAudio: React.FC<SceneAudioProps> = ({ scene, from }) => {
+  return (
+    <Sequence from={from} durationInFrames={180}>
+      <Audio 
+        src={staticFile(`segments/scene-${scene.toString().padStart(2, '0')}.mp3`)} 
+        volume={1}
+        startFrom={0}
+      />
+    </Sequence>
+  );
+};
+
 // ============ MAIN DEMO VIDEO ============
 export const DemoVideo: React.FC<DemoVideoProps> = ({ showAudio }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: colors.dark }}>
-      {/* Audio track - optional */}
+      {/* Audio tracks - scene-synced segments */}
       {showAudio && (
-        <Audio src={staticFile("demo-narration.mp3")} volume={1} />
+        <>
+          {/* Scene 1: Intro (0-4s) */}
+          <Sequence from={0} durationInFrames={120}>
+            <Audio src={staticFile("segments/scene-01.mp3")} volume={1} />
+          </Sequence>
+          {/* Scene 2: Core Features (4-9s) */}
+          <Sequence from={120} durationInFrames={150}>
+            <Audio src={staticFile("segments/scene-02.mp3")} volume={1} />
+          </Sequence>
+          {/* Scene 3: Pipeline (9-15s) */}
+          <Sequence from={270} durationInFrames={180}>
+            <Audio src={staticFile("segments/scene-03.mp3")} volume={1} />
+          </Sequence>
+          {/* Scene 4: Assessments (15-21s) */}
+          <Sequence from={450} durationInFrames={180}>
+            <Audio src={staticFile("segments/scene-04.mp3")} volume={1} />
+          </Sequence>
+          {/* Scene 5: Visit Detail (21-27s) */}
+          <Sequence from={630} durationInFrames={180}>
+            <Audio src={staticFile("segments/scene-05.mp3")} volume={1} />
+          </Sequence>
+          {/* Scene 6: Contract (27-33s) */}
+          <Sequence from={810} durationInFrames={180}>
+            <Audio src={staticFile("segments/scene-06.mp3")} volume={1} />
+          </Sequence>
+          {/* Scene 7: Clients (33-39s) */}
+          <Sequence from={990} durationInFrames={180}>
+            <Audio src={staticFile("segments/scene-07.mp3")} volume={1} />
+          </Sequence>
+          {/* Scene 8: Reports (39-45s) */}
+          <Sequence from={1170} durationInFrames={180}>
+            <Audio src={staticFile("segments/scene-08.mp3")} volume={1} />
+          </Sequence>
+          {/* Scene 9: CTA (45-50s) */}
+          <Sequence from={1350} durationInFrames={150}>
+            <Audio src={staticFile("segments/scene-09.mp3")} volume={1} />
+          </Sequence>
+        </>
       )}
 
       {/* Scene 1: Intro (0-4 seconds) */}
