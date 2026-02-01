@@ -321,11 +321,27 @@ def diarize_visit(self, visit_id: str):
             # Align diarization with transcript segments
             aligned_count = align_diarization_with_transcript(db, visit.id, turns)
             
-            # Identify speaker names from transcript content
-            speaker_names = identify_speaker_names(db, visit.id)
+            # Use COMBINED analysis for speaker names + billables (single Claude call)
+            from libs.transcript_analysis import analyze_transcript_combined
+            from models import TranscriptSegment
+            
+            # Get segments for combined analysis
+            segments = db.query(TranscriptSegment).filter(
+                TranscriptSegment.visit_id == visit.id,
+                TranscriptSegment.speaker_label.isnot(None)
+            ).order_by(TranscriptSegment.start_ms).all()
+            
+            segment_dicts = [{"speaker_label": s.speaker_label, "text": s.text, "start_ms": s.start_ms} for s in segments]
+            unique_speakers = list(set(s.speaker_label for s in segments))
+            
+            # Single Claude call for both speaker names AND services
+            speaker_names, services = analyze_transcript_combined(segment_dicts, unique_speakers)
+            
+            # Update speaker names
             if speaker_names:
                 update_speaker_names(db, visit.id, speaker_names)
             
+            # Store services in pipeline state for billing step to use (avoids second Claude call)
             # Update pipeline state - use identified names if available
             speakers = list(set(t["speaker"] for t in turns))
             if speaker_names:
@@ -339,7 +355,9 @@ def diarize_visit(self, visit_id: str):
                     "turn_count": len(turns),
                     "speakers": speakers,
                     "aligned_segments": aligned_count,
-                }
+                },
+                # Store extracted services for billing step (avoids duplicate Claude call)
+                "extracted_services": services if services else [],
             }
             
             db.commit()

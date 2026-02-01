@@ -69,12 +69,26 @@ def generate_billables(self, visit_id: str):
         visit_start_ms = min(s.start_ms for s in segments)
         visit_end_ms = max(s.end_ms for s in segments)
         
-        # Generate billables using rules engine
-        billable_blocks = generate_billables_from_transcript(
-            segment_dicts,
-            visit_start_ms,
-            visit_end_ms,
-        )
+        # Check if services were already extracted during diarization (combined analysis)
+        extracted_services = visit.pipeline_state.get("extracted_services", [])
+        
+        if extracted_services:
+            # Use cached services - no need for another Claude call!
+            logger.info(f"Using {len(extracted_services)} cached services from diarization")
+            from libs.transcript_analysis import process_services_to_billables
+            billable_blocks = process_services_to_billables(
+                extracted_services,
+                visit_start_ms,
+                visit_end_ms,
+            )
+        else:
+            # Fallback: Generate billables using Claude (if diarization was skipped)
+            logger.info("No cached services, running full billables extraction")
+            billable_blocks = generate_billables_from_transcript(
+                segment_dicts,
+                visit_start_ms,
+                visit_end_ms,
+            )
         
         # Delete existing billables for this visit
         db.query(BillableItem).filter(

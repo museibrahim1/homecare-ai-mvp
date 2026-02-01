@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v12 - Claude billables extraction + all speakers detection
+# Version: 2026-02-01-v13 - OPTIMIZED: Combined Claude call for speakers+billables
 WORKDIR /app
 
 # Install system dependencies for audio processing
