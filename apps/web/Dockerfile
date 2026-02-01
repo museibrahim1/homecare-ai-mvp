@@ -1,3 +1,4 @@
+# Version: 2026-02-01-v1 - Added Notes button to pipeline
 FROM node:20-alpine
 
 WORKDIR /app
