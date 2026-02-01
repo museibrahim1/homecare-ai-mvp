@@ -319,8 +319,8 @@ export default function VisitDetailPage() {
     <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       
-      {/* Main Content */}
-      <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300 ${sidebarOpen ? 'lg:mr-[560px] md:mr-[400px]' : ''}`}>
+      {/* Main Content - Only push content on wide screens (1280px+) */}
+      <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300 ${sidebarOpen ? 'xl:mr-[500px]' : ''}`}>
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
@@ -668,13 +668,13 @@ export default function VisitDetailPage() {
       {/* Slide-out Preview Panel - Responsive Width */}
       {sidebarOpen && (
       <>
-        {/* Mobile overlay backdrop */}
+        {/* Overlay backdrop - show on screens narrower than xl (1280px) */}
         <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          className="fixed inset-0 bg-black/50 z-30 xl:hidden"
           onClick={() => setSidebarOpen(false)}
         />
         <div
-          className="fixed top-0 right-0 h-full w-full sm:w-[85vw] md:w-[400px] lg:w-[560px] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
+          className="fixed top-0 right-0 h-full w-full sm:w-[380px] md:w-[420px] lg:w-[450px] xl:w-[500px] max-w-[90vw] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
         >
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
