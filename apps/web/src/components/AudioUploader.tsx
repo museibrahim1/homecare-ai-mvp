@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Upload, Mic, FileAudio, CheckCircle, AlertCircle, X, Loader2, Sparkles } from 'lucide-react';
+import { Upload, Mic, FileAudio, CheckCircle, AlertCircle, X, Loader2, Sparkles, Square, Play, Pause } from 'lucide-react';
 import { api } from '@/lib/api';
 
 interface AudioUploaderProps {
@@ -11,6 +11,8 @@ interface AudioUploaderProps {
   onClose?: () => void;
   autoProcess?: boolean;
 }
+
+type InputMode = 'upload' | 'record';
 
 const PIPELINE_STEPS = [
   { key: 'transcription', label: 'Transcribing audio...', icon: '🎤' },
@@ -30,11 +32,174 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Recording states
+  const [inputMode, setInputMode] = useState<InputMode>('upload');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
+  
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Recording functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          echoCancellation: true, 
+          noiseSuppression: true,
+          sampleRate: 44100 
+        } 
+      });
+      
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        setAudioUrl(URL.createObjectURL(blob));
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorder.start(1000); // Collect data every second
+      setIsRecording(true);
+      setRecordingTime(0);
+      setError(null);
+      
+      // Start timer
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+      
+    } catch (err: any) {
+      console.error('Recording error:', err);
+      if (err.name === 'NotAllowedError') {
+        setError('Microphone access denied. Please allow microphone access in your browser settings.');
+      } else if (err.name === 'NotFoundError') {
+        setError('No microphone found. Please connect a microphone and try again.');
+      } else {
+        setError('Failed to start recording: ' + err.message);
+      }
+      setState('error');
+    }
+  };
+  
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+    }
+  };
+  
+  const playRecording = () => {
+    if (audioUrl) {
+      if (!audioElementRef.current) {
+        audioElementRef.current = new Audio(audioUrl);
+        audioElementRef.current.onended = () => setIsPlaying(false);
+      }
+      audioElementRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+  
+  const pauseRecording = () => {
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+  
+  const clearRecording = () => {
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current = null;
+    }
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
+    setAudioBlob(null);
+    setAudioUrl(null);
+    setRecordingTime(0);
+    setIsPlaying(false);
+  };
+  
+  const uploadRecording = async () => {
+    if (!audioBlob) return;
+    
+    // Convert blob to file
+    const file = new File([audioBlob], `recording_${Date.now()}.webm`, { type: 'audio/webm' });
+    setSelectedFile(file);
+    
+    setState('uploading');
+    setProgress(0);
+    
+    const interval = setInterval(() => setProgress(p => Math.min(p + 10, 90)), 300);
+    
+    try {
+      await api.uploadAudio(token, visitId, file, autoProcess);
+      clearInterval(interval);
+      setProgress(100);
+      
+      if (autoProcess) {
+        setState('processing');
+        setCurrentStep('transcription');
+        pollIntervalRef.current = setInterval(pollPipelineStatus, 3000);
+        pollPipelineStatus();
+      } else {
+        setState('success');
+        setTimeout(() => onUploadComplete?.({}), 1500);
+      }
+    } catch (err: any) {
+      clearInterval(interval);
+      setError(err.message || 'Upload failed');
+      setState('error');
+    }
+  };
+  
+  // Cleanup recording on unmount
+  useEffect(() => {
+    return () => {
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+      }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+      if (audioElementRef.current) {
+        audioElementRef.current.pause();
+      }
+    };
+  }, [audioUrl]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setState('dragging'); }, []);
   const handleDragLeave = useCallback((e: React.DragEvent) => { e.preventDefault(); setState('idle'); }, []);
@@ -138,6 +303,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
     setProgress(0);
     setCurrentStep(null);
     setCompletedSteps([]);
+    clearRecording();
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
       pollIntervalRef.current = null;
@@ -146,24 +312,52 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
 
   return (
     <div className="card p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
             <Mic className="w-5 h-5 text-primary-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Upload Audio</h3>
+            <h3 className="text-lg font-semibold text-white">Add Audio</h3>
             <p className="text-dark-400 text-sm">
-              {autoProcess ? 'Upload & auto-process with AI' : 'Upload a recording for this visit'}
+              {autoProcess ? 'Record or upload & auto-process with AI' : 'Record or upload for this visit'}
             </p>
           </div>
         </div>
-        {onClose && state !== 'processing' && (
+        {onClose && state !== 'processing' && !isRecording && (
           <button onClick={onClose} className="p-2 hover:bg-dark-700 rounded-lg">
             <X className="w-5 h-5 text-dark-400" />
           </button>
         )}
       </div>
+      
+      {/* Mode Toggle Tabs */}
+      {state === 'idle' && !selectedFile && !audioBlob && (
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setInputMode('record')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+              inputMode === 'record'
+                ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                : 'bg-dark-700/50 text-dark-400 hover:bg-dark-700'
+            }`}
+          >
+            <Mic className="w-4 h-4" />
+            Record
+          </button>
+          <button
+            onClick={() => setInputMode('upload')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+              inputMode === 'upload'
+                ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                : 'bg-dark-700/50 text-dark-400 hover:bg-dark-700'
+            }`}
+          >
+            <Upload className="w-4 h-4" />
+            Upload File
+          </button>
+        </div>
+      )}
 
       {state === 'processing' && (
         <div className="space-y-4">
@@ -231,7 +425,114 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
         </div>
       )}
 
-      {state !== 'success' && state !== 'processing' && (
+      {/* Recording Interface */}
+      {inputMode === 'record' && state !== 'success' && state !== 'processing' && state !== 'uploading' && !selectedFile && (
+        <div className="border-2 border-dashed rounded-2xl p-8 text-center bg-dark-700/30 border-dark-600">
+          {!audioBlob ? (
+            // Recording controls
+            <div className="space-y-6">
+              <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center transition-all ${
+                isRecording 
+                  ? 'bg-red-500/20 animate-pulse' 
+                  : 'bg-primary-500/20 hover:bg-primary-500/30'
+              }`}>
+                {isRecording ? (
+                  <div className="relative">
+                    <div className="absolute inset-0 animate-ping bg-red-500/30 rounded-full"></div>
+                    <Mic className="w-12 h-12 text-red-400 relative z-10" />
+                  </div>
+                ) : (
+                  <Mic className="w-12 h-12 text-primary-400" />
+                )}
+              </div>
+              
+              {isRecording && (
+                <div className="space-y-2">
+                  <div className="text-3xl font-mono text-white">{formatTime(recordingTime)}</div>
+                  <p className="text-red-400 text-sm animate-pulse">● Recording...</p>
+                </div>
+              )}
+              
+              <div className="flex justify-center gap-4">
+                {!isRecording ? (
+                  <button
+                    onClick={startRecording}
+                    className="btn-primary px-6 py-3 flex items-center gap-2"
+                  >
+                    <Mic className="w-5 h-5" />
+                    Start Recording
+                  </button>
+                ) : (
+                  <button
+                    onClick={stopRecording}
+                    className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium flex items-center gap-2 transition-colors"
+                  >
+                    <Square className="w-5 h-5" />
+                    Stop Recording
+                  </button>
+                )}
+              </div>
+              
+              {!isRecording && (
+                <p className="text-dark-400 text-sm">
+                  Click to start recording your assessment
+                </p>
+              )}
+            </div>
+          ) : (
+            // Preview recorded audio
+            <div className="space-y-6">
+              <div className="w-16 h-16 bg-accent-green/20 rounded-2xl flex items-center justify-center mx-auto">
+                <FileAudio className="w-8 h-8 text-accent-green" />
+              </div>
+              
+              <div>
+                <p className="text-white font-medium">Recording Complete</p>
+                <p className="text-dark-400 text-sm">Duration: {formatTime(recordingTime)}</p>
+              </div>
+              
+              {/* Playback controls */}
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  onClick={isPlaying ? pauseRecording : playRecording}
+                  className="btn-secondary px-4 py-2 flex items-center gap-2"
+                >
+                  {isPlaying ? (
+                    <>
+                      <Pause className="w-4 h-4" />
+                      Pause
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4" />
+                      Play
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-center gap-3 pt-4 border-t border-dark-700">
+                <button
+                  onClick={clearRecording}
+                  className="btn-secondary px-4 py-2"
+                >
+                  Record Again
+                </button>
+                <button
+                  onClick={uploadRecording}
+                  className="btn-primary px-6 py-2 flex items-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Upload & Process
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* File Upload Interface */}
+      {inputMode === 'upload' && state !== 'success' && state !== 'processing' && (
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -306,14 +607,24 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
         </div>
       )}
 
-      {state === 'idle' && !selectedFile && (
+      {state === 'idle' && !selectedFile && !audioBlob && (
         <div className="mt-6 p-4 bg-primary-500/10 border border-primary-500/20 rounded-xl">
           <h4 className="text-primary-400 font-medium text-sm mb-2 flex items-center gap-2">
             <Sparkles className="w-4 h-4" /> Auto-Processing Enabled
           </h4>
           <p className="text-dark-300 text-sm">
-            Upload will automatically: transcribe audio → identify speakers → extract billables → generate notes → create contract
+            {inputMode === 'record' 
+              ? 'Record your assessment conversation. AI will automatically transcribe, identify speakers, extract billables, and generate notes & contract.'
+              : 'Upload will automatically: transcribe audio → identify speakers → extract billables → generate notes → create contract'
+            }
           </p>
+          {inputMode === 'record' && (
+            <ul className="mt-3 text-dark-400 text-xs space-y-1">
+              <li>• Speak clearly and at a normal pace</li>
+              <li>• Introduce speakers at the start (e.g., "This is Nurse Jane with Mrs. Smith")</li>
+              <li>• Keep background noise to a minimum</li>
+            </ul>
+          )}
         </div>
       )}
     </div>

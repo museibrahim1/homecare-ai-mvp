@@ -1,4 +1,4 @@
-# Version: 2026-02-01-v6 - Added drag-and-drop to pipeline for client stage management
+# Version: v8 - Added in-app audio recording
 FROM node:20-alpine
 
 WORKDIR /app
