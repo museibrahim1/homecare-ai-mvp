@@ -71,15 +71,23 @@ def identify_speaker_names(db, visit_id: UUID) -> dict:
             max_tokens=500,
             messages=[{
                 "role": "user",
-                "content": f"""Analyze this transcript and identify the names of each speaker based on introductions or how they're addressed.
+                "content": f"""Analyze this transcript and identify the EXACT NAMES of each speaker.
+
+Look for:
+- Self-introductions: "I'm Dr. Drostman", "My name is Sarah", "I'm Mrs. Smith"
+- How others address them: "Hello Dr. Jones", "Thank you, Mary"
+- Name mentions in context
 
 Transcript:
 {transcript_text}
 
-Return ONLY a JSON object mapping speaker labels to names. If a speaker's name cannot be determined, use a descriptive role like "Patient", "Doctor", "Caregiver", "Family Member", etc.
+IMPORTANT: Use the EXACT names spoken in the transcript (e.g., "Dr. Drostman", "Mrs. Smith", "Davis"). 
+Only fall back to roles like "Doctor" or "Patient" if NO name is ever mentioned for that speaker.
+
+Return ONLY a JSON object mapping speaker labels to their exact names.
 
 Example output format:
-{{"SPEAKER_00": "Dr. Smith", "SPEAKER_01": "Mrs. Johnson", "SPEAKER_02": "Family Member"}}
+{{"SPEAKER_00": "Dr. Drostman", "SPEAKER_01": "Mrs. Smith", "SPEAKER_02": "Davis"}}
 
 JSON response:"""
             }]

@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: 2026-02-01-v8 - AI-powered speaker name identification from transcript
+# Version: 2026-02-01-v9 - Use exact speaker names from introductions
 WORKDIR /app
 
 # Install system dependencies for audio processing
