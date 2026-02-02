@@ -1,4 +1,4 @@
-# Version: v9 - Added team management
+# Version: v10 - Full QA rebuild
 FROM node:20-alpine
 
 WORKDIR /app
