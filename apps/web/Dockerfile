@@ -1,4 +1,4 @@
-# Version: v15 - Email reply/forward + quick email to clients/caregivers
+# Version: v16 - Contract proposals page with export
 FROM node:20-alpine
 
 WORKDIR /app

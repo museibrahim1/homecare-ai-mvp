@@ -56,6 +56,7 @@ const communicationNavItems = [
 
 // Resources
 const resourcesNavItems = [
+  { href: '/proposals', label: 'Proposals', icon: FileText, description: 'Contract proposals' },
   { href: '/documents', label: 'Documents', icon: FolderOpen, description: 'Files & contracts' },
   { href: '/reports', label: 'Reports', icon: BarChart3, description: 'Analytics' },
   { href: '/help', label: 'Help & Support', icon: HelpCircle, description: 'Get help' },

@@ -131,7 +131,7 @@ export default function DashboardPage() {
                 {[
                   { label: 'New Assessment', desc: 'Start a new intake/visit', icon: Calendar, href: '/visits/new', color: 'primary' },
                   { label: 'Add Client', desc: 'Register new client', icon: Users, href: '/clients', color: 'green' },
-                  { label: 'Export Proposals', desc: 'Download contracts/PDFs', icon: TrendingUp, href: '/reports', color: 'cyan' },
+                  { label: 'Export Proposals', desc: 'View & export contracts', icon: TrendingUp, href: '/proposals', color: 'cyan' },
                 ].map((action, i) => (
                   <button key={i} onClick={() => router.push(action.href)} className="w-full p-4 bg-dark-700/50 hover:bg-dark-700 rounded-xl text-left transition group">
                     <div className="flex items-center gap-3">
