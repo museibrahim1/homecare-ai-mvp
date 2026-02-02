@@ -72,12 +72,12 @@ export const RemotionRoot: React.FC = () => {
         }}
       />
 
-      {/* ===== FOCUSED ~100-SECOND VIDEO ===== */}
+      {/* ===== FOCUSED 88-SECOND VIDEO ===== */}
       {/* Short & focused - Healthcare CRM + AI Automation */}
       <Composition
         id="QuickDemo"
         component={DemoVideoV3}
-        durationInFrames={3020}
+        durationInFrames={2640}
         fps={30}
         width={1920}
         height={1080}
@@ -90,7 +90,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="QuickDemoWithAudio"
         component={DemoVideoV3}
-        durationInFrames={3020}
+        durationInFrames={2640}
         fps={30}
         width={1920}
         height={1080}

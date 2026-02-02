@@ -16,50 +16,89 @@ import {
 // Total: 90 seconds (2700 frames at 30fps)
 
 const SCENE_TIMING = {
-  // HOOK - Establish the problem and solution (20s, audio: 19.3s)
-  hook:       { from: 0,    duration: 600 },   // Pain point + solution intro
+  // HOOK - Problem + Solution (19s, audio: 18.8s)
+  hook:       { from: 0,    duration: 580 },
   
-  // CORE VALUE - CRM + AI Automation (51s)
-  crm:        { from: 600,  duration: 570 },   // Healthcare CRM (audio: 18.2s)
-  record:     { from: 1170, duration: 500 },   // Record/Upload (audio: 15.7s)
-  aiProcess:  { from: 1670, duration: 480 },   // AI → Billing → Contract (audio: 15.3s)
+  // CORE VALUE - CRM + AI Automation (45s)
+  crm:        { from: 580,  duration: 480 },   // Healthcare CRM (audio: 15.4s)
+  record:     { from: 1060, duration: 450 },   // Record/Upload (audio: 14.2s)
+  aiProcess:  { from: 1510, duration: 400 },   // AI → Billing → Contract (audio: 12.6s)
   
-  // CTA - Close the deal (27s)
-  results:    { from: 2150, duration: 540 },   // Time savings (audio: 17.4s)
-  cta:        { from: 2690, duration: 330 },   // Call to action (audio: 10.1s)
+  // CTA - Close the deal (24s)
+  results:    { from: 1910, duration: 430 },   // Time savings (audio: 13.7s)
+  cta:        { from: 2340, duration: 300 },   // Call to action (audio: 9.2s)
   
-  total: 3020, // ~101 seconds (buffer for transitions)
+  total: 2640, // 88 seconds
 };
 
 // ============ SCENE COMPONENTS ============
 
-// Hook Scene - Problem + Solution
+// Hook Scene - Vibrant Problem + Solution with Real Branding
 const HookScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  const phase1 = frame < 180; // First 6 seconds - problem
-  const phase2 = frame >= 180 && frame < 360; // Next 6 seconds - transition
-  const phase3 = frame >= 360; // Last 8 seconds - solution
+  // Phase timing
+  const showGenericCRMs = frame < 180;  // 0-6s: Show generic CRMs
+  const showTransition = frame >= 180 && frame < 300;  // 6-10s: Transition
+  const showSolution = frame >= 300;  // 10-20s: Show our solution
   
-  const problemOpacity = interpolate(frame, [0, 30, 150, 180], [0, 1, 1, 0], { extrapolateRight: "clamp" });
-  const solutionOpacity = interpolate(frame, [200, 280], [0, 1], { extrapolateRight: "clamp" });
-  const logoScale = spring({ frame: frame - 240, fps, config: { damping: 12 } });
-  const taglineOpacity = interpolate(frame, [320, 400], [0, 1], { extrapolateRight: "clamp" });
+  // Animations for generic CRMs phase
+  const crmCardsScale = spring({ frame, fps, config: { damping: 15 } });
+  const crmShake = Math.sin(frame * 0.3) * 3;
+  const redXOpacity = interpolate(frame, [60, 90], [0, 1], { extrapolateRight: "clamp" });
+  const problemFadeOut = interpolate(frame, [150, 180], [1, 0], { extrapolateRight: "clamp" });
+  
+  // Animations for transition
+  const burstScale = interpolate(frame, [180, 220], [0, 3], { extrapolateRight: "clamp" });
+  const burstOpacity = interpolate(frame, [180, 220, 280], [0, 1, 0], { extrapolateRight: "clamp" });
+  
+  // Animations for solution reveal
+  const solutionOpacity = interpolate(frame, [280, 340], [0, 1], { extrapolateRight: "clamp" });
+  const screenshotSlide = interpolate(frame, [320, 400], [100, 0], { extrapolateRight: "clamp" });
+  const screenshotScale = spring({ frame: frame - 340, fps, config: { damping: 12 } });
+  const taglineSlide = interpolate(frame, [400, 480], [50, 0], { extrapolateRight: "clamp" });
+  const taglineOpacity = interpolate(frame, [400, 480], [0, 1], { extrapolateRight: "clamp" });
+  const glowPulse = Math.sin(frame * 0.08) * 0.3 + 0.7;
+  
+  // Generic CRM logos (text-based for reliability)
+  const genericCRMs = [
+    { name: "Monday", color: "#FF3D57" },
+    { name: "Salesforce", color: "#00A1E0" },
+    { name: "HubSpot", color: "#FF7A59" },
+  ];
   
   return (
-    <AbsoluteFill style={{ backgroundColor: "#0f172a" }}>
-      {/* Gradient background */}
+    <AbsoluteFill style={{ backgroundColor: "#0f172a", overflow: "hidden" }}>
+      {/* Animated gradient background */}
       <div style={{
         position: "absolute",
         inset: 0,
-        background: phase3 
-          ? "linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #7c3aed 100%)"
+        background: showSolution 
+          ? `radial-gradient(ellipse at center, rgba(14, 165, 233, ${glowPulse * 0.3}) 0%, transparent 70%)`
           : "radial-gradient(ellipse at top, #1e3a5f 0%, #0f172a 60%)",
-        transition: "background 0.5s",
       }} />
       
-      {/* Problem statement */}
+      {/* Floating particles for energy */}
+      {showSolution && [...Array(20)].map((_, i) => {
+        const x = Math.sin(frame * 0.02 + i) * 400 + 960;
+        const y = Math.cos(frame * 0.015 + i * 2) * 300 + 540;
+        const size = 4 + (i % 3) * 2;
+        return (
+          <div key={i} style={{
+            position: "absolute",
+            left: x,
+            top: y,
+            width: size,
+            height: size,
+            borderRadius: "50%",
+            background: `rgba(14, 165, 233, ${0.3 + Math.sin(frame * 0.1 + i) * 0.2})`,
+            boxShadow: `0 0 ${size * 2}px rgba(14, 165, 233, 0.5)`,
+          }} />
+        );
+      })}
+      
+      {/* PHASE 1: Generic CRMs with problems */}
       <div style={{
         position: "absolute",
         inset: 0,
@@ -67,104 +106,198 @@ const HookScene: React.FC = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        opacity: problemOpacity,
+        opacity: problemFadeOut,
         padding: "60px",
       }}>
         <h1 style={{
-          fontSize: "64px",
+          fontSize: "56px",
           fontWeight: 700,
           color: "white",
           textAlign: "center",
-          marginBottom: "40px",
+          marginBottom: "50px",
+          transform: `translateX(${crmShake}px)`,
         }}>
           Still Using Generic CRMs for Home Care?
         </h1>
+        
+        {/* Generic CRM Cards */}
         <div style={{
           display: "flex",
           gap: "40px",
+          marginBottom: "50px",
+          transform: `scale(${crmCardsScale})`,
         }}>
-          {[
-            { stat: "Hours", label: "on manual contracts" },
-            { stat: "Lost", label: "billing opportunities" },
-            { stat: "Scattered", label: "client data" },
-          ].map((item, i) => (
+          {genericCRMs.map((crm, i) => (
             <div key={i} style={{
-              background: "rgba(239, 68, 68, 0.2)",
-              border: "2px solid #ef4444",
-              borderRadius: "16px",
-              padding: "24px 40px",
+              position: "relative",
+              background: "rgba(255,255,255,0.05)",
+              border: `2px solid ${crm.color}`,
+              borderRadius: "20px",
+              padding: "40px 50px",
               textAlign: "center",
+              transform: `rotate(${Math.sin(frame * 0.1 + i) * 2}deg)`,
             }}>
-              <div style={{ fontSize: "36px", fontWeight: 700, color: "#ef4444" }}>
-                {item.stat}
+              <div style={{
+                fontSize: "32px",
+                fontWeight: 700,
+                color: crm.color,
+                marginBottom: "8px",
+              }}>
+                {crm.name}
               </div>
-              <div style={{ fontSize: "18px", color: "#fca5a5" }}>
-                {item.label}
+              <div style={{ fontSize: "16px", color: "#64748b" }}>
+                Not built for healthcare
               </div>
+              
+              {/* Red X overlay */}
+              <div style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: redXOpacity,
+              }}>
+                <div style={{
+                  fontSize: "120px",
+                  color: "#ef4444",
+                  fontWeight: 900,
+                  textShadow: "0 0 30px rgba(239, 68, 68, 0.8)",
+                }}>
+                  ✕
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Pain points */}
+        <div style={{ display: "flex", gap: "30px" }}>
+          {[
+            "Hours on contracts",
+            "Missed billing",
+            "No healthcare focus",
+          ].map((pain, i) => (
+            <div key={i} style={{
+              background: "rgba(239, 68, 68, 0.15)",
+              border: "1px solid #ef4444",
+              borderRadius: "30px",
+              padding: "12px 28px",
+              color: "#fca5a5",
+              fontSize: "18px",
+            }}>
+              {pain}
             </div>
           ))}
         </div>
       </div>
       
-      {/* Solution - Brand reveal */}
+      {/* PHASE 2: Burst transition */}
       <div style={{
         position: "absolute",
         inset: 0,
         display: "flex",
-        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: burstOpacity,
+        pointerEvents: "none",
+      }}>
+        <div style={{
+          width: "200px",
+          height: "200px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, #0ea5e9 0%, #2563eb 50%, transparent 70%)",
+          transform: `scale(${burstScale})`,
+          boxShadow: "0 0 100px rgba(14, 165, 233, 0.8)",
+        }} />
+      </div>
+      
+      {/* PHASE 3: Solution with REAL app branding */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
         alignItems: "center",
         justifyContent: "center",
         opacity: solutionOpacity,
         padding: "60px",
+        gap: "60px",
       }}>
-        {/* Logo */}
+        {/* Left side - Tagline */}
         <div style={{
-          transform: `scale(${Math.max(0, logoScale)})`,
-          display: "flex",
-          alignItems: "center",
-          gap: "24px",
-          marginBottom: "40px",
+          flex: 1,
+          transform: `translateY(${taglineSlide}px)`,
+          opacity: taglineOpacity,
         }}>
           <div style={{
-            width: "100px",
-            height: "100px",
-            borderRadius: "24px",
-            background: "rgba(255,255,255,0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "50px",
+            fontSize: "20px",
+            color: "#0ea5e9",
+            fontWeight: 600,
+            letterSpacing: "3px",
+            marginBottom: "20px",
           }}>
-            🎙️
+            INTRODUCING
           </div>
-          <div style={{
-            fontSize: "72px",
+          <h2 style={{
+            fontSize: "64px",
             fontWeight: 800,
             color: "white",
-            textShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            marginBottom: "24px",
+            lineHeight: 1.1,
           }}>
-            HomeCare AI
+            The First<br />
+            <span style={{
+              background: "linear-gradient(135deg, #0ea5e9, #8b5cf6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}>
+              Healthcare-Centric
+            </span><br />
+            CRM
+          </h2>
+          <p style={{
+            fontSize: "28px",
+            color: "#94a3b8",
+            marginBottom: "32px",
+          }}>
+            Powered by AI Automation
+          </p>
+          
+          {/* Quick benefits */}
+          <div style={{ display: "flex", gap: "20px" }}>
+            {["Voice → Contract", "Auto Billing", "Built for Care"].map((benefit, i) => (
+              <div key={i} style={{
+                background: "rgba(14, 165, 233, 0.15)",
+                border: "1px solid #0ea5e9",
+                borderRadius: "30px",
+                padding: "10px 20px",
+                color: "#7dd3fc",
+                fontSize: "16px",
+              }}>
+                {benefit}
+              </div>
+            ))}
           </div>
         </div>
         
-        {/* Tagline */}
+        {/* Right side - Real app screenshot */}
         <div style={{
-          opacity: taglineOpacity,
-          textAlign: "center",
+          flex: 1,
+          transform: `translateX(${screenshotSlide}px) scale(${Math.max(0.5, screenshotScale)})`,
         }}>
           <div style={{
-            fontSize: "36px",
-            color: "white",
-            fontWeight: 600,
-            marginBottom: "16px",
+            borderRadius: "20px",
+            overflow: "hidden",
+            boxShadow: `0 30px 80px rgba(14, 165, 233, ${glowPulse * 0.4})`,
+            border: "2px solid rgba(14, 165, 233, 0.3)",
           }}>
-            The First Healthcare-Centric CRM
-          </div>
-          <div style={{
-            fontSize: "28px",
-            color: "rgba(255,255,255,0.9)",
-          }}>
-            Powered by AI Automation
+            <Img
+              src={staticFile("screenshots-v2/01-landing-hero.png")}
+              style={{
+                width: "100%",
+                height: "auto",
+              }}
+            />
           </div>
         </div>
       </div>
