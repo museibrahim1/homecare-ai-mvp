@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
-import { CalendarDays, Plus, Clock, MapPin, User, X, Link2, Check, Loader2 } from 'lucide-react';
+import { CalendarDays, Plus, Clock, MapPin, User, X, Link2, Check, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 type Appointment = {
@@ -116,10 +116,13 @@ function ScheduleContent() {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [deleting, setDeleting] = useState<number | null>(null);
   const [checkingStatus, setCheckingStatus] = useState(true);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [newAppointment, setNewAppointment] = useState({
     title: '',
     client: '',
@@ -222,6 +225,78 @@ function ScheduleContent() {
       notes: '',
     });
     setShowAddModal(false);
+  };
+
+  const handleEditAppointment = (apt: Appointment) => {
+    setEditingAppointment(apt);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateAppointment = async () => {
+    if (!editingAppointment) return;
+    
+    setSyncing(true);
+    
+    // Update in Google Calendar if connected and has googleEventId
+    if (googleConnected && token && editingAppointment.googleEventId) {
+      try {
+        const startDateTime = `${editingAppointment.date}T${editingAppointment.time}:00`;
+        const durationMinutes = getDurationMinutes(editingAppointment.duration);
+        const startDate = new Date(startDateTime);
+        const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+        
+        await fetch(`${API_URL}/calendar/events`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            event_id: editingAppointment.googleEventId,
+            title: `${editingAppointment.title} - ${editingAppointment.client}`,
+            description: editingAppointment.notes,
+            start_time: startDate.toISOString(),
+            end_time: endDate.toISOString(),
+            location: editingAppointment.location,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to update Google Calendar:', error);
+      }
+    }
+    
+    // Update local state
+    setAppointments(appointments.map(apt => 
+      apt.id === editingAppointment.id ? editingAppointment : apt
+    ));
+    
+    setSyncing(false);
+    setShowEditModal(false);
+    setEditingAppointment(null);
+  };
+
+  const handleDeleteAppointment = async (apt: Appointment) => {
+    if (!confirm('Are you sure you want to delete this appointment?')) return;
+    
+    setDeleting(apt.id);
+    
+    // Delete from Google Calendar if connected and has googleEventId
+    if (googleConnected && token && apt.googleEventId) {
+      try {
+        await fetch(`${API_URL}/calendar/events/${apt.googleEventId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+      } catch (error) {
+        console.error('Failed to delete from Google Calendar:', error);
+      }
+    }
+    
+    // Remove from local state
+    setAppointments(appointments.filter(a => a.id !== apt.id));
+    setDeleting(null);
   };
 
   const handleConnectGoogle = () => {
@@ -516,14 +591,37 @@ function ScheduleContent() {
                 {todayAppointments.map(apt => (
                   <div
                     key={apt.id}
-                    className={`border-l-4 rounded-lg p-4 ${typeColors[apt.type]}`}
+                    className={`border-l-4 rounded-lg p-4 ${typeColors[apt.type]} group`}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <span className="text-xs text-dark-500 uppercase">{typeLabels[apt.type]}</span>
                         <h3 className="font-medium text-white">{apt.title}</h3>
                       </div>
-                      <span className="text-sm text-dark-400">{apt.time}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-dark-400">{apt.time}</span>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleEditAppointment(apt)}
+                            className="p-1.5 hover:bg-dark-700 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4 text-dark-400 hover:text-white" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAppointment(apt)}
+                            disabled={deleting === apt.id}
+                            className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            {deleting === apt.id ? (
+                              <Loader2 className="w-4 h-4 text-red-400 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4 text-dark-400 hover:text-red-400" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-dark-400">
                       <div className="flex items-center gap-1.5">
@@ -536,7 +634,7 @@ function ScheduleContent() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <MapPin className="w-4 h-4" />
-                        {apt.location}
+                        {apt.location || 'No location'}
                       </div>
                     </div>
                     {apt.googleEventId && (
@@ -674,6 +772,129 @@ function ScheduleContent() {
               >
                 {syncing && <Loader2 className="w-4 h-4 animate-spin" />}
                 {syncing ? 'Creating...' : 'Create Appointment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Appointment Modal */}
+      {showEditModal && editingAppointment && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Edit Appointment</h2>
+              <button onClick={() => { setShowEditModal(false); setEditingAppointment(null); }} className="p-2 hover:bg-dark-700 rounded-lg">
+                <X className="w-5 h-5 text-dark-400" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">Title *</label>
+                <input
+                  type="text"
+                  value={editingAppointment.title}
+                  onChange={(e) => setEditingAppointment({ ...editingAppointment, title: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">Client *</label>
+                <input
+                  type="text"
+                  value={editingAppointment.client}
+                  onChange={(e) => setEditingAppointment({ ...editingAppointment, client: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={editingAppointment.date}
+                    onChange={(e) => setEditingAppointment({ ...editingAppointment, date: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Time</label>
+                  <input
+                    type="time"
+                    value={editingAppointment.time}
+                    onChange={(e) => setEditingAppointment({ ...editingAppointment, time: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Duration</label>
+                  <select
+                    value={editingAppointment.duration}
+                    onChange={(e) => setEditingAppointment({ ...editingAppointment, duration: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                  >
+                    <option value="30 min">30 minutes</option>
+                    <option value="45 min">45 minutes</option>
+                    <option value="1 hour">1 hour</option>
+                    <option value="1.5 hours">1.5 hours</option>
+                    <option value="2 hours">2 hours</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Type</label>
+                  <select
+                    value={editingAppointment.type}
+                    onChange={(e) => setEditingAppointment({ ...editingAppointment, type: e.target.value as any })}
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                  >
+                    <option value="assessment">Assessment</option>
+                    <option value="review">Care Review</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="visit">Home Visit</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">Location</label>
+                <input
+                  type="text"
+                  value={editingAppointment.location}
+                  onChange={(e) => setEditingAppointment({ ...editingAppointment, location: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">Notes</label>
+                <textarea
+                  value={editingAppointment.notes}
+                  onChange={(e) => setEditingAppointment({ ...editingAppointment, notes: e.target.value })}
+                  rows={3}
+                  className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                />
+              </div>
+              {googleConnected && editingAppointment.googleEventId && (
+                <div className="flex items-center gap-2 text-sm text-green-400 bg-green-500/10 px-3 py-2 rounded-lg">
+                  <Check className="w-4 h-4" />
+                  Changes will sync to Google Calendar
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => { setShowEditModal(false); setEditingAppointment(null); }}
+                className="flex-1 px-4 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateAppointment}
+                disabled={syncing}
+                className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {syncing && <Loader2 className="w-4 h-4 animate-spin" />}
+                {syncing ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>

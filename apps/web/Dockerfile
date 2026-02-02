@@ -1,4 +1,4 @@
-# Version: v13 - Fix email data mapping
+# Version: v14 - Calendar edit/delete with Google sync
 FROM node:20-alpine
 
 WORKDIR /app
