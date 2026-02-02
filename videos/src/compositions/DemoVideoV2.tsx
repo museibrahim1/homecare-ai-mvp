@@ -130,13 +130,14 @@ const HookScene: React.FC = () => {
   );
 };
 
-// Solution Intro Scene
+// Solution Intro Scene - Shows actual app landing page
 const SolutionScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
   const logoScale = spring({ frame, fps, config: { damping: 10 } });
   const taglineOpacity = interpolate(frame, [40, 70], [0, 1], { extrapolateRight: "clamp" });
+  const screenshotOpacity = interpolate(frame, [60, 100], [0, 1], { extrapolateRight: "clamp" });
   
   return (
     <AbsoluteFill style={{
@@ -144,117 +145,217 @@ const SolutionScene: React.FC = () => {
     }}>
       <div style={{
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
+        padding: "60px",
+        gap: "60px",
       }}>
-        {/* Logo */}
+        {/* Left - Branding */}
         <div style={{
-          transform: `scale(${logoScale})`,
-          marginBottom: "40px",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
         }}>
+          {/* Logo with microphone icon */}
           <div style={{
-            fontSize: "100px",
-            fontWeight: 800,
-            color: "white",
-            textShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            transform: `scale(${logoScale})`,
+            marginBottom: "30px",
+            display: "flex",
+            alignItems: "center",
+            gap: "20px",
           }}>
-            🏠 HomeCare AI
+            <div style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "20px",
+              background: "rgba(255,255,255,0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "40px",
+            }}>
+              🎙️
+            </div>
+            <div style={{
+              fontSize: "64px",
+              fontWeight: 800,
+              color: "white",
+              textShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            }}>
+              HomeCare AI
+            </div>
+          </div>
+          
+          {/* Tagline */}
+          <div style={{
+            opacity: taglineOpacity,
+          }}>
+            <div style={{
+              fontSize: "40px",
+              color: "white",
+              fontWeight: 600,
+              marginBottom: "12px",
+            }}>
+              Turn Voice Assessments Into Contracts
+            </div>
+            <div style={{
+              fontSize: "28px",
+              color: "rgba(255,255,255,0.9)",
+            }}>
+              In Minutes, Not Hours
+            </div>
           </div>
         </div>
         
-        {/* Tagline */}
+        {/* Right - App Screenshot */}
         <div style={{
-          fontSize: "48px",
-          color: "white",
-          textAlign: "center",
-          opacity: taglineOpacity,
-          fontWeight: 500,
+          flex: 1,
+          opacity: screenshotOpacity,
+          transform: `scale(${logoScale * 0.95})`,
         }}>
-          Turn Voice Assessments Into Contracts
-          <br />
-          <span style={{ fontSize: "36px", opacity: 0.9 }}>
-            In Minutes, Not Hours
-          </span>
+          <div style={{
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow: "0 25px 80px rgba(0,0,0,0.4)",
+          }}>
+            <Img
+              src={staticFile("screenshots-v2/01-landing-hero.png")}
+              style={{
+                width: "100%",
+                height: "auto",
+                maxHeight: "500px",
+                objectFit: "contain",
+              }}
+            />
+          </div>
         </div>
       </div>
     </AbsoluteFill>
   );
 };
 
-// Workflow Step Scene
+// Workflow Step Scene - Now with optional screenshot
 const WorkflowStepScene: React.FC<{
   stepNumber: number;
   title: string;
   description: string;
   icon: string;
   color: string;
-}> = ({ stepNumber, title, description, icon, color }) => {
+  screenshotPath?: string;
+}> = ({ stepNumber, title, description, icon, color, screenshotPath }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
   const scale = spring({ frame, fps, config: { damping: 12 } });
   const contentOpacity = interpolate(frame, [20, 50], [0, 1], { extrapolateRight: "clamp" });
+  const screenshotScale = spring({ frame: frame - 30, fps, config: { damping: 15 } });
   
   return (
     <AbsoluteFill style={{ backgroundColor: "#0f172a" }}>
+      {/* Top accent bar */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "6px",
+        background: `linear-gradient(90deg, ${color}, ${color}88)`,
+      }} />
+      
       <div style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
-        padding: "80px",
-        gap: "80px",
+        padding: "60px 80px",
+        gap: "60px",
       }}>
-        {/* Step indicator */}
+        {/* Left - Step info */}
         <div style={{
-          transform: `scale(${scale})`,
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
         }}>
+          {/* Step indicator */}
           <div style={{
-            width: "200px",
-            height: "200px",
-            borderRadius: "50%",
-            background: `linear-gradient(135deg, ${color}, ${color}88)`,
+            transform: `scale(${scale})`,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontSize: "80px",
-            boxShadow: `0 0 60px ${color}66`,
+            gap: "24px",
+            marginBottom: "30px",
           }}>
-            {icon}
+            <div style={{
+              width: "100px",
+              height: "100px",
+              borderRadius: "24px",
+              background: `linear-gradient(135deg, ${color}, ${color}88)`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "48px",
+              boxShadow: `0 0 40px ${color}44`,
+            }}>
+              {icon}
+            </div>
+            <div style={{
+              fontSize: "20px",
+              color: color,
+              fontWeight: 600,
+              letterSpacing: "2px",
+            }}>
+              STEP {stepNumber}
+            </div>
           </div>
-          <div style={{
-            marginTop: "20px",
-            fontSize: "24px",
-            color: color,
-            fontWeight: 600,
-          }}>
-            STEP {stepNumber}
+          
+          {/* Content */}
+          <div style={{ opacity: contentOpacity }}>
+            <h2 style={{
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "white",
+              marginBottom: "20px",
+            }}>
+              {title}
+            </h2>
+            <p style={{
+              fontSize: "24px",
+              color: "#94a3b8",
+              lineHeight: 1.6,
+            }}>
+              {description}
+            </p>
           </div>
         </div>
         
-        {/* Content */}
-        <div style={{ opacity: contentOpacity, maxWidth: "700px" }}>
-          <h2 style={{
-            fontSize: "56px",
-            fontWeight: 700,
-            color: "white",
-            marginBottom: "20px",
+        {/* Right - Screenshot */}
+        {screenshotPath && (
+          <div style={{
+            flex: 1.2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: `scale(${screenshotScale})`,
           }}>
-            {title}
-          </h2>
-          <p style={{
-            fontSize: "28px",
-            color: "#94a3b8",
-            lineHeight: 1.6,
-          }}>
-            {description}
-          </p>
-        </div>
+            <div style={{
+              borderRadius: "16px",
+              overflow: "hidden",
+              boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
+              border: "1px solid #334155",
+            }}>
+              <Img
+                src={staticFile(screenshotPath)}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: "550px",
+                  objectFit: "contain",
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -468,7 +569,7 @@ const FeatureScene: React.FC<{
   );
 };
 
-// Integrations Scene
+// Integrations Scene - Shows actual app integrations page
 const IntegrationsScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -482,62 +583,109 @@ const IntegrationsScene: React.FC = () => {
     { name: "Webhooks", icon: "🔗", color: "#8B5CF6" },
   ];
   
+  const titleOpacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: "clamp" });
+  const screenshotScale = spring({ frame: frame - 30, fps, config: { damping: 15 } });
+  
   return (
     <AbsoluteFill style={{ backgroundColor: "#0f172a" }}>
+      {/* Gradient accent */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "8px",
+        background: "linear-gradient(135deg, #4285F4, #EA4335, #34A853, #635BFF)",
+      }} />
+      
       <div style={{
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
         height: "100%",
-        padding: "60px",
+        padding: "60px 80px",
+        gap: "60px",
       }}>
-        <h2 style={{
-          fontSize: "52px",
-          fontWeight: 700,
-          color: "white",
-          marginBottom: "16px",
-        }}>
-          Integrates With Your Tools
-        </h2>
-        <p style={{
-          fontSize: "24px",
-          color: "#64748b",
-          marginBottom: "60px",
-        }}>
-          Connect to the apps you already use
-        </p>
-        
+        {/* Left - Content */}
         <div style={{
+          flex: 1,
           display: "flex",
-          flexWrap: "wrap",
-          gap: "30px",
+          flexDirection: "column",
           justifyContent: "center",
-          maxWidth: "1200px",
+          opacity: titleOpacity,
         }}>
-          {integrations.map((int, i) => {
-            const delay = i * 8;
-            const scale = spring({ frame: frame - delay, fps, config: { damping: 12 } });
-            
-            return (
-              <div key={i} style={{
-                transform: `scale(${scale})`,
-                background: "rgba(255,255,255,0.05)",
-                border: `2px solid ${int.color}44`,
-                borderRadius: "20px",
-                padding: "30px 50px",
-                textAlign: "center",
-                minWidth: "180px",
-              }}>
-                <div style={{ fontSize: "48px", marginBottom: "12px" }}>
-                  {int.icon}
+          <h2 style={{
+            fontSize: "52px",
+            fontWeight: 700,
+            color: "white",
+            marginBottom: "16px",
+          }}>
+            Integrates With Your Tools
+          </h2>
+          <p style={{
+            fontSize: "24px",
+            color: "#64748b",
+            marginBottom: "40px",
+          }}>
+            Connect to the apps you already use
+          </p>
+          
+          {/* Integration icons */}
+          <div style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "20px",
+          }}>
+            {integrations.map((int, i) => {
+              const delay = i * 8;
+              const scale = spring({ frame: frame - 40 - delay, fps, config: { damping: 12 } });
+              
+              return (
+                <div key={i} style={{
+                  transform: `scale(${scale})`,
+                  background: "rgba(255,255,255,0.05)",
+                  border: `2px solid ${int.color}44`,
+                  borderRadius: "16px",
+                  padding: "16px 24px",
+                  textAlign: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                }}>
+                  <div style={{ fontSize: "28px" }}>
+                    {int.icon}
+                  </div>
+                  <div style={{ fontSize: "16px", color: "white", fontWeight: 500 }}>
+                    {int.name}
+                  </div>
                 </div>
-                <div style={{ fontSize: "20px", color: "white", fontWeight: 500 }}>
-                  {int.name}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        </div>
+        
+        {/* Right - Screenshot */}
+        <div style={{
+          flex: 1.2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transform: `scale(${screenshotScale})`,
+        }}>
+          <div style={{
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
+            border: "1px solid #334155",
+          }}>
+            <Img
+              src={staticFile("screenshots-v2/08-integrations.png")}
+              style={{
+                width: "100%",
+                height: "auto",
+                maxHeight: "600px",
+                objectFit: "contain",
+              }}
+            />
+          </div>
         </div>
       </div>
     </AbsoluteFill>
@@ -901,6 +1049,7 @@ export const DemoVideoV2: React.FC<DemoVideoV2Props> = ({ showAudio = false }) =
           description="Use your phone or any device to record client assessments. Speak naturally - our AI understands care-specific terminology and speaker identification."
           icon="🎙️"
           color="#0ea5e9"
+          screenshotPath="screenshots-v2/04-assessments.png"
         />
         {showAudio && <Audio src={staticFile("segments-v2/03-workflow1.mp3")} />}
       </Sequence>
@@ -912,6 +1061,7 @@ export const DemoVideoV2: React.FC<DemoVideoV2Props> = ({ showAudio = false }) =
           description="Automatic transcription, speaker diarization, billable item extraction, and service categorization. One click runs the entire pipeline."
           icon="🤖"
           color="#8b5cf6"
+          screenshotPath="screenshots-v2/09-visit-pipeline.png"
         />
         {showAudio && <Audio src={staticFile("segments-v2/04-workflow2.mp3")} />}
       </Sequence>
@@ -923,6 +1073,7 @@ export const DemoVideoV2: React.FC<DemoVideoV2Props> = ({ showAudio = false }) =
           description="AI creates complete, ready-to-sign contracts with services, schedules, and pricing. Export to PDF, email directly, or use your custom templates."
           icon="📄"
           color="#22c55e"
+          screenshotPath="screenshots-v2/10-contract-preview.png"
         />
         {showAudio && <Audio src={staticFile("segments-v2/05-workflow3.mp3")} />}
       </Sequence>
@@ -943,7 +1094,7 @@ export const DemoVideoV2: React.FC<DemoVideoV2Props> = ({ showAudio = false }) =
             "Pending assessments tracker",
             "Quick action buttons",
           ]}
-          screenshotPath="screenshots/08-dashboard.png"
+          screenshotPath="screenshots-v2/03-dashboard.png"
           gradient="linear-gradient(135deg, #0ea5e9, #2563eb)"
         />
         {showAudio && <Audio src={staticFile("segments-v2/07-dashboard.mp3")} />}
@@ -960,7 +1111,7 @@ export const DemoVideoV2: React.FC<DemoVideoV2Props> = ({ showAudio = false }) =
             "Care level tracking",
             "Medical history management",
           ]}
-          screenshotPath="screenshots/09-pipeline.png"
+          screenshotPath="screenshots-v2/06-pipeline.png"
           gradient="linear-gradient(135deg, #8b5cf6, #d946ef)"
         />
         {showAudio && <Audio src={staticFile("segments-v2/08-crm.mp3")} />}
@@ -977,7 +1128,7 @@ export const DemoVideoV2: React.FC<DemoVideoV2Props> = ({ showAudio = false }) =
             "Smart contract generation",
             "Visit note automation",
           ]}
-          screenshotPath="screenshots/10-voice-id.png"
+          screenshotPath="screenshots-v2/09-visit-pipeline.png"
           gradient="linear-gradient(135deg, #f59e0b, #ef4444)"
         />
         {showAudio && <Audio src={staticFile("segments-v2/09-ai.mp3")} />}
@@ -998,7 +1149,7 @@ export const DemoVideoV2: React.FC<DemoVideoV2Props> = ({ showAudio = false }) =
             "CSV export for payroll",
             "Client activity tracking",
           ]}
-          screenshotPath="screenshots/06-reports.png"
+          screenshotPath="screenshots-v2/07-reports.png"
           gradient="linear-gradient(135deg, #22c55e, #14b8a6)"
         />
         {showAudio && <Audio src={staticFile("segments-v2/11-reports.mp3")} />}
