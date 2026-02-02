@@ -50,6 +50,7 @@ export default function TeamChatPage() {
   const [gmailConnected, setGmailConnected] = useState(false);
   const [emails, setEmails] = useState<Email[]>([]);
   const [gmailLoading, setGmailLoading] = useState(false);
+  const [gmailError, setGmailError] = useState<string | null>(null);
   const [checkingGmail, setCheckingGmail] = useState(true);
   const [showComposeModal, setShowComposeModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -137,6 +138,7 @@ export default function TeamChatPage() {
     if (!token) return;
     
     setGmailLoading(true);
+    setGmailError(null);
     try {
       const response = await fetch(`${API_URL}/gmail/messages?label=${folder}`, {
         headers: { 'Authorization': `Bearer ${token}` },
@@ -145,9 +147,14 @@ export default function TeamChatPage() {
       if (response.ok) {
         const data = await response.json();
         setEmails(data.messages || []);
+      } else {
+        const errorData = await response.json();
+        console.error('Gmail API error:', response.status, errorData);
+        setGmailError(errorData.detail || `Failed to fetch emails (${response.status})`);
       }
     } catch (error) {
       console.error('Failed to fetch emails:', error);
+      setGmailError('Network error fetching emails');
     }
     setGmailLoading(false);
   };
@@ -516,12 +523,24 @@ export default function TeamChatPage() {
                   </div>
                 )}
                 
-                {displayEmails.length === 0 ? (
+                {gmailError && gmailConnected && (
+                  <div className="p-4 bg-red-500/10 border-b border-red-500/20">
+                    <p className="text-sm text-red-400">{gmailError}</p>
+                    <button 
+                      onClick={() => fetchEmails()}
+                      className="mt-2 text-xs text-red-300 underline hover:text-red-200"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                )}
+                
+                {displayEmails.length === 0 && !gmailError ? (
                   <div className="flex flex-col items-center justify-center h-64 text-dark-400">
                     <Mail className="w-12 h-12 mb-4 opacity-50" />
                     <p>No emails to display</p>
                   </div>
-                ) : (
+                ) : displayEmails.length === 0 ? null : (
                   displayEmails.map(email => (
                     <div
                       key={email.id}
