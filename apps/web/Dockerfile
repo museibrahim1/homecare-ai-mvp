@@ -1,4 +1,4 @@
-# Version: v11 - Gmail folders, Calendar auto-sync
+# Version: v12 - Gmail error display
 FROM node:20-alpine
 
 WORKDIR /app
