@@ -758,21 +758,22 @@ const SceneAudio: React.FC<SceneAudioProps> = ({ scene, from }) => {
 };
 
 // ============ SCENE TIMING CONFIGURATION ============
-// 12 scenes with CRM features - Total: 72 seconds
+// 12 scenes with CRM features - ElevenLabs v3 audio (longer, more natural)
+// Total: ~94 seconds
 const SCENE_TIMING = {
-  scene1:  { from: 0,    duration: 150 },    // Intro (5s, audio: 4.0s)
-  scene2:  { from: 150,  duration: 210 },    // Core Features (7s, audio: 6.0s)
-  scene3:  { from: 360,  duration: 165 },    // AI Pipeline (5.5s, audio: 4.7s)
-  scene4:  { from: 525,  duration: 195 },    // Dashboard (6.5s, audio: 5.8s)
-  scene5:  { from: 720,  duration: 195 },    // Assessments (6.5s, audio: 5.7s)
-  scene6:  { from: 915,  duration: 165 },    // Visit Detail (5.5s, audio: 4.9s)
-  scene7:  { from: 1080, duration: 165 },    // Contract (5.5s, audio: 4.5s)
-  scene8:  { from: 1245, duration: 195 },    // Clients CRM (6.5s, audio: 5.6s)
-  scene9:  { from: 1440, duration: 210 },    // Pipeline Board (7s, audio: 6.0s)
-  scene10: { from: 1650, duration: 195 },    // Voice ID (6.5s, audio: 5.6s)
-  scene11: { from: 1845, duration: 150 },    // Reports (5s, audio: 4.2s)
-  scene12: { from: 1995, duration: 165 },    // CTA (5.5s, audio: 4.4s)
-  total: 2160,                               // 72 seconds total
+  scene1:  { from: 0,    duration: 210 },    // Intro (7s, audio: 5.7s)
+  scene2:  { from: 210,  duration: 255 },    // Core Features (8.5s, audio: 7.6s)
+  scene3:  { from: 465,  duration: 270 },    // AI Pipeline (9s, audio: 7.8s)
+  scene4:  { from: 735,  duration: 240 },    // Dashboard (8s, audio: 6.6s)
+  scene5:  { from: 975,  duration: 240 },    // Assessments (8s, audio: 7.0s)
+  scene6:  { from: 1215, duration: 210 },    // Visit Detail (7s, audio: 6.1s)
+  scene7:  { from: 1425, duration: 240 },    // Contract (8s, audio: 6.9s)
+  scene8:  { from: 1665, duration: 255 },    // Clients CRM (8.5s, audio: 7.2s)
+  scene9:  { from: 1920, duration: 255 },    // Pipeline Board (8.5s, audio: 7.5s)
+  scene10: { from: 2175, duration: 255 },    // Voice ID (8.5s, audio: 7.4s)
+  scene11: { from: 2430, duration: 210 },    // Reports (7s, audio: 5.6s)
+  scene12: { from: 2640, duration: 180 },    // CTA (6s, audio: 4.8s)
+  total: 2820,                               // 94 seconds total
 };
 
 // ============ MAIN DEMO VIDEO ============

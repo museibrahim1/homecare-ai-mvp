@@ -69,37 +69,50 @@ When the user asks to generate voiceovers, narration, speech, or audio from text
 ### API Configuration
 ```
 Provider: WaveSpeed AI
-Model: ElevenLabs v3 (fal-ai/elevenlabs-v3)
+Model: ElevenLabs Eleven V3
 API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
 ```
 
-### API Endpoint
+### API Endpoints
 ```
-POST https://api.wavespeed.ai/v1/generate
+# Submit task
+POST https://api.wavespeed.ai/api/v3/elevenlabs/eleven-v3
 Authorization: Bearer 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+
+# Get result (poll until status=completed)
+GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
 ```
 
-### Request Format
+### Request Format (Submit Task)
 ```json
 {
-  "model": "fal-ai/elevenlabs-v3",
-  "input": {
-    "text": "Your text to convert to speech",
-    "voice": "Rachel",
-    "model_id": "eleven_multilingual_v2"
-  }
+  "text": "Your text to convert to speech",
+  "voice_id": "Alice",
+  "similarity": 1.0,
+  "stability": 0.5,
+  "use_speaker_boost": true
 }
 ```
 
 ### Available ElevenLabs Voices
-- Rachel (female, calm, narration)
-- Domi (female, strong, confident)
-- Bella (female, soft, storytelling)
-- Antoni (male, warm, professional)
-- Josh (male, deep, narrative)
-- Arnold (male, crisp, clear)
-- Adam (male, deep, authoritative)
-- Sam (male, raspy, dynamic)
+- Alice (female, clear, professional) - RECOMMENDED
+- Aria (female, expressive)
+- Sarah (female, soft)
+- Laura (female, warm)
+- Charlotte (female, elegant)
+- Jessica (female, friendly)
+- Lily (female, gentle)
+- Roger (male, authoritative)
+- George (male, deep)
+- Charlie (male, casual)
+- Callum (male, Scottish)
+- Liam (male, young)
+- Will (male, confident)
+- Eric (male, clear)
+- Chris (male, warm)
+- Brian (male, newscast)
+- Daniel (male, British)
+- Bill (male, mature)
 
 ### Usage Instructions
 1. Use ElevenLabs v3 via WaveSpeed for high-quality voiceovers
