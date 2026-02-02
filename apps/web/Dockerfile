@@ -1,4 +1,4 @@
-# Version: v14 - Calendar edit/delete with Google sync
+# Version: v15 - Email reply/forward + quick email to clients/caregivers
 FROM node:20-alpine
 
 WORKDIR /app

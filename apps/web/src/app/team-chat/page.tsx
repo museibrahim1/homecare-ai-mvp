@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { MessagesSquare, Hash, Users, Plus, Send, AtSign, Mail, Inbox, Check, Loader2, RefreshCw, X, Star, Paperclip, Reply, Trash2 } from 'lucide-react';
+import { MessagesSquare, Hash, Users, Plus, Send, AtSign, Mail, Inbox, Check, Loader2, RefreshCw, X, Star, Paperclip, Reply, Trash2, Forward, UserCircle, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -57,6 +57,9 @@ export default function TeamChatPage() {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [composeData, setComposeData] = useState({ to: '', subject: '', body: '' });
   const [emailFolder, setEmailFolder] = useState<'INBOX' | 'SENT' | 'STARRED'>('INBOX');
+  const [composeMode, setComposeMode] = useState<'new' | 'reply' | 'forward'>('new');
+  const [showContactPicker, setShowContactPicker] = useState(false);
+  const [contacts, setContacts] = useState<{ id: number; name: string; email: string; type: 'client' | 'caregiver' }[]>([]);
 
   // Check Gmail connection status
   useEffect(() => {
@@ -85,6 +88,46 @@ export default function TeamChatPage() {
     };
 
     checkGmailStatus();
+  }, [token]);
+
+  // Fetch clients and caregivers for quick email
+  useEffect(() => {
+    const fetchContacts = async () => {
+      if (!token) return;
+      
+      try {
+        // Fetch clients
+        const clientsRes = await fetch(`${API_URL}/clients`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        
+        if (clientsRes.ok) {
+          const clientsData = await clientsRes.json();
+          const clientContacts = (clientsData || [])
+            .filter((c: any) => c.email)
+            .map((c: any) => ({
+              id: c.id,
+              name: c.full_name,
+              email: c.email,
+              type: 'client' as const,
+            }));
+          
+          // Also add caregivers from team members (mock data for now)
+          const caregiverContacts = teamMembers.map((m, i) => ({
+            id: 1000 + i,
+            name: m.name,
+            email: `${m.name.toLowerCase().replace(' ', '.')}@homecare.com`,
+            type: 'caregiver' as const,
+          }));
+          
+          setContacts([...clientContacts, ...caregiverContacts]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch contacts:', error);
+      }
+    };
+    
+    fetchContacts();
   }, [token]);
 
   // Handle OAuth callback
@@ -251,6 +294,7 @@ export default function TeamChatPage() {
       if (response.ok) {
         setShowComposeModal(false);
         setComposeData({ to: '', subject: '', body: '' });
+        setComposeMode('new');
         fetchEmails();
       } else {
         const data = await response.json();
@@ -261,6 +305,39 @@ export default function TeamChatPage() {
       alert('Failed to send email');
     }
     setGmailLoading(false);
+  };
+
+  const handleReply = (email: Email) => {
+    setComposeMode('reply');
+    setComposeData({
+      to: email.fromEmail || '',
+      subject: email.subject.startsWith('Re:') ? email.subject : `Re: ${email.subject}`,
+      body: `\n\n--- Original Message ---\nFrom: ${email.from} <${email.fromEmail}>\nDate: ${email.date}\nSubject: ${email.subject}\n\n${email.snippet}`,
+    });
+    setShowEmailModal(false);
+    setShowComposeModal(true);
+  };
+
+  const handleForward = (email: Email) => {
+    setComposeMode('forward');
+    setComposeData({
+      to: '',
+      subject: email.subject.startsWith('Fwd:') ? email.subject : `Fwd: ${email.subject}`,
+      body: `\n\n--- Forwarded Message ---\nFrom: ${email.from} <${email.fromEmail}>\nDate: ${email.date}\nSubject: ${email.subject}\n\n${email.snippet}`,
+    });
+    setShowEmailModal(false);
+    setShowComposeModal(true);
+  };
+
+  const handleQuickEmail = (contact: { name: string; email: string }) => {
+    setComposeMode('new');
+    setComposeData({
+      to: contact.email,
+      subject: '',
+      body: `Hi ${contact.name.split(' ')[0]},\n\n`,
+    });
+    setShowContactPicker(false);
+    setShowComposeModal(true);
   };
 
   // Mock emails for demo (when not connected)
@@ -504,7 +581,9 @@ export default function TeamChatPage() {
               <div className="p-4 border-b border-dark-700/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Inbox className="w-5 h-5 text-dark-400" />
-                  <h2 className="font-medium text-white">Inbox</h2>
+                  <h2 className="font-medium text-white">
+                    {emailFolder === 'INBOX' ? 'Inbox' : emailFolder === 'SENT' ? 'Sent' : 'Starred'}
+                  </h2>
                   <span className="text-sm text-dark-500">{displayEmails.length} messages</span>
                 </div>
                 <div className="flex gap-2">
@@ -515,8 +594,69 @@ export default function TeamChatPage() {
                   >
                     <RefreshCw className={`w-5 h-5 text-dark-400 ${gmailLoading ? 'animate-spin' : ''}`} />
                   </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowContactPicker(!showContactPicker)}
+                      className="flex items-center gap-2 px-3 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors text-sm"
+                    >
+                      <UserCircle className="w-4 h-4" />
+                      Quick Email
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                    {showContactPicker && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowContactPicker(false)} />
+                        <div className="absolute right-0 mt-2 w-72 bg-dark-800 border border-dark-700 rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+                        <div className="p-3 border-b border-dark-700">
+                          <p className="text-xs font-semibold text-dark-400 uppercase">Clients</p>
+                        </div>
+                        {contacts.filter(c => c.type === 'client').length === 0 ? (
+                          <div className="p-3 text-sm text-dark-500">No clients with emails</div>
+                        ) : (
+                          contacts.filter(c => c.type === 'client').map(contact => (
+                            <button
+                              key={contact.id}
+                              onClick={() => handleQuickEmail(contact)}
+                              className="w-full flex items-center gap-3 p-3 hover:bg-dark-700 transition-colors text-left"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                <span className="text-blue-400 text-xs font-medium">
+                                  {contact.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white truncate">{contact.name}</p>
+                                <p className="text-xs text-dark-500 truncate">{contact.email}</p>
+                              </div>
+                            </button>
+                          ))
+                        )}
+                        <div className="p-3 border-t border-b border-dark-700">
+                          <p className="text-xs font-semibold text-dark-400 uppercase">Caregivers</p>
+                        </div>
+                        {contacts.filter(c => c.type === 'caregiver').map(contact => (
+                          <button
+                            key={contact.id}
+                            onClick={() => handleQuickEmail(contact)}
+                            className="w-full flex items-center gap-3 p-3 hover:bg-dark-700 transition-colors text-left"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                              <span className="text-green-400 text-xs font-medium">
+                                {contact.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-white truncate">{contact.name}</p>
+                              <p className="text-xs text-dark-500 truncate">{contact.email}</p>
+                            </div>
+                          </button>
+                        ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
                   <button
-                    onClick={() => setShowComposeModal(true)}
+                    onClick={() => { setComposeMode('new'); setComposeData({ to: '', subject: '', body: '' }); setShowComposeModal(true); }}
                     className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm"
                   >
                     <Plus className="w-4 h-4" />
@@ -599,8 +739,14 @@ export default function TeamChatPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-dark-800 border border-dark-700 rounded-xl w-full max-w-2xl">
               <div className="flex items-center justify-between p-4 border-b border-dark-700">
-                <h2 className="font-bold text-white">New Message</h2>
-                <button onClick={() => setShowComposeModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
+                <div className="flex items-center gap-2">
+                  {composeMode === 'reply' && <Reply className="w-5 h-5 text-primary-400" />}
+                  {composeMode === 'forward' && <Forward className="w-5 h-5 text-primary-400" />}
+                  <h2 className="font-bold text-white">
+                    {composeMode === 'reply' ? 'Reply' : composeMode === 'forward' ? 'Forward' : 'New Message'}
+                  </h2>
+                </div>
+                <button onClick={() => { setShowComposeModal(false); setComposeMode('new'); }} className="p-2 hover:bg-dark-700 rounded-lg">
                   <X className="w-5 h-5 text-dark-400" />
                 </button>
               </div>
@@ -686,10 +832,21 @@ export default function TeamChatPage() {
                 <p className="text-dark-300 whitespace-pre-wrap">{selectedEmail.snippet}</p>
               </div>
               <div className="flex items-center gap-3 p-4 border-t border-dark-700">
-                <button className="flex items-center gap-2 px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors">
+                <button 
+                  onClick={() => handleReply(selectedEmail)}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                >
                   <Reply className="w-4 h-4" />
                   Reply
                 </button>
+                <button 
+                  onClick={() => handleForward(selectedEmail)}
+                  className="flex items-center gap-2 px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors"
+                >
+                  <Forward className="w-4 h-4" />
+                  Forward
+                </button>
+                <div className="flex-1" />
                 <button 
                   onClick={() => handleToggleStar(selectedEmail.id, selectedEmail.starred)}
                   className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
