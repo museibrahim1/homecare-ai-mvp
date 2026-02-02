@@ -251,8 +251,16 @@ async def list_messages(
             
             if msg_response.status_code == 200:
                 msg_data = msg_response.json()
-                headers = parse_email_headers(msg_data.get("payload", {}).get("headers", []))
-                labels = msg_data.get("labelIds", [])
+                
+                # Safely get headers - ensure it's a list
+                payload = msg_data.get("payload") or {}
+                raw_headers = payload.get("headers") if isinstance(payload, dict) else []
+                headers = parse_email_headers(raw_headers if isinstance(raw_headers, list) else [])
+                
+                # Safely get labels - ensure it's a list
+                labels = msg_data.get("labelIds")
+                if not isinstance(labels, list):
+                    labels = []
                 
                 from_name, from_email = parse_from_field(headers.get("from", ""))
                 
@@ -276,7 +284,7 @@ async def list_messages(
                     date=date_str,
                     unread="UNREAD" in labels,
                     starred="STARRED" in labels,
-                    hasAttachment=any("filename" in str(msg_data.get("payload", {})).lower()),
+                    hasAttachment="filename" in str(payload).lower() if payload else False,
                 ))
     
     return EmailListResponse(messages=messages)

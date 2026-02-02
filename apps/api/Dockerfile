@@ -1,4 +1,4 @@
-# Version: v13 - CatchAll middleware for CORS on errors
+# Version: v14 - Fix bool iterable error in Gmail parser
 FROM python:3.11-slim
 
 WORKDIR /app
