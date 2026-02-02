@@ -16,57 +16,40 @@ import {
 // Total: 90 seconds (2700 frames at 30fps)
 
 const SCENE_TIMING = {
-  // HOOK - Problem + Solution (19s, audio: 18.8s)
-  hook:       { from: 0,    duration: 580 },
+  // HOOK - Brand intro (14s, audio: 13.7s)
+  hook:       { from: 0,    duration: 420 },
   
-  // CORE VALUE - CRM + AI Automation (45s)
-  crm:        { from: 580,  duration: 480 },   // Healthcare CRM (audio: 15.4s)
-  record:     { from: 1060, duration: 450 },   // Record/Upload (audio: 14.2s)
-  aiProcess:  { from: 1510, duration: 400 },   // AI → Billing → Contract (audio: 12.6s)
+  // CORE VALUE - CRM + AI Automation (42s)
+  crm:        { from: 420,  duration: 430 },   // Healthcare CRM (audio: 13.8s)
+  record:     { from: 850,  duration: 430 },   // Record/Upload (audio: 13.8s)
+  aiProcess:  { from: 1280, duration: 390 },   // AI → Billing → Contract (audio: 12.5s)
   
-  // CTA - Close the deal (24s)
-  results:    { from: 1910, duration: 430 },   // Time savings (audio: 13.7s)
-  cta:        { from: 2340, duration: 300 },   // Call to action (audio: 9.2s)
+  // CTA - Close the deal (22s)
+  results:    { from: 1670, duration: 360 },   // Time savings (audio: 11.6s)
+  cta:        { from: 2030, duration: 300 },   // Call to action (audio: 9.2s)
   
-  total: 2640, // 88 seconds
+  total: 2330, // ~78 seconds
 };
 
 // ============ SCENE COMPONENTS ============
 
-// Hook Scene - Vibrant Problem + Solution with Real Branding
+// Hook Scene - Clean brand intro with app screenshot
 const HookScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Phase timing
-  const showGenericCRMs = frame < 180;  // 0-6s: Show generic CRMs
-  const showTransition = frame >= 180 && frame < 300;  // 6-10s: Transition
-  const showSolution = frame >= 300;  // 10-20s: Show our solution
-  
-  // Animations for generic CRMs phase
-  const crmCardsScale = spring({ frame, fps, config: { damping: 15 } });
-  const crmShake = Math.sin(frame * 0.3) * 3;
-  const redXOpacity = interpolate(frame, [60, 90], [0, 1], { extrapolateRight: "clamp" });
-  const problemFadeOut = interpolate(frame, [150, 180], [1, 0], { extrapolateRight: "clamp" });
-  
-  // Animations for transition
-  const burstScale = interpolate(frame, [180, 220], [0, 3], { extrapolateRight: "clamp" });
-  const burstOpacity = interpolate(frame, [180, 220, 280], [0, 1, 0], { extrapolateRight: "clamp" });
-  
-  // Animations for solution reveal
-  const solutionOpacity = interpolate(frame, [280, 340], [0, 1], { extrapolateRight: "clamp" });
-  const screenshotSlide = interpolate(frame, [320, 400], [100, 0], { extrapolateRight: "clamp" });
-  const screenshotScale = spring({ frame: frame - 340, fps, config: { damping: 12 } });
-  const taglineSlide = interpolate(frame, [400, 480], [50, 0], { extrapolateRight: "clamp" });
-  const taglineOpacity = interpolate(frame, [400, 480], [0, 1], { extrapolateRight: "clamp" });
+  // Smooth animations throughout
   const glowPulse = Math.sin(frame * 0.08) * 0.3 + 0.7;
   
-  // Generic CRM logos (text-based for reliability)
-  const genericCRMs = [
-    { name: "Monday", color: "#FF3D57" },
-    { name: "Salesforce", color: "#00A1E0" },
-    { name: "HubSpot", color: "#FF7A59" },
-  ];
+  // Left side animations
+  const titleOpacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: "clamp" });
+  const titleSlide = interpolate(frame, [0, 40], [-30, 0], { extrapolateRight: "clamp" });
+  const taglineOpacity = interpolate(frame, [40, 80], [0, 1], { extrapolateRight: "clamp" });
+  const benefitsOpacity = interpolate(frame, [100, 150], [0, 1], { extrapolateRight: "clamp" });
+  
+  // Right side - screenshot
+  const screenshotScale = spring({ frame: frame - 20, fps, config: { damping: 15 } });
+  const screenshotOpacity = interpolate(frame, [20, 60], [0, 1], { extrapolateRight: "clamp" });
   
   return (
     <AbsoluteFill style={{ backgroundColor: "#0f172a", overflow: "hidden" }}>
@@ -74,16 +57,24 @@ const HookScene: React.FC = () => {
       <div style={{
         position: "absolute",
         inset: 0,
-        background: showSolution 
-          ? `radial-gradient(ellipse at center, rgba(14, 165, 233, ${glowPulse * 0.3}) 0%, transparent 70%)`
-          : "radial-gradient(ellipse at top, #1e3a5f 0%, #0f172a 60%)",
+        background: `radial-gradient(ellipse at 70% 50%, rgba(14, 165, 233, ${glowPulse * 0.2}) 0%, transparent 50%)`,
       }} />
       
-      {/* Floating particles for energy */}
-      {showSolution && [...Array(20)].map((_, i) => {
-        const x = Math.sin(frame * 0.02 + i) * 400 + 960;
-        const y = Math.cos(frame * 0.015 + i * 2) * 300 + 540;
-        const size = 4 + (i % 3) * 2;
+      {/* Accent line at top */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "4px",
+        background: "linear-gradient(90deg, #0ea5e9, #8b5cf6, #0ea5e9)",
+      }} />
+      
+      {/* Floating particles */}
+      {[...Array(15)].map((_, i) => {
+        const x = Math.sin(frame * 0.02 + i) * 300 + 1200;
+        const y = Math.cos(frame * 0.015 + i * 2) * 250 + 540;
+        const size = 3 + (i % 3) * 2;
         return (
           <div key={i} style={{
             position: "absolute",
@@ -92,187 +83,79 @@ const HookScene: React.FC = () => {
             width: size,
             height: size,
             borderRadius: "50%",
-            background: `rgba(14, 165, 233, ${0.3 + Math.sin(frame * 0.1 + i) * 0.2})`,
-            boxShadow: `0 0 ${size * 2}px rgba(14, 165, 233, 0.5)`,
+            background: `rgba(14, 165, 233, ${0.2 + Math.sin(frame * 0.1 + i) * 0.15})`,
+            boxShadow: `0 0 ${size * 2}px rgba(14, 165, 233, 0.4)`,
           }} />
         );
       })}
       
-      {/* PHASE 1: Generic CRMs with problems */}
+      {/* Main content */}
       <div style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: problemFadeOut,
-        padding: "60px",
-      }}>
-        <h1 style={{
-          fontSize: "56px",
-          fontWeight: 700,
-          color: "white",
-          textAlign: "center",
-          marginBottom: "50px",
-          transform: `translateX(${crmShake}px)`,
-        }}>
-          Still Using Generic CRMs for Home Care?
-        </h1>
-        
-        {/* Generic CRM Cards */}
-        <div style={{
-          display: "flex",
-          gap: "40px",
-          marginBottom: "50px",
-          transform: `scale(${crmCardsScale})`,
-        }}>
-          {genericCRMs.map((crm, i) => (
-            <div key={i} style={{
-              position: "relative",
-              background: "rgba(255,255,255,0.05)",
-              border: `2px solid ${crm.color}`,
-              borderRadius: "20px",
-              padding: "40px 50px",
-              textAlign: "center",
-              transform: `rotate(${Math.sin(frame * 0.1 + i) * 2}deg)`,
-            }}>
-              <div style={{
-                fontSize: "32px",
-                fontWeight: 700,
-                color: crm.color,
-                marginBottom: "8px",
-              }}>
-                {crm.name}
-              </div>
-              <div style={{ fontSize: "16px", color: "#64748b" }}>
-                Not built for healthcare
-              </div>
-              
-              {/* Red X overlay */}
-              <div style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: redXOpacity,
-              }}>
-                <div style={{
-                  fontSize: "120px",
-                  color: "#ef4444",
-                  fontWeight: 900,
-                  textShadow: "0 0 30px rgba(239, 68, 68, 0.8)",
-                }}>
-                  ✕
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Pain points */}
-        <div style={{ display: "flex", gap: "30px" }}>
-          {[
-            "Hours on contracts",
-            "Missed billing",
-            "No healthcare focus",
-          ].map((pain, i) => (
-            <div key={i} style={{
-              background: "rgba(239, 68, 68, 0.15)",
-              border: "1px solid #ef4444",
-              borderRadius: "30px",
-              padding: "12px 28px",
-              color: "#fca5a5",
-              fontSize: "18px",
-            }}>
-              {pain}
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* PHASE 2: Burst transition */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        opacity: burstOpacity,
-        pointerEvents: "none",
+        height: "100%",
+        padding: "60px 80px",
+        gap: "80px",
       }}>
-        <div style={{
-          width: "200px",
-          height: "200px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, #0ea5e9 0%, #2563eb 50%, transparent 70%)",
-          transform: `scale(${burstScale})`,
-          boxShadow: "0 0 100px rgba(14, 165, 233, 0.8)",
-        }} />
-      </div>
-      
-      {/* PHASE 3: Solution with REAL app branding */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: solutionOpacity,
-        padding: "60px",
-        gap: "60px",
-      }}>
-        {/* Left side - Tagline */}
-        <div style={{
-          flex: 1,
-          transform: `translateY(${taglineSlide}px)`,
-          opacity: taglineOpacity,
-        }}>
+        {/* Left side - Branding */}
+        <div style={{ flex: 1 }}>
           <div style={{
-            fontSize: "20px",
-            color: "#0ea5e9",
-            fontWeight: 600,
-            letterSpacing: "3px",
-            marginBottom: "20px",
+            opacity: titleOpacity,
+            transform: `translateY(${titleSlide}px)`,
           }}>
-            INTRODUCING
-          </div>
-          <h2 style={{
-            fontSize: "64px",
-            fontWeight: 800,
-            color: "white",
-            marginBottom: "24px",
-            lineHeight: 1.1,
-          }}>
-            The First<br />
-            <span style={{
-              background: "linear-gradient(135deg, #0ea5e9, #8b5cf6)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+            <div style={{
+              fontSize: "18px",
+              color: "#0ea5e9",
+              fontWeight: 600,
+              letterSpacing: "3px",
+              marginBottom: "16px",
             }}>
-              Healthcare-Centric
-            </span><br />
-            CRM
-          </h2>
-          <p style={{
-            fontSize: "28px",
-            color: "#94a3b8",
-            marginBottom: "32px",
-          }}>
-            Powered by AI Automation
-          </p>
+              INTRODUCING
+            </div>
+            <h1 style={{
+              fontSize: "58px",
+              fontWeight: 800,
+              color: "white",
+              marginBottom: "20px",
+              lineHeight: 1.15,
+            }}>
+              The First<br />
+              <span style={{
+                background: "linear-gradient(135deg, #0ea5e9, #8b5cf6)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}>
+                Healthcare-Centric
+              </span><br />
+              CRM
+            </h1>
+          </div>
+          
+          <div style={{ opacity: taglineOpacity }}>
+            <p style={{
+              fontSize: "26px",
+              color: "#94a3b8",
+              marginBottom: "32px",
+            }}>
+              Powered by AI Automation
+            </p>
+          </div>
           
           {/* Quick benefits */}
-          <div style={{ display: "flex", gap: "20px" }}>
+          <div style={{
+            display: "flex",
+            gap: "16px",
+            opacity: benefitsOpacity,
+          }}>
             {["Voice → Contract", "Auto Billing", "Built for Care"].map((benefit, i) => (
               <div key={i} style={{
-                background: "rgba(14, 165, 233, 0.15)",
-                border: "1px solid #0ea5e9",
+                background: "rgba(14, 165, 233, 0.1)",
+                border: "1px solid rgba(14, 165, 233, 0.4)",
                 borderRadius: "30px",
                 padding: "10px 20px",
                 color: "#7dd3fc",
-                fontSize: "16px",
+                fontSize: "15px",
               }}>
                 {benefit}
               </div>
@@ -282,14 +165,15 @@ const HookScene: React.FC = () => {
         
         {/* Right side - Real app screenshot */}
         <div style={{
-          flex: 1,
-          transform: `translateX(${screenshotSlide}px) scale(${Math.max(0.5, screenshotScale)})`,
+          flex: 1.1,
+          opacity: screenshotOpacity,
+          transform: `scale(${Math.max(0.8, screenshotScale)})`,
         }}>
           <div style={{
-            borderRadius: "20px",
+            borderRadius: "16px",
             overflow: "hidden",
-            boxShadow: `0 30px 80px rgba(14, 165, 233, ${glowPulse * 0.4})`,
-            border: "2px solid rgba(14, 165, 233, 0.3)",
+            boxShadow: `0 25px 60px rgba(14, 165, 233, ${glowPulse * 0.3})`,
+            border: "1px solid rgba(14, 165, 233, 0.2)",
           }}>
             <Img
               src={staticFile("screenshots-v2/01-landing-hero.png")}
