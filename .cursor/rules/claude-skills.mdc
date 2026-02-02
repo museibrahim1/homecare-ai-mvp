@@ -1,0 +1,37 @@
+# Claude Skills Reference
+
+## IMPORTANT: Always Check Claude.MD
+
+Before performing any of these tasks, **always read `/Claude.MD`** for the latest instructions:
+
+- Creating videos or animations → Use Remotion (see Claude.MD)
+- Generating voiceovers/speech → Use WaveSpeed + ElevenLabs v3 (see Claude.MD)
+- Generating images/pictures → Use WaveSpeed + Nano Banana Pro (see Claude.MD)
+
+## Quick API Reference
+
+### WaveSpeed AI
+```
+API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+Endpoint: https://api.wavespeed.ai/v1/generate
+```
+
+### Models to Use
+| Task | Model |
+|------|-------|
+| Voiceovers | fal-ai/elevenlabs-v3 |
+| Images | fal-ai/nano-banana-pro |
+
+## Workflow
+
+1. User asks for video/voiceover/image
+2. Read Claude.MD for full instructions
+3. Use the appropriate API/tool
+4. If learning something new, update Claude.MD
+
+## Updating Claude.MD
+
+When the user teaches a new skill or API:
+1. Read current Claude.MD
+2. Add new section with: When to Use, API Config, Request Format
+3. Commit with descriptive message
