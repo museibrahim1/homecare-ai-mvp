@@ -55,6 +55,7 @@ export default function TeamChatPage() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [composeData, setComposeData] = useState({ to: '', subject: '', body: '' });
+  const [emailFolder, setEmailFolder] = useState<'INBOX' | 'SENT' | 'STARRED'>('INBOX');
 
   // Check Gmail connection status
   useEffect(() => {
@@ -132,12 +133,12 @@ export default function TeamChatPage() {
     }
   }, [token]);
 
-  const fetchEmails = async () => {
+  const fetchEmails = async (folder: string = emailFolder) => {
     if (!token) return;
     
     setGmailLoading(true);
     try {
-      const response = await fetch(`${API_URL}/gmail/messages`, {
+      const response = await fetch(`${API_URL}/gmail/messages?label=${folder}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       
@@ -149,6 +150,38 @@ export default function TeamChatPage() {
       console.error('Failed to fetch emails:', error);
     }
     setGmailLoading(false);
+  };
+  
+  // Fetch emails when folder changes
+  useEffect(() => {
+    if (gmailConnected && token) {
+      fetchEmails(emailFolder);
+    }
+  }, [emailFolder, gmailConnected]);
+  
+  // Toggle star on an email
+  const handleToggleStar = async (emailId: string, currentlyStarred: boolean) => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/gmail/messages/${emailId}/star?starred=${!currentlyStarred}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (response.ok) {
+        // Update local state
+        setEmails(emails.map(e => 
+          e.id === emailId ? { ...e, starred: !currentlyStarred } : e
+        ));
+        // Update selected email if viewing
+        if (selectedEmail?.id === emailId) {
+          setSelectedEmail({ ...selectedEmail, starred: !currentlyStarred });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to toggle star:', error);
+    }
   };
 
   const handleConnectGmail = () => {
@@ -350,20 +383,35 @@ export default function TeamChatPage() {
                 )}
 
                 <div className="space-y-1">
-                  <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-500/20 text-white">
+                  <button 
+                    onClick={() => setEmailFolder('INBOX')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                      emailFolder === 'INBOX' ? 'bg-primary-500/20 text-white' : 'text-dark-400 hover:bg-dark-800 hover:text-white'
+                    }`}
+                  >
                     <Inbox className="w-4 h-4" />
                     <span className="flex-1 text-left text-sm">Inbox</span>
-                    {displayEmails.filter(e => e.unread).length > 0 && (
+                    {displayEmails.filter(e => e.unread).length > 0 && emailFolder === 'INBOX' && (
                       <span className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center text-xs">
                         {displayEmails.filter(e => e.unread).length}
                       </span>
                     )}
                   </button>
-                  <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-dark-400 hover:bg-dark-800 hover:text-white transition-colors">
+                  <button 
+                    onClick={() => setEmailFolder('STARRED')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                      emailFolder === 'STARRED' ? 'bg-primary-500/20 text-white' : 'text-dark-400 hover:bg-dark-800 hover:text-white'
+                    }`}
+                  >
                     <Star className="w-4 h-4" />
                     <span className="flex-1 text-left text-sm">Starred</span>
                   </button>
-                  <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-dark-400 hover:bg-dark-800 hover:text-white transition-colors">
+                  <button 
+                    onClick={() => setEmailFolder('SENT')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                      emailFolder === 'SENT' ? 'bg-primary-500/20 text-white' : 'text-dark-400 hover:bg-dark-800 hover:text-white'
+                    }`}
+                  >
                     <Send className="w-4 h-4" />
                     <span className="flex-1 text-left text-sm">Sent</span>
                   </button>
@@ -442,7 +490,7 @@ export default function TeamChatPage() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={fetchEmails}
+                    onClick={() => fetchEmails()}
                     disabled={gmailLoading || !gmailConnected}
                     className="p-2 hover:bg-dark-800 rounded-lg transition-colors disabled:opacity-50"
                   >
@@ -475,21 +523,26 @@ export default function TeamChatPage() {
                   </div>
                 ) : (
                   displayEmails.map(email => (
-                    <button
+                    <div
                       key={email.id}
-                      onClick={() => { setSelectedEmail(email); setShowEmailModal(true); }}
                       className={`w-full flex items-start gap-4 p-4 border-b border-dark-700/30 hover:bg-dark-800/50 transition-colors text-left ${
                         email.unread ? 'bg-dark-800/30' : ''
                       }`}
                     >
-                      <div className="flex-shrink-0 pt-1">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleToggleStar(email.id, email.starred); }}
+                        className="flex-shrink-0 pt-1 hover:scale-110 transition-transform"
+                      >
                         {email.starred ? (
                           <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                         ) : (
-                          <Star className="w-4 h-4 text-dark-600" />
+                          <Star className="w-4 h-4 text-dark-600 hover:text-yellow-400" />
                         )}
-                      </div>
-                      <div className="flex-1 min-w-0">
+                      </button>
+                      <button 
+                        onClick={() => { setSelectedEmail(email); setShowEmailModal(true); }}
+                        className="flex-1 min-w-0 text-left"
+                      >
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`font-medium ${email.unread ? 'text-white' : 'text-dark-300'}`}>
                             {email.from}
@@ -501,8 +554,8 @@ export default function TeamChatPage() {
                           {email.subject}
                         </p>
                         <p className="text-sm text-dark-500 truncate">{email.snippet}</p>
-                      </div>
-                    </button>
+                      </button>
+                    </div>
                   ))
                 )}
               </div>
@@ -606,8 +659,11 @@ export default function TeamChatPage() {
                   <Reply className="w-4 h-4" />
                   Reply
                 </button>
-                <button className="p-2 hover:bg-dark-700 rounded-lg transition-colors">
-                  <Star className={`w-5 h-5 ${selectedEmail.starred ? 'text-yellow-400 fill-yellow-400' : 'text-dark-400'}`} />
+                <button 
+                  onClick={() => handleToggleStar(selectedEmail.id, selectedEmail.starred)}
+                  className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                >
+                  <Star className={`w-5 h-5 ${selectedEmail.starred ? 'text-yellow-400 fill-yellow-400' : 'text-dark-400 hover:text-yellow-400'}`} />
                 </button>
                 <button className="p-2 hover:bg-dark-700 rounded-lg transition-colors">
                   <Trash2 className="w-5 h-5 text-dark-400 hover:text-red-400" />

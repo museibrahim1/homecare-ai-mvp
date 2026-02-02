@@ -273,13 +273,73 @@ function ScheduleContent() {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Synced events:', data.events);
+        const googleEvents = data.events || [];
+        
+        // Convert Google events to our appointment format
+        const syncedAppointments: Appointment[] = googleEvents.map((event: any, index: number) => {
+          const start = event.start?.dateTime || event.start?.date || '';
+          const end = event.end?.dateTime || event.end?.date || '';
+          
+          // Parse date and time
+          let dateStr = '';
+          let timeStr = '09:00';
+          let duration = '1 hour';
+          
+          if (start) {
+            const startDate = new Date(start);
+            dateStr = startDate.toISOString().split('T')[0];
+            timeStr = startDate.toTimeString().slice(0, 5);
+            
+            if (end) {
+              const endDate = new Date(end);
+              const durationMs = endDate.getTime() - startDate.getTime();
+              const durationMins = Math.round(durationMs / 60000);
+              
+              if (durationMins <= 30) duration = '30 min';
+              else if (durationMins <= 45) duration = '45 min';
+              else if (durationMins <= 60) duration = '1 hour';
+              else if (durationMins <= 90) duration = '1.5 hours';
+              else duration = '2 hours';
+            }
+          }
+          
+          // Parse title to extract client name if in format "Title - Client"
+          const titleParts = (event.summary || 'Untitled Event').split(' - ');
+          const title = titleParts[0];
+          const client = titleParts[1] || 'Unknown Client';
+          
+          return {
+            id: Date.now() + index,
+            title,
+            client,
+            date: dateStr,
+            time: timeStr,
+            duration,
+            location: event.location || '',
+            type: event.summary?.toLowerCase().includes('assessment') ? 'assessment' as const :
+                  event.summary?.toLowerCase().includes('review') ? 'review' as const :
+                  event.summary?.toLowerCase().includes('meeting') ? 'meeting' as const : 'visit' as const,
+            notes: event.description || '',
+            googleEventId: event.id,
+          };
+        });
+        
+        // Merge with existing appointments (keep local ones without google IDs)
+        const localOnly = appointments.filter(a => !a.googleEventId);
+        setAppointments([...localOnly, ...syncedAppointments]);
       }
     } catch (error) {
       console.error('Sync failed:', error);
     }
     setSyncing(false);
   };
+  
+  // Auto-load calendar events when connected
+  useEffect(() => {
+    if (googleConnected && token && !checkingStatus) {
+      handleSyncNow();
+    }
+  }, [googleConnected, checkingStatus]);
 
   const generateCalendarDays = () => {
     const year = selectedDate.getFullYear();

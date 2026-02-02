@@ -191,10 +191,11 @@ def parse_from_field(from_str: str) -> tuple:
 @router.get("/messages", response_model=EmailListResponse)
 async def list_messages(
     max_results: int = 20,
+    label: str = "INBOX",  # INBOX, SENT, STARRED, UNREAD, SPAM, TRASH
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List emails from user's Gmail inbox."""
+    """List emails from user's Gmail by label (INBOX, SENT, STARRED, etc.)."""
     access_token = await get_valid_access_token(current_user, db)
     
     messages = []
@@ -206,7 +207,7 @@ async def list_messages(
             headers={"Authorization": f"Bearer {access_token}"},
             params={
                 "maxResults": max_results,
-                "labelIds": "INBOX",
+                "labelIds": label.upper(),
             },
         )
         
@@ -318,3 +319,74 @@ async def get_message(
             )
         
         return response.json()
+
+
+@router.post("/messages/{message_id}/star")
+async def toggle_star(
+    message_id: str,
+    starred: bool = True,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Toggle star status on an email."""
+    access_token = await get_valid_access_token(current_user, db)
+    
+    # Modify labels to add or remove STARRED
+    modify_data = {}
+    if starred:
+        modify_data = {"addLabelIds": ["STARRED"]}
+    else:
+        modify_data = {"removeLabelIds": ["STARRED"]}
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{message_id}/modify",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+            },
+            json=modify_data,
+        )
+        
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to modify star: {response.text}",
+            )
+        
+        return {"success": True, "starred": starred}
+
+
+@router.post("/messages/{message_id}/read")
+async def mark_as_read(
+    message_id: str,
+    read: bool = True,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Mark an email as read or unread."""
+    access_token = await get_valid_access_token(current_user, db)
+    
+    modify_data = {}
+    if read:
+        modify_data = {"removeLabelIds": ["UNREAD"]}
+    else:
+        modify_data = {"addLabelIds": ["UNREAD"]}
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{message_id}/modify",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+            },
+            json=modify_data,
+        )
+        
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to mark as read: {response.text}",
+            )
+        
+        return {"success": True, "read": read}
