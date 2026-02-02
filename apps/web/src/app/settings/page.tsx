@@ -153,6 +153,31 @@ export default function SettingsPage() {
       loadVoiceprintStatus();
     }
   }, [token]);
+  
+  // Load team when tab changes - must be before any early returns!
+  useEffect(() => {
+    if (activeTab === 'team' && token) {
+      loadTeamMembersInternal();
+    }
+  }, [activeTab, token]);
+  
+  const loadTeamMembersInternal = async () => {
+    if (!token) return;
+    setLoadingTeam(true);
+    try {
+      const response = await fetch(`${API_BASE}/auth/business/team`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTeamMembers(data);
+      }
+    } catch (err) {
+      console.error('Failed to load team:', err);
+    } finally {
+      setLoadingTeam(false);
+    }
+  };
 
   // Load voiceprint status
   const loadVoiceprintStatus = async () => {
@@ -489,25 +514,6 @@ export default function SettingsPage() {
     { id: 'security', label: 'Security', icon: Shield },
   ];
   
-  // Load team members
-  const loadTeamMembers = async () => {
-    if (!token) return;
-    setLoadingTeam(true);
-    try {
-      const response = await fetch(`${API_BASE}/auth/business/team`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTeamMembers(data);
-      }
-    } catch (err) {
-      console.error('Failed to load team:', err);
-    } finally {
-      setLoadingTeam(false);
-    }
-  };
-  
   // Invite team member
   const handleInvite = async () => {
     if (!token || !inviteEmail || !inviteName) return;
@@ -530,7 +536,7 @@ export default function SettingsPage() {
       setInviteSuccess(`Invitation sent to ${inviteEmail}. Temporary password: ${data.temp_password}`);
       setInviteEmail('');
       setInviteName('');
-      loadTeamMembers();
+      loadTeamMembersInternal();
       
       // Auto-close modal after 5 seconds
       setTimeout(() => {
@@ -560,19 +566,12 @@ export default function SettingsPage() {
       });
       
       if (response.ok) {
-        loadTeamMembers();
+        loadTeamMembersInternal();
       }
     } catch (err) {
       console.error('Failed to update member:', err);
     }
   };
-  
-  // Load team when tab changes
-  useEffect(() => {
-    if (activeTab === 'team') {
-      loadTeamMembers();
-    }
-  }, [activeTab, token]);
 
   return (
     <div className="flex min-h-screen bg-dark-900">
