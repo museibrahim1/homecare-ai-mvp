@@ -1,4 +1,4 @@
-# Version: v9 - Added team management endpoints
+# Version: v10 - Gmail label/star/read endpoints fix
 FROM python:3.11-slim
 
 WORKDIR /app

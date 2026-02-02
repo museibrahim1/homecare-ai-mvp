@@ -1,4 +1,4 @@
-# Version: v10 - Full QA rebuild
+# Version: v11 - Gmail folders, Calendar auto-sync
 FROM node:20-alpine
 
 WORKDIR /app
