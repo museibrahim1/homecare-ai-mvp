@@ -1,4 +1,4 @@
-# Version: v14 - Fix bool iterable error in Gmail parser
+# Version: v15 - Redeploy trigger
 FROM python:3.11-slim
 
 WORKDIR /app
