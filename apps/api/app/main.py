@@ -1,8 +1,12 @@
 import os
-from fastapi import FastAPI
+import logging
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 from app.routers import (
     auth,
     users,
@@ -65,6 +69,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Global exception handler to ensure errors return JSON with proper CORS
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Handle all unhandled exceptions and return JSON response."""
+    logger.error(f"Unhandled exception: {type(exc).__name__}: {str(exc)}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error: {str(exc)}"},
+    )
+
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
@@ -240,3 +256,14 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {"status": "healthy"}
+
+
+@app.get("/health/google", tags=["Health"])
+async def google_health_check():
+    """Check if Google OAuth credentials are configured."""
+    return {
+        "google_client_id_set": bool(settings.google_client_id),
+        "google_client_id_preview": settings.google_client_id[:20] + "..." if settings.google_client_id else None,
+        "google_client_secret_set": bool(settings.google_client_secret),
+        "google_client_secret_length": len(settings.google_client_secret) if settings.google_client_secret else 0,
+    }

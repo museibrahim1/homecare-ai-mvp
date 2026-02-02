@@ -1,4 +1,4 @@
-# Version: v11 - Gmail debug logging
+# Version: v12 - Global exception handler + Google health check
 FROM python:3.11-slim
 
 WORKDIR /app
