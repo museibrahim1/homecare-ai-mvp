@@ -1,4 +1,4 @@
-# Version: v10 - Gmail label/star/read endpoints fix
+# Version: v11 - Gmail debug logging
 FROM python:3.11-slim
 
 WORKDIR /app

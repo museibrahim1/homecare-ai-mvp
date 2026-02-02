@@ -65,6 +65,13 @@ async def connect_gmail(
     current_user: User = Depends(get_current_user),
 ):
     """Exchange OAuth code for tokens and save to user."""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Gmail connect attempt for user {current_user.id}")
+    logger.info(f"Using client_id: {settings.google_client_id[:20] if settings.google_client_id else 'None'}...")
+    logger.info(f"Client secret set: {bool(settings.google_client_secret)}, length: {len(settings.google_client_secret) if settings.google_client_secret else 0}")
+    
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -78,13 +85,17 @@ async def connect_gmail(
                 },
             )
             
+            logger.info(f"Token exchange response status: {response.status_code}")
+            
             if response.status_code != 200:
+                logger.error(f"Token exchange failed: {response.text}")
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Failed to exchange code: {response.text}",
                 )
             
             tokens = response.json()
+            logger.info(f"Got tokens - access_token: {bool(tokens.get('access_token'))}, refresh_token: {bool(tokens.get('refresh_token'))}")
         
         expires_in = tokens.get("expires_in", 3600)
         token_expiry = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
@@ -196,7 +207,15 @@ async def list_messages(
     current_user: User = Depends(get_current_user),
 ):
     """List emails from user's Gmail by label (INBOX, SENT, STARRED, etc.)."""
-    access_token = await get_valid_access_token(current_user, db)
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        access_token = await get_valid_access_token(current_user, db)
+        logger.info(f"Got access token for user {current_user.id}, token length: {len(access_token) if access_token else 0}")
+    except Exception as e:
+        logger.error(f"Failed to get access token: {str(e)}")
+        raise
     
     messages = []
     
@@ -211,10 +230,13 @@ async def list_messages(
             },
         )
         
+        logger.info(f"Gmail API response status: {list_response.status_code}")
+        
         if list_response.status_code != 200:
+            logger.error(f"Gmail API error: {list_response.text}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to fetch messages: {list_response.text}",
+                detail=f"Gmail API error ({list_response.status_code}): {list_response.text}",
             )
         
         message_list = list_response.json().get("messages", [])
