@@ -1,12 +1,52 @@
 import os
 import logging
+import traceback
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+class CatchAllMiddleware(BaseHTTPMiddleware):
+    """Middleware to catch all exceptions and ensure CORS headers are always sent."""
+    
+    async def dispatch(self, request: Request, call_next):
+        try:
+            response = await call_next(request)
+            return response
+        except Exception as e:
+            logger.error(f"Unhandled exception in middleware: {type(e).__name__}: {str(e)}")
+            logger.error(traceback.format_exc())
+            
+            # Get origin from request
+            origin = request.headers.get("origin", "")
+            
+            # Build response with CORS headers
+            response = JSONResponse(
+                status_code=500,
+                content={"detail": f"Internal server error: {str(e)}"},
+            )
+            
+            # Add CORS headers manually
+            allowed_origins = [
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://localhost:3001",
+                "http://127.0.0.1:3001",
+                "https://web-production-11611.up.railway.app",
+            ]
+            
+            if origin in allowed_origins:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Methods"] = "*"
+                response.headers["Access-Control-Allow-Headers"] = "*"
+            
+            return response
 from app.routers import (
     auth,
     users,
@@ -61,6 +101,9 @@ cors_origins = [
 extra_origins = os.getenv("CORS_ORIGINS", "")
 if extra_origins:
     cors_origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
+
+# Add catch-all middleware FIRST (runs last, catches everything)
+app.add_middleware(CatchAllMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

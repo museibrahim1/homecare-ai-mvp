@@ -1,4 +1,4 @@
-# Version: v12 - Global exception handler + Google health check
+# Version: v13 - CatchAll middleware for CORS on errors
 FROM python:3.11-slim
 
 WORKDIR /app
