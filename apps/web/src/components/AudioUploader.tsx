@@ -319,9 +319,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">Add Audio</h3>
-            <p className="text-dark-400 text-sm">
-              {autoProcess ? 'Record or upload & auto-process with AI' : 'Record or upload for this visit'}
-            </p>
+            <p className="text-dark-400 text-sm">Record or upload & auto-process with AI</p>
           </div>
         </div>
         {onClose && state !== 'processing' && !isRecording && (
@@ -333,13 +331,13 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       
       {/* Mode Toggle Tabs */}
       {state === 'idle' && !selectedFile && !audioBlob && (
-        <div className="flex gap-2 mb-6">
+        <div className="flex border-b border-dark-700 mb-6">
           <button
             onClick={() => setInputMode('record')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3 px-4 font-medium transition-all flex items-center justify-center gap-2 border-b-2 ${
               inputMode === 'record'
-                ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                : 'bg-dark-700/50 text-dark-400 hover:bg-dark-700'
+                ? 'text-primary-400 border-primary-400'
+                : 'text-dark-400 border-transparent hover:text-white'
             }`}
           >
             <Mic className="w-4 h-4" />
@@ -347,14 +345,14 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
           </button>
           <button
             onClick={() => setInputMode('upload')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3 px-4 font-medium transition-all flex items-center justify-center gap-2 border-b-2 ${
               inputMode === 'upload'
-                ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                : 'bg-dark-700/50 text-dark-400 hover:bg-dark-700'
+                ? 'text-primary-400 border-primary-400'
+                : 'text-dark-400 border-transparent hover:text-white'
             }`}
           >
             <Upload className="w-4 h-4" />
-            Upload File
+            Upload
           </button>
         </div>
       )}
@@ -608,23 +606,11 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       )}
 
       {state === 'idle' && !selectedFile && !audioBlob && (
-        <div className="mt-6 p-4 bg-primary-500/10 border border-primary-500/20 rounded-xl">
-          <h4 className="text-primary-400 font-medium text-sm mb-2 flex items-center gap-2">
-            <Sparkles className="w-4 h-4" /> Auto-Processing Enabled
-          </h4>
+        <div className="mt-6 p-3 bg-primary-500/10 border border-primary-500/20 rounded-xl flex items-center gap-3">
+          <Sparkles className="w-5 h-5 text-primary-400 flex-shrink-0" />
           <p className="text-dark-300 text-sm">
-            {inputMode === 'record' 
-              ? 'Record your assessment conversation. AI will automatically transcribe, identify speakers, extract billables, and generate notes & contract.'
-              : 'Upload will automatically: transcribe audio → identify speakers → extract billables → generate notes → create contract'
-            }
+            AI will transcribe, identify speakers, and generate notes & contract
           </p>
-          {inputMode === 'record' && (
-            <ul className="mt-3 text-dark-400 text-xs space-y-1">
-              <li>• Speak clearly and at a normal pace</li>
-              <li>• Introduce speakers at the start (e.g., "This is Nurse Jane with Mrs. Smith")</li>
-              <li>• Keep background noise to a minimum</li>
-            </ul>
-          )}
         </div>
       )}
     </div>

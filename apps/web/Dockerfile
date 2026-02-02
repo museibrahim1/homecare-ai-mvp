@@ -1,4 +1,4 @@
-# Version: v16 - Contract proposals page with export
+# Version: v17 - Cleaner assessment UI + fix proposals API
 FROM node:20-alpine
 
 WORKDIR /app

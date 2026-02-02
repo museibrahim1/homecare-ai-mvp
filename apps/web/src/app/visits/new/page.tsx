@@ -306,36 +306,39 @@ export default function NewVisitPage() {
 
           {step === 'source' && createdVisit && (
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-white mb-2">Add Intake Recording or Transcript</h2>
+              <h2 className="text-lg font-semibold text-white mb-2">Add Intake Data</h2>
               <p className="text-dark-400 text-sm mb-6">
-                Choose how to add data for this assessment. Upload an audio recording
-                or import a transcript from another service.
+                Choose how to add data for this assessment
               </p>
               
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <button
                   onClick={() => handleSelectSource('audio')}
-                  className="p-6 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-primary-500 rounded-xl transition-all group"
+                  className="p-5 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-primary-500 rounded-xl transition-all group text-left"
                 >
-                  <div className="w-14 h-14 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:bg-primary-500/30 transition">
-                    <Mic className="w-7 h-7 text-primary-400" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center group-hover:bg-primary-500/30 transition">
+                      <Mic className="w-5 h-5 text-primary-400" />
+                    </div>
+                    <h3 className="text-white font-medium">Audio</h3>
                   </div>
-                  <h3 className="text-white font-medium mb-1">Upload Audio</h3>
                   <p className="text-dark-400 text-sm">
-                    MP3, WAV, M4A files. We'll transcribe and generate a contract draft.
+                    Record or upload audio
                   </p>
                 </button>
                 
                 <button
                   onClick={() => handleSelectSource('transcript')}
-                  className="p-6 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-purple-500 rounded-xl transition-all group"
+                  className="p-5 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-purple-500 rounded-xl transition-all group text-left"
                 >
-                  <div className="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:bg-purple-500/30 transition">
-                    <FileText className="w-7 h-7 text-purple-400" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center group-hover:bg-purple-500/30 transition">
+                      <FileText className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <h3 className="text-white font-medium">Transcript</h3>
                   </div>
-                  <h3 className="text-white font-medium mb-1">Import Transcript</h3>
                   <p className="text-dark-400 text-sm">
-                    Already have a transcript? Import SRT, VTT, or plain text to generate a contract.
+                    Import text or SRT file
                   </p>
                 </button>
               </div>
@@ -344,7 +347,7 @@ export default function NewVisitPage() {
                 onClick={handleSkipSource}
                 className="w-full text-center text-dark-400 hover:text-white py-2 transition text-sm"
               >
-                Skip for now - add data later
+                Skip for now
               </button>
             </div>
           )}

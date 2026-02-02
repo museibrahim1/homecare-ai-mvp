@@ -74,7 +74,7 @@ export default function ProposalsPage() {
 
         if (contractsRes.ok) {
           const contractsData = await contractsRes.json();
-          setProposals(contractsData);
+          setProposals(contractsData || []);
         }
 
         if (clientsRes.ok) {
