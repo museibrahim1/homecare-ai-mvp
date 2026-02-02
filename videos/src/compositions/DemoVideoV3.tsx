@@ -435,114 +435,117 @@ const RecordScene: React.FC = () => {
   );
 };
 
-// AI Process Scene - Pipeline automation
+// AI Process Scene - Stylish pipeline visualization
 const AIProcessScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
   const titleOpacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: "clamp" });
-  const step1Scale = spring({ frame: frame - 60, fps, config: { damping: 12 } });
-  const step2Scale = spring({ frame: frame - 120, fps, config: { damping: 12 } });
-  const step3Scale = spring({ frame: frame - 180, fps, config: { damping: 12 } });
-  const screenshotOpacity = interpolate(frame, [200, 280], [0, 1], { extrapolateRight: "clamp" });
+  const step1Scale = spring({ frame: frame - 30, fps, config: { damping: 12 } });
+  const step2Scale = spring({ frame: frame - 60, fps, config: { damping: 12 } });
+  const step3Scale = spring({ frame: frame - 90, fps, config: { damping: 12 } });
+  const arrow1Opacity = interpolate(frame, [60, 90], [0, 1], { extrapolateRight: "clamp" });
+  const arrow2Opacity = interpolate(frame, [90, 120], [0, 1], { extrapolateRight: "clamp" });
+  const screenshotOpacity = interpolate(frame, [150, 200], [0, 1], { extrapolateRight: "clamp" });
+  const glowPulse = Math.sin(frame * 0.1) * 0.2 + 0.8;
   
   const steps = [
-    { icon: "📝", title: "Transcribe", desc: "AI transcribes & identifies speakers", color: "#0ea5e9" },
-    { icon: "💰", title: "Extract Billing", desc: "Automatically find billable items", color: "#22c55e" },
-    { icon: "📄", title: "Generate Contract", desc: "Ready-to-sign in seconds", color: "#8b5cf6" },
+    { icon: "🎙️", title: "Transcribe", color: "#0ea5e9", gradient: "linear-gradient(135deg, #0ea5e9, #0284c7)" },
+    { icon: "💵", title: "Extract Billing", color: "#22c55e", gradient: "linear-gradient(135deg, #22c55e, #16a34a)" },
+    { icon: "📋", title: "Generate Contract", color: "#8b5cf6", gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)" },
   ];
   
   const scales = [step1Scale, step2Scale, step3Scale];
   
   return (
     <AbsoluteFill style={{ backgroundColor: "#0f172a" }}>
-      {/* Accent bar */}
+      {/* Animated gradient background */}
       <div style={{
         position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: "6px",
-        background: "linear-gradient(90deg, #0ea5e9, #22c55e, #8b5cf6)",
+        inset: 0,
+        background: `radial-gradient(ellipse at 50% 30%, rgba(34, 197, 94, ${glowPulse * 0.15}) 0%, transparent 50%)`,
       }} />
       
       <div style={{
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        padding: "60px 80px",
+        padding: "50px 80px",
       }}>
         {/* Header */}
-        <div style={{ opacity: titleOpacity, marginBottom: "40px" }}>
-          <div style={{
-            fontSize: "20px",
-            color: "#22c55e",
-            fontWeight: 600,
-            letterSpacing: "2px",
-            marginBottom: "8px",
-          }}>
-            AI AUTOMATION
-          </div>
+        <div style={{ opacity: titleOpacity, textAlign: "center", marginBottom: "30px" }}>
           <h2 style={{
-            fontSize: "48px",
+            fontSize: "44px",
             fontWeight: 700,
             color: "white",
           }}>
-            From Voice to Contract in Minutes
+            From Voice to Contract in <span style={{ color: "#22c55e" }}>Minutes</span>
           </h2>
         </div>
         
-        {/* Steps */}
+        {/* Stylish Steps with Arrows */}
         <div style={{
           display: "flex",
-          gap: "40px",
-          marginBottom: "40px",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "20px",
+          marginBottom: "30px",
         }}>
           {steps.map((step, i) => (
-            <div key={i} style={{
-              flex: 1,
-              transform: `scale(${scales[i]})`,
-              background: "rgba(255,255,255,0.03)",
-              border: `2px solid ${step.color}33`,
-              borderRadius: "20px",
-              padding: "32px",
-              textAlign: "center",
-            }}>
+            <React.Fragment key={i}>
+              {/* Step Card */}
               <div style={{
-                width: "80px",
-                height: "80px",
+                transform: `scale(${scales[i]})`,
+                background: step.gradient,
                 borderRadius: "20px",
-                background: `${step.color}22`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "40px",
-                margin: "0 auto 20px",
+                padding: "28px 36px",
+                textAlign: "center",
+                boxShadow: `0 15px 40px ${step.color}44`,
+                minWidth: "200px",
               }}>
-                {step.icon}
+                <div style={{
+                  fontSize: "40px",
+                  marginBottom: "12px",
+                  filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.3))",
+                }}>
+                  {step.icon}
+                </div>
+                <div style={{
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  color: "white",
+                  textShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                }}>
+                  {step.title}
+                </div>
               </div>
-              <div style={{ fontSize: "24px", fontWeight: 600, color: "white", marginBottom: "8px" }}>
-                {step.title}
-              </div>
-              <div style={{ fontSize: "16px", color: "#94a3b8" }}>
-                {step.desc}
-              </div>
-            </div>
+              
+              {/* Arrow between steps */}
+              {i < 2 && (
+                <div style={{
+                  opacity: i === 0 ? arrow1Opacity : arrow2Opacity,
+                  fontSize: "36px",
+                  color: "#64748b",
+                }}>
+                  →
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
         
-        {/* Screenshot */}
+        {/* Screenshots */}
         <div style={{
           flex: 1,
           display: "flex",
-          gap: "30px",
+          gap: "24px",
           opacity: screenshotOpacity,
         }}>
           <div style={{
             flex: 1,
-            borderRadius: "16px",
+            borderRadius: "12px",
             overflow: "hidden",
-            boxShadow: "0 15px 30px rgba(0,0,0,0.4)",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
             border: "1px solid #334155",
           }}>
             <Img
@@ -552,9 +555,9 @@ const AIProcessScene: React.FC = () => {
           </div>
           <div style={{
             flex: 1,
-            borderRadius: "16px",
+            borderRadius: "12px",
             overflow: "hidden",
-            boxShadow: "0 15px 30px rgba(0,0,0,0.4)",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
             border: "1px solid #334155",
           }}>
             <Img
@@ -568,28 +571,50 @@ const AIProcessScene: React.FC = () => {
   );
 };
 
-// Results Scene - Time savings
+// Results Scene - Engaging stats with animated counters
 const ResultsScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
   const titleOpacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: "clamp" });
-  const stat1Scale = spring({ frame: frame - 60, fps, config: { damping: 12 } });
-  const stat2Scale = spring({ frame: frame - 90, fps, config: { damping: 12 } });
-  const stat3Scale = spring({ frame: frame - 120, fps, config: { damping: 12 } });
+  const glowPulse = Math.sin(frame * 0.08) * 0.3 + 0.7;
   
-  const stats = [
-    { value: "6 Hours", label: "→ 6 Minutes", desc: "Contract creation time" },
-    { value: "100%", label: "Billables captured", desc: "No more missed items" },
-    { value: "Zero", label: "Manual data entry", desc: "AI handles everything" },
-  ];
+  // Animated number for hours
+  const hoursCount = Math.min(6, Math.floor(interpolate(frame, [60, 120], [0, 6], { extrapolateRight: "clamp" })));
+  const minutesCount = Math.min(6, Math.floor(interpolate(frame, [120, 180], [0, 6], { extrapolateRight: "clamp" })));
+  const percentCount = Math.min(100, Math.floor(interpolate(frame, [90, 150], [0, 100], { extrapolateRight: "clamp" })));
   
-  const scales = [stat1Scale, stat2Scale, stat3Scale];
+  const card1Opacity = interpolate(frame, [40, 70], [0, 1], { extrapolateRight: "clamp" });
+  const card2Opacity = interpolate(frame, [80, 110], [0, 1], { extrapolateRight: "clamp" });
+  const card3Opacity = interpolate(frame, [120, 150], [0, 1], { extrapolateRight: "clamp" });
   
   return (
-    <AbsoluteFill style={{
-      background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-    }}>
+    <AbsoluteFill style={{ backgroundColor: "#0f172a" }}>
+      {/* Animated gradient background */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        background: `radial-gradient(ellipse at 50% 50%, rgba(14, 165, 233, ${glowPulse * 0.15}) 0%, transparent 60%)`,
+      }} />
+      
+      {/* Floating particles */}
+      {[...Array(12)].map((_, i) => {
+        const x = Math.sin(frame * 0.015 + i * 0.5) * 500 + 960;
+        const y = Math.cos(frame * 0.02 + i) * 300 + 540;
+        return (
+          <div key={i} style={{
+            position: "absolute",
+            left: x,
+            top: y,
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: `rgba(14, 165, 233, ${0.2 + Math.sin(frame * 0.1 + i) * 0.1})`,
+            boxShadow: "0 0 12px rgba(14, 165, 233, 0.4)",
+          }} />
+        );
+      })}
+      
       <div style={{
         display: "flex",
         flexDirection: "column",
@@ -598,148 +623,209 @@ const ResultsScene: React.FC = () => {
         height: "100%",
         padding: "60px",
       }}>
-        <div style={{ opacity: titleOpacity, textAlign: "center", marginBottom: "60px" }}>
-          <h2 style={{
-            fontSize: "52px",
-            fontWeight: 700,
-            color: "white",
-            marginBottom: "16px",
+        {/* Main stat - Time transformation */}
+        <div style={{
+          opacity: titleOpacity,
+          textAlign: "center",
+          marginBottom: "60px",
+        }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "30px",
+            marginBottom: "24px",
           }}>
-            The Results Speak for Themselves
-          </h2>
+            <div style={{
+              fontSize: "100px",
+              fontWeight: 800,
+              color: "#ef4444",
+              textDecoration: "line-through",
+              opacity: 0.6,
+            }}>
+              {hoursCount}h
+            </div>
+            <div style={{
+              fontSize: "60px",
+              color: "#22c55e",
+            }}>
+              →
+            </div>
+            <div style={{
+              fontSize: "100px",
+              fontWeight: 800,
+              background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}>
+              {minutesCount}m
+            </div>
+          </div>
           <p style={{
-            fontSize: "24px",
-            color: "#64748b",
+            fontSize: "28px",
+            color: "#94a3b8",
           }}>
-            Save time. Capture more revenue. Focus on care.
+            Contract creation time
           </p>
         </div>
         
+        {/* Bottom stats */}
         <div style={{
           display: "flex",
-          gap: "40px",
+          gap: "50px",
         }}>
-          {stats.map((stat, i) => (
-            <div key={i} style={{
-              transform: `scale(${scales[i]})`,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid #334155",
-              borderRadius: "24px",
-              padding: "48px",
-              textAlign: "center",
-              minWidth: "280px",
+          <div style={{
+            opacity: card2Opacity,
+            textAlign: "center",
+            padding: "30px 50px",
+            background: "rgba(34, 197, 94, 0.1)",
+            borderRadius: "20px",
+            border: "1px solid rgba(34, 197, 94, 0.3)",
+          }}>
+            <div style={{
+              fontSize: "56px",
+              fontWeight: 700,
+              color: "#22c55e",
+              marginBottom: "8px",
             }}>
-              <div style={{
-                fontSize: "48px",
-                fontWeight: 700,
-                background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                marginBottom: "8px",
-              }}>
-                {stat.value}
-              </div>
-              <div style={{
-                fontSize: "24px",
-                color: "white",
-                fontWeight: 500,
-                marginBottom: "8px",
-              }}>
-                {stat.label}
-              </div>
-              <div style={{ fontSize: "16px", color: "#64748b" }}>
-                {stat.desc}
-              </div>
+              {percentCount}%
             </div>
-          ))}
+            <div style={{ fontSize: "20px", color: "#94a3b8" }}>
+              Billables Captured
+            </div>
+          </div>
+          
+          <div style={{
+            opacity: card3Opacity,
+            textAlign: "center",
+            padding: "30px 50px",
+            background: "rgba(14, 165, 233, 0.1)",
+            borderRadius: "20px",
+            border: "1px solid rgba(14, 165, 233, 0.3)",
+          }}>
+            <div style={{
+              fontSize: "56px",
+              fontWeight: 700,
+              color: "#0ea5e9",
+              marginBottom: "8px",
+            }}>
+              Zero
+            </div>
+            <div style={{ fontSize: "20px", color: "#94a3b8" }}>
+              Manual Data Entry
+            </div>
+          </div>
         </div>
       </div>
     </AbsoluteFill>
   );
 };
 
-// CTA Scene - Call to action
+// CTA Scene - Clean centered logo design
 const CTAScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  const scale = spring({ frame, fps, config: { damping: 10 } });
-  const buttonPulse = Math.sin(frame * 0.1) * 0.03 + 1;
+  const logoScale = spring({ frame, fps, config: { damping: 12 } });
+  const titleOpacity = interpolate(frame, [30, 60], [0, 1], { extrapolateRight: "clamp" });
+  const buttonOpacity = interpolate(frame, [60, 100], [0, 1], { extrapolateRight: "clamp" });
+  const buttonPulse = Math.sin(frame * 0.1) * 0.02 + 1;
+  const glowPulse = Math.sin(frame * 0.08) * 0.3 + 0.7;
   
   return (
-    <AbsoluteFill style={{
-      background: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #7c3aed 100%)",
-    }}>
+    <AbsoluteFill style={{ backgroundColor: "#0f172a" }}>
+      {/* Subtle glow behind logo */}
+      <div style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "400px",
+        height: "400px",
+        borderRadius: "50%",
+        background: `radial-gradient(circle, rgba(99, 102, 241, ${glowPulse * 0.2}) 0%, transparent 70%)`,
+      }} />
+      
       <div style={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
-        transform: `scale(${scale})`,
       }}>
-        {/* Logo */}
+        {/* Logo Icon */}
         <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "20px",
-          marginBottom: "40px",
+          transform: `scale(${logoScale})`,
+          marginBottom: "32px",
         }}>
           <div style={{
-            width: "80px",
-            height: "80px",
-            borderRadius: "20px",
-            background: "rgba(255,255,255,0.2)",
+            width: "120px",
+            height: "120px",
+            borderRadius: "28px",
+            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "40px",
+            boxShadow: `0 20px 60px rgba(99, 102, 241, ${glowPulse * 0.5})`,
           }}>
-            🎙️
-          </div>
-          <div style={{
-            fontSize: "56px",
-            fontWeight: 800,
-            color: "white",
-          }}>
-            HomeCare AI
+            {/* Microphone icon */}
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 19v4M8 23h8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
         
-        <h2 style={{
-          fontSize: "48px",
-          fontWeight: 700,
+        {/* Brand name */}
+        <h1 style={{
+          fontSize: "64px",
+          fontWeight: 800,
           color: "white",
-          textAlign: "center",
-          marginBottom: "32px",
+          marginBottom: "48px",
+          transform: `scale(${logoScale})`,
         }}>
-          Ready to Transform Your Agency?
-        </h2>
+          Homecare AI
+        </h1>
+        
+        {/* Title */}
+        <div style={{ opacity: titleOpacity, textAlign: "center", marginBottom: "32px" }}>
+          <h2 style={{
+            fontSize: "48px",
+            fontWeight: 700,
+            color: "white",
+            marginBottom: "12px",
+          }}>
+            Ready to Save Hours?
+          </h2>
+          <p style={{
+            fontSize: "24px",
+            color: "#94a3b8",
+          }}>
+            Start your free trial today
+          </p>
+        </div>
         
         {/* CTA Button */}
         <div style={{
+          opacity: buttonOpacity,
           transform: `scale(${buttonPulse})`,
-          background: "white",
-          borderRadius: "16px",
-          padding: "24px 60px",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
-          marginBottom: "32px",
         }}>
-          <span style={{
-            fontSize: "28px",
-            fontWeight: 700,
-            color: "#2563eb",
+          <div style={{
+            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            borderRadius: "16px",
+            padding: "20px 60px",
+            boxShadow: `0 15px 50px rgba(99, 102, 241, ${glowPulse * 0.5})`,
           }}>
-            Start Your Free Trial
-          </span>
+            <span style={{
+              fontSize: "24px",
+              fontWeight: 600,
+              color: "white",
+            }}>
+              Get Started Free
+            </span>
+          </div>
         </div>
-        
-        <p style={{
-          fontSize: "20px",
-          color: "rgba(255,255,255,0.8)",
-        }}>
-          No credit card required • Setup in minutes
-        </p>
       </div>
     </AbsoluteFill>
   );
