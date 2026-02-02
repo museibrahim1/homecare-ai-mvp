@@ -146,7 +146,19 @@ export default function TeamChatPage() {
       
       if (response.ok) {
         const data = await response.json();
-        setEmails(data.messages || []);
+        // Map API response to Email type
+        const mappedEmails = (data.messages || []).map((msg: any) => ({
+          id: msg.id,
+          from: msg.from_name || msg.from || 'Unknown',
+          fromEmail: msg.from_email || msg.fromEmail || '',
+          subject: msg.subject || '(No Subject)',
+          snippet: msg.snippet || '',
+          date: msg.date || '',
+          unread: msg.unread || false,
+          starred: msg.starred || false,
+          hasAttachment: msg.hasAttachment || msg.has_attachment || false,
+        }));
+        setEmails(mappedEmails);
       } else {
         const errorData = await response.json();
         console.error('Gmail API error:', response.status, errorData);
@@ -660,14 +672,14 @@ export default function TeamChatPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
                     <span className="text-primary-400 text-sm font-medium">
-                      {selectedEmail.from.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      {(selectedEmail.from || 'U').split(' ').map(n => n?.[0] || '').join('').slice(0, 2) || 'U'}
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-white">{selectedEmail.from}</p>
-                    <p className="text-sm text-dark-400">{selectedEmail.fromEmail}</p>
+                    <p className="font-medium text-white">{selectedEmail.from || 'Unknown Sender'}</p>
+                    <p className="text-sm text-dark-400">{selectedEmail.fromEmail || ''}</p>
                   </div>
-                  <span className="text-sm text-dark-500">{selectedEmail.date}</span>
+                  <span className="text-sm text-dark-500">{selectedEmail.date || ''}</span>
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4">

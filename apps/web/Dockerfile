@@ -1,4 +1,4 @@
-# Version: v12 - Gmail error display
+# Version: v13 - Fix email data mapping
 FROM node:20-alpine
 
 WORKDIR /app
