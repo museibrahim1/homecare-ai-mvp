@@ -1,4 +1,4 @@
-# Version: v18 - Fix standalone mode startup
+# Version: v19 - Fix missing public folder
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -9,6 +9,9 @@ RUN npm ci || npm install
 
 # Copy source
 COPY . .
+
+# Create public folder if it doesn't exist (Next.js standalone needs it)
+RUN mkdir -p public
 
 # Build args for environment variables needed at build time
 ARG NEXT_PUBLIC_API_URL
@@ -32,6 +35,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Copy standalone output
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Copy public folder (may be empty but must exist)
 COPY --from=builder /app/public ./public
 
 EXPOSE 3000
