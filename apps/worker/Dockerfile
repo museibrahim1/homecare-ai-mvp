@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: v18 - Added email notifications for contract generation
+# Version: v19 - Fix transcription: convert webm to wav + better logging
 WORKDIR /app
 
 # Install system dependencies for audio processing

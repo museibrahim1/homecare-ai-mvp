@@ -8,9 +8,45 @@ Supports two modes:
 
 import logging
 import os
+import subprocess
+import tempfile
 from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
+
+
+def convert_to_wav(input_path: str) -> str:
+    """Convert audio file to WAV format using ffmpeg for better compatibility."""
+    # Check if already wav
+    if input_path.lower().endswith('.wav'):
+        return input_path
+    
+    # Create temp wav file
+    output_path = tempfile.mktemp(suffix='.wav')
+    
+    try:
+        logger.info(f"Converting {input_path} to WAV format...")
+        result = subprocess.run([
+            'ffmpeg', '-i', input_path,
+            '-ar', '16000',  # 16kHz sample rate (optimal for Whisper)
+            '-ac', '1',      # Mono
+            '-y',            # Overwrite
+            output_path
+        ], capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            logger.warning(f"FFmpeg conversion warning: {result.stderr}")
+        
+        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            logger.info(f"Converted to WAV: {output_path}")
+            return output_path
+        else:
+            logger.warning("Conversion failed, using original file")
+            return input_path
+            
+    except Exception as e:
+        logger.warning(f"Audio conversion failed: {e}, using original file")
+        return input_path
 
 
 def transcribe_audio(
@@ -35,17 +71,29 @@ def transcribe_audio(
     Returns:
         List of transcript segments with timing information
     """
-    # Use OpenAI API for fast cloud transcription
-    if use_openai_api:
-        api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
-        if api_key:
-            logger.info("Using OpenAI Whisper API for fast cloud transcription")
-            return _transcribe_openai_api(audio_path, api_key, language)
-        else:
-            logger.warning("OpenAI API key not found, falling back to local transcription")
+    # Convert audio to WAV for better compatibility (handles webm, m4a, etc)
+    converted_path = convert_to_wav(audio_path)
+    cleanup_converted = converted_path != audio_path
     
-    # Fall back to local faster-whisper
-    return _transcribe_local(audio_path, model_size, use_gpu, language)
+    try:
+        # Use OpenAI API for fast cloud transcription
+        if use_openai_api:
+            api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+            if api_key:
+                logger.info(f"Using OpenAI Whisper API for fast cloud transcription (key length: {len(api_key)})")
+                return _transcribe_openai_api(converted_path, api_key, language)
+            else:
+                logger.warning("OpenAI API key not found, falling back to local transcription")
+        
+        # Fall back to local faster-whisper
+        return _transcribe_local(converted_path, model_size, use_gpu, language)
+    finally:
+        # Cleanup converted file if we created one
+        if cleanup_converted and os.path.exists(converted_path):
+            try:
+                os.remove(converted_path)
+            except:
+                pass
 
 
 def _transcribe_openai_api(
@@ -62,9 +110,18 @@ def _transcribe_openai_api(
     try:
         from openai import OpenAI
         
+        # Validate API key
+        if not api_key or len(api_key) < 10:
+            raise ValueError(f"Invalid OpenAI API key (length: {len(api_key) if api_key else 0})")
+        
         client = OpenAI(api_key=api_key)
         
-        logger.info(f"Uploading to OpenAI Whisper API: {audio_path}")
+        # Check file exists and has content
+        if not os.path.exists(audio_path):
+            raise ValueError(f"Audio file not found: {audio_path}")
+        
+        file_size = os.path.getsize(audio_path)
+        logger.info(f"Uploading to OpenAI Whisper API: {audio_path} ({file_size} bytes)")
         
         with open(audio_path, "rb") as audio_file:
             # Use verbose_json for timestamps
