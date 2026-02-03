@@ -301,6 +301,35 @@ async def health_check():
     return {"status": "healthy"}
 
 
+@app.get("/health/redis", tags=["Health"])
+async def redis_health_check():
+    """Check Redis connectivity for task queue."""
+    import redis
+    redis_url = settings.redis_url
+    
+    try:
+        r = redis.from_url(redis_url)
+        r.ping()
+        connected = True
+        error = None
+    except Exception as e:
+        connected = False
+        error = str(e)
+    
+    # Mask password in URL for display
+    display_url = redis_url
+    if "@" in display_url:
+        parts = display_url.split("@")
+        display_url = parts[0].split(":")[0] + ":***@" + parts[1]
+    
+    return {
+        "redis_url": display_url,
+        "redis_url_source": "REDIS_URL env" if os.getenv("REDIS_URL") else "default (localhost)",
+        "connected": connected,
+        "error": error,
+    }
+
+
 @app.get("/health/google", tags=["Health"])
 async def google_health_check():
     """Check if Google OAuth credentials are configured."""

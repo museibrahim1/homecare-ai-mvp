@@ -1,4 +1,4 @@
-# Version: v15 - Redeploy trigger
+# Version: v16 - Add Redis health check endpoint
 FROM python:3.11-slim
 
 WORKDIR /app
