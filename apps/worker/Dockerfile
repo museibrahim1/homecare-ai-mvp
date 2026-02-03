@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: v21 - Ensure fresh data per client: clear old data, always create new contracts
+# Version: v22 - Fix SQLAlchemy query syntax for clearing old data
 WORKDIR /app
 
 # Install system dependencies for audio processing
