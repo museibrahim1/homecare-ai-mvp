@@ -84,6 +84,40 @@ def run_full_pipeline(self, visit_id: str):
     skip_diarization = settings.skip_diarization
     
     # =========================================================================
+    # CLEAR OLD DATA - Ensure fresh processing for this visit
+    # =========================================================================
+    logger.info(f"Clearing old pipeline data for visit {visit_id}")
+    with get_db_session() as db:
+        from models import TranscriptSegment, BillableItem
+        
+        # Clear old transcript segments (except imported ones)
+        deleted_segments = db.query(TranscriptSegment).filter(
+            TranscriptSegment.visit_id == visit_id,
+            ~TranscriptSegment.source.like('import_%')
+        ).delete(synchronize_session=False)
+        
+        # Clear old billable items
+        deleted_billables = db.query(BillableItem).filter(
+            BillableItem.visit_id == visit_id
+        ).delete(synchronize_session=False)
+        
+        # Reset pipeline state to fresh
+        visit = db.query(Visit).filter(Visit.id == visit_id).first()
+        if visit:
+            visit.pipeline_state = {
+                "full_pipeline": {"status": "processing"},
+                "transcription": {"status": "pending"},
+                "diarization": {"status": "pending"},
+                "alignment": {"status": "pending"},
+                "billing": {"status": "pending"},
+                "note": {"status": "pending"},
+                "contract": {"status": "pending"},
+            }
+        
+        db.commit()
+        logger.info(f"Cleared {deleted_segments} segments and {deleted_billables} billables")
+    
+    # =========================================================================
     # PHASE 1: Transcription + Diarization (can run in parallel)
     # =========================================================================
     logger.info(f"Phase 1: Audio processing for visit {visit_id}")

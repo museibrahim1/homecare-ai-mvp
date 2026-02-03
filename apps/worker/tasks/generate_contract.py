@@ -657,33 +657,27 @@ def generate_service_contract(self, visit_id: str):
         # STEP 6: Save contract to database
         # =====================================================================
         
-        # Check for existing contract
-        existing_contract = db.query(Contract).filter(
-            Contract.client_id == client.id,
-            Contract.status.in_(["draft", "pending_signature"]),
-        ).first()
+        # Always create a NEW contract for each assessment
+        # This ensures each assessment has its own fresh contract data
+        # Old drafts remain in history for reference
+        contract = Contract(
+            client_id=client.id,
+            title=f"Home Care Service Agreement - {client.full_name}",
+            services=contract_services,
+            schedule=extended_schedule,
+            hourly_rate=Decimal(str(hourly_rate)),
+            weekly_hours=Decimal(str(weekly_hours)),
+            cancellation_policy="",
+            terms_and_conditions=contract_text,
+        )
+        db.add(contract)
         
-        if existing_contract:
-            existing_contract.services = contract_services
-            existing_contract.schedule = extended_schedule
-            existing_contract.weekly_hours = Decimal(str(weekly_hours))
-            existing_contract.hourly_rate = Decimal(str(hourly_rate))
-            existing_contract.cancellation_policy = ""  # Template handles this
-            existing_contract.terms_and_conditions = contract_text  # Store full text
-            existing_contract.updated_at = datetime.now(timezone.utc)
-            contract = existing_contract
-        else:
-            contract = Contract(
-                client_id=client.id,
-                title=f"Home Care Service Agreement - {client.full_name}",
-                services=contract_services,
-                schedule=extended_schedule,
-                hourly_rate=Decimal(str(hourly_rate)),
-                weekly_hours=Decimal(str(weekly_hours)),
-                cancellation_policy="",
-                terms_and_conditions=contract_text,
-            )
-            db.add(contract)
+        # Mark any previous draft contracts as superseded
+        db.query(Contract).filter(
+            Contract.client_id == client.id,
+            Contract.status == "draft",
+            Contract.id != contract.id,
+        ).update({"status": "superseded"})
         
         # Update pipeline state
         visit.pipeline_state = {

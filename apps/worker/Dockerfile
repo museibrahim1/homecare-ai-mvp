@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: v20 - Always run transcription for audio uploads (not just imports)
+# Version: v21 - Ensure fresh data per client: clear old data, always create new contracts
 WORKDIR /app
 
 # Install system dependencies for audio processing
