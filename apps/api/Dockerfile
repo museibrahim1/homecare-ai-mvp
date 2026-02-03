@@ -1,4 +1,4 @@
-# Version: v17 - Add Celery health check endpoint
+# Version: v18 - Add S3 health check endpoint
 FROM python:3.11-slim
 
 WORKDIR /app

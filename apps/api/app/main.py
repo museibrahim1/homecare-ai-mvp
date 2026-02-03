@@ -354,6 +354,42 @@ async def celery_health_check():
         }
 
 
+@app.get("/health/s3", tags=["Health"])
+async def s3_health_check():
+    """Check S3/MinIO storage connectivity."""
+    import boto3
+    from botocore.config import Config
+    
+    try:
+        client = boto3.client(
+            "s3",
+            endpoint_url=settings.s3_endpoint_url,
+            aws_access_key_id=settings.s3_access_key,
+            aws_secret_access_key=settings.s3_secret_key,
+            config=Config(signature_version="s3v4"),
+            region_name="us-east-1",
+        )
+        # Try to list the bucket
+        client.head_bucket(Bucket=settings.s3_bucket)
+        connected = True
+        error = None
+    except Exception as e:
+        connected = False
+        error = str(e)
+    
+    # Mask sensitive values
+    endpoint_display = settings.s3_endpoint_url if settings.s3_endpoint_url else "NOT SET"
+    
+    return {
+        "s3_endpoint_url": endpoint_display,
+        "s3_bucket": settings.s3_bucket,
+        "s3_access_key_set": bool(settings.s3_access_key) and settings.s3_access_key != "minio",
+        "s3_secret_key_set": bool(settings.s3_secret_key) and settings.s3_secret_key != "minio12345",
+        "connected": connected,
+        "error": error,
+    }
+
+
 @app.get("/health/google", tags=["Health"])
 async def google_health_check():
     """Check if Google OAuth credentials are configured."""
