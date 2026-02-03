@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: v19 - Fix transcription: convert webm to wav + better logging
+# Version: v20 - Always run transcription for audio uploads (not just imports)
 WORKDIR /app
 
 # Install system dependencies for audio processing

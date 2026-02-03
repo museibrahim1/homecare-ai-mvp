@@ -88,20 +88,24 @@ def run_full_pipeline(self, visit_id: str):
     # =========================================================================
     logger.info(f"Phase 1: Audio processing for visit {visit_id}")
     
-    # Check if we already have a transcript (imported directly)
-    has_transcript = False
+    # Check if transcript was explicitly imported (not from audio processing)
+    # Only skip if source is 'import_*' - always re-transcribe for audio uploads
+    skip_transcription = False
     with get_db_session() as db:
         from models import TranscriptSegment
-        segment_count = db.query(TranscriptSegment).filter(
-            TranscriptSegment.visit_id == visit_id
-        ).count()
-        has_transcript = segment_count > 0
+        imported_segment = db.query(TranscriptSegment).filter(
+            TranscriptSegment.visit_id == visit_id,
+            TranscriptSegment.source.like('import_%')
+        ).first()
+        skip_transcription = imported_segment is not None
     
-    if has_transcript:
-        logger.info(f"Transcript already exists ({segment_count} segments), skipping Phase 1")
+    if skip_transcription:
+        logger.info(f"Transcript was imported, skipping Phase 1")
         update_pipeline_state(visit_id, "transcription", "skipped")
         update_pipeline_state(visit_id, "diarization", "skipped")
     else:
+        # Always run transcription for audio uploads (transcribe.py will clear old segments)
+        logger.info(f"Running transcription for visit {visit_id}")
         phase1_steps = [("transcription", "transcribe", transcribe_visit)]
         
         if not skip_diarization:
@@ -120,7 +124,7 @@ def run_full_pipeline(self, visit_id: str):
     # =========================================================================
     logger.info(f"Phase 2: Alignment for visit {visit_id}")
     
-    if not skip_diarization and not has_transcript:
+    if not skip_diarization and not skip_transcription:
         run_step(visit_id, "alignment", "align", align_visit)
     else:
         logger.info(f"Skipping alignment (diarization skipped or transcript imported)")
