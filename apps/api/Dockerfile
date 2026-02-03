@@ -1,4 +1,4 @@
-# Version: v16 - Add Redis health check endpoint
+# Version: v17 - Add Celery health check endpoint
 FROM python:3.11-slim
 
 WORKDIR /app

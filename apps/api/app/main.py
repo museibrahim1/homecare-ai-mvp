@@ -330,6 +330,30 @@ async def redis_health_check():
     }
 
 
+@app.get("/health/celery", tags=["Health"])
+async def celery_health_check():
+    """Check Celery task queue status."""
+    from app.services.jobs import celery_app
+    
+    try:
+        # Check if we can inspect workers
+        inspector = celery_app.control.inspect()
+        active_workers = inspector.active()
+        registered_tasks = inspector.registered()
+        
+        return {
+            "status": "ok",
+            "workers_found": active_workers is not None and len(active_workers) > 0,
+            "active_workers": list(active_workers.keys()) if active_workers else [],
+            "registered_tasks": registered_tasks,
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+        }
+
+
 @app.get("/health/google", tags=["Health"])
 async def google_health_check():
     """Check if Google OAuth credentials are configured."""
