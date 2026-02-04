@@ -137,6 +137,7 @@ class TranscriptSegment(Base):
     text = Column(Text, nullable=False)
     speaker_label = Column(String(50))
     confidence = Column(Float)
+    source = Column(String(50))  # Track source: whisper, whisper_api, import_json, import_srt, etc.
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

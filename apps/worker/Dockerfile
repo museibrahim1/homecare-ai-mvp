@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: v22 - Fix SQLAlchemy query syntax for clearing old data
+# Version: v23 - Add source column to TranscriptSegment model
 WORKDIR /app
 
 # Install system dependencies for audio processing
