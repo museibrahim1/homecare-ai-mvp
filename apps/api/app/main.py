@@ -390,6 +390,31 @@ async def s3_health_check():
     }
 
 
+@app.get("/health/openai", tags=["Health"])
+async def openai_health_check():
+    """Check OpenAI API key configuration."""
+    openai_key = os.getenv("OPENAI_API_KEY", "")
+    
+    # Try to use the key
+    test_result = None
+    if openai_key and len(openai_key) > 10:
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=openai_key)
+            # Quick test - list models
+            models = client.models.list()
+            test_result = "success"
+        except Exception as e:
+            test_result = f"error: {str(e)[:100]}"
+    
+    return {
+        "openai_api_key_set": bool(openai_key) and len(openai_key) > 10,
+        "openai_api_key_length": len(openai_key) if openai_key else 0,
+        "openai_api_key_prefix": openai_key[:7] + "..." if openai_key and len(openai_key) > 10 else "NOT SET",
+        "test_result": test_result,
+    }
+
+
 @app.get("/health/google", tags=["Health"])
 async def google_health_check():
     """Check if Google OAuth credentials are configured."""
