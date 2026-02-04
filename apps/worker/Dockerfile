@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Version: v23 - Add source column to TranscriptSegment model
+# Version: v24 - Simplify pipeline to always clear and re-transcribe
 WORKDIR /app
 
 # Install system dependencies for audio processing
