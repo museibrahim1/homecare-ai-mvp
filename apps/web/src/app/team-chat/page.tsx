@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { MessagesSquare, Hash, Users, Plus, Send, AtSign, Mail, Inbox, Check, Loader2, RefreshCw, X, Star, Paperclip, Reply, Trash2, Forward, UserCircle, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth';

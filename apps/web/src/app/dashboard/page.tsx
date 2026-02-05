@@ -8,6 +8,7 @@ import {
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
+import OnboardingChecklist from '@/components/OnboardingChecklist';
 import { format } from 'date-fns';
 
 export default function DashboardPage() {
@@ -72,6 +73,9 @@ export default function DashboardPage() {
             <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">Dashboard</h1>
             <p className="text-dark-300 text-sm lg:text-base">Care assessments in, proposal-ready contracts out.</p>
           </div>
+
+          {/* Onboarding Checklist - shows for new users */}
+          <OnboardingChecklist />
 
           {/* Stats Grid - responsive: 2 cols on mobile, 4 on desktop */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6 lg:mb-8">

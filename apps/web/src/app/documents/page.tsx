@@ -401,6 +401,13 @@ export default function DocumentsPage() {
           </div>
           <div className="flex gap-3">
             <button 
+              onClick={() => setShowUploadModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+            >
+              <Upload className="w-5 h-5" />
+              Upload File
+            </button>
+            <button 
               onClick={() => setShowDriveModal(true)}
               disabled={checkingDrive}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
@@ -839,6 +846,66 @@ export default function DocumentsPage() {
                   </p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Upload Modal */}
+        {showUploadModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-lg">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">Upload Document</h2>
+                <button onClick={() => setShowUploadModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
+                  <X className="w-5 h-5 text-dark-400" />
+                </button>
+              </div>
+              
+              {/* Drag & Drop Area */}
+              <div 
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                  dragActive 
+                    ? 'border-primary-500 bg-primary-500/10' 
+                    : 'border-dark-600 hover:border-dark-500'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <div className="w-16 h-16 bg-dark-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Upload className="w-8 h-8 text-primary-400" />
+                </div>
+                <p className="text-white font-medium mb-2">
+                  {dragActive ? 'Drop files here' : 'Drag and drop files here'}
+                </p>
+                <p className="text-dark-400 text-sm mb-4">
+                  or click to browse your computer
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  onChange={(e) => {
+                    handleFileUpload(e.target.files);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  className="hidden"
+                  accept="*/*"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                >
+                  Browse Files
+                </button>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-dark-400 text-sm">
+                  Supported formats: PDF, DOCX, XLSX, images, audio files, and more
+                </p>
+              </div>
             </div>
           </div>
         )}
