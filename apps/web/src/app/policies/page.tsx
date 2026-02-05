@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { RefreshCw, Plus, AlertCircle, CheckCircle, Clock, Search, Filter, X, User, Calendar, FileText } from 'lucide-react';
+import { RefreshCw, Plus, AlertCircle, CheckCircle, Clock, Search, Filter, X, User, Calendar, FileText, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
 
 type Policy = {
-  id: number;
+  id: string;
   client: string;
   type: string;
   startDate: string;
@@ -14,14 +15,6 @@ type Policy = {
   monthlyValue: number;
   notes: string;
 };
-
-const initialPolicies: Policy[] = [
-  { id: 1, client: 'Margaret Thompson', type: 'Care Agreement', startDate: '2025-06-15', endDate: '2026-06-15', status: 'active', monthlyValue: 3200, notes: '' },
-  { id: 2, client: 'Robert Williams', type: 'Service Contract', startDate: '2025-08-01', endDate: '2026-02-01', status: 'expiring', monthlyValue: 4800, notes: '' },
-  { id: 3, client: 'Eleanor Davis', type: 'Care Agreement', startDate: '2025-03-10', endDate: '2026-03-10', status: 'active', monthlyValue: 2800, notes: '' },
-  { id: 4, client: 'James Wilson', type: 'Service Contract', startDate: '2024-12-01', endDate: '2025-12-01', status: 'expired', monthlyValue: 5200, notes: '' },
-  { id: 5, client: 'Patricia Moore', type: 'Care Agreement', startDate: '2025-09-20', endDate: '2026-09-20', status: 'active', monthlyValue: 3600, notes: '' },
-];
 
 const statusConfig: Record<string, { color: string; icon: any; label: string }> = {
   active: { color: 'bg-green-500/20 text-green-400', icon: CheckCircle, label: 'Active' },
@@ -32,7 +25,9 @@ const statusConfig: Record<string, { color: string; icon: any; label: string }> 
 const policyTypes = ['Care Agreement', 'Service Contract', 'Family Agreement', 'Respite Care'];
 
 export default function PoliciesPage() {
-  const [policies, setPolicies] = useState(initialPolicies);
+  const { user } = useAuth();
+  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRenewModal, setShowRenewModal] = useState(false);
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
@@ -45,6 +40,42 @@ export default function PoliciesPage() {
     monthlyValue: '',
     notes: '',
   });
+
+  // Get user-specific storage key
+  const getStorageKey = useCallback(() => {
+    return user?.id ? `homecare_policies_${user.id}` : null;
+  }, [user?.id]);
+
+  // Load policies from localStorage (user-specific)
+  useEffect(() => {
+    const storageKey = getStorageKey();
+    if (!storageKey) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const savedPolicies = localStorage.getItem(storageKey);
+      if (savedPolicies) {
+        setPolicies(JSON.parse(savedPolicies));
+      }
+    } catch (error) {
+      console.error('Failed to load policies:', error);
+    }
+    setLoading(false);
+  }, [getStorageKey]);
+
+  // Save policies to localStorage when they change
+  useEffect(() => {
+    const storageKey = getStorageKey();
+    if (!storageKey || loading) return;
+    
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(policies));
+    } catch (error) {
+      console.error('Failed to save policies:', error);
+    }
+  }, [policies, getStorageKey, loading]);
 
   const filteredPolicies = policies.filter(policy =>
     policy.client.toLowerCase().includes(searchQuery.toLowerCase())
@@ -73,7 +104,7 @@ export default function PoliciesPage() {
     else if (daysUntil < 30) status = 'expiring';
 
     const policy: Policy = {
-      id: Date.now(),
+      id: `policy_${Date.now()}`,
       client: newPolicy.client,
       type: newPolicy.type,
       startDate: newPolicy.startDate,
@@ -94,6 +125,12 @@ export default function PoliciesPage() {
     setShowAddModal(false);
   };
 
+  const handleDeletePolicy = (policyId: string) => {
+    setPolicies(policies.filter(p => p.id !== policyId));
+    setShowRenewModal(false);
+    setSelectedPolicy(null);
+  };
+
   const handleRenewPolicy = () => {
     if (!selectedPolicy) return;
     
@@ -110,6 +147,17 @@ export default function PoliciesPage() {
     setShowRenewModal(false);
     setSelectedPolicy(null);
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-dark-900">
+        <Sidebar />
+        <main className="flex-1 p-8 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-dark-900">
@@ -173,62 +221,86 @@ export default function PoliciesPage() {
           </button>
         </div>
 
-        {/* Policies Table */}
-        <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-dark-700/50">
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Client</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Type</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Start Date</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">End Date</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Monthly Value</th>
-                <th className="px-6 py-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPolicies.map(policy => {
-                const config = statusConfig[policy.status];
-                const daysUntil = getDaysUntilRenewal(policy.endDate);
-                return (
-                  <tr key={policy.id} className="border-b border-dark-700/30 hover:bg-dark-700/20 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
-                          <span className="text-primary-400 font-medium">{policy.client.charAt(0)}</span>
+        {/* Empty State */}
+        {policies.length === 0 ? (
+          <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl p-12 text-center">
+            <ShieldCheck className="w-16 h-16 text-dark-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2">No Policies Yet</h3>
+            <p className="text-dark-400 mb-6">Create and manage care agreements and service contracts</p>
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Create Your First Policy
+            </button>
+          </div>
+        ) : (
+          /* Policies Table */
+          <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-dark-700/50">
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Client</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Type</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Start Date</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">End Date</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Status</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Monthly Value</th>
+                  <th className="px-6 py-4"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPolicies.map(policy => {
+                  const config = statusConfig[policy.status];
+                  const daysUntil = getDaysUntilRenewal(policy.endDate);
+                  return (
+                    <tr key={policy.id} className="border-b border-dark-700/30 hover:bg-dark-700/20 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                            <span className="text-primary-400 font-medium">{policy.client.charAt(0)}</span>
+                          </div>
+                          <span className="font-medium text-white">{policy.client}</span>
                         </div>
-                        <span className="font-medium text-white">{policy.client}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-dark-300">{policy.type}</td>
-                    <td className="px-6 py-4 text-dark-400">{policy.startDate}</td>
-                    <td className="px-6 py-4 text-dark-400">{policy.endDate}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
-                        <config.icon className="w-3.5 h-3.5" />
-                        {config.label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-green-400 font-medium">${policy.monthlyValue.toLocaleString()}</span>
-                      <span className="text-dark-500 text-sm ml-1">/mo</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button 
-                        onClick={() => { setSelectedPolicy(policy); setShowRenewModal(true); }}
-                        className="px-3 py-1.5 bg-primary-500/20 text-primary-400 rounded-lg text-sm font-medium hover:bg-primary-500/30 transition-colors flex items-center gap-1"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                        Renew
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                      <td className="px-6 py-4 text-dark-300">{policy.type}</td>
+                      <td className="px-6 py-4 text-dark-400">{policy.startDate}</td>
+                      <td className="px-6 py-4 text-dark-400">{policy.endDate}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
+                          <config.icon className="w-3.5 h-3.5" />
+                          {config.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-green-400 font-medium">${policy.monthlyValue.toLocaleString()}</span>
+                        <span className="text-dark-500 text-sm ml-1">/mo</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => { setSelectedPolicy(policy); setShowRenewModal(true); }}
+                            className="px-3 py-1.5 bg-primary-500/20 text-primary-400 rounded-lg text-sm font-medium hover:bg-primary-500/30 transition-colors flex items-center gap-1"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                            Renew
+                          </button>
+                          <button 
+                            onClick={() => handleDeletePolicy(policy.id)}
+                            className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4 text-dark-400 hover:text-red-400" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Add Policy Modal */}
         {showAddModal && (

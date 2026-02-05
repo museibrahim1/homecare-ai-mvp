@@ -7,26 +7,9 @@ import { useAuth } from '@/lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-const channels = [
-  { id: 1, name: 'general', unread: 3 },
-  { id: 2, name: 'care-team', unread: 0 },
-  { id: 3, name: 'scheduling', unread: 1 },
-  { id: 4, name: 'urgent', unread: 5 },
-];
-
-const teamMembers = [
-  { id: 1, name: 'Sarah Johnson', status: 'online', role: 'Care Coordinator' },
-  { id: 2, name: 'Mike Chen', status: 'online', role: 'RN Supervisor' },
-  { id: 3, name: 'Emily Rodriguez', status: 'away', role: 'Caregiver' },
-  { id: 4, name: 'David Kim', status: 'offline', role: 'Caregiver' },
-];
-
-const mockMessages = [
-  { id: 1, user: 'Sarah Johnson', avatar: 'SJ', text: 'Good morning team! Just a reminder about the staff meeting at 10 AM.', time: '9:15 AM' },
-  { id: 2, user: 'Mike Chen', avatar: 'MC', text: 'Thanks Sarah. I\'ll be there. Also, we have a new client assessment scheduled for this afternoon.', time: '9:20 AM' },
-  { id: 3, user: 'Emily Rodriguez', avatar: 'ER', text: 'I can cover the afternoon shift if anyone needs. Just let me know!', time: '9:25 AM' },
-  { id: 4, user: 'Sarah Johnson', avatar: 'SJ', text: '@Emily that would be great! Can you handle the Thompson visit at 2 PM?', time: '9:30 AM' },
-];
+// Empty defaults - no demo data for new users
+const defaultChannels: { id: string; name: string; unread: number }[] = [];
+const defaultTeamMembers: { id: string; name: string; status: string; role: string }[] = [];
 
 type Email = {
   id: string;
@@ -41,10 +24,96 @@ type Email = {
 };
 
 export default function TeamChatPage() {
-  const { token } = useAuth();
-  const [selectedChannel, setSelectedChannel] = useState(channels[0]);
+  const { token, user } = useAuth();
+  const [channels, setChannels] = useState<{ id: string; name: string; unread: number }[]>([]);
+  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string; status: string; role: string }[]>([]);
+  const [chatMessages, setChatMessages] = useState<{ id: string; user: string; avatar: string; text: string; time: string; channelId: string }[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<{ id: string; name: string; unread: number } | null>(null);
   const [newMessage, setNewMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'chat' | 'email'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'email'>('email'); // Default to email since chat is empty for new users
+  const [chatLoading, setChatLoading] = useState(true);
+  const [showAddChannelModal, setShowAddChannelModal] = useState(false);
+  const [newChannelName, setNewChannelName] = useState('');
+
+  // Get user-specific storage key for chat data
+  const getChatStorageKey = useCallback(() => {
+    return user?.id ? `homecare_teamchat_${user.id}` : null;
+  }, [user?.id]);
+
+  // Load chat data from localStorage (user-specific)
+  useEffect(() => {
+    const storageKey = getChatStorageKey();
+    if (!storageKey) {
+      setChatLoading(false);
+      return;
+    }
+    
+    try {
+      const savedData = localStorage.getItem(storageKey);
+      if (savedData) {
+        const { channels: savedChannels, teamMembers: savedMembers, messages: savedMessages } = JSON.parse(savedData);
+        setChannels(savedChannels || []);
+        setTeamMembers(savedMembers || []);
+        setChatMessages(savedMessages || []);
+        if (savedChannels?.length > 0) {
+          setSelectedChannel(savedChannels[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load chat data:', error);
+    }
+    setChatLoading(false);
+  }, [getChatStorageKey]);
+
+  // Save chat data to localStorage when it changes
+  useEffect(() => {
+    const storageKey = getChatStorageKey();
+    if (!storageKey || chatLoading) return;
+    
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ 
+        channels, 
+        teamMembers, 
+        messages: chatMessages 
+      }));
+    } catch (error) {
+      console.error('Failed to save chat data:', error);
+    }
+  }, [channels, teamMembers, chatMessages, getChatStorageKey, chatLoading]);
+
+  const handleAddChannel = () => {
+    if (!newChannelName.trim()) return;
+    const newChannel = {
+      id: `channel_${Date.now()}`,
+      name: newChannelName.toLowerCase().replace(/\s+/g, '-'),
+      unread: 0,
+    };
+    setChannels([...channels, newChannel]);
+    setSelectedChannel(newChannel);
+    setNewChannelName('');
+    setShowAddChannelModal(false);
+  };
+
+  const handleSendChatMessage = () => {
+    if (!newMessage.trim() || !selectedChannel || !user) return;
+    
+    const newMsg = {
+      id: `msg_${Date.now()}`,
+      user: user.name || user.email || 'You',
+      avatar: (user.name || user.email || 'U').split(' ').map(n => n[0]).join('').slice(0, 2),
+      text: newMessage,
+      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      channelId: selectedChannel.id,
+    };
+    
+    setChatMessages([...chatMessages, newMsg]);
+    setNewMessage('');
+  };
+
+  const getChannelMessages = () => {
+    if (!selectedChannel) return [];
+    return chatMessages.filter(m => m.channelId === selectedChannel.id);
+  };
   
   // Gmail state
   const [gmailConnected, setGmailConnected] = useState(false);
@@ -112,15 +181,30 @@ export default function TeamChatPage() {
               type: 'client' as const,
             }));
           
-          // Also add caregivers from team members (mock data for now)
-          const caregiverContacts = teamMembers.map((m, i) => ({
-            id: 1000 + i,
-            name: m.name,
-            email: `${m.name.toLowerCase().replace(' ', '.')}@homecare.com`,
-            type: 'caregiver' as const,
-          }));
-          
-          setContacts([...clientContacts, ...caregiverContacts]);
+          // Fetch caregivers from API instead of mock data
+          try {
+            const caregiversRes = await fetch(`${API_URL}/caregivers`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            
+            if (caregiversRes.ok) {
+              const caregiversData = await caregiversRes.json();
+              const caregiverContacts = (caregiversData || [])
+                .filter((c: any) => c.email)
+                .map((c: any) => ({
+                  id: c.id,
+                  name: c.full_name,
+                  email: c.email,
+                  type: 'caregiver' as const,
+                }));
+              
+              setContacts([...clientContacts, ...caregiverContacts]);
+            } else {
+              setContacts(clientContacts);
+            }
+          } catch {
+            setContacts(clientContacts);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch contacts:', error);
@@ -340,16 +424,8 @@ export default function TeamChatPage() {
     setShowComposeModal(true);
   };
 
-  // Mock emails for demo (when not connected)
-  const mockEmails: Email[] = [
-    { id: '1', from: 'Margaret Thompson', fromEmail: 'margaret@email.com', subject: 'Re: Care Plan Update', snippet: 'Thank you for the detailed care plan. I have reviewed it with my family and we are happy with...', date: '10:30 AM', unread: true, starred: false, hasAttachment: false },
-    { id: '2', from: 'Insurance Co.', fromEmail: 'claims@insurance.com', subject: 'Claim #12345 Approved', snippet: 'Your claim has been approved. Please find the details attached...', date: '9:15 AM', unread: true, starred: true, hasAttachment: true },
-    { id: '3', from: 'Robert Williams', fromEmail: 'rwilliams@email.com', subject: 'Schedule Change Request', snippet: 'I need to reschedule my appointment from Thursday to Friday if possible...', date: 'Yesterday', unread: false, starred: false, hasAttachment: false },
-    { id: '4', from: 'State Health Dept.', fromEmail: 'compliance@state.gov', subject: 'Annual Compliance Review', snippet: 'This is a reminder that your annual compliance review is due next month...', date: 'Yesterday', unread: false, starred: true, hasAttachment: true },
-    { id: '5', from: 'Eleanor Davis', fromEmail: 'edavis@email.com', subject: 'Thank You!', snippet: 'I wanted to thank Sarah for her wonderful care this week. She has been...', date: 'Jan 27', unread: false, starred: false, hasAttachment: false },
-  ];
-
-  const displayEmails = gmailConnected ? emails : mockEmails;
+  // No mock emails - only show real emails when connected
+  const displayEmails = gmailConnected ? emails : [];
 
   return (
     <div className="flex min-h-screen bg-dark-900">
@@ -393,17 +469,31 @@ export default function TeamChatPage() {
               <div className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-semibold text-dark-500 uppercase">Channels</span>
-                  <button className="p-1 hover:bg-dark-800 rounded transition-colors">
+                  <button 
+                    onClick={() => setShowAddChannelModal(true)}
+                    className="p-1 hover:bg-dark-800 rounded transition-colors"
+                  >
                     <Plus className="w-4 h-4 text-dark-400" />
                   </button>
                 </div>
+                {channels.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-dark-500 text-xs">No channels yet</p>
+                    <button 
+                      onClick={() => setShowAddChannelModal(true)}
+                      className="text-primary-400 text-xs mt-1 hover:underline"
+                    >
+                      Create one
+                    </button>
+                  </div>
+                ) : (
                 <div className="space-y-1">
                   {channels.map(channel => (
                     <button
                       key={channel.id}
                       onClick={() => setSelectedChannel(channel)}
                       className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                        selectedChannel.id === channel.id
+                        selectedChannel?.id === channel.id
                           ? 'bg-primary-500/20 text-white'
                           : 'text-dark-400 hover:bg-dark-800 hover:text-white'
                       }`}
@@ -418,6 +508,7 @@ export default function TeamChatPage() {
                     </button>
                   ))}
                 </div>
+                )}
               </div>
 
               {/* Team Members */}
@@ -426,25 +517,31 @@ export default function TeamChatPage() {
                   <span className="text-xs font-semibold text-dark-500 uppercase">Team</span>
                   <span className="text-xs text-dark-500">{teamMembers.filter(m => m.status === 'online').length} online</span>
                 </div>
-                <div className="space-y-2">
-                  {teamMembers.map(member => (
-                    <div key={member.id} className="flex items-center gap-2 px-2 py-1.5">
-                      <div className="relative">
-                        <div className="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center">
-                          <span className="text-xs text-white">{member.name.split(' ').map(n => n[0]).join('')}</span>
+                {teamMembers.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-dark-500 text-xs">No team members yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {teamMembers.map(member => (
+                      <div key={member.id} className="flex items-center gap-2 px-2 py-1.5">
+                        <div className="relative">
+                          <div className="w-8 h-8 rounded-full bg-dark-700 flex items-center justify-center">
+                            <span className="text-xs text-white">{member.name.split(' ').map(n => n[0]).join('')}</span>
+                          </div>
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-dark-900 ${
+                            member.status === 'online' ? 'bg-green-500' :
+                            member.status === 'away' ? 'bg-yellow-500' : 'bg-dark-600'
+                          }`} />
                         </div>
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-dark-900 ${
-                          member.status === 'online' ? 'bg-green-500' :
-                          member.status === 'away' ? 'bg-yellow-500' : 'bg-dark-600'
-                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-white truncate">{member.name}</p>
+                          <p className="text-xs text-dark-500 truncate">{member.role}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white truncate">{member.name}</p>
-                        <p className="text-xs text-dark-500 truncate">{member.role}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </>
           ) : (
@@ -531,50 +628,76 @@ export default function TeamChatPage() {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
           {activeTab === 'chat' ? (
-            <>
-              {/* Chat Header */}
-              <div className="p-4 border-b border-dark-700/50 flex items-center gap-3">
-                <Hash className="w-5 h-5 text-dark-400" />
-                <h2 className="font-medium text-white">{selectedChannel.name}</h2>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                {mockMessages.map(msg => (
-                  <div key={msg.id} className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary-400 text-sm font-medium">{msg.avatar}</span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-white">{msg.user}</span>
-                        <span className="text-xs text-dark-500">{msg.time}</span>
-                      </div>
-                      <p className="text-dark-300">{msg.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Chat Input */}
-              <div className="p-4 border-t border-dark-700/50">
-                <div className="flex items-center gap-3">
-                  <button className="p-2 hover:bg-dark-800 rounded-lg transition-colors">
-                    <AtSign className="w-5 h-5 text-dark-400" />
-                  </button>
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder={`Message #${selectedChannel.name}`}
-                    className="flex-1 px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:border-primary-500 focus:outline-none"
-                  />
-                  <button className="p-2.5 bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
-                    <Send className="w-5 h-5 text-white" />
-                  </button>
+            selectedChannel ? (
+              <>
+                {/* Chat Header */}
+                <div className="p-4 border-b border-dark-700/50 flex items-center gap-3">
+                  <Hash className="w-5 h-5 text-dark-400" />
+                  <h2 className="font-medium text-white">{selectedChannel.name}</h2>
                 </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                  {getChannelMessages().length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-dark-400">
+                      <MessagesSquare className="w-12 h-12 mb-3 opacity-50" />
+                      <p>No messages in #{selectedChannel.name} yet</p>
+                      <p className="text-sm">Be the first to say something!</p>
+                    </div>
+                  ) : (
+                    getChannelMessages().map(msg => (
+                      <div key={msg.id} className="flex gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary-400 text-sm font-medium">{msg.avatar}</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-white">{msg.user}</span>
+                            <span className="text-xs text-dark-500">{msg.time}</span>
+                          </div>
+                          <p className="text-dark-300">{msg.text}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Chat Input */}
+                <div className="p-4 border-t border-dark-700/50">
+                  <div className="flex items-center gap-3">
+                    <button className="p-2 hover:bg-dark-800 rounded-lg transition-colors">
+                      <AtSign className="w-5 h-5 text-dark-400" />
+                    </button>
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
+                      placeholder={`Message #${selectedChannel.name}`}
+                      className="flex-1 px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                    />
+                    <button 
+                      onClick={handleSendChatMessage}
+                      className="p-2.5 bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors"
+                    >
+                      <Send className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-dark-400">
+                <MessagesSquare className="w-16 h-16 mb-4 opacity-50" />
+                <p className="text-lg mb-2">No channel selected</p>
+                <p className="text-sm mb-4">Create a channel to start chatting</p>
+                <button 
+                  onClick={() => setShowAddChannelModal(true)}
+                  className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                >
+                  Create Channel
+                </button>
               </div>
-            </>
+            )
           ) : (
             <>
               {/* Email Header */}
@@ -668,9 +791,9 @@ export default function TeamChatPage() {
               {/* Email List */}
               <div className="flex-1 overflow-y-auto">
                 {!gmailConnected && (
-                  <div className="p-4 bg-yellow-500/10 border-b border-yellow-500/20">
-                    <p className="text-sm text-yellow-400">
-                      Connect your Gmail account to sync your emails. Showing demo data below.
+                  <div className="p-4 bg-dark-800/50 border-b border-dark-700/50">
+                    <p className="text-sm text-dark-400">
+                      Connect your Gmail account above to sync your emails.
                     </p>
                   </div>
                 )}
@@ -855,6 +978,47 @@ export default function TeamChatPage() {
                 </button>
                 <button className="p-2 hover:bg-dark-700 rounded-lg transition-colors">
                   <Trash2 className="w-5 h-5 text-dark-400 hover:text-red-400" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Channel Modal */}
+        {showAddChannelModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">Create Channel</h2>
+                <button onClick={() => setShowAddChannelModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
+                  <X className="w-5 h-5 text-dark-400" />
+                </button>
+              </div>
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-dark-300 mb-2">Channel Name</label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input
+                    type="text"
+                    value={newChannelName}
+                    onChange={(e) => setNewChannelName(e.target.value)}
+                    placeholder="e.g. general"
+                    className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowAddChannelModal(false)}
+                  className="flex-1 px-4 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddChannel}
+                  className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                >
+                  Create Channel
                 </button>
               </div>
             </div>

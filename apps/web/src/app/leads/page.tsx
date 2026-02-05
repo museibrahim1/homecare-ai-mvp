@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { Plus, Phone, Mail, MoreVertical, Search, Filter, X, User, Globe, MessageSquare } from 'lucide-react';
+import { Plus, Phone, Mail, MoreVertical, Search, Filter, X, User, Globe, MessageSquare, Loader2, UserPlus, Trash2 } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 type Lead = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -14,14 +17,6 @@ type Lead = {
   notes: string;
   created: string;
 };
-
-const initialLeads: Lead[] = [
-  { id: 1, name: 'Susan Martinez', email: 'susan.m@email.com', phone: '(555) 123-4567', source: 'Website', status: 'New', notes: '', created: '2 hours ago' },
-  { id: 2, name: 'William Johnson', email: 'w.johnson@email.com', phone: '(555) 234-5678', source: 'Referral', status: 'Contacted', notes: '', created: '1 day ago' },
-  { id: 3, name: 'Barbara White', email: 'b.white@email.com', phone: '(555) 345-6789', source: 'Google Ads', status: 'Qualified', notes: '', created: '2 days ago' },
-  { id: 4, name: 'Michael Brown', email: 'm.brown@email.com', phone: '(555) 456-7890', source: 'Website', status: 'New', notes: '', created: '3 hours ago' },
-  { id: 5, name: 'Linda Davis', email: 'l.davis@email.com', phone: '(555) 567-8901', source: 'Facebook', status: 'Contacted', notes: '', created: '5 days ago' },
-];
 
 const statusColors: Record<string, string> = {
   'New': 'bg-blue-500/20 text-blue-400',
@@ -33,12 +28,51 @@ const sources = ['Website', 'Referral', 'Google Ads', 'Facebook', 'Instagram', '
 const statuses = ['New', 'Contacted', 'Qualified'];
 
 export default function LeadsPage() {
-  const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  const { token, user } = useAuth();
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [newLead, setNewLead] = useState({ name: '', email: '', phone: '', source: 'Website', status: 'New', notes: '' });
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Get user-specific storage key
+  const getStorageKey = useCallback(() => {
+    return user?.id ? `homecare_leads_${user.id}` : null;
+  }, [user?.id]);
+
+  // Load leads from localStorage (user-specific)
+  useEffect(() => {
+    const storageKey = getStorageKey();
+    if (!storageKey) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const savedLeads = localStorage.getItem(storageKey);
+      if (savedLeads) {
+        setLeads(JSON.parse(savedLeads));
+      }
+    } catch (error) {
+      console.error('Failed to load leads:', error);
+    }
+    setLoading(false);
+  }, [getStorageKey]);
+
+  // Save leads to localStorage when they change
+  useEffect(() => {
+    const storageKey = getStorageKey();
+    if (!storageKey || loading) return;
+    
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(leads));
+    } catch (error) {
+      console.error('Failed to save leads:', error);
+    }
+  }, [leads, getStorageKey, loading]);
 
   const filteredLeads = leads.filter(lead =>
     lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -48,7 +82,7 @@ export default function LeadsPage() {
   const handleAddLead = () => {
     if (!newLead.name) return;
     const lead: Lead = {
-      id: Date.now(),
+      id: `lead_${Date.now()}`,
       ...newLead,
       created: 'Just now',
     };
@@ -57,8 +91,18 @@ export default function LeadsPage() {
     setShowAddModal(false);
   };
 
-  const handleUpdateStatus = (leadId: number, newStatus: string) => {
+  const handleUpdateStatus = (leadId: string, newStatus: string) => {
     setLeads(leads.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+  };
+
+  const handleDeleteLead = (leadId: string) => {
+    setDeletingId(leadId);
+    setTimeout(() => {
+      setLeads(leads.filter(l => l.id !== leadId));
+      setDeletingId(null);
+      setShowDetailModal(false);
+      setSelectedLead(null);
+    }, 300);
   };
 
   const handleConvertToDeal = (lead: Lead) => {
@@ -66,6 +110,17 @@ export default function LeadsPage() {
     alert(`Converting ${lead.name} to deal - would navigate to pipeline`);
     setShowDetailModal(false);
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-dark-900">
+        <Sidebar />
+        <main className="flex-1 p-8 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-dark-900">
@@ -104,63 +159,87 @@ export default function LeadsPage() {
           </button>
         </div>
 
-        {/* Leads Table */}
-        <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-dark-700/50">
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Name</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Contact</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Source</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Created</th>
-                <th className="px-6 py-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeads.map(lead => (
-                <tr 
-                  key={lead.id} 
-                  className="border-b border-dark-700/30 hover:bg-dark-700/20 transition-colors cursor-pointer"
-                  onClick={() => { setSelectedLead(lead); setShowDetailModal(true); }}
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
-                        <span className="text-primary-400 font-medium">{lead.name.charAt(0)}</span>
-                      </div>
-                      <span className="font-medium text-white">{lead.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-dark-300">
-                        <Mail className="w-4 h-4" />
-                        {lead.email}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-dark-400">
-                        <Phone className="w-4 h-4" />
-                        {lead.phone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-dark-300">{lead.source}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status]}`}>
-                      {lead.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-dark-400 text-sm">{lead.created}</td>
-                  <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                    <button className="p-2 hover:bg-dark-700 rounded-lg transition-colors">
-                      <MoreVertical className="w-5 h-5 text-dark-400" />
-                    </button>
-                  </td>
+        {/* Empty State */}
+        {leads.length === 0 ? (
+          <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl p-12 text-center">
+            <UserPlus className="w-16 h-16 text-dark-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2">No Leads Yet</h3>
+            <p className="text-dark-400 mb-6">Start tracking potential clients by adding your first lead</p>
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Add Your First Lead
+            </button>
+          </div>
+        ) : (
+          /* Leads Table */
+          <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-dark-700/50">
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Name</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Contact</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Source</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Status</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Created</th>
+                  <th className="px-6 py-4"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredLeads.map(lead => (
+                  <tr 
+                    key={lead.id} 
+                    className="border-b border-dark-700/30 hover:bg-dark-700/20 transition-colors cursor-pointer"
+                    onClick={() => { setSelectedLead(lead); setShowDetailModal(true); }}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                          <span className="text-primary-400 font-medium">{lead.name.charAt(0)}</span>
+                        </div>
+                        <span className="font-medium text-white">{lead.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-dark-300">
+                          <Mail className="w-4 h-4" />
+                          {lead.email || 'No email'}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-dark-400">
+                          <Phone className="w-4 h-4" />
+                          {lead.phone || 'No phone'}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-dark-300">{lead.source}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status] || 'bg-dark-600 text-dark-300'}`}>
+                        {lead.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-dark-400 text-sm">{lead.created}</td>
+                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                      <button 
+                        onClick={() => handleDeleteLead(lead.id)}
+                        disabled={deletingId === lead.id}
+                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                      >
+                        {deletingId === lead.id ? (
+                          <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-5 h-5 text-dark-400 hover:text-red-400" />
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Add Lead Modal */}
         {showAddModal && (
@@ -298,12 +377,20 @@ export default function LeadsPage() {
                   ))}
                 </div>
               </div>
-              <button
-                onClick={() => handleConvertToDeal(selectedLead)}
-                className="w-full px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium"
-              >
-                Convert to Deal
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleDeleteLead(selectedLead.id)}
+                  className="flex-1 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors font-medium"
+                >
+                  Delete Lead
+                </button>
+                <button
+                  onClick={() => handleConvertToDeal(selectedLead)}
+                  className="flex-1 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium"
+                >
+                  Convert to Deal
+                </button>
+              </div>
             </div>
           </div>
         )}

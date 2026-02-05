@@ -702,25 +702,19 @@ export default function ReportsPage() {
           {/* Recent Activity Feed */}
           <div className="card p-6 mt-6">
             <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-            <div className="space-y-3">
-              {[
-                { action: 'Assessment completed', client: 'New Client', time: '2 hours ago', icon: FileText, color: 'primary' },
-                { action: 'Contract generated', client: 'Demo Client', time: '5 hours ago', icon: FileText, color: 'green' },
-                { action: 'Billing report exported', client: 'System', time: '1 day ago', icon: Download, color: 'orange' },
-                { action: 'New client added', client: 'John Smith', time: '2 days ago', icon: Users, color: 'cyan' },
-              ].map((activity, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 bg-dark-700/30 rounded-lg">
-                  <div className={`w-10 h-10 bg-accent-${activity.color}/20 rounded-xl flex items-center justify-center`}>
-                    <activity.icon className={`w-5 h-5 text-accent-${activity.color}`} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-white text-sm">{activity.action}</p>
-                    <p className="text-dark-400 text-xs">{activity.client}</p>
-                  </div>
-                  <span className="text-dark-500 text-xs">{activity.time}</span>
+            {(overviewStats?.assessments_this_week || 0) === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="w-12 h-12 text-dark-600 mx-auto mb-3" />
+                <p className="text-dark-400">No recent activity</p>
+                <p className="text-dark-500 text-sm mt-1">Complete an assessment to see activity here</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="text-center py-4 text-dark-400 text-sm">
+                  Activity feed based on your assessments will appear here
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
