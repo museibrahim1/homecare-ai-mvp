@@ -1,4 +1,4 @@
-# Version: v21 - Add data isolation for multi-tenant support
+# Version: v22 - Add admin endpoint to clear all businesses
 FROM python:3.11-slim
 
 WORKDIR /app

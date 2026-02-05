@@ -427,6 +427,75 @@ async def verify_document(
 
 
 # =============================================================================
+# DATABASE MANAGEMENT
+# =============================================================================
+
+@router.delete("/businesses/clear-all")
+async def clear_all_businesses(
+    confirm: str = Query(..., description="Must be 'CONFIRM' to proceed"),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_platform_admin),
+):
+    """
+    Clear ALL businesses from the database (for testing/demo reset).
+    
+    WARNING: This is destructive! Requires confirm='CONFIRM' parameter.
+    """
+    if confirm != "CONFIRM":
+        raise HTTPException(
+            status_code=400,
+            detail="Must provide confirm=CONFIRM to clear all businesses"
+        )
+    
+    # Get counts before deletion
+    business_count = db.query(Business).count()
+    user_count = db.query(BusinessUser).count()
+    doc_count = db.query(BusinessDocument).count()
+    
+    # Delete in order (foreign key constraints)
+    db.query(BusinessDocument).delete(synchronize_session=False)
+    db.query(BusinessUser).delete(synchronize_session=False)
+    
+    # Also delete the linked User records for business users
+    from app.models.user import User as UserModel
+    # Get business user emails before deleting
+    business_user_emails = [b.email for b in db.query(BusinessUser).all()]
+    
+    # Actually query again since we haven't committed
+    db.rollback()  # Rollback the partial deletes
+    
+    # Get all business user IDs and emails
+    business_users = db.query(BusinessUser).all()
+    business_user_ids = [str(bu.id) for bu in business_users]
+    business_user_emails = [bu.email for bu in business_users]
+    
+    # Now delete properly
+    db.query(BusinessDocument).delete(synchronize_session=False)
+    db.query(BusinessUser).delete(synchronize_session=False)
+    db.query(Business).delete(synchronize_session=False)
+    
+    # Delete corresponding User records (but NOT the admin user)
+    deleted_users = db.query(UserModel).filter(
+        UserModel.email.in_(business_user_emails),
+        UserModel.role != 'admin'  # Keep admin user
+    ).delete(synchronize_session=False)
+    
+    db.commit()
+    
+    logger.info(f"Admin {admin.email} cleared all businesses: {business_count} businesses, {user_count} business users, {doc_count} documents, {deleted_users} user records")
+    
+    return {
+        "message": "All businesses cleared successfully",
+        "deleted": {
+            "businesses": business_count,
+            "business_users": user_count,
+            "documents": doc_count,
+            "user_records": deleted_users,
+        }
+    }
+
+
+# =============================================================================
 # STATS
 # =============================================================================
 

@@ -1,4 +1,4 @@
-# Version: v21 - Fix mobile UI with responsive sidebar and dashboard
+# Version: v22 - Improve mobile Document Preview panel
 FROM node:20-alpine AS builder
 
 WORKDIR /app

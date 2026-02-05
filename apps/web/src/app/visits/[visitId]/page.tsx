@@ -725,7 +725,7 @@ export default function VisitDetailPage() {
           onClick={() => setSidebarOpen(false)}
         />
         <div
-          className="fixed top-0 right-0 h-full w-full sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] max-w-[85vw] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
+          className="fixed top-0 right-0 h-full w-full xs:w-[90vw] sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
         >
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
