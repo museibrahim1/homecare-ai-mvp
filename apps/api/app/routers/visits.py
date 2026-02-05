@@ -11,6 +11,9 @@ from app.models.transcript_segment import TranscriptSegment
 from app.models.billable_item import BillableItem
 from app.models.note import Note
 from app.models.contract import Contract
+from app.models.audio_asset import AudioAsset
+from app.models.diarization_turn import DiarizationTurn
+from app.models.call import Call
 from app.schemas.visit import VisitCreate, VisitUpdate, VisitResponse, VisitListResponse
 
 router = APIRouter()
@@ -163,9 +166,18 @@ async def delete_visit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a visit (data isolation enforced)."""
+    """Delete a visit and all related records (data isolation enforced)."""
     visit = get_user_visit(db, visit_id, current_user)
     
+    # Delete all related records first to avoid foreign key constraint errors
+    db.query(TranscriptSegment).filter(TranscriptSegment.visit_id == visit_id).delete(synchronize_session=False)
+    db.query(DiarizationTurn).filter(DiarizationTurn.visit_id == visit_id).delete(synchronize_session=False)
+    db.query(BillableItem).filter(BillableItem.visit_id == visit_id).delete(synchronize_session=False)
+    db.query(Note).filter(Note.visit_id == visit_id).delete(synchronize_session=False)
+    db.query(AudioAsset).filter(AudioAsset.visit_id == visit_id).delete(synchronize_session=False)
+    db.query(Call).filter(Call.visit_id == visit_id).delete(synchronize_session=False)
+    
+    # Now delete the visit itself
     db.delete(visit)
     db.commit()
 
