@@ -14,7 +14,7 @@ import sqlalchemy as sa
 
 # revision identifiers
 revision = '014'
-down_revision = '013_client_data_isolation'
+down_revision = '013'
 branch_labels = None
 depends_on = None
 
