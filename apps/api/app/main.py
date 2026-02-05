@@ -38,6 +38,8 @@ class CatchAllMiddleware(BaseHTTPMiddleware):
                 "http://localhost:3001",
                 "http://127.0.0.1:3001",
                 "https://web-production-11611.up.railway.app",
+                "https://app.palmtai.com",
+                "https://palmtai.com",
             ]
             
             if origin in allowed_origins:
@@ -94,7 +96,10 @@ cors_origins = [
     "http://127.0.0.1:3001",
     # Railway deployments
     "https://web-production-11611.up.railway.app",
-    "https://helcarai.up.railway.app",  # Custom domain placeholder
+    "https://helcarai.up.railway.app",
+    # Custom domain
+    "https://app.palmtai.com",
+    "https://palmtai.com",
 ]
 
 # Add any custom origins from environment
