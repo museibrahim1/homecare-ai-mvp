@@ -163,7 +163,7 @@ class EmailService:
                 
                 <!-- CTA Button -->
                 <div style="text-align: center; margin: 35px 0;">
-                    <a href="{self.app_url}/login" 
+                    <a href="{self.app_url}" 
                        style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
                         Start Your First Assessment →
                     </a>
