@@ -111,7 +111,7 @@ class EmailService:
             <!-- Main content -->
             <div style="padding: 40px 30px;">
                 <div style="text-align: center; margin-bottom: 30px;">
-                    <span style="font-size: 50px;">🎉</span>
+                    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f389.png" alt="Party" style="width: 50px; height: 50px;">
                     <h2 style="color: #1f2937; margin: 15px 0 10px 0; font-size: 24px;">Welcome, {business_name}!</h2>
                     <p style="color: #6b7280; margin: 0; font-size: 16px;">Your account is ready to transform your agency</p>
                 </div>
@@ -130,35 +130,59 @@ class EmailService:
                 <div style="margin: 30px 0;">
                     <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 18px; text-align: center;">What You Can Do Today</h3>
                     
-                    <div style="background: #faf5ff; border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center;">
-                        <div style="background: #6366f1; width: 40px; height: 40px; border-radius: 10px; display: inline-block; text-align: center; line-height: 40px; margin-right: 15px; flex-shrink: 0;">
-                            <span style="color: white; font-size: 18px;">🎙️</span>
-                        </div>
-                        <div>
-                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Record or Upload Assessments</p>
-                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">AI transcribes and extracts billable services automatically</p>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #faf5ff; border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center;">
-                        <div style="background: #8b5cf6; width: 40px; height: 40px; border-radius: 10px; display: inline-block; text-align: center; line-height: 40px; margin-right: 15px; flex-shrink: 0;">
-                            <span style="color: white; font-size: 18px;">📄</span>
-                        </div>
-                        <div>
-                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Generate Contracts Instantly</p>
-                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">Professional service agreements created in seconds, not hours</p>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #faf5ff; border-radius: 12px; padding: 20px; display: flex; align-items: center;">
-                        <div style="background: #a855f7; width: 40px; height: 40px; border-radius: 10px; display: inline-block; text-align: center; line-height: 40px; margin-right: 15px; flex-shrink: 0;">
-                            <span style="color: white; font-size: 18px;">💰</span>
-                        </div>
-                        <div>
-                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Get to Revenue Faster</p>
-                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">Close deals same-day with ready-to-sign proposals</p>
-                        </div>
-                    </div>
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0 12px;">
+                        <tr>
+                            <td style="background: #faf5ff; border-radius: 12px; padding: 20px;">
+                                <table style="width: 100%;">
+                                    <tr>
+                                        <td style="width: 50px; vertical-align: top;">
+                                            <div style="background: #6366f1; width: 40px; height: 40px; border-radius: 10px; text-align: center; line-height: 40px;">
+                                                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f399.png" alt="Mic" style="width: 20px; height: 20px; vertical-align: middle;">
+                                            </div>
+                                        </td>
+                                        <td style="vertical-align: top; padding-left: 10px;">
+                                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Record or Upload Assessments</p>
+                                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">AI transcribes and extracts billable services automatically</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background: #faf5ff; border-radius: 12px; padding: 20px;">
+                                <table style="width: 100%;">
+                                    <tr>
+                                        <td style="width: 50px; vertical-align: top;">
+                                            <div style="background: #8b5cf6; width: 40px; height: 40px; border-radius: 10px; text-align: center; line-height: 40px;">
+                                                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c4.png" alt="Document" style="width: 20px; height: 20px; vertical-align: middle;">
+                                            </div>
+                                        </td>
+                                        <td style="vertical-align: top; padding-left: 10px;">
+                                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Generate Contracts Instantly</p>
+                                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">Professional service agreements created in seconds, not hours</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background: #faf5ff; border-radius: 12px; padding: 20px;">
+                                <table style="width: 100%;">
+                                    <tr>
+                                        <td style="width: 50px; vertical-align: top;">
+                                            <div style="background: #a855f7; width: 40px; height: 40px; border-radius: 10px; text-align: center; line-height: 40px;">
+                                                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4b0.png" alt="Money" style="width: 20px; height: 20px; vertical-align: middle;">
+                                            </div>
+                                        </td>
+                                        <td style="vertical-align: top; padding-left: 10px;">
+                                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Get to Revenue Faster</p>
+                                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">Close deals same-day with ready-to-sign proposals</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
                 
                 <!-- CTA Button -->
