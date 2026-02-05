@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Date, Text, Index, Boolean
+from sqlalchemy import Column, String, Date, Text, Index, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from app.db.base import Base, TimestampMixin
@@ -9,6 +9,9 @@ class Client(Base, TimestampMixin):
     __tablename__ = "clients"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    
+    # === OWNERSHIP - For data isolation ===
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     
     # === BASIC INFORMATION ===
     full_name = Column(String(255), nullable=False)

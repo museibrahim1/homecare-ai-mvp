@@ -19,8 +19,16 @@ async def list_clients(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all clients."""
-    clients = db.query(Client).offset(skip).limit(limit).all()
+    """List clients created by the current user (data isolation)."""
+    # Filter by created_by for data isolation
+    # Also include clients with no created_by (legacy data) for the creator user
+    from sqlalchemy import or_
+    clients = db.query(Client).filter(
+        or_(
+            Client.created_by == current_user.id,
+            Client.created_by == None  # Legacy clients before this field was added
+        )
+    ).offset(skip).limit(limit).all()
     return clients
 
 
@@ -30,8 +38,10 @@ async def create_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new client."""
-    client = Client(**client_in.model_dump())
+    """Create a new client (associated with the current user)."""
+    client_data = client_in.model_dump()
+    client_data['created_by'] = current_user.id  # Set owner for data isolation
+    client = Client(**client_data)
     db.add(client)
     db.commit()
     db.refresh(client)

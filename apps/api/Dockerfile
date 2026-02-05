@@ -1,4 +1,4 @@
-# Version: v20 - Fix admin businesses listing with optional state
+# Version: v21 - Add data isolation for multi-tenant support
 FROM python:3.11-slim
 
 WORKDIR /app

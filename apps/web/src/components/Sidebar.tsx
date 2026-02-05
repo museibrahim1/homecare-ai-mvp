@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -29,7 +30,9 @@ import {
   UserCog,
   Eye,
   RefreshCw,
-  HelpCircle
+  HelpCircle,
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -86,6 +89,21 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user, hydrated } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Close mobile sidebar on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
 
   // Debug: log user data to understand why admin section might not show
   const isAdmin = user?.role === 'admin';
@@ -138,19 +156,52 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col h-screen flex-shrink-0 sticky top-0 left-0 z-50">
-      {/* Logo */}
-      <div className="px-6 py-6 flex-shrink-0">
-        <Link href="/dashboard" className="flex items-center gap-4">
-          <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-            <Mic className="w-6 h-6 text-white" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-xl font-bold text-white block">Homecare AI</span>
-            <span className="text-xs text-dark-400">Contracts & proposals</span>
-          </div>
-        </Link>
-      </div>
+    <>
+      {/* Mobile Menu Button - Fixed at top left */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-dark-800 border border-dark-700 rounded-lg text-white hover:bg-dark-700 transition-colors"
+        aria-label="Open menu"
+      >
+        <Menu className="w-6 h-6" />
+      </button>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/60 z-50"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col h-screen flex-shrink-0 z-50
+        fixed lg:sticky top-0 left-0
+        transform transition-transform duration-300 ease-in-out
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        {/* Mobile Close Button */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="lg:hidden absolute top-4 right-4 p-2 text-dark-400 hover:text-white transition-colors"
+          aria-label="Close menu"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Logo */}
+        <div className="px-6 py-6 flex-shrink-0">
+          <Link href="/dashboard" className="flex items-center gap-4">
+            <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+              <Mic className="w-6 h-6 text-white" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-xl font-bold text-white block">Homecare AI</span>
+              <span className="text-xs text-dark-400">Contracts & proposals</span>
+            </div>
+          </Link>
+        </div>
 
       {/* Main Navigation */}
       <nav className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
@@ -269,5 +320,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

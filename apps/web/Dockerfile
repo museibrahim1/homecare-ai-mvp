@@ -1,4 +1,4 @@
-# Version: v20 - Fix responsive layout for 1920x1080
+# Version: v21 - Fix mobile UI with responsive sidebar and dashboard
 FROM node:20-alpine AS builder
 
 WORKDIR /app

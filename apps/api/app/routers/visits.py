@@ -26,10 +26,26 @@ async def list_visits(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List visits with pagination and filters."""
+    """List visits with pagination and filters (data isolation by user)."""
+    from sqlalchemy import or_
+    
+    # Get client IDs that belong to this user for data isolation
+    user_client_ids = db.query(Client.id).filter(
+        or_(
+            Client.created_by == current_user.id,
+            Client.created_by == None  # Legacy clients
+        )
+    ).subquery()
+    
     query = db.query(Visit).options(
         joinedload(Visit.client),
         joinedload(Visit.caregiver),
+    ).filter(
+        # Data isolation: only show visits for user's clients OR visits where user is caregiver
+        or_(
+            Visit.client_id.in_(user_client_ids),
+            Visit.caregiver_id == current_user.id
+        )
     )
     
     if status:
