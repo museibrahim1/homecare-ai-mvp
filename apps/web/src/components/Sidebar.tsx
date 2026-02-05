@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -90,6 +90,25 @@ export default function Sidebar() {
   const router = useRouter();
   const { logout, user, hydrated } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const scrollPositionRef = useRef<number>(0);
+
+  // Preserve sidebar scroll position across navigations
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
+    // Save scroll position before navigation
+    const handleScroll = () => {
+      scrollPositionRef.current = nav.scrollTop;
+    };
+    nav.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Restore scroll position after navigation
+    nav.scrollTop = scrollPositionRef.current;
+
+    return () => nav.removeEventListener('scroll', handleScroll);
+  }, [pathname]);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -123,7 +142,9 @@ export default function Sidebar() {
     return (
       <Link
         href={item.href}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group cursor-pointer ${
+        scroll={false}
+        prefetch={true}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group cursor-pointer select-none ${
           isActive 
             ? 'bg-primary-500/15 text-white border border-primary-500/30' 
             : 'text-dark-300 hover:bg-dark-700/50 hover:text-white border border-transparent'
@@ -197,7 +218,7 @@ export default function Sidebar() {
         </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
+      <nav ref={navRef} className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
         {/* Sales Section */}
         <div className="mb-5">
           <div className="px-4 py-2 mb-2">
