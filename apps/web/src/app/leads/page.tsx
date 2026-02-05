@@ -94,7 +94,7 @@ export default function LeadsPage() {
       created: 'Just now',
     };
     setLeads([lead, ...leads]);
-    setNewLead({ name: '', email: '', phone: '', source: 'Website', status: 'New', notes: '' });
+    setNewLead({ name: '', email: '', phone: '', source: 'Website', status: 'New', notes: '', insurance_type: '', insurance_id: '' });
     setShowAddModal(false);
   };
 
