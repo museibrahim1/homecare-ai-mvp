@@ -30,11 +30,13 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
     # HIPAA: Check if account is locked
     is_locked, seconds_remaining = check_account_lockout(email)
     if is_locked:
-        log_action(db, None, "login_blocked_lockout", "security", None, {
-            "email": email,
-            "ip": client_ip,
-            "seconds_remaining": seconds_remaining
-        })
+        log_action(
+            db=db, user_id=None, action="login_blocked_lockout", 
+            entity_type="security", entity_id=None,
+            description=f"Login blocked for {email} - account locked",
+            changes={"email": email, "ip": client_ip, "seconds_remaining": seconds_remaining},
+            ip_address=client_ip
+        )
         minutes = (seconds_remaining or 900) // 60
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -48,12 +50,13 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
         # Record failed attempt
         is_now_locked, lock_duration = record_failed_login(email)
         
-        log_action(db, None, "login_failed", "security", None, {
-            "email": email,
-            "ip": client_ip,
-            "user_exists": user is not None,
-            "locked": is_now_locked
-        })
+        log_action(
+            db=db, user_id=None, action="login_failed", 
+            entity_type="security", entity_id=None,
+            description=f"Failed login attempt for {email}",
+            changes={"email": email, "user_exists": user is not None, "locked": is_now_locked},
+            ip_address=client_ip
+        )
         
         if is_now_locked:
             raise HTTPException(
@@ -68,7 +71,12 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
         )
     
     if not user.is_active:
-        log_action(db, user.id, "login_failed_inactive", "security", user.id, {"ip": client_ip})
+        log_action(
+            db=db, user_id=user.id, action="login_failed_inactive", 
+            entity_type="security", entity_id=user.id,
+            description=f"Inactive account login attempt: {email}",
+            ip_address=client_ip
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user account",
@@ -80,7 +88,12 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
     access_token = create_access_token(data={"sub": str(user.id)})
     
     # HIPAA: Audit log successful login
-    log_action(db, user.id, "user_login", "user", user.id, {"ip": client_ip})
+    log_action(
+        db=db, user_id=user.id, action="user_login", 
+        entity_type="user", entity_id=user.id,
+        description=f"Successful login: {email}",
+        ip_address=client_ip
+    )
     
     return Token(access_token=access_token)
 

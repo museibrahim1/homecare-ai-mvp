@@ -108,17 +108,19 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
                 try:
                     from app.services.audit import log_action
                     log_action(
-                        db, 
-                        user_id, 
-                        f"phi_{request.method.lower()}", 
-                        "phi_access",
-                        None,
-                        {
+                        db=db, 
+                        user_id=user_id, 
+                        action=f"phi_{request.method.lower()}", 
+                        entity_type="phi_access",
+                        entity_id=None,
+                        description=f"PHI {request.method} to {path}",
+                        changes={
                             "path": path,
                             "ip": client_ip,
                             "status": response.status_code,
                             "response_time_ms": round(response_time_ms, 2)
-                        }
+                        },
+                        ip_address=client_ip
                     )
                 finally:
                     db.close()
