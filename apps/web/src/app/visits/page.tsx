@@ -123,16 +123,18 @@ export default function VisitsPage() {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       
-      if (response.ok || response.status === 404) {
-        // Remove from local state regardless (404 means it's already gone)
+      if (response.ok || response.status === 204 || response.status === 404) {
+        // Successfully deleted or already gone
         setVisits(visits.filter(v => v.id !== visitId));
       } else {
-        alert('Failed to delete assessment');
+        // Show the actual error
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error(`Delete failed: ${response.status} - ${errorText}`);
+        alert(`Failed to delete: ${response.status}. The backend API may need to redeploy.`);
       }
     } catch (err) {
       console.error('Failed to delete visit:', err);
-      // Still remove from local state if it fails (likely means it doesn't exist)
-      setVisits(visits.filter(v => v.id !== visitId));
+      alert('Network error when deleting. Please try again.');
     } finally {
       setDeletingId(null);
     }
@@ -142,19 +144,39 @@ export default function VisitsPage() {
     if (!confirm(`Are you sure you want to delete all ${visits.length} assessments? This cannot be undone.`)) return;
     
     setLoading(true);
+    let successCount = 0;
+    let failCount = 0;
+    
     try {
-      // Delete all visits in parallel
-      await Promise.all(
-        visits.map(visit =>
-          fetch(`${API_BASE}/visits/${visit.id}`, {
+      // Delete all visits in sequence to avoid overwhelming the server
+      for (const visit of visits) {
+        try {
+          const response = await fetch(`${API_BASE}/visits/${visit.id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` },
-          }).catch(() => {}) // Ignore errors for individual deletes
-        )
-      );
-      setVisits([]);
+          });
+          if (response.ok || response.status === 204 || response.status === 404) {
+            successCount++;
+          } else {
+            failCount++;
+            console.error(`Failed to delete visit ${visit.id}: ${response.status}`);
+          }
+        } catch (err) {
+          failCount++;
+          console.error(`Error deleting visit ${visit.id}:`, err);
+        }
+      }
+      
+      // Show results
+      if (failCount > 0) {
+        alert(`Deleted ${successCount} assessments. ${failCount} failed to delete (may need backend update).`);
+      }
+      
+      // Reload to see what's actually in the database
+      await loadVisits();
     } catch (err) {
       console.error('Failed to clear all visits:', err);
+      alert('Failed to clear assessments. Please try again.');
     } finally {
       setLoading(false);
     }
