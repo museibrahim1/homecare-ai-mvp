@@ -2,11 +2,14 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 // HIPAA Compliance: Session timeout after 15 minutes of inactivity
 const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
-const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+// Only track discrete events, NOT mousemove (causes performance issues)
+const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+// Throttle activity updates to prevent excessive state changes
+const ACTIVITY_THROTTLE_MS = 5000; // Only update every 5 seconds max
 
 interface AuthState {
   token: string | null;
@@ -61,12 +64,18 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [hydrated, setHydrated] = useState(false);
   const [sessionWarning, setSessionWarning] = useState(false);
+  const lastActivityUpdateRef = useRef<number>(0);
 
-  // Update activity timestamp on user interaction
+  // Update activity timestamp on user interaction (throttled to prevent performance issues)
   const handleActivity = useCallback(() => {
     if (store.token) {
-      store.updateLastActivity();
-      setSessionWarning(false);
+      const now = Date.now();
+      // Only update if enough time has passed since last update
+      if (now - lastActivityUpdateRef.current >= ACTIVITY_THROTTLE_MS) {
+        lastActivityUpdateRef.current = now;
+        store.updateLastActivity();
+        setSessionWarning(false);
+      }
     }
   }, [store.token]);
 

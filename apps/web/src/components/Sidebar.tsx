@@ -120,16 +120,9 @@ export default function Sidebar() {
     const isActive = pathname === item.href || 
       (item.href !== '/dashboard' && pathname.startsWith(item.href));
     
-    const handleClick = (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      router.push(item.href);
-    };
-    
     return (
-      <a
+      <Link
         href={item.href}
-        onClick={handleClick}
         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group cursor-pointer ${
           isActive 
             ? 'bg-primary-500/15 text-white border border-primary-500/30' 
@@ -151,7 +144,7 @@ export default function Sidebar() {
         {isActive && (
           <ChevronRight className="w-3.5 h-3.5 text-primary-400 flex-shrink-0 ml-auto" />
         )}
-      </a>
+      </Link>
     );
   };
 
