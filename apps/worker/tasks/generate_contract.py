@@ -694,26 +694,9 @@ def generate_service_contract(self, visit_id: str):
         db.commit()
         logger.info(f"Contract generation completed for visit {visit_id}")
         
-        # Send email notification
-        try:
-            from services.email import get_email_service
-            email_service = get_email_service()
-            
-            # Get user email
-            from models import User
-            user = db.query(User).filter(User.id == visit.user_id).first()
-            if user and user.email:
-                weekly_cost = f"${float(contract.hourly_rate or 0) * float(contract.weekly_hours or 0):.2f}"
-                email_service.send_contract_ready(
-                    user_email=user.email,
-                    client_name=client.full_name,
-                    client_email=client.email or "Not provided",
-                    weekly_cost=weekly_cost,
-                    visit_id=visit_id,
-                )
-                logger.info(f"Contract ready notification sent to {user.email}")
-        except Exception as email_err:
-            logger.warning(f"Failed to send contract notification: {email_err}")
+        # Email notification is handled by the API, not the worker
+        # The worker focuses on contract generation only
+        logger.info(f"Contract created - notification will be sent by API layer")
         
         return {
             "status": "success",
