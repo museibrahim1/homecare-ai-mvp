@@ -110,9 +110,17 @@ async def create_visit(
 
 def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
     """Helper to get a visit with data isolation enforced."""
+    from sqlalchemy import or_
+    
+    # User can access visit if:
+    # 1. They created the client (owner)
+    # 2. They are the assigned caregiver
     visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
         Visit.id == visit_id,
-        Client.created_by == current_user.id
+        or_(
+            Client.created_by == current_user.id,
+            Visit.caregiver_id == current_user.id
+        )
     ).first()
     if not visit:
         raise HTTPException(
@@ -166,8 +174,17 @@ async def delete_visit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a visit and all related records (data isolation enforced)."""
-    visit = get_user_visit(db, visit_id, current_user)
+    """Delete a visit and all related records (data isolation enforced, admins can delete any)."""
+    # Admins can delete any visit
+    if current_user.role == "admin":
+        visit = db.query(Visit).filter(Visit.id == visit_id).first()
+        if not visit:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Visit not found",
+            )
+    else:
+        visit = get_user_visit(db, visit_id, current_user)
     
     # Delete all related records first to avoid foreign key constraint errors
     db.query(TranscriptSegment).filter(TranscriptSegment.visit_id == visit_id).delete(synchronize_session=False)
@@ -180,6 +197,39 @@ async def delete_visit(
     # Now delete the visit itself
     db.delete(visit)
     db.commit()
+
+
+@router.delete("", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_all_visits(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete ALL visits for the current user (or all visits if admin). Use with caution!"""
+    from sqlalchemy import select
+    
+    if current_user.role == "admin":
+        # Admin can delete all visits in the system
+        visits = db.query(Visit).all()
+    else:
+        # Regular users can only delete visits for their clients
+        user_client_ids = db.query(Client.id).filter(Client.created_by == current_user.id).all()
+        user_client_ids = [c[0] for c in user_client_ids]
+        visits = db.query(Visit).filter(Visit.client_id.in_(user_client_ids)).all()
+    
+    deleted_count = 0
+    for visit in visits:
+        # Delete all related records
+        db.query(TranscriptSegment).filter(TranscriptSegment.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(DiarizationTurn).filter(DiarizationTurn.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(BillableItem).filter(BillableItem.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(Note).filter(Note.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(AudioAsset).filter(AudioAsset.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(Call).filter(Call.visit_id == visit.id).delete(synchronize_session=False)
+        db.delete(visit)
+        deleted_count += 1
+    
+    db.commit()
+    return {"deleted": deleted_count}
 
 
 @router.post("/{visit_id}/restart")
