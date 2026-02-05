@@ -491,17 +491,16 @@ async def clear_all_businesses(
         
         # Delete in order of dependencies
         if visit_ids:
-            # 1. Delete transcript segments, billables, notes, contracts, audio assets for visits
+            # 1. Delete transcript segments, billables, notes, audio assets for visits
             db.query(TranscriptSegment).filter(TranscriptSegment.visit_id.in_(visit_ids)).delete(synchronize_session=False)
             db.query(BillableItem).filter(BillableItem.visit_id.in_(visit_ids)).delete(synchronize_session=False)
             db.query(Note).filter(Note.visit_id.in_(visit_ids)).delete(synchronize_session=False)
-            db.query(Contract).filter(Contract.visit_id.in_(visit_ids)).delete(synchronize_session=False)
             db.query(AudioAsset).filter(AudioAsset.visit_id.in_(visit_ids)).delete(synchronize_session=False)
             
             # 2. Delete visits
             deleted_visits = db.query(Visit).filter(Visit.id.in_(visit_ids)).delete(synchronize_session=False)
         
-        # 3. Delete contracts for clients (not tied to visits)
+        # 3. Delete contracts for clients
         if client_ids:
             db.query(Contract).filter(Contract.client_id.in_(client_ids)).delete(synchronize_session=False)
         
