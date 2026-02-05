@@ -100,7 +100,7 @@ export default function TeamChatPage() {
     const newMsg = {
       id: `msg_${Date.now()}`,
       user: user.name || user.email || 'You',
-      avatar: (user.name || user.email || 'U').split(' ').map(n => n[0]).join('').slice(0, 2),
+      avatar: (user.name || user.email || 'U').split(' ').map((n: string) => n[0]).join('').slice(0, 2),
       text: newMessage,
       time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
       channelId: selectedChannel.id,
