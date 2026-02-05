@@ -18,7 +18,8 @@ import {
   Timer,
   Sparkles,
   Play,
-  Loader2
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -84,6 +85,7 @@ export default function VisitsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [creatingDemo, setCreatingDemo] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -104,6 +106,55 @@ export default function VisitsPage() {
       setVisits(response.items);
     } catch (err) {
       console.error('Failed to load visits:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteVisit = async (e: React.MouseEvent, visitId: string) => {
+    e.stopPropagation(); // Prevent navigation to visit detail
+    
+    if (!confirm('Are you sure you want to delete this assessment?')) return;
+    
+    setDeletingId(visitId);
+    try {
+      const response = await fetch(`${API_BASE}/visits/${visitId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (response.ok || response.status === 404) {
+        // Remove from local state regardless (404 means it's already gone)
+        setVisits(visits.filter(v => v.id !== visitId));
+      } else {
+        alert('Failed to delete assessment');
+      }
+    } catch (err) {
+      console.error('Failed to delete visit:', err);
+      // Still remove from local state if it fails (likely means it doesn't exist)
+      setVisits(visits.filter(v => v.id !== visitId));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!confirm(`Are you sure you want to delete all ${visits.length} assessments? This cannot be undone.`)) return;
+    
+    setLoading(true);
+    try {
+      // Delete all visits in parallel
+      await Promise.all(
+        visits.map(visit =>
+          fetch(`${API_BASE}/visits/${visit.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+          }).catch(() => {}) // Ignore errors for individual deletes
+        )
+      );
+      setVisits([]);
+    } catch (err) {
+      console.error('Failed to clear all visits:', err);
     } finally {
       setLoading(false);
     }
@@ -292,6 +343,17 @@ export default function VisitsPage() {
               <p className="text-dark-300">Review and manage care assessments</p>
             </div>
             <div className="flex gap-3">
+              {/* Clear All Button - only show when there are visits */}
+              {visits.length > 0 && (
+                <button 
+                  onClick={handleClearAll}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-dark-700 hover:bg-red-500/20 text-dark-300 hover:text-red-400 rounded-xl font-medium transition-colors"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Clear All
+                </button>
+              )}
+              
               {/* Demo Flow Button */}
               <button 
                 onClick={createSampleAssessment}
@@ -471,6 +533,20 @@ export default function VisitsPage() {
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Delete Button */}
+                      <button
+                        onClick={(e) => handleDeleteVisit(e, visit.id)}
+                        disabled={deletingId === visit.id}
+                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        title="Delete assessment"
+                      >
+                        {deletingId === visit.id ? (
+                          <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-5 h-5 text-dark-400 hover:text-red-400" />
+                        )}
+                      </button>
                       
                       {/* Arrow */}
                       <ChevronRight className="w-5 h-5 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
