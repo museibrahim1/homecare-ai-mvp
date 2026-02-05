@@ -58,11 +58,15 @@ function isSessionExpired(lastActivity: number | null): boolean {
   return Date.now() - lastActivity > SESSION_TIMEOUT_MS;
 }
 
+// Track global hydration state to prevent re-showing loading on navigation
+let globalHydrated = false;
+
 // Hook that handles hydration and session timeout
 export function useAuth() {
   const store = useAuthStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const [hydrated, setHydrated] = useState(false);
+  // Start with globalHydrated value - if already hydrated from previous page, don't show loading
+  const [isLoading, setIsLoading] = useState(!globalHydrated);
+  const [hydrated, setHydrated] = useState(globalHydrated);
   const [sessionWarning, setSessionWarning] = useState(false);
   const lastActivityUpdateRef = useRef<number>(0);
 
@@ -123,7 +127,15 @@ export function useAuth() {
 
   // Handle hydration
   useEffect(() => {
+    // If already globally hydrated, just sync state immediately
+    if (globalHydrated) {
+      setHydrated(true);
+      setIsLoading(false);
+      return;
+    }
+
     const unsubFinishHydration = useAuthStore.persist.onFinishHydration(() => {
+      globalHydrated = true;
       setHydrated(true);
       setIsLoading(false);
       
@@ -136,6 +148,7 @@ export function useAuth() {
     });
 
     if (useAuthStore.persist.hasHydrated()) {
+      globalHydrated = true;
       setHydrated(true);
       setIsLoading(false);
       
