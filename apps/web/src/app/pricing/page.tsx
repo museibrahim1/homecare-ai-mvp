@@ -25,8 +25,8 @@ export default function PricingPage() {
     {
       name: 'Starter',
       description: 'For small agencies getting organized',
-      monthlyPrice: 295,
-      annualPrice: 3009,
+      monthlyPrice: 299,
+      annualPrice: 3049,
       setupFee: null,
       highlighted: false,
       cta: 'Get Started',
@@ -35,8 +35,8 @@ export default function PricingPage() {
     {
       name: 'Growth',
       description: 'For growing teams',
-      monthlyPrice: 495,
-      annualPrice: 5049,
+      monthlyPrice: 599,
+      annualPrice: 6109,
       setupFee: null,
       highlighted: true,
       cta: 'Get Started',
@@ -45,8 +45,8 @@ export default function PricingPage() {
     {
       name: 'Pro',
       description: 'For high-volume teams',
-      monthlyPrice: 895,
-      annualPrice: 9129,
+      monthlyPrice: 1299,
+      annualPrice: 13249,
       setupFee: null,
       highlighted: false,
       cta: 'Get Started',
@@ -69,10 +69,10 @@ export default function PricingPage() {
     {
       name: 'Core Features',
       features: [
-        { name: 'Generated contracts / month', values: ['25', '100', '300'] },
+        { name: 'Generated contracts / month', values: ['5', '25', 'Unlimited'] },
         { name: 'Clients in CRM', values: ['50', '200', '1,000'] },
         { name: 'Caregivers in CRM', values: ['25', '100', '500'] },
-        { name: 'Team seats', values: ['3', '10', 'Unlimited'] },
+        { name: 'Team seats', values: ['1', '10', 'Unlimited'] },
         { name: 'Assessment intake', values: [true, true, true] },
         { name: 'Transcript import/upload', values: [true, true, true] },
         { name: 'AI billables extraction', values: [true, true, true] },

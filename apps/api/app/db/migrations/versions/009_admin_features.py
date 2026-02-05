@@ -128,10 +128,12 @@ def upgrade() -> None:
     op.execute("""
         INSERT INTO plans (id, name, tier, description, monthly_price, annual_price, setup_fee, max_users, max_clients, max_visits_per_month, max_storage_gb, is_active, is_contact_sales, features)
         VALUES 
-        (gen_random_uuid(), 'Growth', 'starter', 'Built for growing home healthcare agencies', 899, 8091, 1500, 5, 500, 9999, 50, true, false, 
-         '["Unlimited assessments & transcripts", "AI billable extraction", "Automatic contract generation", "Care documentation exports", "Billing-ready reports", "Up to 5 admin users", "Secure cloud workspace", "Fast onboarding"]'),
-        (gen_random_uuid(), 'Pro', 'professional', 'For multi-location and high-volume teams', 1499, 13491, 2500, 9999, 9999, 9999, 500, true, false,
-         '["Everything in Growth", "Unlimited users", "Multi-location management", "Advanced analytics", "Custom templates", "Integrations & API", "Priority support", "Dedicated onboarding"]'),
+        (gen_random_uuid(), 'Starter', 'starter', 'For small agencies getting organized', 299, 3049, 0, 1, 50, 5, 10, true, false, 
+         '["5 contracts per month", "AI billable extraction", "Automatic contract generation", "Care documentation exports", "1 team seat", "Secure cloud workspace", "Email support"]'),
+        (gen_random_uuid(), 'Growth', 'professional', 'For growing teams', 599, 6109, 0, 10, 200, 25, 50, true, false,
+         '["25 contracts per month", "Everything in Starter", "10 team seats", "Advanced templates", "Timesheet exports", "Priority support"]'),
+        (gen_random_uuid(), 'Pro', 'enterprise', 'For high-volume teams', 1299, 13249, 0, 9999, 1000, 9999, 500, true, false,
+         '["Unlimited contracts", "Everything in Growth", "Unlimited team seats", "Multi-location management", "Advanced analytics", "Custom templates", "Integrations & API", "Dedicated onboarding"]'),
         (gen_random_uuid(), 'Enterprise', 'enterprise', 'Custom solutions for large organizations', 0, 0, 0, 9999, 9999, 9999, 9999, true, true,
          '["Everything in Pro", "Custom integrations", "Dedicated account manager", "SLA guarantees", "Custom contracts", "On-premise option", "White-label available"]')
     """)
