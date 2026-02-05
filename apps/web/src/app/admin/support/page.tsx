@@ -6,8 +6,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Ticket, Shield, Loader2, RefreshCw, Search, MessageSquare,
-  Clock, CheckCircle, AlertCircle, User, Send, X, Filter
+  Clock, CheckCircle, AlertCircle, User, Send, X, Filter, ArrowLeft
 } from 'lucide-react';
+import Link from 'next/link';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -213,9 +214,17 @@ export default function SupportTicketsPage() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Support Tickets</h1>
-            <p className="text-dark-400 mt-1">Manage support requests</p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-dark-400" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Support Tickets</h1>
+              <p className="text-dark-400 mt-1">Manage support requests</p>
+            </div>
           </div>
           <button
             onClick={fetchTickets}

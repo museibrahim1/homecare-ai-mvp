@@ -7,8 +7,9 @@ import { useRouter } from 'next/navigation';
 import { 
   Building2, Clock, CheckCircle, XCircle, FileText, 
   ChevronRight, Search, Filter, RefreshCw, Loader2,
-  Eye, Download, Shield, AlertTriangle, User, ExternalLink
+  Eye, Download, Shield, AlertTriangle, User, ExternalLink, ArrowLeft
 } from 'lucide-react';
+import Link from 'next/link';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -184,9 +185,15 @@ export default function AdminApprovalsPage() {
       if (response.ok) {
         const data = await response.json();
         setSelectedBusiness(data);
+      } else {
+        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+        console.error('Failed to fetch business detail:', response.status, errorData);
+        // Still show empty state rather than bouncing
+        setSelectedBusiness(null);
       }
     } catch (err) {
       console.error('Failed to fetch business detail:', err);
+      setSelectedBusiness(null);
     } finally {
       setDetailLoading(false);
     }
@@ -289,9 +296,17 @@ export default function AdminApprovalsPage() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Business Approvals</h1>
-            <p className="text-dark-400 mt-1">Review and approve business registrations</p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-dark-400" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Business Approvals</h1>
+              <p className="text-dark-400 mt-1">Review and approve business registrations</p>
+            </div>
           </div>
           <button
             onClick={() => { fetchStats(); fetchBusinesses(); }}

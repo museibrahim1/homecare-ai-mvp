@@ -18,7 +18,8 @@ import {
   FileCheck,
   Shield,
   RefreshCw,
-  Loader2
+  Loader2,
+  ArrowLeft
 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 
@@ -123,9 +124,17 @@ export default function AdminBusinessesPage() {
       <main className="flex-1 p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Business Approvals</h1>
-            <p className="text-dark-400">Review and approve business registrations</p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-dark-400" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-white">All Businesses</h1>
+              <p className="text-dark-400">View and manage all registered businesses</p>
+            </div>
           </div>
           <button
             onClick={handleRefresh}

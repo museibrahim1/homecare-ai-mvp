@@ -6,8 +6,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   DollarSign, Building2, CreditCard, TrendingUp, Loader2, Shield,
-  RefreshCw, Search, Filter, MoreVertical, Check, X, AlertCircle
+  RefreshCw, Search, Filter, MoreVertical, Check, X, AlertCircle, ArrowLeft
 } from 'lucide-react';
+import Link from 'next/link';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -148,9 +149,17 @@ export default function SubscriptionsPage() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Subscriptions</h1>
-            <p className="text-dark-400 mt-1">Manage business plans and billing</p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-dark-400" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Subscriptions</h1>
+              <p className="text-dark-400 mt-1">Manage business plans and billing</p>
+            </div>
           </div>
           <button
             onClick={fetchData}
