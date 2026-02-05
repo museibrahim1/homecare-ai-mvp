@@ -1,7 +1,9 @@
 from uuid import UUID
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+import io
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
@@ -9,7 +11,7 @@ from app.models.visit import Visit
 from app.models.client import Client
 from app.models.audio_asset import AudioAsset
 from app.schemas.upload import UploadResponse
-from app.services.storage import upload_file_to_s3
+from app.services.storage import upload_file_to_s3, download_file_from_s3
 from app.services.audit import log_action
 from app.services.jobs import enqueue_task
 
@@ -106,3 +108,44 @@ async def upload_audio(
     log_action(db, current_user.id, "audio_uploaded", "audio_asset", audio_asset.id)
     
     return audio_asset
+
+
+@router.get("/audio/{audio_id}/download")
+async def download_audio(
+    audio_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Download an audio file (data isolation enforced)."""
+    # Get audio asset
+    audio = db.query(AudioAsset).filter(AudioAsset.id == audio_id).first()
+    if not audio:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Audio not found")
+    
+    # Verify ownership through visit -> client chain
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == audio.visit_id,
+        Client.created_by == current_user.id
+    ).first()
+    
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Audio not found")
+    
+    # Download from S3
+    try:
+        content = download_file_from_s3(audio.s3_key)
+        
+        # Determine content type
+        content_type = audio.content_type or "audio/mpeg"
+        filename = audio.original_filename or f"audio_{audio_id}.mp3"
+        
+        return StreamingResponse(
+            io.BytesIO(content),
+            media_type=content_type,
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to download file: {str(e)}"
+        )

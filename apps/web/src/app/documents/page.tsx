@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2 } from 'lucide-react';
+import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2, Mic, FileCheck, Play, User } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -10,10 +10,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 type Document = {
   id: string;
   name: string;
-  type: string;
+  type: string; // contract, note, audio
+  format: string; // PDF, MP3, WAV
   size: string;
-  modified: string;
   folder: string;
+  client_id?: string;
+  client_name?: string;
+  visit_id?: string;
+  created_at: string;
+  download_url?: string;
   driveId?: string;
   webViewLink?: string;
 };
@@ -34,31 +39,23 @@ type DriveFile = {
   webViewLink?: string;
 };
 
-const initialFolders: Folder[] = [
-  { id: 1, name: 'Contracts', count: 24, icon: '📄' },
-  { id: 2, name: 'Care Plans', count: 18, icon: '📋' },
-  { id: 3, name: 'Assessments', count: 32, icon: '📝' },
-  { id: 4, name: 'Policies', count: 8, icon: '📜' },
-  { id: 5, name: 'Training', count: 12, icon: '📚' },
-];
-
-const initialFiles: Document[] = [
-  { id: '1', name: 'Thompson_Care_Contract.pdf', type: 'PDF', size: '245 KB', modified: '2 hours ago', folder: 'Contracts' },
-  { id: '2', name: 'Williams_Assessment_Jan2026.docx', type: 'DOCX', size: '128 KB', modified: '5 hours ago', folder: 'Assessments' },
-  { id: '3', name: 'Care_Plan_Template_v3.pdf', type: 'PDF', size: '89 KB', modified: '1 day ago', folder: 'Care Plans' },
-  { id: '4', name: 'Davis_Family_Agreement.pdf', type: 'PDF', size: '312 KB', modified: '2 days ago', folder: 'Contracts' },
-  { id: '5', name: 'Monthly_Report_Dec2025.xlsx', type: 'XLSX', size: '456 KB', modified: '3 days ago', folder: 'Reports' },
-];
-
 const typeColors: Record<string, string> = {
   PDF: 'bg-red-500/20 text-red-400',
   DOCX: 'bg-blue-500/20 text-blue-400',
   XLSX: 'bg-green-500/20 text-green-400',
-  PNG: 'bg-purple-500/20 text-purple-400',
-  JPG: 'bg-purple-500/20 text-purple-400',
+  MP3: 'bg-purple-500/20 text-purple-400',
+  WAV: 'bg-purple-500/20 text-purple-400',
+  M4A: 'bg-purple-500/20 text-purple-400',
+  AUDIO: 'bg-purple-500/20 text-purple-400',
   GDOC: 'bg-blue-500/20 text-blue-400',
   GSHEET: 'bg-green-500/20 text-green-400',
   GSLIDE: 'bg-yellow-500/20 text-yellow-400',
+};
+
+const typeIcons: Record<string, any> = {
+  contract: FileCheck,
+  note: FileText,
+  audio: Mic,
 };
 
 const getMimeTypeLabel = (mimeType: string): string => {
@@ -71,11 +68,29 @@ const getMimeTypeLabel = (mimeType: string): string => {
   return 'FILE';
 };
 
+const formatDate = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24) return `${Math.floor(diffHours)} hours ago`;
+    if (diffDays < 7) return `${Math.floor(diffDays)} days ago`;
+    return date.toLocaleDateString();
+  } catch {
+    return dateStr;
+  }
+};
+
 export default function DocumentsPage() {
   const { token } = useAuth();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
-  const [folders, setFolders] = useState(initialFolders);
-  const [files, setFiles] = useState<Document[]>(initialFiles);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [files, setFiles] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -92,6 +107,37 @@ export default function DocumentsPage() {
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [driveLoading, setDriveLoading] = useState(false);
   const [checkingDrive, setCheckingDrive] = useState(true);
+
+  // Fetch documents from API
+  const fetchDocuments = useCallback(async () => {
+    if (!token) return;
+    
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedFolder) params.append('folder', selectedFolder);
+      if (searchQuery) params.append('search', searchQuery);
+      
+      const response = await fetch(`${API_URL}/documents?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setFiles(data.documents || []);
+        setFolders(data.folders || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch documents:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, selectedFolder, searchQuery]);
+
+  // Load documents on mount and when filters change
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   // Check Google Drive connection status
   useEffect(() => {
@@ -120,7 +166,8 @@ export default function DocumentsPage() {
   }, [token]);
 
   const filteredFiles = files.filter(file => {
-    const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = !searchQuery || file.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (file.client_name && file.client_name.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesFolder = !selectedFolder || file.folder === selectedFolder;
     return matchesSearch && matchesFolder;
   });
@@ -133,9 +180,10 @@ export default function DocumentsPage() {
       const newFile: Document = {
         id: String(Date.now() + Math.random()),
         name: file.name,
-        type: ext,
+        type: 'uploaded',
+        format: ext,
         size: `${Math.round(file.size / 1024)} KB`,
-        modified: 'Just now',
+        created_at: new Date().toISOString(),
         folder: selectedFolder || 'Contracts',
       };
       setFiles(prev => [newFile, ...prev]);
@@ -180,6 +228,34 @@ export default function DocumentsPage() {
     setShowPreviewModal(false);
   };
 
+  const handleDownload = async (file: Document) => {
+    if (!token || !file.download_url) return;
+    
+    try {
+      const response = await fetch(`${API_URL}${file.download_url}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (!response.ok) {
+        alert('Failed to download file');
+        return;
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to download file');
+    }
+  };
+
   const handleConnectDrive = () => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     
@@ -189,7 +265,6 @@ export default function DocumentsPage() {
     }
 
     const redirectUri = `${window.location.origin}/documents`;
-    // Request all Google scopes so the token works for Calendar, Drive, and Gmail
     const scope = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send';
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
     
@@ -229,9 +304,10 @@ export default function DocumentsPage() {
         const newFiles: Document[] = (data.files || []).map((df: DriveFile) => ({
           id: df.id,
           name: df.name,
-          type: getMimeTypeLabel(df.mimeType),
+          type: 'drive',
+          format: getMimeTypeLabel(df.mimeType),
           size: df.size ? `${Math.round(parseInt(df.size) / 1024)} KB` : '-',
-          modified: df.modifiedTime ? new Date(df.modifiedTime).toLocaleDateString() : '-',
+          created_at: df.modifiedTime || new Date().toISOString(),
           folder: 'Google Drive',
           driveId: df.id,
           webViewLink: df.webViewLink,
@@ -302,6 +378,17 @@ export default function DocumentsPage() {
     }
   }, [token]);
 
+  // Select folder handler (single click)
+  const handleFolderClick = (folderName: string) => {
+    setSelectedFolder(selectedFolder === folderName ? null : folderName);
+  };
+
+  const getFileIcon = (file: Document) => {
+    if (file.driveId) return Cloud;
+    const Icon = typeIcons[file.type] || FileText;
+    return Icon;
+  };
+
   return (
     <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
@@ -310,7 +397,7 @@ export default function DocumentsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Documents</h1>
-            <p className="text-dark-400">Manage contracts, care plans, and files</p>
+            <p className="text-dark-400">Contracts, assessments, and recordings from your clients</p>
           </div>
           <div className="flex gap-3">
             <button 
@@ -332,18 +419,12 @@ export default function DocumentsPage() {
               {driveConnected ? 'Drive Connected' : 'Connect Google Drive'}
             </button>
             <button 
-              onClick={() => setShowNewFolderModal(true)}
+              onClick={fetchDocuments}
+              disabled={loading}
               className="flex items-center gap-2 px-4 py-2.5 bg-dark-800 border border-dark-700 text-dark-300 hover:text-white rounded-lg transition-colors"
             >
-              <Plus className="w-5 h-5" />
-              New Folder
-            </button>
-            <button 
-              onClick={() => setShowUploadModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-            >
-              <Upload className="w-5 h-5" />
-              Upload File
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
             </button>
           </div>
         </div>
@@ -379,14 +460,10 @@ export default function DocumentsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search documents..."
+              placeholder="Search documents or clients..."
               className="w-full pl-10 pr-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-dark-300 hover:text-white transition-colors">
-            <Filter className="w-5 h-5" />
-            Filter
-          </button>
           <div className="flex bg-dark-800 border border-dark-700 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode('grid')}
@@ -403,31 +480,31 @@ export default function DocumentsPage() {
           </div>
         </div>
 
-        {/* Folders */}
+        {/* Folders - Single click to filter */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-white mb-4">Folders</h2>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {folders.map(folder => (
               <button
                 key={folder.id}
-                onClick={() => setSelectedFolder(selectedFolder === folder.name ? null : folder.name)}
+                onClick={() => handleFolderClick(folder.name)}
                 className={`bg-dark-800/50 border rounded-xl p-4 hover:border-primary-500/30 transition-colors text-left ${
                   selectedFolder === folder.name ? 'border-primary-500/50 bg-primary-500/5' : 'border-dark-700/50'
                 }`}
               >
                 <div className="text-3xl mb-3">{folder.icon}</div>
                 <h3 className="font-medium text-white mb-1">{folder.name}</h3>
-                <p className="text-sm text-dark-400">{files.filter(f => f.folder === folder.name).length} files</p>
+                <p className="text-sm text-dark-400">{folder.count} files</p>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Recent Files */}
+        {/* Files */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">
-              {selectedFolder ? `${selectedFolder} Files` : 'Recent Files'}
+              {selectedFolder ? `${selectedFolder}` : 'All Documents'}
             </h2>
             {selectedFolder && (
               <button 
@@ -438,208 +515,260 @@ export default function DocumentsPage() {
               </button>
             )}
           </div>
-          <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-dark-700/50">
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Name</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Type</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Size</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Folder</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Modified</th>
-                  <th className="px-6 py-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredFiles.map(file => (
-                  <tr key={file.id} className="border-b border-dark-700/30 hover:bg-dark-700/20 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {file.driveId ? (
-                          <Cloud className="w-5 h-5 text-blue-400" />
-                        ) : (
-                          <FileText className="w-5 h-5 text-dark-400" />
-                        )}
-                        <span className="font-medium text-white">{file.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${typeColors[file.type] || 'bg-dark-700 text-dark-300'}`}>
-                        {file.type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-dark-400">{file.size}</td>
-                    <td className="px-6 py-4 text-dark-400">{file.folder}</td>
-                    <td className="px-6 py-4 text-dark-400 text-sm">{file.modified}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1">
-                        {file.webViewLink ? (
-                          <a 
-                            href={file.webViewLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
-                          >
-                            <Link2 className="w-4 h-4 text-dark-400" />
-                          </a>
-                        ) : (
-                          <button 
-                            onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
-                            className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
-                          >
-                            <Eye className="w-4 h-4 text-dark-400" />
-                          </button>
-                        )}
-                        <button className="p-2 hover:bg-dark-700 rounded-lg transition-colors">
-                          <Download className="w-4 h-4 text-dark-400" />
-                        </button>
-                        {!file.driveId && (
-                          <button 
-                            onClick={() => handleDeleteFile(file.id)}
-                            className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4 text-dark-400 hover:text-red-400" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Upload Modal */}
-        {showUploadModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Upload Files</h2>
-                <button onClick={() => setShowUploadModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
-                  <X className="w-5 h-5 text-dark-400" />
-                </button>
+          
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+            </div>
+          ) : filteredFiles.length === 0 ? (
+            <div className="text-center py-20 bg-dark-800/50 border border-dark-700/50 rounded-xl">
+              <div className="w-16 h-16 bg-dark-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <FolderOpen className="w-8 h-8 text-dark-400" />
               </div>
-              <div
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  dragActive ? 'border-primary-500 bg-primary-500/10' : 'border-dark-600'
-                }`}
+              <h3 className="text-lg font-medium text-white mb-2">No documents yet</h3>
+              <p className="text-dark-400 mb-4">Documents from your assessments will appear here automatically</p>
+              <a 
+                href="/visits/new" 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
               >
-                <Upload className="w-12 h-12 text-dark-500 mx-auto mb-4" />
-                <p className="text-white mb-2">Drag and drop files here</p>
-                <p className="text-dark-400 text-sm mb-4">or</p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  onChange={(e) => handleFileUpload(e.target.files)}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-                >
-                  Browse Files
-                </button>
-              </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-dark-300 mb-2">Upload to folder</label>
-                <select
-                  value={selectedFolder || 'Contracts'}
-                  onChange={(e) => setSelectedFolder(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
-                >
-                  {folders.filter(f => f.name !== 'Google Drive').map(f => (
-                    <option key={f.id} value={f.name}>{f.name}</option>
-                  ))}
-                </select>
-              </div>
+                <Plus className="w-4 h-4" />
+                Start New Assessment
+              </a>
             </div>
-          </div>
-        )}
-
-        {/* New Folder Modal */}
-        {showNewFolderModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-sm">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">New Folder</h2>
-                <button onClick={() => setShowNewFolderModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
-                  <X className="w-5 h-5 text-dark-400" />
-                </button>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-dark-300 mb-2">Folder Name</label>
-                <input
-                  type="text"
-                  value={newFolderName}
-                  onChange={(e) => setNewFolderName(e.target.value)}
-                  placeholder="e.g., Insurance Documents"
-                  className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
-                />
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => setShowNewFolderModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateFolder}
-                  className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-                >
-                  Create
-                </button>
-              </div>
+          ) : viewMode === 'list' ? (
+            <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-dark-700/50">
+                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Name</th>
+                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Client</th>
+                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Type</th>
+                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Size</th>
+                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Modified</th>
+                    <th className="px-6 py-4"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredFiles.map(file => {
+                    const FileIcon = getFileIcon(file);
+                    return (
+                      <tr key={file.id} className="border-b border-dark-700/30 hover:bg-dark-700/20 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              file.type === 'contract' ? 'bg-purple-500/20' :
+                              file.type === 'note' ? 'bg-blue-500/20' :
+                              file.type === 'audio' ? 'bg-green-500/20' :
+                              'bg-dark-700'
+                            }`}>
+                              <FileIcon className={`w-4 h-4 ${
+                                file.type === 'contract' ? 'text-purple-400' :
+                                file.type === 'note' ? 'text-blue-400' :
+                                file.type === 'audio' ? 'text-green-400' :
+                                'text-dark-400'
+                              }`} />
+                            </div>
+                            <span className="font-medium text-white">{file.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {file.client_name ? (
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-dark-500" />
+                              <span className="text-dark-300">{file.client_name}</span>
+                            </div>
+                          ) : (
+                            <span className="text-dark-500">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${typeColors[file.format] || 'bg-dark-700 text-dark-300'}`}>
+                            {file.format}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-dark-400">{file.size}</td>
+                        <td className="px-6 py-4 text-dark-400 text-sm">{formatDate(file.created_at)}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-1">
+                            {file.webViewLink ? (
+                              <a 
+                                href={file.webViewLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                              >
+                                <Link2 className="w-4 h-4 text-dark-400" />
+                              </a>
+                            ) : file.type === 'audio' ? (
+                              <button 
+                                onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
+                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                                title="Preview"
+                              >
+                                <Play className="w-4 h-4 text-dark-400" />
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
+                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                                title="Preview"
+                              >
+                                <Eye className="w-4 h-4 text-dark-400" />
+                              </button>
+                            )}
+                            {file.download_url && (
+                              <button 
+                                onClick={() => handleDownload(file)}
+                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                                title="Download"
+                              >
+                                <Download className="w-4 h-4 text-dark-400" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          </div>
-        )}
+          ) : (
+            // Grid view
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {filteredFiles.map(file => {
+                const FileIcon = getFileIcon(file);
+                return (
+                  <div
+                    key={file.id}
+                    className="bg-dark-800/50 border border-dark-700/50 rounded-xl p-4 hover:border-primary-500/30 transition-colors group"
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
+                      file.type === 'contract' ? 'bg-purple-500/20' :
+                      file.type === 'note' ? 'bg-blue-500/20' :
+                      file.type === 'audio' ? 'bg-green-500/20' :
+                      'bg-dark-700'
+                    }`}>
+                      <FileIcon className={`w-6 h-6 ${
+                        file.type === 'contract' ? 'text-purple-400' :
+                        file.type === 'note' ? 'text-blue-400' :
+                        file.type === 'audio' ? 'text-green-400' :
+                        'text-dark-400'
+                      }`} />
+                    </div>
+                    <h3 className="font-medium text-white text-sm truncate mb-1" title={file.name}>
+                      {file.name}
+                    </h3>
+                    {file.client_name && (
+                      <p className="text-xs text-dark-400 truncate mb-2">{file.client_name}</p>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[file.format] || 'bg-dark-700 text-dark-300'}`}>
+                        {file.format}
+                      </span>
+                      <span className="text-xs text-dark-500">{file.size}</span>
+                    </div>
+                    <div className="flex gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {file.download_url && (
+                        <button 
+                          onClick={() => handleDownload(file)}
+                          className="flex-1 p-2 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
+                        >
+                          <Download className="w-4 h-4 text-dark-300 mx-auto" />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
+                        className="flex-1 p-2 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
+                      >
+                        <Eye className="w-4 h-4 text-dark-300 mx-auto" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Preview Modal */}
         {showPreviewModal && selectedFile && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-lg">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">File Details</h2>
+                <h2 className="text-xl font-bold text-white">Document Details</h2>
                 <button onClick={() => setShowPreviewModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
                   <X className="w-5 h-5 text-dark-400" />
                 </button>
               </div>
               <div className="flex items-center gap-4 mb-6 p-4 bg-dark-900 rounded-lg">
-                <div className="w-16 h-16 bg-dark-700 rounded-lg flex items-center justify-center">
-                  <File className="w-8 h-8 text-dark-400" />
+                <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${
+                  selectedFile.type === 'contract' ? 'bg-purple-500/20' :
+                  selectedFile.type === 'note' ? 'bg-blue-500/20' :
+                  selectedFile.type === 'audio' ? 'bg-green-500/20' :
+                  'bg-dark-700'
+                }`}>
+                  {(() => {
+                    const Icon = getFileIcon(selectedFile);
+                    return <Icon className={`w-8 h-8 ${
+                      selectedFile.type === 'contract' ? 'text-purple-400' :
+                      selectedFile.type === 'note' ? 'text-blue-400' :
+                      selectedFile.type === 'audio' ? 'text-green-400' :
+                      'text-dark-400'
+                    }`} />;
+                  })()}
                 </div>
-                <div>
-                  <h3 className="font-medium text-white mb-1">{selectedFile.name}</h3>
-                  <p className="text-sm text-dark-400">{selectedFile.size} • {selectedFile.type}</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-white mb-1 truncate">{selectedFile.name}</h3>
+                  <p className="text-sm text-dark-400">{selectedFile.size} • {selectedFile.format}</p>
                 </div>
               </div>
               <div className="space-y-3 mb-6">
+                {selectedFile.client_name && (
+                  <div className="flex justify-between py-2 border-b border-dark-700">
+                    <span className="text-dark-400">Client</span>
+                    <span className="text-white">{selectedFile.client_name}</span>
+                  </div>
+                )}
                 <div className="flex justify-between py-2 border-b border-dark-700">
                   <span className="text-dark-400">Folder</span>
                   <span className="text-white">{selectedFile.folder}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-dark-700">
-                  <span className="text-dark-400">Modified</span>
-                  <span className="text-white">{selectedFile.modified}</span>
+                  <span className="text-dark-400">Created</span>
+                  <span className="text-white">{formatDate(selectedFile.created_at)}</span>
                 </div>
+                {selectedFile.visit_id && (
+                  <div className="flex justify-between py-2 border-b border-dark-700">
+                    <span className="text-dark-400">Visit</span>
+                    <a 
+                      href={`/visits/${selectedFile.visit_id}`}
+                      className="text-primary-400 hover:text-primary-300"
+                    >
+                      View Assessment →
+                    </a>
+                  </div>
+                )}
               </div>
               <div className="flex gap-3">
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">
-                  <Download className="w-5 h-5" />
-                  Download
-                </button>
-                <button 
-                  onClick={() => handleDeleteFile(selectedFile.id)}
-                  className="px-4 py-2.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-colors"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                {selectedFile.download_url && (
+                  <button 
+                    onClick={() => handleDownload(selectedFile)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                  >
+                    <Download className="w-5 h-5" />
+                    Download
+                  </button>
+                )}
+                {selectedFile.visit_id && (
+                  <a 
+                    href={`/visits/${selectedFile.visit_id}`}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors"
+                  >
+                    <Eye className="w-5 h-5" />
+                    View Visit
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -669,10 +798,6 @@ export default function DocumentsPage() {
                     <div className="flex items-center justify-between p-3 bg-dark-900 rounded-lg">
                       <span className="text-dark-300">Files synced</span>
                       <span className="text-green-400 text-sm">{files.filter(f => f.driveId).length} files</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-dark-900 rounded-lg">
-                      <span className="text-dark-300">Auto-sync</span>
-                      <span className="text-green-400 text-sm">Enabled</span>
                     </div>
                   </div>
                   <button

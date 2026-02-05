@@ -75,6 +75,7 @@ from app.routers import (
     drive,
     gmail,
     voiceprint,
+    documents,
     # calls,  # Twilio integration disabled for MVP - re-enable when needed
 )
 
@@ -160,6 +161,7 @@ app.include_router(calendar.router, prefix="/calendar", tags=["Google Calendar"]
 app.include_router(voiceprint.router, prefix="/voiceprint", tags=["Voiceprint"])
 app.include_router(drive.router, prefix="/drive", tags=["Google Drive"])
 app.include_router(gmail.router, prefix="/gmail", tags=["Gmail"])
+app.include_router(documents.router, prefix="/documents", tags=["Documents"])
 # app.include_router(calls.router, prefix="/calls", tags=["Calls"])  # Twilio disabled for MVP
 
 
