@@ -1,4 +1,4 @@
-# Version: v23 - Fix clear-all endpoint with proper FK cascade
+# Version: v24 - Fix clear-all endpoint with full cascade delete
 FROM python:3.11-slim
 
 WORKDIR /app

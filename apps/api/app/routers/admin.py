@@ -451,6 +451,11 @@ async def clear_all_businesses(
     from app.models.audit_log import AuditLog
     from app.models.client import Client
     from app.models.visit import Visit
+    from app.models.contract import Contract
+    from app.models.transcript_segment import TranscriptSegment
+    from app.models.billable_item import BillableItem
+    from app.models.visit_note import VisitNote
+    from app.models.audio_asset import AudioAsset
     
     # Get all business user emails FIRST (before any deletes)
     business_users = db.query(BusinessUser).all()
@@ -468,37 +473,55 @@ async def clear_all_businesses(
     ).all()
     user_ids_to_delete = [u.id for u in users_to_delete]
     
-    # Delete in order (foreign key constraints)
-    # 1. Delete audit logs for these users
+    deleted_visits = 0
+    deleted_clients = 0
     deleted_audit_logs = 0
+    deleted_users = 0
+    
     if user_ids_to_delete:
-        deleted_audit_logs = db.query(AuditLog).filter(
-            AuditLog.user_id.in_(user_ids_to_delete)
-        ).delete(synchronize_session=False)
+        # Get client IDs created by these users
+        client_ids = [c.id for c in db.query(Client.id).filter(Client.created_by.in_(user_ids_to_delete)).all()]
+        
+        # Get visit IDs for these clients or caregivers
+        visit_ids = []
+        if client_ids:
+            visit_ids.extend([v.id for v in db.query(Visit.id).filter(Visit.client_id.in_(client_ids)).all()])
+        visit_ids.extend([v.id for v in db.query(Visit.id).filter(Visit.caregiver_id.in_(user_ids_to_delete)).all()])
+        visit_ids = list(set(visit_ids))  # Remove duplicates
+        
+        # Delete in order of dependencies
+        if visit_ids:
+            # 1. Delete transcript segments, billables, notes, contracts, audio assets for visits
+            db.query(TranscriptSegment).filter(TranscriptSegment.visit_id.in_(visit_ids)).delete(synchronize_session=False)
+            db.query(BillableItem).filter(BillableItem.visit_id.in_(visit_ids)).delete(synchronize_session=False)
+            db.query(VisitNote).filter(VisitNote.visit_id.in_(visit_ids)).delete(synchronize_session=False)
+            db.query(Contract).filter(Contract.visit_id.in_(visit_ids)).delete(synchronize_session=False)
+            db.query(AudioAsset).filter(AudioAsset.visit_id.in_(visit_ids)).delete(synchronize_session=False)
+            
+            # 2. Delete visits
+            deleted_visits = db.query(Visit).filter(Visit.id.in_(visit_ids)).delete(synchronize_session=False)
+        
+        # 3. Delete contracts for clients (not tied to visits)
+        if client_ids:
+            db.query(Contract).filter(Contract.client_id.in_(client_ids)).delete(synchronize_session=False)
+        
+        # 4. Delete clients
+        if client_ids:
+            deleted_clients = db.query(Client).filter(Client.id.in_(client_ids)).delete(synchronize_session=False)
+        
+        # 5. Delete audit logs
+        deleted_audit_logs = db.query(AuditLog).filter(AuditLog.user_id.in_(user_ids_to_delete)).delete(synchronize_session=False)
     
-    # 2. Delete visits for clients created by these users
-    deleted_visits = db.query(Visit).filter(
-        Visit.client_id.in_(
-            db.query(Client.id).filter(Client.created_by.in_(user_ids_to_delete))
-        )
-    ).delete(synchronize_session=False)
-    
-    # 3. Delete clients created by these users
-    deleted_clients = db.query(Client).filter(
-        Client.created_by.in_(user_ids_to_delete)
-    ).delete(synchronize_session=False) if user_ids_to_delete else 0
-    
-    # 4. Delete business documents
+    # 6. Delete business documents
     db.query(BusinessDocument).delete(synchronize_session=False)
     
-    # 5. Delete business users
+    # 7. Delete business users
     db.query(BusinessUser).delete(synchronize_session=False)
     
-    # 6. Delete businesses
+    # 8. Delete businesses
     db.query(Business).delete(synchronize_session=False)
     
-    # 7. Delete corresponding User records (but NOT the admin user)
-    deleted_users = 0
+    # 9. Delete corresponding User records (but NOT the admin user)
     if user_ids_to_delete:
         deleted_users = db.query(UserModel).filter(
             UserModel.id.in_(user_ids_to_delete)
