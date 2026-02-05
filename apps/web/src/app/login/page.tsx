@@ -42,7 +42,14 @@ export default function LoginPage() {
       // Small delay to ensure localStorage is updated before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      router.push('/dashboard');
+      // Check if this is a first-time login (show welcome page)
+      const hasSeenWelcome = localStorage.getItem('has-seen-welcome');
+      if (!hasSeenWelcome) {
+        localStorage.setItem('has-seen-welcome', 'true');
+        router.push('/welcome');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {

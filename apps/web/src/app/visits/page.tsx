@@ -24,6 +24,7 @@ import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Visit } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
+import OnboardingChecklist from '@/components/OnboardingChecklist';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -285,6 +286,9 @@ export default function VisitsPage() {
       
       <main className="flex-1 p-8">
         <div className="max-w-6xl mx-auto">
+          {/* Onboarding Checklist - shows for new users */}
+          <OnboardingChecklist />
+          
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
             <div>
