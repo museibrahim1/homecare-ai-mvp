@@ -1,4 +1,4 @@
-# Version: v19 - Fix missing public folder
+# Version: v20 - Fix responsive layout for 1920x1080
 FROM node:20-alpine AS builder
 
 WORKDIR /app
