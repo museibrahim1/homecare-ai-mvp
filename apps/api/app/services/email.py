@@ -27,9 +27,11 @@ class EmailService:
         # Use Resend's default sender if custom domain not verified
         # To use custom domain: verify it at https://resend.com/domains
         custom_from = os.getenv("EMAIL_FROM")
-        # Default to welcome@palmtai.com if domain is verified, else use Resend's test domain
-        self.from_email = custom_from if custom_from else "Homecare AI <welcome@palmtai.com>"
+        # Use Resend's test domain until palmtai.com is verified
+        # Change to "Homecare AI <welcome@palmtai.com>" once domain is verified
+        self.from_email = custom_from if custom_from else "Homecare AI <onboarding@resend.dev>"
         self.support_email = os.getenv("SUPPORT_EMAIL", "support@palmtai.com")
+        self.app_url = os.getenv("APP_URL", "https://app.palmtai.com")
         
         if self.api_key and RESEND_AVAILABLE:
             resend.api_key = self.api_key
@@ -115,7 +117,7 @@ class EmailService:
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
-                <a href="https://web-production-11611.up.railway.app/login" 
+                <a href="{self.app_url}/login" 
                    style="background-color: #6366f1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
                     Log In to Your Dashboard
                 </a>
@@ -274,7 +276,7 @@ class EmailService:
             <p style="color: #6B7280; font-size: 14px;">Changed by: {changed_by}</p>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://app.homecare.ai/clients" 
+                <a href="{self.app_url}/clients" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     View Client
                 </a>
@@ -318,7 +320,7 @@ class EmailService:
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://app.homecare.ai/visits/{visit_id}" 
+                <a href="{self.app_url}/visits/{visit_id}" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     Review Results
                 </a>
@@ -356,7 +358,7 @@ class EmailService:
             </p>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://app.homecare.ai/visits/{visit_id}" 
+                <a href="{self.app_url}/visits/{visit_id}" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     Review & Send Contract
                 </a>
@@ -393,7 +395,7 @@ class EmailService:
             </p>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://app.homecare.ai/visits/new?client={client_id}" 
+                <a href="{self.app_url}/visits/new?client={client_id}" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     Schedule Assessment
                 </a>
