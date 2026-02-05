@@ -95,16 +95,16 @@ class EmailService:
     
     def send_business_registration_received(self, business_email: str, business_name: str):
         """Send welcome email after registration."""
-        subject = "Welcome to Palm Technology - Let's Get You to Revenue Faster!"
+        subject = "Welcome to Homecare AI - Let's Get You to Revenue Faster!"
         html = f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
             <!-- Header with gradient -->
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
                 <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
-                    Palm Technology
+                    Homecare AI
                 </h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px; font-weight: 500;">
-                    AI-Powered CRM for Home Healthcare
+                    The #1 CRM for Home Healthcare Agencies
                 </p>
             </div>
             
@@ -176,12 +176,12 @@ class EmailService:
             
             <!-- Footer -->
             <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">Palm Technology</p>
+                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">Homecare AI</p>
                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                    AI-Powered Solutions for Home Healthcare
+                    AI-Powered CRM for Home Healthcare Agencies
                 </p>
                 <p style="color: #d1d5db; font-size: 11px; margin: 15px 0 0 0;">
-                    © 2026 Palm Technology. All rights reserved.
+                    © 2026 Homecare AI. All rights reserved.
                 </p>
             </div>
         </div>
