@@ -69,9 +69,12 @@ async def create_visit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new visit."""
-    # Verify client exists
-    client = db.query(Client).filter(Client.id == visit_in.client_id).first()
+    """Create a new visit (data isolation enforced)."""
+    # Verify client exists AND belongs to current user
+    client = db.query(Client).filter(
+        Client.id == visit_in.client_id,
+        Client.created_by == current_user.id
+    ).first()
     if not client:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -102,23 +105,36 @@ async def create_visit(
     return visit
 
 
+def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
+    """Helper to get a visit with data isolation enforced."""
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
+    if not visit:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Visit not found",
+        )
+    return visit
+
+
 @router.get("/{visit_id}", response_model=VisitResponse)
 async def get_visit(
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get a specific visit with full details."""
+    """Get a specific visit with full details (data isolation enforced)."""
+    # First verify ownership
+    get_user_visit(db, visit_id, current_user)
+    
+    # Then load with relationships
     visit = db.query(Visit).options(
         joinedload(Visit.client),
         joinedload(Visit.caregiver),
     ).filter(Visit.id == visit_id).first()
     
-    if not visit:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Visit not found",
-        )
     return visit
 
 
@@ -129,13 +145,8 @@ async def update_visit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a visit."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Visit not found",
-        )
+    """Update a visit (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     update_data = visit_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -152,13 +163,8 @@ async def delete_visit(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a visit."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Visit not found",
-        )
+    """Delete a visit (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     db.delete(visit)
     db.commit()
@@ -171,7 +177,7 @@ async def restart_assessment(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Restart an assessment by clearing all generated data.
+    Restart an assessment by clearing all generated data (data isolation enforced).
     
     This deletes:
     - All transcript segments
@@ -180,12 +186,7 @@ async def restart_assessment(
     - Generated contract
     - Resets pipeline state
     """
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Visit not found",
-        )
+    visit = get_user_visit(db, visit_id, current_user)
     
     # Delete transcript segments
     deleted_segments = db.query(TranscriptSegment).filter(

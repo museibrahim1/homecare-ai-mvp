@@ -22,7 +22,10 @@ import {
   Loader2,
   Filter,
   MoreHorizontal,
-  Activity
+  Activity,
+  Trash2,
+  Building2,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -75,6 +78,7 @@ interface Client {
 }
 
 type ViewMode = 'table' | 'pipeline' | 'forecast';
+type InsuranceFilter = 'all' | 'medicaid' | 'medicare' | 'private';
 
 // Status configuration with colors
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
@@ -283,13 +287,43 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+// Insurance type badge component
+function InsuranceBadge({ client }: { client: Client }) {
+  if (client.medicaid_id) {
+    return (
+      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+        Medicaid
+      </span>
+    );
+  }
+  if (client.medicare_id) {
+    return (
+      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+        Medicare
+      </span>
+    );
+  }
+  if (client.insurance_provider) {
+    return (
+      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+        Private
+      </span>
+    );
+  }
+  return null;
+}
+
 // Grouped Client Row Component
 function ClientRow({ 
   client, 
-  onClick 
+  onClick,
+  onDelete,
+  isConfirmingDelete = false
 }: { 
   client: Client; 
   onClick: () => void;
+  onDelete: (e: React.MouseEvent) => void;
+  isConfirmingDelete?: boolean;
 }) {
   const status = client.status || 'active';
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.active;
@@ -297,12 +331,15 @@ function ClientRow({
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-4 px-4 py-3 bg-dark-800/50 hover:bg-dark-700/80 cursor-pointer transition-all border-l-4 ${config.borderColor} group`}
+      className={`flex items-center gap-4 px-4 py-3 bg-dark-800/50 hover:bg-dark-700/80 cursor-pointer transition-all border-l-4 ${config.borderColor} group ${isConfirmingDelete ? 'bg-red-500/5' : ''}`}
     >
       <ClientAvatar name={client.full_name} />
       
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-white truncate">{client.full_name}</p>
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-white truncate">{client.full_name}</p>
+          <InsuranceBadge client={client} />
+        </div>
       </div>
       
       <StatusBadge status={status} />
@@ -314,6 +351,23 @@ function ClientRow({
       <div className="w-36 text-sm text-dark-300 truncate">
         {client.primary_diagnosis || 'General Care'}
       </div>
+      
+      {isConfirmingDelete ? (
+        <button
+          onClick={onDelete}
+          className="px-2 py-1 text-xs font-medium text-red-400 bg-red-500/20 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-all animate-pulse"
+        >
+          Confirm?
+        </button>
+      ) : (
+        <button
+          onClick={onDelete}
+          className="p-1.5 text-dark-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+          title="Delete client"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
       
       <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
     </div>
@@ -327,10 +381,12 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [insuranceFilter, setInsuranceFilter] = useState<InsuranceFilter>('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showAutomationsModal, setShowAutomationsModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
   // Client automations
   const [automations, setAutomations] = useState([
@@ -420,11 +476,46 @@ export default function ClientsPage() {
     await loadClients();
   };
 
-  const filteredClients = clients.filter(client =>
-    client.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.phone?.includes(searchQuery)
-  );
+  // Filter by search and insurance type
+  const filteredClients = clients.filter(client => {
+    // Search filter
+    const matchesSearch = client.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.phone?.includes(searchQuery);
+    
+    if (!matchesSearch) return false;
+    
+    // Insurance filter
+    if (insuranceFilter === 'medicaid') return !!client.medicaid_id;
+    if (insuranceFilter === 'medicare') return !!client.medicare_id;
+    if (insuranceFilter === 'private') return !!client.insurance_provider && !client.medicaid_id && !client.medicare_id;
+    
+    return true; // 'all'
+  });
+
+  // Count clients by insurance type
+  const medicaidCount = clients.filter(c => c.medicaid_id).length;
+  const medicareCount = clients.filter(c => c.medicare_id).length;
+  const privateCount = clients.filter(c => c.insurance_provider && !c.medicaid_id && !c.medicare_id).length;
+
+  // Handler for inline delete with confirmation
+  const handleInlineDelete = async (e: React.MouseEvent, clientId: string) => {
+    e.stopPropagation();
+    if (deleteConfirm === clientId) {
+      // Second click - actually delete
+      try {
+        await handleDeleteClient(clientId);
+        setDeleteConfirm(null);
+      } catch (err) {
+        console.error('Delete failed:', err);
+      }
+    } else {
+      // First click - show confirmation
+      setDeleteConfirm(clientId);
+      // Auto-reset after 3 seconds
+      setTimeout(() => setDeleteConfirm(null), 3000);
+    }
+  };
 
   // Group clients by status for pipeline view
   const intakeClients = filteredClients.filter(c => c.status === 'intake' || c.status === 'assessment' || c.status === 'pending');
@@ -479,6 +570,58 @@ export default function ClientsPage() {
                 <MoreHorizontal className="w-5 h-5" />
               </button>
             </div>
+          </div>
+
+          {/* Insurance Type Filter Tabs */}
+          <div className="flex items-center gap-2 mb-4 border-b border-dark-700 pb-4">
+            <button
+              onClick={() => setInsuranceFilter('all')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                insuranceFilter === 'all' 
+                  ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' 
+                  : 'text-dark-400 hover:text-white hover:bg-dark-700'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              All Clients
+              <span className="text-xs bg-dark-600 px-2 py-0.5 rounded-full">{clients.length}</span>
+            </button>
+            <button
+              onClick={() => setInsuranceFilter('medicaid')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                insuranceFilter === 'medicaid' 
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
+                  : 'text-dark-400 hover:text-white hover:bg-dark-700'
+              }`}
+            >
+              <Building2 className="w-4 h-4" />
+              Medicaid
+              <span className="text-xs bg-dark-600 px-2 py-0.5 rounded-full">{medicaidCount}</span>
+            </button>
+            <button
+              onClick={() => setInsuranceFilter('medicare')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                insuranceFilter === 'medicare' 
+                  ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                  : 'text-dark-400 hover:text-white hover:bg-dark-700'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              Medicare
+              <span className="text-xs bg-dark-600 px-2 py-0.5 rounded-full">{medicareCount}</span>
+            </button>
+            <button
+              onClick={() => setInsuranceFilter('private')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                insuranceFilter === 'private' 
+                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
+                  : 'text-dark-400 hover:text-white hover:bg-dark-700'
+              }`}
+            >
+              <Heart className="w-4 h-4" />
+              Private Insurance
+              <span className="text-xs bg-dark-600 px-2 py-0.5 rounded-full">{privateCount}</span>
+            </button>
           </div>
 
           {/* View Tabs & Search */}
@@ -570,6 +713,7 @@ export default function ClientsPage() {
                     <div className="w-28">Visit status</div>
                     <div className="w-32">Phone</div>
                     <div className="w-36">Care specialty</div>
+                    <div className="w-8" />
                     <div className="w-4" />
                   </div>
 
@@ -579,6 +723,8 @@ export default function ClientsPage() {
                         key={client.id} 
                         client={client} 
                         onClick={() => handleEditClient(client)}
+                        onDelete={(e) => handleInlineDelete(e, client.id)}
+                        isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
                   </div>
@@ -600,6 +746,7 @@ export default function ClientsPage() {
                     <div className="w-28">Visit status</div>
                     <div className="w-32">Phone</div>
                     <div className="w-36">Care specialty</div>
+                    <div className="w-8" />
                     <div className="w-4" />
                   </div>
 
@@ -609,6 +756,8 @@ export default function ClientsPage() {
                         key={client.id} 
                         client={client} 
                         onClick={() => handleEditClient(client)}
+                        onDelete={(e) => handleInlineDelete(e, client.id)}
+                        isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
                   </div>
@@ -630,6 +779,7 @@ export default function ClientsPage() {
                     <div className="w-28">Visit status</div>
                     <div className="w-32">Phone</div>
                     <div className="w-36">Care specialty</div>
+                    <div className="w-8" />
                     <div className="w-4" />
                   </div>
 
@@ -639,6 +789,8 @@ export default function ClientsPage() {
                         key={client.id} 
                         client={client} 
                         onClick={() => handleEditClient(client)}
+                        onDelete={(e) => handleInlineDelete(e, client.id)}
+                        isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
                   </div>
@@ -659,6 +811,7 @@ export default function ClientsPage() {
                     <div className="w-28">Visit status</div>
                     <div className="w-32">Phone</div>
                     <div className="w-36">Care specialty</div>
+                    <div className="w-8" />
                     <div className="w-4" />
                   </div>
 
@@ -668,6 +821,8 @@ export default function ClientsPage() {
                         key={client.id} 
                         client={client} 
                         onClick={() => handleEditClient(client)}
+                        onDelete={(e) => handleInlineDelete(e, client.id)}
+                        isConfirmingDelete={deleteConfirm === client.id}
                       />
                     ))}
                   </div>

@@ -35,8 +35,9 @@ async def list_caregivers(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all caregivers with optional filters."""
-    query = db.query(Caregiver)
+    """List caregivers (data isolation enforced)."""
+    # Only show caregivers created by current user
+    query = db.query(Caregiver).filter(Caregiver.created_by == current_user.id)
     
     if status:
         query = query.filter(Caregiver.status == status)
@@ -62,8 +63,10 @@ async def create_caregiver(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new caregiver."""
-    caregiver = Caregiver(**caregiver_in.model_dump())
+    """Create a new caregiver (data isolation enforced)."""
+    caregiver_data = caregiver_in.model_dump()
+    caregiver_data['created_by'] = current_user.id  # Set owner for data isolation
+    caregiver = Caregiver(**caregiver_data)
     db.add(caregiver)
     db.commit()
     db.refresh(caregiver)
@@ -76,8 +79,11 @@ async def get_caregiver(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get a specific caregiver."""
-    caregiver = db.query(Caregiver).filter(Caregiver.id == caregiver_id).first()
+    """Get a specific caregiver (data isolation enforced)."""
+    caregiver = db.query(Caregiver).filter(
+        Caregiver.id == caregiver_id,
+        Caregiver.created_by == current_user.id
+    ).first()
     if not caregiver:
         raise HTTPException(status_code=404, detail="Caregiver not found")
     return caregiver
@@ -90,8 +96,11 @@ async def update_caregiver(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a caregiver."""
-    caregiver = db.query(Caregiver).filter(Caregiver.id == caregiver_id).first()
+    """Update a caregiver (data isolation enforced)."""
+    caregiver = db.query(Caregiver).filter(
+        Caregiver.id == caregiver_id,
+        Caregiver.created_by == current_user.id
+    ).first()
     if not caregiver:
         raise HTTPException(status_code=404, detail="Caregiver not found")
     
@@ -110,8 +119,11 @@ async def delete_caregiver(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a caregiver."""
-    caregiver = db.query(Caregiver).filter(Caregiver.id == caregiver_id).first()
+    """Delete a caregiver (data isolation enforced)."""
+    caregiver = db.query(Caregiver).filter(
+        Caregiver.id == caregiver_id,
+        Caregiver.created_by == current_user.id
+    ).first()
     if not caregiver:
         raise HTTPException(status_code=404, detail="Caregiver not found")
     
@@ -130,10 +142,13 @@ async def match_caregivers(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Find best matching caregivers for a client based on care needs.
+    Find best matching caregivers for a client based on care needs (data isolation enforced).
     Used by Claude after care assessment to recommend caregivers.
     """
-    query = db.query(Caregiver).filter(Caregiver.status == 'active')
+    query = db.query(Caregiver).filter(
+        Caregiver.status == 'active',
+        Caregiver.created_by == current_user.id
+    )
     
     # Filter by care level capability
     if request.care_level == "HIGH":

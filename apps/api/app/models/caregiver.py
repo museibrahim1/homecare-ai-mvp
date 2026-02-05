@@ -6,7 +6,7 @@ Caregivers don't use the app - they're managed by administrators.
 """
 
 import uuid
-from sqlalchemy import Column, String, Text, Boolean, Date, Integer, Float
+from sqlalchemy import Column, String, Text, Boolean, Date, Integer, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app.db.base import Base, TimestampMixin
 
@@ -15,6 +15,9 @@ class Caregiver(Base, TimestampMixin):
     __tablename__ = "caregivers"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    
+    # Data isolation - track who created this caregiver
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     
     # Basic Info
     full_name = Column(String(255), nullable=False)

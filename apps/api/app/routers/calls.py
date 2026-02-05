@@ -41,6 +41,7 @@ async def initiate_call(
 ):
     """
     Initiate a recorded call bridge between caregiver and client.
+    Data isolation enforced.
     
     This creates a Twilio conference call:
     1. Calls the caregiver first
@@ -51,16 +52,22 @@ async def initiate_call(
     """
     twilio = get_twilio_service()
     
-    # Validate visit exists if provided
+    # Validate visit exists if provided and belongs to user
     if request.visit_id:
-        visit = db.query(Visit).filter(Visit.id == request.visit_id).first()
+        visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+            Visit.id == request.visit_id,
+            Client.created_by == current_user.id
+        ).first()
         if not visit:
             raise HTTPException(status_code=404, detail="Visit not found")
     
-    # Validate client exists if provided
+    # Validate client exists if provided and belongs to user
     client = None
     if request.client_id:
-        client = db.query(Client).filter(Client.id == request.client_id).first()
+        client = db.query(Client).filter(
+            Client.id == request.client_id,
+            Client.created_by == current_user.id
+        ).first()
         if not client:
             raise HTTPException(status_code=404, detail="Client not found")
     
@@ -110,8 +117,11 @@ async def get_call(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get details of a specific call."""
-    call = db.query(Call).filter(Call.id == call_id).first()
+    """Get details of a specific call (data isolation enforced)."""
+    call = db.query(Call).filter(
+        Call.id == call_id,
+        Call.user_id == current_user.id
+    ).first()
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
     
@@ -141,8 +151,11 @@ async def get_call_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get current status of a call (for polling)."""
-    call = db.query(Call).filter(Call.id == call_id).first()
+    """Get current status of a call (data isolation enforced)."""
+    call = db.query(Call).filter(
+        Call.id == call_id,
+        Call.user_id == current_user.id
+    ).first()
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
     
@@ -177,8 +190,11 @@ async def end_call(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """End an active call."""
-    call = db.query(Call).filter(Call.id == call_id).first()
+    """End an active call (data isolation enforced)."""
+    call = db.query(Call).filter(
+        Call.id == call_id,
+        Call.user_id == current_user.id
+    ).first()
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
     
@@ -220,8 +236,8 @@ async def list_calls(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List calls with optional filtering."""
-    query = db.query(Call)
+    """List calls with optional filtering (data isolation enforced)."""
+    query = db.query(Call).filter(Call.user_id == current_user.id)
     
     if visit_id:
         query = query.filter(Call.visit_id == visit_id)

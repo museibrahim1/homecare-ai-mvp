@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
+from app.models.client import Client
 from app.models.audio_asset import AudioAsset
 from app.schemas.upload import UploadResponse
 from app.services.storage import upload_file_to_s3
@@ -13,6 +14,17 @@ from app.services.audit import log_action
 from app.services.jobs import enqueue_task
 
 router = APIRouter()
+
+
+def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
+    """Helper to get a visit with data isolation enforced."""
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    return visit
 
 
 @router.post("/audio", response_model=UploadResponse, status_code=status.HTTP_201_CREATED)
@@ -23,18 +35,13 @@ async def upload_audio(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Upload an audio file for a visit.
+    """Upload an audio file for a visit (data isolation enforced).
     
     If auto_process=true, automatically runs the full pipeline:
     transcribe -> diarize -> align -> bill -> note -> contract
     """
-    # Verify visit exists
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Visit not found",
-        )
+    # Verify visit exists and belongs to user
+    visit = get_user_visit(db, visit_id, current_user)
     
     # Validate file type
     allowed_types = ["audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg", "audio/webm", "audio/x-m4a"]

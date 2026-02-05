@@ -36,17 +36,36 @@ class EmailContractRequest(BaseModel):
 router = APIRouter()
 
 
+def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
+    """Helper to get a visit with data isolation enforced."""
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    return visit
+
+
 @router.get("/template-status")
 async def get_template_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Check if a contract template is uploaded and ready to use."""
+    """Check if a contract template is uploaded and ready to use (data isolation enforced)."""
     import json
     
+    # First check for user-specific settings
     agency_settings = db.query(AgencySettings).filter(
-        AgencySettings.settings_key == "default"
+        AgencySettings.user_id == current_user.id
     ).first()
+    
+    # Fall back to default only if needed for template lookup
+    if not agency_settings:
+        agency_settings = db.query(AgencySettings).filter(
+            AgencySettings.settings_key == "default",
+            AgencySettings.user_id == None
+        ).first()
     
     result = {
         "has_settings": agency_settings is not None,
@@ -93,10 +112,8 @@ async def export_timesheet_csv(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Export billable items as CSV timesheet."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Export billable items as CSV timesheet (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     items = db.query(BillableItem).filter(
         BillableItem.visit_id == visit_id
@@ -154,10 +171,8 @@ async def export_note_pdf(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Export visit note as PDF."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Export visit note as PDF (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     note = db.query(Note).filter(Note.visit_id == visit_id).first()
     if not note:
@@ -179,10 +194,8 @@ async def export_contract_pdf(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Export service contract as PDF."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Export service contract as PDF (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     contract = db.query(Contract).filter(
         Contract.client_id == visit.client_id
@@ -208,15 +221,13 @@ async def export_contract_from_template(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Export contract using the uploaded agency template.
+    Export contract using the uploaded agency template (data isolation enforced).
     Falls back to default DOCX if no template is uploaded.
     """
     import logging
     logger = logging.getLogger(__name__)
     
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    visit = get_user_visit(db, visit_id, current_user)
     
     contract = db.query(Contract).filter(
         Contract.client_id == visit.client_id
@@ -225,9 +236,9 @@ async def export_contract_from_template(
     if not contract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
     
-    # Get agency settings to check for uploaded template
+    # Get agency settings for current user to check for uploaded template
     agency_settings = db.query(AgencySettings).filter(
-        AgencySettings.settings_key == "default"
+        AgencySettings.user_id == current_user.id
     ).first()
     
     logger.info(f"Agency settings found: {agency_settings is not None}")
@@ -330,10 +341,8 @@ async def export_note_docx(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Export visit note as DOCX (legacy format)."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Export visit note as DOCX (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     note = db.query(Note).filter(Note.visit_id == visit_id).first()
     if not note:
@@ -355,10 +364,8 @@ async def export_contract_docx(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Export service contract as DOCX (legacy format)."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Export service contract as DOCX (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     contract = db.query(Contract).filter(
         Contract.client_id == visit.client_id

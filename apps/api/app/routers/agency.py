@@ -98,14 +98,14 @@ class ExtractedInfo(BaseModel):
     terms_and_conditions: Optional[str] = None
 
 
-def get_or_create_settings(db: Session) -> AgencySettings:
-    """Get or create the singleton agency settings record."""
+def get_or_create_settings(db: Session, user_id) -> AgencySettings:
+    """Get or create agency settings for the current user (data isolation)."""
     settings = db.query(AgencySettings).filter(
-        AgencySettings.settings_key == "default"
+        AgencySettings.user_id == user_id
     ).first()
     
     if not settings:
-        settings = AgencySettings(settings_key="default")
+        settings = AgencySettings(user_id=user_id, settings_key=f"user_{user_id}")
         db.add(settings)
         db.commit()
         db.refresh(settings)
@@ -118,8 +118,8 @@ async def get_agency_settings(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get agency settings."""
-    settings = get_or_create_settings(db)
+    """Get agency settings (data isolation enforced)."""
+    settings = get_or_create_settings(db, current_user.id)
     
     # Parse documents JSON if it exists
     documents = []
@@ -159,8 +159,8 @@ async def update_agency_settings(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update agency settings."""
-    settings = get_or_create_settings(db)
+    """Update agency settings (data isolation enforced)."""
+    settings = get_or_create_settings(db, current_user.id)
     
     update_data = settings_update.model_dump(exclude_unset=True)
     

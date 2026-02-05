@@ -130,32 +130,41 @@ class IntegrationConfig(BaseModel):
 # HELPER FUNCTIONS
 # =============================================================================
 
-def find_existing_client(db: Session, client_data: ClientImport) -> Optional[Client]:
-    """Find existing client by external_id, email, or phone."""
+def find_existing_client(db: Session, client_data: ClientImport, user_id) -> Optional[Client]:
+    """Find existing client by external_id, email, or phone (data isolation enforced)."""
     if client_data.external_id and client_data.external_source:
         existing = db.query(Client).filter(
             Client.external_id == client_data.external_id,
-            Client.external_source == client_data.external_source
+            Client.external_source == client_data.external_source,
+            Client.created_by == user_id
         ).first()
         if existing:
             return existing
     
     if client_data.email:
-        existing = db.query(Client).filter(Client.email == client_data.email).first()
+        existing = db.query(Client).filter(
+            Client.email == client_data.email,
+            Client.created_by == user_id
+        ).first()
         if existing:
             return existing
     
     if client_data.phone:
-        existing = db.query(Client).filter(Client.phone == client_data.phone).first()
+        existing = db.query(Client).filter(
+            Client.phone == client_data.phone,
+            Client.created_by == user_id
+        ).first()
         if existing:
             return existing
     
     return None
 
 
-def create_client_from_import(db: Session, client_data: ClientImport) -> Client:
-    """Create a new client from import data."""
+def create_client_from_import(db: Session, client_data: ClientImport, user_id) -> Client:
+    """Create a new client from import data (with data isolation)."""
     client = Client(
+        # Data isolation - assign to importing user
+        created_by=user_id,
         # Basic Information
         full_name=client_data.full_name,
         preferred_name=client_data.preferred_name,
@@ -239,15 +248,15 @@ async def bulk_import_clients(
     
     for idx, client_data in enumerate(request.clients):
         try:
-            # Check for existing client
+            # Check for existing client (with data isolation)
             if request.skip_duplicates:
-                existing = find_existing_client(db, client_data)
+                existing = find_existing_client(db, client_data, current_user.id)
                 if existing:
                     skipped += 1
                     continue
             
-            # Create new client
-            client = create_client_from_import(db, client_data)
+            # Create new client (with data isolation)
+            client = create_client_from_import(db, client_data, current_user.id)
             db.flush()  # Get the ID
             
             created_clients.append({
@@ -360,15 +369,15 @@ async def import_clients_from_csv(
                 external_source='csv_import',
             )
             
-            # Check for duplicates
+            # Check for duplicates (with data isolation)
             if skip_duplicates:
-                existing = find_existing_client(db, client_data)
+                existing = find_existing_client(db, client_data, current_user.id)
                 if existing:
                     skipped += 1
                     continue
             
-            # Create client
-            client = create_client_from_import(db, client_data)
+            # Create client (with data isolation)
+            client = create_client_from_import(db, client_data, current_user.id)
             db.flush()
             
             created_clients.append({
@@ -628,17 +637,18 @@ async def fetch_from_monday(
         item_name = item.get("name", "")
         column_values = {cv["id"]: cv for cv in item.get("column_values", [])}
         
-        # Check if already exists
+        # Check if already exists (with data isolation)
         existing = db.query(Client).filter(
             Client.external_id == str(item_id),
-            Client.external_source == "monday.com"
+            Client.external_source == "monday.com",
+            Client.created_by == current_user.id
         ).first()
         
         if existing:
             skipped += 1
             continue
         
-        # Create client
+        # Create client (with data isolation)
         client_data = ClientImport(
             full_name=item_name,
             phone=extract_monday_column(column_values, ["phone", "telephone"]),
@@ -649,7 +659,7 @@ async def fetch_from_monday(
             external_source="monday.com",
         )
         
-        create_client_from_import(db, client_data)
+        create_client_from_import(db, client_data, current_user.id)
         imported += 1
     
     db.commit()

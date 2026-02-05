@@ -193,17 +193,15 @@ async def get_team_voiceprints(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get voiceprint status for all team members (for identification)."""
-    users = db.query(User).filter(User.is_active == True).all()
-    
+    """Get voiceprint status for current user only (data isolation enforced)."""
+    # Only return current user's voiceprint status - no team data leak
     return {
         "team": [
             {
-                "id": str(user.id),
-                "name": user.full_name,
-                "has_voiceprint": user.voiceprint is not None,
-                "created_at": user.voiceprint_created_at.isoformat() if user.voiceprint_created_at else None,
+                "id": str(current_user.id),
+                "name": current_user.full_name,
+                "has_voiceprint": current_user.voiceprint is not None,
+                "created_at": current_user.voiceprint_created_at.isoformat() if current_user.voiceprint_created_at else None,
             }
-            for user in users
         ]
     }

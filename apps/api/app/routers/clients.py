@@ -49,8 +49,11 @@ async def get_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get a specific client."""
-    client = db.query(Client).filter(Client.id == client_id).first()
+    """Get a specific client (data isolation enforced)."""
+    client = db.query(Client).filter(
+        Client.id == client_id,
+        Client.created_by == current_user.id
+    ).first()
     if not client:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -67,8 +70,11 @@ async def update_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a client."""
-    client = db.query(Client).filter(Client.id == client_id).first()
+    """Update a client (data isolation enforced)."""
+    client = db.query(Client).filter(
+        Client.id == client_id,
+        Client.created_by == current_user.id
+    ).first()
     if not client:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -107,8 +113,11 @@ async def delete_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a client."""
-    client = db.query(Client).filter(Client.id == client_id).first()
+    """Delete a client (data isolation enforced)."""
+    client = db.query(Client).filter(
+        Client.id == client_id,
+        Client.created_by == current_user.id
+    ).first()
     if not client:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

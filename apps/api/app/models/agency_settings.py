@@ -2,10 +2,11 @@
 Agency Settings Model
 
 Stores agency-wide settings including branding, templates, and contact info.
+Each user has their own settings (data isolation).
 """
 
 import uuid
-from sqlalchemy import Column, String, Text
+from sqlalchemy import Column, String, Text, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from app.db.base import Base, TimestampMixin
 
@@ -14,6 +15,9 @@ class AgencySettings(Base, TimestampMixin):
     __tablename__ = "agency_settings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    
+    # Data isolation - each user has their own settings
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     
     # Agency Information
     name = Column(String(255), nullable=False, default="Home Care Services Agency")

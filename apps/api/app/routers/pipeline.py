@@ -6,10 +6,22 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
+from app.models.client import Client
 from app.models.transcript_segment import TranscriptSegment
 from app.services.jobs import enqueue_task
 
 router = APIRouter()
+
+
+def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
+    """Helper to get a visit with data isolation enforced."""
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    return visit
 
 
 @router.post("/visits/{visit_id}/process-transcript")
@@ -23,14 +35,9 @@ async def process_transcript_only(
 ):
     """
     Process an imported transcript (skip audio transcription/diarization).
-    
-    Use this after importing a transcript to generate billing, notes, and contracts.
-    This is useful when you have a transcript from another source and don't need
-    to re-transcribe audio.
+    Data isolation enforced.
     """
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    visit = get_user_visit(db, visit_id, current_user)
     
     # Check if transcript exists
     segment_count = db.query(TranscriptSegment).filter(
@@ -84,10 +91,8 @@ async def start_transcription(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Start transcription job for a visit."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Start transcription job for a visit (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     # Check if audio exists
     if not visit.audio_assets:
@@ -112,10 +117,8 @@ async def start_diarization(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Start diarization job for a visit."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Start diarization job for a visit (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     task_id = enqueue_task("diarize", visit_id=str(visit_id))
     
@@ -134,10 +137,8 @@ async def start_alignment(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Align transcription with diarization (merge speaker turns)."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Align transcription with diarization (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     task_id = enqueue_task("align", visit_id=str(visit_id))
     
@@ -156,10 +157,8 @@ async def start_billing(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Generate billable items from transcript."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Generate billable items from transcript (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     task_id = enqueue_task("bill", visit_id=str(visit_id))
     
@@ -178,10 +177,8 @@ async def start_note_generation(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Generate visit note from transcript and billables."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Generate visit note from transcript and billables (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     task_id = enqueue_task("generate_note", visit_id=str(visit_id))
     
@@ -200,10 +197,8 @@ async def start_contract_generation(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Generate service contract based on visit data."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Generate service contract based on visit data (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     task_id = enqueue_task("generate_contract", visit_id=str(visit_id))
     
@@ -222,10 +217,8 @@ async def get_pipeline_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get the current pipeline status for a visit."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Get the current pipeline status for a visit (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     return {
         "visit_id": str(visit_id),
