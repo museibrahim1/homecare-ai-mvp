@@ -27,8 +27,9 @@ class EmailService:
         # Use Resend's default sender if custom domain not verified
         # To use custom domain: verify it at https://resend.com/domains
         custom_from = os.getenv("EMAIL_FROM")
-        self.from_email = custom_from if custom_from else "Homecare AI <onboarding@resend.dev>"
-        self.support_email = os.getenv("SUPPORT_EMAIL", "support@homecare.ai")
+        # Default to welcome@palmtai.com if domain is verified, else use Resend's test domain
+        self.from_email = custom_from if custom_from else "Homecare AI <welcome@palmtai.com>"
+        self.support_email = os.getenv("SUPPORT_EMAIL", "support@palmtai.com")
         
         if self.api_key and RESEND_AVAILABLE:
             resend.api_key = self.api_key
