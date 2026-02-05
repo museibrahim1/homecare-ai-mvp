@@ -224,6 +224,7 @@ export default function DocumentsPage() {
   };
 
   const handleDeleteFile = (fileId: string) => {
+    if (!confirm('Are you sure you want to delete this file?')) return;
     setFiles(files.filter(f => f.id !== fileId));
     setShowPreviewModal(false);
   };
@@ -632,6 +633,13 @@ export default function DocumentsPage() {
                                 <Download className="w-4 h-4 text-dark-400" />
                               </button>
                             )}
+                            <button 
+                              onClick={() => handleDeleteFile(file.id)}
+                              className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 text-dark-400 hover:text-red-400" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -680,6 +688,7 @@ export default function DocumentsPage() {
                         <button 
                           onClick={() => handleDownload(file)}
                           className="flex-1 p-2 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
+                          title="Download"
                         >
                           <Download className="w-4 h-4 text-dark-300 mx-auto" />
                         </button>
@@ -687,8 +696,16 @@ export default function DocumentsPage() {
                       <button 
                         onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
                         className="flex-1 p-2 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
+                        title="Preview"
                       >
                         <Eye className="w-4 h-4 text-dark-300 mx-auto" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteFile(file.id)}
+                        className="flex-1 p-2 bg-dark-700 hover:bg-red-500/30 rounded-lg transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4 text-dark-300 hover:text-red-400 mx-auto" />
                       </button>
                     </div>
                   </div>
@@ -776,6 +793,13 @@ export default function DocumentsPage() {
                     View Visit
                   </a>
                 )}
+                <button 
+                  onClick={() => handleDeleteFile(selectedFile.id)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Delete
+                </button>
               </div>
             </div>
           </div>
