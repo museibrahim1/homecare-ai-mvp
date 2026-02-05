@@ -95,22 +95,36 @@ async def list_all_businesses(
     
     businesses = query.order_by(Business.created_at.desc()).offset(skip).limit(limit).all()
     
+    logger.info(f"Found {len(businesses)} businesses for admin listing")
+    
     result = []
     for b in businesses:
-        docs_count = db.query(BusinessDocument).filter(
-            BusinessDocument.business_id == b.id
-        ).count()
-        
-        result.append(AdminBusinessListItem(
-            id=b.id,
-            name=b.name,
-            email=b.email,
-            state_of_incorporation=b.state_of_incorporation,
-            verification_status=VerificationStatusEnum(b.verification_status.value),
-            documents_count=docs_count,
-            created_at=b.created_at,
-        ))
+        try:
+            docs_count = db.query(BusinessDocument).filter(
+                BusinessDocument.business_id == b.id
+            ).count()
+            
+            # Handle verification_status - could be enum or string
+            if hasattr(b.verification_status, 'value'):
+                status_value = b.verification_status.value
+            else:
+                status_value = str(b.verification_status)
+            
+            result.append(AdminBusinessListItem(
+                id=b.id,
+                name=b.name,
+                email=b.email,
+                state_of_incorporation=b.state_of_incorporation,
+                verification_status=VerificationStatusEnum(status_value),
+                documents_count=docs_count,
+                created_at=b.created_at,
+            ))
+        except Exception as e:
+            logger.error(f"Error processing business {b.id}: {e}")
+            # Continue processing other businesses
+            continue
     
+    logger.info(f"Returning {len(result)} businesses after processing")
     return result
 
 

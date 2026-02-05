@@ -28,7 +28,7 @@ interface Business {
   id: string;
   name: string;
   email: string;
-  state_of_incorporation: string;
+  state_of_incorporation: string | null;
   verification_status: string;
   documents_count: number;
   created_at: string;
@@ -78,14 +78,21 @@ export default function AdminBusinessesPage() {
       if (search) params.append('search', search);
       if (params.toString()) url += `?${params.toString()}`;
 
+      console.log('[Admin] Fetching businesses from:', url);
       const bizRes = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('[Admin] Businesses response status:', bizRes.status);
       if (bizRes.ok) {
-        setBusinesses(await bizRes.json());
+        const data = await bizRes.json();
+        console.log('[Admin] Businesses loaded:', data.length, 'records');
+        setBusinesses(data);
+      } else {
+        const errorText = await bizRes.text();
+        console.error('[Admin] Failed to load businesses:', bizRes.status, errorText);
       }
     } catch (err) {
-      console.error('Failed to load data:', err);
+      console.error('[Admin] Failed to load data:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -268,7 +275,7 @@ export default function AdminBusinessesPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-dark-300">{business.state_of_incorporation}</span>
+                        <span className="text-dark-300">{business.state_of_incorporation || '-'}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm ${statusConfig.bgColor} ${statusConfig.color}`}>

@@ -1,4 +1,4 @@
-# Version: v19 - Add OpenAI health check endpoint
+# Version: v20 - Fix admin businesses listing with optional state
 FROM python:3.11-slim
 
 WORKDIR /app

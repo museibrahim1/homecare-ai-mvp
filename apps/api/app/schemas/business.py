@@ -270,7 +270,7 @@ class AdminBusinessListItem(BaseModel):
     id: UUID
     name: str
     email: str
-    state_of_incorporation: str
+    state_of_incorporation: Optional[str] = None
     verification_status: VerificationStatusEnum
     documents_count: int
     created_at: datetime
