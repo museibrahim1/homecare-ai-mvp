@@ -4,6 +4,7 @@ Business Authentication Router
 Handles business registration, verification, login, and user management.
 """
 
+import os
 import logging
 import secrets
 from datetime import datetime, timezone, timedelta
@@ -205,12 +206,21 @@ async def register_business(
     
     db.commit()
     
-    # Send registration confirmation email
+    # Send registration confirmation email to the new user
     email_service = get_email_service()
     email_service.send_business_registration_received(
         business_email=registration.owner_email,
         business_name=registration.name,
     )
+    
+    # Notify platform admin of new registration
+    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "admin@homecare.ai")
+    email_service.send_admin_new_registration(
+        admin_email=admin_email,
+        business_name=registration.name,
+        business_id=str(business.id),
+    )
+    logger.info(f"New business registered: {registration.name} - Admin notified at {admin_email}")
     
     return BusinessRegistrationResponse(
         business_id=business.id,
