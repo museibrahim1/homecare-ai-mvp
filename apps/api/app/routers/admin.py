@@ -454,7 +454,7 @@ async def clear_all_businesses(
     from app.models.contract import Contract
     from app.models.transcript_segment import TranscriptSegment
     from app.models.billable_item import BillableItem
-    from app.models.visit_note import VisitNote
+    from app.models.note import Note
     from app.models.audio_asset import AudioAsset
     
     # Get all business user emails FIRST (before any deletes)
@@ -494,7 +494,7 @@ async def clear_all_businesses(
             # 1. Delete transcript segments, billables, notes, contracts, audio assets for visits
             db.query(TranscriptSegment).filter(TranscriptSegment.visit_id.in_(visit_ids)).delete(synchronize_session=False)
             db.query(BillableItem).filter(BillableItem.visit_id.in_(visit_ids)).delete(synchronize_session=False)
-            db.query(VisitNote).filter(VisitNote.visit_id.in_(visit_ids)).delete(synchronize_session=False)
+            db.query(Note).filter(Note.visit_id.in_(visit_ids)).delete(synchronize_session=False)
             db.query(Contract).filter(Contract.visit_id.in_(visit_ids)).delete(synchronize_session=False)
             db.query(AudioAsset).filter(AudioAsset.visit_id.in_(visit_ids)).delete(synchronize_session=False)
             
