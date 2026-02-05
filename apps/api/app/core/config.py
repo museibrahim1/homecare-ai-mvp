@@ -15,11 +15,20 @@ class Settings(BaseSettings):
     s3_secret_key: str = "minio12345"
     s3_bucket: str = "homecare-audio"
     
-    # JWT
+    # JWT - HIPAA: Shorter token lifetime for security
     jwt_secret: str = "change-me-to-a-secure-random-string"
     jwt_issuer: str = "homecare-ai"
     jwt_algorithm: str = "HS256"
-    jwt_expiration_hours: int = 24
+    jwt_expiration_hours: int = 1  # HIPAA: 1 hour token lifetime (was 24)
+    
+    # HIPAA Security Settings
+    password_min_length: int = 8
+    password_require_uppercase: bool = True
+    password_require_lowercase: bool = True
+    password_require_number: bool = True
+    password_require_special: bool = False
+    max_login_attempts: int = 5
+    lockout_duration_minutes: int = 15
     
     # ASR
     asr_model_size: str = "medium"

@@ -435,7 +435,7 @@ export default function PricingPage() {
               },
               {
                 q: 'Is my data secure?',
-                a: 'Yes. We use bank-level encryption, are HIPAA compliant, and never share your data with third parties.',
+                a: 'Yes. We use bank-level 256-bit encryption, implement HIPAA security controls including automatic session timeouts, audit logging, and secure password policies. We never share your data with third parties.',
               },
               {
                 q: 'Can I cancel anytime?',
@@ -500,12 +500,12 @@ export default function PricingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-dark-400 text-sm">
             <Shield className="w-4 h-4" />
-            <span>HIPAA Compliant</span>
+            <span>HIPAA-Ready Security</span>
             <span className="mx-2">•</span>
-            <span>SOC 2 Type II</span>
+            <span>256-bit Encryption</span>
           </div>
           <p className="text-dark-500 text-sm">
-            © 2024 Homecare AI. All rights reserved.
+            © 2026 Homecare AI. All rights reserved.
           </p>
         </div>
       </footer>

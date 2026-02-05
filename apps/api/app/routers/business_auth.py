@@ -134,6 +134,15 @@ async def register_business(
             detail="An account with this email already exists"
         )
     
+    # HIPAA Compliance: Validate password meets security requirements
+    from app.core.security import validate_password
+    is_valid, error_msg = validate_password(registration.owner_password)
+    if not is_valid:
+        raise HTTPException(
+            status_code=400,
+            detail=error_msg
+        )
+    
     # Create business
     # Use lowercase entity_type value to match PostgreSQL enum
     entity_type_value = registration.entity_type.value.lower() if hasattr(registration.entity_type, 'value') else registration.entity_type.lower()

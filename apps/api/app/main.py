@@ -102,6 +102,10 @@ extra_origins = os.getenv("CORS_ORIGINS", "")
 if extra_origins:
     cors_origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
 
+# HIPAA Compliance: Add audit logging middleware for PHI access
+from app.middleware.audit import AuditLoggingMiddleware
+app.add_middleware(AuditLoggingMiddleware)
+
 # Add catch-all middleware FIRST (runs last, catches everything)
 app.add_middleware(CatchAllMiddleware)
 
