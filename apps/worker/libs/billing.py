@@ -169,12 +169,17 @@ def analyze_transcript_with_claude(
     """
     Use Claude to analyze transcript and extract ALL billable services comprehensively.
     """
-    import anthropic
     import os
     
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         logger.warning("No ANTHROPIC_API_KEY, skipping LLM billables analysis")
+        return []
+    
+    try:
+        import anthropic
+    except ImportError:
+        logger.warning("anthropic package not installed, skipping LLM billables analysis")
         return []
     
     # Combine segments into full transcript

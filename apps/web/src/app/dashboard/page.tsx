@@ -51,7 +51,11 @@ export default function DashboardPage() {
     }
   };
 
-  if (authLoading) {
+  // Only show full loading on initial page load, not during navigation
+  // Check localStorage directly for faster response
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+  
+  if (authLoading && !hasStoredToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-2xl flex items-center justify-center animate-pulse-glow">
@@ -61,7 +65,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!token) return null;
+  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

@@ -61,14 +61,37 @@ function isSessionExpired(lastActivity: number | null): boolean {
 // Track global hydration state to prevent re-showing loading on navigation
 let globalHydrated = false;
 
+// Also track if we've ever had a valid session (prevents flash on navigation)
+let hasEverHadSession = false;
+
 // Hook that handles hydration and session timeout
 export function useAuth() {
   const store = useAuthStore();
-  // Start with globalHydrated value - if already hydrated from previous page, don't show loading
-  const [isLoading, setIsLoading] = useState(!globalHydrated);
+  
+  // Check localStorage directly for immediate token availability
+  const hasStoredToken = typeof window !== 'undefined' && (() => {
+    try {
+      const data = localStorage.getItem('homecare-auth');
+      if (data) {
+        const parsed = JSON.parse(data);
+        return !!parsed?.state?.token;
+      }
+    } catch {}
+    return false;
+  })();
+  
+  // Only show loading if: not hydrated AND no stored token AND never had a session
+  const shouldShowLoading = !globalHydrated && !hasStoredToken && !hasEverHadSession;
+  
+  const [isLoading, setIsLoading] = useState(shouldShowLoading);
   const [hydrated, setHydrated] = useState(globalHydrated);
   const [sessionWarning, setSessionWarning] = useState(false);
   const lastActivityUpdateRef = useRef<number>(0);
+  
+  // Track if we have a session
+  if (store.token) {
+    hasEverHadSession = true;
+  }
 
   // Update activity timestamp on user interaction (throttled to prevent performance issues)
   const handleActivity = useCallback(() => {
