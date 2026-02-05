@@ -79,13 +79,14 @@ Client: Thank you so much. This gives me such peace of mind.`;
 
 export default function VisitsPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, user, isLoading: authLoading } = useAuth();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [creatingDemo, setCreatingDemo] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -166,6 +167,36 @@ export default function VisitsPage() {
       console.error('Failed to clear all visits:', err);
       alert('Failed to clear assessments. Please try again.');
       await loadVisits();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Admin-only function to clean up ALL orphaned visits in the system
+  const handleAdminCleanup = async () => {
+    if (!confirm('ADMIN: This will delete ALL visits in the entire system. Are you absolutely sure?')) return;
+    
+    setLoading(true);
+    
+    try {
+      const response = await fetch(`${API_BASE}/admin/cleanup/visits`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Cleaned up ${result.deleted_visits} visits from the system.`);
+        setVisits([]);
+        await loadVisits();
+      } else {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error(`Admin cleanup failed: ${response.status} - ${errorText}`);
+        alert(`Admin cleanup failed: ${response.status}`);
+      }
+    } catch (err) {
+      console.error('Admin cleanup failed:', err);
+      alert('Admin cleanup failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -354,8 +385,19 @@ export default function VisitsPage() {
               <p className="text-dark-300">Review and manage care assessments</p>
             </div>
             <div className="flex gap-3">
-              {/* Clear All Button - only show when there are visits */}
-              {visits.length > 0 && (
+              {/* Admin Cleanup Button - only for platform admins */}
+              {isAdmin && (
+                <button 
+                  onClick={handleAdminCleanup}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Admin Cleanup
+                </button>
+              )}
+              
+              {/* Clear All Button - only show when there are visits (for regular users) */}
+              {!isAdmin && visits.length > 0 && (
                 <button 
                   onClick={handleClearAll}
                   className="flex items-center gap-2 px-4 py-2.5 bg-dark-700 hover:bg-red-500/20 text-dark-300 hover:text-red-400 rounded-xl font-medium transition-colors"

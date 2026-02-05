@@ -581,3 +581,50 @@ async def get_admin_stats(
         "rejected": rejected,
         "suspended": suspended,
     }
+
+
+# =============================================================================
+# CLEANUP ORPHANED DATA
+# =============================================================================
+
+@router.delete("/cleanup/visits")
+async def cleanup_orphaned_visits(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_platform_admin),
+):
+    """
+    Clean up ALL orphaned visits and related data.
+    This is for cleaning up demo/test data that doesn't belong to any business.
+    Platform admin only - does NOT access PHI, just removes orphaned records.
+    """
+    from app.models.visit import Visit
+    from app.models.transcript_segment import TranscriptSegment
+    from app.models.diarization_turn import DiarizationTurn
+    from app.models.billable_item import BillableItem
+    from app.models.note import Note
+    from app.models.audio_asset import AudioAsset
+    from app.models.call import Call
+    
+    # Get all visit IDs
+    all_visits = db.query(Visit).all()
+    deleted_count = 0
+    
+    for visit in all_visits:
+        # Delete all related records first
+        db.query(TranscriptSegment).filter(TranscriptSegment.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(DiarizationTurn).filter(DiarizationTurn.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(BillableItem).filter(BillableItem.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(Note).filter(Note.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(AudioAsset).filter(AudioAsset.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(Call).filter(Call.visit_id == visit.id).delete(synchronize_session=False)
+        db.delete(visit)
+        deleted_count += 1
+    
+    db.commit()
+    
+    logger.info(f"Admin {admin.email} cleaned up {deleted_count} orphaned visits")
+    
+    return {
+        "message": f"Cleaned up {deleted_count} visits",
+        "deleted_visits": deleted_count
+    }
