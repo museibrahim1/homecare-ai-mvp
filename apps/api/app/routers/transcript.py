@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
+from app.models.client import Client
 from app.models.transcript_segment import TranscriptSegment
 from app.schemas.transcript import (
     TranscriptResponse, TranscriptSegmentResponse, TranscriptSource,
@@ -331,16 +332,25 @@ def create_transcript_segments(
 # API Endpoints
 # =============================================================================
 
+def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
+    """Helper to get a visit with data isolation enforced."""
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    return visit
+
+
 @router.get("/{visit_id}/transcript", response_model=TranscriptResponse)
 async def get_transcript(
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get the transcript for a visit."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Get the transcript for a visit (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     segments = db.query(TranscriptSegment).filter(
         TranscriptSegment.visit_id == visit_id
@@ -377,14 +387,12 @@ async def import_transcript(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Import transcript segments directly (JSON format).
+    Import transcript segments directly (JSON format) (data isolation enforced).
     
     Use this when you have a transcript from another source (e.g., another transcription
     service, manual transcription, etc.) and want to import it for billing/note generation.
     """
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    visit = get_user_visit(db, visit_id, current_user)
     
     # Validate segments
     for i, seg in enumerate(request.segments):
@@ -426,13 +434,11 @@ async def import_transcript_srt(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Import transcript from SRT subtitle format.
+    Import transcript from SRT subtitle format (data isolation enforced).
     
     SRT is a common subtitle format used by many transcription services.
     """
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    visit = get_user_visit(db, visit_id, current_user)
     
     try:
         segments = parse_srt_content(request.srt_content, request.speaker_pattern)
@@ -474,13 +480,11 @@ async def import_transcript_vtt(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Import transcript from WebVTT format.
+    Import transcript from WebVTT format (data isolation enforced).
     
     WebVTT is used by many web-based transcription services.
     """
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    visit = get_user_visit(db, visit_id, current_user)
     
     try:
         segments = parse_vtt_content(request.vtt_content, request.speaker_pattern)
@@ -522,16 +526,14 @@ async def import_transcript_text(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Import transcript from plain text.
+    Import transcript from plain text (data isolation enforced).
     
     Supports multiple formats:
     - **dialogue**: "Speaker: text" format (most common for conversations)
     - **timestamped**: "[00:00] text" format
     - **paragraph**: Continuous text (will be split into chunks)
     """
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    visit = get_user_visit(db, visit_id, current_user)
     
     try:
         segments = parse_plain_text(
@@ -633,7 +635,7 @@ async def import_transcript_auto(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Auto-detect format and import transcript.
+    Auto-detect format and import transcript (data isolation enforced).
     
     This endpoint automatically detects whether the content is:
     - JSON (structured segments)
@@ -652,9 +654,7 @@ async def import_transcript_auto(
             detail="No content provided"
         )
     
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    visit = get_user_visit(db, visit_id, current_user)
     
     # Detect format
     format_type, text_hint = detect_transcript_format(content)
@@ -735,10 +735,8 @@ async def delete_transcript(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete all transcript segments for a visit."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    """Delete all transcript segments for a visit (data isolation enforced)."""
+    visit = get_user_visit(db, visit_id, current_user)
     
     deleted_count = db.query(TranscriptSegment).filter(
         TranscriptSegment.visit_id == visit_id

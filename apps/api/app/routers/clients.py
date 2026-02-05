@@ -20,14 +20,9 @@ async def list_clients(
     current_user: User = Depends(get_current_user),
 ):
     """List clients created by the current user (data isolation)."""
-    # Filter by created_by for data isolation
-    # Also include clients with no created_by (legacy data) for the creator user
-    from sqlalchemy import or_
+    # Filter by created_by for strict data isolation - only show user's own clients
     clients = db.query(Client).filter(
-        or_(
-            Client.created_by == current_user.id,
-            Client.created_by == None  # Legacy clients before this field was added
-        )
+        Client.created_by == current_user.id
     ).offset(skip).limit(limit).all()
     return clients
 

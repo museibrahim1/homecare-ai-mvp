@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
+from app.models.client import Client
 from app.models.note import Note
 from app.schemas.note import NoteResponse, NoteUpdate
 
@@ -17,8 +18,12 @@ async def get_note(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get the visit note."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    """Get the visit note (data isolation enforced)."""
+    # Join visit -> client and verify ownership
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
     
@@ -39,8 +44,12 @@ async def update_note(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update the visit note."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    """Update the visit note (data isolation enforced)."""
+    # Join visit -> client and verify ownership
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
     

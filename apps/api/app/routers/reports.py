@@ -149,25 +149,40 @@ async def get_overview_stats(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Get quick overview stats for the reports dashboard.
+    Get quick overview stats for the reports dashboard (data isolation enforced).
     """
     now = datetime.utcnow()
     week_start = now - timedelta(days=now.weekday())
     week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
     
-    # Assessments this week
+    # Get client IDs belonging to this user
+    user_client_ids = db.query(Client.id).filter(
+        Client.created_by == current_user.id
+    ).subquery()
+    
+    # Assessments this week (only for user's clients)
     assessments_this_week = db.query(func.count(Visit.id)).filter(
-        Visit.created_at >= week_start
+        Visit.created_at >= week_start,
+        Visit.client_id.in_(user_client_ids)
     ).scalar() or 0
     
-    # Total services identified (all billable items)
-    services_identified = db.query(func.count(BillableItem.id)).scalar() or 0
+    # Total services identified (only for user's visits)
+    user_visit_ids = db.query(Visit.id).filter(
+        Visit.client_id.in_(user_client_ids)
+    ).subquery()
+    services_identified = db.query(func.count(BillableItem.id)).filter(
+        BillableItem.visit_id.in_(user_visit_ids)
+    ).scalar() or 0
     
-    # Contracts generated
-    contracts_generated = db.query(func.count(Contract.id)).scalar() or 0
+    # Contracts generated (only for user's clients)
+    contracts_generated = db.query(func.count(Contract.id)).filter(
+        Contract.client_id.in_(user_client_ids)
+    ).scalar() or 0
     
-    # Active clients (clients with at least one visit)
-    active_clients = db.query(func.count(func.distinct(Visit.client_id))).scalar() or 0
+    # Active clients (user's clients with at least one visit)
+    active_clients = db.query(func.count(func.distinct(Visit.client_id))).filter(
+        Visit.client_id.in_(user_client_ids)
+    ).scalar() or 0
     
     return {
         "assessments_this_week": assessments_this_week,
@@ -186,7 +201,7 @@ async def get_weekly_timesheet(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Get weekly timesheet report with all billable services identified in assessments.
+    Get weekly timesheet report with all billable services identified in assessments (data isolation enforced).
     """
     # Calculate date range
     today = datetime.now()
@@ -194,11 +209,17 @@ async def get_weekly_timesheet(
     start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_week = start_of_week + timedelta(days=7)
     
-    # Get visits in date range
+    # Get client IDs belonging to this user
+    user_client_ids = db.query(Client.id).filter(
+        Client.created_by == current_user.id
+    ).subquery()
+    
+    # Get visits in date range for user's clients only
     visits = db.query(Visit).filter(
         and_(
             Visit.created_at >= start_of_week,
-            Visit.created_at < end_of_week
+            Visit.created_at < end_of_week,
+            Visit.client_id.in_(user_client_ids)
         )
     ).all()
     
@@ -275,7 +296,7 @@ async def get_monthly_summary(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Get monthly summary with assessment statistics and service breakdown.
+    Get monthly summary with assessment statistics and service breakdown (data isolation enforced).
     """
     today = datetime.now()
     target_month = month or today.month
@@ -288,27 +309,35 @@ async def get_monthly_summary(
     else:
         end_date = datetime(target_year, target_month + 1, 1)
     
-    # Get all visits for the month
+    # Get client IDs belonging to this user
+    user_client_ids = db.query(Client.id).filter(
+        Client.created_by == current_user.id
+    ).subquery()
+    
+    # Get all visits for the month (user's clients only)
     visits = db.query(Visit).filter(
         and_(
             Visit.created_at >= start_date,
-            Visit.created_at < end_date
+            Visit.created_at < end_date,
+            Visit.client_id.in_(user_client_ids)
         )
     ).all()
     
-    # Get contracts generated this month
+    # Get contracts generated this month (user's clients only)
     contracts = db.query(Contract).filter(
         and_(
             Contract.created_at >= start_date,
-            Contract.created_at < end_date
+            Contract.created_at < end_date,
+            Contract.client_id.in_(user_client_ids)
         )
     ).all()
     
-    # Get new clients this month
+    # Get new clients this month (user's clients only)
     new_clients = db.query(Client).filter(
         and_(
             Client.created_at >= start_date,
-            Client.created_at < end_date
+            Client.created_at < end_date,
+            Client.created_by == current_user.id
         )
     ).count()
     
@@ -388,13 +417,19 @@ async def get_billing_report(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Get detailed billing report with services breakdown per client.
+    Get detailed billing report with services breakdown per client (data isolation enforced).
     """
     start_date = datetime.now() - timedelta(days=days)
     
-    # Get visits in date range
+    # Get client IDs belonging to this user
+    user_client_ids = db.query(Client.id).filter(
+        Client.created_by == current_user.id
+    ).subquery()
+    
+    # Get visits in date range (user's clients only)
     visits = db.query(Visit).filter(
-        Visit.created_at >= start_date
+        Visit.created_at >= start_date,
+        Visit.client_id.in_(user_client_ids)
     ).order_by(Visit.created_at.desc()).all()
     
     # Get billables
@@ -486,10 +521,12 @@ async def get_client_activity(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Get client activity report with assessment history.
+    Get client activity report with assessment history (data isolation enforced).
     """
-    # Get all clients
-    clients = db.query(Client).order_by(Client.created_at.desc()).all()
+    # Get clients belonging to current user only
+    clients = db.query(Client).filter(
+        Client.created_by == current_user.id
+    ).order_by(Client.created_at.desc()).all()
     
     client_items = []
     clients_with_contracts = 0

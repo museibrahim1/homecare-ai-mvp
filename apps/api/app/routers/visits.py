@@ -29,12 +29,9 @@ async def list_visits(
     """List visits with pagination and filters (data isolation by user)."""
     from sqlalchemy import or_
     
-    # Get client IDs that belong to this user for data isolation
+    # Get client IDs that belong to this user for strict data isolation
     user_client_ids = db.query(Client.id).filter(
-        or_(
-            Client.created_by == current_user.id,
-            Client.created_by == None  # Legacy clients
-        )
+        Client.created_by == current_user.id
     ).subquery()
     
     query = db.query(Visit).options(

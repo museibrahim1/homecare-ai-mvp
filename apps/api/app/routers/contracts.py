@@ -18,10 +18,14 @@ async def get_visit_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get the contract associated with a visit's client."""
+    """Get the contract associated with a visit's client (data isolation enforced)."""
     from app.models.visit import Visit
     
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    # Join visit -> client and verify ownership
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
     
@@ -45,10 +49,14 @@ async def update_visit_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update the contract associated with a visit's client."""
+    """Update the contract associated with a visit's client (data isolation enforced)."""
     from app.models.visit import Visit
     
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    # Join visit -> client and verify ownership
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
     
@@ -77,8 +85,15 @@ async def list_contracts(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all contracts."""
-    contracts = db.query(Contract).offset(skip).limit(limit).all()
+    """List contracts for clients owned by the current user (data isolation)."""
+    # Get client IDs belonging to this user
+    user_client_ids = db.query(Client.id).filter(
+        Client.created_by == current_user.id
+    ).subquery()
+    
+    contracts = db.query(Contract).filter(
+        Contract.client_id.in_(user_client_ids)
+    ).offset(skip).limit(limit).all()
     return contracts
 
 
@@ -170,9 +185,12 @@ async def get_client_contracts(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get all contracts for a specific client."""
-    # Verify client exists
-    client = db.query(Client).filter(Client.id == client_id).first()
+    """Get all contracts for a specific client (data isolation enforced)."""
+    # Verify client exists AND belongs to current user
+    client = db.query(Client).filter(
+        Client.id == client_id,
+        Client.created_by == current_user.id
+    ).first()
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
     

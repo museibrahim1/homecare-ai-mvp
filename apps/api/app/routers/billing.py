@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
+from app.models.client import Client
 from app.models.billable_item import BillableItem
 from app.schemas.billing import BillingResponse, BillableItemResponse, BillableItemUpdate
 
@@ -18,8 +19,12 @@ async def get_billables(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get billable items for a visit."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    """Get billable items for a visit (data isolation enforced)."""
+    # Join visit -> client and verify ownership
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
     
@@ -54,8 +59,12 @@ async def update_billables(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update billable items (batch update)."""
-    visit = db.query(Visit).filter(Visit.id == visit_id).first()
+    """Update billable items (batch update) (data isolation enforced)."""
+    # Join visit -> client and verify ownership
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
     if not visit:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
     
@@ -72,7 +81,15 @@ async def update_billable_item(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update a specific billable item."""
+    """Update a specific billable item (data isolation enforced)."""
+    # First verify the visit belongs to the current user
+    visit = db.query(Visit).join(Client, Visit.client_id == Client.id).filter(
+        Visit.id == visit_id,
+        Client.created_by == current_user.id
+    ).first()
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    
     item = db.query(BillableItem).filter(
         BillableItem.id == item_id,
         BillableItem.visit_id == visit_id,
