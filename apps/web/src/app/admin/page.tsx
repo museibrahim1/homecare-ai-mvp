@@ -54,39 +54,46 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const { token, user, isLoading: authLoading, hydrated } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
   const [supportStats, setSupportStats] = useState<SupportStats | null>(null);
   const [health, setHealth] = useState<SystemHealth | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Check if user is admin (allow @homecare.ai OR @palmtai.com)
+  const isAdmin = user?.role === 'admin' && 
+    (user?.email?.endsWith('@homecare.ai') || user?.email?.endsWith('@palmtai.com'));
 
   useEffect(() => {
     // Wait for auth to hydrate before checking
     if (!hydrated || authLoading) return;
     
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    
+    // If already authorized, fetch data
+    if (isAdmin) {
+      setAuthChecked(true);
+      fetchData();
+      return;
+    }
+    
+    // Fallback: fetch user data if not in store
     const checkAuth = async () => {
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-      // Use stored user data if available, otherwise fetch
-      if (user?.role === 'admin' && user?.email?.endsWith('@homecare.ai')) {
-        setIsAuthorized(true);
-        fetchData();
-        return;
-      }
-      // Fallback: fetch user data
       try {
         const response = await fetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.ok) {
           const userData = await response.json();
-          if (userData.role === 'admin' && userData.email.endsWith('@homecare.ai')) {
-            setIsAuthorized(true);
+          if (userData.role === 'admin' && 
+              (userData.email.endsWith('@homecare.ai') || userData.email.endsWith('@palmtai.com'))) {
+            setAuthChecked(true);
             fetchData();
           } else {
-            router.push('/visits');
+            router.push('/dashboard');
           }
         } else {
           router.push('/login');
@@ -96,7 +103,7 @@ export default function AdminDashboardPage() {
       }
     };
     checkAuth();
-  }, [token, user, hydrated, authLoading, router]);
+  }, [token, user, hydrated, authLoading, router, isAdmin]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -122,12 +129,18 @@ export default function AdminDashboardPage() {
     }
   };
 
-  if (!isAuthorized) {
+  // Only show loading during initial hydration, not on every navigation
+  if (!hydrated || authLoading) {
     return (
       <div className="min-h-screen bg-dark-900 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
       </div>
     );
+  }
+
+  // If not admin after auth check, don't render (redirect will happen)
+  if (authChecked && !isAdmin) {
+    return null;
   }
 
   const StatCard = ({ label, value, icon: Icon, color, href }: any) => (

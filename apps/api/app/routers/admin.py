@@ -45,9 +45,9 @@ def require_platform_admin(current_user: User = Depends(get_current_user)) -> Us
             detail="Platform admin access required"
         )
     # Check if this is a platform admin (not associated with a business)
-    # Platform admins have email ending in @homecare.ai or are in admin list
-    if not current_user.email.endswith("@homecare.ai"):
-        # Could also check against a list of platform admin emails in settings
+    # Platform admins have email ending in @homecare.ai or @palmtai.com
+    allowed_domains = ["@homecare.ai", "@palmtai.com"]
+    if not any(current_user.email.endswith(domain) for domain in allowed_domains):
         logger.warning(f"Non-platform user {current_user.email} attempted admin access")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

@@ -90,38 +90,26 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function AdminApprovalsPage() {
   const router = useRouter();
+  const { token, user, isLoading: authLoading, hydrated } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  // Check if user is platform admin
+  // Check if user is admin (allow @homecare.ai OR @palmtai.com)
+  const isAdmin = user?.role === 'admin' && 
+    (user?.email?.endsWith('@homecare.ai') || user?.email?.endsWith('@palmtai.com'));
+
+  // Check authorization on mount
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = getStoredToken();
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-      try {
-        const response = await fetch(`${API_BASE}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.ok) {
-          const user = await response.json();
-          // Only platform admins (email ending in @homecare.ai) can access
-          if (user.role === 'admin' && user.email.endsWith('@homecare.ai')) {
-            setIsAuthorized(true);
-          } else {
-            router.push('/visits');
-          }
-        } else {
-          router.push('/login');
-        }
-      } catch {
-        router.push('/login');
-      }
-    };
-    checkAuth();
-  }, [router]);
+    if (!hydrated || authLoading) return;
+    
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    
+    if (!isAdmin) {
+      router.push('/dashboard');
+    }
+  }, [token, user, hydrated, authLoading, router, isAdmin]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [selectedBusiness, setSelectedBusiness] = useState<BusinessDetail | null>(null);
@@ -275,12 +263,18 @@ export default function AdminApprovalsPage() {
     fetchBusinesses();
   }, [filter]);
 
-  if (!isAuthorized) {
+  // Only show loading during initial hydration
+  if (!hydrated || authLoading) {
     return (
       <div className="min-h-screen bg-dark-900 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
       </div>
     );
+  }
+
+  // If not admin, don't render (redirect will happen)
+  if (!isAdmin) {
+    return null;
   }
 
   return (
