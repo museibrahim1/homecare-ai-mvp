@@ -130,6 +130,10 @@ function QuickAddModal({
     care_level: '',
     status: 'intake',
     primary_diagnosis: '',
+    insurance_type: '' as '' | 'medicaid' | 'medicare' | 'private',
+    insurance_provider: '',
+    medicaid_id: '',
+    medicare_id: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,8 +142,31 @@ function QuickAddModal({
     
     setLoading(true);
     try {
-      await onSave(formData);
-      setFormData({ full_name: '', email: '', phone: '', care_level: '', status: 'intake', primary_diagnosis: '' });
+      // Build the client data with insurance fields
+      const clientData: Partial<Client> = {
+        full_name: formData.full_name,
+        email: formData.email,
+        phone: formData.phone,
+        care_level: formData.care_level,
+        status: formData.status,
+        primary_diagnosis: formData.primary_diagnosis,
+      };
+      
+      // Add insurance fields based on type
+      if (formData.insurance_type === 'medicaid') {
+        clientData.medicaid_id = formData.medicaid_id || 'PENDING';
+      } else if (formData.insurance_type === 'medicare') {
+        clientData.medicare_id = formData.medicare_id || 'PENDING';
+      } else if (formData.insurance_type === 'private') {
+        clientData.insurance_provider = formData.insurance_provider || 'Private Insurance';
+      }
+      
+      await onSave(clientData);
+      setFormData({ 
+        full_name: '', email: '', phone: '', care_level: '', status: 'intake', 
+        primary_diagnosis: '', insurance_type: '', insurance_provider: '', 
+        medicaid_id: '', medicare_id: '' 
+      });
       onClose();
     } catch (err) {
       console.error('Failed to save:', err);
@@ -154,10 +181,10 @@ function QuickAddModal({
     <div className="fixed inset-0 z-50 flex items-start justify-end p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
-      <div className="relative bg-dark-800 rounded-2xl w-full max-w-md shadow-2xl border border-dark-600 mt-20 mr-4">
+      <div className="relative bg-dark-800 rounded-2xl w-full max-w-md shadow-2xl border border-dark-600 mt-20 mr-4 max-h-[85vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-dark-600">
-          <h3 className="text-lg font-semibold text-white">Request form</h3>
+        <div className="flex items-center justify-between p-5 border-b border-dark-600 sticky top-0 bg-dark-800 z-10">
+          <h3 className="text-lg font-semibold text-white">Add New Client</h3>
           <button onClick={onClose} className="text-dark-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>
@@ -166,7 +193,7 @@ function QuickAddModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Name</label>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Name *</label>
             <input
               type="text"
               value={formData.full_name}
@@ -188,20 +215,6 @@ function QuickAddModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Priority</label>
-            <select
-              value={formData.care_level}
-              onChange={(e) => setFormData(prev => ({ ...prev, care_level: e.target.value }))}
-              className="input-dark"
-            >
-              <option value="">Select priority...</option>
-              <option value="LOW">Low</option>
-              <option value="MODERATE">Medium</option>
-              <option value="HIGH">High</option>
-            </select>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-dark-300 mb-2">Phone</label>
             <input
               type="tel"
@@ -212,8 +225,100 @@ function QuickAddModal({
             />
           </div>
 
+          {/* Insurance Type Selection */}
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Care specialty</label>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Insurance Type</label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, insurance_type: 'medicaid' }))}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  formData.insurance_type === 'medicaid'
+                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
+                    : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-dark-500'
+                }`}
+              >
+                Medicaid
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, insurance_type: 'medicare' }))}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  formData.insurance_type === 'medicare'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                    : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-dark-500'
+                }`}
+              >
+                Medicare
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, insurance_type: 'private' }))}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  formData.insurance_type === 'private'
+                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50'
+                    : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-dark-500'
+                }`}
+              >
+                Private
+              </button>
+            </div>
+          </div>
+
+          {/* Insurance ID field based on type */}
+          {formData.insurance_type === 'medicaid' && (
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-2">Medicaid ID</label>
+              <input
+                type="text"
+                value={formData.medicaid_id}
+                onChange={(e) => setFormData(prev => ({ ...prev, medicaid_id: e.target.value }))}
+                className="input-dark"
+                placeholder="MCD123456789"
+              />
+            </div>
+          )}
+          {formData.insurance_type === 'medicare' && (
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-2">Medicare ID</label>
+              <input
+                type="text"
+                value={formData.medicare_id}
+                onChange={(e) => setFormData(prev => ({ ...prev, medicare_id: e.target.value }))}
+                className="input-dark"
+                placeholder="MCR123456789"
+              />
+            </div>
+          )}
+          {formData.insurance_type === 'private' && (
+            <div>
+              <label className="block text-sm font-medium text-dark-300 mb-2">Insurance Provider</label>
+              <input
+                type="text"
+                value={formData.insurance_provider}
+                onChange={(e) => setFormData(prev => ({ ...prev, insurance_provider: e.target.value }))}
+                className="input-dark"
+                placeholder="Blue Cross Blue Shield"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Care Level</label>
+            <select
+              value={formData.care_level}
+              onChange={(e) => setFormData(prev => ({ ...prev, care_level: e.target.value }))}
+              className="input-dark"
+            >
+              <option value="">Select level...</option>
+              <option value="LOW">Low</option>
+              <option value="MODERATE">Moderate</option>
+              <option value="HIGH">High</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Care Specialty</label>
             <select
               value={formData.primary_diagnosis}
               onChange={(e) => setFormData(prev => ({ ...prev, primary_diagnosis: e.target.value }))}
@@ -287,30 +392,41 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// Insurance type badge component
+// Insurance type badge component - shows all applicable insurance types
 function InsuranceBadge({ client }: { client: Client }) {
+  const badges = [];
+  
   if (client.medicaid_id) {
-    return (
-      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+    badges.push(
+      <span key="medicaid" className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
         Medicaid
       </span>
     );
   }
   if (client.medicare_id) {
-    return (
-      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+    badges.push(
+      <span key="medicare" className="px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/20 text-green-400 border border-green-500/30">
         Medicare
       </span>
     );
   }
-  if (client.insurance_provider) {
-    return (
-      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+  if (client.insurance_provider && !client.medicaid_id && !client.medicare_id) {
+    badges.push(
+      <span key="private" className="px-2 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
         Private
       </span>
     );
   }
-  return null;
+  
+  if (badges.length === 0) {
+    return (
+      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-dark-600 text-dark-400 border border-dark-500">
+        No Insurance
+      </span>
+    );
+  }
+  
+  return <div className="flex gap-1">{badges}</div>;
 }
 
 // Grouped Client Row Component
