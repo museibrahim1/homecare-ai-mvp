@@ -555,6 +555,94 @@ async def update_business_profile(
 # =============================================================================
 
 from app.core.deps import get_current_user as get_current_api_user
+from app.models.subscription import Subscription, Plan
+
+def get_team_limits(db: Session, company_name: str):
+    """Get team limits based on subscription plan."""
+    # Find business by company name
+    business = db.query(Business).filter(Business.name == company_name).first()
+    
+    # Default limits for free tier
+    default_limits = {
+        "max_users": 1,
+        "plan_name": "Free",
+        "plan_tier": "free",
+        "monthly_price": 0,
+        "upgrade_options": []
+    }
+    
+    if not business:
+        return default_limits
+    
+    # Get subscription and plan
+    subscription = db.query(Subscription).filter(
+        Subscription.business_id == business.id
+    ).first()
+    
+    if not subscription:
+        return default_limits
+    
+    plan = db.query(Plan).filter(Plan.id == subscription.plan_id).first()
+    if not plan:
+        return default_limits
+    
+    # Get upgrade options (higher tier plans)
+    tier_order = {"free": 0, "starter": 1, "professional": 2, "enterprise": 3}
+    current_tier_level = tier_order.get(plan.tier.value if hasattr(plan.tier, 'value') else plan.tier, 0)
+    
+    upgrade_plans = db.query(Plan).filter(
+        Plan.is_active == True
+    ).all()
+    
+    upgrade_options = []
+    for up in upgrade_plans:
+        up_tier = up.tier.value if hasattr(up.tier, 'value') else up.tier
+        up_level = tier_order.get(up_tier, 0)
+        if up_level > current_tier_level:
+            upgrade_options.append({
+                "name": up.name,
+                "tier": up_tier,
+                "max_users": up.max_users,
+                "monthly_price": float(up.monthly_price) if up.monthly_price else 0,
+                "additional_users": up.max_users - plan.max_users,
+            })
+    
+    # Sort by tier level
+    upgrade_options.sort(key=lambda x: tier_order.get(x["tier"], 0))
+    
+    return {
+        "max_users": plan.max_users,
+        "plan_name": plan.name,
+        "plan_tier": plan.tier.value if hasattr(plan.tier, 'value') else plan.tier,
+        "monthly_price": float(plan.monthly_price) if plan.monthly_price else 0,
+        "upgrade_options": upgrade_options
+    }
+
+@router.get("/team/limits")
+async def get_team_plan_limits(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+):
+    """Get team size limits based on current subscription plan."""
+    # Get team limits
+    limits = get_team_limits(db, current_user.company_name)
+    
+    # Count current team members
+    current_count = db.query(User).filter(
+        User.company_name == current_user.company_name,
+        User.company_name.isnot(None),
+        User.company_name != ""
+    ).count()
+    
+    return {
+        "current_users": current_count,
+        "max_users": limits["max_users"],
+        "plan_name": limits["plan_name"],
+        "plan_tier": limits["plan_tier"],
+        "can_invite": current_count < limits["max_users"],
+        "remaining_seats": max(0, limits["max_users"] - current_count),
+        "upgrade_options": limits["upgrade_options"]
+    }
 
 @router.get("/team")
 async def list_team_members(
@@ -569,16 +657,27 @@ async def list_team_members(
         User.company_name != ""
     ).all()
     
-    return [{
-        "id": str(member.id),
-        "email": member.email,
-        "full_name": member.full_name,
-        "role": member.role,
-        "phone": member.phone,
-        "is_active": member.is_active,
-        "voiceprint_created": member.voiceprint is not None,
-        "created_at": member.created_at.isoformat() if member.created_at else None,
-    } for member in team_members]
+    # Get plan limits for context
+    limits = get_team_limits(db, current_user.company_name)
+    
+    return {
+        "members": [{
+            "id": str(member.id),
+            "email": member.email,
+            "full_name": member.full_name,
+            "role": member.role,
+            "phone": member.phone,
+            "is_active": member.is_active,
+            "voiceprint_created": member.voiceprint is not None,
+            "created_at": member.created_at.isoformat() if member.created_at else None,
+        } for member in team_members],
+        "limits": {
+            "current_users": len(team_members),
+            "max_users": limits["max_users"],
+            "plan_name": limits["plan_name"],
+            "can_invite": len(team_members) < limits["max_users"],
+        }
+    }
 
 
 @router.post("/team/invite")
@@ -592,6 +691,26 @@ async def invite_team_member(
     """Invite a new team member."""
     if not email or not full_name:
         raise HTTPException(status_code=400, detail="Email and full_name are required")
+    
+    # Check team limits based on subscription plan
+    limits = get_team_limits(db, current_user.company_name)
+    current_count = db.query(User).filter(
+        User.company_name == current_user.company_name,
+        User.company_name.isnot(None),
+        User.company_name != ""
+    ).count()
+    
+    if current_count >= limits["max_users"]:
+        # Include upgrade info in error message
+        upgrade_msg = ""
+        if limits["upgrade_options"]:
+            next_plan = limits["upgrade_options"][0]
+            upgrade_msg = f" Upgrade to {next_plan['name']} (${next_plan['monthly_price']}/mo) to add up to {next_plan['max_users']} users."
+        
+        raise HTTPException(
+            status_code=403,
+            detail=f"Team limit reached. Your {limits['plan_name']} plan allows {limits['max_users']} user(s).{upgrade_msg}"
+        )
     
     # Check if user already exists
     existing = db.query(User).filter(User.email == email).first()

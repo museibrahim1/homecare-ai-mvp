@@ -108,8 +108,23 @@ export default function SettingsPage() {
   
   // Team state
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [teamLimits, setTeamLimits] = useState<{
+    current_users: number;
+    max_users: number;
+    plan_name: string;
+    can_invite: boolean;
+    remaining_seats?: number;
+    upgrade_options?: Array<{
+      name: string;
+      tier: string;
+      max_users: number;
+      monthly_price: number;
+      additional_users: number;
+    }>;
+  } | null>(null);
   const [loadingTeam, setLoadingTeam] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState('caregiver');
@@ -170,7 +185,24 @@ export default function SettingsPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setTeamMembers(data);
+        // Handle both old format (array) and new format (object with members and limits)
+        if (Array.isArray(data)) {
+          setTeamMembers(data);
+        } else {
+          setTeamMembers(data.members || []);
+          if (data.limits) {
+            setTeamLimits(data.limits);
+          }
+        }
+      }
+      
+      // Also fetch detailed limits
+      const limitsResponse = await fetch(`${API_BASE}/auth/business/team/limits`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (limitsResponse.ok) {
+        const limitsData = await limitsResponse.json();
+        setTeamLimits(limitsData);
       }
     } catch (err) {
       console.error('Failed to load team:', err);
@@ -1256,6 +1288,54 @@ export default function SettingsPage() {
           {/* Team Tab */}
           {activeTab === 'team' && (
             <div className="space-y-6">
+              {/* Plan Usage Banner */}
+              {teamLimits && (
+                <div className={`p-4 rounded-xl border ${
+                  teamLimits.can_invite 
+                    ? 'bg-dark-800 border-dark-700'
+                    : 'bg-yellow-500/10 border-yellow-500/30'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        teamLimits.can_invite ? 'bg-primary-500/20' : 'bg-yellow-500/20'
+                      }`}>
+                        <Users className={`w-5 h-5 ${teamLimits.can_invite ? 'text-primary-400' : 'text-yellow-400'}`} />
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">
+                          {teamLimits.current_users} / {teamLimits.max_users} Team Members
+                        </p>
+                        <p className="text-dark-400 text-sm">
+                          {teamLimits.plan_name} Plan
+                          {teamLimits.remaining_seats !== undefined && teamLimits.remaining_seats > 0 && (
+                            <span> · {teamLimits.remaining_seats} seat{teamLimits.remaining_seats !== 1 ? 's' : ''} available</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    {!teamLimits.can_invite && teamLimits.upgrade_options && teamLimits.upgrade_options.length > 0 && (
+                      <button
+                        onClick={() => setShowUpgradeModal(true)}
+                        className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition"
+                      >
+                        Upgrade Plan
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="mt-3 h-2 bg-dark-700 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-300 ${
+                        teamLimits.can_invite ? 'bg-primary-500' : 'bg-yellow-500'
+                      }`}
+                      style={{ width: `${Math.min(100, (teamLimits.current_users / teamLimits.max_users) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              
               {/* Team Header */}
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -1266,13 +1346,24 @@ export default function SettingsPage() {
                     </h2>
                     <p className="text-dark-400 text-sm mt-1">Manage your team and their permissions</p>
                   </div>
-                  <button
-                    onClick={() => setShowInviteModal(true)}
-                    className="btn-primary flex items-center gap-2"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Invite Member
-                  </button>
+                  {teamLimits?.can_invite ? (
+                    <button
+                      onClick={() => setShowInviteModal(true)}
+                      className="btn-primary flex items-center gap-2"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Invite Member
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowUpgradeModal(true)}
+                      className="btn-secondary flex items-center gap-2"
+                      title="Upgrade your plan to invite more team members"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Upgrade to Invite
+                    </button>
+                  )}
                 </div>
                 
                 {/* Team List */}
@@ -1429,6 +1520,77 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Upgrade Modal */}
+          {showUpgradeModal && teamLimits?.upgrade_options && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-dark-800 rounded-2xl p-6 w-full max-w-lg border border-dark-700">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-primary-400" />
+                    Upgrade Your Plan
+                  </h3>
+                  <button onClick={() => setShowUpgradeModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
+                    <X className="w-5 h-5 text-dark-400" />
+                  </button>
+                </div>
+                
+                <p className="text-dark-400 text-sm mb-6">
+                  Your current <span className="text-white font-medium">{teamLimits.plan_name}</span> plan 
+                  allows {teamLimits.max_users} team member{teamLimits.max_users !== 1 ? 's' : ''}. 
+                  Upgrade to add more users and unlock additional features.
+                </p>
+                
+                <div className="space-y-4">
+                  {teamLimits.upgrade_options.map((plan, index) => (
+                    <div 
+                      key={plan.name}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                        index === 0 
+                          ? 'bg-primary-500/10 border-primary-500/30 hover:border-primary-500/50' 
+                          : 'bg-dark-700/50 border-dark-600 hover:border-dark-500'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className={`font-semibold ${index === 0 ? 'text-primary-400' : 'text-white'}`}>
+                            {plan.name}
+                          </h4>
+                          {index === 0 && (
+                            <span className="px-2 py-0.5 bg-primary-500/20 text-primary-400 text-xs rounded-full">
+                              Recommended
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-white font-bold">
+                          ${plan.monthly_price}<span className="text-dark-400 font-normal text-sm">/mo</span>
+                        </p>
+                      </div>
+                      <p className="text-dark-400 text-sm">
+                        Up to {plan.max_users} team members 
+                        <span className="text-green-400 ml-1">
+                          (+{plan.additional_users} more than current)
+                        </span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-dark-700">
+                  <a 
+                    href="/pricing" 
+                    className="btn-primary w-full flex items-center justify-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    View All Plans & Pricing
+                  </a>
+                  <p className="text-dark-500 text-xs text-center mt-3">
+                    Contact us for custom enterprise pricing
+                  </p>
+                </div>
               </div>
             </div>
           )}
