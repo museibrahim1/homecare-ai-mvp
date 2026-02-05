@@ -447,38 +447,62 @@ async def clear_all_businesses(
             detail="Must provide confirm=CONFIRM to clear all businesses"
         )
     
-    # Get counts before deletion
-    business_count = db.query(Business).count()
-    user_count = db.query(BusinessUser).count()
-    doc_count = db.query(BusinessDocument).count()
-    
-    # Delete in order (foreign key constraints)
-    db.query(BusinessDocument).delete(synchronize_session=False)
-    db.query(BusinessUser).delete(synchronize_session=False)
-    
-    # Also delete the linked User records for business users
     from app.models.user import User as UserModel
-    # Get business user emails before deleting
-    business_user_emails = [b.email for b in db.query(BusinessUser).all()]
+    from app.models.audit_log import AuditLog
+    from app.models.client import Client
+    from app.models.visit import Visit
     
-    # Actually query again since we haven't committed
-    db.rollback()  # Rollback the partial deletes
-    
-    # Get all business user IDs and emails
+    # Get all business user emails FIRST (before any deletes)
     business_users = db.query(BusinessUser).all()
-    business_user_ids = [str(bu.id) for bu in business_users]
     business_user_emails = [bu.email for bu in business_users]
     
-    # Now delete properly
+    # Get counts before deletion
+    business_count = db.query(Business).count()
+    user_count = len(business_users)
+    doc_count = db.query(BusinessDocument).count()
+    
+    # Get user IDs to delete (non-admin users from business signups)
+    users_to_delete = db.query(UserModel).filter(
+        UserModel.email.in_(business_user_emails),
+        UserModel.role != 'admin'
+    ).all()
+    user_ids_to_delete = [u.id for u in users_to_delete]
+    
+    # Delete in order (foreign key constraints)
+    # 1. Delete audit logs for these users
+    deleted_audit_logs = 0
+    if user_ids_to_delete:
+        deleted_audit_logs = db.query(AuditLog).filter(
+            AuditLog.user_id.in_(user_ids_to_delete)
+        ).delete(synchronize_session=False)
+    
+    # 2. Delete visits for clients created by these users
+    deleted_visits = db.query(Visit).filter(
+        Visit.client_id.in_(
+            db.query(Client.id).filter(Client.created_by.in_(user_ids_to_delete))
+        )
+    ).delete(synchronize_session=False)
+    
+    # 3. Delete clients created by these users
+    deleted_clients = db.query(Client).filter(
+        Client.created_by.in_(user_ids_to_delete)
+    ).delete(synchronize_session=False) if user_ids_to_delete else 0
+    
+    # 4. Delete business documents
     db.query(BusinessDocument).delete(synchronize_session=False)
+    
+    # 5. Delete business users
     db.query(BusinessUser).delete(synchronize_session=False)
+    
+    # 6. Delete businesses
     db.query(Business).delete(synchronize_session=False)
     
-    # Delete corresponding User records (but NOT the admin user)
-    deleted_users = db.query(UserModel).filter(
-        UserModel.email.in_(business_user_emails),
-        UserModel.role != 'admin'  # Keep admin user
-    ).delete(synchronize_session=False)
+    # 7. Delete corresponding User records (but NOT the admin user)
+    deleted_users = 0
+    if user_ids_to_delete:
+        deleted_users = db.query(UserModel).filter(
+            UserModel.id.in_(user_ids_to_delete)
+        ).delete(synchronize_session=False)
     
     db.commit()
     
@@ -491,6 +515,9 @@ async def clear_all_businesses(
             "business_users": user_count,
             "documents": doc_count,
             "user_records": deleted_users,
+            "audit_logs": deleted_audit_logs,
+            "clients": deleted_clients,
+            "visits": deleted_visits,
         }
     }
 

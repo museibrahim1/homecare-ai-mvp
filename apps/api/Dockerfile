@@ -1,4 +1,4 @@
-# Version: v22 - Add admin endpoint to clear all businesses
+# Version: v23 - Fix clear-all endpoint with proper FK cascade
 FROM python:3.11-slim
 
 WORKDIR /app
