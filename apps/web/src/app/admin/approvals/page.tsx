@@ -131,6 +131,7 @@ export default function AdminApprovalsPage() {
   const [search, setSearch] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   const fetchStats = async () => {
     try {
@@ -177,6 +178,7 @@ export default function AdminApprovalsPage() {
 
   const fetchBusinessDetail = async (id: string) => {
     setDetailLoading(true);
+    setDetailError(null);
     try {
       const token = getStoredToken();
       const response = await fetch(`${API_BASE}/admin/businesses/${id}`, {
@@ -185,14 +187,16 @@ export default function AdminApprovalsPage() {
       if (response.ok) {
         const data = await response.json();
         setSelectedBusiness(data);
+        setDetailError(null);
       } else {
         const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
         console.error('Failed to fetch business detail:', response.status, errorData);
-        // Still show empty state rather than bouncing
+        setDetailError(`Error ${response.status}: ${errorData.detail || 'Failed to load business details'}`);
         setSelectedBusiness(null);
       }
     } catch (err) {
       console.error('Failed to fetch business detail:', err);
+      setDetailError(`Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setSelectedBusiness(null);
     } finally {
       setDetailLoading(false);
@@ -552,6 +556,17 @@ export default function AdminApprovalsPage() {
                     </button>
                   </div>
                 )}
+              </div>
+            ) : detailError ? (
+              <div className="flex flex-col items-center justify-center h-96 text-red-400 p-4">
+                <AlertTriangle className="w-12 h-12 mb-4 opacity-50" />
+                <p className="text-center">{detailError}</p>
+                <button 
+                  onClick={() => setDetailError(null)}
+                  className="mt-4 px-4 py-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition text-sm"
+                >
+                  Dismiss
+                </button>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-96 text-dark-400">
