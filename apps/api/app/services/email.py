@@ -95,43 +95,95 @@ class EmailService:
     
     def send_business_registration_received(self, business_email: str, business_name: str):
         """Send welcome email after registration."""
-        subject = "Welcome to Homecare AI!"
+        subject = "Welcome to Palm Technology - Let's Get You to Revenue Faster!"
         html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #6366f1; margin-bottom: 10px;">Welcome to Homecare AI!</h1>
-                <p style="color: #666; font-size: 16px;">Your account is ready to use</p>
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+            <!-- Header with gradient -->
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
+                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                    Palm Technology
+                </h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px; font-weight: 500;">
+                    AI-Powered CRM for Home Healthcare
+                </p>
             </div>
             
-            <p>Hello <strong>{business_name}</strong>,</p>
-            
-            <p>Thank you for joining Homecare AI! Your account has been created and is ready to use.</p>
-            
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0;">
-                <h3 style="color: #333; margin-top: 0;">Getting Started:</h3>
-                <ol style="color: #555; line-height: 1.8;">
-                    <li><strong>Upload an Assessment</strong> - Record or upload a care assessment conversation</li>
-                    <li><strong>AI Processing</strong> - We'll transcribe and analyze the assessment</li>
-                    <li><strong>Generate Contract</strong> - Get a proposal-ready service contract</li>
-                </ol>
+            <!-- Main content -->
+            <div style="padding: 40px 30px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <span style="font-size: 50px;">🎉</span>
+                    <h2 style="color: #1f2937; margin: 15px 0 10px 0; font-size: 24px;">Welcome, {business_name}!</h2>
+                    <p style="color: #6b7280; margin: 0; font-size: 16px;">Your account is ready to transform your agency</p>
+                </div>
+                
+                <!-- Value proposition box -->
+                <div style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 16px; padding: 25px; margin: 25px 0; border-left: 4px solid #6366f1;">
+                    <p style="color: #4c1d95; margin: 0; font-size: 18px; font-weight: 600; line-height: 1.5;">
+                        The #1 Complete CRM for Home Healthcare Agencies
+                    </p>
+                    <p style="color: #5b21b6; margin: 12px 0 0 0; font-size: 15px; line-height: 1.6;">
+                        Reduce your workload, save hours every week, and start generating revenue faster with AI-powered assessments and instant contract creation.
+                    </p>
+                </div>
+                
+                <!-- Features grid -->
+                <div style="margin: 30px 0;">
+                    <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 18px; text-align: center;">What You Can Do Today</h3>
+                    
+                    <div style="background: #faf5ff; border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center;">
+                        <div style="background: #6366f1; width: 40px; height: 40px; border-radius: 10px; display: inline-block; text-align: center; line-height: 40px; margin-right: 15px; flex-shrink: 0;">
+                            <span style="color: white; font-size: 18px;">🎙️</span>
+                        </div>
+                        <div>
+                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Record or Upload Assessments</p>
+                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">AI transcribes and extracts billable services automatically</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #faf5ff; border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center;">
+                        <div style="background: #8b5cf6; width: 40px; height: 40px; border-radius: 10px; display: inline-block; text-align: center; line-height: 40px; margin-right: 15px; flex-shrink: 0;">
+                            <span style="color: white; font-size: 18px;">📄</span>
+                        </div>
+                        <div>
+                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Generate Contracts Instantly</p>
+                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">Professional service agreements created in seconds, not hours</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #faf5ff; border-radius: 12px; padding: 20px; display: flex; align-items: center;">
+                        <div style="background: #a855f7; width: 40px; height: 40px; border-radius: 10px; display: inline-block; text-align: center; line-height: 40px; margin-right: 15px; flex-shrink: 0;">
+                            <span style="color: white; font-size: 18px;">💰</span>
+                        </div>
+                        <div>
+                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Get to Revenue Faster</p>
+                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">Close deals same-day with ready-to-sign proposals</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="{self.app_url}/login" 
+                       style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
+                        Start Your First Assessment →
+                    </a>
+                </div>
+                
+                <p style="color: #9ca3af; font-size: 14px; text-align: center; margin-top: 30px;">
+                    Questions? Reply to this email - we're here to help you succeed.
+                </p>
             </div>
             
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="{self.app_url}/login" 
-                   style="background-color: #6366f1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                    Log In to Your Dashboard
-                </a>
+            <!-- Footer -->
+            <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">Palm Technology</p>
+                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                    AI-Powered Solutions for Home Healthcare
+                </p>
+                <p style="color: #d1d5db; font-size: 11px; margin: 15px 0 0 0;">
+                    © 2026 Palm Technology. All rights reserved.
+                </p>
             </div>
-            
-            <p style="color: #666; font-size: 14px;">
-                Questions? Reply to this email or contact our support team.
-            </p>
-            
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-            
-            <p style="color: #999; font-size: 12px; text-align: center;">
-                © 2026 Homecare AI. All rights reserved.
-            </p>
         </div>
         """
         return self.send_email(business_email, subject, html)
