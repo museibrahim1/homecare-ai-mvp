@@ -359,7 +359,7 @@ export default function VisitDetailPage() {
       <Sidebar />
       
       {/* Main Content - Only push content on wide screens (1280px+) */}
-      <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300 ${sidebarOpen ? 'xl:mr-[500px]' : ''}`}>
+      <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300 ${sidebarOpen ? 'xl:mr-[450px] 2xl:mr-[500px]' : ''}`}>
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
@@ -725,7 +725,7 @@ export default function VisitDetailPage() {
           onClick={() => setSidebarOpen(false)}
         />
         <div
-          className="fixed top-0 right-0 h-full w-full sm:w-[380px] md:w-[420px] lg:w-[450px] xl:w-[500px] max-w-[90vw] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
+          className="fixed top-0 right-0 h-full w-full sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] max-w-[85vw] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
         >
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
@@ -746,8 +746,8 @@ export default function VisitDetailPage() {
           </button>
         </div>
 
-        {/* Panel Tabs */}
-        <div className="flex border-b border-dark-700 px-4 pt-3 gap-2 bg-dark-800">
+        {/* Panel Tabs - Scrollable on smaller screens */}
+        <div className="flex border-b border-dark-700 px-2 sm:px-4 pt-2 sm:pt-3 gap-1 sm:gap-2 bg-dark-800 overflow-x-auto scrollbar-hide">
           {panelTabs.map((tab) => {
             const TabIcon = tab.icon;
             const isActive = activePanel === tab.id;
@@ -760,16 +760,16 @@ export default function VisitDetailPage() {
                   e.stopPropagation();
                   setActivePanel(tab.id as any);
                 }}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg cursor-pointer select-none ${
+                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg cursor-pointer select-none whitespace-nowrap flex-shrink-0 ${
                   isActive
                     ? 'bg-primary-500/20 text-white border border-primary-500/30'
                     : 'text-dark-400 hover:text-white hover:bg-dark-700/50 border border-transparent'
                 }`}
               >
-                <TabIcon className={`w-4 h-4 ${isActive ? 'text-primary-400' : ''}`} />
+                <TabIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${isActive ? 'text-primary-400' : ''}`} />
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
-                  <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                  <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs ${
                     isActive 
                       ? 'bg-primary-500/30 text-primary-300' 
                       : 'bg-dark-600 text-dark-400'

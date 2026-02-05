@@ -91,6 +91,17 @@ input[type="range"]::-webkit-slider-thumb {
   animation: waveform 0.5s ease-in-out infinite;
 }
 
+@layer utilities {
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer components {
   .card {
     @apply bg-dark-800/80 backdrop-blur-sm border border-dark-600/50 rounded-2xl;
