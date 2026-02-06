@@ -69,6 +69,9 @@ export default function ContractPreview({ contract, client, visitId, onContractU
   // Editable contract data
   const [editData, setEditData] = useState<any>({});
   
+  // DOCX download state
+  const [downloading, setDownloading] = useState(false);
+  
   // Email modal state
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
@@ -487,6 +490,56 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     }
   };
 
+  const handleDownloadDocx = async () => {
+    if (!visitId || !token) return;
+    
+    setDownloading(true);
+    setError(null);
+    
+    try {
+      // Try template-based DOCX first, falls back to default DOCX
+      const response = await fetch(`${API_BASE}/exports/visits/${visitId}/contract-template.docx`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      
+      if (!response.ok) {
+        // Fallback to basic DOCX export
+        const fallbackResponse = await fetch(`${API_BASE}/exports/visits/${visitId}/contract.docx`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        
+        if (!fallbackResponse.ok) {
+          throw new Error('Failed to generate DOCX');
+        }
+        
+        const blob = await fallbackResponse.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Contract_${client?.full_name?.replace(/\s+/g, '_') || 'Client'}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Contract_${client?.full_name?.replace(/\s+/g, '_') || 'Client'}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error('DOCX download error:', err);
+      setError('Failed to download DOCX. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handleOpenEmailModal = () => {
     // Pre-fill form with client info
     setEmailForm({
@@ -650,6 +703,14 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               >
                 <RefreshCw className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                 <span className="hidden sm:inline">Regenerate</span>
+              </button>
+              <button 
+                onClick={handleDownloadDocx}
+                disabled={downloading}
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs sm:text-sm disabled:opacity-50"
+              >
+                {downloading ? <Loader2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 animate-spin" /> : <Download className="w-3.5 sm:w-4 h-3.5 sm:h-4" />}
+                <span className="hidden sm:inline">{downloading ? 'Downloading...' : 'DOCX'}</span>
               </button>
               <button 
                 onClick={handleOpenEmailModal} 
