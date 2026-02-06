@@ -187,14 +187,15 @@ export default function VisitDetailPage() {
     try {
       await api.restartAssessment(token, visitId);
       
-      // Clear local state
+      // Clear ALL local state including audio
       setTranscript([]);
       setBillables([]);
       setContract(null);
       setNote(null);
       setHasAudio(false);
+      setSidebarOpen(false);
       
-      // Reload visit data
+      // Reload visit data (will show fresh empty state)
       await loadVisitData();
       
       setShowRestartModal(false);
@@ -939,6 +940,7 @@ export default function VisitDetailPage() {
                 This will permanently delete:
               </p>
               <ul className="mt-2 space-y-1 text-red-400 text-sm">
+                {hasAudio && <li>• Uploaded audio files</li>}
                 {transcript.length > 0 && <li>• {transcript.length} transcript segments</li>}
                 {billables.length > 0 && <li>• {billables.length} billable items</li>}
                 {note && <li>• Generated visit notes</li>}

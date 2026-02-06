@@ -216,13 +216,15 @@ async def restart_assessment(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Restart an assessment by clearing all generated data (data isolation enforced).
+    Restart an assessment by clearing ALL generated data including audio files.
     
     This deletes:
     - All transcript segments
+    - All diarization turns
     - All billable items
     - Generated notes
     - Generated contract
+    - Audio assets (DB records + S3 files)
     - Resets pipeline state
     """
     visit = get_user_visit(db, visit_id, current_user)
@@ -230,6 +232,11 @@ async def restart_assessment(
     # Delete transcript segments
     deleted_segments = db.query(TranscriptSegment).filter(
         TranscriptSegment.visit_id == visit_id
+    ).delete()
+    
+    # Delete diarization turns
+    deleted_diarization = db.query(DiarizationTurn).filter(
+        DiarizationTurn.visit_id == visit_id
     ).delete()
     
     # Delete billable items
@@ -250,7 +257,30 @@ async def restart_assessment(
     else:
         deleted_contracts = 0
     
-    # Reset pipeline state
+    # Delete audio assets (DB records + S3 files)
+    audio_assets = db.query(AudioAsset).filter(
+        AudioAsset.visit_id == visit_id
+    ).all()
+    deleted_audio = len(audio_assets)
+    
+    for audio in audio_assets:
+        # Delete from S3
+        if audio.s3_key:
+            try:
+                from app.services.storage import delete_file_from_s3
+                delete_file_from_s3(audio.s3_key)
+            except Exception as e:
+                # Log but don't fail - S3 cleanup is best-effort
+                import logging
+                logging.getLogger(__name__).warning(f"Failed to delete S3 file {audio.s3_key}: {e}")
+        db.delete(audio)
+    
+    # Delete calls if any
+    deleted_calls = db.query(Call).filter(
+        Call.visit_id == visit_id
+    ).delete()
+    
+    # Reset pipeline state completely
     visit.pipeline_state = {}
     visit.status = "pending"
     visit.audio_url = None
@@ -259,11 +289,14 @@ async def restart_assessment(
     
     return {
         "status": "success",
-        "message": "Assessment restarted successfully",
+        "message": "Assessment restarted successfully. Upload new audio to begin.",
         "deleted": {
             "transcript_segments": deleted_segments,
+            "diarization_turns": deleted_diarization,
             "billable_items": deleted_billables,
             "notes": deleted_notes,
             "contracts": deleted_contracts,
+            "audio_files": deleted_audio,
+            "calls": deleted_calls,
         }
     }

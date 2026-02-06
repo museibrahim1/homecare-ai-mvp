@@ -271,10 +271,10 @@ def diarize_visit(self, visit_id: str):
         }
         db.commit()
         
-        # Get audio asset
+        # Get the LATEST audio asset (most recently uploaded)
         audio_asset = db.query(AudioAsset).filter(
             AudioAsset.visit_id == visit.id
-        ).first()
+        ).order_by(AudioAsset.created_at.desc()).first()
         
         if not audio_asset:
             raise ValueError(f"No audio found for visit: {visit_id}")
