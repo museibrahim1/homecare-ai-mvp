@@ -79,14 +79,11 @@ export default function AdminBusinessesPage() {
       if (search) params.append('search', search);
       if (params.toString()) url += `?${params.toString()}`;
 
-      console.log('[Admin] Fetching businesses from:', url);
       const bizRes = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('[Admin] Businesses response status:', bizRes.status);
       if (bizRes.ok) {
         const data = await bizRes.json();
-        console.log('[Admin] Businesses loaded:', data.length, 'records');
         setBusinesses(data);
       } else {
         const errorText = await bizRes.text();

@@ -32,6 +32,8 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollCountRef = useRef(0);
+  const MAX_POLL_COUNT = 200; // 200 * 3s = 10 minutes max
   
   // Recording states
   const [inputMode, setInputMode] = useState<InputMode>('upload');
@@ -173,6 +175,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       if (autoProcess) {
         setState('processing');
         setCurrentStep('transcription');
+        pollCountRef.current = 0;
         pollIntervalRef.current = setInterval(pollPipelineStatus, 3000);
         pollPipelineStatus();
       } else {
@@ -221,17 +224,34 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   };
 
   const pollPipelineStatus = useCallback(async () => {
+    pollCountRef.current += 1;
+    
+    // Safety: stop polling after max attempts (10 minutes)
+    if (pollCountRef.current > MAX_POLL_COUNT) {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      setState('success');
+      setTimeout(() => onUploadComplete?.({}), 1500);
+      return;
+    }
+    
     try {
       const status = await api.getPipelineStatus(token, visitId);
       const pipelineState = status.pipeline_state || {};
       
       const completed: string[] = [];
       let processing: string | null = null;
+      let hasFailed = false;
       
       for (const step of PIPELINE_STEPS) {
         const stepState = pipelineState[step.key];
         if (stepState?.status === 'completed') {
           completed.push(step.key);
+        } else if (stepState?.status === 'failed' || stepState?.status === 'error') {
+          hasFailed = true;
+          break;
         } else if (stepState?.status === 'processing' || stepState?.status === 'queued') {
           processing = step.key;
           break;
@@ -241,12 +261,13 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       setCompletedSteps(completed);
       setCurrentStep(processing);
       
-      // Check if all steps are done
+      // Check if all steps are done or the full pipeline completed
       const allDone = PIPELINE_STEPS.every(s => 
         pipelineState[s.key]?.status === 'completed' || pipelineState[s.key]?.status === 'failed'
       );
       
-      if (allDone || pipelineState.full_pipeline?.status === 'completed') {
+      // Stop polling if: all done, full pipeline completed, or a step failed
+      if (allDone || pipelineState.full_pipeline?.status === 'completed' || hasFailed) {
         setState('success');
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
@@ -282,6 +303,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       if (autoProcess) {
         setState('processing');
         setCurrentStep('transcription');
+        pollCountRef.current = 0;
         // Start polling for pipeline status
         pollIntervalRef.current = setInterval(pollPipelineStatus, 3000);
         pollPipelineStatus(); // Initial poll

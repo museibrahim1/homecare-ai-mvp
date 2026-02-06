@@ -227,7 +227,7 @@ Return as JSON array. Extract EVERY task - do not limit or summarize. Each menti
 JSON:"""
 
     try:
-        client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(api_key=api_key, timeout=120.0)
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=8000,  # Comprehensive extraction needs more tokens

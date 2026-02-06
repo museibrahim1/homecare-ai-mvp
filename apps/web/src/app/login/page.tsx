@@ -31,12 +31,9 @@ export default function LoginPage() {
       }
       
       // Set token and user data
-      console.log('[Login] Setting token and user data');
-      console.log('[Login] User data from API:', JSON.stringify(userData));
       setToken(response.access_token);
       if (userData) {
         setUser(userData);
-        console.log('[Login] User role is:', userData.role);
       }
       
       // Small delay to ensure localStorage is updated before redirect

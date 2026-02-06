@@ -85,7 +85,7 @@ def identify_speaker_names(db, visit_id: UUID) -> dict:
         return {}
     
     try:
-        client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(api_key=api_key, timeout=120.0)
         
         # Include list of speakers that need identification
         speakers_list = ", ".join(unique_speakers)

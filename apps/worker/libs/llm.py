@@ -946,7 +946,7 @@ class LLMService:
             self.openai_client = OpenAI(api_key=self.openai_api_key)
         
         if ANTHROPIC_AVAILABLE and self.anthropic_api_key:
-            self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
+            self.anthropic_client = anthropic.Anthropic(api_key=self.anthropic_api_key, timeout=120.0)
             logger.info(f"LLM Service ready with Claude: {model}")
     
     def _detect_provider(self, model: str) -> LLMProvider:
