@@ -71,21 +71,58 @@ def transcribe_audio(
     Returns:
         List of transcript segments with timing information
     """
-    # Convert audio to WAV for better compatibility (handles webm, m4a, etc)
-    converted_path = convert_to_wav(audio_path)
-    cleanup_converted = converted_path != audio_path
+    # Log the input file details
+    file_size = os.path.getsize(audio_path)
+    file_size_mb = file_size / (1024 * 1024)
+    logger.info(f"Transcription input: {audio_path} ({file_size_mb:.1f}MB, {file_size} bytes)")
+    
+    # For OpenAI API, convert to mp3 first (much smaller than WAV)
+    cleanup_converted = False
+    converted_path = audio_path
+    
+    if use_openai_api and file_size_mb > 20:
+        # Convert large files to mp3 to reduce size
+        mp3_path = tempfile.mktemp(suffix='.mp3')
+        try:
+            logger.info(f"Converting large file ({file_size_mb:.1f}MB) to mp3 for API upload...")
+            result = subprocess.run([
+                'ffmpeg', '-i', audio_path,
+                '-b:a', '64k',    # Low bitrate (good enough for speech)
+                '-ar', '16000',   # 16kHz (optimal for Whisper)
+                '-ac', '1',       # Mono
+                '-y', mp3_path
+            ], capture_output=True, text=True, timeout=120)
+            
+            if os.path.exists(mp3_path) and os.path.getsize(mp3_path) > 0:
+                mp3_size = os.path.getsize(mp3_path) / (1024 * 1024)
+                logger.info(f"Converted to mp3: {mp3_size:.1f}MB (was {file_size_mb:.1f}MB)")
+                converted_path = mp3_path
+                cleanup_converted = True
+            else:
+                logger.warning(f"MP3 conversion failed: {result.stderr[:200]}")
+        except Exception as e:
+            logger.warning(f"MP3 conversion error: {e}")
+    elif not use_openai_api:
+        # For local whisper, convert to WAV
+        converted_path = convert_to_wav(audio_path)
+        cleanup_converted = converted_path != audio_path
     
     try:
         # Use OpenAI API for fast cloud transcription
         if use_openai_api:
             api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
             if api_key:
-                logger.info(f"Using OpenAI Whisper API for fast cloud transcription (key length: {len(api_key)})")
-                return _transcribe_openai_api(converted_path, api_key, language)
+                logger.info(f"Using OpenAI Whisper API for fast cloud transcription")
+                # IMPORTANT: Do NOT fall back to local/mock in production
+                result = _transcribe_openai_api(converted_path, api_key, language, fallback_to_local=False)
+                if result:
+                    return result
+                else:
+                    raise ValueError("OpenAI API returned no segments")
             else:
-                logger.warning("OpenAI API key not found, falling back to local transcription")
+                raise ValueError("OpenAI API key not configured. Set OPENAI_API_KEY environment variable.")
         
-        # Fall back to local faster-whisper
+        # Fall back to local faster-whisper (only if not using API)
         return _transcribe_local(converted_path, model_size, use_gpu, language)
     finally:
         # Cleanup converted file if we created one
@@ -270,6 +307,8 @@ def _transcribe_openai_api(
         
     except Exception as e:
         logger.error(f"OpenAI API transcription error: {str(e)}")
+        import traceback
+        logger.error(f"Full traceback: {traceback.format_exc()}")
         
         # Clean up any remaining chunk files
         if 'chunk_paths' in locals():
@@ -280,11 +319,12 @@ def _transcribe_openai_api(
                     except:
                         pass
         
-        # Fall back to local transcription
+        # Fall back to local transcription only if explicitly requested
         if fallback_to_local:
             logger.warning("Falling back to local Whisper transcription...")
             return _transcribe_local(audio_path, model_size=model_size, use_gpu=False, language=language)
         
+        # In production, raise the error instead of returning mock data
         raise
 
 
@@ -344,68 +384,14 @@ def _transcribe_local(
         return result
         
     except ImportError:
-        logger.warning("faster-whisper not installed, using mock transcription")
-        return _mock_transcription(audio_path)
+        logger.error(
+            "faster-whisper not installed and OpenAI API not available. "
+            "Cannot transcribe audio. Please set OPENAI_API_KEY or install faster-whisper."
+        )
+        raise RuntimeError(
+            "No transcription engine available. "
+            "Set OPENAI_API_KEY environment variable for cloud transcription."
+        )
     except Exception as e:
         logger.error(f"Local transcription error: {str(e)}")
         raise
-
-
-def _mock_transcription(audio_path: str) -> List[Dict[str, Any]]:
-    """
-    Generate mock transcription for testing without actual ASR.
-    """
-    logger.warning("Using mock transcription - install faster-whisper for real ASR")
-    
-    # Mock segments for testing
-    return [
-        {
-            "start_ms": 0,
-            "end_ms": 5000,
-            "text": "Good morning! How are you feeling today?",
-            "confidence": 0.95,
-            "words": [],
-        },
-        {
-            "start_ms": 5500,
-            "end_ms": 10000,
-            "text": "I'm doing well, thank you for asking.",
-            "confidence": 0.92,
-            "words": [],
-        },
-        {
-            "start_ms": 10500,
-            "end_ms": 18000,
-            "text": "Let me help you with your medication. It's time to take your morning pills.",
-            "confidence": 0.94,
-            "words": [],
-        },
-        {
-            "start_ms": 19000,
-            "end_ms": 25000,
-            "text": "Thank you. What's on the schedule for today?",
-            "confidence": 0.91,
-            "words": [],
-        },
-        {
-            "start_ms": 26000,
-            "end_ms": 35000,
-            "text": "I'm going to prepare your breakfast, and then we can do some light exercises together.",
-            "confidence": 0.93,
-            "words": [],
-        },
-        {
-            "start_ms": 36000,
-            "end_ms": 42000,
-            "text": "That sounds wonderful. I've been feeling a bit stiff lately.",
-            "confidence": 0.90,
-            "words": [],
-        },
-        {
-            "start_ms": 43000,
-            "end_ms": 50000,
-            "text": "We'll do some gentle stretches to help with that. Let me check your blood pressure first.",
-            "confidence": 0.94,
-            "words": [],
-        },
-    ]
