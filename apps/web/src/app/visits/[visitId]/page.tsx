@@ -85,7 +85,10 @@ export default function VisitDetailPage() {
       if (!isResizing.current) return;
       e.preventDefault();
       const delta = startX.current - e.clientX;
-      const newWidth = Math.max(300, Math.min(900, startWidth.current + delta));
+      // Cap at 55% of viewport to prevent content from being crushed
+      // (sidebar nav ~288px needs room + main content needs at least ~400px)
+      const maxWidth = Math.min(900, window.innerWidth * 0.55);
+      const newWidth = Math.max(300, Math.min(maxWidth, startWidth.current + delta));
       setPanelWidth(newWidth);
     };
     
@@ -406,7 +409,7 @@ export default function VisitDetailPage() {
       {/* Main Content - push content right when panel is open */}
       <main 
         className={`flex-1 min-w-0 p-4 sm:p-6 lg:p-8 transition-[margin] duration-300 overflow-x-hidden ${sidebarOpen && !panelWidth ? 'lg:mr-[420px] xl:mr-[450px] 2xl:mr-[500px]' : ''}`}
-        style={sidebarOpen && panelWidth ? { marginRight: `${panelWidth}px` } : undefined}
+        style={sidebarOpen && panelWidth && typeof window !== 'undefined' && window.innerWidth >= 1024 ? { marginRight: `${panelWidth}px` } : undefined}
       >
         <div className="max-w-5xl mx-auto">
           {/* Header */}
@@ -996,9 +999,9 @@ export default function VisitDetailPage() {
       </>
       )}
 
-      {/* Pop-out Full View Modal */}
+      {/* Pop-out Full View Modal - z-[70] to render above sidebar nav (z-[60]) */}
       {popoutPanel && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4">
           <div className="bg-dark-900 border border-dark-700 rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800 flex-shrink-0">
