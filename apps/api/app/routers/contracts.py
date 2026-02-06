@@ -103,9 +103,12 @@ async def create_contract(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new contract."""
-    # Verify client exists
-    client = db.query(Client).filter(Client.id == contract_in.client_id).first()
+    """Create a new contract (data isolation enforced)."""
+    # Verify client exists AND belongs to current user
+    client = db.query(Client).filter(
+        Client.id == contract_in.client_id,
+        Client.created_by == current_user.id
+    ).first()
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
     
@@ -124,10 +127,14 @@ async def sync_contract_to_client(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Sync contract data to client record.
+    Sync contract data to client record (data isolation enforced).
     Updates client's scheduling preferences from contract schedule.
     """
-    contract = db.query(Contract).filter(Contract.id == contract_id).first()
+    # Join contract -> client and verify ownership
+    contract = db.query(Contract).join(Client, Contract.client_id == Client.id).filter(
+        Contract.id == contract_id,
+        Client.created_by == current_user.id
+    ).first()
     if not contract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
     

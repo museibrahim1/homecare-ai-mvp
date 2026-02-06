@@ -257,10 +257,11 @@ async def import_caregivers_from_csv(
     
     for row in reader:
         try:
-            # Check for existing caregiver by email
+            # Check for existing caregiver by email (scoped to current user)
             if row.get('email'):
                 existing = db.query(Caregiver).filter(
-                    Caregiver.email == row['email']
+                    Caregiver.email == row['email'],
+                    Caregiver.created_by == current_user.id
                 ).first()
                 if existing:
                     errors.append(f"Caregiver with email {row['email']} already exists")
@@ -281,6 +282,7 @@ async def import_caregivers_from_csv(
                 state=row.get('state', '').strip() or None,
                 status='active',
                 external_source='csv',
+                created_by=current_user.id,
             )
             db.add(caregiver)
             imported += 1
@@ -308,16 +310,19 @@ async def import_caregivers_bulk(
     
     for cg_data in caregivers:
         try:
-            # Check for existing
+            # Check for existing (scoped to current user)
             if cg_data.email:
                 existing = db.query(Caregiver).filter(
-                    Caregiver.email == cg_data.email
+                    Caregiver.email == cg_data.email,
+                    Caregiver.created_by == current_user.id
                 ).first()
                 if existing:
                     errors.append(f"Caregiver with email {cg_data.email} already exists")
                     continue
             
-            caregiver = Caregiver(**cg_data.model_dump())
+            caregiver_dict = cg_data.model_dump()
+            caregiver_dict['created_by'] = current_user.id
+            caregiver = Caregiver(**caregiver_dict)
             db.add(caregiver)
             imported += 1
         except Exception as e:
@@ -336,10 +341,11 @@ async def import_caregivers_bulk(
 async def caregiver_webhook(
     data: dict,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Generic webhook for receiving caregiver data from external systems.
-    No auth required - intended for automated integrations.
+    Auth required - caregiver is linked to the authenticated user.
     """
     try:
         caregiver = Caregiver(
@@ -358,6 +364,7 @@ async def caregiver_webhook(
             status='active',
             external_id=data.get('external_id'),
             external_source=data.get('source', 'webhook'),
+            created_by=current_user.id,
         )
         db.add(caregiver)
         db.commit()

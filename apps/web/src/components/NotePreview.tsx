@@ -6,6 +6,8 @@ import { Note } from '@/lib/types';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
 interface NotePreviewProps {
   note: Note | null;
   visitId: string;
@@ -20,7 +22,7 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
   const downloadNote = async () => {
     if (!token) return;
     try {
-      const response = await fetch(`http://localhost:8000/exports/visits/${visitId}/note.pdf`, {
+      const response = await fetch(`${API_BASE}/exports/visits/${visitId}/note.pdf`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
