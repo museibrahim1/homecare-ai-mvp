@@ -108,17 +108,13 @@ export default function DocumentsPage() {
   const [driveLoading, setDriveLoading] = useState(false);
   const [checkingDrive, setCheckingDrive] = useState(true);
 
-  // Fetch documents from API
+  // Fetch ALL documents from API (filtering is done client-side to keep folder counts accurate)
   const fetchDocuments = useCallback(async () => {
     if (!token) return;
     
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (selectedFolder) params.append('folder', selectedFolder);
-      if (searchQuery) params.append('search', searchQuery);
-      
-      const response = await fetch(`${API_URL}/documents?${params.toString()}`, {
+      const response = await fetch(`${API_URL}/documents`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       
@@ -132,7 +128,7 @@ export default function DocumentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, selectedFolder, searchQuery]);
+  }, [token]);
 
   // Load documents on mount and when filters change
   useEffect(() => {
