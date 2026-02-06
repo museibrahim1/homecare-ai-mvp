@@ -751,10 +751,7 @@ export default function VisitDetailPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    setActivePanel(tab.id as any);
-                    setSidebarOpen(true);
-                  }}
+                  onClick={() => setPopoutPanel(tab.id)}
                   className={`card p-4 text-left hover:bg-dark-700/50 transition-all duration-200 group ${
                     activePanel === tab.id && sidebarOpen ? 'ring-2 ring-primary-500/50 bg-dark-700/30' : ''
                   }`}
@@ -772,17 +769,14 @@ export default function VisitDetailPage() {
                         }
                       </p>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span
-                        role="button"
-                        onClick={(e) => { e.stopPropagation(); setPopoutPanel(tab.id); }}
-                        className="p-1.5 rounded-lg hover:bg-dark-600 transition-colors opacity-0 group-hover:opacity-100"
-                        title={`Open ${tab.label} in full view`}
-                      >
-                        <Maximize2 className="w-3.5 h-3.5 text-dark-400 hover:text-primary-400" />
-                      </span>
+                    <span
+                      role="button"
+                      onClick={(e) => { e.stopPropagation(); setActivePanel(tab.id as any); setSidebarOpen(true); }}
+                      className="p-1.5 rounded-lg hover:bg-dark-600 transition-colors"
+                      title={`Open ${tab.label} in sidebar`}
+                    >
                       <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
-                    </div>
+                    </span>
                   </div>
                 </button>
               );

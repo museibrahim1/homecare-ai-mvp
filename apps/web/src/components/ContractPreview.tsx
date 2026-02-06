@@ -69,6 +69,9 @@ export default function ContractPreview({ contract, client, visitId, onContractU
   // Editable contract data
   const [editData, setEditData] = useState<any>({});
   
+  // Document type: proposal first, then service agreement
+  const [documentType, setDocumentType] = useState<'proposal' | 'agreement'>('proposal');
+  
   // DOCX download state
   const [downloading, setDownloading] = useState(false);
   
@@ -139,8 +142,11 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       const services = contract.services || [];
       const clientProfile = schedule.client_profile || {};
       
+      const careLevel = schedule.care_need_level || 'MODERATE';
+      const clientName = client?.full_name || 'the client';
+      
       setEditData({
-        care_level: schedule.care_need_level || 'MODERATE',
+        care_level: careLevel,
         primary_diagnosis: clientProfile.primary_diagnosis || '',
         mobility_status: clientProfile.mobility_status || '',
         cognitive_status: clientProfile.cognitive_status || '',
@@ -159,6 +165,9 @@ export default function ContractPreview({ contract, client, visitId, onContractU
         safety_concerns: (schedule.safety_concerns || [])
           .map((c: any) => typeof c === 'string' ? c : c.concern)
           .filter(Boolean).join('\n'),
+        documentTitle: '',
+        executiveSummary: `Based on our comprehensive assessment of ${clientName}'s care needs, we recommend a ${careLevel.toLowerCase()} level of home care support. ${clientProfile.primary_diagnosis ? `The primary area of focus is ${clientProfile.primary_diagnosis.toLowerCase()}.` : ''} Our proposed care plan is designed to promote independence, safety, and quality of life.`,
+        whyChooseUs: `• Experienced, qualified caregivers\n• Personalized care plans tailored to individual needs\n• 24/7 support and emergency response\n• HIPAA compliant documentation\n• Flexible scheduling to fit your lifestyle\n• Regular care plan reviews and updates`,
       });
     }
   }, [contract]);
@@ -593,6 +602,8 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     const clientProfile = schedule.client_profile || {};
     const hourlyRate = editMode ? editData.hourly_rate : parseFloat(contract?.hourly_rate || 0);
     const weeklyHours = editMode ? editData.weekly_hours : parseFloat(contract?.weekly_hours || 0);
+    const careLevel = editMode ? editData.care_level : (schedule.care_need_level || 'MODERATE');
+    const clientName = client?.full_name || '[Client Name]';
 
     return {
       agency_name: agency.name,
@@ -600,11 +611,11 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       agency_phone: agency.phone || 'N/A',
       agency_email: agency.email || 'N/A',
       agency_logo: agency.logo,
-      client_name: client?.full_name || '[Client Name]',
+      client_name: clientName,
       client_address: [client?.address, [client?.city, client?.state, client?.zip_code].filter(Boolean).join(', ')].filter(Boolean).join(', ') || '[Client Address]',
       client_phone: client?.phone || '[Client Phone]',
       effective_date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-      care_level: editMode ? editData.care_level : (schedule.care_need_level || 'MODERATE'),
+      care_level: careLevel,
       primary_diagnosis: editMode ? editData.primary_diagnosis : (clientProfile.primary_diagnosis || 'See medical records'),
       mobility_status: editMode ? editData.mobility_status : (clientProfile.mobility_status || 'N/A'),
       cognitive_status: editMode ? editData.cognitive_status : (clientProfile.cognitive_status || 'N/A'),
@@ -625,6 +636,11 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       safety_concerns: editMode ? editData.safety_concerns : ((schedule.safety_concerns || [])
         .map((c: any) => typeof c === 'string' ? c : c.concern)
         .filter(Boolean).join('\n') || 'None noted'),
+      documentTitle: editMode && editData.documentTitle 
+        ? editData.documentTitle 
+        : (documentType === 'proposal' ? 'CARE SERVICES PROPOSAL' : 'HOME CARE SERVICE AGREEMENT'),
+      executiveSummary: editMode ? editData.executiveSummary : `Based on our comprehensive assessment, we recommend a ${careLevel.toLowerCase()} level of home care support for ${clientName}. Our proposed care plan is designed to promote independence, safety, and quality of life.`,
+      whyChooseUs: editMode ? editData.whyChooseUs : '• Experienced, qualified caregivers\n• Personalized care plans\n• 24/7 support and emergency response\n• HIPAA compliant documentation\n• Flexible scheduling',
     };
   };
 
@@ -731,6 +747,33 @@ export default function ContractPreview({ contract, client, visitId, onContractU
         </div>
       </div>
 
+      {/* Document Type Selector */}
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-dark-700 bg-dark-800/50 flex-shrink-0">
+        <button
+          onClick={() => setDocumentType('proposal')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            documentType === 'proposal'
+              ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+              : 'text-dark-400 hover:text-white hover:bg-dark-700 border border-transparent'
+          }`}
+        >
+          Proposal
+        </button>
+        <button
+          onClick={() => setDocumentType('agreement')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            documentType === 'agreement'
+              ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+              : 'text-dark-400 hover:text-white hover:bg-dark-700 border border-transparent'
+          }`}
+        >
+          Service Agreement
+        </button>
+        <span className="text-dark-500 text-xs ml-2 hidden sm:inline">
+          {documentType === 'proposal' ? 'Send first to present care options' : 'Formal contract for signatures'}
+        </span>
+      </div>
+
       {error && (
         <div className="mx-4 mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
           <AlertCircle className="w-4 h-4" />
@@ -738,13 +781,14 @@ export default function ContractPreview({ contract, client, visitId, onContractU
         </div>
       )}
 
-      {/* Contract Content */}
+      {/* Document Content */}
       <div className="flex-1 p-3 sm:p-4">
         <div 
           ref={printRef}
           className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto"
           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
         >
+          {documentType === 'agreement' ? (
           <div className="contract-document">
             {/* Header */}
             <div 
@@ -777,7 +821,15 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                 className="contract-title text-center text-xl font-bold pb-3 mb-6 border-b-2"
                 style={{ color: agency.primary_color, borderColor: agency.primary_color }}
               >
-                HOME CARE SERVICE AGREEMENT
+                {editMode ? (
+                  <input 
+                    type="text"
+                    value={editData.documentTitle || data.documentTitle}
+                    onChange={(e) => setEditData({ ...editData, documentTitle: e.target.value })}
+                    className="text-center text-xl font-bold w-full border-none outline-none bg-yellow-50 rounded px-2 py-1"
+                    style={{ color: agency.primary_color }}
+                  />
+                ) : data.documentTitle}
               </h2>
               <p className="effective-date text-center text-gray-500 italic mb-8">
                 Effective Date: {data.effective_date}
@@ -1109,6 +1161,302 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               {data.agency_name} | {data.agency_phone} | {data.agency_email}
             </div>
           </div>
+          ) : (
+          /* ===== PROPOSAL TEMPLATE ===== */
+          <div className="contract-document">
+            {/* Proposal Header */}
+            <div 
+              className="contract-header text-center p-6 border-b-4"
+              style={{ borderColor: agency.primary_color, background: 'linear-gradient(to right, #f0f4ff, #e0e7ff)' }}
+            >
+              {data.agency_logo && (
+                <img src={data.agency_logo} alt="Logo" className="mx-auto mb-3 rounded-lg bg-white p-2" style={{ maxWidth: '80px', maxHeight: '80px' }} />
+              )}
+              <h1 className="text-2xl font-bold mb-1" style={{ color: agency.primary_color }}>{data.agency_name}</h1>
+              <p className="text-gray-600 text-sm">{data.agency_full_address}</p>
+              <p className="text-gray-600 text-sm">Phone: {data.agency_phone} | Email: {data.agency_email}</p>
+            </div>
+
+            {/* Proposal Body */}
+            <div className="p-8 text-gray-800">
+              {/* Title */}
+              <h2 
+                className="text-center text-xl font-bold pb-3 mb-2 border-b-2"
+                style={{ color: agency.primary_color, borderColor: agency.primary_color }}
+              >
+                {editMode ? (
+                  <input 
+                    type="text"
+                    value={editData.documentTitle || data.documentTitle}
+                    onChange={(e) => setEditData({ ...editData, documentTitle: e.target.value })}
+                    className="text-center text-xl font-bold w-full border-none outline-none bg-yellow-50 rounded px-2 py-1"
+                    style={{ color: agency.primary_color }}
+                  />
+                ) : data.documentTitle}
+              </h2>
+              <p className="text-center text-gray-500 italic mb-1">Prepared for: <strong className="text-gray-800">{data.client_name}</strong></p>
+              <p className="text-center text-gray-500 italic mb-8">Date: {data.effective_date}</p>
+
+              {/* Executive Summary */}
+              <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                EXECUTIVE SUMMARY
+              </h3>
+              <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+                {editMode ? (
+                  <textarea 
+                    value={editData.executiveSummary}
+                    onChange={(e) => setEditData({ ...editData, executiveSummary: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white min-h-[100px]"
+                    placeholder="Executive summary of care proposal..."
+                  />
+                ) : (
+                  <p className="text-gray-700 text-sm leading-relaxed">{data.executiveSummary}</p>
+                )}
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-gray-900 font-bold text-sm">Care Need Level:</span>
+                  {editMode ? (
+                    <select 
+                      value={editData.care_level}
+                      onChange={(e) => setEditData({ ...editData, care_level: e.target.value })}
+                      className="px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
+                    >
+                      <option value="LOW">LOW</option>
+                      <option value="MODERATE">MODERATE</option>
+                      <option value="HIGH">HIGH</option>
+                    </select>
+                  ) : (
+                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                      data.care_level === 'HIGH' ? 'bg-red-100 text-red-800' :
+                      data.care_level === 'MODERATE' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>{data.care_level}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Proposed Services */}
+              <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                PROPOSED SERVICES
+              </h3>
+              <div className="bg-blue-50 p-4 rounded-lg mb-6 border-l-4 border-blue-500">
+                {editMode ? (
+                  <div className="space-y-2">
+                    {editData.services.map((service: any, idx: number) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <span className="text-gray-500 mt-1">{idx + 1}.</span>
+                        <div className="flex-1 space-y-1">
+                          <input 
+                            type="text"
+                            value={service.name || service}
+                            onChange={(e) => {
+                              const newServices = [...editData.services];
+                              newServices[idx] = { ...newServices[idx], name: e.target.value };
+                              setEditData({ ...editData, services: newServices });
+                            }}
+                            className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white font-medium"
+                            placeholder="Service name"
+                          />
+                          <input 
+                            type="text"
+                            value={service.description || ''}
+                            onChange={(e) => {
+                              const newServices = [...editData.services];
+                              newServices[idx] = { ...newServices[idx], description: e.target.value };
+                              setEditData({ ...editData, services: newServices });
+                            }}
+                            className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
+                            placeholder="Description (optional)"
+                          />
+                        </div>
+                        <button
+                          onClick={() => {
+                            const newServices = editData.services.filter((_: any, i: number) => i !== idx);
+                            setEditData({ ...editData, services: newServices });
+                          }}
+                          className="text-red-400 hover:text-red-600 text-sm mt-1"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => setEditData({ ...editData, services: [...editData.services, { name: '', description: '', frequency: '' }] })}
+                      className="text-blue-500 text-sm hover:underline"
+                    >
+                      + Add Service
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    {data.services.length > 0 
+                      ? data.services.map((s: any, i: number) => {
+                          const name = typeof s === 'string' ? s : s.name;
+                          const desc = typeof s === 'string' ? '' : s.description;
+                          const freq = typeof s === 'string' ? '' : s.frequency;
+                          return (
+                            <div key={i} className="mb-3 pl-4">
+                              <strong className="text-gray-800">{i + 1}. {name}</strong>
+                              {desc && <p className="text-gray-600 text-sm mt-0.5">{desc}</p>}
+                              {freq && <p className="text-gray-500 text-xs italic">{freq}</p>}
+                            </div>
+                          );
+                        })
+                      : <p className="text-gray-500">Services to be determined based on care plan.</p>}
+                  </div>
+                )}
+              </div>
+
+              {/* Proposed Schedule */}
+              <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                PROPOSED SCHEDULE
+              </h3>
+              <table className="w-full mb-6 border-collapse">
+                <tbody>
+                  <tr>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200 w-2/5">Frequency:</td>
+                    <td className="p-3 border border-gray-200">
+                      {editMode ? (
+                        <input type="text" value={editData.schedule_frequency} onChange={(e) => setEditData({ ...editData, schedule_frequency: e.target.value })} className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" />
+                      ) : data.schedule_frequency}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Days:</td>
+                    <td className="p-3 border border-gray-200">
+                      {editMode ? (
+                        <input type="text" value={editData.schedule_days} onChange={(e) => setEditData({ ...editData, schedule_days: e.target.value })} className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" placeholder="Monday, Wednesday, Friday" />
+                      ) : data.schedule_days}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Preferred Time:</td>
+                    <td className="p-3 border border-gray-200">
+                      {editMode ? (
+                        <input type="text" value={editData.schedule_time} onChange={(e) => setEditData({ ...editData, schedule_time: e.target.value })} className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" />
+                      ) : data.schedule_time}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Hours per Week:</td>
+                    <td className="p-3 border border-gray-200">
+                      {editMode ? (
+                        <input type="number" value={editData.weekly_hours} onChange={(e) => setEditData({ ...editData, weekly_hours: parseFloat(e.target.value) || 0 })} className="w-24 px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" />
+                      ) : data.weekly_hours}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Investment / Pricing */}
+              <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                INVESTMENT
+              </h3>
+              <table className="w-full mb-6 border-collapse">
+                <tbody>
+                  <tr>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200 w-1/2">Hourly Rate:</td>
+                    <td className="p-3 border border-gray-200">
+                      {editMode ? (
+                        <div className="flex items-center gap-1">
+                          <span>$</span>
+                          <input type="number" step="0.01" value={editData.hourly_rate} onChange={(e) => setEditData({ ...editData, hourly_rate: parseFloat(e.target.value) || 0 })} className="w-24 px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" />
+                        </div>
+                      ) : (
+                        <span className="text-green-600 font-bold text-lg">${data.hourly_rate.toFixed(2)}</span>
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Estimated Weekly Cost:</td>
+                    <td className="p-3 border border-gray-200">${data.weekly_estimate.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Estimated Monthly Cost:</td>
+                    <td className="p-3 border border-gray-200 font-bold">${data.monthly_estimate.toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Why Choose Us */}
+              <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                WHY CHOOSE {data.agency_name.toUpperCase()}
+              </h3>
+              <div className="bg-blue-50 p-4 rounded-lg mb-6 border-l-4 border-blue-500">
+                {editMode ? (
+                  <textarea 
+                    value={editData.whyChooseUs}
+                    onChange={(e) => setEditData({ ...editData, whyChooseUs: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white min-h-[100px]"
+                    placeholder="One benefit per line (start with • or -)"
+                  />
+                ) : (
+                  <ul className="space-y-2">
+                    {data.whyChooseUs.split('\n').filter(Boolean).map((item: string, i: number) => (
+                      <li key={i} className="text-blue-900 text-sm flex items-start gap-2">
+                        <span className="text-blue-500 mt-0.5">&#10003;</span>
+                        <span>{item.replace(/^[•\-]\s*/, '')}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              {/* Next Steps */}
+              <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                NEXT STEPS
+              </h3>
+              <div className="bg-green-50 p-4 rounded-lg mb-6 border-l-4 border-green-500">
+                <ol className="space-y-2 text-green-900 text-sm list-decimal list-inside">
+                  <li>Review this care services proposal</li>
+                  <li>Contact us to discuss any questions or modifications</li>
+                  <li>Accept the proposal to proceed</li>
+                  <li>Sign the formal Service Agreement</li>
+                  <li>Welcome your dedicated caregiver</li>
+                </ol>
+              </div>
+
+              {/* Contact CTA */}
+              <div className="text-center p-6 bg-gray-50 rounded-lg mb-8 border border-gray-200">
+                <p className="text-gray-700 text-sm mb-2">Questions about this proposal? We&apos;re here to help.</p>
+                <p className="text-gray-900 font-medium">{data.agency_phone} | {data.agency_email}</p>
+              </div>
+
+              {/* Acceptance */}
+              <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                ACCEPTANCE
+              </h3>
+              <p className="text-gray-600 mb-6 text-sm">
+                By signing below, I acknowledge receipt of this proposal and wish to proceed with the outlined care services.
+              </p>
+              <table className="w-full mt-4">
+                <tbody>
+                  <tr>
+                    <td className="p-5 align-top w-2/5">
+                      <p className="text-gray-500 mb-10">Client / Authorized Representative:</p>
+                      <div className="border-b-2 border-gray-800 h-10 mb-1"></div>
+                      <p className="text-gray-500 text-sm">Signature</p>
+                      <p className="mt-4">Printed Name: <u className="ml-2">{data.client_name}</u></p>
+                      <p className="mt-2">Date: _______________________</p>
+                    </td>
+                    <td className="w-1/5"></td>
+                    <td className="p-5 align-top w-2/5">
+                      <p className="text-gray-500 mb-10">Agency Representative:</p>
+                      <div className="border-b-2 border-gray-800 h-10 mb-1"></div>
+                      <p className="text-gray-500 text-sm">Signature</p>
+                      <p className="mt-4">Printed Name: _______________________</p>
+                      <p className="mt-2">Date: _______________________</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Proposal Footer */}
+            <div className="text-center py-4 px-6 text-sm text-gray-500 border-t border-gray-200">
+              {data.agency_name} | {data.agency_phone} | {data.agency_email}
+            </div>
+          </div>
+          )}
         </div>
       </div>
 
