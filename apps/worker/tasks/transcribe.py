@@ -74,6 +74,25 @@ def transcribe_visit(self, visit_id: str):
                 openai_api_key=settings.openai_api_key,
             )
             
+            # Sort segments by start time to ensure correct order
+            segments.sort(key=lambda s: s["start_ms"])
+            
+            # Remove duplicate/overlapping segments (can happen with chunked transcription)
+            deduped_segments = []
+            for seg in segments:
+                if deduped_segments:
+                    last = deduped_segments[-1]
+                    # Skip if this segment starts before the last one ends and has similar text
+                    if seg["start_ms"] < last["end_ms"] and seg["text"].strip() == last["text"].strip():
+                        continue
+                deduped_segments.append(seg)
+            
+            if len(deduped_segments) != len(segments):
+                logger.info(f"Removed {len(segments) - len(deduped_segments)} duplicate segments")
+            segments = deduped_segments
+            
+            logger.info(f"Transcription produced {len(segments)} segments covering {segments[-1]['end_ms']/1000:.0f}s" if segments else "No segments produced")
+            
             # Delete existing segments for this visit
             db.query(TranscriptSegment).filter(
                 TranscriptSegment.visit_id == visit.id

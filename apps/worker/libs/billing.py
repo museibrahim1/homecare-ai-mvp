@@ -182,11 +182,20 @@ def analyze_transcript_with_claude(
         logger.warning("anthropic package not installed, skipping LLM billables analysis")
         return []
     
-    # Combine segments into full transcript
+    # Combine ALL segments into full transcript (no limit)
+    # For very long transcripts, we include all segments but may truncate individual lines
     full_text = "\n".join([
         f"[{s.get('speaker_label', 'Speaker')}]: {s.get('text', '')}"
-        for s in segments[:300]  # Increased to 300 segments for more comprehensive extraction
+        for s in segments
     ])
+    
+    # If transcript is extremely long (>100k chars), summarize to fit in context window
+    if len(full_text) > 100000:
+        logger.info(f"Transcript is very long ({len(full_text)} chars), using first and last portions")
+        # Take first 60k chars and last 40k chars to capture beginning and end of assessment
+        full_text = full_text[:60000] + "\n\n[... middle portion of conversation ...]\n\n" + full_text[-40000:]
+    
+    logger.info(f"Analyzing {len(segments)} segments ({len(full_text)} chars) for billable services")
     
     prompt = f"""Analyze this home care assessment conversation and extract EVERY care service, task, or need mentioned.
 
@@ -220,8 +229,8 @@ JSON:"""
     try:
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-3-haiku-20240307",
-            max_tokens=8000,  # Increased for more comprehensive extraction
+            model="claude-sonnet-4-20250514",
+            max_tokens=8000,  # Comprehensive extraction needs more tokens
             messages=[{"role": "user", "content": prompt}]
         )
         

@@ -35,14 +35,21 @@ def analyze_transcript_combined(
         logger.warning("No ANTHROPIC_API_KEY, skipping combined analysis")
         return {}, []
     
-    # Build transcript text
+    # Build transcript text from ALL segments
     transcript_lines = []
-    for seg in segments[:300]:  # Increased to 300 segments for more comprehensive extraction
+    for seg in segments:
         speaker = seg.get("speaker_label", "Speaker")
         text = seg.get("text", "")
         transcript_lines.append(f"[{speaker}]: {text}")
     
     transcript_text = "\n".join(transcript_lines)
+    
+    # If transcript is very long, trim to fit context window
+    if len(transcript_text) > 100000:
+        logger.info(f"Transcript is very long ({len(transcript_text)} chars), trimming for analysis")
+        transcript_text = transcript_text[:60000] + "\n\n[... middle portion ...]\n\n" + transcript_text[-40000:]
+    
+    logger.info(f"Analyzing {len(segments)} segments ({len(transcript_text)} chars) for combined analysis")
     speakers_list = ", ".join(unique_speakers)
     
     prompt = f"""Analyze this home care assessment transcript and provide TWO things:
@@ -93,8 +100,8 @@ JSON:"""
     try:
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-3-haiku-20240307",
-            max_tokens=8000,  # Increased for more comprehensive extraction
+            model="claude-sonnet-4-20250514",
+            max_tokens=8000,  # Comprehensive extraction needs more tokens
             messages=[{"role": "user", "content": prompt}]
         )
         
