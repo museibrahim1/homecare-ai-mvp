@@ -70,6 +70,14 @@ def generate_service_contract(self, visit_id: str):
             for s in segments
         ]) if segments else "No transcript available"
         
+        # Determine insurance type for rate selection
+        is_medicaid = bool(client.medicaid_id)
+        is_medicare = bool(client.medicare_id)
+        insurance_type = "medicaid" if is_medicaid else ("medicare" if is_medicare else "private")
+        logger.info(f"Client insurance type: {insurance_type}" + 
+                    (f" (Medicaid ID: {client.medicaid_id})" if is_medicaid else "") +
+                    (f" (Medicare ID: {client.medicare_id})" if is_medicare else ""))
+        
         # Prepare client info
         client_info = {
             "full_name": client.full_name,
@@ -77,6 +85,9 @@ def generate_service_contract(self, visit_id: str):
             "phone": client.phone or "Not provided",
             "emergency_contact_name": client.emergency_contact_name,
             "emergency_contact_phone": client.emergency_contact_phone,
+            "insurance_type": insurance_type,
+            "medicaid_id": client.medicaid_id,
+            "medicare_id": client.medicare_id,
         }
         
         # =====================================================================
@@ -226,81 +237,133 @@ def generate_service_contract(self, visit_id: str):
             logger.info(f"Total from services: {weekly_hours} hrs/week")
         
         # =====================================================================
-        # RATE DETERMINATION (based on specific care needs)
+        # RATE DETERMINATION (based on insurance type and care needs)
         # =====================================================================
+        from libs.llm_rules import (
+            MEDICAID_RATES, MEDICAID_SERVICE_RATE_MAP, 
+            MEDICARE_RATES, HOURLY_RATES
+        )
         
-        # Base rate by care level
-        base_rate_map = {
-            "HIGH": 28.00,      # Base for high care needs
-            "MODERATE": 24.00,  # Base for moderate needs
-            "LOW": 20.00,       # Base for light assistance
-        }
-        base_rate = base_rate_map.get(care_need_level, 24.00)
-        
-        # Rate adjustments based on specific needs
-        rate_adjustments = []
-        
-        # Check services for specialized care needs
+        # Check services for categorization
         service_names = [s.get('name', '').lower() if isinstance(s, dict) else str(s).lower() for s in services]
         service_text = ' '.join(service_names)
         
-        # Skilled nursing or medical care (+$8-10/hr)
-        if any(x in service_text for x in ['nursing', 'wound', 'catheter', 'injection', 'skilled']):
-            rate_adjustments.append(("Skilled nursing care", 10.00))
-        
-        # Dementia/Alzheimer's care (+$5/hr)
-        if any(x in service_text for x in ['dementia', 'alzheimer', 'memory', 'cognitive']):
-            rate_adjustments.append(("Dementia care specialist", 5.00))
-        
-        # Safety supervision/wandering (+$3/hr)
-        if any(x in service_text for x in ['supervision', 'wandering', 'safety monitor']):
-            rate_adjustments.append(("Safety supervision", 3.00))
-        
-        # Check client profile for additional needs
-        if client_profile:
-            cognitive = client_profile.get('cognitive_status', '').lower()
-            if any(x in cognitive for x in ['dementia', 'impair', 'confusion', 'alzheimer']):
-                if ("Dementia care specialist", 5.00) not in rate_adjustments:
-                    rate_adjustments.append(("Cognitive impairment care", 4.00))
+        if is_medicaid:
+            # ============================================================
+            # MEDICAID RATES - Fixed rates based on service type
+            # Companion Care: $25/hr | Personal Care (incl hospice/respite): $28/hr
+            # ============================================================
+            logger.info(f"Applying MEDICAID rates for client {client.full_name}")
             
-            # Mobility challenges (+$2/hr)
-            mobility = client_profile.get('mobility_status', '').lower()
-            if any(x in mobility for x in ['wheelchair', 'bedbound', 'hoyer', 'lift', 'transfer']):
-                rate_adjustments.append(("Mobility/transfer assistance", 2.00))
-        
-        # Check special requirements
-        special_reqs = assessment_data.get('special_requirements', [])
-        for req in special_reqs:
-            req_text = str(req).lower() if isinstance(req, str) else str(req.get('requirement', '')).lower()
+            # Determine if this is personal care or companion care
+            # Personal care = any ADL assistance, medication, health monitoring, hospice, respite
+            has_personal_care = any(x in service_text for x in [
+                'personal care', 'bathing', 'dressing', 'grooming', 'toileting',
+                'feeding', 'medication', 'mobility', 'transfer', 'wound',
+                'vital', 'health monitor', 'nursing', 'dementia', 'alzheimer',
+                'hospice', 'respite', 'meal prep', 'meal preparation',
+            ])
             
-            # Specialized diet management (+$1/hr)
-            if any(x in req_text for x in ['diabetic', 'tube feed', 'g-tube', 'pureed', 'thickened']):
-                if not any('diet' in adj[0].lower() for adj in rate_adjustments):
-                    rate_adjustments.append(("Specialized diet management", 1.00))
+            if has_personal_care:
+                hourly_rate = MEDICAID_RATES["PERSONAL_CARE"]  # $28/hr
+                rate_type = "Medicaid Personal Care"
+            else:
+                hourly_rate = MEDICAID_RATES["COMPANION"]  # $25/hr
+                rate_type = "Medicaid Companion Care"
             
-            # Bilingual caregiver (+$2/hr)
-            if any(x in req_text for x in ['spanish', 'bilingual', 'interpreter', 'non-english']):
-                rate_adjustments.append(("Bilingual caregiver", 2.00))
-        
-        # Check safety concerns for high-risk factors
-        safety_concerns = assessment_data.get('safety_concerns', [])
-        high_severity_count = sum(1 for s in safety_concerns 
-                                   if isinstance(s, dict) and s.get('severity', '').lower() == 'high')
-        if high_severity_count >= 2:
-            rate_adjustments.append(("Multiple high-risk factors", 2.00))
-        
-        # Calculate final rate
-        total_adjustment = sum(adj[1] for adj in rate_adjustments)
-        hourly_rate = base_rate + total_adjustment
-        
-        # Cap at reasonable maximum
-        hourly_rate = min(hourly_rate, 55.00)  # Max $55/hr
-        
-        # Log rate breakdown
-        logger.info(f"Rate calculation: Base ${base_rate:.2f} ({care_need_level})")
-        for adj_name, adj_amount in rate_adjustments:
-            logger.info(f"  + ${adj_amount:.2f} for {adj_name}")
-        logger.info(f"  = ${hourly_rate:.2f}/hr final rate")
+            logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type})")
+            logger.info(f"  Medicaid ID: {client.medicaid_id}")
+            logger.info(f"  Services: {', '.join(service_names[:5])}")
+            
+        elif is_medicare:
+            # ============================================================
+            # MEDICARE RATES
+            # ============================================================
+            logger.info(f"Applying MEDICARE rates for client {client.full_name}")
+            
+            has_skilled = any(x in service_text for x in ['nursing', 'wound', 'catheter', 'skilled'])
+            
+            if has_skilled:
+                hourly_rate = MEDICARE_RATES.get("SKILLED_NURSING", 45.00)
+                rate_type = "Medicare Skilled Nursing"
+            else:
+                hourly_rate = MEDICARE_RATES.get("HOME_HEALTH_AIDE", 28.00)
+                rate_type = "Medicare Home Health Aide"
+            
+            logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type})")
+            
+        else:
+            # ============================================================
+            # PRIVATE PAY RATES - Dynamic based on care needs
+            # ============================================================
+            logger.info(f"Applying PRIVATE PAY rates for client {client.full_name}")
+            
+            # Base rate by care level
+            base_rate_map = {
+                "HIGH": 28.00,
+                "MODERATE": 24.00,
+                "LOW": 20.00,
+            }
+            base_rate = base_rate_map.get(care_need_level, 24.00)
+            
+            # Rate adjustments based on specific needs
+            rate_adjustments = []
+            
+            # Skilled nursing or medical care (+$8-10/hr)
+            if any(x in service_text for x in ['nursing', 'wound', 'catheter', 'injection', 'skilled']):
+                rate_adjustments.append(("Skilled nursing care", 10.00))
+            
+            # Dementia/Alzheimer's care (+$5/hr)
+            if any(x in service_text for x in ['dementia', 'alzheimer', 'memory', 'cognitive']):
+                rate_adjustments.append(("Dementia care specialist", 5.00))
+            
+            # Safety supervision/wandering (+$3/hr)
+            if any(x in service_text for x in ['supervision', 'wandering', 'safety monitor']):
+                rate_adjustments.append(("Safety supervision", 3.00))
+            
+            # Check client profile for additional needs
+            if client_profile:
+                cognitive = client_profile.get('cognitive_status', '').lower()
+                if any(x in cognitive for x in ['dementia', 'impair', 'confusion', 'alzheimer']):
+                    if ("Dementia care specialist", 5.00) not in rate_adjustments:
+                        rate_adjustments.append(("Cognitive impairment care", 4.00))
+                
+                # Mobility challenges (+$2/hr)
+                mobility = client_profile.get('mobility_status', '').lower()
+                if any(x in mobility for x in ['wheelchair', 'bedbound', 'hoyer', 'lift', 'transfer']):
+                    rate_adjustments.append(("Mobility/transfer assistance", 2.00))
+            
+            # Check special requirements
+            special_reqs = assessment_data.get('special_requirements', [])
+            for req in special_reqs:
+                req_text = str(req).lower() if isinstance(req, str) else str(req.get('requirement', '')).lower()
+                
+                if any(x in req_text for x in ['diabetic', 'tube feed', 'g-tube', 'pureed', 'thickened']):
+                    if not any('diet' in adj[0].lower() for adj in rate_adjustments):
+                        rate_adjustments.append(("Specialized diet management", 1.00))
+                
+                if any(x in req_text for x in ['spanish', 'bilingual', 'interpreter', 'non-english']):
+                    rate_adjustments.append(("Bilingual caregiver", 2.00))
+            
+            # Check safety concerns
+            safety_concerns = assessment_data.get('safety_concerns', [])
+            high_severity_count = sum(1 for s in safety_concerns 
+                                       if isinstance(s, dict) and s.get('severity', '').lower() == 'high')
+            if high_severity_count >= 2:
+                rate_adjustments.append(("Multiple high-risk factors", 2.00))
+            
+            # Calculate final rate
+            total_adjustment = sum(adj[1] for adj in rate_adjustments)
+            hourly_rate = base_rate + total_adjustment
+            
+            # Cap at reasonable maximum
+            hourly_rate = min(hourly_rate, 55.00)
+            
+            # Log rate breakdown
+            logger.info(f"Rate calculation: Base ${base_rate:.2f} ({care_need_level})")
+            for adj_name, adj_amount in rate_adjustments:
+                logger.info(f"  + ${adj_amount:.2f} for {adj_name}")
+            logger.info(f"  = ${hourly_rate:.2f}/hr final rate")
         
         # Ensure we have at least some hours if services were identified
         if weekly_hours == 0 and len(services) > 0:

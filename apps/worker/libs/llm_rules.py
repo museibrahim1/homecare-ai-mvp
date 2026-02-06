@@ -9,10 +9,76 @@ Edit this file to change AI behavior without modifying core code.
 # BUSINESS RULES - Rates and Hours
 # =============================================================================
 
+# Private pay rates (default)
 HOURLY_RATES = {
     "HIGH": 35.00,      # Complex care needs
     "MODERATE": 30.00,  # Regular care needs
     "LOW": 25.00,       # Basic companionship
+}
+
+# =============================================================================
+# MEDICAID BILLING RATES
+# =============================================================================
+
+MEDICAID_RATES = {
+    # Companion Care - supervision, socialization, light housekeeping
+    "COMPANION": 25.00,
+    
+    # Personal Care - ADLs: bathing, dressing, grooming, toileting, feeding
+    # Also includes hospice and respite services
+    "PERSONAL_CARE": 28.00,
+    
+    # Hospice companion/personal care - same as personal care rate
+    "HOSPICE": 28.00,
+    
+    # Respite care - same as personal care rate  
+    "RESPITE": 28.00,
+}
+
+# Service-to-Medicaid rate mapping
+# Maps service categories to the correct Medicaid rate tier
+MEDICAID_SERVICE_RATE_MAP = {
+    # $25/hr - Companion Care services
+    "companion care": "COMPANION",
+    "companionship": "COMPANION",
+    "supervision": "COMPANION",
+    "emotional support": "COMPANION",
+    "light housekeeping": "COMPANION",
+    "homemaker": "COMPANION",
+    "housekeeping": "COMPANION",
+    "transportation": "COMPANION",
+    "escort": "COMPANION",
+    "errands": "COMPANION",
+    
+    # $28/hr - Personal Care services (including hospice & respite)
+    "personal care": "PERSONAL_CARE",
+    "bathing": "PERSONAL_CARE",
+    "dressing": "PERSONAL_CARE",
+    "grooming": "PERSONAL_CARE",
+    "toileting": "PERSONAL_CARE",
+    "feeding": "PERSONAL_CARE",
+    "meal preparation": "PERSONAL_CARE",
+    "medication management": "PERSONAL_CARE",
+    "medication": "PERSONAL_CARE",
+    "mobility assistance": "PERSONAL_CARE",
+    "transfer": "PERSONAL_CARE",
+    "ambulation": "PERSONAL_CARE",
+    "wound care": "PERSONAL_CARE",
+    "vital signs": "PERSONAL_CARE",
+    "health monitoring": "PERSONAL_CARE",
+    "skilled nursing": "PERSONAL_CARE",
+    "dementia care": "PERSONAL_CARE",
+    "alzheimer": "PERSONAL_CARE",
+    "hospice": "HOSPICE",
+    "respite": "RESPITE",
+    "respite care": "RESPITE",
+}
+
+# Medicare rates (can be customized per agency contract)
+MEDICARE_RATES = {
+    "SKILLED_NURSING": 45.00,
+    "HOME_HEALTH_AIDE": 28.00,
+    "PERSONAL_CARE": 30.00,
 }
 
 # Minimum/Maximum hours per week
@@ -307,11 +373,22 @@ def get_rules_for_prompt() -> str:
     rules = f"""
 ## YOUR AGENCY'S BUSINESS RULES
 
-### Hourly Rates
+### Private Pay Hourly Rates
 - HIGH Care Level: ${HOURLY_RATES['HIGH']:.2f}/hour
 - MODERATE Care Level: ${HOURLY_RATES['MODERATE']:.2f}/hour  
 - LOW Care Level: ${HOURLY_RATES['LOW']:.2f}/hour
 - Overtime (weekends/holidays): {OVERTIME_MULTIPLIER}x regular rate
+
+### Medicaid Rates (Fixed - Not adjustable)
+- Companion Care: ${MEDICAID_RATES['COMPANION']:.2f}/hour (supervision, socialization, light housekeeping)
+- Personal Care: ${MEDICAID_RATES['PERSONAL_CARE']:.2f}/hour (ADLs, medication, health monitoring)
+- Hospice: ${MEDICAID_RATES['HOSPICE']:.2f}/hour
+- Respite: ${MEDICAID_RATES['RESPITE']:.2f}/hour
+
+### Medicare Rates
+- Skilled Nursing: ${MEDICARE_RATES['SKILLED_NURSING']:.2f}/hour
+- Home Health Aide: ${MEDICARE_RATES['HOME_HEALTH_AIDE']:.2f}/hour
+- Personal Care: ${MEDICARE_RATES['PERSONAL_CARE']:.2f}/hour
 
 ### Service Hours
 - Minimum per visit: {MIN_HOURS_PER_VISIT} hours
