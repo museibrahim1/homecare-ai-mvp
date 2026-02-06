@@ -10,6 +10,7 @@ import {
   MapPin,
   AlertCircle,
   ChevronRight,
+  ChevronLeft,
   Heart,
   LayoutGrid,
   List,
@@ -633,11 +634,50 @@ export default function ClientsPage() {
     }
   };
 
-  // Group clients by status for pipeline view
-  const intakeClients = filteredClients.filter(c => c.status === 'intake' || c.status === 'assessment' || c.status === 'pending');
-  const proposalClients = filteredClients.filter(c => c.status === 'proposal' || c.status === 'pending_review');
-  const assignedClients = filteredClients.filter(c => c.status === 'assigned' || c.status === 'active' || (!c.status && !['intake', 'assessment', 'pending', 'proposal', 'pending_review', 'follow_up', 'review'].includes(c.status || '')));
-  const followUpClients = filteredClients.filter(c => c.status === 'follow_up' || c.status === 'review');
+  // Pipeline columns config
+  const pipelineColumns = [
+    { key: 'intake', label: 'Intake', color: 'blue', statuses: ['intake', 'pending'] },
+    { key: 'assessment', label: 'Assessment', color: 'purple', statuses: ['assessment'] },
+    { key: 'proposal', label: 'Proposal', color: 'orange', statuses: ['proposal', 'pending_review'] },
+    { key: 'active', label: 'Active', color: 'green', statuses: ['active', 'assigned'] },
+    { key: 'follow_up', label: 'Follow-up', color: 'yellow', statuses: ['follow_up', 'review', 'discharged', 'inactive'] },
+  ];
+
+  // Group clients by pipeline column
+  const getPipelineClients = (statuses: string[]) => {
+    return filteredClients.filter(c => {
+      if (!c.status) return statuses.includes('active'); // default to active
+      return statuses.includes(c.status);
+    });
+  };
+
+  // Computed pipeline groups for table view
+  const intakeClients = getPipelineClients(['intake', 'pending']);
+  const proposalClients = getPipelineClients(['proposal', 'pending_review']);
+  const assignedClients = getPipelineClients(['active', 'assigned']);
+  const followUpClients = getPipelineClients(['follow_up', 'review', 'discharged', 'inactive']);
+
+  // Move a client to a new status
+  const handleMoveClient = async (clientId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/clients/${clientId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (response.ok) {
+        // Update local state immediately for snappy feel
+        setClients(prev => prev.map(c => 
+          c.id === clientId ? { ...c, status: newStatus } : c
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to move client:', err);
+    }
+  };
 
   // Stats
   const activeCount = clients.filter(c => c.status === 'active' || !c.status).length;
@@ -969,142 +1009,83 @@ export default function ClientsPage() {
           ) : viewMode === 'pipeline' ? (
             /* Pipeline / Kanban View */
             <div className="grid grid-cols-5 gap-3">
-              {/* Intake Column */}
-              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-3 border-b border-dark-700 bg-blue-500/10">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-blue-400 text-sm">Intake</h3>
-                    <span className="text-xs text-dark-400">{intakeClients.length}</span>
-                  </div>
-                </div>
-                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
-                  {intakeClients.map(client => (
-                    <div 
-                      key={client.id}
-                      onClick={() => handleEditClient(client)}
-                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
+              {pipelineColumns.map((col, colIdx) => {
+                const columnClients = getPipelineClients(col.statuses);
+                const colorMap: Record<string, { header: string; text: string }> = {
+                  blue: { header: 'bg-blue-500/10', text: 'text-blue-400' },
+                  purple: { header: 'bg-purple-500/10', text: 'text-purple-400' },
+                  orange: { header: 'bg-orange-500/10', text: 'text-orange-400' },
+                  green: { header: 'bg-green-500/10', text: 'text-green-400' },
+                  yellow: { header: 'bg-yellow-500/10', text: 'text-yellow-400' },
+                };
+                const colors = colorMap[col.color] || colorMap.blue;
+                
+                return (
+                  <div key={col.key} className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
+                    <div className={`p-3 border-b border-dark-700 ${colors.header}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`font-semibold text-sm ${colors.text}`}>{col.label}</h3>
+                        <span className="text-xs text-dark-400">{columnClients.length}</span>
                       </div>
-                      {client.phone && (
-                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
+                    </div>
+                    <div className="p-2 space-y-2 max-h-[60vh] overflow-y-auto">
+                      {columnClients.map(client => {
+                        // Determine which columns this client can move to
+                        const canMoveLeft = colIdx > 0;
+                        const canMoveRight = colIdx < pipelineColumns.length - 1;
+                        const prevCol = colIdx > 0 ? pipelineColumns[colIdx - 1] : null;
+                        const nextCol = colIdx < pipelineColumns.length - 1 ? pipelineColumns[colIdx + 1] : null;
+                        
+                        return (
+                          <div 
+                            key={client.id}
+                            className="p-2.5 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 transition-all group"
+                          >
+                            <div 
+                              className="flex items-center gap-2 mb-1.5 cursor-pointer"
+                              onClick={() => handleEditClient(client)}
+                            >
+                              <ClientAvatar name={client.full_name} size="sm" />
+                              <p className="font-medium text-white text-xs truncate flex-1">{client.full_name}</p>
+                            </div>
+                            {client.phone && (
+                              <p className="text-xs text-dark-400 truncate mb-2">{client.phone}</p>
+                            )}
+                            {/* Move buttons - visible on hover */}
+                            <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity pt-1 border-t border-dark-700/50">
+                              {canMoveLeft ? (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleMoveClient(client.id, prevCol!.statuses[0]); }}
+                                  className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-dark-400 hover:text-white hover:bg-dark-700 rounded transition-colors"
+                                  title={`Move to ${prevCol!.label}`}
+                                >
+                                  <ChevronLeft className="w-3 h-3" />
+                                  <span className="truncate max-w-[50px]">{prevCol!.label}</span>
+                                </button>
+                              ) : <span />}
+                              {canMoveRight ? (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleMoveClient(client.id, nextCol!.statuses[0]); }}
+                                  className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-dark-400 hover:text-white hover:bg-dark-700 rounded transition-colors"
+                                  title={`Move to ${nextCol!.label}`}
+                                >
+                                  <span className="truncate max-w-[50px]">{nextCol!.label}</span>
+                                  <ChevronRight className="w-3 h-3" />
+                                </button>
+                              ) : <span />}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {columnClients.length === 0 && (
+                        <div className="text-center py-6 text-dark-500 text-xs">
+                          No clients
+                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Assessment Column */}
-              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-3 border-b border-dark-700 bg-purple-500/10">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-purple-400 text-sm">Assessment</h3>
-                    <span className="text-xs text-dark-400">
-                      {filteredClients.filter(c => c.status === 'assessment').length}
-                    </span>
                   </div>
-                </div>
-                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
-                  {filteredClients.filter(c => c.status === 'assessment').map(client => (
-                    <div 
-                      key={client.id}
-                      onClick={() => handleEditClient(client)}
-                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
-                      </div>
-                      {client.phone && (
-                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Proposal Column */}
-              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-3 border-b border-dark-700 bg-orange-500/10">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-orange-400 text-sm">Proposal</h3>
-                    <span className="text-xs text-dark-400">{proposalClients.length}</span>
-                  </div>
-                </div>
-                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
-                  {proposalClients.map(client => (
-                    <div 
-                      key={client.id}
-                      onClick={() => handleEditClient(client)}
-                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
-                      </div>
-                      {client.phone && (
-                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Active Column */}
-              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-3 border-b border-dark-700 bg-green-500/10">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-green-400 text-sm">Active</h3>
-                    <span className="text-xs text-dark-400">{assignedClients.length}</span>
-                  </div>
-                </div>
-                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
-                  {assignedClients.map(client => (
-                    <div 
-                      key={client.id}
-                      onClick={() => handleEditClient(client)}
-                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
-                      </div>
-                      {client.phone && (
-                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Follow-up Column */}
-              <div className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                <div className="p-3 border-b border-dark-700 bg-yellow-500/10">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-yellow-400 text-sm">Follow-up</h3>
-                    <span className="text-xs text-dark-400">{followUpClients.length}</span>
-                  </div>
-                </div>
-                <div className="p-2 space-y-2 max-h-[55vh] overflow-y-auto">
-                  {followUpClients.map(client => (
-                    <div 
-                      key={client.id}
-                      onClick={() => handleEditClient(client)}
-                      className="p-2 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <ClientAvatar name={client.full_name} size="sm" />
-                        <p className="font-medium text-white text-xs truncate">{client.full_name}</p>
-                      </div>
-                      {client.phone && (
-                        <p className="text-xs text-dark-400 truncate">{client.phone}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                );
+              })}
             </div>
           ) : (
             /* Forecast View */

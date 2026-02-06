@@ -207,12 +207,13 @@ export default function VisitDetailPage() {
   };
 
   // Export functions
-  const handleExport = async (type: 'contract' | 'contract-template' | 'timesheet' | 'note') => {
+  const handleExport = async (type: 'contract' | 'contract-template' | 'contract-docx' | 'timesheet' | 'note') => {
     if (!token || !visitId) return;
     
     const endpoints: Record<string, string> = {
       contract: `/exports/visits/${visitId}/contract.pdf`,
       'contract-template': `/exports/visits/${visitId}/contract-template.docx`,
+      'contract-docx': `/exports/visits/${visitId}/contract.docx`,
       timesheet: `/exports/visits/${visitId}/timesheet.csv`,
       note: `/exports/visits/${visitId}/note.pdf`,
     };
@@ -238,7 +239,7 @@ export default function VisitDetailPage() {
       
       if (type === 'timesheet') {
         a.download = `timesheet_${visitId}.csv`;
-      } else if (type === 'contract-template') {
+      } else if (type === 'contract-template' || type === 'contract-docx') {
         a.download = `Contract_${clientName}.docx`;
       } else if (type === 'contract') {
         a.download = `contract_${visitId}.pdf`;
@@ -450,6 +451,20 @@ export default function VisitDetailPage() {
                       <div>
                         <p className="text-sm font-medium text-white">Contract (Your Template)</p>
                         <p className="text-xs text-dark-400">Uses your uploaded template</p>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleExport('contract-docx')}
+                      disabled={!contract}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <File className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Contract DOCX</p>
+                        <p className="text-xs text-dark-400">Editable Word document</p>
                       </div>
                     </button>
                     

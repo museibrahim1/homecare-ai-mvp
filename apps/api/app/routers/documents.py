@@ -91,31 +91,61 @@ async def get_all_documents(
             )
         client_ids = [client_id]
     
-    # 1. Get Contracts
+    # 1. Get Contracts (PDF + DOCX)
     if not folder or folder.lower() == "contracts":
         contracts = db.query(Contract).filter(
             Contract.client_id.in_(client_ids)
         ).order_by(Contract.created_at.desc()).all()
         
+        # Map client -> latest visit for DOCX export links
+        client_visit_map = {}
+        if contracts:
+            contract_client_ids = [c.client_id for c in contracts]
+            client_visits = db.query(Visit).filter(
+                Visit.client_id.in_(contract_client_ids)
+            ).order_by(Visit.created_at.desc()).all()
+            for v in client_visits:
+                cid = str(v.client_id)
+                if cid not in client_visit_map:
+                    client_visit_map[cid] = str(v.id)
+        
         for contract in contracts:
             client_name = client_map.get(str(contract.client_id), "Unknown")
-            doc_name = f"{client_name.replace(' ', '_')}_Contract.pdf"
+            visit_id = client_visit_map.get(str(contract.client_id))
             
-            if search and search.lower() not in doc_name.lower() and search.lower() not in client_name.lower():
+            if search and search.lower() not in client_name.lower():
                 continue
-                
+            
+            # PDF version
             documents.append(DocumentItem(
                 id=f"contract_{contract.id}",
-                name=doc_name,
+                name=f"{client_name.replace(' ', '_')}_Contract.pdf",
                 type="contract",
                 format="PDF",
                 size="-",
                 folder="Contracts",
                 client_id=str(contract.client_id),
                 client_name=client_name,
+                visit_id=visit_id,
                 created_at=contract.created_at,
-                download_url=f"/exports/clients/{contract.client_id}/contract.pdf"
+                download_url=f"/exports/visits/{visit_id}/contract.pdf" if visit_id else None
             ))
+            
+            # DOCX version (editable)
+            if visit_id:
+                documents.append(DocumentItem(
+                    id=f"contract_docx_{contract.id}",
+                    name=f"{client_name.replace(' ', '_')}_Contract.docx",
+                    type="contract",
+                    format="DOCX",
+                    size="-",
+                    folder="Contracts",
+                    client_id=str(contract.client_id),
+                    client_name=client_name,
+                    visit_id=visit_id,
+                    created_at=contract.created_at,
+                    download_url=f"/exports/visits/{visit_id}/contract.docx"
+                ))
     
     # 2. Get Visit Notes
     if not folder or folder.lower() == "assessments":
