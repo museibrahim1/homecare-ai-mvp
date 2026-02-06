@@ -139,12 +139,20 @@ export default function Sidebar() {
     const isActive = pathname === item.href || 
       (item.href !== '/dashboard' && pathname.startsWith(item.href));
     
+    const handleClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setMobileOpen(false);
+      router.push(item.href);
+    };
+    
     return (
       <Link
         href={item.href}
         scroll={false}
         prefetch={true}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group cursor-pointer select-none ${
+        onClick={handleClick}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group cursor-pointer select-none relative ${
           isActive 
             ? 'bg-primary-500/15 text-white border border-primary-500/30' 
             : 'text-dark-300 hover:bg-dark-700/50 hover:text-white border border-transparent'
@@ -190,9 +198,9 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside className={`
-        w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col h-screen flex-shrink-0 z-50
-        fixed lg:sticky top-0 left-0
-        transform transition-transform duration-300 ease-in-out
+        w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col h-screen flex-shrink-0
+        fixed lg:sticky top-0 left-0 z-[60] pointer-events-auto
+        transition-transform duration-300 ease-in-out
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Mobile Close Button */}

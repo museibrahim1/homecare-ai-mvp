@@ -72,8 +72,9 @@ export default function VisitDetailPage() {
   const [restarting, setRestarting] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close export menu when clicking outside
+  // Close export menu when clicking outside - only attach when menu is open
   useEffect(() => {
+    if (!showExportMenu) return;
     const handleClickOutside = (event: MouseEvent) => {
       if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
         setShowExportMenu(false);
@@ -81,7 +82,7 @@ export default function VisitDetailPage() {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [showExportMenu]);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -359,7 +360,7 @@ export default function VisitDetailPage() {
       <Sidebar />
       
       {/* Main Content - Only push content on wide screens (1280px+) */}
-      <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300 ${sidebarOpen ? 'xl:mr-[450px] 2xl:mr-[500px]' : ''}`}>
+      <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-[margin] duration-300 ${sidebarOpen ? 'xl:mr-[450px] 2xl:mr-[500px]' : ''}`}>
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
