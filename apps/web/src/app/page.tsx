@@ -74,21 +74,21 @@ const TESTIMONIALS = [
 const PRICING = [
   {
     name: 'Starter',
-    price: 295,
+    price: 299,
     description: 'For small agencies getting organized',
     features: ['25 contracts/month', '50 clients in CRM', '25 caregivers', '3 team seats', 'Email support'],
     popular: false,
   },
   {
     name: 'Growth',
-    price: 495,
+    price: 599,
     description: 'For growing teams',
     features: ['100 contracts/month', '200 clients in CRM', '100 caregivers', '10 team seats', 'Priority support'],
     popular: true,
   },
   {
     name: 'Pro',
-    price: 895,
+    price: 1299,
     description: 'For high-volume teams',
     features: ['300 contracts/month', '1,000 clients in CRM', '500 caregivers', 'Unlimited seats', 'Advanced analytics'],
     popular: false,

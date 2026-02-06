@@ -493,10 +493,19 @@ async def email_contract(
             detail="Failed to send email. Please check your email configuration."
         )
     
+    # Auto-move client to "proposal" status when contract/proposal is emailed
+    try:
+        if client.status not in ('proposal', 'active', 'assigned'):
+            client.status = 'proposal'
+            db.commit()
+    except Exception:
+        pass  # Don't fail the email send over a status update
+    
     return {
         "success": True,
         "message": f"Contract sent to {email_request.recipient_email}",
         "recipient": email_request.recipient_email,
+        "client_status_updated": client.status == 'proposal',
     }
 
 
