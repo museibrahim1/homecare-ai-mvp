@@ -2,14 +2,14 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 
 // HIPAA Compliance: Session timeout after 15 minutes of inactivity
 const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
-// Only track discrete events, NOT mousemove (causes performance issues)
-const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+// Only track discrete click/key events - NOT scroll or mousemove (causes re-renders)
+const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'touchstart'] as const;
 // Throttle activity updates to prevent excessive state changes
-const ACTIVITY_THROTTLE_MS = 5000; // Only update every 5 seconds max
+const ACTIVITY_THROTTLE_MS = 30000; // Only update every 30 seconds max (was 5s - way too frequent)
 
 interface AuthState {
   token: string | null;
@@ -38,6 +38,32 @@ const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// Cache the localStorage check result to avoid parsing JSON on every render
+let _cachedHasToken: boolean | null = null;
+let _cacheTimestamp = 0;
+const CACHE_TTL_MS = 2000; // Cache for 2 seconds
+
+function hasStoredTokenCached(): boolean {
+  if (typeof window === 'undefined') return false;
+  const now = Date.now();
+  if (_cachedHasToken !== null && now - _cacheTimestamp < CACHE_TTL_MS) {
+    return _cachedHasToken;
+  }
+  try {
+    const data = localStorage.getItem('homecare-auth');
+    if (data) {
+      const parsed = JSON.parse(data);
+      _cachedHasToken = !!parsed?.state?.token;
+    } else {
+      _cachedHasToken = false;
+    }
+  } catch {
+    _cachedHasToken = false;
+  }
+  _cacheTimestamp = now;
+  return _cachedHasToken;
+}
 
 // Helper to get token directly from localStorage (for non-hook contexts)
 export function getStoredToken(): string | null {
@@ -68,17 +94,8 @@ let hasEverHadSession = false;
 export function useAuth() {
   const store = useAuthStore();
   
-  // Check localStorage directly for immediate token availability
-  const hasStoredToken = typeof window !== 'undefined' && (() => {
-    try {
-      const data = localStorage.getItem('homecare-auth');
-      if (data) {
-        const parsed = JSON.parse(data);
-        return !!parsed?.state?.token;
-      }
-    } catch {}
-    return false;
-  })();
+  // Use cached localStorage check instead of parsing JSON on every render
+  const hasStoredToken = hasStoredTokenCached();
   
   // Only show loading if: not hydrated AND no stored token AND never had a session
   const shouldShowLoading = !globalHydrated && !hasStoredToken && !hasEverHadSession;
@@ -88,29 +105,30 @@ export function useAuth() {
   const [sessionWarning, setSessionWarning] = useState(false);
   const lastActivityUpdateRef = useRef<number>(0);
   
-  // Track if we have a session
-  if (store.token) {
+  // Track if we have a session (this is a side-effect-free flag update)
+  if (store.token && !hasEverHadSession) {
     hasEverHadSession = true;
   }
 
-  // Update activity timestamp on user interaction (throttled to prevent performance issues)
+  // Update activity timestamp on user interaction
+  // Uses a ref to track timing WITHOUT causing re-renders
   const handleActivity = useCallback(() => {
-    if (store.token) {
-      const now = Date.now();
-      // Only update if enough time has passed since last update
-      if (now - lastActivityUpdateRef.current >= ACTIVITY_THROTTLE_MS) {
-        lastActivityUpdateRef.current = now;
-        store.updateLastActivity();
+    if (!store.token) return;
+    const now = Date.now();
+    if (now - lastActivityUpdateRef.current >= ACTIVITY_THROTTLE_MS) {
+      lastActivityUpdateRef.current = now;
+      // Update Zustand state - this triggers re-render, but only every 30s
+      store.updateLastActivity();
+      if (sessionWarning) {
         setSessionWarning(false);
       }
     }
-  }, [store.token]);
+  }, [store.token, sessionWarning]);
 
   // Set up activity listeners for session timeout
   useEffect(() => {
     if (typeof window === 'undefined' || !store.token) return;
 
-    // Add activity listeners
     ACTIVITY_EVENTS.forEach(event => {
       window.addEventListener(event, handleActivity, { passive: true });
     });
@@ -128,12 +146,9 @@ export function useAuth() {
 
     const checkTimeout = () => {
       if (isSessionExpired(store.lastActivity)) {
-        // HIPAA: Auto-logout on session timeout
         console.log('Session timeout - logging out for security');
         store.logout();
-        // Redirect will happen via protected route components
       } else {
-        // Warn user 2 minutes before timeout
         const timeLeft = SESSION_TIMEOUT_MS - (Date.now() - (store.lastActivity || 0));
         if (timeLeft < 2 * 60 * 1000 && timeLeft > 0) {
           setSessionWarning(true);
@@ -141,16 +156,15 @@ export function useAuth() {
       }
     };
 
-    // Check every 30 seconds
-    const interval = setInterval(checkTimeout, 30000);
-    checkTimeout(); // Check immediately
+    // Check every 60 seconds (was 30s - unnecessary frequency)
+    const interval = setInterval(checkTimeout, 60000);
+    checkTimeout();
 
     return () => clearInterval(interval);
   }, [store.token, store.lastActivity, store.logout]);
 
   // Handle hydration
   useEffect(() => {
-    // If already globally hydrated, just sync state immediately
     if (globalHydrated) {
       setHydrated(true);
       setIsLoading(false);
@@ -162,7 +176,6 @@ export function useAuth() {
       setHydrated(true);
       setIsLoading(false);
       
-      // Check for session timeout on hydration
       const state = useAuthStore.getState();
       if (state.token && isSessionExpired(state.lastActivity)) {
         console.log('Session expired during reload - logging out');
@@ -175,7 +188,6 @@ export function useAuth() {
       setHydrated(true);
       setIsLoading(false);
       
-      // Check timeout
       const state = useAuthStore.getState();
       if (state.token && isSessionExpired(state.lastActivity)) {
         state.logout();

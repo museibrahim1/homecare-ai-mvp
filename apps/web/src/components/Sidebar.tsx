@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -32,12 +32,21 @@ import {
   RefreshCw,
   HelpCircle,
   Menu,
-  X
+  X,
+  LucideIcon
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
+// Nav item type
+interface NavItemData {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  description: string;
+}
+
 // Sales & Pipeline
-const salesNavItems = [
+const salesNavItems: NavItemData[] = [
   { href: '/dashboard', label: 'Dashboard', icon: Home, description: 'Overview & stats' },
   { href: '/pipeline', label: 'Deals Pipeline', icon: Target, description: 'Track opportunities' },
   { href: '/leads', label: 'Leads', icon: Users, description: 'Potential clients' },
@@ -45,20 +54,19 @@ const salesNavItems = [
 ];
 
 // Clients section
-const clientsNavItems = [
+const clientsNavItems: NavItemData[] = [
   { href: '/clients', label: 'All Clients', icon: Users, description: 'Client records' },
   { href: '/visits', label: 'Assessments', icon: Calendar, description: 'Intakes & visits' },
   { href: '/policies', label: 'Policies & Renewals', icon: RefreshCw, description: 'Care agreements' },
 ];
 
-// Communication (Messages disabled for now)
-const communicationNavItems = [
-  // { href: '/messages', label: 'Messages', icon: MessageSquare, description: 'Client comms' },
+// Communication
+const communicationNavItems: NavItemData[] = [
   { href: '/team-chat', label: 'Team Chat', icon: MessagesSquare, description: 'Internal chat' },
 ];
 
 // Resources
-const resourcesNavItems = [
+const resourcesNavItems: NavItemData[] = [
   { href: '/proposals', label: 'Proposals', icon: FileText, description: 'Contract proposals' },
   { href: '/documents', label: 'Documents', icon: FolderOpen, description: 'Files & contracts' },
   { href: '/reports', label: 'Reports', icon: BarChart3, description: 'Analytics' },
@@ -66,14 +74,14 @@ const resourcesNavItems = [
 ];
 
 // Agency Admin
-const agencyAdminNavItems = [
+const agencyAdminNavItems: NavItemData[] = [
   { href: '/caregivers', label: 'Team Members', icon: UserCheck, description: 'Staff management' },
   { href: '/activity', label: 'Activity Monitor', icon: Eye, description: 'Track actions' },
   { href: '/integrations', label: 'Integrations', icon: Link2, description: 'Connect apps' },
   { href: '/settings', label: 'Settings', icon: Settings, description: 'Agency settings' },
 ];
 
-const adminNavItems = [
+const adminNavItems: NavItemData[] = [
   { href: '/admin', label: 'Dashboard', icon: BarChart3, description: 'Platform overview' },
   { href: '/admin/approvals', label: 'Approvals', icon: Building2, description: 'Review applications' },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard, description: 'Active subs' },
@@ -85,6 +93,92 @@ const adminNavItems = [
   { href: '/admin/system', label: 'System Health', icon: Activity, description: 'Infrastructure' },
 ];
 
+// NavItem defined OUTSIDE the Sidebar to prevent re-creation on every render
+const NavItem = memo(function NavItem({ 
+  item, 
+  isActive, 
+  onNavigate 
+}: { 
+  item: NavItemData; 
+  isActive: boolean; 
+  onNavigate: (href: string) => void;
+}) {
+  const ItemIcon = item.icon;
+  
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onNavigate(item.href);
+  };
+  
+  return (
+    <Link
+      href={item.href}
+      scroll={false}
+      prefetch={true}
+      onClick={handleClick}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group cursor-pointer select-none ${
+        isActive 
+          ? 'bg-primary-500/15 text-white border border-primary-500/30' 
+          : 'text-dark-300 hover:bg-dark-700/50 hover:text-white border border-transparent'
+      }`}
+    >
+      <div className={`w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center ${
+        isActive 
+          ? 'bg-primary-500/20' 
+          : 'bg-dark-700/50 group-hover:bg-dark-600/50'
+      }`}>
+        <ItemIcon className={`w-4 h-4 ${
+          isActive ? 'text-primary-400' : 'text-dark-400 group-hover:text-white'
+        }`} />
+      </div>
+      <span className={`font-medium text-sm truncate ${isActive ? 'text-white' : ''}`}>
+        {item.label}
+      </span>
+      {isActive && (
+        <ChevronRight className="w-3.5 h-3.5 text-primary-400 flex-shrink-0 ml-auto" />
+      )}
+    </Link>
+  );
+});
+
+// NavSection to reduce boilerplate
+const NavSection = memo(function NavSection({ 
+  title, 
+  items, 
+  pathname, 
+  onNavigate 
+}: { 
+  title: string; 
+  items: NavItemData[]; 
+  pathname: string; 
+  onNavigate: (href: string) => void;
+}) {
+  return (
+    <div className="mb-5">
+      <div className="px-4 py-2 mb-2">
+        <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider">
+          {title}
+        </span>
+      </div>
+      <div className="space-y-1">
+        {items.map((item) => {
+          const isActive = pathname === item.href || 
+            (item.href !== '/dashboard' && pathname.startsWith(item.href));
+          return (
+            <NavItem 
+              key={item.href} 
+              item={item} 
+              isActive={isActive} 
+              onNavigate={onNavigate} 
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -93,18 +187,23 @@ export default function Sidebar() {
   const navRef = useRef<HTMLElement>(null);
   const scrollPositionRef = useRef<number>(0);
 
+  const isAdmin = user?.role === 'admin';
+
+  // Stable navigate callback that won't change on re-renders
+  const handleNavigate = useCallback((href: string) => {
+    setMobileOpen(false);
+    router.push(href);
+  }, [router]);
+
   // Preserve sidebar scroll position across navigations
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
 
-    // Save scroll position before navigation
     const handleScroll = () => {
       scrollPositionRef.current = nav.scrollTop;
     };
     nav.addEventListener('scroll', handleScroll, { passive: true });
-
-    // Restore scroll position after navigation
     nav.scrollTop = scrollPositionRef.current;
 
     return () => nav.removeEventListener('scroll', handleScroll);
@@ -124,62 +223,14 @@ export default function Sidebar() {
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
-  // Debug: log user data to understand why admin section might not show
-  const isAdmin = user?.role === 'admin';
-  if (typeof window !== 'undefined') {
-    console.log('[Sidebar] hydrated:', hydrated, '| user exists:', !!user, '| user.role:', user?.role, '| isAdmin:', isAdmin);
-  }
-
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     router.push('/login');
-  };
-
-  const NavItem = ({ item }: { item: typeof salesNavItems[0] }) => {
-    const isActive = pathname === item.href || 
-      (item.href !== '/dashboard' && pathname.startsWith(item.href));
-    
-    const handleClick = (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setMobileOpen(false);
-      router.push(item.href);
-    };
-    
-    return (
-      <Link
-        href={item.href}
-        scroll={false}
-        prefetch={true}
-        onClick={handleClick}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group cursor-pointer select-none relative ${
-          isActive 
-            ? 'bg-primary-500/15 text-white border border-primary-500/30' 
-            : 'text-dark-300 hover:bg-dark-700/50 hover:text-white border border-transparent'
-        }`}
-      >
-        <div className={`w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center ${
-          isActive 
-            ? 'bg-primary-500/20' 
-            : 'bg-dark-700/50 group-hover:bg-dark-600/50'
-        }`}>
-          <item.icon className={`w-4 h-4 ${
-            isActive ? 'text-primary-400' : 'text-dark-400 group-hover:text-white'
-          }`} />
-        </div>
-        <span className={`font-medium text-sm truncate ${isActive ? 'text-white' : ''}`}>
-          {item.label}
-        </span>
-        {isActive && (
-          <ChevronRight className="w-3.5 h-3.5 text-primary-400 flex-shrink-0 ml-auto" />
-        )}
-      </Link>
-    );
-  };
+  }, [logout, router]);
 
   return (
     <>
-      {/* Mobile Menu Button - Fixed at top left */}
+      {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-dark-800 border border-dark-700 rounded-lg text-white hover:bg-dark-700 transition-colors"
@@ -191,7 +242,7 @@ export default function Sidebar() {
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/60 z-50"
+          className="lg:hidden fixed inset-0 bg-black/60 z-[55]"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -214,7 +265,7 @@ export default function Sidebar() {
 
         {/* Logo */}
         <div className="px-6 py-6 flex-shrink-0">
-          <Link href="/dashboard" className="flex items-center gap-4">
+          <Link href="/dashboard" className="flex items-center gap-4" onClick={(e) => { e.preventDefault(); handleNavigate('/dashboard'); }}>
             <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
               <Mic className="w-6 h-6 text-white" />
             </div>
@@ -225,123 +276,63 @@ export default function Sidebar() {
           </Link>
         </div>
 
-      {/* Main Navigation */}
-      <nav ref={navRef} className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
-        {/* Sales Section */}
-        <div className="mb-5">
-          <div className="px-4 py-2 mb-2">
-            <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider">
-              Sales
-            </span>
-          </div>
-          <div className="space-y-1">
-            {salesNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </div>
-        </div>
+        {/* Main Navigation */}
+        <nav ref={navRef} className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
+          <NavSection title="Sales" items={salesNavItems} pathname={pathname} onNavigate={handleNavigate} />
+          <NavSection title="Clients" items={clientsNavItems} pathname={pathname} onNavigate={handleNavigate} />
+          <NavSection title="Communication" items={communicationNavItems} pathname={pathname} onNavigate={handleNavigate} />
+          <NavSection title="Resources" items={resourcesNavItems} pathname={pathname} onNavigate={handleNavigate} />
+          <NavSection title="Admin" items={agencyAdminNavItems} pathname={pathname} onNavigate={handleNavigate} />
 
-        {/* Clients Section */}
-        <div className="mb-5">
-          <div className="px-4 py-2 mb-2">
-            <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider">
-              Clients
-            </span>
-          </div>
-          <div className="space-y-1">
-            {clientsNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </div>
-        </div>
+          {/* Platform Admin Section */}
+          {isAdmin && (
+            <div className="mb-6">
+              <div className="px-4 py-2 mb-2">
+                <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider flex items-center gap-2">
+                  <Shield className="w-3 h-3" />
+                  Platform Admin
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                {adminNavItems.map((item) => {
+                  const isActive = pathname === item.href || 
+                    (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                  return (
+                    <NavItem key={item.href} item={item} isActive={isActive} onNavigate={handleNavigate} />
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </nav>
 
-        {/* Communication Section */}
-        <div className="mb-5">
-          <div className="px-4 py-2 mb-2">
-            <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider">
-              Communication
-            </span>
-          </div>
-          <div className="space-y-1">
-            {communicationNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </div>
-        </div>
-
-        {/* Resources Section */}
-        <div className="mb-5">
-          <div className="px-4 py-2 mb-2">
-            <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider">
-              Resources
-            </span>
-          </div>
-          <div className="space-y-1">
-            {resourcesNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </div>
-        </div>
-
-        {/* Agency Admin Section */}
-        <div className="mb-5">
-          <div className="px-4 py-2 mb-2">
-            <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider">
-              Admin
-            </span>
-          </div>
-          <div className="space-y-1">
-            {agencyAdminNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </div>
-        </div>
-
-        {/* Admin Section - Only visible to platform admins */}
-        {isAdmin && (
-          <div className="mb-6">
-            <div className="px-4 py-2 mb-2">
-              <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider flex items-center gap-2">
-                <Shield className="w-3 h-3" />
-                Platform Admin
+        {/* User Section */}
+        <div className="p-4 border-t border-dark-700/50 bg-dark-800/50 flex-shrink-0">
+          <div className="flex items-center gap-4 px-3 py-3 mb-3 bg-dark-700/30 rounded-xl">
+            <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-lg">
+                {user?.full_name?.charAt(0) || 'A'}
               </span>
             </div>
-            <div className="space-y-1.5">
-              {adminNavItems.map((item) => (
-                <NavItem key={item.href} item={item} />
-              ))}
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium truncate text-sm">
+                {user?.full_name || 'Admin User'}
+              </p>
+              <p className="text-dark-400 text-xs truncate">
+                {user?.email || 'admin@homecare.ai'}
+              </p>
             </div>
           </div>
-        )}
-      </nav>
-
-      {/* User Section */}
-      <div className="p-4 border-t border-dark-700/50 bg-dark-800/50 flex-shrink-0">
-        <div className="flex items-center gap-4 px-3 py-3 mb-3 bg-dark-700/30 rounded-xl">
-          <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center shadow-md">
-            <span className="text-white font-bold text-lg">
-              {user?.full_name?.charAt(0) || 'A'}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-medium truncate text-sm">
-              {user?.full_name || 'Admin User'}
-            </p>
-            <p className="text-dark-400 text-xs truncate">
-              {user?.email || 'admin@homecare.ai'}
-            </p>
-          </div>
+          
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 w-full rounded-xl text-dark-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 border border-dark-700/50 hover:border-red-500/30"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-medium">Sign Out</span>
+          </button>
         </div>
-        
-        <button
-          onClick={handleLogout}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 w-full rounded-xl text-dark-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 border border-dark-700/50 hover:border-red-500/30"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="text-sm font-medium">Sign Out</span>
-        </button>
-      </div>
-    </aside>
+      </aside>
     </>
   );
 }
