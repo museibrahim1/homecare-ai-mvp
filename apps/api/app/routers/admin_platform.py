@@ -846,10 +846,11 @@ async def get_system_health(
     import redis
     import boto3
     from botocore.exceptions import ClientError
+    from sqlalchemy import text
     
     # Database check
     try:
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db_status = "healthy"
     except Exception as e:
         db_status = f"unhealthy: {str(e)}"
@@ -863,7 +864,7 @@ async def get_system_health(
     except Exception as e:
         redis_status = f"unhealthy: {str(e)}"
     
-    # S3/MinIO check
+    # S3/MinIO check - use head_bucket instead of list_buckets (doesn't require ListAllMyBuckets permission)
     try:
         s3 = boto3.client(
             's3',
@@ -871,7 +872,8 @@ async def get_system_health(
             aws_access_key_id=os.getenv("S3_ACCESS_KEY") or os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("S3_SECRET_KEY") or os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
-        s3.list_buckets()
+        bucket_name = os.getenv("S3_BUCKET", "homecare-audio")
+        s3.head_bucket(Bucket=bucket_name)
         storage_status = "healthy"
     except Exception as e:
         storage_status = f"unhealthy: {str(e)}"
