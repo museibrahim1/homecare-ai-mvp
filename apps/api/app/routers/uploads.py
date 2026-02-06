@@ -45,12 +45,30 @@ async def upload_audio(
     # Verify visit exists and belongs to user
     visit = get_user_visit(db, visit_id, current_user)
     
-    # Validate file type
-    allowed_types = ["audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg", "audio/webm", "audio/x-m4a"]
-    if file.content_type and file.content_type not in allowed_types:
+    # Validate file type - be permissive with audio formats
+    allowed_types = [
+        "audio/mpeg", "audio/mp3", "audio/wav", "audio/wave", "audio/x-wav",
+        "audio/mp4", "audio/m4a", "audio/x-m4a", "audio/aac",
+        "audio/ogg", "audio/webm", "audio/flac", "audio/x-flac",
+        "audio/amr", "audio/3gpp", "audio/3gpp2",
+        "video/mp4", "video/webm",  # Some recorders send video content type
+        "application/octet-stream",  # Generic binary - accept and let whisper handle it
+    ]
+    # Also accept any content type that starts with "audio/"
+    is_audio = file.content_type and (
+        file.content_type in allowed_types or 
+        file.content_type.startswith("audio/") or
+        file.content_type.startswith("video/")
+    )
+    # If no content type or unrecognized, check file extension
+    if not is_audio and file.filename:
+        audio_extensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.webm', '.flac', '.mp4', '.amr', '.3gp']
+        is_audio = any(file.filename.lower().endswith(ext) for ext in audio_extensions)
+    
+    if file.content_type and not is_audio:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid file type. Allowed: {', '.join(allowed_types)}",
+            detail=f"Invalid file type: {file.content_type}. Upload an audio file (mp3, wav, m4a, etc.)",
         )
     
     # Read file content
