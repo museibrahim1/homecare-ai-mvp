@@ -37,11 +37,19 @@ export default function DashboardPage() {
         api.getVisits(token!),
         api.getClients(token!),
       ]);
+      // Calculate assessments this week from actual data
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const thisWeekCount = visitsData.items.filter((v: any) => {
+        const created = new Date(v.created_at || v.scheduled_start || 0);
+        return created >= weekAgo;
+      }).length;
+      
       setStats({
         totalVisits: visitsData.total,
         pendingReview: visitsData.items.filter((v: any) => v.status === 'pending_review').length,
         totalClients: clientsData.length,
-        hoursThisWeek: 24,
+        hoursThisWeek: thisWeekCount,
       });
       setRecentVisits(visitsData.items.slice(0, 5));
     } catch (err) {

@@ -35,12 +35,8 @@ const typeLabels: Record<string, string> = {
 
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const initialAppointments: Appointment[] = [
-  { id: 1, title: 'Initial Assessment', client: 'Margaret Thompson', date: '2026-01-30', time: '09:00', duration: '1 hour', location: '123 Oak St', type: 'assessment', notes: '' },
-  { id: 2, title: 'Care Plan Review', client: 'Robert Williams', date: '2026-01-30', time: '11:00', duration: '45 min', location: '456 Pine Ave', type: 'review', notes: '' },
-  { id: 3, title: 'Family Meeting', client: 'Eleanor Davis', date: '2026-01-30', time: '14:00', duration: '1.5 hours', location: 'Virtual', type: 'meeting', notes: '' },
-  { id: 4, title: 'Home Safety Check', client: 'James Wilson', date: '2026-01-30', time: '16:00', duration: '1 hour', location: '789 Elm Blvd', type: 'visit', notes: '' },
-];
+// No demo data - users start with an empty schedule
+const initialAppointments: Appointment[] = [];
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
