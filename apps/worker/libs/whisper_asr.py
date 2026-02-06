@@ -96,6 +96,78 @@ def transcribe_audio(
                 pass
 
 
+def _split_audio_for_api(audio_path: str, max_size_mb: float = 24.0) -> List[str]:
+    """
+    Split audio file into chunks that fit within OpenAI's 25MB limit.
+    Returns list of chunk file paths. Uses pydub for splitting.
+    """
+    file_size_mb = os.path.getsize(audio_path) / (1024 * 1024)
+    
+    if file_size_mb <= max_size_mb:
+        return [audio_path]
+    
+    logger.info(f"Audio file is {file_size_mb:.1f}MB, splitting into chunks (max {max_size_mb}MB each)")
+    
+    try:
+        from pydub import AudioSegment
+        
+        audio = AudioSegment.from_file(audio_path)
+        total_duration_ms = len(audio)
+        
+        # Calculate chunk duration based on file size ratio
+        num_chunks = int(file_size_mb / max_size_mb) + 1
+        chunk_duration_ms = total_duration_ms // num_chunks
+        
+        # Minimum 60 seconds per chunk
+        chunk_duration_ms = max(chunk_duration_ms, 60000)
+        
+        chunks = []
+        start = 0
+        chunk_idx = 0
+        
+        while start < total_duration_ms:
+            end = min(start + chunk_duration_ms, total_duration_ms)
+            chunk = audio[start:end]
+            
+            # Export as mp3 (much smaller than wav)
+            chunk_path = tempfile.mktemp(suffix=f"_chunk{chunk_idx}.mp3")
+            chunk.export(chunk_path, format="mp3", bitrate="64k")
+            
+            chunk_size = os.path.getsize(chunk_path) / (1024 * 1024)
+            logger.info(f"  Chunk {chunk_idx}: {start/1000:.1f}s - {end/1000:.1f}s ({chunk_size:.1f}MB)")
+            
+            chunks.append(chunk_path)
+            start = end
+            chunk_idx += 1
+        
+        logger.info(f"Split into {len(chunks)} chunks")
+        return chunks
+        
+    except ImportError:
+        logger.error("pydub not installed - cannot split audio. Trying to convert to mp3 with ffmpeg.")
+        # Try converting to mp3 which is much smaller
+        mp3_path = tempfile.mktemp(suffix='.mp3')
+        try:
+            result = subprocess.run([
+                'ffmpeg', '-i', audio_path,
+                '-b:a', '64k',  # Low bitrate for smaller file
+                '-ar', '16000',
+                '-ac', '1',
+                '-y', mp3_path
+            ], capture_output=True, text=True)
+            
+            if os.path.exists(mp3_path) and os.path.getsize(mp3_path) > 0:
+                mp3_size = os.path.getsize(mp3_path) / (1024 * 1024)
+                logger.info(f"Converted to mp3: {mp3_size:.1f}MB")
+                if mp3_size <= max_size_mb:
+                    return [mp3_path]
+        except Exception as e:
+            logger.error(f"ffmpeg conversion failed: {e}")
+        
+        # Last resort: return original file and let API error handle it
+        return [audio_path]
+
+
 def _transcribe_openai_api(
     audio_path: str,
     api_key: str,
@@ -105,6 +177,7 @@ def _transcribe_openai_api(
 ) -> List[Dict[str, Any]]:
     """
     Transcribe using OpenAI Whisper API (fast, ~$0.006/minute).
+    Automatically splits large files into chunks.
     Falls back to local transcription if API fails.
     """
     try:
@@ -121,44 +194,91 @@ def _transcribe_openai_api(
             raise ValueError(f"Audio file not found: {audio_path}")
         
         file_size = os.path.getsize(audio_path)
-        logger.info(f"Uploading to OpenAI Whisper API: {audio_path} ({file_size} bytes)")
+        file_size_mb = file_size / (1024 * 1024)
+        logger.info(f"Preparing for OpenAI Whisper API: {audio_path} ({file_size_mb:.1f}MB)")
         
-        with open(audio_path, "rb") as audio_file:
-            # Use verbose_json for timestamps
-            response = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_file,
-                response_format="verbose_json",
-                timestamp_granularities=["segment"],
-                language=language,
-            )
+        # Split large files into chunks
+        chunk_paths = _split_audio_for_api(audio_path)
+        is_chunked = len(chunk_paths) > 1
         
-        # Convert OpenAI response to our format
-        result = []
-        for segment in response.segments:
-            # Handle both dict and object formats
-            if hasattr(segment, 'start'):
-                start = segment.start
-                end = segment.end
-                text = segment.text
-            else:
-                start = segment["start"]
-                end = segment["end"]
-                text = segment["text"]
+        all_segments = []
+        time_offset_ms = 0
+        
+        for chunk_idx, chunk_path in enumerate(chunk_paths):
+            chunk_size = os.path.getsize(chunk_path) / (1024 * 1024)
+            logger.info(f"Transcribing chunk {chunk_idx + 1}/{len(chunk_paths)} ({chunk_size:.1f}MB)")
             
-            result.append({
-                "start_ms": int(start * 1000),
-                "end_ms": int(end * 1000),
-                "text": text.strip(),
-                "confidence": 0.95,
-                "words": [],
-            })
+            try:
+                with open(chunk_path, "rb") as audio_file:
+                    response = client.audio.transcriptions.create(
+                        model="whisper-1",
+                        file=audio_file,
+                        response_format="verbose_json",
+                        timestamp_granularities=["segment"],
+                        language=language,
+                    )
+                
+                # Track the last end time for offset calculation
+                chunk_max_end_ms = 0
+                
+                for segment in response.segments:
+                    if hasattr(segment, 'start'):
+                        start = segment.start
+                        end = segment.end
+                        text = segment.text
+                    else:
+                        start = segment["start"]
+                        end = segment["end"]
+                        text = segment["text"]
+                    
+                    seg_start_ms = int(start * 1000) + time_offset_ms
+                    seg_end_ms = int(end * 1000) + time_offset_ms
+                    
+                    all_segments.append({
+                        "start_ms": seg_start_ms,
+                        "end_ms": seg_end_ms,
+                        "text": text.strip(),
+                        "confidence": 0.95,
+                        "words": [],
+                    })
+                    
+                    chunk_max_end_ms = max(chunk_max_end_ms, int(end * 1000))
+                
+                # Update offset for next chunk
+                if is_chunked:
+                    # Use actual audio duration for more accurate offset
+                    try:
+                        from pydub import AudioSegment
+                        chunk_audio = AudioSegment.from_file(chunk_path)
+                        time_offset_ms += len(chunk_audio)
+                    except:
+                        # Fallback: use the last segment's end time
+                        time_offset_ms += chunk_max_end_ms
+                
+                logger.info(f"  Chunk {chunk_idx + 1} produced {len(response.segments)} segments")
+                
+            finally:
+                # Clean up chunk files (but not the original)
+                if chunk_path != audio_path and os.path.exists(chunk_path):
+                    try:
+                        os.remove(chunk_path)
+                    except:
+                        pass
         
-        logger.info(f"OpenAI transcription complete: {len(result)} segments")
-        return result
+        logger.info(f"OpenAI transcription complete: {len(all_segments)} total segments from {len(chunk_paths)} chunk(s)")
+        return all_segments
         
     except Exception as e:
         logger.error(f"OpenAI API transcription error: {str(e)}")
+        
+        # Clean up any remaining chunk files
+        if 'chunk_paths' in locals():
+            for cp in chunk_paths:
+                if cp != audio_path and os.path.exists(cp):
+                    try:
+                        os.remove(cp)
+                    except:
+                        pass
         
         # Fall back to local transcription
         if fallback_to_local:
