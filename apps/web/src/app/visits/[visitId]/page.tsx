@@ -24,7 +24,8 @@ import {
   Loader2,
   Users,
   ClipboardList,
-  RotateCcw
+  RotateCcw,
+  Maximize2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -71,6 +72,38 @@ export default function VisitDetailPage() {
   const [showRestartModal, setShowRestartModal] = useState(false);
   const [restarting, setRestarting] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const isResizing = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(420);
+  const [panelWidth, setPanelWidth] = useState<number | null>(null);
+  const [popoutPanel, setPopoutPanel] = useState<string | null>(null);
+
+  // Drag-to-resize panel handler
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      e.preventDefault();
+      const delta = startX.current - e.clientX;
+      const newWidth = Math.max(300, Math.min(900, startWidth.current + delta));
+      setPanelWidth(newWidth);
+    };
+    
+    const handleMouseUp = () => {
+      if (!isResizing.current) return;
+      isResizing.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
 
   // Close export menu when clicking outside - only attach when menu is open
   useEffect(() => {
@@ -144,6 +177,15 @@ export default function VisitDetailPage() {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    startX.current = e.clientX;
+    startWidth.current = panelWidth || panelRef.current?.offsetWidth || 420;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
   };
 
   const runPipelineStep = async (step: string) => {
@@ -362,7 +404,10 @@ export default function VisitDetailPage() {
       <Sidebar />
       
       {/* Main Content - push content right when panel is open */}
-      <main className={`flex-1 min-w-0 p-4 sm:p-6 lg:p-8 transition-[margin] duration-300 overflow-x-hidden ${sidebarOpen ? 'lg:mr-[420px] xl:mr-[450px] 2xl:mr-[500px]' : ''}`}>
+      <main 
+        className={`flex-1 min-w-0 p-4 sm:p-6 lg:p-8 transition-[margin] duration-300 overflow-x-hidden ${sidebarOpen && !panelWidth ? 'lg:mr-[420px] xl:mr-[450px] 2xl:mr-[500px]' : ''}`}
+        style={sidebarOpen && panelWidth ? { marginRight: `${panelWidth}px` } : undefined}
+      >
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
@@ -689,9 +734,17 @@ export default function VisitDetailPage() {
           </div>
 
           {/* Quick Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {panelTabs.map((tab) => {
               const TabIcon = tab.icon;
+              const bgColor = tab.color === 'blue' ? 'bg-blue-500/20' :
+                tab.color === 'green' ? 'bg-green-500/20' :
+                tab.color === 'amber' ? 'bg-amber-500/20' :
+                'bg-purple-500/20';
+              const textColor = tab.color === 'blue' ? 'text-blue-400' :
+                tab.color === 'green' ? 'text-green-400' :
+                tab.color === 'amber' ? 'text-amber-400' :
+                'text-purple-400';
               return (
                 <button
                   key={tab.id}
@@ -704,16 +757,8 @@ export default function VisitDetailPage() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                      tab.color === 'blue' ? 'bg-blue-500/20' :
-                      tab.color === 'green' ? 'bg-green-500/20' :
-                      'bg-purple-500/20'
-                    }`}>
-                      <TabIcon className={`w-4 h-4 ${
-                        tab.color === 'blue' ? 'text-blue-400' :
-                        tab.color === 'green' ? 'text-green-400' :
-                        'text-purple-400'
-                      }`} />
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${bgColor}`}>
+                      <TabIcon className={`w-4 h-4 ${textColor}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-medium text-white">{tab.label}</h3>
@@ -724,7 +769,17 @@ export default function VisitDetailPage() {
                         }
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
+                    <div className="flex items-center gap-1">
+                      <span
+                        role="button"
+                        onClick={(e) => { e.stopPropagation(); setPopoutPanel(tab.id); }}
+                        className="p-1.5 rounded-lg hover:bg-dark-600 transition-colors opacity-0 group-hover:opacity-100"
+                        title={`Open ${tab.label} in full view`}
+                      >
+                        <Maximize2 className="w-3.5 h-3.5 text-dark-400 hover:text-primary-400" />
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
+                    </div>
                   </div>
                 </button>
               );
@@ -742,8 +797,19 @@ export default function VisitDetailPage() {
           onClick={() => setSidebarOpen(false)}
         />
         <div
-          className="fixed top-0 right-0 h-full w-[92vw] sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] max-w-[calc(100vw-4rem)] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
+          ref={panelRef}
+          className={`fixed top-0 right-0 h-full bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col ${
+            !panelWidth ? 'w-[92vw] sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] max-w-[calc(100vw-4rem)]' : ''
+          }`}
+          style={panelWidth ? { width: `${panelWidth}px`, maxWidth: 'calc(100vw - 4rem)' } : undefined}
         >
+          {/* Drag handle for resizing - visible on larger screens */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-primary-500/30 z-50 group hidden lg:flex items-center"
+            onMouseDown={handleResizeStart}
+          >
+            <div className="w-1 h-12 bg-dark-500 group-hover:bg-primary-400 rounded-full transition-colors mx-auto" />
+          </div>
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
           <div className="flex items-center gap-3">
@@ -755,12 +821,21 @@ export default function VisitDetailPage() {
               <p className="text-xs text-dark-400">Review generated content</p>
             </div>
           </div>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="p-2 hover:bg-dark-700 rounded-lg transition-colors group"
-          >
-            <X className="w-5 h-5 text-dark-400 group-hover:text-white" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => { setPopoutPanel(activePanel); setSidebarOpen(false); }}
+              className="p-2 hover:bg-dark-700 rounded-lg transition-colors group"
+              title="Open in full view"
+            >
+              <Maximize2 className="w-4 h-4 text-dark-400 group-hover:text-white" />
+            </button>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 hover:bg-dark-700 rounded-lg transition-colors group"
+            >
+              <X className="w-5 h-5 text-dark-400 group-hover:text-white" />
+            </button>
+          </div>
         </div>
 
         {/* Panel Tabs - Scrollable on smaller screens */}
@@ -919,6 +994,176 @@ export default function VisitDetailPage() {
         </div>
       </div>
       </>
+      )}
+
+      {/* Pop-out Full View Modal */}
+      {popoutPanel && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-dark-900 border border-dark-700 rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                {(() => {
+                  const tab = panelTabs.find(t => t.id === popoutPanel);
+                  if (!tab) return null;
+                  const TabIcon = tab.icon;
+                  const bgColor = tab.color === 'blue' ? 'bg-blue-500/20' :
+                    tab.color === 'green' ? 'bg-green-500/20' :
+                    tab.color === 'amber' ? 'bg-amber-500/20' :
+                    'bg-purple-500/20';
+                  const txtColor = tab.color === 'blue' ? 'text-blue-400' :
+                    tab.color === 'green' ? 'text-green-400' :
+                    tab.color === 'amber' ? 'text-amber-400' :
+                    'text-purple-400';
+                  return (
+                    <>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bgColor}`}>
+                        <TabIcon className={`w-5 h-5 ${txtColor}`} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">{tab.label}</h3>
+                        <p className="text-xs text-dark-400">
+                          {tab.id === 'contract' 
+                            ? (contract ? 'Generated - Click Edit to modify' : 'Pending')
+                            : `${tab.count} ${tab.id === 'transcript' ? 'segments' : 'items'}`
+                          }
+                        </p>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+              {/* Tab switcher + close */}
+              <div className="flex items-center gap-2">
+                {panelTabs.map((tab) => {
+                  const TabIcon = tab.icon;
+                  const isActive = popoutPanel === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setPopoutPanel(tab.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-primary-500/20 text-white border border-primary-500/30'
+                          : 'text-dark-400 hover:text-white hover:bg-dark-700 border border-transparent'
+                      }`}
+                    >
+                      <TabIcon className={`w-4 h-4 ${isActive ? 'text-primary-400' : ''}`} />
+                      <span className="hidden md:inline">{tab.label}</span>
+                    </button>
+                  );
+                })}
+                <div className="w-px h-6 bg-dark-600 mx-1" />
+                <button
+                  onClick={() => setPopoutPanel(null)}
+                  className="p-2 hover:bg-dark-700 rounded-lg transition-colors group"
+                >
+                  <X className="w-5 h-5 text-dark-400 group-hover:text-white" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {popoutPanel === 'transcript' && (
+                <TranscriptTimeline segments={transcript} />
+              )}
+              {popoutPanel === 'billables' && (
+                <div className="p-6">
+                  <BillablesEditor
+                    items={billables}
+                    visitId={visitId}
+                    onUpdate={loadVisitData}
+                  />
+                </div>
+              )}
+              {popoutPanel === 'notes' && (
+                <div className="p-6">
+                  {note && note.id ? (
+                    <div className="space-y-6 max-w-4xl mx-auto">
+                      <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
+                        <h3 className="text-xl font-semibold text-white mb-6">Visit Notes (SOAP)</h3>
+                        {note.structured_data && note.structured_data.subjective && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium text-amber-400 mb-1">Subjective</h4>
+                            <p className="text-dark-200 text-sm">{note.structured_data.subjective}</p>
+                          </div>
+                        )}
+                        {note.structured_data && note.structured_data.objective && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium text-blue-400 mb-1">Objective</h4>
+                            <p className="text-dark-200 text-sm">{note.structured_data.objective}</p>
+                          </div>
+                        )}
+                        {note.structured_data && note.structured_data.assessment && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium text-green-400 mb-1">Assessment</h4>
+                            <p className="text-dark-200 text-sm">{note.structured_data.assessment}</p>
+                          </div>
+                        )}
+                        {note.structured_data && note.structured_data.plan && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium text-purple-400 mb-1">Plan</h4>
+                            <p className="text-dark-200 text-sm">{note.structured_data.plan}</p>
+                          </div>
+                        )}
+                        {(!note.structured_data || (!note.structured_data.subjective && !note.structured_data.objective && !note.structured_data.assessment && !note.structured_data.plan)) && (
+                          <p className="text-dark-400 text-sm">No SOAP data available</p>
+                        )}
+                      </div>
+                      {note.narrative && (
+                        <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
+                          <h3 className="text-xl font-semibold text-white mb-2">Narrative Summary</h3>
+                          <p className="text-dark-200 text-sm whitespace-pre-wrap">{note.narrative}</p>
+                        </div>
+                      )}
+                      {note.structured_data && Array.isArray(note.structured_data.tasks_performed) && note.structured_data.tasks_performed.length > 0 && (
+                        <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
+                          <h3 className="text-xl font-semibold text-white mb-2">Tasks Performed</h3>
+                          <ul className="space-y-3">
+                            {note.structured_data.tasks_performed.map((task: any, i: number) => (
+                              <li key={i} className="bg-dark-700/50 rounded-lg p-3">
+                                {typeof task === 'string' ? (
+                                  <p className="text-dark-200 text-sm">{task}</p>
+                                ) : (
+                                  <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="font-medium text-white">{task.task || 'Task'}</span>
+                                      {task.duration_minutes && (
+                                        <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">
+                                          {task.duration_minutes} min
+                                        </span>
+                                      )}
+                                    </div>
+                                    {task.details && <p className="text-dark-300 text-sm mt-1">{task.details}</p>}
+                                    {task.client_response && <p className="text-dark-400 text-xs mt-1 italic">Client: {task.client_response}</p>}
+                                  </div>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-64 text-dark-400">
+                      <ClipboardList className="w-12 h-12 mb-4 opacity-50" />
+                      <p>No notes generated yet</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {popoutPanel === 'contract' && (
+                <ContractPreview 
+                  contract={contract} 
+                  client={visit?.client}
+                  visitId={visitId}
+                  onContractUpdate={setContract}
+                />
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Restart Assessment Confirmation Modal */}
