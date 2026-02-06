@@ -356,11 +356,11 @@ export default function VisitDetailPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-dark-900 overflow-x-hidden">
       <Sidebar />
       
-      {/* Main Content - Only push content on wide screens (1280px+) */}
-      <main className={`flex-1 p-4 sm:p-6 lg:p-8 transition-[margin] duration-300 ${sidebarOpen ? 'xl:mr-[450px] 2xl:mr-[500px]' : ''}`}>
+      {/* Main Content - push content right when panel is open */}
+      <main className={`flex-1 min-w-0 p-4 sm:p-6 lg:p-8 transition-[margin] duration-300 overflow-x-hidden ${sidebarOpen ? 'lg:mr-[420px] xl:mr-[450px] 2xl:mr-[500px]' : ''}`}>
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
@@ -720,13 +720,13 @@ export default function VisitDetailPage() {
       {/* Slide-out Preview Panel - Responsive Width */}
       {sidebarOpen && (
       <>
-        {/* Overlay backdrop - show on screens narrower than xl (1280px) */}
+        {/* Overlay backdrop - show on smaller screens where panel overlaps content */}
         <div 
-          className="fixed inset-0 bg-black/50 z-30 xl:hidden"
+          className="fixed inset-0 bg-black/30 z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
         <div
-          className="fixed top-0 right-0 h-full w-full xs:w-[90vw] sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
+          className="fixed top-0 right-0 h-full w-[92vw] sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] max-w-[calc(100vw-4rem)] bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col"
         >
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
