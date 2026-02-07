@@ -640,6 +640,26 @@ async def deactivate_platform_user(
     return {"message": "User deactivated"}
 
 
+@router.delete("/users/{user_id}")
+async def delete_platform_user(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_platform_admin),
+):
+    """Permanently delete a platform user."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+    
+    db.delete(user)
+    db.commit()
+    
+    return {"message": f"User {user.email} deleted"}
+
+
 # =============================================================================
 # SUPPORT TICKETS
 # =============================================================================

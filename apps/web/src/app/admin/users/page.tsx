@@ -122,16 +122,22 @@ export default function PlatformUsersPage() {
     }
   };
 
-  const deactivateUser = async (userId: string) => {
+  const deleteUser = async (userId: string, email: string) => {
+    if (!confirm(`Are you sure you want to permanently delete ${email}? This cannot be undone.`)) return;
     const token = getStoredToken();
     try {
-      await fetch(`${API_BASE}/platform/users/${userId}/deactivate`, {
-        method: 'PUT',
+      const response = await fetch(`${API_BASE}/platform/users/${userId}`, {
+        method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchUsers();
+      if (response.ok) {
+        fetchUsers();
+      } else {
+        const data = await response.json();
+        alert(data.detail || 'Failed to delete user');
+      }
     } catch (err) {
-      console.error('Failed to deactivate user:', err);
+      console.error('Failed to delete user:', err);
     }
   };
 
@@ -237,15 +243,13 @@ export default function PlatformUsersPage() {
                         <p className="text-dark-400 text-xs">Role</p>
                         <p className="text-primary-400 text-sm capitalize">{user.role}</p>
                       </div>
-                      {user.is_active && (
-                        <button
-                          onClick={() => deactivateUser(user.id)}
-                          className="p-2 hover:bg-dark-600 rounded-lg text-dark-400 hover:text-red-400 transition"
-                          title="Deactivate"
-                        >
-                          <XCircle className="w-5 h-5" />
-                        </button>
-                      )}
+                      <button
+                        onClick={() => deleteUser(user.id, user.email)}
+                        className="p-2 hover:bg-dark-600 rounded-lg text-dark-400 hover:text-red-400 transition"
+                        title="Delete user"
+                      >
+                        <XCircle className="w-5 h-5" />
+                      </button>
                     </div>
                   </div>
                 </div>
