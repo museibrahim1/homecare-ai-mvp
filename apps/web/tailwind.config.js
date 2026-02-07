@@ -1,15 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-
-// Helper to create a color that references a CSS variable with alpha support
-function withOpacity(variableName) {
-  return ({ opacityValue }) => {
-    if (opacityValue !== undefined) {
-      return `rgba(var(${variableName}), ${opacityValue})`;
-    }
-    return `rgb(var(${variableName}))`;
-  };
-}
-
 module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -19,19 +8,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Theme-aware colors via CSS variables
+        // Theme-aware colors via CSS variables (space-separated R G B triplets)
+        // <alpha-value> is a Tailwind token replaced at build time
         dark: {
-          50:  withOpacity('--color-dark-50'),
-          100: withOpacity('--color-dark-100'),
-          200: withOpacity('--color-dark-200'),
-          300: withOpacity('--color-dark-300'),
-          400: withOpacity('--color-dark-400'),
-          500: withOpacity('--color-dark-500'),
-          600: withOpacity('--color-dark-600'),
-          700: withOpacity('--color-dark-700'),
-          800: withOpacity('--color-dark-800'),
-          900: withOpacity('--color-dark-900'),
-          950: withOpacity('--color-dark-950'),
+          50:  'rgb(var(--color-dark-50) / <alpha-value>)',
+          100: 'rgb(var(--color-dark-100) / <alpha-value>)',
+          200: 'rgb(var(--color-dark-200) / <alpha-value>)',
+          300: 'rgb(var(--color-dark-300) / <alpha-value>)',
+          400: 'rgb(var(--color-dark-400) / <alpha-value>)',
+          500: 'rgb(var(--color-dark-500) / <alpha-value>)',
+          600: 'rgb(var(--color-dark-600) / <alpha-value>)',
+          700: 'rgb(var(--color-dark-700) / <alpha-value>)',
+          800: 'rgb(var(--color-dark-800) / <alpha-value>)',
+          900: 'rgb(var(--color-dark-900) / <alpha-value>)',
+          950: 'rgb(var(--color-dark-950) / <alpha-value>)',
         },
         primary: {
           50: '#EFF6FF',

@@ -6,8 +6,8 @@
    THEME SYSTEM: CSS Variables for Dark / Light modes
    
    All dark-* Tailwind colors reference these variables.
-   Toggling data-theme="light" on <html> swaps the palette.
-   Values are R G B triplets (no commas) for Tailwind alpha support.
+   Toggling data-theme on <html> swaps the entire palette.
+   Values are R G B triplets (space-separated) for Tailwind alpha.
    ============================================================ */
 
 :root {
@@ -24,46 +24,48 @@
   --color-dark-900: 10 22 40;
   --color-dark-950: 6 13 23;
 
-  /* Semantic aliases */
+  /* Semantic */
   --primary-500: #6366f1;
   --accent-cyan: #06b6d4;
   
   /* Shadows */
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
   
-  /* Text override */
-  --color-text-white: 255, 255, 255;
-  
-  /* Scrollbar colors */
+  /* Scrollbar */
   --scrollbar-track: rgb(20 43 88);
   --scrollbar-thumb: rgb(45 84 148);
   --scrollbar-thumb-hover: rgb(61 105 178);
 }
 
 [data-theme="light"] {
-  /* Light Theme */
-  --color-dark-50:  30 35 50;
-  --color-dark-100: 50 58 80;
-  --color-dark-200: 75 85 115;
-  --color-dark-300: 55 65 95;
-  --color-dark-400: 110 120 150;
-  --color-dark-500: 150 160 185;
-  --color-dark-600: 210 215 228;
-  --color-dark-700: 230 233 240;
-  --color-dark-800: 255 255 255;
-  --color-dark-900: 240 243 248;
-  --color-dark-950: 235 238 245;
+  /* ---- Light Theme ----
+     Naming is inverted: dark-900 = lightest bg, dark-50 = darkest text.
+     This lets all existing Tailwind classes work without changes. */
   
-  /* Shadows */
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  /* Text colors (dark-50 through dark-300 → dark text) */
+  --color-dark-50:  15 23 42;      /* darkest headings */
+  --color-dark-100: 30 41 59;      /* primary text */
+  --color-dark-200: 51 65 85;      /* secondary text */
+  --color-dark-300: 71 85 105;     /* body text */
   
-  /* Text override */
-  --color-text-white: 30, 40, 70;
+  /* Mid-tones (dark-400, dark-500 → muted text / icons) */
+  --color-dark-400: 100 116 139;   /* muted / placeholder */
+  --color-dark-500: 148 163 184;   /* subtle text, section labels */
   
-  /* Scrollbar colors */
-  --scrollbar-track: rgb(240 243 248);
-  --scrollbar-thumb: rgb(200 205 218);
-  --scrollbar-thumb-hover: rgb(170 178 198);
+  /* Surface colors (dark-600 through dark-950 → light surfaces) */
+  --color-dark-600: 203 213 225;   /* borders, dividers */
+  --color-dark-700: 241 245 249;   /* hover bg, input bg, subtle surfaces */
+  --color-dark-800: 255 255 255;   /* card bg (white) */
+  --color-dark-900: 248 250 252;   /* page bg (off-white with blue tint) */
+  --color-dark-950: 241 245 249;   /* deeper bg areas */
+  
+  /* Shadows - more visible for depth */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+  
+  /* Scrollbar */
+  --scrollbar-track: rgb(241 245 249);
+  --scrollbar-thumb: rgb(203 213 225);
+  --scrollbar-thumb-hover: rgb(148 163 184);
 }
 
 * {
@@ -73,79 +75,69 @@
 body {
   background-color: rgb(var(--color-dark-900));
   color: rgb(var(--color-dark-100));
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ============================================================
-   LIGHT MODE: Override text-white and related utilities
-   In dark mode, text-white is white (#fff).
-   In light mode, text-white becomes dark navy for readability.
+   LIGHT MODE: text-white override
+   
+   In dark mode, text-white = #fff (readable on dark backgrounds).
+   In light mode, text-white must become dark text for readability.
+   
+   EXCEPTIONS: elements on colored/gradient backgrounds keep real white.
    ============================================================ */
 
 [data-theme="light"] .text-white {
-  color: rgb(var(--color-dark-300)) !important;
+  color: rgb(var(--color-dark-100)) !important;
 }
 
-[data-theme="light"] .bg-white {
-  background-color: rgb(255 255 255) !important;
-}
-
-[data-theme="light"] .placeholder-dark-400::placeholder {
-  color: rgb(var(--color-dark-400));
-}
-
-/* Fix gradient text in light mode */
-[data-theme="light"] .bg-gradient-to-br.from-primary-500 {
-  /* Keep gradient buttons looking right */
-}
-
-/* Modal overlays should still darken in light mode */
-[data-theme="light"] .bg-black\/50,
-[data-theme="light"] .bg-black\/60 {
-  background-color: rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Fix status badge text in light mode - keep accent colors visible */
-[data-theme="light"] .text-accent-green,
-[data-theme="light"] .text-accent-cyan,
-[data-theme="light"] .text-accent-orange,
-[data-theme="light"] .text-accent-pink,
-[data-theme="light"] .text-accent-purple,
-[data-theme="light"] .text-accent-blue {
-  /* These should remain their accent colors in light mode */
-}
-
-/* Fix primary button text - should stay white on blue gradient */
-[data-theme="light"] .btn-primary .text-white,
-[data-theme="light"] .btn-primary,
+/* Keep white text on colored backgrounds */
+[data-theme="light"] .bg-gradient-to-br .text-white,
+[data-theme="light"] .bg-gradient-to-r .text-white,
 [data-theme="light"] .bg-gradient-button .text-white,
+[data-theme="light"] [class*="from-primary"] .text-white,
 [data-theme="light"] .bg-primary-500 .text-white,
 [data-theme="light"] .bg-primary-600 .text-white,
 [data-theme="light"] .bg-green-500 .text-white,
 [data-theme="light"] .bg-green-600 .text-white,
 [data-theme="light"] .bg-red-500 .text-white,
-[data-theme="light"] .bg-red-600 .text-white {
+[data-theme="light"] .bg-red-600 .text-white,
+[data-theme="light"] .bg-accent-green .text-white,
+[data-theme="light"] .bg-accent-cyan .text-white {
   color: #ffffff !important;
 }
 
-/* Buttons with colored backgrounds should keep white text */
-[data-theme="light"] button[class*="bg-primary-5"] .text-white,
-[data-theme="light"] button[class*="bg-primary-5"],
-[data-theme="light"] button[class*="bg-green-5"],
-[data-theme="light"] button[class*="bg-red-5"] {
-  color: inherit;
-}
-[data-theme="light"] .bg-primary-500,
-[data-theme="light"] .bg-primary-600,
-[data-theme="light"] .bg-green-500,
-[data-theme="light"] .bg-green-600 {
-  color: #ffffff;
+/* Elements that ARE the gradient/colored bg and have text-white class directly */
+[data-theme="light"] .bg-gradient-to-br.text-white,
+[data-theme="light"] [class*="from-primary-500"][class*="to-"].text-white {
+  color: #ffffff !important;
 }
 
-/* User avatar gradient text stays white */
-[data-theme="light"] .bg-gradient-to-br .text-white,
-[data-theme="light"] [class*="from-primary-500"][class*="to-"] .text-white {
+/* Avatar initials inside gradient containers */
+[data-theme="light"] [class*="bg-gradient-to-br"] > .text-white,
+[data-theme="light"] [class*="from-primary-500"] > .text-white {
   color: #ffffff !important;
+}
+
+/* btn-primary text always white */
+[data-theme="light"] .btn-primary {
+  color: #ffffff !important;
+}
+
+/* Modal overlays */
+[data-theme="light"] .bg-black\/50,
+[data-theme="light"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Give cards a visible border in light mode */
+[data-theme="light"] .card {
+  border-color: rgb(226 232 240) !important;
+}
+
+/* Fix the sidebar active state - keep it readable */
+[data-theme="light"] .bg-primary-500\/15 {
+  background-color: rgba(59, 130, 246, 0.08) !important;
 }
 
 /* ============================================================
@@ -225,6 +217,15 @@ input[type="range"]::-webkit-slider-thumb {
   animation: waveform 0.5s ease-in-out infinite;
 }
 
+/* Reduce glow effects in light mode */
+[data-theme="light"] .animate-pulse-glow {
+  animation: none;
+}
+
+[data-theme="light"] .shadow-glow {
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2) !important;
+}
+
 /* ============================================================
    Utility Layer
    ============================================================ */
@@ -239,7 +240,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* ============================================================
-   Component Layer - theme-aware component classes
+   Component Layer - theme-aware
    ============================================================ */
 @layer components {
   .card {
@@ -264,9 +265,25 @@ input[type="range"]::-webkit-slider-thumb {
   
   .input-dark {
     @apply w-full px-4 py-3 bg-dark-700/50 border border-dark-600 rounded-xl 
-           placeholder-dark-400 
+           text-dark-50 placeholder-dark-400 
            focus:outline-none focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20
            transition-all duration-200;
-    color: rgb(var(--color-text-white));
   }
+}
+
+/* Light mode: increase card opacity for solid white */
+[data-theme="light"] .card {
+  background-color: rgb(255 255 255) !important;
+  backdrop-filter: none;
+}
+
+/* Light mode: make input backgrounds visible */
+[data-theme="light"] .input-dark {
+  background-color: rgb(248 250 252) !important;
+  border-color: rgb(203 213 225) !important;
+  color: rgb(15 23 42) !important;
+}
+
+[data-theme="light"] .input-dark::placeholder {
+  color: rgb(148 163 184) !important;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode } from 'react';
 
 type Theme = 'dark' | 'light';
 
@@ -18,26 +18,42 @@ const ThemeContext = createContext<ThemeContextType>({
 
 const STORAGE_KEY = 'homecare-theme';
 
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'dark';
+  
+  // First check data-theme attribute (set by inline script)
+  const attr = document.documentElement.getAttribute('data-theme');
+  if (attr === 'light' || attr === 'dark') return attr;
+  
+  // Then check localStorage
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+  } catch {
+    // ignore
+  }
+  
+  return 'dark';
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
+  const themeRef = useRef<Theme>('dark');
 
-  // On mount, read persisted theme (the inline script already set data-theme,
-  // so this just syncs React state)
+  // On mount, sync React state with what the inline script already applied
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-      if (stored === 'light' || stored === 'dark') {
-        setThemeState(stored);
-      }
-    } catch {
-      // localStorage unavailable
-    }
+    const initial = getInitialTheme();
+    themeRef.current = initial;
+    setThemeState(initial);
+    // Ensure DOM is in sync
+    document.documentElement.setAttribute('data-theme', initial);
     setMounted(true);
   }, []);
 
   // Apply theme to DOM and persist
   const applyTheme = useCallback((newTheme: Theme) => {
+    themeRef.current = newTheme;
     setThemeState(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
     try {
@@ -47,16 +63,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Use ref to avoid stale closure
   const toggleTheme = useCallback(() => {
-    applyTheme(theme === 'dark' ? 'light' : 'dark');
-  }, [theme, applyTheme]);
+    const current = themeRef.current;
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+  }, [applyTheme]);
 
   const setTheme = useCallback((newTheme: Theme) => {
     applyTheme(newTheme);
   }, [applyTheme]);
 
   // Don't render children until mounted to avoid hydration mismatch
-  // (The inline script handles the initial theme, so there's no flash)
   if (!mounted) {
     return null;
   }
