@@ -68,10 +68,15 @@ export default function PlatformUsersPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
-        setUsers(await response.json());
+        const data = await response.json();
+        console.log('[Admin Users] Fetched users:', data?.length);
+        setUsers(data || []);
+      } else {
+        const errorText = await response.text();
+        console.error('[Admin Users] API error:', response.status, errorText);
       }
     } catch (err) {
-      console.error('Failed to fetch users:', err);
+      console.error('[Admin Users] Failed to fetch users:', err);
     } finally {
       setLoading(false);
     }

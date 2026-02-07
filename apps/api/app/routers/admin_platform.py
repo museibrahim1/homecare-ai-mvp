@@ -105,11 +105,11 @@ class PlatformUserCreate(BaseModel):
 class PlatformUserResponse(BaseModel):
     id: UUID
     email: str
-    full_name: str
-    role: str
-    is_active: bool
-    last_login: Optional[datetime]
-    created_at: datetime
+    full_name: Optional[str] = "Unknown"
+    role: str = "user"
+    is_active: bool = True
+    last_login: Optional[datetime] = None
+    created_at: Optional[datetime] = None
 
 
 class TicketSummary(BaseModel):
@@ -549,18 +549,23 @@ async def list_platform_users(
     """List all users on the platform."""
     users = db.query(User).order_by(desc(User.created_at)).all()
     
-    return [
-        PlatformUserResponse(
-            id=u.id,
-            email=u.email,
-            full_name=u.full_name,
-            role=u.role.value if hasattr(u.role, 'value') else (u.role or "user"),
-            is_active=u.is_active,
-            last_login=u.last_login,
-            created_at=u.created_at,
-        )
-        for u in users
-    ]
+    result = []
+    for u in users:
+        try:
+            result.append(PlatformUserResponse(
+                id=u.id,
+                email=u.email or "unknown",
+                full_name=u.full_name or "Unknown",
+                role=u.role.value if hasattr(u.role, 'value') else (u.role or "user"),
+                is_active=u.is_active if u.is_active is not None else True,
+                last_login=u.last_login,
+                created_at=u.created_at,
+            ))
+        except Exception as e:
+            logger.error(f"Error serializing user {u.id}: {e}")
+            continue
+    
+    return result
 
 
 @router.post("/users", response_model=PlatformUserResponse)
