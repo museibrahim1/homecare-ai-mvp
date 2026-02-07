@@ -106,7 +106,7 @@ class Business(Base, TimestampMixin):
     subscription = relationship("Subscription", back_populates="business", uselist=False)
     
     def __repr__(self):
-        return f"<Business {self.name} ({self.verification_status.value})>"
+        return f"<Business {self.name} ({self.verification_status})>"
 
 
 class BusinessDocument(Base, TimestampMixin):
@@ -140,7 +140,7 @@ class BusinessDocument(Base, TimestampMixin):
     business = relationship("Business", back_populates="documents")
     
     def __repr__(self):
-        return f"<BusinessDocument {self.document_type.value} for {self.business_id}>"
+        return f"<BusinessDocument {self.document_type} for {self.business_id}>"
 
 
 class BusinessUser(Base, TimestampMixin):
@@ -183,7 +183,7 @@ class BusinessUser(Base, TimestampMixin):
     business = relationship("Business", back_populates="users")
     
     def __repr__(self):
-        return f"<BusinessUser {self.email} ({self.role.value})>"
+        return f"<BusinessUser {self.email} ({self.role})>"
     
     @property
     def is_admin(self):

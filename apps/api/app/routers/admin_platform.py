@@ -248,7 +248,7 @@ async def get_business_analytics(
         result.append(BusinessAnalytics(
             id=b.id,
             name=b.name,
-            status=b.verification_status.value,
+            status=b.verification_status.value if hasattr(b.verification_status, 'value') else b.verification_status,
             users_count=users_count,
             clients_count=0,  # Omitted for HIPAA - we track at aggregate level only
             visits_count=0,   # Omitted for HIPAA
@@ -432,7 +432,7 @@ async def get_compliance_alerts(
             business_id=doc.business_id,
             business_name=business.name if business else "Unknown",
             alert_type="document_expiring",
-            document_type=doc.document_type.value,
+            document_type=doc.document_type.value if hasattr(doc.document_type, 'value') else doc.document_type,
             expiration_date=datetime.combine(doc.expiration_date, datetime.min.time()) if doc.expiration_date else None,
             days_until_expiry=days_until,
             severity=severity,
@@ -554,7 +554,7 @@ async def list_platform_users(
             id=u.id,
             email=u.email,
             full_name=u.full_name,
-            role=u.role.value if u.role else "user",
+            role=u.role.value if hasattr(u.role, 'value') else (u.role or "user"),
             is_active=u.is_active,
             last_login=u.last_login,
             created_at=u.created_at,
@@ -607,7 +607,7 @@ async def create_platform_user(
         id=new_user.id,
         email=new_user.email,
         full_name=new_user.full_name,
-        role=new_user.role.value,
+        role=new_user.role.value if hasattr(new_user.role, 'value') else (new_user.role or "user"),
         is_active=new_user.is_active,
         last_login=new_user.last_login,
         created_at=new_user.created_at,

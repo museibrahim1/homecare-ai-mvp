@@ -153,7 +153,7 @@ async def list_pending_businesses(
             name=b.name,
             email=b.email,
             state_of_incorporation=b.state_of_incorporation,
-            verification_status=VerificationStatusEnum(b.verification_status.value),
+            verification_status=VerificationStatusEnum(b.verification_status.value if hasattr(b.verification_status, 'value') else b.verification_status),
             documents_count=docs_count,
             created_at=b.created_at,
         ))
@@ -183,7 +183,7 @@ async def get_business_detail(
     for d in documents:
         doc_responses.append(DocumentResponse(
             id=d.id,
-            document_type=DocumentTypeEnum(d.document_type.value),
+            document_type=DocumentTypeEnum(d.document_type.value if hasattr(d.document_type, 'value') else d.document_type),
             file_name=d.file_name,
             file_size=d.file_size,
             uploaded_at=d.created_at,
@@ -205,7 +205,7 @@ async def get_business_detail(
             email=owner.email,
             full_name=owner.full_name,
             phone=owner.phone,
-            role=UserRoleEnum(owner.role.value),
+            role=UserRoleEnum(owner.role.value if hasattr(owner.role, 'value') else owner.role),
             is_active=owner.is_active,
             is_owner=owner.is_owner,
             email_verified=owner.email_verified,
@@ -217,7 +217,7 @@ async def get_business_detail(
         id=business.id,
         name=business.name,
         dba_name=business.dba_name,
-        entity_type=EntityTypeEnum(business.entity_type.value),
+        entity_type=EntityTypeEnum(business.entity_type.value if hasattr(business.entity_type, 'value') else business.entity_type),
         state_of_incorporation=business.state_of_incorporation,
         registration_number=business.registration_number,
         address=business.address,
@@ -227,7 +227,7 @@ async def get_business_detail(
         phone=business.phone,
         email=business.email,
         website=business.website,
-        verification_status=VerificationStatusEnum(business.verification_status.value),
+        verification_status=VerificationStatusEnum(business.verification_status.value if hasattr(business.verification_status, 'value') else business.verification_status),
         sos_verification_data=business.sos_verification_data,
         sos_verified_at=business.sos_verified_at,
         documents=doc_responses,
@@ -311,7 +311,7 @@ async def approve_business(
     
     return AdminApprovalResponse(
         business_id=business.id,
-        verification_status=VerificationStatusEnum(business.verification_status.value),
+        verification_status=VerificationStatusEnum(business.verification_status.value if hasattr(business.verification_status, 'value') else business.verification_status),
         message=message,
     )
 
@@ -338,7 +338,7 @@ async def suspend_business(
     
     return AdminApprovalResponse(
         business_id=business.id,
-        verification_status=VerificationStatusEnum(business.verification_status.value),
+        verification_status=VerificationStatusEnum(business.verification_status.value if hasattr(business.verification_status, 'value') else business.verification_status),
         message="Business suspended",
     )
 
@@ -365,7 +365,7 @@ async def reactivate_business(
     
     return AdminApprovalResponse(
         business_id=business.id,
-        verification_status=VerificationStatusEnum(business.verification_status.value),
+        verification_status=VerificationStatusEnum(business.verification_status.value if hasattr(business.verification_status, 'value') else business.verification_status),
         message="Business reactivated",
     )
 
