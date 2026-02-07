@@ -76,31 +76,44 @@ body {
 
 /* ============================================================
    LIGHT MODE: text-white becomes dark for readability.
-   Exceptions: colored/gradient backgrounds keep real white.
+   
+   The GLOBAL rule turns all text-white dark.
+   Then SPECIFIC exceptions restore #fff only where a truly
+   opaque colored background exists (gradients with from-primary,
+   from-purple, etc. — NOT from-dark-* which become light).
    ============================================================ */
 
+/* Global: make text-white readable on light backgrounds */
 [data-theme="light"] .text-white {
   color: rgb(15 23 42) !important;
 }
 
-/* Keep white text on gradient backgrounds */
-[data-theme="light"] .bg-gradient-to-br .text-white,
-[data-theme="light"] .bg-gradient-to-r .text-white,
-[data-theme="light"] .bg-gradient-to-t .text-white,
-[data-theme="light"] .bg-gradient-to-l .text-white,
-[data-theme="light"] .bg-gradient-button .text-white {
+/* ---- EXCEPTIONS: keep white text on OPAQUE colored backgrounds only ----
+   These selectors target containers with from-primary, from-purple, etc.
+   at full opacity (not /10 or /20 variants which stay nearly transparent).
+   We use [class*="from-primary-5"] to match from-primary-500, from-primary-600
+   but NOT from-primary-500/10 because the DOM class has the slash escaped. */
+
+/* Small icon/avatar containers with colored gradients */
+[data-theme="light"] [class*="from-primary-5"][class*="to-"] > .text-white,
+[data-theme="light"] [class*="from-primary-5"][class*="to-"] > span,
+[data-theme="light"] [class*="from-primary-5"][class*="to-"] .text-white {
   color: #ffffff !important;
 }
 
-/* Elements that ARE the gradient and also have text-white */
-[data-theme="light"] .bg-gradient-to-br.text-white,
-[data-theme="light"] .bg-gradient-to-r.text-white,
-[data-theme="light"] [class*="from-primary-500"][class*="to-"].text-white,
-[data-theme="light"] [class*="from-purple-"][class*="to-"].text-white {
+/* Purple/pink gradient buttons */
+[data-theme="light"] [class*="from-purple-5"][class*="to-"] .text-white,
+[data-theme="light"] [class*="from-purple-6"][class*="to-"] .text-white {
   color: #ffffff !important;
 }
 
-/* Keep white text on solid colored backgrounds */
+/* bg-gradient-button (the named gradient for btn-primary) */
+[data-theme="light"] .bg-gradient-button .text-white,
+[data-theme="light"] .bg-gradient-button.text-white {
+  color: #ffffff !important;
+}
+
+/* Solid colored backgrounds keep white text */
 [data-theme="light"] .bg-primary-500 .text-white,
 [data-theme="light"] .bg-primary-600 .text-white,
 [data-theme="light"] .bg-primary-500.text-white,
@@ -122,20 +135,12 @@ body {
   color: #ffffff !important;
 }
 
-/* Avatar/icon gradient containers - direct children */
-[data-theme="light"] [class*="bg-gradient-to-br"] > .text-white,
-[data-theme="light"] [class*="bg-gradient-to-br"] > span.text-white,
-[data-theme="light"] [class*="from-primary-500"] > .text-white,
-[data-theme="light"] [class*="from-primary-500"] > span {
-  color: #ffffff !important;
-}
-
 /* btn-primary text always white */
 [data-theme="light"] .btn-primary {
   color: #ffffff !important;
 }
 
-/* Modal/dialog overlays - use attribute selectors for classes with slashes */
+/* Modal/dialog overlays */
 [data-theme="light"] [class*="bg-black"] {
   background-color: rgba(0, 0, 0, 0.3) !important;
 }
@@ -149,11 +154,6 @@ body {
   background-color: rgb(255 255 255) !important;
   backdrop-filter: none;
   border-color: rgb(210 218 230) !important;
-}
-
-/* Sidebar active item - use attribute selector */
-[data-theme="light"] [class*="bg-primary-500"] {
-  /* Keep as-is, just the tinted version needs fixing */
 }
 
 /* Buttons using bg-dark-700: make them visually distinct */
@@ -197,31 +197,46 @@ body {
   color: rgb(15 23 42);
 }
 
-/* Subtle background elements handled via CSS variable values.
-   Since dark-700 = 226 232 240 and dark-800 = 255 255 255 in light mode,
-   their translucent versions (30%, 50%) automatically become visible light grays.
-   No extra overrides needed. */
-
 /* ============================================================
-   LIGHT MODE: Status & Accent Colors
+   LIGHT MODE: Status & Accent Colors — darken for contrast
    ============================================================ */
 
 [data-theme="light"] .text-green-400,
 [data-theme="light"] .text-green-500 {
-  color: rgb(16 185 129) !important;
+  color: rgb(5 150 105) !important;
 }
 
 [data-theme="light"] .text-red-400,
 [data-theme="light"] .text-red-500 {
-  color: rgb(239 68 68) !important;
+  color: rgb(220 38 38) !important;
 }
 
 [data-theme="light"] .text-amber-400 {
-  color: rgb(217 119 6) !important;
+  color: rgb(180 83 9) !important;
 }
 
 [data-theme="light"] .text-primary-400 {
-  color: rgb(59 130 246) !important;
+  color: rgb(37 99 235) !important;
+}
+
+[data-theme="light"] .text-purple-400,
+[data-theme="light"] .text-purple-500 {
+  color: rgb(124 58 237) !important;
+}
+
+[data-theme="light"] .text-pink-400,
+[data-theme="light"] .text-pink-500 {
+  color: rgb(219 39 119) !important;
+}
+
+[data-theme="light"] .text-cyan-400,
+[data-theme="light"] .text-accent-cyan {
+  color: rgb(8 145 178) !important;
+}
+
+[data-theme="light"] .text-orange-400,
+[data-theme="light"] .text-accent-orange {
+  color: rgb(194 65 12) !important;
 }
 
 /* ============================================================
@@ -241,6 +256,17 @@ body {
 /* Border color for dividers */
 [data-theme="light"] [class*="border-dark-700"] {
   border-color: rgb(226 232 240) !important;
+}
+
+/* ============================================================
+   LIGHT MODE: Login page and landing page fixes
+   Gradient panels using from-dark-* become light in light mode.
+   Give them a subtle colored background instead.
+   ============================================================ */
+
+[data-theme="light"] [class*="from-dark-800"][class*="to-dark-950"],
+[data-theme="light"] [class*="from-dark-800"][class*="via-dark-900"] {
+  background: linear-gradient(135deg, rgb(240 245 255), rgb(230 238 250)) !important;
 }
 
 /* ============================================================
