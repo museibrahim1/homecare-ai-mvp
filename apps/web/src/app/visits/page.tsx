@@ -25,6 +25,7 @@ import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Visit } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
+import UpgradeModal from '@/components/UpgradeModal';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -86,6 +87,15 @@ export default function VisitsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [creatingDemo, setCreatingDemo] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [usage, setUsage] = useState<{
+    total_assessments: number;
+    max_allowed: number;
+    can_create: boolean;
+    plan_name: string;
+    has_paid_plan: boolean;
+    upgrade_required: boolean;
+  } | null>(null);
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
@@ -97,8 +107,18 @@ export default function VisitsPage() {
   useEffect(() => {
     if (token) {
       loadVisits();
+      loadUsage();
     }
   }, [token, statusFilter]);
+
+  const loadUsage = async () => {
+    try {
+      const data = await api.getUsage(token!);
+      setUsage(data);
+    } catch (err) {
+      console.error('Failed to load usage:', err);
+    }
+  };
 
   const loadVisits = async () => {
     try {
@@ -409,7 +429,13 @@ export default function VisitsPage() {
               
               {/* Demo Flow Button */}
               <button 
-                onClick={createSampleAssessment}
+                onClick={() => {
+                  if (usage && usage.upgrade_required) {
+                    setShowUpgradeModal(true);
+                  } else {
+                    createSampleAssessment();
+                  }
+                }}
                 disabled={creatingDemo}
                 className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -427,7 +453,13 @@ export default function VisitsPage() {
               </button>
               
               <button 
-                onClick={() => router.push('/visits/new')}
+                onClick={() => {
+                  if (usage && usage.upgrade_required) {
+                    setShowUpgradeModal(true);
+                  } else {
+                    router.push('/visits/new');
+                  }
+                }}
                 className="btn-primary flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
@@ -435,6 +467,57 @@ export default function VisitsPage() {
               </button>
             </div>
           </div>
+
+          {/* Free Tier Usage Banner */}
+          {usage && !usage.has_paid_plan && (
+            <div className={`mb-6 p-4 rounded-xl border flex items-center justify-between ${
+              usage.upgrade_required 
+                ? 'bg-amber-500/10 border-amber-500/30' 
+                : 'bg-dark-700 border-dark-600'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${usage.upgrade_required ? 'bg-amber-500/20' : 'bg-primary-500/20'}`}>
+                  <Sparkles className={`w-5 h-5 ${usage.upgrade_required ? 'text-amber-400' : 'text-primary-400'}`} />
+                </div>
+                <div>
+                  <p className={`font-medium ${usage.upgrade_required ? 'text-amber-400' : 'text-white'}`}>
+                    {usage.upgrade_required 
+                      ? 'Free Plan Limit Reached' 
+                      : `Free Plan — ${usage.total_assessments}/${usage.max_allowed} assessments used`
+                    }
+                  </p>
+                  <p className="text-dark-400 text-sm">
+                    {usage.upgrade_required 
+                      ? 'Upgrade to a paid plan to create more assessments and unlock all features.'
+                      : `You have ${usage.max_allowed - usage.total_assessments} free assessment${usage.max_allowed - usage.total_assessments === 1 ? '' : 's'} remaining.`
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1">
+                  {Array.from({ length: usage.max_allowed }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-3 h-3 rounded-full ${
+                        i < usage.total_assessments 
+                          ? usage.upgrade_required ? 'bg-amber-400' : 'bg-primary-400' 
+                          : 'bg-dark-600'
+                      }`}
+                    />
+                  ))}
+                </div>
+                {usage.upgrade_required && (
+                  <button
+                    onClick={() => setShowUpgradeModal(true)}
+                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg text-sm font-medium hover:opacity-90 transition whitespace-nowrap"
+                  >
+                    Upgrade Now
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Stats Cards */}
           <div className="grid grid-cols-4 gap-4 mb-8">
@@ -611,6 +694,14 @@ export default function VisitsPage() {
           )}
         </div>
       </main>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        usedCount={usage?.total_assessments || 0}
+        maxCount={usage?.max_allowed || 2}
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import AudioUploader from '@/components/AudioUploader';
 import TranscriptImporter from '@/components/TranscriptImporter';
+import UpgradeModal from '@/components/UpgradeModal';
 import { format } from 'date-fns';
 
 interface Client {
@@ -50,6 +51,10 @@ export default function NewVisitPage() {
   
   // Created visit
   const [createdVisit, setCreatedVisit] = useState<any>(null);
+  
+  // Usage / upgrade
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [usage, setUsage] = useState<any>(null);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -60,6 +65,13 @@ export default function NewVisitPage() {
   useEffect(() => {
     if (token) {
       loadClients();
+      // Check usage limits
+      api.getUsage(token).then(data => {
+        setUsage(data);
+        if (data.upgrade_required) {
+          setShowUpgradeModal(true);
+        }
+      }).catch(err => console.error('Failed to check usage:', err));
     }
   }, [token]);
 
@@ -96,7 +108,12 @@ export default function NewVisitPage() {
       setCreatedVisit(visit);
       setStep('source');
     } catch (err: any) {
-      setError(err.message || 'Failed to create visit');
+      const msg = err.message || 'Failed to create visit';
+      if (msg.includes('Free plan limit') || msg.includes('upgrade')) {
+        setShowUpgradeModal(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -421,6 +438,19 @@ export default function NewVisitPage() {
           )}
         </div>
       </main>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => {
+          setShowUpgradeModal(false);
+          if (usage?.upgrade_required) {
+            router.push('/visits');
+          }
+        }}
+        usedCount={usage?.total_assessments || 0}
+        maxCount={usage?.max_allowed || 2}
+      />
     </div>
   );
 }

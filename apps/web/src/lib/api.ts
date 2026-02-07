@@ -71,6 +71,20 @@ class ApiClient {
     return this.request<any>('/auth/me', {}, token);
   }
 
+  // Usage / Subscription
+  async getUsage(token: string) {
+    return this.request<{
+      completed_assessments: number;
+      total_assessments: number;
+      max_allowed: number;
+      can_create: boolean;
+      plan_name: string;
+      plan_tier: string;
+      has_paid_plan: boolean;
+      upgrade_required: boolean;
+    }>('/visits/usage', {}, token);
+  }
+
   // Visits
   async getVisits(token: string, params?: { status?: string; page?: number }) {
     const query = new URLSearchParams();

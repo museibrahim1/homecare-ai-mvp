@@ -1,10 +1,11 @@
+import logging
 from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.deps import get_db, get_current_user
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.models.visit import Visit
 from app.models.client import Client
 from app.models.transcript_segment import TranscriptSegment
@@ -14,9 +15,88 @@ from app.models.contract import Contract
 from app.models.audio_asset import AudioAsset
 from app.models.diarization_turn import DiarizationTurn
 from app.models.call import Call
+from app.models.subscription import Subscription, SubscriptionStatus
+from app.models.business import BusinessUser
 from app.schemas.visit import VisitCreate, VisitUpdate, VisitResponse, VisitListResponse
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+# Free tier limit
+FREE_ASSESSMENT_LIMIT = 2
+
+
+def _get_user_subscription(db: Session, user: User):
+    """Check if user has an active paid subscription."""
+    # Platform admins are unlimited
+    role = user.role.value if hasattr(user.role, 'value') else (user.role or "user")
+    if role == "admin" and hasattr(user, 'email') and user.email.endswith("@palmtai.com"):
+        return {"has_paid_plan": True, "plan_name": "Platform Admin", "tier": "enterprise"}
+    
+    # Check if user belongs to a business with an active subscription
+    business_user = db.query(BusinessUser).filter(
+        BusinessUser.email == user.email
+    ).first()
+    
+    if business_user:
+        sub = db.query(Subscription).filter(
+            Subscription.business_id == business_user.business_id,
+            Subscription.status.in_([SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]),
+        ).first()
+        if sub and sub.plan:
+            plan_tier = sub.plan.tier.value if hasattr(sub.plan.tier, 'value') else str(sub.plan.tier)
+            if plan_tier != "free":
+                return {
+                    "has_paid_plan": True,
+                    "plan_name": sub.plan.name,
+                    "tier": plan_tier,
+                    "max_visits": sub.plan.max_visits_per_month,
+                }
+    
+    return {"has_paid_plan": False, "plan_name": "Free", "tier": "free"}
+
+
+@router.get("/usage")
+async def get_usage(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get current user's assessment usage and plan limits."""
+    # Count completed assessments (any status beyond scheduled)
+    completed_count = db.query(Visit).join(
+        Client, Visit.client_id == Client.id
+    ).filter(
+        Client.created_by == current_user.id,
+        Visit.status.in_(['pending_review', 'approved', 'exported', 'in_progress']),
+    ).count()
+    
+    # Also count total visits created by this user
+    total_visits = db.query(Visit).join(
+        Client, Visit.client_id == Client.id
+    ).filter(
+        Client.created_by == current_user.id,
+    ).count()
+    
+    sub_info = _get_user_subscription(db, current_user)
+    
+    if sub_info["has_paid_plan"]:
+        max_allowed = sub_info.get("max_visits", 999)
+        can_create = True
+    else:
+        max_allowed = FREE_ASSESSMENT_LIMIT
+        can_create = total_visits < FREE_ASSESSMENT_LIMIT
+    
+    return {
+        "completed_assessments": completed_count,
+        "total_assessments": total_visits,
+        "max_allowed": max_allowed,
+        "can_create": can_create,
+        "plan_name": sub_info["plan_name"],
+        "plan_tier": sub_info["tier"],
+        "has_paid_plan": sub_info["has_paid_plan"],
+        "upgrade_required": not can_create,
+    }
 
 
 @router.get("", response_model=VisitListResponse)
@@ -69,6 +149,20 @@ async def create_visit(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new visit (data isolation enforced)."""
+    # Check free tier limit
+    sub_info = _get_user_subscription(db, current_user)
+    if not sub_info["has_paid_plan"]:
+        total_visits = db.query(Visit).join(
+            Client, Visit.client_id == Client.id
+        ).filter(
+            Client.created_by == current_user.id,
+        ).count()
+        if total_visits >= FREE_ASSESSMENT_LIMIT:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail="Free plan limit reached. You've used your 2 free assessments. Please upgrade to continue.",
+            )
+    
     # Verify client exists AND belongs to current user
     client = db.query(Client).filter(
         Client.id == visit_in.client_id,
