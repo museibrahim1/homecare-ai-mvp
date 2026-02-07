@@ -88,22 +88,22 @@ body {
   color: rgb(15 23 42) !important;
 }
 
-/* ---- EXCEPTIONS: keep white text on OPAQUE colored backgrounds only ----
-   These selectors target containers with from-primary, from-purple, etc.
-   at full opacity (not /10 or /20 variants which stay nearly transparent).
-   We use [class*="from-primary-5"] to match from-primary-500, from-primary-600
-   but NOT from-primary-500/10 because the DOM class has the slash escaped. */
+/* ---- EXCEPTIONS: keep white text ONLY on small opaque colored elements ----
+   Use DIRECT CHILD selectors (>) so deep descendants (headings in
+   semi-transparent CTA panels, auto-fill banners) are NOT affected.
+   Elements that ARE the gradient (buttons with .text-white on same element)
+   also keep white. */
 
-/* Small icon/avatar containers with colored gradients */
+/* Small icon/avatar containers: only DIRECT children stay white */
 [data-theme="light"] [class*="from-primary-5"][class*="to-"] > .text-white,
-[data-theme="light"] [class*="from-primary-5"][class*="to-"] > span,
-[data-theme="light"] [class*="from-primary-5"][class*="to-"] .text-white {
+[data-theme="light"] [class*="from-primary-5"][class*="to-"] > span {
   color: #ffffff !important;
 }
 
-/* Purple/pink gradient buttons */
-[data-theme="light"] [class*="from-purple-5"][class*="to-"] .text-white,
-[data-theme="light"] [class*="from-purple-6"][class*="to-"] .text-white {
+/* Gradient BUTTONS that have text-white on the element itself */
+[data-theme="light"] [class*="from-purple-5"][class*="to-"].text-white,
+[data-theme="light"] [class*="from-purple-6"][class*="to-"].text-white,
+[data-theme="light"] [class*="from-primary-5"][class*="to-"].text-white {
   color: #ffffff !important;
 }
 
@@ -156,15 +156,16 @@ body {
   border-color: rgb(210 218 230) !important;
 }
 
-/* Boost semi-transparent primary/accent gradient backgrounds.
+/* Boost semi-transparent gradient backgrounds.
    In dark mode, from-primary-500/10 creates a nice subtle tint.
-   In light mode, 10% opacity is invisible — bump to visible tints. */
+   In light mode, 10% opacity is invisible — boost to visible tints. */
 [data-theme="light"] [class*="from-primary-500"][class*="to-purple"] {
   background: linear-gradient(to right, rgba(59,130,246,0.12), rgba(139,92,246,0.12)) !important;
 }
 
-[data-theme="light"] [class*="bg-green-500"] {
-  /* Keep green tints visible */
+[data-theme="light"] [class*="from-primary-500"][class*="to-accent-cyan"],
+[data-theme="light"] [class*="from-primary-500"][class*="to-cyan"] {
+  background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(6,182,212,0.1)) !important;
 }
 
 /* Checklist items on light bg need slight contrast */
@@ -175,6 +176,24 @@ body {
 
 [data-theme="light"] [class*="from-primary-500"][class*="to-purple"] [class*="bg-dark-800"] {
   background-color: rgb(255 255 255) !important;
+}
+
+/* Inactive tab buttons — give them a visible border + bg in light mode */
+[data-theme="light"] button[class*="text-dark-400"][class*="hover"],
+[data-theme="light"] button[class*="text-dark-300"][class*="hover"] {
+  border: 1px solid rgb(210 218 230) !important;
+  border-radius: 0.5rem;
+}
+
+/* Contact Sales / secondary buttons on landing page — more contrast */
+[data-theme="light"] .btn-secondary {
+  background-color: rgb(226 232 240) !important;
+  border-color: rgb(186 195 211) !important;
+  color: rgb(30 41 59) !important;
+}
+
+[data-theme="light"] .btn-secondary:hover {
+  background-color: rgb(205 213 225) !important;
 }
 
 /* Buttons using bg-dark-700: make them visually distinct */
