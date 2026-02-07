@@ -1,4 +1,4 @@
-# Version: v22 - Improve mobile Document Preview panel
+# Version: v23 - Add dark/light theme switcher
 FROM node:20-alpine AS builder
 
 WORKDIR /app

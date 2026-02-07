@@ -197,12 +197,10 @@ body {
   color: rgb(15 23 42);
 }
 
-/* Subtle background elements (list items, table rows, user info sections) */
-[data-theme="light"] [class*="bg-dark-700"][class*="/30"],
-[data-theme="light"] [class*="bg-dark-700"][class*="/50"],
-[data-theme="light"] [class*="bg-dark-800"][class*="/50"] {
-  background-color: rgb(245 247 250) !important;
-}
+/* Subtle background elements handled via CSS variable values.
+   Since dark-700 = 226 232 240 and dark-800 = 255 255 255 in light mode,
+   their translucent versions (30%, 50%) automatically become visible light grays.
+   No extra overrides needed. */
 
 /* ============================================================
    LIGHT MODE: Status & Accent Colors
