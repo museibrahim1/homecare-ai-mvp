@@ -653,9 +653,17 @@ export default function ClientsPage() {
 
   // Computed pipeline groups for table view
   const intakeClients = getPipelineClients(['intake', 'pending']);
+  const assessmentClients = getPipelineClients(['assessment']);
   const proposalClients = getPipelineClients(['proposal', 'pending_review']);
   const assignedClients = getPipelineClients(['active', 'assigned']);
   const followUpClients = getPipelineClients(['follow_up', 'review', 'discharged', 'inactive']);
+  
+  // Catch-all for clients with unexpected/missing status not covered above
+  const allGroupedStatuses = ['intake', 'pending', 'assessment', 'proposal', 'pending_review', 'active', 'assigned', 'follow_up', 'review', 'discharged', 'inactive'];
+  const ungroupedClients = filteredClients.filter(c => {
+    const status = c.status || 'active';
+    return !allGroupedStatuses.includes(status);
+  });
 
   // Move a client to a new status
   const handleMoveClient = async (clientId: string, newStatus: string) => {
@@ -887,6 +895,38 @@ export default function ClientsPage() {
                 </div>
               )}
 
+              {/* Assessment Section */}
+              {assessmentClients.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-lg font-semibold text-purple-400">In Assessment</h2>
+                    <span className="text-sm text-dark-400">({assessmentClients.length})</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                    <div className="w-10" />
+                    <div className="flex-1">Client</div>
+                    <div className="w-28">Visit status</div>
+                    <div className="w-32">Phone</div>
+                    <div className="w-36">Care specialty</div>
+                    <div className="w-8" />
+                    <div className="w-4" />
+                  </div>
+
+                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                    {assessmentClients.map((client) => (
+                      <ClientRow 
+                        key={client.id} 
+                        client={client} 
+                        onClick={() => handleEditClient(client)}
+                        onDelete={(e) => handleInlineDelete(e, client.id)}
+                        isConfirmingDelete={deleteConfirm === client.id}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Proposal Sent Section */}
               {proposalClients.length > 0 && (
                 <div>
@@ -973,6 +1013,38 @@ export default function ClientsPage() {
 
                   <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
                     {followUpClients.map((client) => (
+                      <ClientRow 
+                        key={client.id} 
+                        client={client} 
+                        onClick={() => handleEditClient(client)}
+                        onDelete={(e) => handleInlineDelete(e, client.id)}
+                        isConfirmingDelete={deleteConfirm === client.id}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Ungrouped Clients (catch-all for unexpected statuses) */}
+              {ungroupedClients.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-lg font-semibold text-dark-300">Other Clients</h2>
+                    <span className="text-sm text-dark-400">({ungroupedClients.length})</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                    <div className="w-10" />
+                    <div className="flex-1">Client</div>
+                    <div className="w-28">Visit status</div>
+                    <div className="w-32">Phone</div>
+                    <div className="w-36">Care specialty</div>
+                    <div className="w-8" />
+                    <div className="w-4" />
+                  </div>
+
+                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                    {ungroupedClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
                         client={client} 
