@@ -1,13 +1,19 @@
+import logging
+from datetime import date
 from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.client import Client
+from app.models.contract import Contract
 from app.schemas.client import ClientCreate, ClientUpdate, ClientResponse
 from app.services.email import get_email_service
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -126,3 +132,58 @@ async def delete_client(
     
     db.delete(client)
     db.commit()
+
+
+@router.post("/{client_id}/activate-policy")
+async def activate_client_policy(
+    client_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Auto-create a policy for a client who signed their service agreement.
+    
+    Finds the latest contract for this client, marks it as 'active' (signed),
+    and sets the signature date. The contract then appears as an active policy
+    in the Documents page.
+    """
+    client = db.query(Client).filter(
+        Client.id == client_id,
+        Client.created_by == current_user.id
+    ).first()
+    if not client:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Client not found",
+        )
+    
+    # Find the latest contract for this client
+    contract = db.query(Contract).filter(
+        Contract.client_id == client_id
+    ).order_by(desc(Contract.created_at)).first()
+    
+    if not contract:
+        return {
+            "success": False,
+            "message": "No contract found for this client. Generate one through an assessment first.",
+        }
+    
+    # Update contract status to active (signed policy)
+    contract.status = "active"
+    contract.client_signature_date = date.today()
+    contract.agency_signature_date = date.today()
+    
+    # Also update the contract title to reflect it's now a policy
+    if contract.title and "Proposal" in contract.title:
+        contract.title = contract.title.replace("Proposal", "Service Agreement")
+    
+    db.commit()
+    
+    logger.info(f"Policy activated for client {client.full_name} (contract {contract.id})")
+    
+    return {
+        "success": True,
+        "message": f"Service agreement activated for {client.full_name}",
+        "contract_id": str(contract.id),
+        "contract_status": contract.status,
+    }

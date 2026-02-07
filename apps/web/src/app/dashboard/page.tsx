@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Mic, Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle
+  Mic, Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle,
+  FileSignature, UserCheck, UserX, Loader2, FileText
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -11,12 +12,16 @@ import Sidebar from '@/components/Sidebar';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
 import { format } from 'date-fns';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
 export default function DashboardPage() {
   const router = useRouter();
   const { token, isLoading: authLoading } = useAuth();
   const [stats, setStats] = useState({ totalVisits: 0, pendingReview: 0, totalClients: 0, hoursThisWeek: 0 });
   const [recentVisits, setRecentVisits] = useState<any[]>([]);
+  const [proposalClients, setProposalClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingClientId, setUpdatingClientId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -45,9 +50,13 @@ export default function DashboardPage() {
         return created >= weekAgo;
       }).length;
       
+      // Find clients with proposal status
+      const proposalList = clientsData.filter((c: any) => c.status === 'proposal');
+      setProposalClients(proposalList);
+      
       setStats({
         totalVisits: visitsData.total,
-        pendingReview: visitsData.items.filter((v: any) => v.status === 'pending_review').length,
+        pendingReview: proposalList.length,
         totalClients: clientsData.length,
         hoursThisWeek: thisWeekCount,
       });
@@ -56,6 +65,34 @@ export default function DashboardPage() {
       console.error('Failed to load dashboard:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClientAction = async (clientId: string, action: 'active' | 'follow_up') => {
+    if (!token) return;
+    setUpdatingClientId(clientId);
+    try {
+      await api.updateClient(token, clientId, { status: action });
+      
+      // If activating, also trigger auto-policy creation
+      if (action === 'active') {
+        try {
+          await fetch(`${API_BASE}/clients/${clientId}/activate-policy`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        } catch {
+          // Policy creation is best-effort
+        }
+      }
+      
+      // Remove from proposal list
+      setProposalClients(prev => prev.filter(c => c.id !== clientId));
+      setStats(prev => ({ ...prev, pendingReview: prev.pendingReview - 1 }));
+    } catch (err) {
+      console.error(`Failed to update client:`, err);
+    } finally {
+      setUpdatingClientId(null);
     }
   };
 
@@ -108,6 +145,79 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+
+          {/* Proposal Follow-Up Widget */}
+          {proposalClients.length > 0 && (
+            <div className="card p-4 lg:p-6 mb-6 lg:mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                    <FileSignature className="w-5 h-5 text-orange-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Proposal Follow-Up</h2>
+                    <p className="text-dark-400 text-sm">{proposalClients.length} client{proposalClients.length !== 1 ? 's' : ''} awaiting response</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => router.push('/clients')}
+                  className="text-primary-400 text-sm hover:text-primary-300 flex items-center gap-1"
+                >
+                  View All <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {proposalClients.map((client) => (
+                  <div
+                    key={client.id}
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-dark-700/30 rounded-xl border border-dark-700/50"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-orange-400 font-bold text-sm">
+                          {(client.full_name || 'U')[0].toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-white font-medium truncate">{client.full_name}</p>
+                        <p className="text-dark-400 text-sm">Proposal sent {client.updated_at ? format(new Date(client.updated_at), 'MMM d, yyyy') : 'recently'}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="px-2.5 py-1 bg-orange-500/20 text-orange-400 rounded-lg text-xs font-medium">
+                        Awaiting Signature
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleClientAction(client.id, 'active')}
+                        disabled={updatingClientId === client.id}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition disabled:opacity-50"
+                      >
+                        {updatingClientId === client.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <UserCheck className="w-4 h-4" />
+                        )}
+                        Signed & Active
+                      </button>
+                      <button
+                        onClick={() => handleClientAction(client.id, 'follow_up')}
+                        disabled={updatingClientId === client.id}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                      >
+                        <UserX className="w-4 h-4" />
+                        Declined
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Content Grid - stack on mobile, side by side on desktop */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">

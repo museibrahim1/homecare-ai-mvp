@@ -161,7 +161,7 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
                   className={`mt-6 w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition ${
                     plan.popular
                       ? 'bg-gradient-to-r from-primary-500 to-purple-500 text-white hover:opacity-90'
-                      : 'bg-dark-600 text-white hover:bg-dark-500'
+                      : 'bg-primary-500 text-white hover:bg-primary-600'
                   }`}
                 >
                   Get Started

@@ -740,7 +740,7 @@ export default function LandingPage() {
                   className={`block text-center py-3 rounded-xl font-medium transition ${
                     plan.popular 
                       ? 'btn-primary' 
-                      : 'bg-dark-700 text-white hover:bg-dark-600'
+                      : 'bg-primary-500 text-white hover:bg-primary-600'
                   }`}
                 >
                   {plan.price ? 'Get Started' : 'Contact Sales'}
