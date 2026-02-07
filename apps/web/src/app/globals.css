@@ -38,33 +38,29 @@
 }
 
 [data-theme="light"] {
-  /* ---- Light Theme ----
-     Naming is inverted: dark-900 = lightest bg, dark-50 = darkest text.
-     This lets all existing Tailwind classes work without changes. */
+  /* Text colors (dark-50 through dark-300 = dark text for readability) */
+  --color-dark-50:  15 23 42;
+  --color-dark-100: 30 41 59;
+  --color-dark-200: 51 65 85;
+  --color-dark-300: 51 65 85;
   
-  /* Text colors (dark-50 through dark-300 → dark text) */
-  --color-dark-50:  15 23 42;      /* darkest headings */
-  --color-dark-100: 30 41 59;      /* primary text */
-  --color-dark-200: 51 65 85;      /* secondary text */
-  --color-dark-300: 71 85 105;     /* body text */
+  /* Mid-tones (muted text, icons, labels) */
+  --color-dark-400: 100 116 139;
+  --color-dark-500: 120 133 155;
   
-  /* Mid-tones (dark-400, dark-500 → muted text / icons) */
-  --color-dark-400: 100 116 139;   /* muted / placeholder */
-  --color-dark-500: 148 163 184;   /* subtle text, section labels */
+  /* Surface colors (light surfaces, buttons, cards) */
+  --color-dark-600: 186 195 211;
+  --color-dark-700: 226 232 240;
+  --color-dark-800: 255 255 255;
+  --color-dark-900: 245 247 250;
+  --color-dark-950: 237 240 245;
   
-  /* Surface colors (dark-600 through dark-950 → light surfaces) */
-  --color-dark-600: 203 213 225;   /* borders, dividers */
-  --color-dark-700: 241 245 249;   /* hover bg, input bg, subtle surfaces */
-  --color-dark-800: 255 255 255;   /* card bg (white) */
-  --color-dark-900: 248 250 252;   /* page bg (off-white with blue tint) */
-  --color-dark-950: 241 245 249;   /* deeper bg areas */
-  
-  /* Shadows - more visible for depth */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.05);
   
   /* Scrollbar */
   --scrollbar-track: rgb(241 245 249);
-  --scrollbar-thumb: rgb(203 213 225);
+  --scrollbar-thumb: rgb(186 195 211);
   --scrollbar-thumb-hover: rgb(148 163 184);
 }
 
@@ -79,43 +75,58 @@ body {
 }
 
 /* ============================================================
-   LIGHT MODE: text-white override
-   
-   In dark mode, text-white = #fff (readable on dark backgrounds).
-   In light mode, text-white must become dark text for readability.
-   
-   EXCEPTIONS: elements on colored/gradient backgrounds keep real white.
+   LIGHT MODE: text-white becomes dark for readability.
+   Exceptions: colored/gradient backgrounds keep real white.
    ============================================================ */
 
 [data-theme="light"] .text-white {
-  color: rgb(var(--color-dark-100)) !important;
+  color: rgb(15 23 42) !important;
 }
 
-/* Keep white text on colored backgrounds */
+/* Keep white text on gradient backgrounds */
 [data-theme="light"] .bg-gradient-to-br .text-white,
 [data-theme="light"] .bg-gradient-to-r .text-white,
-[data-theme="light"] .bg-gradient-button .text-white,
-[data-theme="light"] [class*="from-primary"] .text-white,
+[data-theme="light"] .bg-gradient-to-t .text-white,
+[data-theme="light"] .bg-gradient-to-l .text-white,
+[data-theme="light"] .bg-gradient-button .text-white {
+  color: #ffffff !important;
+}
+
+/* Elements that ARE the gradient and also have text-white */
+[data-theme="light"] .bg-gradient-to-br.text-white,
+[data-theme="light"] .bg-gradient-to-r.text-white,
+[data-theme="light"] [class*="from-primary-500"][class*="to-"].text-white,
+[data-theme="light"] [class*="from-purple-"][class*="to-"].text-white {
+  color: #ffffff !important;
+}
+
+/* Keep white text on solid colored backgrounds */
 [data-theme="light"] .bg-primary-500 .text-white,
 [data-theme="light"] .bg-primary-600 .text-white,
+[data-theme="light"] .bg-primary-500.text-white,
+[data-theme="light"] .bg-primary-600.text-white,
 [data-theme="light"] .bg-green-500 .text-white,
 [data-theme="light"] .bg-green-600 .text-white,
+[data-theme="light"] .bg-green-500.text-white,
+[data-theme="light"] .bg-green-600.text-white,
 [data-theme="light"] .bg-red-500 .text-white,
 [data-theme="light"] .bg-red-600 .text-white,
+[data-theme="light"] .bg-red-500.text-white,
+[data-theme="light"] .bg-red-600.text-white,
+[data-theme="light"] .bg-blue-500.text-white,
+[data-theme="light"] .bg-blue-600.text-white,
+[data-theme="light"] .bg-purple-500.text-white,
+[data-theme="light"] .bg-purple-600.text-white,
 [data-theme="light"] .bg-accent-green .text-white,
 [data-theme="light"] .bg-accent-cyan .text-white {
   color: #ffffff !important;
 }
 
-/* Elements that ARE the gradient/colored bg and have text-white class directly */
-[data-theme="light"] .bg-gradient-to-br.text-white,
-[data-theme="light"] [class*="from-primary-500"][class*="to-"].text-white {
-  color: #ffffff !important;
-}
-
-/* Avatar initials inside gradient containers */
+/* Avatar/icon gradient containers - direct children */
 [data-theme="light"] [class*="bg-gradient-to-br"] > .text-white,
-[data-theme="light"] [class*="from-primary-500"] > .text-white {
+[data-theme="light"] [class*="bg-gradient-to-br"] > span.text-white,
+[data-theme="light"] [class*="from-primary-500"] > .text-white,
+[data-theme="light"] [class*="from-primary-500"] > span {
   color: #ffffff !important;
 }
 
@@ -124,24 +135,118 @@ body {
   color: #ffffff !important;
 }
 
-/* Modal overlays */
-[data-theme="light"] .bg-black\/50,
-[data-theme="light"] .bg-black\/60 {
-  background-color: rgba(0, 0, 0, 0.25) !important;
-}
-
-/* Give cards a visible border in light mode */
-[data-theme="light"] .card {
-  border-color: rgb(226 232 240) !important;
-}
-
-/* Fix the sidebar active state - keep it readable */
-[data-theme="light"] .bg-primary-500\/15 {
-  background-color: rgba(59, 130, 246, 0.08) !important;
+/* Modal/dialog overlays - use attribute selectors for classes with slashes */
+[data-theme="light"] [class*="bg-black"] {
+  background-color: rgba(0, 0, 0, 0.3) !important;
 }
 
 /* ============================================================
-   Custom Scrollbar - theme-aware
+   LIGHT MODE: Surface & Component Fixes
+   ============================================================ */
+
+/* Cards: solid white, visible border */
+[data-theme="light"] .card {
+  background-color: rgb(255 255 255) !important;
+  backdrop-filter: none;
+  border-color: rgb(210 218 230) !important;
+}
+
+/* Sidebar active item - use attribute selector */
+[data-theme="light"] [class*="bg-primary-500"] {
+  /* Keep as-is, just the tinted version needs fixing */
+}
+
+/* Buttons using bg-dark-700: make them visually distinct */
+[data-theme="light"] button[class*="bg-dark-700"],
+[data-theme="light"] a[class*="bg-dark-700"] {
+  background-color: rgb(226 232 240) !important;
+  border-color: rgb(186 195 211) !important;
+}
+
+[data-theme="light"] button[class*="bg-dark-700"]:hover,
+[data-theme="light"] a[class*="bg-dark-700"]:hover {
+  background-color: rgb(205 213 225) !important;
+}
+
+/* Input fields - white bg with visible border */
+[data-theme="light"] .input-dark,
+[data-theme="light"] input[class*="bg-dark-700"],
+[data-theme="light"] select[class*="bg-dark-700"],
+[data-theme="light"] textarea[class*="bg-dark-700"] {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgb(203 213 225) !important;
+  color: rgb(15 23 42) !important;
+}
+
+[data-theme="light"] .input-dark::placeholder,
+[data-theme="light"] input[class*="bg-dark-700"]::placeholder,
+[data-theme="light"] textarea[class*="bg-dark-700"]::placeholder {
+  color: rgb(148 163 184) !important;
+}
+
+[data-theme="light"] .input-dark:focus,
+[data-theme="light"] input[class*="bg-dark-700"]:focus,
+[data-theme="light"] select[class*="bg-dark-700"]:focus,
+[data-theme="light"] textarea[class*="bg-dark-700"]:focus {
+  border-color: rgb(96 165 250) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Select dropdowns */
+[data-theme="light"] select {
+  color: rgb(15 23 42);
+}
+
+/* Subtle background elements (list items, table rows, user info sections) */
+[data-theme="light"] [class*="bg-dark-700"][class*="/30"],
+[data-theme="light"] [class*="bg-dark-700"][class*="/50"],
+[data-theme="light"] [class*="bg-dark-800"][class*="/50"] {
+  background-color: rgb(245 247 250) !important;
+}
+
+/* ============================================================
+   LIGHT MODE: Status & Accent Colors
+   ============================================================ */
+
+[data-theme="light"] .text-green-400,
+[data-theme="light"] .text-green-500 {
+  color: rgb(16 185 129) !important;
+}
+
+[data-theme="light"] .text-red-400,
+[data-theme="light"] .text-red-500 {
+  color: rgb(239 68 68) !important;
+}
+
+[data-theme="light"] .text-amber-400 {
+  color: rgb(217 119 6) !important;
+}
+
+[data-theme="light"] .text-primary-400 {
+  color: rgb(59 130 246) !important;
+}
+
+/* ============================================================
+   LIGHT MODE: Sidebar refinements
+   ============================================================ */
+
+[data-theme="light"] aside[class*="bg-dark-800"] {
+  background-color: rgb(255 255 255) !important;
+  border-right-color: rgb(226 232 240) !important;
+}
+
+/* Section headers in sidebar */
+[data-theme="light"] .text-dark-500 {
+  color: rgb(100 116 139) !important;
+}
+
+/* Border color for dividers */
+[data-theme="light"] [class*="border-dark-700"] {
+  border-color: rgb(226 232 240) !important;
+}
+
+/* ============================================================
+   Custom Scrollbar
    ============================================================ */
 ::-webkit-scrollbar {
   width: 8px;
@@ -217,13 +322,13 @@ input[type="range"]::-webkit-slider-thumb {
   animation: waveform 0.5s ease-in-out infinite;
 }
 
-/* Reduce glow effects in light mode */
+/* Reduce glow in light mode */
 [data-theme="light"] .animate-pulse-glow {
   animation: none;
 }
 
 [data-theme="light"] .shadow-glow {
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15) !important;
 }
 
 /* ============================================================
@@ -240,7 +345,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* ============================================================
-   Component Layer - theme-aware
+   Component Layer
    ============================================================ */
 @layer components {
   .card {
@@ -269,21 +374,4 @@ input[type="range"]::-webkit-slider-thumb {
            focus:outline-none focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20
            transition-all duration-200;
   }
-}
-
-/* Light mode: increase card opacity for solid white */
-[data-theme="light"] .card {
-  background-color: rgb(255 255 255) !important;
-  backdrop-filter: none;
-}
-
-/* Light mode: make input backgrounds visible */
-[data-theme="light"] .input-dark {
-  background-color: rgb(248 250 252) !important;
-  border-color: rgb(203 213 225) !important;
-  color: rgb(15 23 42) !important;
-}
-
-[data-theme="light"] .input-dark::placeholder {
-  color: rgb(148 163 184) !important;
 }
