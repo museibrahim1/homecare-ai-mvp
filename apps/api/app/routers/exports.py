@@ -280,25 +280,33 @@ async def export_contract_from_template(
             detail="No contract template uploaded. Please go to Settings > Documents and upload a Contract Template, then click Save Changes."
         )
     
-    # Debug: Check what type of file this actually is
+    # Validate the template is actually a DOCX file
     try:
         import base64
         decoded_bytes = base64.b64decode(template_base64)
-        first_bytes = decoded_bytes[:20]
-        logger.info(f"Template first 20 bytes (hex): {first_bytes.hex()}")
-        logger.info(f"Template size: {len(decoded_bytes)} bytes")
         
-        # Check file signatures
+        # Check file signature - DOCX files are ZIP archives starting with PK\x03\x04
         if decoded_bytes[:4] == b'PK\x03\x04':
-            logger.info("File signature: ZIP/DOCX (correct)")
-        elif decoded_bytes[:4] == b'%PDF':
-            logger.error("File signature: PDF (WRONG - user uploaded PDF, not DOCX)")
-        elif decoded_bytes[:8] == b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1':
-            logger.error("File signature: Old DOC format (need DOCX)")
+            logger.info("Template file signature: ZIP/DOCX (valid)")
         else:
-            logger.warning(f"Unknown file signature: {decoded_bytes[:8]}")
+            # Invalid file type - log and fall back to default
+            if decoded_bytes[:2] == b'\xff\xd8':
+                file_type = "JPEG image"
+            elif decoded_bytes[:4] == b'%PDF':
+                file_type = "PDF"
+            elif decoded_bytes[:3] == b'\x89PN':
+                file_type = "PNG image"
+            elif decoded_bytes[:8] == b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1':
+                file_type = "Old DOC format"
+            else:
+                file_type = "unknown format"
+            
+            logger.warning(f"Uploaded template is a {file_type}, not DOCX. Falling back to default template.")
+            # Skip the uploaded template and use default
+            template_base64 = None
     except Exception as e:
-        logger.error(f"Failed to decode template: {e}")
+        logger.error(f"Failed to validate template: {e}")
+        template_base64 = None
     
     if template_base64:
         # Use the uploaded template
@@ -319,9 +327,7 @@ async def export_contract_from_template(
                 headers={"Content-Disposition": f"attachment; filename={filename}"},
             )
         except Exception as e:
-            # If template filling fails, fall back to default
-            import logging
-            logging.error(f"Template filling failed: {e}")
+            logger.error(f"Template filling failed: {e}")
     
     # Fall back to default DOCX generation
     docx_bytes = generate_contract_docx(visit.client, contract)

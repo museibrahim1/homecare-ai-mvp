@@ -382,6 +382,16 @@ export default function SettingsPage() {
       return;
     }
     
+    // Validate contract templates must be DOCX files
+    if (selectedCategory === 'contract_template') {
+      const isDocx = file.name.toLowerCase().endsWith('.docx') || 
+        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      if (!isDocx) {
+        alert('Contract templates must be .docx files (Microsoft Word format). Please upload a DOCX file, not a PDF, image, or other file type.');
+        return;
+      }
+    }
+    
     setUploadingDoc(true);
     
     const reader = new FileReader();
