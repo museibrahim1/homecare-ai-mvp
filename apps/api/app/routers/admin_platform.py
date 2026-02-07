@@ -541,33 +541,6 @@ async def get_audit_action_types(
 # PLATFORM USER MANAGEMENT
 # =============================================================================
 
-@router.get("/users/debug")
-async def debug_platform_users(
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_platform_admin),
-):
-    """Debug endpoint to inspect raw user data."""
-    users = db.query(User).order_by(desc(User.created_at)).all()
-    result = []
-    for u in users:
-        try:
-            user_dict = {
-                "id": str(u.id),
-                "email": u.email,
-                "full_name": u.full_name,
-                "role": str(u.role),
-                "role_type": str(type(u.role)),
-                "is_active": u.is_active,
-                "last_login": str(u.last_login) if u.last_login else None,
-                "created_at": str(u.created_at) if u.created_at else None,
-                "id_type": str(type(u.id)),
-            }
-            result.append(user_dict)
-        except Exception as e:
-            result.append({"error": str(e), "user_id_raw": str(getattr(u, 'id', 'unknown'))})
-    return result
-
-
 @router.get("/users", response_model=List[PlatformUserResponse])
 async def list_platform_users(
     db: Session = Depends(get_db),
@@ -576,38 +549,23 @@ async def list_platform_users(
     """List all users on the platform."""
     users = db.query(User).order_by(desc(User.created_at)).all()
     
-    logger.info(f"Found {len(users)} users in database")
-    
     result = []
     for u in users:
         try:
             role_val = u.role.value if hasattr(u.role, 'value') else (u.role or "user")
-            user_resp = PlatformUserResponse(
+            result.append(PlatformUserResponse(
                 id=u.id,
                 email=u.email or "unknown",
                 full_name=u.full_name or "Unknown",
                 role=str(role_val),
                 is_active=u.is_active if u.is_active is not None else True,
-                last_login=u.last_login,
+                last_login=getattr(u, 'last_login', None),
                 created_at=u.created_at,
-            )
-            result.append(user_resp)
+            ))
         except Exception as e:
-            logger.error(f"Error serializing user {u.id} ({u.email}): {type(e).__name__}: {e}")
-            # Try minimal response
-            try:
-                result.append(PlatformUserResponse(
-                    id=u.id,
-                    email=str(u.email or "unknown"),
-                    full_name=str(u.full_name or "Unknown"),
-                    role="user",
-                    is_active=True,
-                ))
-            except Exception as e2:
-                logger.error(f"Even minimal serialization failed for user: {e2}")
-                continue
+            logger.error(f"Error serializing user {u.id}: {e}")
+            continue
     
-    logger.info(f"Returning {len(result)} users")
     return result
 
 
@@ -657,7 +615,7 @@ async def create_platform_user(
         full_name=new_user.full_name,
         role=new_user.role.value if hasattr(new_user.role, 'value') else (new_user.role or "user"),
         is_active=new_user.is_active,
-        last_login=new_user.last_login,
+        last_login=getattr(new_user, 'last_login', None),
         created_at=new_user.created_at,
     )
 
