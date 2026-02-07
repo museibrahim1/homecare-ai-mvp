@@ -86,7 +86,7 @@ export default function SupportTicketsPage() {
         });
         if (response.ok) {
           const user = await response.json();
-          if (user.role === 'admin' && user.email.endsWith('@homecare.ai')) {
+          if (user.role === 'admin' && (user.email.endsWith('@homecare.ai') || user.email.endsWith('@palmtai.com'))) {
             setIsAuthorized(true);
             fetchTickets();
           } else {
