@@ -547,13 +547,8 @@ async def list_platform_users(
     db: Session = Depends(get_db),
     admin: User = Depends(require_platform_admin),
 ):
-    """List all platform admin users."""
-    users = db.query(User).filter(
-        or_(
-            User.email.endswith("@homecare.ai"),
-            User.email.endswith("@palmtai.com"),
-        )
-    ).all()
+    """List all users on the platform."""
+    users = db.query(User).order_by(desc(User.created_at)).all()
     
     return [
         PlatformUserResponse(
