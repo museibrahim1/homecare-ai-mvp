@@ -33,9 +33,12 @@ import {
   HelpCircle,
   Menu,
   X,
+  Sun,
+  Moon,
   LucideIcon
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { useTheme } from '@/lib/theme';
 
 // Nav item type
 interface NavItemData {
@@ -183,6 +186,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user, hydrated } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const scrollPositionRef = useRef<number>(0);
@@ -305,6 +309,26 @@ export default function Sidebar() {
             </div>
           )}
         </nav>
+
+        {/* Theme Toggle */}
+        <div className="px-4 pb-2 flex-shrink-0">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-dark-300 hover:bg-dark-700/50 hover:text-white transition-all duration-200 border border-dark-700/50 hover:border-dark-600"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-dark-700/50">
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-400" />
+              )}
+            </div>
+            <span className="text-sm font-medium">
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          </button>
+        </div>
 
         {/* User Section */}
         <div className="p-4 border-t border-dark-700/50 bg-dark-800/50 flex-shrink-0">

@@ -2,13 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   THEME SYSTEM: CSS Variables for Dark / Light modes
+   
+   All dark-* Tailwind colors reference these variables.
+   Toggling data-theme="light" on <html> swaps the palette.
+   Values are R G B triplets (no commas) for Tailwind alpha support.
+   ============================================================ */
+
 :root {
-  --dark-900: #0a0e1a;
-  --dark-800: #0f1424;
-  --dark-700: #161d2f;
-  --dark-600: #1e2942;
+  /* Dark Theme (default) */
+  --color-dark-50:  232 237 245;
+  --color-dark-100: 197 209 232;
+  --color-dark-200: 159 179 217;
+  --color-dark-300: 120 149 202;
+  --color-dark-400: 90 127 190;
+  --color-dark-500: 61 105 178;
+  --color-dark-600: 45 84 148;
+  --color-dark-700: 30 63 118;
+  --color-dark-800: 20 43 88;
+  --color-dark-900: 10 22 40;
+  --color-dark-950: 6 13 23;
+
+  /* Semantic aliases */
   --primary-500: #6366f1;
   --accent-cyan: #06b6d4;
+  
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+  
+  /* Text override */
+  --color-text-white: 255, 255, 255;
+  
+  /* Scrollbar colors */
+  --scrollbar-track: rgb(20 43 88);
+  --scrollbar-thumb: rgb(45 84 148);
+  --scrollbar-thumb-hover: rgb(61 105 178);
+}
+
+[data-theme="light"] {
+  /* Light Theme */
+  --color-dark-50:  30 35 50;
+  --color-dark-100: 50 58 80;
+  --color-dark-200: 75 85 115;
+  --color-dark-300: 55 65 95;
+  --color-dark-400: 110 120 150;
+  --color-dark-500: 150 160 185;
+  --color-dark-600: 210 215 228;
+  --color-dark-700: 230 233 240;
+  --color-dark-800: 255 255 255;
+  --color-dark-900: 240 243 248;
+  --color-dark-950: 235 238 245;
+  
+  /* Shadows */
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  
+  /* Text override */
+  --color-text-white: 30, 40, 70;
+  
+  /* Scrollbar colors */
+  --scrollbar-track: rgb(240 243 248);
+  --scrollbar-thumb: rgb(200 205 218);
+  --scrollbar-thumb-hover: rgb(170 178 198);
 }
 
 * {
@@ -16,30 +71,107 @@
 }
 
 body {
-  background-color: var(--dark-900);
-  color: #e2e8f4;
+  background-color: rgb(var(--color-dark-900));
+  color: rgb(var(--color-dark-100));
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Custom Scrollbar */
+/* ============================================================
+   LIGHT MODE: Override text-white and related utilities
+   In dark mode, text-white is white (#fff).
+   In light mode, text-white becomes dark navy for readability.
+   ============================================================ */
+
+[data-theme="light"] .text-white {
+  color: rgb(var(--color-dark-300)) !important;
+}
+
+[data-theme="light"] .bg-white {
+  background-color: rgb(255 255 255) !important;
+}
+
+[data-theme="light"] .placeholder-dark-400::placeholder {
+  color: rgb(var(--color-dark-400));
+}
+
+/* Fix gradient text in light mode */
+[data-theme="light"] .bg-gradient-to-br.from-primary-500 {
+  /* Keep gradient buttons looking right */
+}
+
+/* Modal overlays should still darken in light mode */
+[data-theme="light"] .bg-black\/50,
+[data-theme="light"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix status badge text in light mode - keep accent colors visible */
+[data-theme="light"] .text-accent-green,
+[data-theme="light"] .text-accent-cyan,
+[data-theme="light"] .text-accent-orange,
+[data-theme="light"] .text-accent-pink,
+[data-theme="light"] .text-accent-purple,
+[data-theme="light"] .text-accent-blue {
+  /* These should remain their accent colors in light mode */
+}
+
+/* Fix primary button text - should stay white on blue gradient */
+[data-theme="light"] .btn-primary .text-white,
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .bg-gradient-button .text-white,
+[data-theme="light"] .bg-primary-500 .text-white,
+[data-theme="light"] .bg-primary-600 .text-white,
+[data-theme="light"] .bg-green-500 .text-white,
+[data-theme="light"] .bg-green-600 .text-white,
+[data-theme="light"] .bg-red-500 .text-white,
+[data-theme="light"] .bg-red-600 .text-white {
+  color: #ffffff !important;
+}
+
+/* Buttons with colored backgrounds should keep white text */
+[data-theme="light"] button[class*="bg-primary-5"] .text-white,
+[data-theme="light"] button[class*="bg-primary-5"],
+[data-theme="light"] button[class*="bg-green-5"],
+[data-theme="light"] button[class*="bg-red-5"] {
+  color: inherit;
+}
+[data-theme="light"] .bg-primary-500,
+[data-theme="light"] .bg-primary-600,
+[data-theme="light"] .bg-green-500,
+[data-theme="light"] .bg-green-600 {
+  color: #ffffff;
+}
+
+/* User avatar gradient text stays white */
+[data-theme="light"] .bg-gradient-to-br .text-white,
+[data-theme="light"] [class*="from-primary-500"][class*="to-"] .text-white {
+  color: #ffffff !important;
+}
+
+/* ============================================================
+   Custom Scrollbar - theme-aware
+   ============================================================ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--dark-800);
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--dark-600);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--dark-500);
+  background: var(--scrollbar-thumb-hover);
 }
 
-/* Custom Range Slider */
+/* ============================================================
+   Custom Range Slider
+   ============================================================ */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -48,7 +180,7 @@ input[type="range"] {
 }
 
 input[type="range"]::-webkit-slider-track {
-  background: var(--dark-600);
+  background: rgb(var(--color-dark-600));
   height: 4px;
   border-radius: 2px;
 }
@@ -64,7 +196,9 @@ input[type="range"]::-webkit-slider-thumb {
   box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
 }
 
-/* Animations */
+/* ============================================================
+   Animations
+   ============================================================ */
 @keyframes pulse-glow {
   0%, 100% {
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
@@ -91,8 +225,10 @@ input[type="range"]::-webkit-slider-thumb {
   animation: waveform 0.5s ease-in-out infinite;
 }
 
+/* ============================================================
+   Utility Layer
+   ============================================================ */
 @layer utilities {
-  /* Hide scrollbar but allow scrolling */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -102,9 +238,13 @@ input[type="range"]::-webkit-slider-thumb {
   }
 }
 
+/* ============================================================
+   Component Layer - theme-aware component classes
+   ============================================================ */
 @layer components {
   .card {
     @apply bg-dark-800/80 backdrop-blur-sm border border-dark-600/50 rounded-2xl;
+    box-shadow: var(--shadow-card);
   }
   
   .card-hover {
@@ -112,8 +252,9 @@ input[type="range"]::-webkit-slider-thumb {
   }
   
   .btn-primary {
-    @apply px-6 py-3 bg-gradient-button text-white font-medium rounded-xl 
+    @apply px-6 py-3 bg-gradient-button font-medium rounded-xl 
            hover:opacity-90 transition-all duration-200 shadow-glow;
+    color: #ffffff !important;
   }
   
   .btn-secondary {
@@ -123,8 +264,9 @@ input[type="range"]::-webkit-slider-thumb {
   
   .input-dark {
     @apply w-full px-4 py-3 bg-dark-700/50 border border-dark-600 rounded-xl 
-           text-white placeholder-dark-400 
+           placeholder-dark-400 
            focus:outline-none focus:border-primary-500/50 focus:ring-2 focus:ring-primary-500/20
            transition-all duration-200;
+    color: rgb(var(--color-text-white));
   }
 }

@@ -1,4 +1,15 @@
 /** @type {import('tailwindcss').Config} */
+
+// Helper to create a color that references a CSS variable with alpha support
+function withOpacity(variableName) {
+  return ({ opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `rgba(var(${variableName}), ${opacityValue})`;
+    }
+    return `rgb(var(${variableName}))`;
+  };
+}
+
 module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,19 +19,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Dark blue theme colors (matching Voicer style)
+        // Theme-aware colors via CSS variables
         dark: {
-          50: '#E8EDF5',
-          100: '#C5D1E8',
-          200: '#9FB3D9',
-          300: '#7895CA',
-          400: '#5A7FBE',
-          500: '#3D69B2',
-          600: '#2D5494',
-          700: '#1E3F76',
-          800: '#142B58',
-          900: '#0A1628',
-          950: '#060D17',
+          50:  withOpacity('--color-dark-50'),
+          100: withOpacity('--color-dark-100'),
+          200: withOpacity('--color-dark-200'),
+          300: withOpacity('--color-dark-300'),
+          400: withOpacity('--color-dark-400'),
+          500: withOpacity('--color-dark-500'),
+          600: withOpacity('--color-dark-600'),
+          700: withOpacity('--color-dark-700'),
+          800: withOpacity('--color-dark-800'),
+          900: withOpacity('--color-dark-900'),
+          950: withOpacity('--color-dark-950'),
         },
         primary: {
           50: '#EFF6FF',
@@ -51,7 +62,7 @@ module.exports = {
       boxShadow: {
         'glow': '0 0 20px rgba(59, 130, 246, 0.3)',
         'glow-lg': '0 0 40px rgba(59, 130, 246, 0.4)',
-        'card': '0 4px 24px rgba(0, 0, 0, 0.3)',
+        'card': 'var(--shadow-card)',
       },
     },
   },
