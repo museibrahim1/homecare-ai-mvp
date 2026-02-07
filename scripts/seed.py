@@ -94,10 +94,10 @@ def seed_database():
         # CAREGIVERS
         # =============================================
         caregivers_data = [
-            {"full_name": "Sarah Johnson", "email": "sarah@homecare.ai", "phone": "555-0101"},
-            {"full_name": "Michael Brown", "email": "michael@homecare.ai", "phone": "555-0102"},
-            {"full_name": "Emily Davis", "email": "emily@homecare.ai", "phone": "555-0103"},
-            {"full_name": "David Martinez", "email": "david@homecare.ai", "phone": "555-0104"},
+            {"full_name": "Sarah Johnson", "email": "sarah@palmtai.com", "phone": "555-0101"},
+            {"full_name": "Michael Brown", "email": "michael@palmtai.com", "phone": "555-0102"},
+            {"full_name": "Emily Davis", "email": "emily@palmtai.com", "phone": "555-0103"},
+            {"full_name": "David Martinez", "email": "david@palmtai.com", "phone": "555-0104"},
         ]
         
         caregivers = []
@@ -216,7 +216,7 @@ def seed_database():
         caregivers_records = [
             {
                 "full_name": "Sarah Johnson",
-                "email": "sarah@homecare.ai",
+                "email": "sarah@palmtai.com",
                 "phone": "555-0101",
                 "certification_level": "CNA",
                 "specializations": ["dementia", "mobility"],
@@ -228,7 +228,7 @@ def seed_database():
             },
             {
                 "full_name": "Michael Brown",
-                "email": "michael@homecare.ai",
+                "email": "michael@palmtai.com",
                 "phone": "555-0102",
                 "certification_level": "HHA",
                 "specializations": ["diabetes", "wound care"],
@@ -240,7 +240,7 @@ def seed_database():
             },
             {
                 "full_name": "Emily Davis",
-                "email": "emily@homecare.ai",
+                "email": "emily@palmtai.com",
                 "phone": "555-0103",
                 "certification_level": "CNA",
                 "specializations": ["pediatrics", "respite"],
@@ -252,7 +252,7 @@ def seed_database():
             },
             {
                 "full_name": "David Martinez",
-                "email": "david@homecare.ai",
+                "email": "david@palmtai.com",
                 "phone": "555-0104",
                 "certification_level": "RN",
                 "specializations": ["COPD", "cardiac", "high-care"],
@@ -309,7 +309,7 @@ def seed_database():
         print("\nLogin credentials:")
         print("  Platform Admin: museibrahim@palmtai.com / [your password]")
         print("  Demo Agency:    demo@agency.com / demo1234")
-        print("  Caregiver:      sarah@homecare.ai / password123")
+        print("  Caregiver:      sarah@palmtai.com / password123")
         print("="*50)
         
     except Exception as e:

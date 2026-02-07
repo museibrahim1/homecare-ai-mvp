@@ -1121,7 +1121,7 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <label className="block text-dark-300 text-sm mb-1">Email</label>
-                  <input type="email" defaultValue="admin@homecare.ai" className="input-dark w-full" />
+                  <input type="email" defaultValue="admin@palmtai.com" className="input-dark w-full" />
                 </div>
                 <div>
                   <label className="block text-dark-300 text-sm mb-1">Phone</label>

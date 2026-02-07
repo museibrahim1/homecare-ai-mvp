@@ -45,7 +45,7 @@ export default function PlatformUsersPage() {
         });
         if (response.ok) {
           const user = await response.json();
-          if (user.role === 'admin' && (user.email.endsWith('@homecare.ai') || user.email.endsWith('@palmtai.com'))) {
+          if (user.role === 'admin' && (user.email.endsWith('@palmtai.com'))) {
             setIsAuthorized(true);
             fetchUsers();
           } else {
@@ -79,8 +79,8 @@ export default function PlatformUsersPage() {
 
   const inviteUser = async () => {
     if (!inviteForm.email || !inviteForm.full_name) return;
-    if (!inviteForm.email.endsWith('@homecare.ai') && !inviteForm.email.endsWith('@palmtai.com')) {
-      setInviteError('Platform admins must use @homecare.ai or @palmtai.com email');
+    if (!inviteForm.email.endsWith('@palmtai.com')) {
+      setInviteError('Platform admins must use @palmtai.com email');
       return;
     }
     
@@ -147,7 +147,7 @@ export default function PlatformUsersPage() {
           <div>
             <p className="text-blue-400 font-medium">Platform User Management</p>
             <p className="text-blue-300/70 text-sm mt-1">
-              Manage platform administrator accounts. Only @homecare.ai or @palmtai.com emails can be platform admins.
+              Manage platform administrator accounts. Only @palmtai.com emails can be platform admins.
             </p>
           </div>
         </div>
@@ -285,7 +285,7 @@ export default function PlatformUsersPage() {
                   placeholder="john@palmtai.com"
                   className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
                 />
-                <p className="text-dark-500 text-xs mt-1">Must be @homecare.ai or @palmtai.com email</p>
+                <p className="text-dark-500 text-xs mt-1">Must be @palmtai.com email</p>
               </div>
             </div>
             

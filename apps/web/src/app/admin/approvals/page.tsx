@@ -93,9 +93,9 @@ export default function AdminApprovalsPage() {
   const { token, user, isLoading: authLoading, hydrated } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  // Check if user is admin (allow @homecare.ai OR @palmtai.com)
+  // Check if user is admin (@palmtai.com)
   const isAdmin = user?.role === 'admin' && 
-    (user?.email?.endsWith('@homecare.ai') || user?.email?.endsWith('@palmtai.com'));
+    (user?.email?.endsWith('@palmtai.com'));
 
   // Check authorization on mount
   useEffect(() => {

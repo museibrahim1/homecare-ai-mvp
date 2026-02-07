@@ -60,9 +60,9 @@ export default function AdminDashboardPage() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
 
-  // Check if user is admin (allow @homecare.ai OR @palmtai.com)
+  // Check if user is admin (@palmtai.com)
   const isAdmin = user?.role === 'admin' && 
-    (user?.email?.endsWith('@homecare.ai') || user?.email?.endsWith('@palmtai.com'));
+    (user?.email?.endsWith('@palmtai.com'));
 
   useEffect(() => {
     // Wait for auth to hydrate before checking
@@ -89,7 +89,7 @@ export default function AdminDashboardPage() {
         if (response.ok) {
           const userData = await response.json();
           if (userData.role === 'admin' && 
-              (userData.email.endsWith('@homecare.ai') || userData.email.endsWith('@palmtai.com'))) {
+              (userData.email.endsWith('@palmtai.com'))) {
             setAuthChecked(true);
             fetchData();
           } else {

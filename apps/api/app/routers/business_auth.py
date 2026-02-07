@@ -223,7 +223,7 @@ async def register_business(
     )
     
     # Notify platform admin of new registration
-    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "admin@homecare.ai")
+    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "admin@palmtai.com")
     email_service.send_admin_new_registration(
         admin_email=admin_email,
         business_name=registration.name,
@@ -763,7 +763,7 @@ async def invite_team_member(
                 <p style="color: #dc2626; font-size: 14px;">Please change your password after your first login.</p>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <a href="https://app.homecare.ai/login" 
+                    <a href="https://app.palmtai.com/login" 
                        style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                         Login Now
                     </a>

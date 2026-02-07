@@ -80,7 +80,7 @@ def client(db_session):
 def seeded_db(db_session):
     """Seed database with test data."""
     admin = User(
-        email="admin@homecare.ai",
+        email="admin@palmtai.com",
         hashed_password=get_password_hash("admin123"),
         full_name="Admin User",
         role=UserRole.admin,  # lowercase enum value
@@ -96,7 +96,7 @@ def auth_headers(client, seeded_db):
     """Get authentication headers for admin user."""
     response = client.post(
         "/auth/login",
-        json={"email": "admin@homecare.ai", "password": "admin123"}
+        json={"email": "admin@palmtai.com", "password": "admin123"}
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}

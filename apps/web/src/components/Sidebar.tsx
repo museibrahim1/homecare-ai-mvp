@@ -343,7 +343,7 @@ export default function Sidebar() {
                 {user?.full_name || 'Admin User'}
               </p>
               <p className="text-dark-400 text-xs truncate">
-                {user?.email || 'admin@homecare.ai'}
+                {user?.email || 'admin@palmtai.com'}
               </p>
             </div>
           </div>

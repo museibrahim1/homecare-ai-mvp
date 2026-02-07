@@ -26,10 +26,10 @@ def seed() -> None:
 
     try:
         # --- Admin user (used by the Next.js demo login UI) ---
-        admin = db.query(User).filter(User.email == "admin@homecare.ai").first()
+        admin = db.query(User).filter(User.email == "admin@palmtai.com").first()
         if not admin:
             admin = User(
-                email="admin@homecare.ai",
+                email="admin@palmtai.com",
                 hashed_password=get_password_hash("admin123"),
                 full_name="Admin User",
                 role=UserRole.admin,
@@ -63,7 +63,7 @@ def seed() -> None:
 
         db.commit()
         print("✅ Seed complete.")
-        print("Login: admin@homecare.ai / admin123")
+        print("Login: admin@palmtai.com / admin123")
     finally:
         db.close()
 

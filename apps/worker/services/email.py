@@ -88,7 +88,7 @@ class EmailService:
             </p>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://app.homecare.ai/visits/{visit_id}" 
+                <a href="https://app.palmtai.com/visits/{visit_id}" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     Review & Send Contract
                 </a>
@@ -132,7 +132,7 @@ class EmailService:
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://app.homecare.ai/visits/{visit_id}" 
+                <a href="https://app.palmtai.com/visits/{visit_id}" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     Review Results
                 </a>

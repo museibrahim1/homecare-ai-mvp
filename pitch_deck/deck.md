@@ -340,9 +340,9 @@ Intake → Assessment → Proposal → Active → Completed
 
 ### Homecare AI
 
-**Website**: [homecare.ai](https://homecare.ai)
+**Website**: [palmtai.com](https://palmtai.com)
 **Demo**: [web-production-11611.up.railway.app](https://web-production-11611.up.railway.app)
-**Email**: contact@homecare.ai
+**Email**: contact@palmtai.com
 
 ---
 

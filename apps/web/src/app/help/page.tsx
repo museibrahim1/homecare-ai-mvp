@@ -150,7 +150,7 @@ export default function HelpPage() {
           {/* Quick Contact */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <a
-              href="mailto:support@homecare.ai"
+              href="mailto:support@palmtai.com"
               className="flex items-center gap-4 p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-primary-500/50 transition"
             >
               <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
@@ -158,7 +158,7 @@ export default function HelpPage() {
               </div>
               <div>
                 <p className="text-white font-medium">Email Support</p>
-                <p className="text-dark-400 text-sm">support@homecare.ai</p>
+                <p className="text-dark-400 text-sm">support@palmtai.com</p>
               </div>
             </a>
             <a

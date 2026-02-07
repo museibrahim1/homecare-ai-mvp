@@ -354,7 +354,7 @@ export default function WelcomePage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="mailto:support@homecare.ai"
+              href="mailto:support@palmtai.com"
               className="inline-flex items-center gap-2 bg-dark-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-dark-600 transition"
             >
               <Mail className="w-5 h-5" />

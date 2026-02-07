@@ -8,7 +8,7 @@ def test_login_success(client: TestClient, seeded_db):
     """Test successful login."""
     response = client.post(
         "/auth/login",
-        json={"email": "admin@homecare.ai", "password": "admin123"}
+        json={"email": "admin@palmtai.com", "password": "admin123"}
     )
     assert response.status_code == 200
     data = response.json()
@@ -20,7 +20,7 @@ def test_login_invalid_credentials(client: TestClient):
     """Test login with invalid credentials."""
     response = client.post(
         "/auth/login",
-        json={"email": "admin@homecare.ai", "password": "wrongpassword"}
+        json={"email": "admin@palmtai.com", "password": "wrongpassword"}
     )
     assert response.status_code == 401
 
@@ -30,7 +30,7 @@ def test_get_me(client: TestClient, auth_headers):
     response = client.get("/auth/me", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
-    assert data["email"] == "admin@homecare.ai"
+    assert data["email"] == "admin@palmtai.com"
     assert data["role"] == "admin"
 
 

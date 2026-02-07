@@ -142,8 +142,8 @@ function ContactForm() {
                 </div>
                 <div>
                   <p className="text-dark-400 text-sm">Email us at</p>
-                  <a href="mailto:sales@homecare.ai" className="text-white hover:text-primary-400 transition">
-                    sales@homecare.ai
+                  <a href="mailto:sales@palmtai.com" className="text-white hover:text-primary-400 transition">
+                    sales@palmtai.com
                   </a>
                 </div>
               </div>

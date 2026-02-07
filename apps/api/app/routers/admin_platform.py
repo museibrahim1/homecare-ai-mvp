@@ -41,8 +41,7 @@ def require_platform_admin(current_user: User = Depends(get_current_user)) -> Us
     """Ensure current user is a platform admin."""
     if current_user.role != UserRole.admin:
         raise HTTPException(status_code=403, detail="Platform admin access required")
-    allowed_domains = ["@homecare.ai", "@palmtai.com"]
-    if not any(current_user.email.endswith(domain) for domain in allowed_domains):
+    if not current_user.email.endswith("@palmtai.com"):
         raise HTTPException(status_code=403, detail="Platform admin access required")
     return current_user
 
@@ -572,12 +571,11 @@ async def create_platform_user(
     admin: User = Depends(require_platform_admin),
 ):
     """Create a new platform admin user."""
-    # Must be @homecare.ai or @palmtai.com email
-    allowed_domains = ["@homecare.ai", "@palmtai.com"]
-    if not any(user_data.email.endswith(domain) for domain in allowed_domains):
+    # Must be @palmtai.com email
+    if not user_data.email.endswith("@palmtai.com"):
         raise HTTPException(
             status_code=400,
-            detail="Platform admins must use @homecare.ai or @palmtai.com email"
+            detail="Platform admins must use @palmtai.com email"
         )
     
     # Check if exists

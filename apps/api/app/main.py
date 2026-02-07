@@ -185,11 +185,11 @@ async def seed_database():
     
     try:
         # Check if admin user exists
-        admin_exists = db.query(User).filter(User.email == "admin@homecare.ai").first()
+        admin_exists = db.query(User).filter(User.email == "admin@palmtai.com").first()
         if not admin_exists:
             logger.info("Creating admin user...")
             admin = User(
-                email="admin@homecare.ai",
+                email="admin@palmtai.com",
                 hashed_password=get_password_hash("admin123"),
                 full_name="Admin User",
                 role=UserRole.admin,
@@ -197,7 +197,7 @@ async def seed_database():
             )
             db.add(admin)
             db.commit()
-            logger.info("Admin user created: admin@homecare.ai / admin123")
+            logger.info("Admin user created: admin@palmtai.com / admin123")
         
         # Check if any clients exist
         client_count = db.query(Client).count()
@@ -264,7 +264,7 @@ async def seed_database():
                 Caregiver(
                     full_name="Sarah Johnson",
                     preferred_name="Sarah",
-                    email="sarah@homecare.ai",
+                    email="sarah@palmtai.com",
                     phone="402-555-0301",
                     certifications=["CNA", "CPR", "First Aid"],
                     certification_level="CNA",
@@ -277,7 +277,7 @@ async def seed_database():
                 Caregiver(
                     full_name="Michael Chen",
                     preferred_name="Mike",
-                    email="michael@homecare.ai",
+                    email="michael@palmtai.com",
                     phone="402-555-0302",
                     certifications=["RN", "CPR", "Wound Care"],
                     certification_level="RN",
