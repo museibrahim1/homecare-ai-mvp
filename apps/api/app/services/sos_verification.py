@@ -7,6 +7,7 @@ Supports all 50 US states.
 
 import os
 import logging
+import asyncio
 import httpx
 from typing import Optional, Dict, Any
 from datetime import datetime
@@ -93,99 +94,137 @@ class SOSVerificationService:
     async def _lookup_by_number(
         self, 
         jurisdiction: str, 
-        registration_number: str
+        registration_number: str,
+        max_retries: int = 2,
+        retry_delay: float = 2.0,
     ) -> Optional[Dict[str, Any]]:
-        """Look up company by registration number."""
-        try:
-            url = f"{self.base_url}/companies/{jurisdiction}/{registration_number}"
-            params = {}
-            if self.api_key:
-                params["api_token"] = self.api_key
-            
-            async with httpx.AsyncClient() as client:
-                response = await client.get(url, params=params, timeout=30.0)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    company = data.get("results", {}).get("company", {})
-                    return self._format_company_result(company)
-                elif response.status_code == 404:
-                    return None
-                else:
-                    logger.warning(f"OpenCorporates lookup failed: {response.status_code}")
-                    return None
+        """Look up company by registration number with retry logic."""
+        url = f"{self.base_url}/companies/{jurisdiction}/{registration_number}"
+        params = {}
+        if self.api_key:
+            params["api_token"] = self.api_key
+        
+        last_error = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(url, params=params, timeout=30.0)
                     
-        except Exception as e:
-            logger.error(f"OpenCorporates lookup error: {e}")
-            return None
+                    if response.status_code == 200:
+                        data = response.json()
+                        company = data.get("results", {}).get("company", {})
+                        return self._format_company_result(company)
+                    elif response.status_code == 404:
+                        return None
+                    else:
+                        logger.warning(
+                            f"OpenCorporates lookup failed (attempt {attempt}/{max_retries}): "
+                            f"HTTP {response.status_code}"
+                        )
+                        last_error = f"HTTP {response.status_code}"
+                        
+            except httpx.TimeoutException as e:
+                logger.warning(
+                    f"OpenCorporates lookup timeout (attempt {attempt}/{max_retries}): {e}"
+                )
+                last_error = e
+            except httpx.ConnectError as e:
+                logger.warning(
+                    f"OpenCorporates connection error (attempt {attempt}/{max_retries}): {e}"
+                )
+                last_error = e
+            except Exception as e:
+                logger.error(f"OpenCorporates lookup error (attempt {attempt}/{max_retries}): {e}")
+                last_error = e
+            
+            # Wait before retrying (unless this was the last attempt)
+            if attempt < max_retries:
+                await asyncio.sleep(retry_delay)
+        
+        logger.error(f"OpenCorporates lookup failed after {max_retries} attempts: {last_error}")
+        return None
     
     async def _search_by_name(
         self, 
         business_name: str, 
-        jurisdiction: str
+        jurisdiction: str,
+        max_retries: int = 2,
+        retry_delay: float = 2.0,
     ) -> Dict[str, Any]:
-        """Search for company by name."""
-        try:
-            url = f"{self.base_url}/companies/search"
-            params = {
-                "q": business_name,
-                "jurisdiction_code": jurisdiction,
-                "per_page": 5,
-            }
-            if self.api_key:
-                params["api_token"] = self.api_key
-            
-            async with httpx.AsyncClient() as client:
-                response = await client.get(url, params=params, timeout=30.0)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    companies = data.get("results", {}).get("companies", [])
+        """Search for company by name with retry logic."""
+        url = f"{self.base_url}/companies/search"
+        params = {
+            "q": business_name,
+            "jurisdiction_code": jurisdiction,
+            "per_page": 5,
+        }
+        if self.api_key:
+            params["api_token"] = self.api_key
+        
+        last_error = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(url, params=params, timeout=30.0)
                     
-                    if not companies:
+                    if response.status_code == 200:
+                        data = response.json()
+                        companies = data.get("results", {}).get("companies", [])
+                        
+                        if not companies:
+                            return {
+                                "found": False,
+                                "error": "No matching business found in state records",
+                                "search_query": business_name,
+                                "jurisdiction": jurisdiction,
+                            }
+                        
+                        # Find best match
+                        best_match = self._find_best_match(business_name, companies)
+                        if best_match:
+                            return self._format_company_result(best_match.get("company", {}))
+                        
+                        # Return first result if no exact match
+                        return self._format_company_result(companies[0].get("company", {}))
+                        
+                    elif response.status_code == 401:
+                        logger.warning("OpenCorporates API key invalid or rate limited")
                         return {
                             "found": False,
-                            "error": "No matching business found in state records",
-                            "search_query": business_name,
-                            "jurisdiction": jurisdiction,
+                            "error": "Verification service temporarily unavailable",
+                            "requires_manual_review": True,
                         }
-                    
-                    # Find best match
-                    best_match = self._find_best_match(business_name, companies)
-                    if best_match:
-                        return self._format_company_result(best_match.get("company", {}))
-                    
-                    # Return first result if no exact match
-                    return self._format_company_result(companies[0].get("company", {}))
-                    
-                elif response.status_code == 401:
-                    logger.warning("OpenCorporates API key invalid or rate limited")
-                    return {
-                        "found": False,
-                        "error": "Verification service temporarily unavailable",
-                        "requires_manual_review": True,
-                    }
-                else:
-                    logger.warning(f"OpenCorporates search failed: {response.status_code}")
-                    return {
-                        "found": False,
-                        "error": "Verification service error",
-                        "requires_manual_review": True,
-                    }
-                    
-        except httpx.TimeoutException:
-            return {
-                "found": False,
-                "error": "Verification service timeout",
-                "requires_manual_review": True,
-            }
-        except Exception as e:
-            logger.error(f"OpenCorporates search error: {e}")
-            return {
-                "found": False,
-                "error": str(e),
-                "requires_manual_review": True,
-            }
+                    else:
+                        logger.warning(
+                            f"OpenCorporates search failed (attempt {attempt}/{max_retries}): "
+                            f"HTTP {response.status_code}"
+                        )
+                        last_error = f"HTTP {response.status_code}"
+                        
+            except httpx.TimeoutException as e:
+                logger.warning(
+                    f"OpenCorporates search timeout (attempt {attempt}/{max_retries}): {e}"
+                )
+                last_error = e
+            except httpx.ConnectError as e:
+                logger.warning(
+                    f"OpenCorporates connection error (attempt {attempt}/{max_retries}): {e}"
+                )
+                last_error = e
+            except Exception as e:
+                logger.error(f"OpenCorporates search error (attempt {attempt}/{max_retries}): {e}")
+                last_error = e
+            
+            # Wait before retrying (unless this was the last attempt)
+            if attempt < max_retries:
+                await asyncio.sleep(retry_delay)
+        
+        logger.error(f"OpenCorporates search failed after {max_retries} attempts: {last_error}")
+        return {
+            "found": False,
+            "error": f"Verification service failed after {max_retries} attempts",
+            "requires_manual_review": True,
+        }
     
     def _find_best_match(
         self, 

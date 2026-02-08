@@ -11,7 +11,9 @@ from typing import Optional, Dict, Any, Tuple
 from datetime import datetime, timezone
 from uuid import UUID
 
+import requests
 from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
 from twilio.twiml.voice_response import VoiceResponse, Dial, Say
 
 logger = logging.getLogger(__name__)
@@ -68,7 +70,12 @@ class TwilioCallService:
     def __init__(self):
         self.enabled = bool(TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN)
         if self.enabled:
-            self.client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+            # Set a 30-second timeout for all Twilio REST API requests
+            self.client = Client(
+                TWILIO_ACCOUNT_SID,
+                TWILIO_AUTH_TOKEN,
+                timeout=30,
+            )
             logger.info("Twilio call service initialized")
         else:
             self.client = None
@@ -125,8 +132,18 @@ class TwilioCallService:
             
             return True, "Call initiated successfully", caregiver_call.sid
             
+        except TwilioRestException as e:
+            logger.error(
+                f"Twilio API error initiating call for visit {visit_id}: "
+                f"status={e.status}, code={e.code}, msg={e.msg}",
+                exc_info=True,
+            )
+            return False, f"Twilio error: {e.msg}", None
+        except ConnectionError as e:
+            logger.error(f"Network error initiating call for visit {visit_id}: {e}", exc_info=True)
+            return False, "Network error connecting to Twilio", None
         except Exception as e:
-            logger.error(f"Failed to initiate call: {e}")
+            logger.exception(f"Unexpected error initiating call for visit {visit_id}: {e}")
             return False, str(e), None
     
     def get_call_status(self, call_sid: str) -> Dict[str, Any]:
@@ -144,8 +161,11 @@ class TwilioCallService:
                 "start_time": call.start_time.isoformat() if call.start_time else None,
                 "end_time": call.end_time.isoformat() if call.end_time else None,
             }
+        except TwilioRestException as e:
+            logger.error(f"Twilio API error fetching call {call_sid}: status={e.status}, code={e.code}", exc_info=True)
+            return {"error": f"Twilio error: {e.msg}"}
         except Exception as e:
-            logger.error(f"Failed to get call status: {e}")
+            logger.exception(f"Unexpected error fetching call status for {call_sid}: {e}")
             return {"error": str(e)}
     
     def end_call(self, call_sid: str) -> Tuple[bool, str]:
@@ -157,8 +177,11 @@ class TwilioCallService:
             call = self.client.calls(call_sid).update(status="completed")
             logger.info(f"Ended call: {call_sid}")
             return True, "Call ended successfully"
+        except TwilioRestException as e:
+            logger.error(f"Twilio API error ending call {call_sid}: status={e.status}, code={e.code}", exc_info=True)
+            return False, f"Twilio error: {e.msg}"
         except Exception as e:
-            logger.error(f"Failed to end call: {e}")
+            logger.exception(f"Unexpected error ending call {call_sid}: {e}")
             return False, str(e)
     
     def get_conference_participants(self, conference_name: str) -> list:
@@ -188,8 +211,15 @@ class TwilioCallService:
                 }
                 for p in participants
             ]
+        except TwilioRestException as e:
+            logger.error(
+                f"Twilio API error getting participants for conference {conference_name}: "
+                f"status={e.status}, code={e.code}",
+                exc_info=True,
+            )
+            return []
         except Exception as e:
-            logger.error(f"Failed to get conference participants: {e}")
+            logger.exception(f"Unexpected error getting conference participants for {conference_name}: {e}")
             return []
     
     def download_recording(self, recording_sid: str) -> Tuple[bool, Optional[bytes], str]:
@@ -209,7 +239,6 @@ class TwilioCallService:
             media_url = f"https://api.twilio.com{recording.uri.replace('.json', '.wav')}"
             
             # Download using requests with auth
-            import requests
             response = requests.get(
                 media_url,
                 auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN),
@@ -221,8 +250,18 @@ class TwilioCallService:
             else:
                 return False, None, f"Failed to download: HTTP {response.status_code}"
                 
+        except TwilioRestException as e:
+            logger.error(
+                f"Twilio API error downloading recording {recording_sid}: "
+                f"status={e.status}, code={e.code}",
+                exc_info=True,
+            )
+            return False, None, f"Twilio error: {e.msg}"
+        except requests.Timeout as e:
+            logger.error(f"Timeout downloading recording {recording_sid}: {e}")
+            return False, None, "Download timed out"
         except Exception as e:
-            logger.error(f"Failed to download recording: {e}")
+            logger.exception(f"Unexpected error downloading recording {recording_sid}: {e}")
             return False, None, str(e)
     
     def _normalize_phone(self, phone: str) -> Optional[str]:
@@ -352,8 +391,18 @@ class TwilioCallService:
             logger.info(f"Initiated client call: {client_call.sid} for visit {visit_id}")
             return True, "Client call initiated", client_call.sid
             
+        except TwilioRestException as e:
+            logger.error(
+                f"Twilio API error calling client for visit {visit_id}: "
+                f"status={e.status}, code={e.code}, msg={e.msg}",
+                exc_info=True,
+            )
+            return False, f"Twilio error: {e.msg}", None
+        except ConnectionError as e:
+            logger.error(f"Network error calling client for visit {visit_id}: {e}", exc_info=True)
+            return False, "Network error connecting to Twilio", None
         except Exception as e:
-            logger.error(f"Failed to call client: {e}")
+            logger.exception(f"Unexpected error calling client for visit {visit_id}: {e}")
             return False, str(e), None
 
 
