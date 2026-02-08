@@ -1,5 +1,9 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+import logging
+import secrets
+
+_config_logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -50,12 +54,14 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     s = Settings()
-    # Fail fast if critical secrets are not configured
+    # Auto-generate JWT secret if not provided (warns in production)
     if not s.jwt_secret:
-        raise RuntimeError(
-            "JWT_SECRET environment variable is required. "
-            "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(64))\""
+        generated = secrets.token_urlsafe(64)
+        _config_logger.warning(
+            "JWT_SECRET not set — using auto-generated secret. "
+            "Sessions will NOT survive restarts. Set JWT_SECRET env var for production."
         )
+        s.jwt_secret = generated
     return s
 
 
