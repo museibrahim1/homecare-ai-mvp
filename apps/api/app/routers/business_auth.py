@@ -703,11 +703,13 @@ async def invite_team_member(
     
     # Check team limits based on subscription plan
     limits = get_team_limits(db, current_user.company_name)
+    
+    # Lock existing team members to prevent concurrent inserts exceeding limit
     current_count = db.query(User).filter(
         User.company_name == current_user.company_name,
         User.company_name.isnot(None),
         User.company_name != ""
-    ).count()
+    ).with_for_update().count()
     
     if current_count >= limits["max_users"]:
         # Include upgrade info in error message
@@ -730,17 +732,22 @@ async def invite_team_member(
     temp_password = secrets.token_urlsafe(12)
     
     # Create the new user
-    new_user = User(
-        email=email,
-        full_name=full_name,
-        hashed_password=hash_password(temp_password),
-        company_name=current_user.company_name,
-        role=role,
-        is_active=True,
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    try:
+        new_user = User(
+            email=email,
+            full_name=full_name,
+            hashed_password=hash_password(temp_password),
+            company_name=current_user.company_name,
+            role=role,
+            is_active=True,
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to create team member: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create team member. Please try again.")
     
     # Send invitation email
     try:

@@ -108,9 +108,25 @@ extra_origins = os.getenv("CORS_ORIGINS", "")
 if extra_origins:
     cors_origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
 
+# Security headers middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Add security headers to all responses."""
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        if request.url.scheme == "https" or os.getenv("RAILWAY_ENVIRONMENT"):
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
 # HIPAA Compliance: Add audit logging middleware for PHI access
 from app.middleware.audit import AuditLoggingMiddleware
 app.add_middleware(AuditLoggingMiddleware)
+
+# Security headers
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Add catch-all middleware FIRST (runs last, catches everything)
 app.add_middleware(CatchAllMiddleware)

@@ -1,5 +1,7 @@
 import secrets
 import logging
+import time
+from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel, EmailStr
@@ -19,6 +21,24 @@ from app.services.email import email_service
 logger = logging.getLogger(__name__)
 
 PASSWORD_RESET_EXPIRY_HOURS = 1
+
+# Simple in-memory rate limiter for auth endpoints
+_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+RATE_LIMIT_WINDOW = 60  # seconds
+RATE_LIMIT_MAX = 10  # max requests per window
+
+
+def _check_rate_limit(key: str) -> None:
+    """Raise 429 if rate limit exceeded for the given key."""
+    now = time.time()
+    # Prune old entries
+    _rate_limit_store[key] = [t for t in _rate_limit_store[key] if now - t < RATE_LIMIT_WINDOW]
+    if len(_rate_limit_store[key]) >= RATE_LIMIT_MAX:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many requests. Please wait a moment and try again.",
+        )
+    _rate_limit_store[key].append(now)
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -44,6 +64,9 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
     """
     email = request.email.lower().strip()
     client_ip = req.client.host if req.client else "unknown"
+    
+    # Rate limiting by IP
+    _check_rate_limit(f"login:{client_ip}")
     
     # HIPAA: Check if account is locked
     is_locked, seconds_remaining = check_account_lockout(email)
@@ -171,6 +194,7 @@ async def logout_all_devices(
 @router.post("/forgot-password")
 async def forgot_password(
     request: ForgotPasswordRequest,
+    req: Request,
     db: Session = Depends(get_db),
 ):
     """
@@ -178,6 +202,9 @@ async def forgot_password(
     
     Always returns success to prevent email enumeration attacks.
     """
+    client_ip = req.client.host if req.client else "unknown"
+    _check_rate_limit(f"forgot:{client_ip}")
+    
     email = request.email.lower().strip()
     user = db.query(User).filter(User.email == email).first()
     
@@ -217,14 +244,19 @@ async def forgot_password(
 @router.post("/reset-password")
 async def reset_password(
     request: ResetPasswordRequest,
+    req: Request,
     db: Session = Depends(get_db),
 ):
     """
     Reset password using a valid reset token.
     """
+    client_ip = req.client.host if req.client else "unknown"
+    _check_rate_limit(f"reset:{client_ip}")
+    
+    # Use row-level lock to prevent race condition (token reuse)
     user = db.query(User).filter(
         User.password_reset_token == request.token
-    ).first()
+    ).with_for_update().first()
     
     if not user:
         raise HTTPException(
@@ -260,14 +292,10 @@ async def reset_password(
             detail="Password must be at least 6 characters long.",
         )
     
-    # Update password
+    # Atomically: clear token + update password + invalidate sessions
     user.hashed_password = get_password_hash(request.new_password)
-    
-    # Clear the reset token so it can't be reused
     user.password_reset_token = None
     user.password_reset_expires = None
-    
-    # Also invalidate all existing sessions
     user.force_logout_at = datetime.now(timezone.utc)
     
     db.commit()

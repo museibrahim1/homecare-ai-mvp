@@ -9,7 +9,7 @@ import json
 import re
 import logging
 from typing import Optional, List, Any
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -539,12 +539,17 @@ Return ONLY a JSON object with these field names. Use null for any field not fou
         return ExtractedInfo()
 
 
-# Public endpoint (no auth) for contract generation worker
+# Internal endpoint for contract generation worker — protected by API key
 @router.get("/public", response_model=AgencySettingsResponse)
 async def get_public_agency_settings(
+    request: Request,
     db: Session = Depends(get_db),
 ):
-    """Get agency settings (public - for worker access)."""
+    """Get agency settings (internal - for worker access). Requires X-Internal-Key header."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    provided_key = request.headers.get("X-Internal-Key", "")
+    if not expected_key or provided_key != expected_key:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing internal API key")
     settings = get_or_create_settings(db)
     
     documents = []
