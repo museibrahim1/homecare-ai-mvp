@@ -126,7 +126,8 @@ async def get_agency_settings(
     if hasattr(settings, 'documents') and settings.documents:
         try:
             documents = json.loads(settings.documents) if isinstance(settings.documents, str) else settings.documents
-        except:
+        except (json.JSONDecodeError, TypeError, ValueError):
+            logger.warning("Failed to parse agency documents JSON")
             documents = []
     
     return AgencySettingsResponse(
@@ -203,7 +204,8 @@ async def update_agency_settings(
     if settings.documents:
         try:
             documents = json.loads(settings.documents) if isinstance(settings.documents, str) else settings.documents
-        except:
+        except (json.JSONDecodeError, TypeError, ValueError):
+            logger.warning("Failed to parse agency documents JSON")
             documents = []
     
     return AgencySettingsResponse(
@@ -367,7 +369,7 @@ def _extract_text_from_document(content: str) -> tuple[str, str]:
         # Assume it's plain text or raw base64
         try:
             raw_bytes = base64.b64decode(content)
-        except:
+        except (Exception,):
             return content[:3000], "text/plain"
     
     # Handle different mime types
@@ -556,7 +558,8 @@ async def get_public_agency_settings(
     if hasattr(settings, 'documents') and settings.documents:
         try:
             documents = json.loads(settings.documents) if isinstance(settings.documents, str) else settings.documents
-        except:
+        except (json.JSONDecodeError, TypeError, ValueError):
+            logger.warning("Failed to parse agency documents JSON")
             documents = []
     
     return AgencySettingsResponse(

@@ -543,11 +543,13 @@ async def get_audit_action_types(
 
 @router.get("/users", response_model=List[PlatformUserResponse])
 async def list_platform_users(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     admin: User = Depends(require_platform_admin),
 ):
-    """List all users on the platform."""
-    users = db.query(User).order_by(desc(User.created_at)).all()
+    """List all users on the platform (paginated)."""
+    users = db.query(User).order_by(desc(User.created_at)).offset(skip).limit(limit).all()
     
     result = []
     for u in users:
