@@ -21,6 +21,7 @@ class User(Base):
     full_name = Column(String(255), nullable=False)
     role = Column(String(50), default="caregiver")
     is_active = Column(Boolean, default=True)
+    force_logout_at = Column(DateTime(timezone=True), nullable=True)
     # Voiceprint for speaker identification
     voiceprint = Column(Text, nullable=True)
     voiceprint_created_at = Column(DateTime(timezone=True), nullable=True)

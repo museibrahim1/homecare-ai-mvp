@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
@@ -119,3 +120,32 @@ async def logout(
         db.commit()
 
     return {"message": "Successfully logged out"}
+
+
+@router.post("/logout-all-devices")
+async def logout_all_devices(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Force logout from all devices.
+    
+    Sets force_logout_at to now — any token issued before this timestamp
+    will be rejected by get_current_user, forcing re-authentication on
+    every device.
+    """
+    current_user.force_logout_at = datetime.now(timezone.utc)
+    
+    # Also clear Google tokens
+    if getattr(current_user, 'google_calendar_connected', False):
+        current_user.google_calendar_connected = False
+        current_user.google_calendar_access_token = None
+        current_user.google_calendar_refresh_token = None
+        current_user.google_calendar_token_expiry = None
+    
+    db.commit()
+    
+    return {
+        "success": True,
+        "message": "All sessions have been invalidated. You will need to sign in again on all devices.",
+    }

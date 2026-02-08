@@ -660,6 +660,35 @@ async def delete_platform_user(
     return {"message": f"User {user.email} deleted"}
 
 
+@router.post("/users/{user_id}/force-logout")
+async def force_logout_user(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_platform_admin),
+):
+    """Force logout a user from all devices by invalidating all their tokens."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.force_logout_at = datetime.now(timezone.utc)
+    
+    # Also clear Google tokens
+    if getattr(user, 'google_calendar_connected', False):
+        user.google_calendar_connected = False
+        user.google_calendar_access_token = None
+        user.google_calendar_refresh_token = None
+        user.google_calendar_token_expiry = None
+    
+    db.commit()
+    
+    logger.info(f"Admin {admin.email} force-logged out user {user.email}")
+    return {
+        "success": True,
+        "message": f"{user.email} has been logged out of all devices",
+    }
+
+
 # =============================================================================
 # SUPPORT TICKETS
 # =============================================================================

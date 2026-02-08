@@ -30,6 +30,9 @@ class User(Base, TimestampMixin):
     google_calendar_refresh_token = Column(Text, nullable=True)
     google_calendar_token_expiry = Column(DateTime(timezone=True), nullable=True)
     
+    # Force logout: tokens issued before this timestamp are rejected
+    force_logout_at = Column(DateTime(timezone=True), nullable=True)
+    
     # Voiceprint for speaker identification
     voiceprint = Column(Text, nullable=True)  # Base64-encoded voiceprint from pyannote
     voiceprint_created_at = Column(DateTime(timezone=True), nullable=True)

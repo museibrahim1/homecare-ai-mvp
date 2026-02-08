@@ -1,4 +1,5 @@
 from typing import Generator, Optional
+from datetime import datetime, timezone
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -55,6 +56,22 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user",
         )
+    
+    # Check if this token was issued before a forced logout
+    force_logout_at = getattr(user, 'force_logout_at', None)
+    if force_logout_at is not None:
+        token_iat = payload.get("iat")
+        if token_iat is not None:
+            issued_at = datetime.fromtimestamp(token_iat, tz=timezone.utc)
+            # Ensure force_logout_at is timezone-aware
+            if force_logout_at.tzinfo is None:
+                force_logout_at = force_logout_at.replace(tzinfo=timezone.utc)
+            if issued_at < force_logout_at:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Session expired — please sign in again",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
     
     return user
 

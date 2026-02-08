@@ -29,7 +29,9 @@ import {
   Volume2,
   UserPlus,
   Mail,
-  MoreVertical
+  MoreVertical,
+  LogOut,
+  Laptop
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
@@ -101,9 +103,10 @@ const documentCategories = [
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isLoading: authLoading, logout } = useAuth();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loggingOutAll, setLoggingOutAll] = useState(false);
   const [activeTab, setActiveTab] = useState<'agency' | 'documents' | 'profile' | 'voiceprint' | 'team' | 'notifications' | 'security'>('agency');
   
   // Team state
@@ -532,6 +535,32 @@ export default function SettingsPage() {
       alert('Failed to save settings');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleLogoutAllDevices = async () => {
+    if (!token) return;
+    if (!confirm('This will sign you out of ALL devices, including this one. You will need to sign in again. Continue?')) return;
+    
+    setLoggingOutAll(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/logout-all-devices`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (res.ok) {
+        // Clear local session and redirect to login
+        logout();
+        router.push('/login');
+      } else {
+        alert('Failed to log out of all devices. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to logout all devices:', err);
+      alert('Failed to log out of all devices. Please try again.');
+    } finally {
+      setLoggingOutAll(false);
     }
   };
 
@@ -1654,6 +1683,41 @@ export default function SettingsPage() {
                     </div>
                     <button className="btn-secondary text-sm">Change</button>
                   </div>
+                </div>
+              </div>
+
+              {/* Active Sessions / Log Out All Devices */}
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                  <Laptop className="w-5 h-5 text-primary-400" />
+                  Active Sessions
+                </h2>
+                <p className="text-dark-400 text-sm mb-6">
+                  If you suspect unauthorized access or left your account signed in on another device, 
+                  you can sign out of all devices at once. You will need to sign in again everywhere.
+                </p>
+                <div className="flex items-center justify-between p-4 bg-dark-700/30 rounded-xl border border-dark-700/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                      <LogOut className="w-5 h-5 text-orange-400" />
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">Log out of all devices</p>
+                      <p className="text-dark-400 text-sm">Invalidates all active sessions including this one</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogoutAllDevices}
+                    disabled={loggingOutAll}
+                    className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition disabled:opacity-50"
+                  >
+                    {loggingOutAll ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <LogOut className="w-4 h-4" />
+                    )}
+                    {loggingOutAll ? 'Signing out...' : 'Log Out All'}
+                  </button>
                 </div>
               </div>
 
