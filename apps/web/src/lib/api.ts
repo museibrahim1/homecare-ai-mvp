@@ -1,6 +1,9 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 class ApiClient {
+  private static readonly TIMEOUT_MS = 30000; // 30 second timeout
+  private static readonly MAX_RETRIES = 1; // 1 retry on transient failures
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -15,29 +18,71 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    let lastError: Error | null = null;
+    const maxAttempts = ApiClient.MAX_RETRIES + 1;
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-      // Handle different error formats from FastAPI
-      let errorMessage = 'Request failed';
-      if (typeof error.detail === 'string') {
-        errorMessage = error.detail;
-      } else if (Array.isArray(error.detail)) {
-        // Validation errors come as array
-        errorMessage = error.detail.map((e: any) => e.msg || e.message || JSON.stringify(e)).join(', ');
-      } else if (error.detail?.msg) {
-        errorMessage = error.detail.msg;
-      } else if (error.message) {
-        errorMessage = error.message;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        // Set up abort controller for timeout
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), ApiClient.TIMEOUT_MS);
+
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+          ...options,
+          headers,
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({ detail: 'Request failed' }));
+          // Handle different error formats from FastAPI
+          let errorMessage = 'Request failed';
+          if (typeof error.detail === 'string') {
+            errorMessage = error.detail;
+          } else if (Array.isArray(error.detail)) {
+            // Validation errors come as array
+            errorMessage = error.detail.map((e: any) => e.msg || e.message || JSON.stringify(e)).join(', ');
+          } else if (error.detail?.msg) {
+            errorMessage = error.detail.msg;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          // Only retry on 5xx server errors, not client errors
+          if (response.status >= 500 && attempt < ApiClient.MAX_RETRIES) {
+            lastError = new Error(errorMessage);
+            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+            continue;
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        return response.json();
+      } catch (err: any) {
+        // If it's an abort error, convert to a friendlier message
+        if (err.name === 'AbortError') {
+          lastError = new Error('Request timed out. Please check your connection and try again.');
+        } else if (err.message && !err.message.includes('Request failed')) {
+          // Network error — retry on transient failures
+          lastError = err;
+        } else {
+          throw err;
+        }
+
+        // Don't retry on the last attempt
+        if (attempt >= ApiClient.MAX_RETRIES) {
+          throw lastError || err;
+        }
+
+        // Wait before retry with backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
       }
-      throw new Error(errorMessage);
     }
 
-    return response.json();
+    throw lastError || new Error('Request failed');
   }
 
   // Auth
