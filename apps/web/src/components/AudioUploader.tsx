@@ -207,6 +207,13 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       if (audioElementRef.current) {
         audioElementRef.current.pause();
       }
+      // Stop active recording and release mic on unmount
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
+      if (mediaRecorderRef.current?.stream) {
+        mediaRecorderRef.current.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+      }
     };
   }, [audioUrl]);
 

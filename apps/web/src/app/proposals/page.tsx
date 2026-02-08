@@ -122,21 +122,25 @@ export default function ProposalsPage() {
     
     setExporting(proposal.id);
     try {
-      // Find the visit associated with this contract
-      const visitsRes = await fetch(`${API_URL}/visits`, {
+      // Find the visit associated with this contract's client
+      const visitsRes = await fetch(`${API_URL}/visits?client_id=${proposal.client_id}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       
       if (visitsRes.ok) {
-        const visits = await visitsRes.json();
-        const visit = visits.find((v: any) => v.client_id === proposal.client_id);
+        const data = await visitsRes.json();
+        const items = data?.items || data || [];
+        const visitList = Array.isArray(items) ? items : [];
+        // Use the most recent visit for this client
+        const visit = visitList[0];
         
         if (visit) {
-          // Open the visit page with contract tab
           window.open(`/visits/${visit.id}?tab=contract`, '_blank');
         } else {
           alert('No associated visit found. Please create a visit for this client first.');
         }
+      } else {
+        alert('Failed to load visits. Please try again.');
       }
     } catch (error) {
       console.error('Failed to export:', error);

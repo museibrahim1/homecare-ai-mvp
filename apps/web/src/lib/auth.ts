@@ -105,10 +105,12 @@ export function useAuth() {
   const [sessionWarning, setSessionWarning] = useState(false);
   const lastActivityUpdateRef = useRef<number>(0);
   
-  // Track if we have a session (this is a side-effect-free flag update)
-  if (store.token && !hasEverHadSession) {
-    hasEverHadSession = true;
-  }
+  // Track if we've ever had a valid session (moved to useEffect to avoid side-effects in render)
+  useEffect(() => {
+    if (store.token && !hasEverHadSession) {
+      hasEverHadSession = true;
+    }
+  }, [store.token]);
 
   // Update activity timestamp on user interaction
   // Uses a ref to track timing WITHOUT causing re-renders

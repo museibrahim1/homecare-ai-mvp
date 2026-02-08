@@ -15,11 +15,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   // Clear any existing session when the login page loads
-  // so every sign-in requires fresh credentials
+  // so every sign-in requires fresh credentials.
+  // Intentionally using [] — adding token/logout as deps would cause infinite loop.
   useEffect(() => {
     if (token) {
       logout();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

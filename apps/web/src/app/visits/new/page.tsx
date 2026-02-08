@@ -93,6 +93,12 @@ export default function NewVisitPage() {
       return;
     }
 
+    // Validate scheduled times
+    if (scheduledStart && scheduledEnd && new Date(scheduledEnd) <= new Date(scheduledStart)) {
+      setError('End time must be after start time');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
