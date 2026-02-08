@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey, Text, Boolean, Date, Numeric
+from sqlalchemy import Column, String, ForeignKey, Text, Boolean, Date, Numeric, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from app.db.base import Base, TimestampMixin
@@ -43,3 +43,8 @@ class Contract(Base, TimestampMixin):
     
     # Relationships
     client = relationship("Client", back_populates="contracts")
+
+    __table_args__ = (
+        Index('ix_contracts_client_id', 'client_id'),
+        Index('ix_contracts_status', 'status'),
+    )

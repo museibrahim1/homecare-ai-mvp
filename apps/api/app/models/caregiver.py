@@ -6,7 +6,7 @@ Caregivers don't use the app - they're managed by administrators.
 """
 
 import uuid
-from sqlalchemy import Column, String, Text, Boolean, Date, Integer, Float, ForeignKey
+from sqlalchemy import Column, String, Text, Boolean, Date, Integer, Float, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app.db.base import Base, TimestampMixin
 
@@ -71,3 +71,9 @@ class Caregiver(Base, TimestampMixin):
     # External Integration
     external_id = Column(String(255))
     external_source = Column(String(100))  # e.g., "monday", "workday", "csv"
+
+    __table_args__ = (
+        Index('ix_caregivers_created_by', 'created_by'),
+        Index('ix_caregivers_status', 'status'),
+        Index('ix_caregivers_email', 'email'),
+    )

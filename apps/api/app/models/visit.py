@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, ForeignKey, Text
+from sqlalchemy import Column, String, DateTime, ForeignKey, Text, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from app.db.base import Base, TimestampMixin
@@ -47,3 +47,9 @@ class Visit(Base, TimestampMixin):
     billable_items = relationship("BillableItem", back_populates="visit")
     note = relationship("Note", back_populates="visit", uselist=False)
     calls = relationship("Call", back_populates="visit")
+
+    __table_args__ = (
+        Index('ix_visits_client_id', 'client_id'),
+        Index('ix_visits_caregiver_id', 'caregiver_id'),
+        Index('ix_visits_status', 'status'),
+    )
