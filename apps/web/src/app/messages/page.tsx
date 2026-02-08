@@ -95,7 +95,7 @@ export default function MessagesPage() {
   };
 
   const handleStartConversation = (client: any) => {
-    const avatar = client.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
+    const avatar = (client.full_name || 'U').split(' ').map((n: string) => n[0]).join('').slice(0, 2);
     const newConvo: Conversation = {
       id: `convo_${Date.now()}`,
       name: client.full_name,

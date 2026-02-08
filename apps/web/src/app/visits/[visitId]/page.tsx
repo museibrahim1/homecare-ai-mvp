@@ -203,7 +203,7 @@ export default function VisitDetailPage() {
         await new Promise(resolve => setTimeout(resolve, 2000));
         const status = await api.getPipelineStatus(token, visitId);
         const stepKey = step === 'transcribe' ? 'transcription' : step;
-        const stepState = status.pipeline_state[stepKey];
+        const stepState = status?.pipeline_state?.[stepKey];
         
         if (stepState?.status === 'completed' || stepState?.status === 'failed') {
           break;

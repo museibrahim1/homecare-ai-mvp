@@ -42,25 +42,29 @@ export default function DashboardPage() {
         api.getVisits(token!),
         api.getClients(token!),
       ]);
+      // Safely extract arrays with fallback defaults
+      const items = visitsData?.items || [];
+      const clients = Array.isArray(clientsData) ? clientsData : [];
+
       // Calculate assessments this week from actual data
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const thisWeekCount = visitsData.items.filter((v: any) => {
+      const thisWeekCount = items.filter((v: any) => {
         const created = new Date(v.created_at || v.scheduled_start || 0);
         return created >= weekAgo;
       }).length;
       
       // Find clients with proposal status
-      const proposalList = clientsData.filter((c: any) => c.status === 'proposal');
+      const proposalList = clients.filter((c: any) => c.status === 'proposal');
       setProposalClients(proposalList);
       
       setStats({
-        totalVisits: visitsData.total,
+        totalVisits: visitsData?.total || 0,
         pendingReview: proposalList.length,
-        totalClients: clientsData.length,
+        totalClients: clients.length,
         hoursThisWeek: thisWeekCount,
       });
-      setRecentVisits(visitsData.items.slice(0, 5));
+      setRecentVisits(items.slice(0, 5));
     } catch (err) {
       console.error('Failed to load dashboard:', err);
     } finally {

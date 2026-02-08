@@ -596,9 +596,9 @@ export default function ClientsPage() {
   // Filter by search and insurance type
   const filteredClients = clients.filter(client => {
     // Search filter
-    const matchesSearch = client.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.phone?.includes(searchQuery);
+    const matchesSearch = (client.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (client.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (client.phone || '').includes(searchQuery);
     
     if (!matchesSearch) return false;
     
