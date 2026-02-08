@@ -91,6 +91,73 @@ class EmailService:
             logger.error(f"Failed to send email to {to}: {e}")
             return False
     
+    # ==================== Password Reset ====================
+    
+    def send_password_reset(self, user_email: str, user_name: str, reset_url: str):
+        """Send password reset email with link."""
+        subject = "Reset Your Password - Homecare AI"
+        html = f"""
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
+                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">
+                    Homecare AI
+                </h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">
+                    Password Reset Request
+                </p>
+            </div>
+            
+            <!-- Main content -->
+            <div style="padding: 40px 30px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f512.png" alt="Lock" style="width: 50px; height: 50px;">
+                    <h2 style="color: #1f2937; margin: 15px 0 10px 0; font-size: 24px;">Reset Your Password</h2>
+                </div>
+                
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+                    Hi {user_name},
+                </p>
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+                    We received a request to reset your password. Click the button below to create a new password.
+                    This link will expire in <strong>1 hour</strong>.
+                </p>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="{reset_url}" 
+                       style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
+                        Reset Password
+                    </a>
+                </div>
+                
+                <div style="background: #fef3c7; border-radius: 12px; padding: 16px; margin: 25px 0; border-left: 4px solid #f59e0b;">
+                    <p style="color: #92400e; margin: 0; font-size: 14px;">
+                        <strong>Didn't request this?</strong> If you didn't request a password reset, 
+                        you can safely ignore this email. Your password will not be changed.
+                    </p>
+                </div>
+                
+                <p style="color: #9ca3af; font-size: 13px; margin-top: 20px;">
+                    If the button doesn't work, copy and paste this link into your browser:<br>
+                    <span style="color: #6366f1; word-break: break-all;">{reset_url}</span>
+                </p>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">Homecare AI</p>
+                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                    AI-Powered CRM for Home Healthcare Agencies
+                </p>
+                <p style="color: #d1d5db; font-size: 11px; margin: 15px 0 0 0;">
+                    &copy; 2026 Homecare AI. All rights reserved.
+                </p>
+            </div>
+        </div>
+        """
+        return self.send_email(user_email, subject, html)
+    
     # ==================== Business Emails ====================
     
     def send_business_registration_received(self, business_email: str, business_name: str):

@@ -33,6 +33,10 @@ class User(Base, TimestampMixin):
     # Force logout: tokens issued before this timestamp are rejected
     force_logout_at = Column(DateTime(timezone=True), nullable=True)
     
+    # Password reset
+    password_reset_token = Column(String(255), nullable=True, index=True)
+    password_reset_expires = Column(DateTime(timezone=True), nullable=True)
+    
     # Voiceprint for speaker identification
     voiceprint = Column(Text, nullable=True)  # Base64-encoded voiceprint from pyannote
     voiceprint_created_at = Column(DateTime(timezone=True), nullable=True)

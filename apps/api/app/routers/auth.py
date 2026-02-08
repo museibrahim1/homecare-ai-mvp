@@ -1,16 +1,33 @@
-from datetime import datetime, timezone
+import secrets
+import logging
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
 from app.core.security import (
-    verify_password, create_access_token,
+    verify_password, create_access_token, get_password_hash,
     check_account_lockout, record_failed_login, clear_login_attempts
 )
 from app.models.user import User
 from app.schemas.auth import LoginRequest, Token
 from app.schemas.user import UserResponse
 from app.services.audit import log_action
+from app.services.email import email_service
+
+logger = logging.getLogger(__name__)
+
+PASSWORD_RESET_EXPIRY_HOURS = 1
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 
 router = APIRouter()
 
@@ -148,4 +165,116 @@ async def logout_all_devices(
     return {
         "success": True,
         "message": "All sessions have been invalidated. You will need to sign in again on all devices.",
+    }
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Request a password reset. Sends an email with a reset link.
+    
+    Always returns success to prevent email enumeration attacks.
+    """
+    email = request.email.lower().strip()
+    user = db.query(User).filter(User.email == email).first()
+    
+    if user and user.is_active:
+        # Generate a secure reset token
+        reset_token = secrets.token_urlsafe(48)
+        user.password_reset_token = reset_token
+        user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=PASSWORD_RESET_EXPIRY_HOURS)
+        db.commit()
+        
+        # Build reset URL
+        import os
+        app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+        reset_url = f"{app_url}/reset-password?token={reset_token}"
+        
+        # Send reset email
+        try:
+            email_service.send_password_reset(
+                user_email=user.email,
+                user_name=user.full_name,
+                reset_url=reset_url,
+            )
+            logger.info(f"Password reset email sent to {email}")
+        except Exception as e:
+            logger.error(f"Failed to send password reset email to {email}: {e}")
+    else:
+        # Log but don't reveal whether user exists
+        logger.info(f"Password reset requested for unknown/inactive email: {email}")
+    
+    # Always return success to prevent email enumeration
+    return {
+        "success": True,
+        "message": "If an account exists with that email, a password reset link has been sent.",
+    }
+
+
+@router.post("/reset-password")
+async def reset_password(
+    request: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Reset password using a valid reset token.
+    """
+    user = db.query(User).filter(
+        User.password_reset_token == request.token
+    ).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset link. Please request a new one.",
+        )
+    
+    # Check if token has expired
+    if user.password_reset_expires is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset link. Please request a new one.",
+        )
+    
+    expires = user.password_reset_expires
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    
+    if datetime.now(timezone.utc) > expires:
+        # Clear expired token
+        user.password_reset_token = None
+        user.password_reset_expires = None
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Reset link has expired. Please request a new one.",
+        )
+    
+    # Validate new password length
+    if len(request.new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 6 characters long.",
+        )
+    
+    # Update password
+    user.hashed_password = get_password_hash(request.new_password)
+    
+    # Clear the reset token so it can't be reused
+    user.password_reset_token = None
+    user.password_reset_expires = None
+    
+    # Also invalidate all existing sessions
+    user.force_logout_at = datetime.now(timezone.utc)
+    
+    db.commit()
+    
+    logger.info(f"Password successfully reset for {user.email}")
+    
+    return {
+        "success": True,
+        "message": "Password has been reset successfully. You can now sign in with your new password.",
     }
