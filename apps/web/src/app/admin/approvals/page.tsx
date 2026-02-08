@@ -193,6 +193,7 @@ export default function AdminApprovalsPage() {
 
   const handleApprove = async () => {
     if (!selectedBusiness) return;
+    if (!confirm(`Are you sure you want to approve "${selectedBusiness.name}"? This will grant them full platform access.`)) return;
     setActionLoading(true);
     try {
       const token = getStoredToken();

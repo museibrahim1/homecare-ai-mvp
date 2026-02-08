@@ -130,6 +130,9 @@ export default function SubscriptionsPage() {
   );
 
   const updateSubscriptionStatus = async (id: string, status: string) => {
+    const actionLabels: Record<string, string> = { suspended: 'suspend', cancelled: 'cancel', active: 'reactivate' };
+    const label = actionLabels[status] || status;
+    if (!confirm(`Are you sure you want to ${label} this subscription?`)) return;
     try {
       const token = getStoredToken();
       await fetch(`${API_BASE}/platform/subscriptions/${id}/status?new_status=${status}`, {

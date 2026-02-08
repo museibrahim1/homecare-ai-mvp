@@ -107,6 +107,7 @@ export default function CaregiversPage() {
   };
 
   const handleDeleteCaregiver = async (caregiverId: string) => {
+    if (!confirm('Are you sure you want to delete this caregiver? This action cannot be undone.')) return;
     const response = await fetch(`${API_BASE}/caregivers/${caregiverId}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
