@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { TranscriptSegment } from '@/lib/types';
 import { User, Clock, MessageSquare } from 'lucide-react';
 

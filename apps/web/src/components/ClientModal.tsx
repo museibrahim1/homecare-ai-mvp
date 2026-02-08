@@ -141,6 +141,10 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
       alert('Please enter a name');
       return;
     }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
     setSaving(true);
     try {
       await onSave(formData);

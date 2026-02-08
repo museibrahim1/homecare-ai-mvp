@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { CalendarDays, Plus, Clock, MapPin, User, X, Link2, Check, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { formatLocalDate } from '@/lib/api';
 
 type Appointment = {
   id: number;

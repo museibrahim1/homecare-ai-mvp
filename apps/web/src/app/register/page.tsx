@@ -60,6 +60,10 @@ export default function RegisterPage() {
       setError('Email is required');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
     if (!formData.password) {
       setError('Password is required');
       return;
@@ -81,7 +85,7 @@ export default function RegisterPage() {
           owner_name: formData.owner_name,
           owner_email: formData.email,
           owner_password: formData.password,
-          phone: formData.phone || '000-000-0000',
+          phone: formData.phone || '',
           // Default values for simplified signup
           entity_type: 'llc',
           state_of_incorporation: 'CA',
