@@ -6,7 +6,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   DollarSign, Building2, CreditCard, TrendingUp, Loader2, Shield,
-  RefreshCw, Search, Filter, MoreVertical, Check, X, AlertCircle, ArrowLeft
+  RefreshCw, Search, Filter, MoreVertical, Check, X, AlertCircle, ArrowLeft,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -61,6 +62,8 @@ export default function SubscriptionsPage() {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -113,6 +116,18 @@ export default function SubscriptionsPage() {
   useEffect(() => {
     if (isAuthorized) fetchData();
   }, [filter, isAuthorized]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [search, filter]);
+
+  const filteredSubscriptions = subscriptions.filter(
+    s => !search || s.business_name.toLowerCase().includes(search.toLowerCase())
+  );
+  const paginatedSubscriptions = filteredSubscriptions.slice(
+    page * pageSize,
+    (page + 1) * pageSize
+  );
 
   const updateSubscriptionStatus = async (id: string, status: string) => {
     try {
@@ -260,16 +275,14 @@ export default function SubscriptionsPage() {
                     <Loader2 className="w-6 h-6 text-primary-400 animate-spin mx-auto" />
                   </td>
                 </tr>
-              ) : subscriptions.length === 0 ? (
+              ) : filteredSubscriptions.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-dark-400">
                     No subscriptions found
                   </td>
                 </tr>
               ) : (
-                subscriptions
-                  .filter(s => !search || s.business_name.toLowerCase().includes(search.toLowerCase()))
-                  .map(sub => (
+                paginatedSubscriptions.map(sub => (
                     <tr key={sub.id} className="border-b border-dark-700 hover:bg-dark-700/30">
                       <td className="p-4">
                         <p className="text-white font-medium">{sub.business_name}</p>
@@ -332,6 +345,30 @@ export default function SubscriptionsPage() {
               )}
             </tbody>
           </table>
+          {filteredSubscriptions.length > pageSize && (
+            <div className="p-4 border-t border-dark-700 flex items-center justify-between">
+              <p className="text-dark-400 text-sm">
+                Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, filteredSubscriptions.length)} of {filteredSubscriptions.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage(Math.max(0, page - 1))}
+                  disabled={page === 0}
+                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-4 h-4 text-dark-400" />
+                </button>
+                <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={(page + 1) * pageSize >= filteredSubscriptions.length}
+                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                >
+                  <ChevronRight className="w-4 h-4 text-dark-400" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

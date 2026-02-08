@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Users, Plus, Search, Phone, ChevronRight,
+  Users, Plus, Search, Phone, ChevronRight, ChevronLeft,
   MapPin, Star, Clock, Upload, AlertCircle
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
@@ -46,6 +46,8 @@ export default function CaregiversPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCaregiver, setSelectedCaregiver] = useState<Caregiver | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
 
   useEffect(() => {
     if (!authLoading && !token) router.push('/login');
@@ -123,6 +125,14 @@ export default function CaregiversPage() {
     cg.phone?.includes(searchQuery) ||
     cg.certification_level?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const paginatedCaregivers = filteredCaregivers.slice(
+    page * pageSize,
+    (page + 1) * pageSize
+  );
+
+  useEffect(() => {
+    setPage(0);
+  }, [searchQuery]);
 
   if (authLoading) {
     return (
@@ -219,7 +229,7 @@ export default function CaregiversPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredCaregivers.map((caregiver) => (
+              {paginatedCaregivers.map((caregiver) => (
                 <div
                   key={caregiver.id}
                   onClick={() => handleEditCaregiver(caregiver)}
@@ -299,6 +309,30 @@ export default function CaregiversPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {filteredCaregivers.length > pageSize && (
+            <div className="p-4 border-t border-dark-700 flex items-center justify-between mt-4">
+              <p className="text-dark-400 text-sm">
+                Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, filteredCaregivers.length)} of {filteredCaregivers.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage(Math.max(0, page - 1))}
+                  disabled={page === 0}
+                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-4 h-4 text-dark-400" />
+                </button>
+                <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={(page + 1) * pageSize >= filteredCaregivers.length}
+                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                >
+                  <ChevronRight className="w-4 h-4 text-dark-400" />
+                </button>
+              </div>
             </div>
           )}
         </div>
