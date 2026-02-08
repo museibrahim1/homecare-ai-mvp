@@ -22,11 +22,9 @@ class ApiClient {
     const maxAttempts = ApiClient.MAX_RETRIES + 1;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), ApiClient.TIMEOUT_MS);
       try {
-        // Set up abort controller for timeout
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), ApiClient.TIMEOUT_MS);
-
         const response = await fetch(`${API_BASE}${endpoint}`, {
           ...options,
           headers,
@@ -62,6 +60,7 @@ class ApiClient {
 
         return response.json();
       } catch (err: any) {
+        clearTimeout(timeout);
         // If it's an abort error, convert to a friendlier message
         if (err.name === 'AbortError') {
           lastError = new Error('Request timed out. Please check your connection and try again.');
@@ -256,27 +255,41 @@ class ApiClient {
     }, token);
   }
 
-  // Upload
+  // Upload — uses longer timeout (5 minutes) for large audio files
   async uploadAudio(token: string, visitId: string, file: File, autoProcess: boolean = true) {
     const formData = new FormData();
     formData.append('visit_id', visitId);
     formData.append('file', file);
     formData.append('auto_process', autoProcess ? 'true' : 'false');
 
-    const response = await fetch(`${API_BASE}/uploads/audio`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 300000); // 5 minute timeout for uploads
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
-      throw new Error(error.detail || 'Upload failed');
+    try {
+      const response = await fetch(`${API_BASE}/uploads/audio`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
+        throw new Error(error.detail || 'Upload failed');
+      }
+
+      return response.json();
+    } catch (err: any) {
+      clearTimeout(timeout);
+      if (err.name === 'AbortError') {
+        throw new Error('Upload timed out. The file may be too large — please try a shorter recording.');
+      }
+      throw err;
     }
-
-    return response.json();
   }
 }
 

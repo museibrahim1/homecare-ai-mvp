@@ -60,8 +60,9 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   
   // Recording functions
   const startRecording = async () => {
+    let stream: MediaStream | null = null;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      stream = await navigator.mediaDevices.getUserMedia({ 
         audio: { 
           echoCancellation: true, 
           noiseSuppression: true,
@@ -79,13 +80,14 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
         }
       };
       
+      const capturedStream = stream;
       mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         setAudioUrl(URL.createObjectURL(blob));
         
         // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
+        capturedStream.getTracks().forEach(track => track.stop());
       };
       
       mediaRecorder.start(1000); // Collect data every second
@@ -99,6 +101,10 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       }, 1000);
       
     } catch (err: any) {
+      // Clean up stream tracks if we got a stream before the error
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
       console.error('Recording error:', err);
       if (err.name === 'NotAllowedError') {
         setError('Microphone access denied. Please allow microphone access in your browser settings.');

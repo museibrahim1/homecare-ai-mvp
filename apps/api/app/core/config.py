@@ -11,12 +11,12 @@ class Settings(BaseSettings):
     
     # S3/MinIO
     s3_endpoint_url: str = "http://localhost:9000"
-    s3_access_key: str = "minio"
-    s3_secret_key: str = "minio12345"
+    s3_access_key: str = ""  # Set S3_ACCESS_KEY env var
+    s3_secret_key: str = ""  # Set S3_SECRET_KEY env var
     s3_bucket: str = "homecare-audio"
     
     # JWT - HIPAA: Shorter token lifetime for security
-    jwt_secret: str = "change-me-to-a-secure-random-string"
+    jwt_secret: str = ""  # REQUIRED: set JWT_SECRET env var
     jwt_issuer: str = "homecare-ai"
     jwt_algorithm: str = "HS256"
     jwt_expiration_hours: int = 1  # HIPAA: 1 hour token lifetime (was 24)
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     use_gpu: bool = False
     
     # Application
-    debug: bool = True
+    debug: bool = False
     log_level: str = "INFO"
     
     # Google Calendar
@@ -49,7 +49,14 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> Settings:
-    return Settings()
+    s = Settings()
+    # Fail fast if critical secrets are not configured
+    if not s.jwt_secret:
+        raise RuntimeError(
+            "JWT_SECRET environment variable is required. "
+            "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(64))\""
+        )
+    return s
 
 
 settings = get_settings()

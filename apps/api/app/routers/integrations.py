@@ -410,6 +410,7 @@ async def import_clients_from_csv(
 async def monday_webhook(
     payload: Dict[str, Any],
     authorization: Optional[str] = Header(None),
+    x_webhook_secret: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ):
     """
@@ -420,9 +421,15 @@ async def monday_webhook(
     - Item created events
     - Item updated events
     """
-    # Handle challenge verification
+    # Handle challenge verification (Monday requires this unauthenticated)
     if "challenge" in payload:
         return {"challenge": payload["challenge"]}
+    
+    # Verify webhook secret
+    import os
+    expected_secret = os.getenv("WEBHOOK_SECRET", "")
+    if expected_secret and x_webhook_secret != expected_secret:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid webhook secret")
     
     event = payload.get("event", {})
     event_type = event.get("type")
@@ -504,7 +511,13 @@ async def generic_webhook(
     
     Expects JSON with client data fields.
     Can include single client or array of clients.
+    Requires X-Api-Key header matching WEBHOOK_API_KEY env var.
     """
+    import os
+    expected_key = os.getenv("WEBHOOK_API_KEY", "")
+    if not expected_key or x_api_key != expected_key:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing API key")
+    
     # Handle single client or array
     clients_data = payload.get("clients") or payload.get("data") or [payload]
     if not isinstance(clients_data, list):

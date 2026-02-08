@@ -400,13 +400,8 @@ async def email_contract(
     current_user: User = Depends(get_current_user),
 ):
     """Email the contract PDF to a recipient."""
-    # Get visit with user scoping
-    visit = db.query(Visit).filter(
-        Visit.id == visit_id,
-        Visit.user_id == current_user.id
-    ).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    # Get visit with proper data isolation (via client ownership)
+    visit = get_user_visit(db, visit_id, current_user)
     
     if not visit.client_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Visit has no associated client")
@@ -523,12 +518,8 @@ async def email_note(
     current_user: User = Depends(get_current_user),
 ):
     """Email the visit note PDF to a recipient."""
-    visit = db.query(Visit).filter(
-        Visit.id == visit_id,
-        Visit.user_id == current_user.id
-    ).first()
-    if not visit:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Visit not found")
+    # Get visit with proper data isolation (via client ownership)
+    visit = get_user_visit(db, visit_id, current_user)
     
     # Load the client
     client = db.query(Client).filter(Client.id == visit.client_id).first() if visit.client_id else None

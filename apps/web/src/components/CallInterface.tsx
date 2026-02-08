@@ -6,6 +6,7 @@ import {
   AlertCircle, Clock, User, MicOff, Volume2, 
   PhoneIncoming, PhoneOutgoing
 } from 'lucide-react';
+import { getStoredToken } from '@/lib/auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -91,7 +92,7 @@ export default function CallInterface({
     if (!callId) return;
     
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       const response = await fetch(`${API_BASE}/calls/${callId}/status`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -141,7 +142,7 @@ export default function CallInterface({
     setError(null);
     
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       const response = await fetch(`${API_BASE}/calls/initiate`, {
         method: 'POST',
         headers: {
@@ -180,7 +181,7 @@ export default function CallInterface({
     if (!callId) return;
     
     try {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       await fetch(`${API_BASE}/calls/${callId}/end`, {
         method: 'POST',
         headers: {
