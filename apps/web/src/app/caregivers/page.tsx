@@ -173,7 +173,7 @@ export default function CaregiversPage() {
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
               <p className="text-dark-400 text-sm mb-1">Total Caregivers</p>
               <p className="text-3xl font-bold text-white">{caregivers.length}</p>

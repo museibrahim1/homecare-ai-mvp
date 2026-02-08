@@ -216,64 +216,68 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">
+              <label htmlFor="reg-business" className="block text-sm font-medium text-dark-300 mb-2">
                 Business Name
               </label>
               <div className="relative">
                 <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                 <input
+                  id="reg-business"
                   type="text"
                   value={formData.business_name}
                   onChange={(e) => updateField('business_name', e.target.value)}
-                  className="input-dark pl-12"
+                  className="input-dark w-full pl-12"
                   placeholder="ABC Home Care"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">
+              <label htmlFor="reg-name" className="block text-sm font-medium text-dark-300 mb-2">
                 Your Name
               </label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                 <input
+                  id="reg-name"
                   type="text"
                   value={formData.owner_name}
                   onChange={(e) => updateField('owner_name', e.target.value)}
-                  className="input-dark pl-12"
+                  className="input-dark w-full pl-12"
                   placeholder="John Smith"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">
+              <label htmlFor="reg-email" className="block text-sm font-medium text-dark-300 mb-2">
                 Email
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                 <input
+                  id="reg-email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
-                  className="input-dark pl-12"
+                  className="input-dark w-full pl-12"
                   placeholder="you@company.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">
+              <label htmlFor="reg-password" className="block text-sm font-medium text-dark-300 mb-2">
                 Password
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                 <input
+                  id="reg-password"
                   type="password"
                   value={formData.password}
                   onChange={(e) => updateField('password', e.target.value)}
-                  className="input-dark pl-12"
+                  className="input-dark w-full pl-12"
                   placeholder="••••••••"
                 />
               </div>
@@ -281,16 +285,17 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">
+              <label htmlFor="reg-phone" className="block text-sm font-medium text-dark-300 mb-2">
                 Phone <span className="text-dark-500">(optional)</span>
               </label>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                 <input
+                  id="reg-phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
-                  className="input-dark pl-12"
+                  className="input-dark w-full pl-12"
                   placeholder="(555) 123-4567"
                 />
               </div>

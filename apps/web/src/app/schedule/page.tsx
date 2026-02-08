@@ -308,8 +308,8 @@ function ScheduleContent() {
     }
 
     const redirectUri = `${window.location.origin}/schedule`;
-    // Request all Google scopes so the token works for Calendar, Drive, and Gmail
-    const scope = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send';
+    // Request Calendar and Drive scopes only (no email access)
+    const scope = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file';
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
     
     window.location.href = authUrl;

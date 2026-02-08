@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Mic, Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle,
-  FileSignature, UserCheck, UserX, Loader2, FileText
+  FileSignature, UserCheck, UserX, Loader2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -67,7 +67,6 @@ export default function DashboardPage() {
       });
       setRecentVisits(items.slice(0, 5));
     } catch (err: any) {
-      console.error('Failed to load dashboard:', err);
       setError(err?.message || 'Something went wrong');
     } finally {
       setLoading(false);
@@ -96,7 +95,6 @@ export default function DashboardPage() {
       setProposalClients(prev => prev.filter(c => c.id !== clientId));
       setStats(prev => ({ ...prev, pendingReview: prev.pendingReview - 1 }));
     } catch (err) {
-      console.error(`Failed to update client:`, err);
       setError('Failed to update client status. Please try again.');
     } finally {
       setUpdatingClientId(null);
@@ -144,19 +142,19 @@ export default function DashboardPage() {
           {/* Stats Grid - responsive: 2 cols on mobile, 4 on desktop */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6 lg:mb-8">
             {[
-              { label: 'Total Assessments', value: stats.totalVisits, icon: Calendar, color: 'primary' },
-              { label: 'Pending Proposals', value: stats.pendingReview, icon: AlertCircle, color: 'orange' },
-              { label: 'Total Clients', value: stats.totalClients, icon: Users, color: 'green' },
-              { label: 'Assessments This Week', value: stats.hoursThisWeek, icon: Clock, color: 'cyan' },
+              { label: 'Total Assessments', value: stats.totalVisits, icon: Calendar, bgClass: 'bg-accent-primary/20', textClass: 'text-accent-primary' },
+              { label: 'Pending Proposals', value: stats.pendingReview, icon: AlertCircle, bgClass: 'bg-accent-orange/20', textClass: 'text-accent-orange' },
+              { label: 'Total Clients', value: stats.totalClients, icon: Users, bgClass: 'bg-accent-green/20', textClass: 'text-accent-green' },
+              { label: 'Assessments This Week', value: stats.hoursThisWeek, icon: Clock, bgClass: 'bg-accent-cyan/20', textClass: 'text-accent-cyan' },
             ].map((stat, i) => (
               <div key={i} className="card p-3 lg:p-5">
                 <div className="flex items-center gap-2 lg:gap-3 mb-2 lg:mb-3">
-                  <div className={`w-8 h-8 lg:w-10 lg:h-10 bg-accent-${stat.color}/20 rounded-lg lg:rounded-xl flex items-center justify-center`}>
-                    <stat.icon className={`w-4 h-4 lg:w-5 lg:h-5 text-accent-${stat.color}`} />
+                  <div className={`w-8 h-8 lg:w-10 lg:h-10 ${stat.bgClass} rounded-lg lg:rounded-xl flex items-center justify-center`}>
+                    <stat.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${stat.textClass}`} />
                   </div>
                 </div>
                 <p className="text-dark-400 text-xs lg:text-sm mb-1 truncate">{stat.label}</p>
-                <p className={`text-xl lg:text-3xl font-bold text-accent-${stat.color}`}>{stat.value}</p>
+                <p className={`text-xl lg:text-3xl font-bold ${stat.textClass}`}>{stat.value}</p>
               </div>
             ))}
           </div>
@@ -262,7 +260,7 @@ export default function DashboardPage() {
                         <p className="text-dark-400 text-xs lg:text-sm">{visit.scheduled_start ? format(new Date(visit.scheduled_start), 'MMM d, h:mm a') : 'Not scheduled'}</p>
                       </div>
                       <span className={`px-2 py-1 rounded-lg text-[10px] lg:text-xs flex-shrink-0 ${visit.status === 'approved' ? 'bg-accent-green/20 text-accent-green' : 'bg-accent-orange/20 text-accent-orange'}`}>
-                        {visit.status.replace('_', ' ')}
+                        {(visit.status || 'unknown').replace('_', ' ')}
                       </span>
                     </div>
                   ))}
@@ -275,14 +273,14 @@ export default function DashboardPage() {
               <h2 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">Quick Actions</h2>
               <div className="space-y-2 lg:space-y-3">
                 {[
-                  { label: 'New Assessment', desc: 'Start a new intake/visit', icon: Calendar, href: '/visits/new', color: 'primary' },
-                  { label: 'Add Client', desc: 'Register new client', icon: Users, href: '/clients', color: 'green' },
-                  { label: 'Export Proposals', desc: 'View & export contracts', icon: TrendingUp, href: '/proposals', color: 'cyan' },
+                  { label: 'New Assessment', desc: 'Start a new intake/visit', icon: Calendar, href: '/visits/new', bgClass: 'bg-accent-primary/20', textClass: 'text-accent-primary' },
+                  { label: 'Add Client', desc: 'Register new client', icon: Users, href: '/clients', bgClass: 'bg-accent-green/20', textClass: 'text-accent-green' },
+                  { label: 'Export Proposals', desc: 'View & export contracts', icon: TrendingUp, href: '/proposals', bgClass: 'bg-accent-cyan/20', textClass: 'text-accent-cyan' },
                 ].map((action, i) => (
                   <button key={i} onClick={() => router.push(action.href)} className="w-full p-3 lg:p-4 bg-dark-700/50 hover:bg-dark-700 rounded-lg lg:rounded-xl text-left transition group">
                     <div className="flex items-center gap-2 lg:gap-3">
-                      <div className={`w-8 h-8 lg:w-10 lg:h-10 bg-accent-${action.color}/20 rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0`}>
-                        <action.icon className={`w-4 h-4 lg:w-5 lg:h-5 text-accent-${action.color}`} />
+                      <div className={`w-8 h-8 lg:w-10 lg:h-10 ${action.bgClass} rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0`}>
+                        <action.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${action.textClass}`} />
                       </div>
                       <div className="min-w-0">
                         <p className="text-white font-medium text-sm lg:text-base">{action.label}</p>

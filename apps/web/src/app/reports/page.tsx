@@ -67,7 +67,6 @@ export default function ReportsPage() {
         setOverviewStats(data);
       }
     } catch (err) {
-      console.error('Failed to load overview stats:', err);
     }
   };
 
@@ -93,7 +92,6 @@ export default function ReportsPage() {
         setReportData(data);
       }
     } catch (err) {
-      console.error('Failed to load report:', err);
     } finally {
       setLoading(false);
     }
@@ -142,7 +140,6 @@ export default function ReportsPage() {
         a.remove();
       }
     } catch (err) {
-      console.error('Download failed:', err);
     } finally {
       setDownloading(false);
     }
@@ -165,28 +162,32 @@ export default function ReportsPage() {
       title: 'Weekly Timesheet',
       description: 'Export billable hours for the past week',
       icon: Clock,
-      color: 'primary',
+      bgClass: 'bg-accent-primary/20',
+      textClass: 'text-accent-primary',
     },
     {
       id: 'monthly' as ReportType,
       title: 'Monthly Summary',
       description: 'Overview of visits and services by month',
       icon: Calendar,
-      color: 'green',
+      bgClass: 'bg-accent-green/20',
+      textClass: 'text-accent-green',
     },
     {
       id: 'billing' as ReportType,
       title: 'Billing Report',
       description: 'Detailed breakdown of billable items',
       icon: DollarSign,
-      color: 'orange',
+      bgClass: 'bg-accent-orange/20',
+      textClass: 'text-accent-orange',
     },
     {
       id: 'activity' as ReportType,
       title: 'Client Activity',
       description: 'Visit history per client',
       icon: Users,
-      color: 'cyan',
+      bgClass: 'bg-accent-cyan/20',
+      textClass: 'text-accent-cyan',
     },
   ];
 
@@ -228,7 +229,7 @@ export default function ReportsPage() {
         return (
           <div className="p-6 space-y-6">
             {/* Summary Row */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-dark-700/50 rounded-xl p-4 text-center">
                 <p className="text-dark-400 text-xs mb-1">Period</p>
                 <p className="text-white font-medium text-sm">
@@ -553,7 +554,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
@@ -622,8 +623,8 @@ export default function ReportsPage() {
                     className="p-6 cursor-pointer group hover:bg-dark-700/30 transition"
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 bg-accent-${report.color}/20 rounded-xl flex items-center justify-center`}>
-                        <report.icon className={`w-6 h-6 text-accent-${report.color}`} />
+                      <div className={`w-12 h-12 ${report.bgClass} rounded-xl flex items-center justify-center`}>
+                        <report.icon className={`w-6 h-6 ${report.textClass}`} />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-white mb-1">{report.title}</h3>

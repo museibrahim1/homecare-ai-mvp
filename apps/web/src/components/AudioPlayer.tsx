@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Mic } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Mic, Loader2 } from 'lucide-react';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 interface AudioPlayerProps {
   visitId: string;
@@ -15,9 +17,32 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
   const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
+  const [loadingAudio, setLoadingAudio] = useState(true);
 
   useEffect(() => {
-    setAudioUrl(null);
+    // Try to load audio URL from API
+    const loadAudio = async () => {
+      setLoadingAudio(true);
+      setAudioUrl(null);
+      try {
+        const token = JSON.parse(localStorage.getItem('homecare-auth') || '{}')?.state?.token;
+        if (!token) { setLoadingAudio(false); return; }
+        const res = await fetch(`${API_BASE}/visits/${visitId}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const visit = await res.json();
+          if (visit.audio_assets && visit.audio_assets.length > 0) {
+            setAudioUrl(visit.audio_assets[0].url || visit.audio_assets[0].file_url);
+          }
+        }
+      } catch {
+        // No audio available
+      } finally {
+        setLoadingAudio(false);
+      }
+    };
+    loadAudio();
   }, [visitId]);
 
   const togglePlay = () => {
@@ -66,14 +91,30 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Generate waveform bars
-  const waveformBars = Array.from({ length: 40 }, (_, i) => {
-    const height = Math.random() * 60 + 20;
+  // Generate stable waveform bar heights (only once)
+  const barHeights = useMemo(() =>
+    Array.from({ length: 40 }, (_, i) => {
+      // Deterministic pseudo-random based on index
+      const seed = (i * 2654435761) % 100;
+      return seed * 0.6 + 20;
+    }),
+  []);
+
+  const waveformBars = barHeights.map((height, i) => {
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
     const barProgress = (i / 40) * 100;
     const isActive = barProgress <= progress;
     return { height, isActive };
   });
+
+  if (loadingAudio) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8">
+        <Loader2 className="w-8 h-8 text-primary-400 animate-spin mb-4" />
+        <p className="text-dark-300 text-center">Loading audio...</p>
+      </div>
+    );
+  }
 
   if (!audioUrl) {
     return (

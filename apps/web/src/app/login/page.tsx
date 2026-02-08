@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Mic, Waves, Shield, Zap } from 'lucide-react';
@@ -37,7 +38,6 @@ export default function LoginPage() {
       try {
         userData = await api.getMe(response.access_token);
       } catch (userErr) {
-        console.error('Failed to fetch user data:', userErr);
       }
       
       // Set token and user data
@@ -49,10 +49,11 @@ export default function LoginPage() {
       // Small delay to ensure localStorage is updated before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Check if this is a first-time login (show welcome page)
-      const hasSeenWelcome = localStorage.getItem('has-seen-welcome');
+      // Check if this is a first-time login for this user (show welcome page)
+      const userId = userData?.id || email;
+      const hasSeenWelcome = localStorage.getItem(`has-seen-welcome-${userId}`);
       if (!hasSeenWelcome) {
-        localStorage.setItem('has-seen-welcome', 'true');
+        localStorage.setItem(`has-seen-welcome-${userId}`, 'true');
         router.push('/welcome');
       } else {
         router.push('/dashboard');
@@ -126,7 +127,7 @@ export default function LoginPage() {
 
         <div className="relative z-10">
           <p className="text-dark-400 text-sm">
-            © 2024 Homecare AI. All rights reserved.
+            © {new Date().getFullYear()} Homecare AI. All rights reserved.
           </p>
         </div>
       </div>
@@ -175,9 +176,9 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-sm font-medium text-dark-200">
                   Password
                 </label>
-                <a href="/forgot-password" className="text-sm text-primary-400 hover:text-primary-300 hover:underline">
+                <Link href="/forgot-password" className="text-sm text-primary-400 hover:text-primary-300 hover:underline">
                   Forgot password?
-                </a>
+                </Link>
               </div>
               <input
                 id="password"
@@ -213,10 +214,10 @@ export default function LoginPage() {
 
           <div className="mt-8 text-center">
             <p className="text-dark-400 text-sm">
-              New to HomeCare AI?{' '}
-              <a href="/register" className="text-primary-400 hover:underline font-medium">
+              New to Homecare AI?{' '}
+              <Link href="/register" className="text-primary-400 hover:underline font-medium">
                 Register your agency
-              </a>
+              </Link>
             </p>
           </div>
         </div>

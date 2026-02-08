@@ -148,24 +148,32 @@ export default function VisitDetailPage() {
       try {
         const transcriptData = await api.getTranscript(token!, visitId);
         setTranscript(transcriptData.segments);
-      } catch (e) {}
+      } catch {
+        // Transcript not available yet - this is expected for new visits
+      }
 
       try {
         const billablesData = await api.getBillables(token!, visitId);
         setBillables(billablesData.items);
-      } catch (e) {}
+      } catch {
+        // Billables not generated yet
+      }
 
       try {
         const contractData = await api.getContract(token!, visitId);
         setContract(contractData);
-      } catch (e) {}
+      } catch {
+        // Contract not generated yet
+      }
 
       try {
         const noteData = await api.getNote(token!, visitId);
         setNote(noteData);
-      } catch (e) {}
+      } catch {
+        // Notes not generated yet
+      }
     } catch (err) {
-      console.error('Failed to load visit:', err);
+      setError('Failed to load visit data. Please try again.');
     } finally {
       setLoading(false);
     }

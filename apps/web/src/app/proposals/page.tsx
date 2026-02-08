@@ -87,7 +87,6 @@ export default function ProposalsPage() {
           setClients(clientsMap);
         }
       } catch (error) {
-        console.error('Failed to fetch data:', error);
       }
       setLoading(false);
     };
@@ -144,7 +143,6 @@ export default function ProposalsPage() {
         setError('Failed to load visits. Please try again.');
       }
     } catch (error) {
-      console.error('Failed to export:', error);
       setError('Failed to export proposal');
     }
     setExporting(null);
@@ -154,13 +152,15 @@ export default function ProposalsPage() {
     if (!token) return;
     
     try {
-      const visitsRes = await fetch(`${API_URL}/visits`, {
+      const visitsRes = await fetch(`${API_URL}/visits?client_id=${proposal.client_id}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       
       if (visitsRes.ok) {
-        const visits = await visitsRes.json();
-        const visit = visits.find((v: any) => v.client_id === proposal.client_id);
+        const data = await visitsRes.json();
+        const items = data?.items || data || [];
+        const visitList = Array.isArray(items) ? items : [];
+        const visit = visitList[0];
         
         if (visit) {
           window.location.href = `/visits/${visit.id}?tab=contract`;
@@ -169,7 +169,7 @@ export default function ProposalsPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to navigate:', error);
+      setError('Failed to navigate to proposal.');
     }
   };
 
@@ -254,7 +254,7 @@ export default function ProposalsPage() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl p-4">
             <p className="text-dark-400 text-sm mb-1">Total Proposals</p>
             <p className="text-2xl font-bold text-white">{proposals.length}</p>
@@ -375,13 +375,6 @@ export default function ProposalsPage() {
                   >
                     <Eye className="w-4 h-4" />
                     View
-                  </button>
-                  <button
-                    onClick={() => handleViewProposal(proposal)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors text-sm"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    Edit
                   </button>
                   <button
                     onClick={() => handleExportPDF(proposal)}

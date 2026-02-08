@@ -157,6 +157,15 @@ export default function SettingsPage() {
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('contract_template');
   
+  // Notification preferences state
+  const [notifications, setNotifications] = useState({
+    email_notifications: true,
+    visit_reminders: true,
+    weekly_summary: false,
+    new_client_alerts: true,
+    contract_expiration_alerts: true,
+  });
+  
   const logoInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
@@ -209,7 +218,6 @@ export default function SettingsPage() {
         setTeamLimits(limitsData);
       }
     } catch (err) {
-      console.error('Failed to load team:', err);
     } finally {
       setLoadingTeam(false);
     }
@@ -228,7 +236,6 @@ export default function SettingsPage() {
         setVoiceprintCreatedAt(data.created_at);
       }
     } catch (error) {
-      console.error('Failed to load voiceprint status:', error);
     }
   };
 
@@ -268,7 +275,6 @@ export default function SettingsPage() {
       }, 1000);
 
     } catch (error) {
-      console.error('Failed to start recording:', error);
       setError('Could not access microphone. Please allow microphone access.');
     }
   };
@@ -309,7 +315,6 @@ export default function SettingsPage() {
         setError(`Failed to create Voice ID: ${error.detail || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Failed to upload voiceprint:', error);
       setError('Failed to create Voice ID. Please try again.');
     } finally {
       setUploadingVoiceprint(false);
@@ -332,7 +337,6 @@ export default function SettingsPage() {
         setVoiceprintCreatedAt(null);
       }
     } catch (error) {
-      console.error('Failed to delete voiceprint:', error);
     }
   };
 
@@ -349,7 +353,6 @@ export default function SettingsPage() {
         }
       }
     } catch (err) {
-      console.error('Failed to load agency settings:', err);
     }
   };
 
@@ -433,7 +436,6 @@ export default function SettingsPage() {
           setTimeout(() => setSaved(false), 2000);
         }
       } catch (err) {
-        console.error('Failed to save document:', err);
       }
       
       // Extract company info from document
@@ -493,7 +495,6 @@ export default function SettingsPage() {
         setTimeout(() => setExtractionMessage(null), 3000);
       }
     } catch (err) {
-      console.error('Extraction failed:', err);
       setExtractionMessage(null);
     } finally {
       setExtracting(false);
@@ -531,7 +532,6 @@ export default function SettingsPage() {
         setError('Failed to save settings');
       }
     } catch (err) {
-      console.error('Failed to save:', err);
       setError('Failed to save settings');
     } finally {
       setSaving(false);
@@ -557,7 +557,6 @@ export default function SettingsPage() {
         setError('Failed to log out of all devices. Please try again.');
       }
     } catch (err) {
-      console.error('Failed to logout all devices:', err);
       setError('Failed to log out of all devices. Please try again.');
     } finally {
       setLoggingOutAll(false);
@@ -640,7 +639,6 @@ export default function SettingsPage() {
         loadTeamMembersInternal();
       }
     } catch (err) {
-      console.error('Failed to update member:', err);
     }
   };
 
@@ -708,7 +706,7 @@ export default function SettingsPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as typeof activeTab)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-primary-500/20 text-primary-400'
@@ -1157,15 +1155,33 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-dark-300 text-sm mb-1">Full Name</label>
-                  <input type="text" defaultValue="Admin User" className="input-dark w-full" />
+                  <input
+                    type="text"
+                    value={agency.contact_person}
+                    onChange={(e) => setAgency(prev => ({ ...prev, contact_person: e.target.value }))}
+                    className="input-dark w-full"
+                    placeholder="Your full name"
+                  />
                 </div>
                 <div>
                   <label className="block text-dark-300 text-sm mb-1">Email</label>
-                  <input type="email" defaultValue="admin@palmtai.com" className="input-dark w-full" />
+                  <input
+                    type="email"
+                    value={agency.email}
+                    onChange={(e) => setAgency(prev => ({ ...prev, email: e.target.value }))}
+                    className="input-dark w-full"
+                    placeholder="you@company.com"
+                  />
                 </div>
                 <div>
                   <label className="block text-dark-300 text-sm mb-1">Phone</label>
-                  <input type="tel" placeholder="+1 (555) 000-0000" className="input-dark w-full" />
+                  <input
+                    type="tel"
+                    value={agency.phone}
+                    onChange={(e) => setAgency(prev => ({ ...prev, phone: e.target.value }))}
+                    className="input-dark w-full"
+                    placeholder="+1 (555) 000-0000"
+                  />
                 </div>
               </div>
             </div>
@@ -1453,7 +1469,7 @@ export default function SettingsPage() {
                             onChange={(e) => handleUpdateMember(member.id, { role: e.target.value })}
                             className="bg-dark-700 border border-dark-600 rounded-lg px-3 py-1.5 text-sm text-white"
                           >
-                            <option value="user">Owner</option>
+                            <option value="owner">Owner</option>
                             <option value="admin">Admin</option>
                             <option value="caregiver">Caregiver</option>
                           </select>
@@ -1653,17 +1669,22 @@ export default function SettingsPage() {
                 Notification Preferences
               </h2>
               <div className="space-y-4">
-                {[
-                  { label: 'Email Notifications', value: true },
-                  { label: 'Visit Reminders', value: true },
-                  { label: 'Weekly Summary', value: false },
-                  { label: 'New Client Alerts', value: true },
-                  { label: 'Contract Expiration Alerts', value: true },
-                ].map((setting, i) => (
-                  <div key={i} className="flex items-center justify-between py-3 border-b border-dark-600/50 last:border-0">
+                {([
+                  { label: 'Email Notifications', key: 'email_notifications' as const },
+                  { label: 'Visit Reminders', key: 'visit_reminders' as const },
+                  { label: 'Weekly Summary', key: 'weekly_summary' as const },
+                  { label: 'New Client Alerts', key: 'new_client_alerts' as const },
+                  { label: 'Contract Expiration Alerts', key: 'contract_expiration_alerts' as const },
+                ]).map((setting) => (
+                  <div key={setting.key} className="flex items-center justify-between py-3 border-b border-dark-600/50 last:border-0">
                     <span className="text-dark-200">{setting.label}</span>
-                    <button className={`w-12 h-6 rounded-full transition-colors relative ${setting.value ? 'bg-primary-500' : 'bg-dark-600'}`}>
-                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${setting.value ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                    <button
+                      role="switch"
+                      aria-checked={notifications[setting.key]}
+                      onClick={() => setNotifications(prev => ({ ...prev, [setting.key]: !prev[setting.key] }))}
+                      className={`w-12 h-6 rounded-full transition-colors relative ${notifications[setting.key] ? 'bg-primary-500' : 'bg-dark-600'}`}
+                    >
+                      <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${notifications[setting.key] ? 'translate-x-6' : 'translate-x-0.5'}`} />
                     </button>
                   </div>
                 ))}
@@ -1685,14 +1706,14 @@ export default function SettingsPage() {
                       <p className="text-dark-200">Two-Factor Authentication</p>
                       <p className="text-dark-500 text-sm">Add an extra layer of security</p>
                     </div>
-                    <button className="btn-secondary text-sm">Enable</button>
+                    <button onClick={() => setError('Two-factor authentication setup is coming soon.')} className="btn-secondary text-sm">Enable</button>
                   </div>
                   <div className="flex items-center justify-between py-3">
                     <div>
                       <p className="text-dark-200">Change Password</p>
                       <p className="text-dark-500 text-sm">Update your account password</p>
                     </div>
-                    <button className="btn-secondary text-sm">Change</button>
+                    <button onClick={() => router.push('/forgot-password')} className="btn-secondary text-sm">Change</button>
                   </div>
                 </div>
               </div>
@@ -1742,7 +1763,14 @@ export default function SettingsPage() {
                     <p className="text-dark-200">Delete Account</p>
                     <p className="text-dark-500 text-sm">Permanently delete your account and all data</p>
                   </div>
-                  <button className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition">
+                  <button
+                    onClick={() => {
+                      if (confirm('Are you sure you want to delete your account? This action is permanent and cannot be undone.')) {
+                        setError('Account deletion requires contacting support. Please email support for assistance.');
+                      }
+                    }}
+                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition"
+                  >
                     Delete Account
                   </button>
                 </div>

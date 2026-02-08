@@ -1227,9 +1227,9 @@ export default function ClientsPage() {
                 <div className="h-64 flex items-end justify-around gap-4">
                   {['Intake', 'Assessment', 'Active', 'Follow-up'].map((stage, i) => {
                     const heights = [intakeCount, 
-                      clients.filter(c => c.status === 'assessment').length || 1,
+                      clients.filter(c => c.status === 'assessment').length,
                       activeCount,
-                      followUpClients.length || 1
+                      followUpClients.length
                     ];
                     const maxHeight = Math.max(...heights, 1);
                     const height = (heights[i] / maxHeight) * 100;

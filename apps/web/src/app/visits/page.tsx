@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { 
@@ -100,6 +100,17 @@ export default function VisitsPage() {
   } | null>(null);
   const isAdmin = user?.role === 'admin';
 
+  // Filter visits by search query
+  const filteredVisits = useMemo(() => {
+    if (!searchQuery.trim()) return visits;
+    const q = searchQuery.toLowerCase();
+    return visits.filter(v =>
+      (v.client?.full_name || '').toLowerCase().includes(q) ||
+      (v.caregiver?.full_name || '').toLowerCase().includes(q) ||
+      (v.status || '').toLowerCase().includes(q)
+    );
+  }, [visits, searchQuery]);
+
   useEffect(() => {
     if (!authLoading && !token) {
       router.push('/login');
@@ -118,7 +129,6 @@ export default function VisitsPage() {
       const data = await api.getUsage(token!);
       setUsage(data);
     } catch (err) {
-      console.error('Failed to load usage:', err);
     }
   };
 
@@ -128,7 +138,7 @@ export default function VisitsPage() {
       const response = await api.getVisits(token!, { status: statusFilter || undefined });
       setVisits(response.items);
     } catch (err) {
-      console.error('Failed to load visits:', err);
+      setError('Failed to load assessments. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -148,15 +158,13 @@ export default function VisitsPage() {
       
       if (response.ok || response.status === 204 || response.status === 404) {
         // Successfully deleted or already gone
-        setVisits(visits.filter(v => v.id !== visitId));
+        setVisits(prev => prev.filter(v => v.id !== visitId));
       } else {
         // Show the actual error
         const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`Delete failed: ${response.status} - ${errorText}`);
         setError(`Failed to delete: ${response.status}. The backend API may need to redeploy.`);
       }
     } catch (err) {
-      console.error('Failed to delete visit:', err);
       setError('Network error when deleting. Please try again.');
     } finally {
       setDeletingId(null);
@@ -181,12 +189,10 @@ export default function VisitsPage() {
         await loadVisits();
       } else {
         const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`Bulk delete failed: ${response.status} - ${errorText}`);
         setError(`Failed to clear assessments: ${response.status}`);
         await loadVisits();
       }
     } catch (err) {
-      console.error('Failed to clear all visits:', err);
       setError('Failed to clear assessments. Please try again.');
       await loadVisits();
     } finally {
@@ -212,11 +218,9 @@ export default function VisitsPage() {
         await loadVisits();
       } else {
         const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`Admin cleanup failed: ${response.status} - ${errorText}`);
         setError(`Admin cleanup failed: ${response.status}`);
       }
     } catch (err) {
-      console.error('Admin cleanup failed:', err);
       setError('Admin cleanup failed. Please try again.');
     } finally {
       setLoading(false);
@@ -264,7 +268,6 @@ export default function VisitsPage() {
           clientId = newClient.id;
         }
       } catch (err) {
-        console.error('Failed to get/create client:', err);
         throw new Error('Failed to create demo client');
       }
       
@@ -306,7 +309,6 @@ export default function VisitsPage() {
       
       if (!importResponse.ok) {
         const errorData = await importResponse.json().catch(() => ({}));
-        console.error('Import failed:', errorData);
         throw new Error('Failed to import transcript');
       }
       
@@ -329,7 +331,6 @@ export default function VisitsPage() {
       router.push(`/visits/${visitId}`);
       
     } catch (err) {
-      console.error('Failed to create sample assessment:', err);
       setError('Failed to create sample assessment. Please try again.');
       setCreatingDemo(false);
     }
@@ -532,16 +533,16 @@ export default function VisitsPage() {
           )}
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { label: 'Total Visits', value: visits.length, color: 'primary' },
-              { label: 'Pending Review', value: visits.filter(v => v.status === 'pending_review').length, color: 'orange' },
-              { label: 'Approved', value: visits.filter(v => v.status === 'approved').length, color: 'green' },
-              { label: 'Today', value: visits.filter(v => v.scheduled_start && formatLocalDate(new Date(v.scheduled_start)) === formatLocalDate(new Date())).length, color: 'cyan' },
+              { label: 'Total Visits', value: visits.length, textClass: 'text-accent-primary' },
+              { label: 'Pending Review', value: visits.filter(v => v.status === 'pending_review').length, textClass: 'text-accent-orange' },
+              { label: 'Approved', value: visits.filter(v => v.status === 'approved').length, textClass: 'text-accent-green' },
+              { label: 'Today', value: visits.filter(v => v.scheduled_start && formatLocalDate(new Date(v.scheduled_start)) === formatLocalDate(new Date())).length, textClass: 'text-accent-cyan' },
             ].map((stat, i) => (
               <div key={i} className="card p-5">
                 <p className="text-dark-400 text-sm mb-1">{stat.label}</p>
-                <p className={`text-3xl font-bold text-accent-${stat.color}`}>{stat.value}</p>
+                <p className={`text-3xl font-bold ${stat.textClass}`}>{stat.value}</p>
               </div>
             ))}
           </div>
@@ -581,7 +582,7 @@ export default function VisitsPage() {
               <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="text-dark-400">Loading assessments...</p>
             </div>
-          ) : visits.length === 0 ? (
+          ) : filteredVisits.length === 0 ? (
             <div className="space-y-6">
               {/* Demo CTA Card */}
               <div className="card p-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
@@ -633,7 +634,7 @@ export default function VisitsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {visits.map((visit) => {
+              {filteredVisits.map((visit) => {
                 const statusConfig = getStatusConfig(visit.status);
                 const StatusIcon = statusConfig.icon;
                 
