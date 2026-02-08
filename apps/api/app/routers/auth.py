@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_db, get_current_user
 from app.core.security import (
     verify_password, create_access_token, get_password_hash,
-    check_account_lockout, record_failed_login, clear_login_attempts
+    check_account_lockout, record_failed_login, clear_login_attempts,
+    _get_redis,
 )
 from app.models.user import User
 from app.schemas.auth import LoginRequest, Token
@@ -22,16 +23,36 @@ logger = logging.getLogger(__name__)
 
 PASSWORD_RESET_EXPIRY_HOURS = 1
 
-# Simple in-memory rate limiter for auth endpoints
-_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+# Rate limit settings
 RATE_LIMIT_WINDOW = 60  # seconds
 RATE_LIMIT_MAX = 10  # max requests per window
 
+# Fallback in-memory rate limiter (used only when Redis is unavailable)
+_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+
 
 def _check_rate_limit(key: str) -> None:
-    """Raise 429 if rate limit exceeded for the given key."""
+    """Raise 429 if rate limit exceeded. Uses Redis when available."""
+    r = _get_redis()
+    if r is not None:
+        try:
+            redis_key = f"ratelimit:{key}"
+            count = r.incr(redis_key)
+            if count == 1:
+                r.expire(redis_key, RATE_LIMIT_WINDOW)
+            if count > RATE_LIMIT_MAX:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Too many requests. Please wait a moment and try again.",
+                )
+            return
+        except HTTPException:
+            raise
+        except Exception:
+            pass  # fall through to in-memory
+
+    # In-memory fallback
     now = time.time()
-    # Prune old entries
     _rate_limit_store[key] = [t for t in _rate_limit_store[key] if now - t < RATE_LIMIT_WINDOW]
     if len(_rate_limit_store[key]) >= RATE_LIMIT_MAX:
         raise HTTPException(
