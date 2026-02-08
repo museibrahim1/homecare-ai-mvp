@@ -84,11 +84,31 @@ class EmailService:
                 params["attachments"] = attachments
             
             response = resend.Emails.send(params)
-            logger.info(f"Email sent to {to}: {subject}")
+            logger.info(f"Email sent to {to}: {subject} (id={response.get('id', 'unknown') if isinstance(response, dict) else response})")
             return True
             
+        except resend.exceptions.ResendError as e:
+            logger.error(
+                f"Resend API error sending email to {to} (subject={subject}): {e}",
+                exc_info=True,
+            )
+            return False
+        except ConnectionError as e:
+            logger.error(
+                f"Network error sending email to {to} (subject={subject}): {e}",
+                exc_info=True,
+            )
+            return False
+        except TimeoutError as e:
+            logger.error(
+                f"Timeout sending email to {to} (subject={subject}): {e}",
+                exc_info=True,
+            )
+            return False
         except Exception as e:
-            logger.error(f"Failed to send email to {to}: {e}")
+            logger.exception(
+                f"Unexpected error sending email to {to} (subject={subject}): {e}"
+            )
             return False
     
     # ==================== Password Reset ====================

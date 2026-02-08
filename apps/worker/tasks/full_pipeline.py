@@ -69,7 +69,13 @@ def run_steps_parallel(visit_id: str, steps: list):
     return results
 
 
-@celery_app.task(name="tasks.full_pipeline.run_full_pipeline", bind=True)
+@celery_app.task(
+    name="tasks.full_pipeline.run_full_pipeline",
+    bind=True,
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 2},
+)
 def run_full_pipeline(self, visit_id: str):
     """
     Run the complete processing pipeline for a visit with parallel optimization:

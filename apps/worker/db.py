@@ -1,9 +1,12 @@
 """Database session for worker."""
 
+import logging
 from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 engine = create_engine(
     settings.database_url,
@@ -20,7 +23,8 @@ def get_db() -> Session:
     db = SessionLocal()
     try:
         return db
-    except Exception:
+    except Exception as e:
+        logger.error(f"Failed to create database session: {e}", exc_info=True)
         db.close()
         raise
 
