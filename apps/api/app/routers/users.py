@@ -1,10 +1,10 @@
 from typing import List
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_admin_user
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, validate_password
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate, UserResponse
 
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get("", response_model=List[UserResponse])
 async def list_users(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = Query(100, ge=1, le=200),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
@@ -36,6 +36,14 @@ async def create_user(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered",
+        )
+    
+    # Validate password strength (HIPAA compliance)
+    is_valid, error_msg = validate_password(user_in.password)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg,
         )
     
     user = User(

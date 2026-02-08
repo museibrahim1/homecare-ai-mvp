@@ -191,10 +191,10 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           ...contract.schedule,
           care_need_level: editData.care_level,
           frequency: editData.schedule_frequency,
-          preferred_days: editData.schedule_days.split(',').map((d: string) => d.trim()).filter(Boolean),
+          preferred_days: (editData.schedule_days || '').split(',').map((d: string) => d.trim()).filter(Boolean),
           preferred_times: editData.schedule_time,
-          special_requirements: editData.special_requirements.split('\n').filter(Boolean),
-          safety_concerns: editData.safety_concerns.split('\n').filter(Boolean),
+          special_requirements: (editData.special_requirements || '').split('\n').filter(Boolean),
+          safety_concerns: (editData.safety_concerns || '').split('\n').filter(Boolean),
           client_profile: {
             ...contract.schedule?.client_profile,
             primary_diagnosis: editData.primary_diagnosis,
@@ -246,7 +246,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Service Agreement - ${client?.full_name || 'Client'}</title>
+          <title>Service Agreement - ${(client?.full_name || 'Client').replace(/[<>&"']/g, '')}</title>
           <style>
             @page {
               size: letter;

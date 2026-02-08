@@ -73,6 +73,9 @@ async def upload_audio(
     
     # Read file content
     content = await file.read()
+    MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500MB
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File too large. Maximum size is 500MB.")
     file_size = len(content)
     
     # Generate S3 key

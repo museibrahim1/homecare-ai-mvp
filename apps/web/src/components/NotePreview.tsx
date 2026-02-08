@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, Edit2, X, Download } from 'lucide-react';
 import { Note } from '@/lib/types';
 import { api } from '@/lib/api';
@@ -18,6 +18,10 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
   const { token } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [narrative, setNarrative] = useState(note?.narrative || '');
+
+  useEffect(() => {
+    setNarrative(note?.narrative || '');
+  }, [note?.narrative]);
 
   const downloadNote = async () => {
     if (!token) return;
@@ -130,7 +134,7 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
       {/* Tasks Performed */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-dark-300 mb-2">Tasks Performed</h4>
-        {tasks.length > 0 ? (
+        {Array.isArray(tasks) && tasks.length > 0 ? (
           <ul className="space-y-2">
             {tasks.map((task: any, index: number) => (
               <li key={index} className="flex items-center justify-between p-2 bg-dark-700/50 rounded">

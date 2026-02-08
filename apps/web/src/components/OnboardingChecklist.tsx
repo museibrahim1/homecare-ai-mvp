@@ -90,7 +90,7 @@ export default function OnboardingChecklist() {
         });
         if (clientsRes.ok) {
           const clients = await clientsRes.json();
-          if (clients.length > 0) {
+          if (Array.isArray(clients) && clients.length > 0) {
             completed.push('client');
           }
         }
@@ -101,10 +101,10 @@ export default function OnboardingChecklist() {
         });
         if (visitsRes.ok) {
           const visits = await visitsRes.json();
-          if (visits.length > 0) {
+          if (Array.isArray(visits) && visits.length > 0) {
             completed.push('assessment');
           }
-          if (visits.some((v: any) => v.contract_generated)) {
+          if (Array.isArray(visits) && visits.some((v: any) => v.contract_generated)) {
             completed.push('contract');
           }
         }

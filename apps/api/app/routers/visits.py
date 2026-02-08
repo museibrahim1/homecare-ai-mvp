@@ -116,12 +116,14 @@ async def list_visits(
         Client.created_by == current_user.id
     ).all()]
     
+    if not user_client_ids:
+        return VisitListResponse(items=[], total=0, page=page, page_size=page_size)
+    
     query = db.query(Visit).options(
         joinedload(Visit.client),
         joinedload(Visit.caregiver),
     ).filter(
-        # Strict data isolation: only show visits for clients you own
-        Visit.client_id.in_(user_client_ids) if user_client_ids else False
+        Visit.client_id.in_(user_client_ids)
     )
     
     if status:
@@ -260,17 +262,21 @@ async def delete_visit(
     """Delete a visit and all related records (strict data isolation - only your clients)."""
     visit = get_user_visit(db, visit_id, current_user)
     
-    # Delete all related records first to avoid foreign key constraint errors
-    db.query(TranscriptSegment).filter(TranscriptSegment.visit_id == visit_id).delete(synchronize_session=False)
-    db.query(DiarizationTurn).filter(DiarizationTurn.visit_id == visit_id).delete(synchronize_session=False)
-    db.query(BillableItem).filter(BillableItem.visit_id == visit_id).delete(synchronize_session=False)
-    db.query(Note).filter(Note.visit_id == visit_id).delete(synchronize_session=False)
-    db.query(AudioAsset).filter(AudioAsset.visit_id == visit_id).delete(synchronize_session=False)
-    db.query(Call).filter(Call.visit_id == visit_id).delete(synchronize_session=False)
-    
-    # Now delete the visit itself
-    db.delete(visit)
-    db.commit()
+    try:
+        # Delete all related records first to avoid foreign key constraint errors
+        db.query(TranscriptSegment).filter(TranscriptSegment.visit_id == visit_id).delete(synchronize_session=False)
+        db.query(DiarizationTurn).filter(DiarizationTurn.visit_id == visit_id).delete(synchronize_session=False)
+        db.query(BillableItem).filter(BillableItem.visit_id == visit_id).delete(synchronize_session=False)
+        db.query(Note).filter(Note.visit_id == visit_id).delete(synchronize_session=False)
+        db.query(AudioAsset).filter(AudioAsset.visit_id == visit_id).delete(synchronize_session=False)
+        db.query(Call).filter(Call.visit_id == visit_id).delete(synchronize_session=False)
+        
+        # Now delete the visit itself
+        db.delete(visit)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
 
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)

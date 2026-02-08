@@ -2,7 +2,7 @@ import logging
 from datetime import date
 from typing import List
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -21,7 +21,7 @@ router = APIRouter()
 @router.get("", response_model=List[ClientResponse])
 async def list_clients(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

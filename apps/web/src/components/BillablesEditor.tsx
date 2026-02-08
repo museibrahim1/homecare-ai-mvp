@@ -310,7 +310,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                             Transcript Evidence
                           </h5>
                           <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {item.evidence.map((ev: any, idx: number) => (
+                            {item.evidence?.map((ev: any, idx: number) => (
                               <div 
                                 key={idx} 
                                 className="bg-dark-800/80 rounded-lg p-3 border border-dark-600/30"
