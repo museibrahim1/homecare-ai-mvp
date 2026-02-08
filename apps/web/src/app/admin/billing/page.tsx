@@ -48,6 +48,7 @@ export default function BillingConfigPage() {
     stripe_price_id_annual: '',
     stripe_price_id_setup: '',
   });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -89,6 +90,7 @@ export default function BillingConfigPage() {
       }
     } catch (err) {
       console.error('Failed to fetch plans:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load plans');
     } finally {
       setLoading(false);
     }
@@ -113,6 +115,7 @@ export default function BillingConfigPage() {
       }
     } catch (err) {
       console.error('Failed to fetch Stripe config:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load Stripe config');
     }
   };
 
@@ -137,6 +140,7 @@ export default function BillingConfigPage() {
       }
     } catch (err) {
       console.error('Failed to save:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save configuration');
     } finally {
       setSaving(false);
     }
@@ -202,6 +206,14 @@ export default function BillingConfigPage() {
             Stripe Dashboard
           </a>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+            <p className="text-red-400 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          </div>
+        )}
 
         <div className="grid grid-cols-3 gap-6">
           {/* Plans List */}

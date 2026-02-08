@@ -59,6 +59,7 @@ export default function AdminBusinessesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     const token = getStoredToken();
@@ -91,6 +92,7 @@ export default function AdminBusinessesPage() {
       }
     } catch (err) {
       console.error('[Admin] Failed to load data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -142,6 +144,14 @@ export default function AdminBusinessesPage() {
             Refresh
           </button>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+            <p className="text-red-400 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          </div>
+        )}
 
         {/* Stats Cards */}
         {stats && (

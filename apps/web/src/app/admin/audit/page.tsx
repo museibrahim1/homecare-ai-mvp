@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   FileText, Shield, Loader2, RefreshCw, Search, Filter,
-  User, Clock, ChevronLeft, ChevronRight, Download, ArrowLeft
+  User, Clock, ChevronLeft, ChevronRight, Download, ArrowLeft, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -42,6 +42,7 @@ export default function AuditLogsPage() {
   const [filter, setFilter] = useState({ action: '', user_email: '' });
   const [page, setPage] = useState(0);
   const pageSize = 50;
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -82,6 +83,7 @@ export default function AuditLogsPage() {
       }
     } catch (err) {
       console.error('Failed to fetch actions:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load actions');
     }
   };
 
@@ -102,6 +104,7 @@ export default function AuditLogsPage() {
       }
     } catch (err) {
       console.error('Failed to fetch logs:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load audit logs');
     } finally {
       setLoading(false);
     }
@@ -185,6 +188,14 @@ export default function AuditLogsPage() {
             </button>
           </div>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+            <p className="text-red-400 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="flex items-center gap-4 mb-6">
