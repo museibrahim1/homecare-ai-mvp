@@ -33,6 +33,7 @@ def generate_service_contract(self, visit_id: str):
     logger.info(f"Starting contract generation for visit {visit_id}")
     
     db = get_db()
+    visit = None
     
     try:
         from models import Visit, TranscriptSegment, BillableItem, Contract

@@ -26,6 +26,7 @@ def align_visit(self, visit_id: str):
     logger.info(f"Starting alignment for visit {visit_id}")
     
     db = get_db()
+    visit = None
     
     try:
         from models import Visit, TranscriptSegment, DiarizationTurn

@@ -252,6 +252,7 @@ def diarize_visit(self, visit_id: str):
     logger.info(f"Starting diarization for visit {visit_id}")
     
     db = get_db()
+    visit = None
     
     try:
         from models import Visit, AudioAsset, DiarizationTurn

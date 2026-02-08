@@ -30,6 +30,7 @@ def transcribe_visit(self, visit_id: str):
     logger.info(f"Starting transcription for visit {visit_id}")
     
     db = get_db()
+    visit = None
     
     try:
         # Import models here to avoid circular imports
