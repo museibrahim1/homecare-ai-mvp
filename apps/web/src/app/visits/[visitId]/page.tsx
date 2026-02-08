@@ -64,6 +64,7 @@ export default function VisitDetailPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<'transcript' | 'billables' | 'notes' | 'contract'>('transcript');
   const [processingStep, setProcessingStep] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
   const [hasAudio, setHasAudio] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
   const [uploadMode, setUploadMode] = useState<'audio' | 'transcript'>('audio');
@@ -127,9 +128,11 @@ export default function VisitDetailPage() {
   }, [token, authLoading, router]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     if (token && visitId) {
       loadVisitData();
     }
+    return () => { isMountedRef.current = false; };
   }, [token, visitId]);
 
   const loadVisitData = async () => {
@@ -199,8 +202,9 @@ export default function VisitDetailPage() {
       await api.runPipelineStep(token, visitId, step);
       
       let attempts = 0;
-      while (attempts < 60) {
+      while (attempts < 60 && isMountedRef.current) {
         await new Promise(resolve => setTimeout(resolve, 2000));
+        if (!isMountedRef.current) break;
         const status = await api.getPipelineStatus(token, visitId);
         const stepKey = step === 'transcribe' ? 'transcription' : step;
         const stepState = status?.pipeline_state?.[stepKey];
@@ -325,26 +329,30 @@ export default function VisitDetailPage() {
         await api.runPipelineStep(token, visitId, 'bill');
         
         // Wait for completion
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 30 && isMountedRef.current; i++) {
           await new Promise(resolve => setTimeout(resolve, 2000));
+          if (!isMountedRef.current) break;
           const status = await api.getPipelineStatus(token, visitId);
-          if (status.pipeline_state.billing?.status === 'completed' || 
-              status.pipeline_state.billing?.status === 'failed') {
+          if (status?.pipeline_state?.billing?.status === 'completed' || 
+              status?.pipeline_state?.billing?.status === 'failed') {
             break;
           }
         }
       }
+      
+      if (!isMountedRef.current) return;
       
       // Run contract generation
       setProcessingStep('contract');
       await api.runPipelineStep(token, visitId, 'contract');
       
       // Wait for contract completion
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 60 && isMountedRef.current; i++) {
         await new Promise(resolve => setTimeout(resolve, 2000));
+        if (!isMountedRef.current) break;
         const status = await api.getPipelineStatus(token, visitId);
-        if (status.pipeline_state.contract?.status === 'completed' || 
-            status.pipeline_state.contract?.status === 'failed') {
+        if (status?.pipeline_state?.contract?.status === 'completed' || 
+            status?.pipeline_state?.contract?.status === 'failed') {
           break;
         }
       }

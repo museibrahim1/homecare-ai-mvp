@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Users, 
@@ -504,6 +504,14 @@ export default function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showAutomationsModal, setShowAutomationsModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Cleanup delete timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (deleteTimeoutRef.current) clearTimeout(deleteTimeoutRef.current);
+    };
+  }, []);
   
   // Client automations
   const [automations, setAutomations] = useState([
@@ -629,8 +637,9 @@ export default function ClientsPage() {
     } else {
       // First click - show confirmation
       setDeleteConfirm(clientId);
-      // Auto-reset after 3 seconds
-      setTimeout(() => setDeleteConfirm(null), 3000);
+      // Auto-reset after 3 seconds (clear previous timeout first)
+      if (deleteTimeoutRef.current) clearTimeout(deleteTimeoutRef.current);
+      deleteTimeoutRef.current = setTimeout(() => setDeleteConfirm(null), 3000);
     }
   };
 
