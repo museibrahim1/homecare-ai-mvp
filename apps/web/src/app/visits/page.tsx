@@ -276,7 +276,7 @@ export default function VisitsPage() {
         },
         body: JSON.stringify({
           client_id: clientId,
-          visit_date: new Date().toISOString().split('T')[0],
+          visit_date: formatLocalDate(new Date()),
           duration_minutes: 60,
         }),
       });
@@ -525,7 +525,7 @@ export default function VisitsPage() {
               { label: 'Total Visits', value: visits.length, color: 'primary' },
               { label: 'Pending Review', value: visits.filter(v => v.status === 'pending_review').length, color: 'orange' },
               { label: 'Approved', value: visits.filter(v => v.status === 'approved').length, color: 'green' },
-              { label: 'Today', value: visits.filter(v => v.scheduled_start && new Date(v.scheduled_start).toDateString() === new Date().toDateString()).length, color: 'cyan' },
+              { label: 'Today', value: visits.filter(v => v.scheduled_start && formatLocalDate(new Date(v.scheduled_start)) === formatLocalDate(new Date())).length, color: 'cyan' },
             ].map((stat, i) => (
               <div key={i} className="card p-5">
                 <p className="text-dark-400 text-sm mb-1">{stat.label}</p>
