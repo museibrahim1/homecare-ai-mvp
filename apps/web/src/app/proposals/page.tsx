@@ -165,7 +165,7 @@ export default function ProposalsPage() {
         if (visit) {
           window.location.href = `/visits/${visit.id}?tab=contract`;
         } else {
-          alert('No associated visit found. Please create a visit for this client first.');
+          setError('No associated visit found. Please create a visit for this client first.');
         }
       }
     } catch (error) {
@@ -239,6 +239,19 @@ export default function ProposalsPage() {
             </select>
           </div>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400" />
+              <span className="text-red-400">{error}</span>
+            </div>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-8">
