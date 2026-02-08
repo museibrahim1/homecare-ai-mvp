@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Users, Plus, Search, Phone, ChevronRight,
-  MapPin, Star, Clock, Upload
+  MapPin, Star, Clock, Upload, AlertCircle
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
@@ -45,6 +45,7 @@ export default function CaregiversPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCaregiver, setSelectedCaregiver] = useState<Caregiver | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !token) router.push('/login');
@@ -64,8 +65,9 @@ export default function CaregiversPage() {
         const data = await response.json();
         setCaregivers(data);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load caregivers:', err);
+      setError(err?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -150,6 +152,14 @@ export default function CaregiversPage() {
               </button>
             </div>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+              <p className="text-red-400 text-sm flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-4 gap-4 mb-8">

@@ -22,6 +22,7 @@ export default function DashboardPage() {
   const [proposalClients, setProposalClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingClientId, setUpdatingClientId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !token) {
@@ -65,8 +66,9 @@ export default function DashboardPage() {
         hoursThisWeek: thisWeekCount,
       });
       setRecentVisits(items.slice(0, 5));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load dashboard:', err);
+      setError(err?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -95,6 +97,7 @@ export default function DashboardPage() {
       setStats(prev => ({ ...prev, pendingReview: prev.pendingReview - 1 }));
     } catch (err) {
       console.error(`Failed to update client:`, err);
+      setError('Failed to update client status. Please try again.');
     } finally {
       setUpdatingClientId(null);
     }
@@ -126,6 +129,14 @@ export default function DashboardPage() {
             <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">Dashboard</h1>
             <p className="text-dark-300 text-sm lg:text-base">Care assessments in, proposal-ready contracts out.</p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+              <p className="text-red-400 text-sm flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+            </div>
+          )}
 
           {/* Onboarding Checklist - shows for new users */}
           <OnboardingChecklist />

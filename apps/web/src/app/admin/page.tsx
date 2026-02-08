@@ -8,7 +8,7 @@ import Link from 'next/link';
 import {
   BarChart3, Users, Building2, FileText, TrendingUp, DollarSign,
   Shield, AlertTriangle, Loader2, Activity, Ticket, Settings,
-  ChevronRight, RefreshCw, Clock, CheckCircle, XCircle
+  ChevronRight, RefreshCw, Clock, CheckCircle, XCircle, AlertCircle
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -59,6 +59,7 @@ export default function AdminDashboardPage() {
   const [supportStats, setSupportStats] = useState<SupportStats | null>(null);
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Check if user is admin (@palmtai.com)
   const isAdmin = user?.role === 'admin' && 
@@ -122,8 +123,9 @@ export default function AdminDashboardPage() {
       if (alertsRes.ok) setAlerts(await alertsRes.json());
       if (supportRes.ok) setSupportStats(await supportRes.json());
       if (healthRes.ok) setHealth(await healthRes.json());
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch data:', err);
+      setError(err?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -206,6 +208,14 @@ export default function AdminDashboardPage() {
             <RefreshCw className={`w-5 h-5 text-dark-400 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+            <p className="text-red-400 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-20">

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Mic, FileText, Users, CheckCircle, ArrowRight, ArrowLeft,
   Upload, Sparkles, Clock, Building2, Play, ChevronRight,
-  FileCheck, Calendar, Mail, Settings, Loader2
+  FileCheck, Calendar, Mail, Settings, Loader2, AlertCircle
 } from 'lucide-react';
 import { useAuth, getStoredToken } from '@/lib/auth';
 
@@ -30,6 +30,7 @@ export default function WelcomePage() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [agencyName, setAgencyName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Walkthrough steps
   const steps: WalkthroughStep[] = [
@@ -120,8 +121,9 @@ export default function WelcomePage() {
             setCompletedSteps(prev => [...prev, 'contract']);
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error loading walkthrough data:', err);
+        setError(err?.message || 'Something went wrong');
       } finally {
         setLoading(false);
       }
@@ -172,6 +174,14 @@ export default function WelcomePage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-12">
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+            <p className="text-red-400 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          </div>
+        )}
+
         {/* Progress */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-3">

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Activity, Shield, Loader2, RefreshCw, Server, Database,
-  HardDrive, Cpu, CheckCircle, XCircle, AlertTriangle, Clock, ArrowLeft
+  HardDrive, Cpu, CheckCircle, XCircle, AlertTriangle, Clock, ArrowLeft, AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -38,6 +38,7 @@ export default function SystemHealthPage() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -86,8 +87,9 @@ export default function SystemHealthPage() {
 
       if (healthRes.ok) setHealth(await healthRes.json());
       if (metricsRes.ok) setMetrics(await metricsRes.json());
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch data:', err);
+      setError(err?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -174,6 +176,14 @@ export default function SystemHealthPage() {
             </button>
           </div>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+            <p className="text-red-400 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          </div>
+        )}
 
         {/* Overall Status */}
         <div className={`p-6 rounded-xl border mb-8 ${
