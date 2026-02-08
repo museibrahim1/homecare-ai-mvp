@@ -94,9 +94,17 @@ body {
    Elements that ARE the gradient (buttons with .text-white on same element)
    also keep white. */
 
-/* Small icon/avatar containers: only DIRECT children stay white */
+/* Small icon/avatar containers with gradient bg: keep white text/icons.
+   Target ONLY small containers (w-* h-* rounded) — NOT large panels.
+   The "from-dark" gradients become light in light mode, so exclude them. */
 [data-theme="light"] [class*="from-primary-5"][class*="to-"] > .text-white,
-[data-theme="light"] [class*="from-primary-5"][class*="to-"] > span {
+[data-theme="light"] [class*="from-primary-5"][class*="to-"] > span,
+[data-theme="light"] div[class*="bg-gradient-to-br"][class*="from-"]:not([class*="from-dark"]) > .text-white,
+[data-theme="light"] div[class*="bg-gradient-to-br"][class*="from-"]:not([class*="from-dark"]) > svg,
+[data-theme="light"] div[class*="bg-gradient-to-r"][class*="from-"]:not(.bg-clip-text):not([class*="from-dark"]) > svg,
+/* Small rounded icon badges with any solid gradient */
+[data-theme="light"] div[class*="rounded-full"][class*="bg-gradient-to-br"] > svg,
+[data-theme="light"] div[class*="rounded-xl"][class*="bg-gradient-to-br"][class*="from-"]:not([class*="from-dark"]) > svg {
   color: #ffffff !important;
 }
 
@@ -119,7 +127,7 @@ body {
   color: #ffffff !important;
 }
 
-/* Solid colored backgrounds keep white text */
+/* Solid colored backgrounds keep white text — both .text-white children AND self */
 [data-theme="light"] .bg-primary-500 .text-white,
 [data-theme="light"] .bg-primary-600 .text-white,
 [data-theme="light"] .bg-primary-500.text-white,
@@ -137,7 +145,15 @@ body {
 [data-theme="light"] .bg-purple-500.text-white,
 [data-theme="light"] .bg-purple-600.text-white,
 [data-theme="light"] .bg-accent-green .text-white,
-[data-theme="light"] .bg-accent-cyan .text-white {
+[data-theme="light"] .bg-accent-cyan .text-white,
+/* Solid bg containers — all text inside should be white */
+[data-theme="light"] .bg-primary-500,
+[data-theme="light"] .bg-primary-600,
+[data-theme="light"] .bg-blue-500,
+[data-theme="light"] .bg-purple-500,
+[data-theme="light"] .bg-green-500,
+[data-theme="light"] .bg-orange-500,
+[data-theme="light"] .bg-red-500 {
   color: #ffffff !important;
 }
 
@@ -146,11 +162,21 @@ body {
   color: #ffffff !important;
 }
 
-/* All gradient buttons: keep children white */
-[data-theme="light"] [class*="bg-gradient-to-r"][class*="from-"] {
+/* PROTECT gradient text (bg-clip-text) — must stay transparent to show gradient */
+[data-theme="light"] .bg-clip-text {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Gradient LINK/BUTTON elements keep white text (not divs, spans, or containers) */
+[data-theme="light"] a[class*="bg-gradient-to-r"][class*="from-"],
+[data-theme="light"] button[class*="bg-gradient-to-r"][class*="from-"],
+[data-theme="light"] a[class*="bg-gradient-to-br"][class*="from-"],
+[data-theme="light"] button[class*="bg-gradient-to-br"][class*="from-"] {
   color: #ffffff !important;
 }
-[data-theme="light"] [class*="bg-gradient-to-r"][class*="from-"] * {
+[data-theme="light"] a[class*="bg-gradient-to-r"][class*="from-"] *,
+[data-theme="light"] button[class*="bg-gradient-to-r"][class*="from-"] * {
   color: inherit !important;
 }
 
@@ -249,18 +275,22 @@ body {
 }
 
 /* Semi-transparent dark backgrounds in light mode */
-[data-theme="light"] button[class*="bg-dark-700\\/"],
-[data-theme="light"] div[class*="bg-dark-700\\/"],
+[data-theme="light"] [class*="bg-dark-700\\/"],
 [data-theme="light"] [class*="bg-dark-700\\/30"],
 [data-theme="light"] [class*="bg-dark-700\\/50"] {
   background-color: rgb(241 245 249) !important;
 }
 
-[data-theme="light"] button[class*="bg-dark-800\\/"],
-[data-theme="light"] div[class*="bg-dark-800\\/"],
+[data-theme="light"] [class*="bg-dark-800\\/"],
+[data-theme="light"] [class*="bg-dark-800\\/30"],
 [data-theme="light"] [class*="bg-dark-800\\/50"],
 [data-theme="light"] [class*="bg-dark-800\\/80"] {
   background-color: rgb(248 250 252) !important;
+}
+
+[data-theme="light"] [class*="bg-dark-900\\/50"],
+[data-theme="light"] [class*="bg-dark-900\\/30"] {
+  background-color: rgb(241 245 249) !important;
 }
 
 /* Hover states for dark buttons in light mode */
@@ -306,10 +336,10 @@ body {
   color: rgb(30 41 59) !important;
 }
 
-/* Gradient buttons always keep white text */
+/* Gradient buttons/links always keep white text (NOT divs/spans) */
 [data-theme="light"] button[class*="bg-gradient-"],
 [data-theme="light"] a[class*="bg-gradient-"],
-[data-theme="light"] button[class*="from-"] {
+[data-theme="light"] button[class*="from-"]:not(.bg-clip-text) {
   color: #ffffff !important;
 }
 
@@ -403,6 +433,11 @@ body {
   border-color: rgb(226 232 240) !important;
 }
 
+/* Avatar/badge borders referencing dark-900 bg — use white in light mode */
+[data-theme="light"] [class*="border-dark-900"] {
+  border-color: rgb(255 255 255) !important;
+}
+
 /* ============================================================
    LIGHT MODE: Login page and landing page fixes
    Gradient panels using from-dark-* become light in light mode.
@@ -412,6 +447,141 @@ body {
 [data-theme="light"] [class*="from-dark-800"][class*="to-dark-950"],
 [data-theme="light"] [class*="from-dark-800"][class*="via-dark-900"] {
   background: linear-gradient(135deg, rgb(240 245 255), rgb(230 238 250)) !important;
+}
+
+/* Landing page: hero badge, feature icon containers, step badges —
+   keep their vibrant gradient backgrounds visible */
+[data-theme="light"] div[class*="bg-gradient-to-br"][class*="from-"] {
+  /* Don't override gradient backgrounds on decorative divs */
+}
+
+/* Landing page mock dashboard card — needs contrast against light bg */
+[data-theme="light"] section .bg-dark-800[class*="border"][class*="rounded-2xl"] {
+  background-color: rgb(248 250 252) !important;
+  border-color: rgb(203 213 225) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+}
+
+/* Feature section alternate bg */
+[data-theme="light"] .bg-dark-800\/30 {
+  background-color: rgb(241 245 249) !important;
+}
+
+/* Gradient CTA/banner panels: give them visible tint in light mode */
+[data-theme="light"] [class*="from-primary-500\\/10"][class*="to-accent-cyan\\/10"],
+[data-theme="light"] [class*="from-primary-500\\/10"][class*="to-cyan"] {
+  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.08)) !important;
+}
+
+/* Pricing highlighted card — keep its gradient visible */
+[data-theme="light"] [class*="from-primary-500\\/20"][class*="to-dark-800"] {
+  background: linear-gradient(to bottom, rgba(99,102,241,0.12), rgb(248 250 252)) !important;
+}
+
+/* Report / feature accent cards with colored gradients */
+[data-theme="light"] [class*="from-accent-green\\/10"],
+[data-theme="light"] [class*="from-accent-orange\\/10"],
+[data-theme="light"] [class*="from-accent-cyan\\/10"] {
+  /* Let Tailwind gradient show — these already have low opacity so they look fine */
+}
+
+/* Welcome page gradient banner */
+[data-theme="light"] [class*="from-primary-500\\/10"][class*="to-purple-500\\/10"] {
+  background: linear-gradient(to right, rgba(99,102,241,0.08), rgba(139,92,246,0.08)) !important;
+}
+
+/* Settings page accent banner */
+[data-theme="light"] .card[class*="from-primary-500\\/10"][class*="to-purple-500\\/10"] {
+  background: linear-gradient(to right, rgba(99,102,241,0.08), rgba(139,92,246,0.08)) !important;
+}
+
+/* Progress bars — gradient bars should keep their color, not get text overrides */
+[data-theme="light"] [class*="bg-gradient-to-r"][class*="from-primary-500"][class*="to-green-500"],
+[data-theme="light"] [class*="bg-gradient-to-t"][class*="from-primary-500"] {
+  /* Progress bars/chart bars: preserve native gradient */
+}
+
+/* Ensure gradient icon containers (small rounded divs) keep their bg */
+[data-theme="light"] div[class*="bg-gradient-to-br"][class*="rounded"] {
+  /* Don't override — keep native gradient for icons/avatars */
+}
+
+/* ============================================================
+   LIGHT MODE: Table & list row hover states
+   ============================================================ */
+[data-theme="light"] tr[class*="hover\\:bg-dark-700"]:hover {
+  background-color: rgb(241 245 249) !important;
+}
+
+[data-theme="light"] [class*="hover\\:bg-dark-800"]:hover {
+  background-color: rgb(248 250 252) !important;
+}
+
+/* Table headers with dark bg */
+[data-theme="light"] thead[class*="bg-dark-700"] {
+  background-color: rgb(241 245 249) !important;
+}
+
+[data-theme="light"] thead[class*="bg-dark-800"] {
+  background-color: rgb(248 250 252) !important;
+}
+
+/* ============================================================
+   LIGHT MODE: Nav/header bars
+   ============================================================ */
+[data-theme="light"] header[class*="bg-dark-800"] {
+  background-color: rgb(255 255 255) !important;
+  border-color: rgb(226 232 240) !important;
+}
+
+[data-theme="light"] nav[class*="bg-dark-800"],
+[data-theme="light"] nav[class*="bg-dark-900"] {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgb(226 232 240) !important;
+}
+
+/* Landing page main bg */
+[data-theme="light"] .bg-dark-900 {
+  background-color: rgb(249 250 251) !important;
+}
+
+[data-theme="light"] .min-h-screen.bg-dark-900 {
+  background-color: rgb(249 250 251) !important;
+}
+
+/* ============================================================
+   LIGHT MODE: Ensure small "badge" spans inside colored bg keep white
+   ============================================================ */
+[data-theme="light"] span.bg-primary-500,
+[data-theme="light"] span.bg-green-500,
+[data-theme="light"] span.bg-red-500,
+[data-theme="light"] span.bg-orange-500,
+[data-theme="light"] span.bg-blue-500,
+[data-theme="light"] span.bg-purple-500 {
+  color: #ffffff !important;
+}
+
+/* ============================================================
+   LIGHT MODE: Pipeline / Kanban column backgrounds
+   ============================================================ */
+[data-theme="light"] [class*="bg-dark-800\\/30"][class*="rounded-xl"][class*="border"] {
+  background-color: rgb(248 250 252) !important;
+  border-color: rgb(226 232 240) !important;
+}
+
+/* ============================================================
+   LIGHT MODE: Footer and section dividers
+   ============================================================ */
+[data-theme="light"] footer {
+  border-color: rgb(226 232 240) !important;
+}
+
+[data-theme="light"] [class*="border-t"][class*="border-dark-700"] {
+  border-top-color: rgb(226 232 240) !important;
+}
+
+[data-theme="light"] [class*="border-b"][class*="border-dark-700"] {
+  border-bottom-color: rgb(226 232 240) !important;
 }
 
 /* ============================================================
