@@ -39,6 +39,9 @@ export default function TranscriptTimeline({
   currentTimeMs,
   onSegmentClick,
 }: TranscriptTimelineProps) {
+  const [visibleCount, setVisibleCount] = useState(50);
+  const visibleSegments = segments.slice(0, visibleCount);
+
   if (segments.length === 0) {
     return (
       <div className="p-12 text-center">
@@ -54,7 +57,7 @@ export default function TranscriptTimeline({
   return (
     <div className="p-4 sm:p-6 h-full overflow-y-auto">
       <div className="space-y-4">
-        {segments.map((segment, index) => {
+        {visibleSegments.map((segment, index) => {
           const isActive = currentTimeMs !== undefined && 
             currentTimeMs >= segment.start_ms && 
             currentTimeMs <= segment.end_ms;
@@ -116,6 +119,16 @@ export default function TranscriptTimeline({
             </div>
           );
         })}
+        {visibleCount < segments.length && (
+          <div className="text-center pt-4">
+            <button
+              onClick={() => setVisibleCount(prev => Math.min(prev + 50, segments.length))}
+              className="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white rounded-lg text-sm transition"
+            >
+              Show more ({segments.length - visibleCount} remaining)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

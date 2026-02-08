@@ -22,7 +22,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-import { api } from '@/lib/api';
+import { api, formatLocalDate } from '@/lib/api';
 import { Visit } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 import UpgradeModal from '@/components/UpgradeModal';

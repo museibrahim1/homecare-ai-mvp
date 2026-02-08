@@ -123,7 +123,7 @@ function ScheduleContent() {
   const [newAppointment, setNewAppointment] = useState({
     title: '',
     client: '',
-    date: new Date().toISOString().split('T')[0],
+    date: formatLocalDate(new Date()),
     time: '09:00',
     duration: '1 hour',
     location: '',
@@ -159,7 +159,7 @@ function ScheduleContent() {
     checkGoogleStatus();
   }, [token]);
 
-  const todayAppointments = appointments.filter(apt => apt.date === selectedDate.toISOString().split('T')[0]);
+  const todayAppointments = appointments.filter(apt => apt.date === formatLocalDate(selectedDate));
 
   const getDurationMinutes = (duration: string): number => {
     if (duration.includes('1.5')) return 90;
@@ -214,7 +214,7 @@ function ScheduleContent() {
     setNewAppointment({
       title: '',
       client: '',
-      date: new Date().toISOString().split('T')[0],
+      date: formatLocalDate(new Date()),
       time: '09:00',
       duration: '1 hour',
       location: '',
@@ -359,7 +359,7 @@ function ScheduleContent() {
           
           if (start) {
             const startDate = new Date(start);
-            dateStr = startDate.toISOString().split('T')[0];
+            dateStr = formatLocalDate(startDate);
             timeStr = startDate.toTimeString().slice(0, 5);
             
             if (end) {
@@ -575,7 +575,7 @@ function ScheduleContent() {
                 <p className="text-dark-400">No appointments scheduled for this day</p>
                 <button 
                   onClick={() => {
-                    setNewAppointment({ ...newAppointment, date: selectedDate.toISOString().split('T')[0] });
+                    setNewAppointment({ ...newAppointment, date: formatLocalDate(selectedDate) });
                     setShowAddModal(true);
                   }}
                   className="mt-4 text-primary-400 hover:text-primary-300 text-sm"
