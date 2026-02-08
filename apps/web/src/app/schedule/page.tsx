@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
-import { CalendarDays, Plus, Clock, MapPin, User, X, Link2, Check, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { CalendarDays, Plus, Clock, MapPin, User, X, Link2, Check, Loader2, Pencil, Trash2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { formatLocalDate } from '@/lib/api';
 
@@ -44,10 +44,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 // Inner component that handles OAuth callback
 function OAuthHandler({ 
   token, 
-  onConnected 
+  onConnected,
+  onError,
 }: { 
   token: string | null; 
   onConnected: () => void;
+  onError: (msg: string) => void;
 }) {
   const searchParams = useSearchParams();
   const [processing, setProcessing] = useState(false);
@@ -57,7 +59,7 @@ function OAuthHandler({
     const error = searchParams.get('error');
     
     if (error) {
-      alert('Failed to connect Google Calendar: ' + error);
+      onError('Failed to connect Google Calendar: ' + error);
       window.history.replaceState({}, '', '/schedule');
       return;
     }
@@ -82,11 +84,11 @@ function OAuthHandler({
             onConnected();
           } else {
             const data = await response.json();
-            alert('Failed to connect: ' + (data.detail || 'Unknown error'));
+            onError('Failed to connect: ' + (data.detail || 'Unknown error'));
           }
         } catch (error) {
           console.error('Failed to connect Google:', error);
-          alert('Failed to connect Google Calendar');
+          onError('Failed to connect Google Calendar');
         }
         window.history.replaceState({}, '', '/schedule');
         setProcessing(false);
@@ -120,6 +122,7 @@ function ScheduleContent() {
   const [deleting, setDeleting] = useState<number | null>(null);
   const [checkingStatus, setCheckingStatus] = useState(true);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [newAppointment, setNewAppointment] = useState({
     title: '',
     client: '',
@@ -300,7 +303,7 @@ function ScheduleContent() {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     
     if (!clientId) {
-      alert('Google Calendar is not configured. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID to environment variables.');
+      setError('Google Calendar is not configured. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID to environment variables.');
       return;
     }
 
@@ -433,7 +436,7 @@ function ScheduleContent() {
     <>
       {/* OAuth Handler - wrapped in Suspense at page level */}
       <Suspense fallback={null}>
-        <OAuthHandler token={token} onConnected={() => setGoogleConnected(true)} />
+        <OAuthHandler token={token} onConnected={() => setGoogleConnected(true)} onError={(msg) => setError(msg)} />
       </Suspense>
 
       {/* Header */}
@@ -470,6 +473,19 @@ function ScheduleContent() {
           </button>
         </div>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400" />
+            <span className="text-red-400">{error}</span>
+          </div>
+          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Google Calendar Sync Status */}
       {googleConnected && (

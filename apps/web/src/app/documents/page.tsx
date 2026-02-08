@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2, Mic, FileCheck, Play, User } from 'lucide-react';
+import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2, Mic, FileCheck, Play, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -100,6 +100,7 @@ export default function DocumentsPage() {
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [newFolderName, setNewFolderName] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Google Drive state
@@ -234,7 +235,7 @@ export default function DocumentsPage() {
       });
       
       if (!response.ok) {
-        alert('Failed to download file');
+        setError('Failed to download file');
         return;
       }
       
@@ -249,7 +250,7 @@ export default function DocumentsPage() {
       a.remove();
     } catch (error) {
       console.error('Download failed:', error);
-      alert('Failed to download file');
+      setError('Failed to download file');
     }
   };
 
@@ -257,7 +258,7 @@ export default function DocumentsPage() {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     
     if (!clientId) {
-      alert('Google Drive is not configured. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID to environment variables.');
+      setError('Google Drive is not configured. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID to environment variables.');
       return;
     }
 
@@ -335,7 +336,7 @@ export default function DocumentsPage() {
     const error = urlParams.get('error');
     
     if (error) {
-      alert('Failed to connect Google Drive: ' + error);
+      setError('Failed to connect Google Drive: ' + error);
       window.history.replaceState({}, '', '/documents');
       return;
     }
@@ -361,11 +362,11 @@ export default function DocumentsPage() {
             handleSyncDrive();
           } else {
             const data = await response.json();
-            alert('Failed to connect: ' + (data.detail || 'Unknown error'));
+            setError('Failed to connect: ' + (data.detail || 'Unknown error'));
           }
         } catch (error) {
           console.error('Failed to connect Drive:', error);
-          alert('Failed to connect Google Drive');
+          setError('Failed to connect Google Drive');
         }
         window.history.replaceState({}, '', '/documents');
         setDriveLoading(false);
@@ -432,6 +433,19 @@ export default function DocumentsPage() {
             </button>
           </div>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400" />
+              <span className="text-red-400">{error}</span>
+            </div>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Google Drive Status Banner */}
         {driveConnected && (

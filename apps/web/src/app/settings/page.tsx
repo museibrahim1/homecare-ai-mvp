@@ -106,6 +106,7 @@ export default function SettingsPage() {
   const { token, isLoading: authLoading, logout } = useAuth();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loggingOutAll, setLoggingOutAll] = useState(false);
   const [activeTab, setActiveTab] = useState<'agency' | 'documents' | 'profile' | 'voiceprint' | 'team' | 'notifications' | 'security'>('agency');
   
@@ -268,7 +269,7 @@ export default function SettingsPage() {
 
     } catch (error) {
       console.error('Failed to start recording:', error);
-      alert('Could not access microphone. Please allow microphone access.');
+      setError('Could not access microphone. Please allow microphone access.');
     }
   };
 
@@ -303,14 +304,13 @@ export default function SettingsPage() {
         setHasVoiceprint(true);
         setVoiceprintCreatedAt(data.created_at);
         setAudioBlob(null);
-        alert('Voice ID created successfully! Your voice will now be automatically identified in assessments.');
       } else {
         const error = await response.json();
-        alert(`Failed to create Voice ID: ${error.detail || 'Unknown error'}`);
+        setError(`Failed to create Voice ID: ${error.detail || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Failed to upload voiceprint:', error);
-      alert('Failed to create Voice ID. Please try again.');
+      setError('Failed to create Voice ID. Please try again.');
     } finally {
       setUploadingVoiceprint(false);
     }
@@ -358,7 +358,7 @@ export default function SettingsPage() {
     if (!file) return;
     
     if (file.size > 5 * 1024 * 1024) {
-      alert('Logo must be under 5MB');
+      setError('Logo must be under 5MB');
       return;
     }
     
@@ -381,7 +381,7 @@ export default function SettingsPage() {
     if (!file) return;
     
     if (file.size > 25 * 1024 * 1024) {
-      alert('Document must be under 25MB');
+      setError('Document must be under 25MB');
       return;
     }
     
@@ -390,7 +390,7 @@ export default function SettingsPage() {
       const isDocx = file.name.toLowerCase().endsWith('.docx') || 
         file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
       if (!isDocx) {
-        alert('Contract templates must be .docx files (Microsoft Word format). Please upload a DOCX file, not a PDF, image, or other file type.');
+        setError('Contract templates must be .docx files (Microsoft Word format). Please upload a DOCX file, not a PDF, image, or other file type.');
         return;
       }
     }
@@ -528,11 +528,11 @@ export default function SettingsPage() {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
       } else {
-        alert('Failed to save settings');
+        setError('Failed to save settings');
       }
     } catch (err) {
       console.error('Failed to save:', err);
-      alert('Failed to save settings');
+      setError('Failed to save settings');
     } finally {
       setSaving(false);
     }
@@ -554,11 +554,11 @@ export default function SettingsPage() {
         logout();
         router.push('/login');
       } else {
-        alert('Failed to log out of all devices. Please try again.');
+        setError('Failed to log out of all devices. Please try again.');
       }
     } catch (err) {
       console.error('Failed to logout all devices:', err);
-      alert('Failed to log out of all devices. Please try again.');
+      setError('Failed to log out of all devices. Please try again.');
     } finally {
       setLoggingOutAll(false);
     }
@@ -687,6 +687,17 @@ export default function SettingsPage() {
               <span className={extractionMessage.includes('✓') ? 'text-accent-green' : 'text-primary-400'}>
                 {extractionMessage}
               </span>
+            </div>
+          )}
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-red-400 flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+                <X className="w-4 h-4" />
+              </button>
             </div>
           )}
 

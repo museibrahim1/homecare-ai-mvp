@@ -56,6 +56,7 @@ export default function VisitDetailPage() {
   const { token, isLoading: authLoading } = useAuth();
   
   const [visit, setVisit] = useState<Visit | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptSegment[]>([]);
   const [billables, setBillables] = useState<BillableItem[]>([]);
   const [contract, setContract] = useState<any>(null);
@@ -250,7 +251,7 @@ export default function VisitDetailPage() {
       setShowRestartModal(false);
     } catch (error) {
       console.error('Failed to restart assessment:', error);
-      alert('Failed to restart assessment. Please try again.');
+      setError('Failed to restart assessment. Please try again.');
     } finally {
       setRestarting(false);
     }
@@ -275,7 +276,7 @@ export default function VisitDetailPage() {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        alert(errorData.detail || `Failed to export ${type}`);
+        setError(errorData.detail || `Failed to export ${type}`);
         return;
       }
       
@@ -303,7 +304,7 @@ export default function VisitDetailPage() {
       a.remove();
     } catch (err) {
       console.error(`Export ${type} failed:`, err);
-      alert(`Failed to export ${type}`);
+      setError(`Failed to export ${type}`);
     }
     
     setShowExportMenu(false);
@@ -315,7 +316,7 @@ export default function VisitDetailPage() {
     
     // Check if we have a transcript
     if (transcript.length === 0) {
-      alert('Please upload audio or import a transcript first');
+      setError('Please upload audio or import a transcript first');
       return;
     }
     
@@ -364,7 +365,7 @@ export default function VisitDetailPage() {
       
     } catch (err) {
       console.error('Generate proposal failed:', err);
-      alert('Failed to generate proposal. Please try again.');
+      setError('Failed to generate proposal. Please try again.');
     } finally {
       setGeneratingProposal(false);
       setProcessingStep(null);
@@ -572,6 +573,17 @@ export default function VisitDetailPage() {
             </div>
             </div>
           </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-red-400 flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           {/* Pipeline Steps */}
           <div className="card p-3 sm:p-5 mb-6">

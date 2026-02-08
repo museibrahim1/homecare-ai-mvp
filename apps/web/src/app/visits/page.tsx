@@ -19,7 +19,8 @@ import {
   Sparkles,
   Play,
   Loader2,
-  Trash2
+  Trash2,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api, formatLocalDate } from '@/lib/api';
@@ -88,6 +89,7 @@ export default function VisitsPage() {
   const [creatingDemo, setCreatingDemo] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [usage, setUsage] = useState<{
     total_assessments: number;
     max_allowed: number;
@@ -151,11 +153,11 @@ export default function VisitsPage() {
         // Show the actual error
         const errorText = await response.text().catch(() => 'Unknown error');
         console.error(`Delete failed: ${response.status} - ${errorText}`);
-        alert(`Failed to delete: ${response.status}. The backend API may need to redeploy.`);
+        setError(`Failed to delete: ${response.status}. The backend API may need to redeploy.`);
       }
     } catch (err) {
       console.error('Failed to delete visit:', err);
-      alert('Network error when deleting. Please try again.');
+      setError('Network error when deleting. Please try again.');
     } finally {
       setDeletingId(null);
     }
@@ -180,12 +182,12 @@ export default function VisitsPage() {
       } else {
         const errorText = await response.text().catch(() => 'Unknown error');
         console.error(`Bulk delete failed: ${response.status} - ${errorText}`);
-        alert(`Failed to clear assessments: ${response.status}`);
+        setError(`Failed to clear assessments: ${response.status}`);
         await loadVisits();
       }
     } catch (err) {
       console.error('Failed to clear all visits:', err);
-      alert('Failed to clear assessments. Please try again.');
+      setError('Failed to clear assessments. Please try again.');
       await loadVisits();
     } finally {
       setLoading(false);
@@ -206,17 +208,16 @@ export default function VisitsPage() {
       
       if (response.ok) {
         const result = await response.json();
-        alert(`Cleaned up ${result.deleted_visits} visits from the system.`);
         setVisits([]);
         await loadVisits();
       } else {
         const errorText = await response.text().catch(() => 'Unknown error');
         console.error(`Admin cleanup failed: ${response.status} - ${errorText}`);
-        alert(`Admin cleanup failed: ${response.status}`);
+        setError(`Admin cleanup failed: ${response.status}`);
       }
     } catch (err) {
       console.error('Admin cleanup failed:', err);
-      alert('Admin cleanup failed. Please try again.');
+      setError('Admin cleanup failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -329,7 +330,7 @@ export default function VisitsPage() {
       
     } catch (err) {
       console.error('Failed to create sample assessment:', err);
-      alert('Failed to create sample assessment. Please try again.');
+      setError('Failed to create sample assessment. Please try again.');
       setCreatingDemo(false);
     }
   };
@@ -467,6 +468,17 @@ export default function VisitsPage() {
               </button>
             </div>
           </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-red-400 flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           {/* Free Tier Usage Banner */}
           {usage && !usage.has_paid_plan && (

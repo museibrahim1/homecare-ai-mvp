@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { FileText, Download, Edit3, Eye, Loader2, Search, Calendar, DollarSign, Clock, User, Filter, RefreshCw, Printer, Mail } from 'lucide-react';
+import { FileText, Download, Edit3, Eye, Loader2, Search, Calendar, DollarSign, Clock, User, Filter, RefreshCw, Printer, Mail, AlertCircle, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
 
@@ -53,6 +53,7 @@ export default function ProposalsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [exporting, setExporting] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,14 +138,14 @@ export default function ProposalsPage() {
         if (visit) {
           window.open(`/visits/${visit.id}?tab=contract`, '_blank');
         } else {
-          alert('No associated visit found. Please create a visit for this client first.');
+          setError('No associated visit found. Please create a visit for this client first.');
         }
       } else {
-        alert('Failed to load visits. Please try again.');
+        setError('Failed to load visits. Please try again.');
       }
     } catch (error) {
       console.error('Failed to export:', error);
-      alert('Failed to export proposal');
+      setError('Failed to export proposal');
     }
     setExporting(null);
   };
