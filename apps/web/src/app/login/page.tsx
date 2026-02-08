@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -8,11 +8,19 @@ import { Mic, Waves, Shield, Zap } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setToken, setUser } = useAuth();
+  const { setToken, setUser, logout, token } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Clear any existing session when the login page loads
+  // so every sign-in requires fresh credentials
+  useEffect(() => {
+    if (token) {
+      logout();
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,25 +202,6 @@ export default function LoginPage() {
               )}
             </button>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-dark-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-dark-900 text-dark-400">or</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('demo@agency.com');
-                setPassword('demo1234');
-              }}
-              className="w-full py-3 px-4 bg-dark-700 hover:bg-dark-600 text-white rounded-xl font-medium transition-colors border border-dark-600"
-            >
-              Try Demo Account
-            </button>
           </form>
 
           <div className="mt-8 text-center">

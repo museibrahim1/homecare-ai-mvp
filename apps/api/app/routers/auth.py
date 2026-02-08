@@ -105,6 +105,17 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/logout")
-async def logout(current_user: User = Depends(get_current_user)):
-    """Logout current user (client should discard token)."""
+async def logout(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Logout current user — clears Google tokens so they must reconnect on next login."""
+    # Disconnect Gmail / Google Calendar so user must re-authenticate each session
+    if getattr(current_user, 'google_calendar_connected', False):
+        current_user.google_calendar_connected = False
+        current_user.google_calendar_access_token = None
+        current_user.google_calendar_refresh_token = None
+        current_user.google_calendar_token_expiry = None
+        db.commit()
+
     return {"message": "Successfully logged out"}

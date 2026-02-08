@@ -227,7 +227,24 @@ export default function Sidebar() {
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
+    // Call backend to clear Google tokens so user must reconnect next login
+    try {
+      const authData = localStorage.getItem('homecare-auth');
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        const token = parsed?.state?.token;
+        if (token) {
+          const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+          await fetch(`${API_BASE}/auth/logout`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        }
+      }
+    } catch {
+      // Best-effort — proceed with frontend logout regardless
+    }
     logout();
     router.push('/login');
   }, [logout, router]);
