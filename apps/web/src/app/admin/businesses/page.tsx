@@ -13,6 +13,7 @@ import {
   Clock,
   AlertCircle,
   Eye,
+  ChevronLeft,
   ChevronRight,
   Users,
   FileCheck,
@@ -60,6 +61,8 @@ export default function AdminBusinessesPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
 
   const loadData = useCallback(async () => {
     const token = getStoredToken();
@@ -115,6 +118,8 @@ export default function AdminBusinessesPage() {
       year: 'numeric',
     });
   };
+
+  const paginatedBusinesses = businesses.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
     <div className="min-h-screen bg-dark-900 flex">
@@ -226,7 +231,7 @@ export default function AdminBusinessesPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setPage(0); }}
                 placeholder="Search businesses..."
                 className="w-full pl-10 pr-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
               />
@@ -236,7 +241,7 @@ export default function AdminBusinessesPage() {
               <Filter className="w-5 h-5 text-dark-400" />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
                 className="px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
               >
                 <option value="">All Statuses</option>
@@ -278,7 +283,7 @@ export default function AdminBusinessesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-700">
-                {businesses.map((business) => {
+                {paginatedBusinesses.map((business) => {
                   const statusConfig = STATUS_CONFIG[business.verification_status] || STATUS_CONFIG.pending;
                   const StatusIcon = statusConfig.icon;
                   
@@ -320,6 +325,30 @@ export default function AdminBusinessesPage() {
                 })}
               </tbody>
             </table>
+          )}
+          {businesses.length > pageSize && (
+            <div className="p-4 border-t border-dark-700 flex items-center justify-between">
+              <p className="text-dark-400 text-sm">
+                Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, businesses.length)} of {businesses.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage(Math.max(0, page - 1))}
+                  disabled={page === 0}
+                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-4 h-4 text-dark-400" />
+                </button>
+                <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={(page + 1) * pageSize >= businesses.length}
+                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                >
+                  <ChevronRight className="w-4 h-4 text-dark-400" />
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </main>

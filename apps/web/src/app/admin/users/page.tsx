@@ -6,7 +6,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Users, Shield, Loader2, RefreshCw, Plus, UserPlus,
-  MoreVertical, CheckCircle, XCircle, Mail, Clock, ArrowLeft, AlertCircle
+  MoreVertical, CheckCircle, XCircle, Mail, Clock, ArrowLeft, AlertCircle,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -32,6 +33,8 @@ export default function PlatformUsersPage() {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -144,6 +147,8 @@ export default function PlatformUsersPage() {
     }
   };
 
+  const paginatedUsers = users.slice(page * pageSize, (page + 1) * pageSize);
+
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-dark-900 flex items-center justify-center">
@@ -219,7 +224,7 @@ export default function PlatformUsersPage() {
             </div>
           ) : (
             <div className="divide-y divide-dark-700">
-              {users.map(user => (
+              {paginatedUsers.map(user => (
                 <div key={user.id} className="p-5 hover:bg-dark-700/30 transition">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -265,6 +270,30 @@ export default function PlatformUsersPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {users.length > pageSize && (
+            <div className="p-4 border-t border-dark-700 flex items-center justify-between">
+              <p className="text-dark-400 text-sm">
+                Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, users.length)} of {users.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage(Math.max(0, page - 1))}
+                  disabled={page === 0}
+                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-4 h-4 text-dark-400" />
+                </button>
+                <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={(page + 1) * pageSize >= users.length}
+                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                >
+                  <ChevronRight className="w-4 h-4 text-dark-400" />
+                </button>
+              </div>
             </div>
           )}
         </div>

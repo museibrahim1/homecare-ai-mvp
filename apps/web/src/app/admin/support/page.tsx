@@ -6,7 +6,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Ticket, Shield, Loader2, RefreshCw, Search, MessageSquare,
-  Clock, CheckCircle, AlertCircle, User, Send, X, Filter, ArrowLeft
+  Clock, CheckCircle, AlertCircle, User, Send, X, Filter, ArrowLeft,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -73,6 +74,8 @@ export default function SupportTicketsPage() {
   const [responseText, setResponseText] = useState('');
   const [sendingResponse, setSendingResponse] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -195,6 +198,8 @@ export default function SupportTicketsPage() {
     if (isAuthorized) fetchTickets();
   }, [filter.status, filter.priority, isAuthorized]);
 
+  const paginatedTickets = tickets.slice(page * pageSize, (page + 1) * pageSize);
+
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-dark-900 flex items-center justify-center">
@@ -252,7 +257,7 @@ export default function SupportTicketsPage() {
         <div className="flex items-center gap-4 mb-6">
           <select
             value={filter.status}
-            onChange={e => setFilter({ ...filter, status: e.target.value })}
+            onChange={e => { setFilter({ ...filter, status: e.target.value }); setPage(0); }}
             className="px-4 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
           >
             <option value="">All Status</option>
@@ -264,7 +269,7 @@ export default function SupportTicketsPage() {
           </select>
           <select
             value={filter.priority}
-            onChange={e => setFilter({ ...filter, priority: e.target.value })}
+            onChange={e => { setFilter({ ...filter, priority: e.target.value }); setPage(0); }}
             className="px-4 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
           >
             <option value="">All Priority</option>
@@ -289,7 +294,7 @@ export default function SupportTicketsPage() {
               </div>
             ) : (
               <div className="divide-y divide-dark-700">
-                {tickets.map(ticket => (
+                {paginatedTickets.map(ticket => (
                   <div
                     key={ticket.id}
                     onClick={() => fetchTicketDetail(ticket.id)}
@@ -310,6 +315,30 @@ export default function SupportTicketsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            {tickets.length > pageSize && (
+              <div className="p-4 border-t border-dark-700 flex items-center justify-between">
+                <p className="text-dark-400 text-sm">
+                  Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, tickets.length)} of {tickets.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPage(Math.max(0, page - 1))}
+                    disabled={page === 0}
+                    className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-dark-400" />
+                  </button>
+                  <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
+                  <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={(page + 1) * pageSize >= tickets.length}
+                    className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                  >
+                    <ChevronRight className="w-4 h-4 text-dark-400" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
