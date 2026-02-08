@@ -394,6 +394,13 @@ async def import_transcript(
     """
     visit = get_user_visit(db, visit_id, current_user)
     
+    # Validate segment count
+    if len(request.segments) > 50000:
+        raise HTTPException(
+            status_code=400,
+            detail="Too many segments. Maximum is 50,000."
+        )
+    
     # Validate segments
     for i, seg in enumerate(request.segments):
         if seg.end_ms <= seg.start_ms:
