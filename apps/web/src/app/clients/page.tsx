@@ -26,7 +26,11 @@ import {
   Activity,
   Trash2,
   Building2,
-  Shield
+  Shield,
+  Upload,
+  FileSpreadsheet,
+  UserPlus,
+  FolderUp
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -504,6 +508,8 @@ export default function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showAutomationsModal, setShowAutomationsModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [showPlusMenu, setShowPlusMenu] = useState(false);
+  const plusMenuRef = useRef<HTMLDivElement>(null);
   const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Cleanup delete timeout on unmount
@@ -512,6 +518,17 @@ export default function ClientsPage() {
       if (deleteTimeoutRef.current) clearTimeout(deleteTimeoutRef.current);
     };
   }, []);
+
+  // Close plus menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (plusMenuRef.current && !plusMenuRef.current.contains(e.target as Node)) {
+        setShowPlusMenu(false);
+      }
+    };
+    if (showPlusMenu) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showPlusMenu]);
   
   // Client automations
   const [automations, setAutomations] = useState([
@@ -833,9 +850,54 @@ export default function ClientsPage() {
                 <BarChart3 className="w-4 h-4" />
                 Forecast
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-dark-400 hover:text-white">
-                <Plus className="w-4 h-4" />
-              </button>
+              <div className="relative" ref={plusMenuRef}>
+                <button 
+                  onClick={() => setShowPlusMenu(!showPlusMenu)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-dark-400 hover:text-white hover:bg-dark-700 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+                {showPlusMenu && (
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl z-50 py-2 overflow-hidden">
+                    <button
+                      onClick={() => { setQuickAddOpen(true); setShowPlusMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                    >
+                      <UserPlus className="w-4 h-4 text-primary-400" />
+                      Add New Client
+                    </button>
+                    <button
+                      onClick={() => { setShowPlusMenu(false); /* TODO: import CSV */ }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                    >
+                      <FileSpreadsheet className="w-4 h-4 text-green-400" />
+                      Import from CSV
+                    </button>
+                    <button
+                      onClick={() => { setShowPlusMenu(false); /* TODO: bulk import */ }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                    >
+                      <FolderUp className="w-4 h-4 text-orange-400" />
+                      Bulk Import
+                    </button>
+                    <div className="border-t border-dark-600 my-1" />
+                    <button
+                      onClick={() => { setViewMode('pipeline'); setShowPlusMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                    >
+                      <LayoutGrid className="w-4 h-4 text-purple-400" />
+                      Switch to Pipeline View
+                    </button>
+                    <button
+                      onClick={() => { setShowAutomationsModal(true); setShowPlusMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                    >
+                      <Zap className="w-4 h-4 text-yellow-400" />
+                      Manage Automations
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -895,7 +957,7 @@ export default function ClientsPage() {
                       <ClientRow 
                         key={client.id} 
                         client={client} 
-                        onClick={() => handleEditClient(client)}
+                        onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
@@ -927,7 +989,7 @@ export default function ClientsPage() {
                       <ClientRow 
                         key={client.id} 
                         client={client} 
-                        onClick={() => handleEditClient(client)}
+                        onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
@@ -960,7 +1022,7 @@ export default function ClientsPage() {
                       <ClientRow 
                         key={client.id} 
                         client={client} 
-                        onClick={() => handleEditClient(client)}
+                        onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
@@ -993,7 +1055,7 @@ export default function ClientsPage() {
                       <ClientRow 
                         key={client.id} 
                         client={client} 
-                        onClick={() => handleEditClient(client)}
+                        onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
@@ -1025,7 +1087,7 @@ export default function ClientsPage() {
                       <ClientRow 
                         key={client.id} 
                         client={client} 
-                        onClick={() => handleEditClient(client)}
+                        onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
@@ -1057,7 +1119,7 @@ export default function ClientsPage() {
                       <ClientRow 
                         key={client.id} 
                         client={client} 
-                        onClick={() => handleEditClient(client)}
+                        onClick={() => router.push(`/clients/${client.id}`)}
                         onDelete={(e) => handleInlineDelete(e, client.id)}
                         isConfirmingDelete={deleteConfirm === client.id}
                       />
@@ -1124,7 +1186,7 @@ export default function ClientsPage() {
                           >
                             <div 
                               className="flex items-center gap-2 mb-1.5 cursor-pointer"
-                              onClick={() => handleEditClient(client)}
+                              onClick={() => router.push(`/clients/${client.id}`)}
                             >
                               <ClientAvatar name={client.full_name} size="sm" />
                               <p className="font-medium text-white text-xs truncate flex-1">{client.full_name}</p>
