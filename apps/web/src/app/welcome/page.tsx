@@ -111,7 +111,8 @@ export default function WelcomePage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (visitsRes.ok) {
-          const visits = await visitsRes.json();
+          const visitsData = await visitsRes.json();
+          const visits = Array.isArray(visitsData) ? visitsData : (visitsData?.items || []);
           if (visits.length > 0) {
             setCompletedSteps(prev => [...prev, 'assessment']);
           }
