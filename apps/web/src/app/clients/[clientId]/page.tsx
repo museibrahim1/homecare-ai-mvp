@@ -684,7 +684,7 @@ export default function ClientDetailPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors text-sm font-medium ${activeTab === tab.id ? 'border-primary-500 text-primary-400' : 'border-transparent text-dark-400 hover:text-white'}`}
+                className={`flex items-center gap-2 px-4 py-3 -mb-px border-b-2 transition-colors text-sm font-medium ${activeTab === tab.id ? 'border-primary-500 text-primary-400' : 'border-transparent text-dark-400 hover:text-white'}`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
