@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Mic, Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle,
-  FileSignature, UserCheck, UserX, Loader2
+  FileSignature, UserCheck, UserX, Loader2, Activity, BarChart3, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -14,11 +14,77 @@ import { format } from 'date-fns';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
+/* ─── Pipeline stage config ─── */
+const PIPELINE_STAGES = [
+  { key: 'intake', label: 'Intake', color: 'bg-blue-500', text: 'text-blue-400', bg: 'bg-blue-500/20', statuses: ['intake', 'pending'] },
+  { key: 'assessment', label: 'Assessment', color: 'bg-purple-500', text: 'text-purple-400', bg: 'bg-purple-500/20', statuses: ['assessment'] },
+  { key: 'proposal', label: 'Proposal', color: 'bg-orange-500', text: 'text-orange-400', bg: 'bg-orange-500/20', statuses: ['proposal', 'pending_review'] },
+  { key: 'active', label: 'Active', color: 'bg-green-500', text: 'text-green-400', bg: 'bg-green-500/20', statuses: ['active', 'assigned'] },
+  { key: 'follow_up', label: 'Follow-up', color: 'bg-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500/20', statuses: ['follow_up', 'review', 'discharged', 'inactive'] },
+];
+
+/* ─── Simple bar chart component (pure CSS, no library) ─── */
+function MiniBarChart({ data, maxValue }: { data: { label: string; value: number }[]; maxValue: number }) {
+  const safeMax = Math.max(maxValue, 1);
+  return (
+    <div className="flex items-end gap-1.5 h-32">
+      {data.map((item, i) => {
+        const heightPct = Math.max((item.value / safeMax) * 100, 4);
+        return (
+          <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+            <span className="text-xs text-dark-300 font-medium">{item.value}</span>
+            <div className="w-full relative rounded-t-md overflow-hidden" style={{ height: `${heightPct}%` }}>
+              <div className="absolute inset-0 bg-gradient-to-t from-primary-600 to-primary-400 opacity-80 hover:opacity-100 transition-opacity rounded-t-md" />
+            </div>
+            <span className="text-[10px] text-dark-400 truncate w-full text-center">{item.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── Pipeline bar component ─── */
+function PipelineBar({ stages }: { stages: { label: string; count: number; color: string; text: string; bg: string }[] }) {
+  const total = Math.max(stages.reduce((sum, s) => sum + s.count, 0), 1);
+  return (
+    <div className="space-y-3">
+      {/* Stacked bar */}
+      <div className="flex h-3 rounded-full overflow-hidden bg-dark-600">
+        {stages.map((stage, i) => {
+          const pct = (stage.count / total) * 100;
+          if (pct === 0) return null;
+          return (
+            <div
+              key={i}
+              className={`${stage.color} transition-all duration-500`}
+              style={{ width: `${pct}%` }}
+              title={`${stage.label}: ${stage.count}`}
+            />
+          );
+        })}
+      </div>
+      {/* Legend */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+        {stages.map((stage, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
+            <span className="text-xs text-dark-300">{stage.label}</span>
+            <span className={`text-xs font-semibold ${stage.text}`}>{stage.count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { token, isLoading: authLoading } = useAuth();
   const [stats, setStats] = useState({ totalVisits: 0, pendingReview: 0, totalClients: 0, hoursThisWeek: 0 });
   const [recentVisits, setRecentVisits] = useState<any[]>([]);
+  const [allVisits, setAllVisits] = useState<any[]>([]);
+  const [allClients, setAllClients] = useState<any[]>([]);
   const [proposalClients, setProposalClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingClientId, setUpdatingClientId] = useState<string | null>(null);
@@ -43,11 +109,12 @@ export default function DashboardPage() {
         api.getVisits(token!),
         api.getClients(token!),
       ]);
-      // Safely extract arrays with fallback defaults
       const items = visitsData?.items || [];
       const clients = Array.isArray(clientsData) ? clientsData : [];
 
-      // Calculate assessments this week from actual data
+      setAllVisits(items);
+      setAllClients(clients);
+
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const thisWeekCount = items.filter((v: any) => {
@@ -55,7 +122,6 @@ export default function DashboardPage() {
         return created >= weekAgo;
       }).length;
       
-      // Find clients with proposal status
       const proposalList = clients.filter((c: any) => c.status === 'proposal');
       setProposalClients(proposalList);
       
@@ -65,7 +131,7 @@ export default function DashboardPage() {
         totalClients: clients.length,
         hoursThisWeek: thisWeekCount,
       });
-      setRecentVisits(items.slice(0, 5));
+      setRecentVisits(items.slice(0, 6));
     } catch (err: any) {
       setError(err?.message || 'Something went wrong');
     } finally {
@@ -73,13 +139,58 @@ export default function DashboardPage() {
     }
   };
 
+  /* ─── Compute monthly assessment chart data (last 6 months) ─── */
+  const monthlyData = useMemo(() => {
+    const now = new Date();
+    const months: { label: string; value: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+      const count = allVisits.filter((v: any) => {
+        const created = new Date(v.created_at || 0);
+        return created >= d && created <= monthEnd;
+      }).length;
+      months.push({
+        label: format(d, 'MMM'),
+        value: count,
+      });
+    }
+    return months;
+  }, [allVisits]);
+
+  const monthlyMax = useMemo(() => Math.max(...monthlyData.map(m => m.value), 1), [monthlyData]);
+
+  /* ─── Compute week-over-week change ─── */
+  const weekOverWeek = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const thisWeek = allVisits.filter((v: any) => new Date(v.created_at || 0) >= weekAgo).length;
+    const lastWeek = allVisits.filter((v: any) => {
+      const d = new Date(v.created_at || 0);
+      return d >= twoWeeksAgo && d < weekAgo;
+    }).length;
+    if (lastWeek === 0) return thisWeek > 0 ? 100 : 0;
+    return Math.round(((thisWeek - lastWeek) / lastWeek) * 100);
+  }, [allVisits]);
+
+  /* ─── Compute pipeline breakdown ─── */
+  const pipelineStages = useMemo(() => {
+    return PIPELINE_STAGES.map(stage => ({
+      ...stage,
+      count: allClients.filter(c => {
+        const status = c.status || 'active';
+        return stage.statuses.includes(status);
+      }).length,
+    }));
+  }, [allClients]);
+
   const handleClientAction = async (clientId: string, action: 'active' | 'follow_up') => {
     if (!token) return;
     setUpdatingClientId(clientId);
     try {
       await api.updateClient(token, clientId, { status: action });
       
-      // If activating, also trigger auto-policy creation
       if (action === 'active') {
         try {
           await fetch(`${API_BASE}/clients/${clientId}/activate-policy`, {
@@ -91,18 +202,15 @@ export default function DashboardPage() {
         }
       }
       
-      // Remove from proposal list
       setProposalClients(prev => prev.filter(c => c.id !== clientId));
       setStats(prev => ({ ...prev, pendingReview: prev.pendingReview - 1 }));
-    } catch (err) {
+    } catch {
       setError('Failed to update client status. Please try again.');
     } finally {
       setUpdatingClientId(null);
     }
   };
 
-  // Only show full loading on initial page load, not during navigation
-  // Check localStorage directly for faster response
   const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
   
   if (authLoading && !hasStoredToken) {
@@ -120,9 +228,9 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
-      {/* Main content - add left padding on mobile for menu button */}
       <main className="flex-1 p-4 pt-16 lg:pt-4 lg:p-8 min-w-0">
         <div className="max-w-6xl mx-auto">
+          {/* Header */}
           <div className="mb-6 lg:mb-8">
             <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">Dashboard</h1>
             <p className="text-dark-300 text-sm lg:text-base">Care assessments in, proposal-ready contracts out.</p>
@@ -136,22 +244,27 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Onboarding Checklist - shows for new users */}
           <OnboardingChecklist />
 
-          {/* Stats Grid - responsive: 2 cols on mobile, 4 on desktop */}
+          {/* ─── Stats Grid ─── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6 lg:mb-8">
             {[
               { label: 'Total Assessments', value: stats.totalVisits, icon: Calendar, bgClass: 'bg-accent-primary/20', textClass: 'text-accent-primary' },
               { label: 'Pending Proposals', value: stats.pendingReview, icon: AlertCircle, bgClass: 'bg-accent-orange/20', textClass: 'text-accent-orange' },
               { label: 'Total Clients', value: stats.totalClients, icon: Users, bgClass: 'bg-accent-green/20', textClass: 'text-accent-green' },
-              { label: 'Assessments This Week', value: stats.hoursThisWeek, icon: Clock, bgClass: 'bg-accent-cyan/20', textClass: 'text-accent-cyan' },
+              { label: 'This Week', value: stats.hoursThisWeek, icon: Clock, bgClass: 'bg-accent-cyan/20', textClass: 'text-accent-cyan', trend: weekOverWeek },
             ].map((stat, i) => (
               <div key={i} className="card p-3 lg:p-5">
-                <div className="flex items-center gap-2 lg:gap-3 mb-2 lg:mb-3">
+                <div className="flex items-center justify-between mb-2 lg:mb-3">
                   <div className={`w-8 h-8 lg:w-10 lg:h-10 ${stat.bgClass} rounded-lg lg:rounded-xl flex items-center justify-center`}>
                     <stat.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${stat.textClass}`} />
                   </div>
+                  {'trend' in stat && stat.trend !== undefined && stat.trend !== 0 && (
+                    <div className={`flex items-center gap-0.5 text-xs font-medium ${stat.trend > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {stat.trend > 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+                      {Math.abs(stat.trend)}%
+                    </div>
+                  )}
                 </div>
                 <p className="text-dark-400 text-xs lg:text-sm mb-1 truncate">{stat.label}</p>
                 <p className={`text-xl lg:text-3xl font-bold ${stat.textClass}`}>{stat.value}</p>
@@ -159,7 +272,63 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Proposal Follow-Up Widget */}
+          {/* ─── Charts Row: Assessments Trend + Client Pipeline ─── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+            {/* Monthly Assessments Chart */}
+            <div className="card p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-primary-400" />
+                  <h2 className="text-sm lg:text-base font-semibold text-white">Assessments Trend</h2>
+                </div>
+                <span className="text-xs text-dark-400">Last 6 months</span>
+              </div>
+              {loading ? (
+                <div className="h-32 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <MiniBarChart data={monthlyData} maxValue={monthlyMax} />
+              )}
+            </div>
+
+            {/* Client Pipeline Breakdown */}
+            <div className="card p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-green-400" />
+                  <h2 className="text-sm lg:text-base font-semibold text-white">Client Pipeline</h2>
+                </div>
+                <button
+                  onClick={() => router.push('/clients')}
+                  className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1"
+                >
+                  View all <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {loading ? (
+                <div className="h-20 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : allClients.length === 0 ? (
+                <div className="text-center py-6">
+                  <Users className="w-8 h-8 text-dark-600 mx-auto mb-2" />
+                  <p className="text-dark-400 text-sm">No clients yet</p>
+                </div>
+              ) : (
+                <div>
+                  {/* Total count */}
+                  <div className="flex items-baseline gap-2 mb-4">
+                    <span className="text-3xl font-bold text-white">{allClients.length}</span>
+                    <span className="text-sm text-dark-400">total clients</span>
+                  </div>
+                  <PipelineBar stages={pipelineStages} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ─── Proposal Follow-Up Widget ─── */}
           {proposalClients.length > 0 && (
             <div className="card p-4 lg:p-6 mb-6 lg:mb-8">
               <div className="flex items-center justify-between mb-4">
@@ -232,12 +401,15 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Content Grid - stack on mobile, side by side on desktop */}
+          {/* ─── Content Grid: Activity Feed + Quick Actions ─── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-            {/* Recent Assessments - full width on mobile, 2/3 on desktop */}
+            {/* Recent Activity Feed */}
             <div className="lg:col-span-2 card p-4 lg:p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base lg:text-lg font-semibold text-white">Recent Assessments</h2>
+                <div className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-primary-400" />
+                  <h2 className="text-base lg:text-lg font-semibold text-white">Recent Activity</h2>
+                </div>
                 <button onClick={() => router.push('/visits')} className="text-primary-400 text-xs lg:text-sm hover:text-primary-300 flex items-center gap-1">
                   View all <ChevronRight className="w-4 h-4" />
                 </button>
@@ -247,28 +419,100 @@ export default function DashboardPage() {
                   <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto" />
                 </div>
               ) : recentVisits.length === 0 ? (
-                <div className="text-center py-6 lg:py-8 text-dark-400 text-sm">No assessments yet</div>
-              ) : (
-                <div className="space-y-2 lg:space-y-3">
-                  {recentVisits.map((visit) => (
-                    <div key={visit.id} onClick={() => router.push(`/visits/${visit.id}`)} className="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg lg:rounded-xl bg-dark-700/30 hover:bg-dark-700/50 cursor-pointer transition">
-                      <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0 ${visit.status === 'approved' ? 'bg-accent-green/20' : 'bg-accent-orange/20'}`}>
-                        {visit.status === 'approved' ? <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5 text-accent-green" /> : <AlertCircle className="w-4 h-4 lg:w-5 lg:h-5 text-accent-orange" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium text-sm lg:text-base truncate">{visit.client?.full_name || 'Unknown'}</p>
-                        <p className="text-dark-400 text-xs lg:text-sm">{visit.scheduled_start ? format(new Date(visit.scheduled_start), 'MMM d, h:mm a') : 'Not scheduled'}</p>
-                      </div>
-                      <span className={`px-2 py-1 rounded-lg text-[10px] lg:text-xs flex-shrink-0 ${visit.status === 'approved' ? 'bg-accent-green/20 text-accent-green' : 'bg-accent-orange/20 text-accent-orange'}`}>
-                        {(visit.status || 'unknown').replace('_', ' ')}
-                      </span>
-                    </div>
-                  ))}
+                <div className="text-center py-6 lg:py-8">
+                  <Calendar className="w-10 h-10 text-dark-600 mx-auto mb-3" />
+                  <p className="text-dark-400 text-sm">No assessments yet</p>
+                  <button onClick={() => router.push('/visits/new')} className="text-sm text-primary-400 hover:text-primary-300 mt-2">
+                    Start your first assessment
+                  </button>
                 </div>
+              ) : (
+                <>
+                  {/* Table header */}
+                  <div className="hidden sm:grid grid-cols-12 gap-3 px-3 pb-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700/50">
+                    <div className="col-span-2">Date</div>
+                    <div className="col-span-4">Client</div>
+                    <div className="col-span-2">Status</div>
+                    <div className="col-span-3">Type</div>
+                    <div className="col-span-1"></div>
+                  </div>
+                  <div className="space-y-1 mt-1">
+                    {recentVisits.map((visit) => {
+                      const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+                        completed: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Completed' },
+                        approved: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Approved' },
+                        processing: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', label: 'Processing' },
+                        pending: { bg: 'bg-dark-600', text: 'text-dark-300', label: 'Pending' },
+                        failed: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Failed' },
+                        uploaded: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Uploaded' },
+                      };
+                      const status = visit.status || 'pending';
+                      const cfg = statusConfig[status] || statusConfig.pending;
+
+                      // Determine activity type
+                      let typeLabel = 'Assessment';
+                      let typeBg = 'bg-primary-500/20';
+                      let typeText = 'text-primary-400';
+                      if (visit.contract_generated) {
+                        typeLabel = 'Contract';
+                        typeBg = 'bg-green-500/20';
+                        typeText = 'text-green-400';
+                      } else if (visit.note_generated) {
+                        typeLabel = 'Visit Note';
+                        typeBg = 'bg-purple-500/20';
+                        typeText = 'text-purple-400';
+                      } else if (status === 'processing') {
+                        typeLabel = 'Processing';
+                        typeBg = 'bg-yellow-500/20';
+                        typeText = 'text-yellow-400';
+                      }
+
+                      return (
+                        <div
+                          key={visit.id}
+                          onClick={() => router.push(`/visits/${visit.id}`)}
+                          className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 p-3 rounded-xl bg-dark-700/30 hover:bg-dark-700/50 cursor-pointer transition group items-center"
+                        >
+                          {/* Date */}
+                          <div className="sm:col-span-2 text-xs text-dark-400">
+                            {visit.created_at ? format(new Date(visit.created_at), 'MMM d, h:mm a') : '-'}
+                          </div>
+                          {/* Client */}
+                          <div className="sm:col-span-4 flex items-center gap-2 min-w-0">
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
+                              <span className={`text-xs font-bold ${cfg.text}`}>
+                                {((visit.client_name || visit.client?.full_name || 'U')[0] || 'U').toUpperCase()}
+                              </span>
+                            </div>
+                            <span className="text-sm text-white font-medium truncate">
+                              {visit.client_name || visit.client?.full_name || 'Unknown'}
+                            </span>
+                          </div>
+                          {/* Status */}
+                          <div className="sm:col-span-2">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] lg:text-xs font-medium ${cfg.bg} ${cfg.text}`}>
+                              {cfg.label}
+                            </span>
+                          </div>
+                          {/* Type */}
+                          <div className="sm:col-span-3">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] lg:text-xs font-medium ${typeBg} ${typeText}`}>
+                              {typeLabel}
+                            </span>
+                          </div>
+                          {/* Arrow */}
+                          <div className="sm:col-span-1 hidden sm:flex justify-end">
+                            <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
               )}
             </div>
 
-            {/* Quick Actions - full width on mobile, 1/3 on desktop */}
+            {/* Quick Actions */}
             <div className="card p-4 lg:p-6">
               <h2 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">Quick Actions</h2>
               <div className="space-y-2 lg:space-y-3">
@@ -289,6 +533,25 @@ export default function DashboardPage() {
                     </div>
                   </button>
                 ))}
+              </div>
+
+              {/* Pipeline Summary (compact) */}
+              <div className="mt-5 pt-5 border-t border-dark-700">
+                <h3 className="text-sm font-medium text-dark-400 mb-3">Pipeline Summary</h3>
+                <div className="space-y-2">
+                  {pipelineStages.filter(s => s.count > 0).map((stage, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${stage.color}`} />
+                        <span className="text-xs text-dark-300">{stage.label}</span>
+                      </div>
+                      <span className={`text-xs font-semibold ${stage.text}`}>{stage.count}</span>
+                    </div>
+                  ))}
+                  {pipelineStages.every(s => s.count === 0) && (
+                    <p className="text-xs text-dark-500">No clients in pipeline</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
