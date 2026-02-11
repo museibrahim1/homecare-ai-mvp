@@ -756,9 +756,39 @@ export default function ClientsPage() {
                 <Zap className="w-4 h-4" />
                 Automate / {automations.filter(a => a.enabled).length}
               </button>
-              <button className="p-2 text-dark-400 hover:text-white">
-                <MoreHorizontal className="w-5 h-5" />
-              </button>
+              <div className="relative" ref={plusMenuRef}>
+                <button 
+                  onClick={() => setShowPlusMenu(!showPlusMenu)}
+                  className="p-2 text-dark-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors"
+                >
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
+                {showPlusMenu && (
+                  <div className="absolute top-full right-0 mt-2 w-52 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden">
+                    <button
+                      onClick={() => { setQuickAddOpen(true); setShowPlusMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                    >
+                      <UserPlus className="w-4 h-4 text-primary-400" />
+                      Add New Client
+                    </button>
+                    <button
+                      onClick={() => { setShowPlusMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                    >
+                      <FileSpreadsheet className="w-4 h-4 text-green-400" />
+                      Import from CSV
+                    </button>
+                    <button
+                      onClick={() => { setShowPlusMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                    >
+                      <FolderUp className="w-4 h-4 text-orange-400" />
+                      Bulk Import
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -850,54 +880,13 @@ export default function ClientsPage() {
                 <BarChart3 className="w-4 h-4" />
                 Forecast
               </button>
-              <div className="relative" ref={plusMenuRef}>
-                <button 
-                  onClick={() => setShowPlusMenu(!showPlusMenu)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-dark-400 hover:text-white hover:bg-dark-700 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-                {showPlusMenu && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl z-50 py-2 overflow-hidden">
-                    <button
-                      onClick={() => { setQuickAddOpen(true); setShowPlusMenu(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
-                    >
-                      <UserPlus className="w-4 h-4 text-primary-400" />
-                      Add New Client
-                    </button>
-                    <button
-                      onClick={() => { setShowPlusMenu(false); /* TODO: import CSV */ }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
-                    >
-                      <FileSpreadsheet className="w-4 h-4 text-green-400" />
-                      Import from CSV
-                    </button>
-                    <button
-                      onClick={() => { setShowPlusMenu(false); /* TODO: bulk import */ }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
-                    >
-                      <FolderUp className="w-4 h-4 text-orange-400" />
-                      Bulk Import
-                    </button>
-                    <div className="border-t border-dark-600 my-1" />
-                    <button
-                      onClick={() => { setViewMode('pipeline'); setShowPlusMenu(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
-                    >
-                      <LayoutGrid className="w-4 h-4 text-purple-400" />
-                      Switch to Pipeline View
-                    </button>
-                    <button
-                      onClick={() => { setShowAutomationsModal(true); setShowPlusMenu(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
-                    >
-                      <Zap className="w-4 h-4 text-yellow-400" />
-                      Manage Automations
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                onClick={() => setQuickAddOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-dark-400 hover:text-white hover:bg-dark-700 transition-colors"
+                title="Add new client"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
             </div>
 
             <div className="flex items-center gap-3">
