@@ -25,6 +25,32 @@ from app.models.user import User, UserRole
 TEST_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///:memory:")
 
 
+@pytest.fixture(autouse=True)
+def _reset_rate_limiters():
+    """Reset module-level rate limiters and caches between each test.
+
+    The auth router and security module keep in-memory dicts
+    (_rate_limit_store, _login_attempts) that persist across tests in the
+    same process.  After ~10 login calls the rate limiter starts returning
+    HTTP 429, which breaks the auth_headers fixture.
+    """
+    # --- auth router rate-limit store ---
+    from app.routers.auth import _rate_limit_store
+    _rate_limit_store.clear()
+
+    # --- security module login-attempt tracker ---
+    import app.core.security as sec
+    sec._login_attempts.clear()
+    sec._redis_client = None          # force fresh Redis probe each test
+
+    yield
+
+    # clean up again after the test (belt-and-suspenders)
+    _rate_limit_store.clear()
+    sec._login_attempts.clear()
+    sec._redis_client = None
+
+
 @pytest.fixture(scope="function")
 def db_engine():
     """Create test database engine."""
@@ -98,5 +124,9 @@ def auth_headers(client, seeded_db):
         "/auth/login",
         json={"email": "admin@palmtai.com", "password": "admin123"}
     )
-    token = response.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+    data = response.json()
+    assert response.status_code == 200, (
+        f"Login failed (HTTP {response.status_code}): {data}"
+    )
+    assert "access_token" in data, f"Missing access_token in response: {data}"
+    return {"Authorization": f"Bearer {data['access_token']}"}
