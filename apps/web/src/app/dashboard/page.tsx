@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { 
   Mic, Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle,
   FileSignature, UserCheck, UserX, Loader2, Activity, BarChart3, ArrowUpRight, ArrowDownRight,
-  Plus, Trash2, Circle, CheckCircle2, X, GripVertical, Tag, Settings2, Eye, EyeOff,
-  ArrowUp, ArrowDown, LayoutGrid
+  Plus, Trash2, Circle, CheckCircle2, X, GripVertical, Tag, Settings2,
+  LayoutGrid
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -367,7 +367,16 @@ function saveWidgetPrefs(prefs: WidgetPrefs) {
   localStorage.setItem(WIDGET_PREFS_KEY, JSON.stringify(prefs));
 }
 
-/* ─── Customize Panel ─── */
+/* ─── Widget icons for the customize panel ─── */
+const WIDGET_ICONS: Record<string, typeof CheckCircle2> = {
+  tasks: CheckCircle2,
+  stats: BarChart3,
+  charts: Activity,
+  proposals: FileSignature,
+  activity: Calendar,
+};
+
+/* ─── Customize Panel (drag-and-drop + toggle switches) ─── */
 function CustomizePanel({
   prefs,
   onUpdate,
@@ -378,6 +387,8 @@ function CustomizePanel({
   onClose: () => void;
 }) {
   const [localPrefs, setLocalPrefs] = useState<WidgetPrefs>(prefs);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const orderedWidgets = localPrefs.order.map(id => ALL_WIDGETS.find(w => w.id === id)!).filter(Boolean);
 
@@ -390,22 +401,47 @@ function CustomizePanel({
     });
   };
 
-  const moveUp = (idx: number) => {
-    if (idx === 0) return;
-    setLocalPrefs(prev => {
-      const order = [...prev.order];
-      [order[idx - 1], order[idx]] = [order[idx], order[idx - 1]];
-      return { ...prev, order };
-    });
+  /* ─── Drag handlers ─── */
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = 'move';
+    // Make the drag image semi-transparent
+    if (e.currentTarget instanceof HTMLElement) {
+      e.dataTransfer.setDragImage(e.currentTarget, e.currentTarget.offsetWidth / 2, 20);
+    }
   };
 
-  const moveDown = (idx: number) => {
-    if (idx >= orderedWidgets.length - 1) return;
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (id !== draggedId) {
+      setDragOverId(id);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedId || draggedId === targetId) {
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
     setLocalPrefs(prev => {
       const order = [...prev.order];
-      [order[idx], order[idx + 1]] = [order[idx + 1], order[idx]];
+      const fromIdx = order.indexOf(draggedId);
+      const toIdx = order.indexOf(targetId);
+      if (fromIdx === -1 || toIdx === -1) return prev;
+      order.splice(fromIdx, 1);
+      order.splice(toIdx, 0, draggedId);
       return { ...prev, order };
     });
+    setDraggedId(null);
+    setDragOverId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
   };
 
   const handleSave = () => {
@@ -414,8 +450,7 @@ function CustomizePanel({
   };
 
   const handleReset = () => {
-    const defaults: WidgetPrefs = { order: DEFAULT_ORDER, hidden: [] };
-    setLocalPrefs(defaults);
+    setLocalPrefs({ order: DEFAULT_ORDER, hidden: [] });
   };
 
   return (
@@ -434,54 +469,62 @@ function CustomizePanel({
         </div>
 
         {/* Widget List */}
-        <div className="p-4 space-y-1.5 max-h-[400px] overflow-y-auto">
-          <p className="text-xs text-dark-400 mb-3">Toggle widgets on or off. Use arrows to reorder.</p>
-          {orderedWidgets.map((widget, idx) => {
+        <div className="p-4 space-y-1.5">
+          <p className="text-xs text-dark-400 mb-3">Drag to reorder. Toggle to show or hide.</p>
+          {orderedWidgets.map((widget) => {
             const isHidden = localPrefs.hidden.includes(widget.id);
+            const isDragging = draggedId === widget.id;
+            const isDragOver = dragOverId === widget.id && draggedId !== widget.id;
+            const WidgetIcon = WIDGET_ICONS[widget.id] || LayoutGrid;
+
             return (
               <div
                 key={widget.id}
-                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
-                  isHidden
-                    ? 'bg-dark-700/20 border-dark-700/30 opacity-50'
-                    : 'bg-dark-700/40 border-dark-600/50'
+                draggable
+                onDragStart={(e) => handleDragStart(e, widget.id)}
+                onDragOver={(e) => handleDragOver(e, widget.id)}
+                onDrop={(e) => handleDrop(e, widget.id)}
+                onDragEnd={handleDragEnd}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-150 select-none ${
+                  isDragging
+                    ? 'opacity-40 scale-[0.98] border-primary-500/40 bg-primary-500/5'
+                    : isDragOver
+                    ? 'border-primary-500/60 bg-primary-500/10 scale-[1.01]'
+                    : isHidden
+                    ? 'bg-dark-700/20 border-dark-700/30'
+                    : 'bg-dark-700/40 border-dark-600/50 hover:border-dark-500'
                 }`}
               >
-                {/* Reorder arrows */}
-                <div className="flex flex-col gap-0.5">
-                  <button
-                    onClick={() => moveUp(idx)}
-                    disabled={idx === 0}
-                    className="p-0.5 text-dark-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ArrowUp className="w-3 h-3" />
-                  </button>
-                  <button
-                    onClick={() => moveDown(idx)}
-                    disabled={idx === orderedWidgets.length - 1}
-                    className="p-0.5 text-dark-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ArrowDown className="w-3 h-3" />
-                  </button>
+                {/* Drag handle */}
+                <div className="cursor-grab active:cursor-grabbing p-1 text-dark-500 hover:text-dark-300 transition-colors shrink-0">
+                  <GripVertical className="w-4 h-4" />
+                </div>
+
+                {/* Icon */}
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                  isHidden ? 'bg-dark-700/30' : 'bg-primary-500/10'
+                }`}>
+                  <WidgetIcon className={`w-4 h-4 transition-colors ${isHidden ? 'text-dark-500' : 'text-primary-400'}`} />
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 min-w-0">
+                <div className={`flex-1 min-w-0 transition-opacity ${isHidden ? 'opacity-40' : ''}`}>
                   <p className="text-sm font-medium text-white">{widget.label}</p>
-                  <p className="text-xs text-dark-400">{widget.description}</p>
+                  <p className="text-[11px] text-dark-400 leading-tight">{widget.description}</p>
                 </div>
 
-                {/* Toggle */}
+                {/* Toggle switch */}
                 <button
                   onClick={() => toggleVisibility(widget.id)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    isHidden
-                      ? 'text-dark-500 hover:text-white hover:bg-dark-600'
-                      : 'text-primary-400 hover:bg-primary-500/10'
+                  className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 shrink-0 ${
+                    isHidden ? 'bg-dark-600' : 'bg-primary-500'
                   }`}
-                  title={isHidden ? 'Show widget' : 'Hide widget'}
+                  role="switch"
+                  aria-checked={!isHidden}
                 >
-                  {isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <div className={`absolute top-[3px] w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                    isHidden ? 'left-[3px]' : 'translate-x-[21px] left-0'
+                  }`} />
                 </button>
               </div>
             );
