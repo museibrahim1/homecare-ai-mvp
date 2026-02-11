@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Mic, Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle,
-  FileSignature, UserCheck, UserX, Loader2, Activity, BarChart3, ArrowUpRight, ArrowDownRight
+  FileSignature, UserCheck, UserX, Loader2, Activity, BarChart3, ArrowUpRight, ArrowDownRight,
+  Plus, Trash2, Circle, CheckCircle2, X, GripVertical, Tag
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
+import TopBar from '@/components/TopBar';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
 import { format } from 'date-fns';
 
@@ -74,6 +76,246 @@ function PipelineBar({ stages }: { stages: { label: string; count: number; color
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ─── Task types ─── */
+interface Task {
+  id: string;
+  title: string;
+  status: 'todo' | 'in_progress' | 'completed';
+  category?: string;
+  dueDate?: string;
+  createdAt: string;
+}
+
+const TASK_CATEGORIES = [
+  { value: 'assessment', label: 'Assessment', bg: 'bg-primary-500/20', text: 'text-primary-400' },
+  { value: 'follow_up', label: 'Follow-up', bg: 'bg-orange-500/20', text: 'text-orange-400' },
+  { value: 'documentation', label: 'Documentation', bg: 'bg-purple-500/20', text: 'text-purple-400' },
+  { value: 'billing', label: 'Billing', bg: 'bg-green-500/20', text: 'text-green-400' },
+  { value: 'general', label: 'General', bg: 'bg-dark-600', text: 'text-dark-300' },
+];
+
+const TASK_STORAGE_KEY = 'homecare-tasks';
+
+function loadTasks(): Task[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const data = localStorage.getItem(TASK_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveTasks(tasks: Task[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(tasks));
+}
+
+/* ─── Tasks Widget ─── */
+function TasksWidget() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newCategory, setNewCategory] = useState('general');
+  const [newDueDate, setNewDueDate] = useState('');
+  const [filter, setFilter] = useState<'all' | 'todo' | 'in_progress' | 'completed'>('all');
+
+  useEffect(() => {
+    setTasks(loadTasks());
+  }, []);
+
+  const updateTasks = (updated: Task[]) => {
+    setTasks(updated);
+    saveTasks(updated);
+  };
+
+  const addTask = () => {
+    if (!newTitle.trim()) return;
+    const task: Task = {
+      id: Date.now().toString(),
+      title: newTitle.trim(),
+      status: 'todo',
+      category: newCategory,
+      dueDate: newDueDate || undefined,
+      createdAt: new Date().toISOString(),
+    };
+    updateTasks([task, ...tasks]);
+    setNewTitle('');
+    setNewCategory('general');
+    setNewDueDate('');
+    setShowAddForm(false);
+  };
+
+  const toggleStatus = (id: string) => {
+    updateTasks(tasks.map(t => {
+      if (t.id !== id) return t;
+      const next = t.status === 'todo' ? 'in_progress' : t.status === 'in_progress' ? 'completed' : 'todo';
+      return { ...t, status: next };
+    }));
+  };
+
+  const deleteTask = (id: string) => {
+    updateTasks(tasks.filter(t => t.id !== id));
+  };
+
+  const filtered = filter === 'all' ? tasks : tasks.filter(t => t.status === filter);
+  const todoCount = tasks.filter(t => t.status === 'todo').length;
+  const inProgressCount = tasks.filter(t => t.status === 'in_progress').length;
+  const completedCount = tasks.filter(t => t.status === 'completed').length;
+
+  const getCategoryConfig = (cat?: string) =>
+    TASK_CATEGORIES.find(c => c.value === cat) || TASK_CATEGORIES[4];
+
+  return (
+    <div className="card p-4 lg:p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 text-primary-400" />
+          <h2 className="text-base lg:text-lg font-semibold text-white">Tasks</h2>
+          <span className="text-xs bg-dark-600 text-dark-300 px-2 py-0.5 rounded-full">{tasks.length}</span>
+        </div>
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-400 hover:bg-primary-500/10 rounded-lg transition-colors"
+        >
+          {showAddForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          {showAddForm ? 'Cancel' : 'Add Task'}
+        </button>
+      </div>
+
+      {/* Add Task Form */}
+      {showAddForm && (
+        <div className="mb-4 p-3 bg-dark-700/50 rounded-xl border border-dark-600 space-y-3">
+          <input
+            type="text"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addTask()}
+            placeholder="What needs to be done?"
+            className="w-full px-3 py-2 bg-dark-700 border border-dark-500 rounded-lg text-white text-sm placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            autoFocus
+          />
+          <div className="flex items-center gap-2">
+            <select
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              className="flex-1 px-3 py-1.5 bg-dark-700 border border-dark-500 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              {TASK_CATEGORIES.map(c => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={newDueDate}
+              onChange={(e) => setNewDueDate(e.target.value)}
+              className="px-3 py-1.5 bg-dark-700 border border-dark-500 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <button
+              onClick={addTask}
+              disabled={!newTitle.trim()}
+              className="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 disabled:bg-dark-600 disabled:text-dark-400 text-white text-xs font-medium rounded-lg transition-colors"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-1 mb-3 bg-dark-700/30 rounded-lg p-0.5">
+        {[
+          { key: 'all' as const, label: 'All', count: tasks.length },
+          { key: 'todo' as const, label: 'To Do', count: todoCount },
+          { key: 'in_progress' as const, label: 'In Progress', count: inProgressCount },
+          { key: 'completed' as const, label: 'Done', count: completedCount },
+        ].map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`flex-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              filter === f.key
+                ? 'bg-dark-700 text-white'
+                : 'text-dark-400 hover:text-white'
+            }`}
+          >
+            {f.label} {f.count > 0 && <span className="text-dark-500 ml-0.5">{f.count}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* Task List */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-6">
+          <CheckCircle2 className="w-8 h-8 text-dark-600 mx-auto mb-2" />
+          <p className="text-dark-400 text-sm">
+            {filter === 'all' ? 'No tasks yet. Add one above!' : `No ${filter.replace('_', ' ')} tasks`}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-1.5 max-h-[320px] overflow-y-auto">
+          {filtered.map((task) => {
+            const catCfg = getCategoryConfig(task.category);
+            const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+            return (
+              <div
+                key={task.id}
+                className={`flex items-start gap-2.5 p-2.5 rounded-lg transition-colors group ${
+                  task.status === 'completed' ? 'bg-dark-700/20 opacity-60' : 'bg-dark-700/30 hover:bg-dark-700/50'
+                }`}
+              >
+                {/* Status toggle */}
+                <button
+                  onClick={() => toggleStatus(task.id)}
+                  className="mt-0.5 shrink-0"
+                  title={`Status: ${task.status.replace('_', ' ')}`}
+                >
+                  {task.status === 'completed' ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                  ) : task.status === 'in_progress' ? (
+                    <div className="w-5 h-5 rounded-full border-2 border-yellow-400 flex items-center justify-center">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full" />
+                    </div>
+                  ) : (
+                    <Circle className="w-5 h-5 text-dark-500 hover:text-primary-400 transition-colors" />
+                  )}
+                </button>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm leading-tight ${task.status === 'completed' ? 'text-dark-400 line-through' : 'text-white'}`}>
+                    {task.title}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${catCfg.bg} ${catCfg.text}`}>
+                      {catCfg.label}
+                    </span>
+                    {task.dueDate && (
+                      <span className={`text-[10px] ${isOverdue ? 'text-red-400 font-medium' : 'text-dark-400'}`}>
+                        {isOverdue ? 'Overdue: ' : 'Due: '}{format(new Date(task.dueDate), 'MMM d')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Delete */}
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="p-1 text-dark-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                  title="Delete task"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -228,7 +470,9 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
-      <main className="flex-1 p-4 pt-16 lg:pt-4 lg:p-8 min-w-0">
+      <main className="flex-1 min-w-0 flex flex-col">
+        <TopBar />
+        <div className="flex-1 p-4 lg:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-6 lg:mb-8">
@@ -555,6 +799,12 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* ─── Tasks Section ─── */}
+          <div className="mt-6 lg:mt-8">
+            <TasksWidget />
+          </div>
+        </div>
         </div>
       </main>
     </div>
