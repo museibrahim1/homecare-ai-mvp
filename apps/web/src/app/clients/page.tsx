@@ -35,6 +35,7 @@ import {
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
+import TopBar from '@/components/TopBar';
 import ClientModal from '@/components/ClientModal';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -132,9 +133,11 @@ function QuickAddModal({
     full_name: '',
     email: '',
     phone: '',
+    address: '',
     care_level: '',
     status: 'intake',
     primary_diagnosis: '',
+    notes: '',
     insurance_type: '' as '' | 'medicaid' | 'medicare' | 'private',
     insurance_provider: '',
     medicaid_id: '',
@@ -152,9 +155,11 @@ function QuickAddModal({
         full_name: formData.full_name,
         email: formData.email,
         phone: formData.phone,
+        address: formData.address,
         care_level: formData.care_level,
         status: formData.status,
         primary_diagnosis: formData.primary_diagnosis,
+        notes: formData.notes,
       };
       
       // Add insurance fields based on type
@@ -168,8 +173,8 @@ function QuickAddModal({
       
       await onSave(clientData);
       setFormData({ 
-        full_name: '', email: '', phone: '', care_level: '', status: 'intake', 
-        primary_diagnosis: '', insurance_type: '', insurance_provider: '', 
+        full_name: '', email: '', phone: '', address: '', care_level: '', status: 'intake', 
+        primary_diagnosis: '', notes: '', insurance_type: '', insurance_provider: '', 
         medicaid_id: '', medicare_id: '' 
       });
       onClose();
@@ -228,6 +233,41 @@ function QuickAddModal({
               className="input-dark"
               placeholder="+1 555 123 4567"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Address</label>
+            <input
+              type="text"
+              value={formData.address}
+              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+              className="input-dark"
+              placeholder="123 Main St, City, State"
+            />
+          </div>
+
+          {/* Priority / Care Level */}
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Priority</label>
+            <div className="grid grid-cols-4 gap-2">
+              {PRIORITY_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, care_level: opt.value.toUpperCase() }))}
+                  className={`px-2 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+                    formData.care_level === opt.value.toUpperCase()
+                      ? `${opt.color} bg-dark-700 border border-current`
+                      : 'text-dark-400 bg-dark-700/50 border border-dark-600 hover:border-dark-500'
+                  }`}
+                >
+                  <div className={`w-1 h-3 rounded-full ${
+                    opt.value === 'urgent' ? 'bg-red-500' : opt.value === 'high' ? 'bg-orange-500' : opt.value === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                  }`} />
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Insurance Type Selection */}
@@ -309,20 +349,6 @@ function QuickAddModal({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Care Level</label>
-            <select
-              value={formData.care_level}
-              onChange={(e) => setFormData(prev => ({ ...prev, care_level: e.target.value }))}
-              className="input-dark"
-            >
-              <option value="">Select level...</option>
-              <option value="LOW">Low</option>
-              <option value="MODERATE">Moderate</option>
-              <option value="HIGH">High</option>
-            </select>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-dark-300 mb-2">Care Specialty</label>
             <select
               value={formData.primary_diagnosis}
@@ -334,6 +360,17 @@ function QuickAddModal({
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-dark-300 mb-2">Referral Notes</label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              className="input-dark resize-none"
+              rows={2}
+              placeholder="Referral source, special requirements..."
+            />
           </div>
 
           <div className="pt-4">
@@ -660,13 +697,17 @@ export default function ClientsPage() {
     }
   };
 
-  // Pipeline columns config
+  // Drag-and-drop state for pipeline
+  const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+
+  // Pipeline columns config - homecare tailored
   const pipelineColumns = [
-    { key: 'intake', label: 'Intake', color: 'blue', statuses: ['intake', 'pending'] },
-    { key: 'assessment', label: 'Assessment', color: 'purple', statuses: ['assessment'] },
-    { key: 'proposal', label: 'Proposal', color: 'orange', statuses: ['proposal', 'pending_review'] },
-    { key: 'active', label: 'Active', color: 'green', statuses: ['active', 'assigned'] },
-    { key: 'follow_up', label: 'Follow-up', color: 'yellow', statuses: ['follow_up', 'review', 'discharged', 'inactive'] },
+    { key: 'intake', label: 'New Referrals', color: 'blue', statuses: ['intake', 'pending'] },
+    { key: 'assessment', label: 'In Assessment', color: 'purple', statuses: ['assessment'] },
+    { key: 'proposal', label: 'Awaiting Approval', color: 'orange', statuses: ['proposal', 'pending_review'] },
+    { key: 'active', label: 'Active Care', color: 'green', statuses: ['active', 'assigned'] },
+    { key: 'follow_up', label: 'Follow-up Required', color: 'yellow', statuses: ['follow_up', 'review', 'discharged', 'inactive'] },
   ];
 
   // Group clients by pipeline column
@@ -733,8 +774,9 @@ export default function ClientsPage() {
     <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       
-      <main className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
+      <main className="flex-1 min-w-0 flex flex-col">
+        <TopBar />
+        <div className="flex-1 p-4 lg:p-8 max-w-7xl mx-auto w-full">
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
             <div>
@@ -1139,79 +1181,110 @@ export default function ClientsPage() {
               )}
             </div>
           ) : viewMode === 'pipeline' ? (
-            /* Pipeline / Kanban View */
-            <div className="grid grid-cols-5 gap-3">
-              {pipelineColumns.map((col, colIdx) => {
+            /* Pipeline / Kanban View — Drag & Drop */
+            <div className="grid grid-cols-5 gap-3 items-start">
+              {pipelineColumns.map((col) => {
                 const columnClients = getPipelineClients(col.statuses);
-                const colorMap: Record<string, { header: string; text: string }> = {
-                  blue: { header: 'bg-blue-500/10', text: 'text-blue-400' },
-                  purple: { header: 'bg-purple-500/10', text: 'text-purple-400' },
-                  orange: { header: 'bg-orange-500/10', text: 'text-orange-400' },
-                  green: { header: 'bg-green-500/10', text: 'text-green-400' },
-                  yellow: { header: 'bg-yellow-500/10', text: 'text-yellow-400' },
+                const colorMap: Record<string, { header: string; headerBorder: string; text: string; dot: string }> = {
+                  blue:   { header: 'bg-blue-500',   headerBorder: 'border-blue-500',   text: 'text-blue-400',   dot: 'bg-blue-400' },
+                  purple: { header: 'bg-purple-500', headerBorder: 'border-purple-500', text: 'text-purple-400', dot: 'bg-purple-400' },
+                  orange: { header: 'bg-orange-500', headerBorder: 'border-orange-500', text: 'text-orange-400', dot: 'bg-orange-400' },
+                  green:  { header: 'bg-green-500',  headerBorder: 'border-green-500',  text: 'text-green-400',  dot: 'bg-green-400' },
+                  yellow: { header: 'bg-yellow-500', headerBorder: 'border-yellow-500', text: 'text-yellow-400', dot: 'bg-yellow-400' },
                 };
                 const colors = colorMap[col.color] || colorMap.blue;
+                const isOver = dragOverColumn === col.key;
                 
                 return (
-                  <div key={col.key} className="bg-dark-800/30 rounded-xl border border-dark-700/50 overflow-hidden">
-                    <div className={`p-3 border-b border-dark-700 ${colors.header}`}>
+                  <div
+                    key={col.key}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverColumn(col.key); }}
+                    onDragLeave={() => setDragOverColumn(null)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragOverColumn(null);
+                      if (draggedClientId) {
+                        handleMoveClient(draggedClientId, col.statuses[0]);
+                        setDraggedClientId(null);
+                      }
+                    }}
+                    className={`rounded-xl border overflow-hidden transition-all ${
+                      isOver
+                        ? `border-2 ${colors.headerBorder} bg-dark-700/20 scale-[1.01]`
+                        : 'border-dark-700/50 bg-dark-800/30'
+                    }`}
+                  >
+                    {/* Column header with colored top bar */}
+                    <div className={`h-1 ${colors.header}`} />
+                    <div className="px-3 py-2.5 border-b border-dark-700/50">
                       <div className="flex items-center justify-between">
-                        <h3 className={`font-semibold text-sm ${colors.text}`}>{col.label}</h3>
-                        <span className="text-xs text-dark-400">{columnClients.length}</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${colors.dot}`} />
+                          <h3 className="font-semibold text-sm text-white">{col.label}</h3>
+                        </div>
+                        <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${colors.text} bg-dark-700/50`}>
+                          {columnClients.length}
+                        </span>
                       </div>
                     </div>
-                    <div className="p-2 space-y-2 max-h-[60vh] overflow-y-auto">
+
+                    {/* Cards */}
+                    <div className="p-2 space-y-2 max-h-[65vh] overflow-y-auto">
                       {columnClients.map(client => {
-                        // Determine which columns this client can move to
-                        const canMoveLeft = colIdx > 0;
-                        const canMoveRight = colIdx < pipelineColumns.length - 1;
-                        const prevCol = colIdx > 0 ? pipelineColumns[colIdx - 1] : null;
-                        const nextCol = colIdx < pipelineColumns.length - 1 ? pipelineColumns[colIdx + 1] : null;
-                        
+                        const isDragging = draggedClientId === client.id;
+                        const careLevel = client.care_level?.toLowerCase();
+                        const priorityBorder = careLevel === 'high' ? 'border-l-red-500' :
+                          careLevel === 'moderate' ? 'border-l-orange-400' : 'border-l-transparent';
+                        const priorityLabel = careLevel === 'high' ? 'High' :
+                          careLevel === 'moderate' ? 'Moderate' : careLevel === 'low' ? 'Routine' : null;
+                        const priorityColor = careLevel === 'high' ? 'text-red-400' :
+                          careLevel === 'moderate' ? 'text-orange-400' : 'text-green-400';
+
                         return (
-                          <div 
+                          <div
                             key={client.id}
-                            className="p-2.5 bg-dark-800 rounded-lg border border-dark-600 hover:border-primary-500/50 transition-all group"
+                            draggable
+                            onDragStart={() => setDraggedClientId(client.id)}
+                            onDragEnd={() => { setDraggedClientId(null); setDragOverColumn(null); }}
+                            onClick={() => router.push(`/clients/${client.id}`)}
+                            className={`p-3 bg-dark-800 rounded-lg border-l-[3px] ${priorityBorder} border border-dark-600 cursor-grab active:cursor-grabbing hover:border-dark-500 hover:shadow-lg hover:shadow-black/20 transition-all group ${
+                              isDragging ? 'opacity-40 scale-95' : ''
+                            }`}
                           >
-                            <div 
-                              className="flex items-center gap-2 mb-1.5 cursor-pointer"
-                              onClick={() => router.push(`/clients/${client.id}`)}
-                            >
-                              <ClientAvatar name={client.full_name} size="sm" />
+                            {/* Client name row */}
+                            <div className="flex items-center gap-2 mb-1.5">
                               <p className="font-medium text-white text-xs truncate flex-1">{client.full_name}</p>
                             </div>
-                            {client.phone && (
-                              <p className="text-xs text-dark-400 truncate mb-2">{client.phone}</p>
+
+                            {/* Priority badge */}
+                            {priorityLabel && (
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <div className={`w-1 h-3 rounded-full ${
+                                  careLevel === 'high' ? 'bg-red-500' : careLevel === 'moderate' ? 'bg-orange-400' : 'bg-green-400'
+                                }`} />
+                                <span className={`text-[10px] font-medium ${priorityColor}`}>{priorityLabel}</span>
+                              </div>
                             )}
-                            {/* Move buttons - visible on hover */}
-                            <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity pt-1 border-t border-dark-700/50">
-                              {canMoveLeft ? (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); handleMoveClient(client.id, prevCol!.statuses[0]); }}
-                                  className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-dark-400 hover:text-white hover:bg-dark-700 rounded transition-colors"
-                                  title={`Move to ${prevCol!.label}`}
-                                >
-                                  <ChevronLeft className="w-3 h-3" />
-                                  <span className="truncate max-w-[50px]">{prevCol!.label}</span>
-                                </button>
-                              ) : <span />}
-                              {canMoveRight ? (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); handleMoveClient(client.id, nextCol!.statuses[0]); }}
-                                  className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-dark-400 hover:text-white hover:bg-dark-700 rounded transition-colors"
-                                  title={`Move to ${nextCol!.label}`}
-                                >
-                                  <span className="truncate max-w-[50px]">{nextCol!.label}</span>
-                                  <ChevronRight className="w-3 h-3" />
-                                </button>
-                              ) : <span />}
+
+                            {/* Meta row: avatar, specialty */}
+                            <div className="flex items-center justify-between mt-2">
+                              <ClientAvatar name={client.full_name} size="sm" />
+                              <div className="flex items-center gap-2 text-dark-500">
+                                {client.primary_diagnosis && (
+                                  <span className="text-[9px] px-1.5 py-0.5 bg-dark-700/60 rounded text-dark-400 truncate max-w-[80px]">
+                                    {client.primary_diagnosis}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         );
                       })}
                       {columnClients.length === 0 && (
-                        <div className="text-center py-6 text-dark-500 text-xs">
-                          No clients
+                        <div className={`text-center py-8 text-dark-500 text-xs rounded-lg border border-dashed transition-colors ${
+                          isOver ? `${colors.headerBorder} border-opacity-50` : 'border-dark-700/30'
+                        }`}>
+                          {isOver ? 'Drop here' : 'No clients'}
                         </div>
                       )}
                     </div>

@@ -60,6 +60,7 @@ const salesNavItems: NavItemData[] = [
 const clientsNavItems: NavItemData[] = [
   { href: '/clients', label: 'All Clients', icon: Users, description: 'Client records' },
   { href: '/visits', label: 'Assessments', icon: Calendar, description: 'Intakes & visits' },
+  { href: '/care-tracker', label: 'Care Tracker', icon: Activity, description: 'Post-visit follow-ups' },
   { href: '/policies', label: 'Policies & Renewals', icon: RefreshCw, description: 'Care agreements' },
 ];
 
