@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/lib/theme';
+import { NotificationProvider } from '@/lib/notifications';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,7 +35,9 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-dark-900 text-dark-100 min-h-screen`}>
         <ThemeProvider>
-          {children}
+          <NotificationProvider>
+            {children}
+          </NotificationProvider>
         </ThemeProvider>
       </body>
     </html>
