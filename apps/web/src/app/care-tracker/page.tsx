@@ -418,8 +418,8 @@ export default function CareTrackerPage() {
                                 <div className="flex items-center gap-2 shrink-0">
                                   {/* Priority */}
                                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${pCfg.bg} ${pCfg.color}`}>{pCfg.label}</span>
-                                  {overdue && <AlertCircle className="w-3.5 h-3.5 text-red-400" title="Overdue" />}
-                                  {noContact && <Phone className="w-3.5 h-3.5 text-amber-400" title="No contact 7d+" />}
+                                  {overdue && <span title="Overdue"><AlertCircle className="w-3.5 h-3.5 text-red-400" /></span>}
+                                  {noContact && <span title="No contact 7d+"><Phone className="w-3.5 h-3.5 text-amber-400" /></span>}
 
                                   {/* Actions */}
                                   <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
