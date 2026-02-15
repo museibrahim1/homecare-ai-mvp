@@ -6,18 +6,19 @@ alwaysApply: true
 
 # Project Memory — Homecare AI (AI Voice Contractor)
 
-> **IMPORTANT**: Read this file at the start of every conversation to recall project context, decisions, and current state. Update this file whenever significant changes are made (new features, config changes, deployment updates, key decisions).
+> **IMPORTANT**: Read this file at the start of every conversation to recall project context, decisions, and current state. Update the "Update Log" section whenever significant changes are made.
 
 ---
 
 ## 1. What This Project Is
 
-**Homecare AI** is an AI-powered care assessment platform for in-home healthcare agencies. It turns intake/visit conversations (audio or transcripts) into **proposal-ready service contracts** — so agencies can send accurate contracts and pricing faster.
+**Homecare AI** is an AI-powered care assessment platform for in-home healthcare agencies. It turns intake/visit conversations (audio or transcripts) into **proposal-ready service contracts**.
 
 - **Company**: PalmtAI
-- **Domain**: palmtai.com
+- **Domain**: palmtai.com / app.palmtai.com
 - **GitHub Repo**: https://github.com/museibrahim1/homecare-ai-mvp
 - **Branch**: `main` (single branch workflow)
+- **Total commits**: ~358+
 
 ---
 
@@ -26,43 +27,55 @@ alwaysApply: true
 | Layer | Technology | Location |
 |-------|-----------|----------|
 | Frontend | Next.js 14, React 18, Tailwind CSS, Zustand, Lucide icons | `apps/web/` |
-| Backend API | FastAPI (Python) | `apps/api/` |
+| Backend API | FastAPI (Python), SQLAlchemy, Alembic migrations | `apps/api/` |
 | Worker | Celery with Redis | `apps/worker/` |
 | Database | PostgreSQL 16 | `infra/postgres/` |
-| Object Storage | MinIO (S3-compatible) | Local dev only |
+| Object Storage | MinIO (S3-compatible, local), Railway (prod) | — |
 | Cache/Queue | Redis 7 | — |
-| LLM | Claude (Anthropic) primary, OpenAI fallback | — |
-| Infrastructure | Docker Compose (local), Railway (production) | — |
+| LLM | Claude/Anthropic (primary), OpenAI (fallback) | — |
+| ASR | OpenAI Whisper API (prod), faster-whisper (local option) | — |
+| Diarization | pyannote.ai API (cloud, async polling) | — |
+| Email | Resend (welcome@palmtai.com sender) | — |
+| Payments | Stripe (test keys) | — |
+| Forms | Formspree (contact & support forms, ID: xaqbwpzy) | — |
+| Calendar | Google Calendar OAuth integration | — |
+| Infrastructure | Docker Compose (local), **Railway (production)** | — |
 
 ---
 
 ## 3. Deployment — Railway (PRODUCTION)
 
-**The app is deployed on Railway.** Each service has its own `railway.json`:
+**The app is deployed on Railway. It auto-deploys from `main` on push.**
 
-- `apps/web/railway.json` — Next.js frontend (Dockerfile build, healthcheck at `/`)
-- `apps/api/railway.json` — FastAPI backend (Dockerfile build, healthcheck at `/health`)
-- `apps/worker/railway.json` — Celery worker (Dockerfile build, no healthcheck)
+Each service has its own `railway.json`:
+- `apps/web/railway.json` — Next.js (Dockerfile builder, healthcheck `/`)
+- `apps/api/railway.json` — FastAPI (Dockerfile builder, healthcheck `/health`)
+- `apps/worker/railway.json` — Celery worker (Dockerfile builder, no healthcheck)
 
-**Railway auto-deploys from `main` branch on push to GitHub.**
+**To deploy**: `git push origin main` — Railway handles the rest.
 
-To deploy: just `git push origin main` — Railway picks up changes automatically.
+**Production URL**: app.palmtai.com (CORS configured for this domain)
 
-### Railway Services
-- **Web** (Next.js) — serves the frontend
-- **API** (FastAPI) — backend REST API
-- **Worker** (Celery) — background task processing (transcription, contract generation, etc.)
-- **PostgreSQL** — managed by Railway
-- **Redis** — managed by Railway
-
-### Key Environment Variables (set in Railway dashboard)
-- `DATABASE_URL`, `REDIS_URL` — Railway-provisioned
+### Railway Environment Variables (set in Railway dashboard)
+- `DATABASE_URL`, `REDIS_URL` — Railway-provisioned PostgreSQL & Redis
 - `JWT_SECRET` — auto-generated if not set
 - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` — LLM providers
-- `NEXT_PUBLIC_API_BASE_URL` — points frontend to API service URL
-- `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` — billing
+- `NEXT_PUBLIC_API_BASE_URL` — points frontend to Railway API service URL
+- `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
 - `RESEND_API_KEY` — email service
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — Google Calendar integration
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google Calendar/Drive/Gmail
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` — passed as Dockerfile build arg
+- `PYANNOTE_API_KEY` — speaker diarization
+- `HF_TOKEN` — Hugging Face (backup diarization)
+- `S3_ENDPOINT_URL`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`
+- `NEXT_PUBLIC_FORMSPREE_CONTACT_ID`, `NEXT_PUBLIC_FORMSPREE_SUPPORT_ID`
+
+### Railway Build Notes
+- Web uses Dockerfile builder (not Nixpacks — Nixpacks was tried and failed)
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` must be passed as a build arg in the Dockerfile
+- `next.config.js` has `output: 'standalone'` for Docker deployments
+- Worker uses lightweight dependencies (API-based ASR/diarization, not local models)
+- `apps/web/Dockerfile` creates a `/public` folder during build (standalone mode needs it)
 
 ---
 
@@ -72,22 +85,27 @@ To deploy: just `git push origin main` — Railway picks up changes automaticall
 homecare-ai-mvp/
 ├── apps/
 │   ├── api/          # FastAPI backend + Dockerfile + railway.json
+│   │   └── app/
+│   │       ├── routers/      # API endpoints
+│   │       ├── services/     # Business logic (billing_rules, email, etc.)
+│   │       └── models/       # SQLAlchemy models
 │   ├── worker/       # Celery worker + Dockerfile + railway.json
+│   │   └── tasks/    # Pipeline tasks (transcribe, diarize, bill, note, contract)
 │   └── web/          # Next.js frontend + Dockerfile + railway.json
 │       └── src/
-│           ├── app/           # Next.js app router pages (26 pages)
+│           ├── app/           # Next.js App Router pages (26+ pages)
 │           ├── components/    # Shared React components (15 files)
-│           ├── lib/           # Utilities (auth store, walkthrough context, etc.)
-│           └── styles/        # Global CSS
-├── infra/            # Docker infrastructure configs
+│           ├── lib/           # Utilities (auth store, walkthrough context, API client)
+│           └── styles/        # Global CSS with dark/light theme variables
+├── infra/            # Docker infrastructure configs (postgres init.sql, minio policy)
 ├── templates/        # DOCX contract & note templates
-├── scripts/          # Utility scripts (seed, generate templates, etc.)
+├── scripts/          # Utility scripts (seed.py, auto_commit.sh, etc.)
 ├── tests/            # API & pipeline tests
-├── pitch_deck/       # Pitch deck assets
+├── pitch_deck/       # Pitch deck assets & screenshots
 └── docker-compose.yml
 ```
 
-### Frontend Pages (apps/web/src/app/)
+### Frontend Pages (26 pages in apps/web/src/app/)
 `dashboard`, `login`, `register`, `forgot-password`, `reset-password`, `welcome`, `clients`, `visits`, `proposals`, `documents`, `reports`, `schedule`, `settings`, `help`, `pricing`, `contact`, `caregivers`, `messages`, `leads`, `team-chat`, `policies`, `pipeline`, `activity`, `integrations`, `care-tracker`, `admin`
 
 ### Key Components (apps/web/src/components/)
@@ -95,51 +113,162 @@ homecare-ai-mvp/
 
 ---
 
-## 5. Demo/Test Credentials
+## 5. Auth & Credentials
 
+### Demo/Test Account
 - **Email**: `admin@palmtai.com`
 - **Password**: `admin123`
-- These work for the local dev environment and demo mode
+- Works for local dev and demo mode
+
+### Admin Access
+- Any `@palmtai.com` email gets admin access to all admin pages
+- Admin check: `role === 'admin'` (simplified from email domain check)
+- Admin section includes: Dashboard, Approvals, Subscriptions, Stripe Config, Compliance, Support, Audit Logs, Platform Users, System Health
+
+### Auth Flow
+- JWT-based auth with Zustand store + localStorage persistence
+- Auto-generate JWT_SECRET if not set (prevents crashes)
+- Forgot password / reset password flow implemented
+- Business registration with auto-approval (no manual approval needed)
+- `force-logout` endpoint for all-device signout
+- Demo sign-in button was removed — fresh auth required each session
 
 ---
 
-## 6. Feature History (Recent → Oldest)
+## 6. Complete Feature History (Chronological)
 
-| Date | Feature | Commit(s) |
-|------|---------|-----------|
-| Jan 2026 | **Spotlight walkthrough tour** — interactive page-anchored guide for new users with SVG mask overlay, 9 steps, only shows for authenticated users | `50c87d7`, `dfaadd7`, `deecb1c`, `69c078b` |
-| Jan 2026 | **Design system upgrade** — animations, better components, UI utilities | `ba61925` |
-| Jan 2026 | **Care Tracker page** + CRM pipeline upgrade + enhanced intake form | `68fc25b` |
-| Jan 2026 | **Notification system** — connected to schedule, tasks, chat, email | `75674fb` |
-| Jan 2026 | **Schedule redesign** — day/week/month views, visual timeline, stats | `1e8d43a` |
-| Jan 2026 | **Customizable dashboard** — show/hide and reorder widgets, drag-and-drop | `b554b20`, `b999986` |
-| Jan 2026 | **Tasks widget + TopBar** with agency logo and user avatar | `bb77c81` |
-| Jan 2026 | **Dashboard charts** — assessment trends, pipeline bar, activity feed | `6075167` |
-| Jan 2026 | **Client detail page** — fully editable with inline editing | `2e2979c`, `6bad41a` |
-| Jan 2026 | **Security hardening** — removed hardcoded creds, Redis rate limiting | `b005d8f`, `e74125a` |
-| Jan 2026 | **Bug audit** — 30+ fixes across all pages | `620abd6` |
+### Phase 1: Foundation
+- Initial MVP with FastAPI + Next.js + Docker Compose
+- PostgreSQL schema, Redis queue, MinIO storage
+- Audio upload, speech-to-text (faster-whisper), speaker diarization
+- Basic visit/client CRUD
 
-**Total commits**: ~357
+### Phase 2: Core Pipeline
+- LLM integration (OpenAI GPT) for contract & note generation
+- Added Claude/Anthropic support alongside OpenAI
+- Transcript import feature (auto-format detection)
+- Contract generation from assessment data
+- DOCX template support for contracts
+
+### Phase 3: UI/UX Overhaul
+- Dark blue theme redesign (Voicer-inspired)
+- Comprehensive 7-tab modals for clients and caregivers
+- Slide-out sidebar for Transcript/Billables/Contract preview
+- Multi-document upload with AI company info extraction
+- Needs-based hourly rate calculation from assessments
+
+### Phase 4: Business Features
+- Business registration and verification flow
+- Stripe billing integration ($299/$599/$1299 pricing tiers)
+- Resend email integration (HIPAA-compliant)
+- Google Calendar OAuth integration
+- Google Drive integration (Documents page)
+- Gmail integration (Team Chat page)
+- Formspree for contact/support forms
+- Comprehensive admin dashboard with enterprise features
+
+### Phase 5: CRM & Pages
+- CRM features: pipeline, leads, schedule, messages, team chat, documents, policies, activity monitor
+- Working modals on all CRM pages
+- Public landing page with product demo modal
+- Pricing page with comparison table (Heidi-inspired)
+- Reports page with auto-filled assessment data and real data connections
+
+### Phase 6: Pipeline Improvements
+- pyannote.ai API for cloud-based speaker diarization (async polling)
+- AI-powered speaker name identification from transcript content
+- Claude-powered billables extraction (combined speakers+billables in single API call)
+- Medicaid billing rate rules
+- Fix for long audio files (26+ minutes) — convert to mp3 before API
+- Notes generation tab in pipeline viewer
+- DOCX export for contracts
+- Draggable panel resize and pop-out full view
+
+### Phase 7: Deployment & Railway
+- Railway configuration for all 3 services
+- Dockerfile optimizations for Railway production
+- CORS configured for app.palmtai.com
+- Database auto-seeding on startup
+- S3 and OpenAI health check endpoints
+- Fixed Nixpacks → Dockerfile builder for Railway web builds
+
+### Phase 8: Security & Hardening (Major Audit)
+- **Security audit rounds 1-3**: auth fixes, validation, XSS vulnerability patches
+- Removed all hardcoded credentials from docker-compose.yml
+- HIPAA security safeguards implemented
+- Strict data isolation across all API endpoints (multi-tenant)
+- Rate limiting moved to Redis (from in-memory)
+- Transaction wrappers and guard fixes in backend routers
+- Missing database indexes added for query performance
+- API client hardening with timeout + retry logic
+- Celery worker retry config and exception handling
+- External API service call timeouts and retry logic
+- Confirmation dialogs for all destructive actions
+
+### Phase 9: Bug Fix Campaigns
+- **Comprehensive bug audit**: 30+ issues across all pages
+- Fix UI freezing/stuttering caused by excessive activity tracking
+- Fix app-wide stuttering and frozen navigation
+- Fix double-click navigation issues
+- Fix welcome page crash (visits API returns `{items:[]}` not array)
+- Fix sidebar navigation click blocking (z-index issues)
+- Fix document preview panel bleeding over main content
+- Fix document folder counts resetting when switching tabs
+- Fix contract preview scrolling on vertical monitors
+- Fix responsive layout for 1080px and 1920x1080 displays
+- Fix timezone edge cases in date handling
+- Fix PostgreSQL enum case sensitivity issues (multiple rounds)
+- Fix billing hours and special requirements extraction
+- Fix light/dark theme contrast issues (multiple rounds)
+- Replace all `alert()` calls with inline error banners
+- Add email format validation across forms
+- Fix scroll position preservation in sidebar navigation
+- Phase 1-8 crash guards, memory leak cleanup, null checks
+
+### Phase 10: Dashboard & UX Polish
+- Customizable dashboard: show/hide and reorder widgets with drag-and-drop
+- Tasks widget with categories, due dates, persistence
+- TopBar with agency logo and user avatar
+- Dashboard charts: assessment trends, pipeline bar, activity feed
+- Schedule redesign: day/week/month views, visual timeline, stats, persistence
+- Notification system connected to schedule, tasks, chat, email alerts
+- CRM pipeline upgrade + Care Tracker page + enhanced intake form
+- Design system upgrade with animations and UI utilities
+- Client detail page fully editable with inline editing
+- Free tier limit: 2 assessments then upgrade required
+
+### Phase 11: Walkthrough & Onboarding
+- Interactive spotlight walkthrough for new users (9 steps)
+- SVG mask overlay with tooltip positioning
+- Only triggers for authenticated users on non-public pages
+- Persisted via localStorage (`homecare-walkthrough-seen`)
+- Can be replayed from user menu or Help & Support page
+- Fixed freeze bug (scroll event listener infinite loop)
 
 ---
 
 ## 7. Architecture Decisions
 
-- **Frontend-only demo mode**: The Next.js frontend works standalone with mock data (no backend needed for UI demos). Auth is handled via Zustand store with localStorage.
-- **Standalone Next.js output**: `next.config.js` has `output: 'standalone'` for Docker deployment.
-- **API proxy via rewrites**: Frontend proxies `/api/*` requests to the backend via Next.js rewrites in `next.config.js`.
-- **Walkthrough persistence**: Uses `localStorage` key `homecare-walkthrough-seen` to track if tour was shown. Only auto-triggers for authenticated users on non-public pages.
-- **Public pages** (no auth required): `/`, `/login`, `/register`, `/forgot-password`, `/pricing`, `/welcome`
-- **Contract-first workflow**: The primary pipeline is audio → transcription → contract generation → review → export.
+- **Frontend-only demo mode**: Next.js frontend works standalone with mock data for UI demos
+- **Standalone Next.js output**: `output: 'standalone'` in next.config.js for Docker
+- **API proxy via rewrites**: Frontend proxies `/api/*` to backend via Next.js rewrites
+- **Multi-tenant data isolation**: All API endpoints filter by `business_id`
+- **Combined LLM calls**: Speakers + billables extracted in a single Claude API call for efficiency
+- **Async diarization**: pyannote.ai uses async job polling (not synchronous)
+- **Public pages** (no auth): `/`, `/login`, `/register`, `/forgot-password`, `/pricing`, `/welcome`, `/contact`
+- **Dark/light theme**: CSS variable architecture with Zustand-persisted toggle
+- **Contract-first workflow**: audio → transcription → diarization → billables → contract → review → export
 
 ---
 
 ## 8. Known Issues / Tech Debt
 
-- [ ] Pitch deck pptx has uncommitted binary changes (shows in git status)
-- [ ] No production database migrations system yet (using init.sql)
-- [ ] `package-lock.json` at root level may be stale (frontend package.json is in `apps/web/`)
-- [ ] Some Lucide icon components needed `<span>` wrappers for `title` prop (fixed in care-tracker)
+- [ ] Pitch deck .pptx has uncommitted binary changes
+- [ ] No Alembic migration versioning in production (using init.sql + migrations)
+- [ ] Root `package-lock.json` may be stale (frontend package.json is in `apps/web/`)
+- [ ] Some Lucide icons need `<span>` wrappers for `title` prop
+- [ ] `messages` page is disabled (Google integration pending full setup)
+- [ ] Worker uses `psycopg2-binary` (should use `psycopg2` in production)
 
 ---
 
@@ -149,7 +278,7 @@ homecare-ai-mvp/
 # Start all services
 docker compose up --build
 
-# Or just the frontend (faster)
+# Or just the frontend (faster, uses mock data)
 cd apps/web && npm run dev
 
 # Seed the database
@@ -159,18 +288,51 @@ docker compose exec api python scripts/seed.py
 docker compose exec api pytest
 
 # Access points
-# Frontend: http://localhost:3000
-# API: http://localhost:8000
-# API Docs: http://localhost:8000/docs
+# Frontend:     http://localhost:3000
+# API:          http://localhost:8000
+# API Docs:     http://localhost:8000/docs
 # MinIO Console: http://localhost:9001
 ```
 
 ---
 
-## 10. Update Log
+## 10. Important File Locations
 
-> Add a line here every time you make a significant change so future sessions have context.
+| What | Path |
+|------|------|
+| API routes | `apps/api/app/routers/` |
+| DB models | `apps/api/app/models/` |
+| Worker tasks | `apps/worker/tasks/` |
+| Billing rules | `apps/api/app/services/billing_rules.py` |
+| Email service | `apps/api/app/services/email_service.py` |
+| Auth store | `apps/web/src/lib/store.ts` |
+| Walkthrough context | `apps/web/src/lib/walkthrough.tsx` |
+| API client | `apps/web/src/lib/api.ts` (or similar) |
+| Theme CSS | `apps/web/src/styles/globals.css` |
+| Docker configs | `docker-compose.yml`, `apps/*/Dockerfile` |
+| Railway configs | `apps/*/railway.json` |
+| DB init | `infra/postgres/init.sql` |
+| DOCX templates | `templates/contracts/`, `templates/notes/` |
+| Env template | `.env.example` |
 
-- **2026-01-29**: Fixed walkthrough freeze (scroll event listener infinite loop). Pushed to GitHub + Railway auto-deploys.
+---
+
+## 11. Pricing Tiers
+
+| Tier | Price | Assessments | Features |
+|------|-------|-------------|----------|
+| Growth | $299/mo | Up to X | Core features |
+| Pro | $599/mo | More | + advanced features |
+| Enterprise | $1,299/mo | Unlimited | Full platform |
+| Free trial | $0 | 2 assessments | Then upgrade required |
+
+---
+
+## 12. Update Log
+
+> Add a line here every session. This is the cross-session memory.
+
+- **2026-01-29**: Fixed walkthrough freeze (scroll event listener infinite loop). Pushed to GitHub → Railway auto-deploys.
 - **2026-01-29**: Rewrote walkthrough from modal popup to spotlight/tooltip style with SVG mask overlay. Only shows for authenticated users.
 - **2026-01-29**: Created this project memory file for cross-session context persistence.
+- **2026-01-29**: Rebuilt memory file with complete 358-commit history covering all phases of development.
