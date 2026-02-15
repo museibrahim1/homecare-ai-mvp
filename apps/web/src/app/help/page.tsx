@@ -385,7 +385,6 @@ export default function HelpPage() {
             </div>
           )}
         </div>
-        </div>
       </main>
     </div>
   );
