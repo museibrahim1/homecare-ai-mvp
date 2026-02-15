@@ -1,0 +1,176 @@
+---
+description: Project memory and context — read this FIRST at the start of every conversation
+globs: **/*
+alwaysApply: true
+---
+
+# Project Memory — Homecare AI (AI Voice Contractor)
+
+> **IMPORTANT**: Read this file at the start of every conversation to recall project context, decisions, and current state. Update this file whenever significant changes are made (new features, config changes, deployment updates, key decisions).
+
+---
+
+## 1. What This Project Is
+
+**Homecare AI** is an AI-powered care assessment platform for in-home healthcare agencies. It turns intake/visit conversations (audio or transcripts) into **proposal-ready service contracts** — so agencies can send accurate contracts and pricing faster.
+
+- **Company**: PalmtAI
+- **Domain**: palmtai.com
+- **GitHub Repo**: https://github.com/museibrahim1/homecare-ai-mvp
+- **Branch**: `main` (single branch workflow)
+
+---
+
+## 2. Tech Stack
+
+| Layer | Technology | Location |
+|-------|-----------|----------|
+| Frontend | Next.js 14, React 18, Tailwind CSS, Zustand, Lucide icons | `apps/web/` |
+| Backend API | FastAPI (Python) | `apps/api/` |
+| Worker | Celery with Redis | `apps/worker/` |
+| Database | PostgreSQL 16 | `infra/postgres/` |
+| Object Storage | MinIO (S3-compatible) | Local dev only |
+| Cache/Queue | Redis 7 | — |
+| LLM | Claude (Anthropic) primary, OpenAI fallback | — |
+| Infrastructure | Docker Compose (local), Railway (production) | — |
+
+---
+
+## 3. Deployment — Railway (PRODUCTION)
+
+**The app is deployed on Railway.** Each service has its own `railway.json`:
+
+- `apps/web/railway.json` — Next.js frontend (Dockerfile build, healthcheck at `/`)
+- `apps/api/railway.json` — FastAPI backend (Dockerfile build, healthcheck at `/health`)
+- `apps/worker/railway.json` — Celery worker (Dockerfile build, no healthcheck)
+
+**Railway auto-deploys from `main` branch on push to GitHub.**
+
+To deploy: just `git push origin main` — Railway picks up changes automatically.
+
+### Railway Services
+- **Web** (Next.js) — serves the frontend
+- **API** (FastAPI) — backend REST API
+- **Worker** (Celery) — background task processing (transcription, contract generation, etc.)
+- **PostgreSQL** — managed by Railway
+- **Redis** — managed by Railway
+
+### Key Environment Variables (set in Railway dashboard)
+- `DATABASE_URL`, `REDIS_URL` — Railway-provisioned
+- `JWT_SECRET` — auto-generated if not set
+- `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` — LLM providers
+- `NEXT_PUBLIC_API_BASE_URL` — points frontend to API service URL
+- `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` — billing
+- `RESEND_API_KEY` — email service
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — Google Calendar integration
+
+---
+
+## 4. Project Structure
+
+```
+homecare-ai-mvp/
+├── apps/
+│   ├── api/          # FastAPI backend + Dockerfile + railway.json
+│   ├── worker/       # Celery worker + Dockerfile + railway.json
+│   └── web/          # Next.js frontend + Dockerfile + railway.json
+│       └── src/
+│           ├── app/           # Next.js app router pages (26 pages)
+│           ├── components/    # Shared React components (15 files)
+│           ├── lib/           # Utilities (auth store, walkthrough context, etc.)
+│           └── styles/        # Global CSS
+├── infra/            # Docker infrastructure configs
+├── templates/        # DOCX contract & note templates
+├── scripts/          # Utility scripts (seed, generate templates, etc.)
+├── tests/            # API & pipeline tests
+├── pitch_deck/       # Pitch deck assets
+└── docker-compose.yml
+```
+
+### Frontend Pages (apps/web/src/app/)
+`dashboard`, `login`, `register`, `forgot-password`, `reset-password`, `welcome`, `clients`, `visits`, `proposals`, `documents`, `reports`, `schedule`, `settings`, `help`, `pricing`, `contact`, `caregivers`, `messages`, `leads`, `team-chat`, `policies`, `pipeline`, `activity`, `integrations`, `care-tracker`, `admin`
+
+### Key Components (apps/web/src/components/)
+`Sidebar`, `TopBar`, `WalkthroughGuide`, `ClientModal`, `CaregiverModal`, `AudioPlayer`, `AudioUploader`, `TranscriptTimeline`, `BillablesEditor`, `NotePreview`, `ContractPreview`, `CallInterface`, `TranscriptImporter`, `OnboardingChecklist`, `UpgradeModal`
+
+---
+
+## 5. Demo/Test Credentials
+
+- **Email**: `admin@palmtai.com`
+- **Password**: `admin123`
+- These work for the local dev environment and demo mode
+
+---
+
+## 6. Feature History (Recent → Oldest)
+
+| Date | Feature | Commit(s) |
+|------|---------|-----------|
+| Jan 2026 | **Spotlight walkthrough tour** — interactive page-anchored guide for new users with SVG mask overlay, 9 steps, only shows for authenticated users | `50c87d7`, `dfaadd7`, `deecb1c`, `69c078b` |
+| Jan 2026 | **Design system upgrade** — animations, better components, UI utilities | `ba61925` |
+| Jan 2026 | **Care Tracker page** + CRM pipeline upgrade + enhanced intake form | `68fc25b` |
+| Jan 2026 | **Notification system** — connected to schedule, tasks, chat, email | `75674fb` |
+| Jan 2026 | **Schedule redesign** — day/week/month views, visual timeline, stats | `1e8d43a` |
+| Jan 2026 | **Customizable dashboard** — show/hide and reorder widgets, drag-and-drop | `b554b20`, `b999986` |
+| Jan 2026 | **Tasks widget + TopBar** with agency logo and user avatar | `bb77c81` |
+| Jan 2026 | **Dashboard charts** — assessment trends, pipeline bar, activity feed | `6075167` |
+| Jan 2026 | **Client detail page** — fully editable with inline editing | `2e2979c`, `6bad41a` |
+| Jan 2026 | **Security hardening** — removed hardcoded creds, Redis rate limiting | `b005d8f`, `e74125a` |
+| Jan 2026 | **Bug audit** — 30+ fixes across all pages | `620abd6` |
+
+**Total commits**: ~357
+
+---
+
+## 7. Architecture Decisions
+
+- **Frontend-only demo mode**: The Next.js frontend works standalone with mock data (no backend needed for UI demos). Auth is handled via Zustand store with localStorage.
+- **Standalone Next.js output**: `next.config.js` has `output: 'standalone'` for Docker deployment.
+- **API proxy via rewrites**: Frontend proxies `/api/*` requests to the backend via Next.js rewrites in `next.config.js`.
+- **Walkthrough persistence**: Uses `localStorage` key `homecare-walkthrough-seen` to track if tour was shown. Only auto-triggers for authenticated users on non-public pages.
+- **Public pages** (no auth required): `/`, `/login`, `/register`, `/forgot-password`, `/pricing`, `/welcome`
+- **Contract-first workflow**: The primary pipeline is audio → transcription → contract generation → review → export.
+
+---
+
+## 8. Known Issues / Tech Debt
+
+- [ ] Pitch deck pptx has uncommitted binary changes (shows in git status)
+- [ ] No production database migrations system yet (using init.sql)
+- [ ] `package-lock.json` at root level may be stale (frontend package.json is in `apps/web/`)
+- [ ] Some Lucide icon components needed `<span>` wrappers for `title` prop (fixed in care-tracker)
+
+---
+
+## 9. Local Development
+
+```bash
+# Start all services
+docker compose up --build
+
+# Or just the frontend (faster)
+cd apps/web && npm run dev
+
+# Seed the database
+docker compose exec api python scripts/seed.py
+
+# Run tests
+docker compose exec api pytest
+
+# Access points
+# Frontend: http://localhost:3000
+# API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
+# MinIO Console: http://localhost:9001
+```
+
+---
+
+## 10. Update Log
+
+> Add a line here every time you make a significant change so future sessions have context.
+
+- **2026-01-29**: Fixed walkthrough freeze (scroll event listener infinite loop). Pushed to GitHub + Railway auto-deploys.
+- **2026-01-29**: Rewrote walkthrough from modal popup to spotlight/tooltip style with SVG mask overlay. Only shows for authenticated users.
+- **2026-01-29**: Created this project memory file for cross-session context persistence.
