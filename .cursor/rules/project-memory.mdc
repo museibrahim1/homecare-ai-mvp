@@ -336,3 +336,6 @@ docker compose exec api pytest
 - **2026-01-29**: Rewrote walkthrough from modal popup to spotlight/tooltip style with SVG mask overlay. Only shows for authenticated users.
 - **2026-01-29**: Created this project memory file for cross-session context persistence.
 - **2026-01-29**: Rebuilt memory file with complete 358-commit history covering all phases of development.
+
+### Notable past work (from previous chat sessions)
+- **Pitch deck**: Created 20+ slide deck in `pitch_deck/deck.md`, feature explanations doc, took 4 new app screenshots, generated PowerPoint via `export_pptx.py` (commits `a50442b`, `a66841e`).
