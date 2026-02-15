@@ -1,417 +1,399 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
-  X, ChevronRight, ChevronLeft, Home, Users, Calendar, Mic,
+  X, ChevronRight, ChevronLeft, Home, Users, Mic,
   FileText, MessageSquare, Bell, BarChart3, CalendarDays,
-  Target, UserCheck, Settings, Heart, Sparkles, CheckCircle,
-  ArrowRight, Activity, HelpCircle, BookOpen, Navigation
+  Target, Settings, Sparkles, CheckCircle,
+  ArrowRight, Activity, HelpCircle, BookOpen
 } from 'lucide-react';
 import { useWalkthrough } from '@/lib/walkthrough';
 
-/* ─── Types ─── */
-interface WalkthroughStep {
+/* ─── Step definition ─── */
+interface SpotlightStep {
   id: string;
+  target?: string;
   title: string;
   description: string;
   tip?: string;
   icon: any;
   iconBg: string;
   iconColor: string;
-  route?: string;
-  illustration?: 'welcome' | 'done';
+  preferredSide?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-const WALKTHROUGH_STEPS: WalkthroughStep[] = [
+const STEPS: SpotlightStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to Homecare AI',
-    description: 'This quick tour will walk you through the key features of your homecare CRM. It takes about 2 minutes and you can revisit it anytime from Help & Support.',
-    tip: 'Use arrow keys to navigate. Press Escape to exit.',
+    description: 'Let\'s take a quick tour of your dashboard. We\'ll highlight the key areas you\'ll use every day. Takes about a minute.',
+    tip: 'Use arrow keys or click Next to navigate. Press Escape to exit anytime.',
     icon: Sparkles,
     iconBg: 'bg-gradient-to-br from-primary-500 to-accent-cyan',
     iconColor: 'text-white',
-    illustration: 'welcome',
   },
   {
-    id: 'dashboard',
-    title: 'Your Dashboard',
-    description: 'Your command center. See active clients, assessments in progress, upcoming tasks, and your client pipeline at a glance. The onboarding checklist tracks your setup progress until you dismiss it.',
-    tip: 'The dashboard auto-refreshes so you always see live data.',
+    id: 'sidebar',
+    target: 'sidebar-nav',
+    title: 'Navigation Sidebar',
+    description: 'Your main navigation. Jump between Clients, Assessments, Schedule, Pipeline, Team Chat, Reports, and more — organized into clear sections.',
+    tip: 'On mobile, tap the menu icon to open the sidebar.',
     icon: Home,
     iconBg: 'bg-blue-500/15',
     iconColor: 'text-blue-400',
-    route: '/dashboard',
+    preferredSide: 'right',
   },
   {
-    id: 'clients',
-    title: 'Client Management',
-    description: 'Manage your entire client base. The **Table View** groups clients by status. The **Pipeline View** is a drag-and-drop Kanban board — drag clients between stages like New Referrals, In Assessment, Awaiting Approval, and Active Care.',
-    tip: 'Use the quick-add button to create a new referral in seconds with priority level and care specialty.',
-    icon: Users,
-    iconBg: 'bg-green-500/15',
-    iconColor: 'text-green-400',
-    route: '/clients',
-  },
-  {
-    id: 'assessments',
-    title: 'Assessments & Voice Recording',
-    description: 'Upload an audio recording of a care assessment or record one live. Our AI transcribes it, extracts key client information, identifies billable services, and generates visit notes — all automatically.',
-    tip: 'Supported formats: MP3, WAV, M4A. Most recordings process in 2-5 minutes.',
-    icon: Mic,
+    id: 'stats',
+    target: 'stats',
+    title: 'Key Metrics',
+    description: 'Your at-a-glance numbers — total assessments, pending proposals, client count, and weekly activity. These update in real-time as you work.',
+    icon: BarChart3,
     iconBg: 'bg-purple-500/15',
     iconColor: 'text-purple-400',
-    route: '/visits',
-  },
-  {
-    id: 'contracts',
-    title: 'Proposals & Contracts',
-    description: 'After an assessment is processed, generate a professional service contract with one click. Review the AI-extracted details, make edits, then export as PDF or email directly to the client.',
-    tip: 'Contracts automatically pull in your agency branding from Settings.',
-    icon: FileText,
-    iconBg: 'bg-orange-500/15',
-    iconColor: 'text-orange-400',
-    route: '/proposals',
-  },
-  {
-    id: 'schedule',
-    title: 'My Schedule',
-    description: 'Plan your day with three calendar views — **Day** (visual timeline), **Week** (7-day overview), and **Month**. Click any time slot to quickly book an appointment. Connect Google Calendar for two-way sync.',
-    tip: 'Appointments are color-coded by type: Assessment, Care Review, Meeting, Home Visit.',
-    icon: CalendarDays,
-    iconBg: 'bg-amber-500/15',
-    iconColor: 'text-amber-400',
-    route: '/schedule',
-  },
-  {
-    id: 'care-tracker',
-    title: 'Post-Visit Care Tracker',
-    description: 'Track what happens after each visit. The **Timeline View** shows progress bars from start to target date with overdue alerts. The **Board View** is a Kanban with stages: Follow-up Needed, Care Plan Under Review, and Ongoing Care.',
-    tip: 'Clients with no contact in 7+ days are automatically flagged.',
-    icon: Activity,
-    iconBg: 'bg-teal-500/15',
-    iconColor: 'text-teal-400',
-    route: '/care-tracker',
+    preferredSide: 'bottom',
   },
   {
     id: 'pipeline',
-    title: 'Deals Pipeline',
-    description: 'Track your sales opportunities from initial referral through to signed contracts. Each deal card shows the client, estimated value, and status. Move deals between stages to track your revenue pipeline.',
-    tip: 'Great for tracking which referrals convert into active clients.',
+    target: 'pipeline',
+    title: 'Charts & Pipeline',
+    description: 'Track assessment trends over the last 6 months and see your client pipeline breakdown — from intake through active care.',
+    icon: Activity,
+    iconBg: 'bg-green-500/15',
+    iconColor: 'text-green-400',
+    preferredSide: 'bottom',
+  },
+  {
+    id: 'quick-actions',
+    target: 'quick-actions',
+    title: 'Activity & Quick Actions',
+    description: 'Recent assessments alongside quick-launch buttons — start a new assessment, add a client, or export proposals in one click.',
+    icon: CalendarDays,
+    iconBg: 'bg-amber-500/15',
+    iconColor: 'text-amber-400',
+    preferredSide: 'top',
+  },
+  {
+    id: 'tasks',
+    target: 'tasks',
+    title: 'Task Manager',
+    description: 'Create and manage your daily tasks right on the dashboard. Categorize them, set due dates, and track from To Do through Done.',
+    tip: 'Tasks persist locally so you won\'t lose them between sessions.',
     icon: Target,
     iconBg: 'bg-pink-500/15',
     iconColor: 'text-pink-400',
-    route: '/pipeline',
-  },
-  {
-    id: 'team-chat',
-    title: 'Team Chat & Email',
-    description: 'Coordinate with your care team in real-time. Create channels for different topics (scheduling, urgent, general). The Gmail tab lets you view and manage emails right from the app.',
-    tip: 'Use @mentions to get a team member\'s attention quickly.',
-    icon: MessageSquare,
-    iconBg: 'bg-indigo-500/15',
-    iconColor: 'text-indigo-400',
-    route: '/team-chat',
+    preferredSide: 'top',
   },
   {
     id: 'notifications',
+    target: 'notifications',
     title: 'Smart Notifications',
-    description: 'The notification bell in the top bar aggregates alerts from everywhere — upcoming appointments, overdue tasks, unread messages, emails, and follow-up reminders. Notifications are sorted by priority so you never miss what matters.',
+    description: 'This bell aggregates alerts from your schedule, tasks, messages, emails, and follow-ups — sorted by priority so you never miss what matters.',
     tip: 'Click any notification to jump directly to the relevant page.',
     icon: Bell,
     iconBg: 'bg-red-500/15',
     iconColor: 'text-red-400',
+    preferredSide: 'bottom',
   },
   {
-    id: 'reports',
-    title: 'Reports & Analytics',
-    description: 'View detailed reports on assessments completed, revenue trends, client growth, and caregiver performance. Export reports as PDFs for stakeholders or compliance audits.',
-    tip: 'Reports update in real-time as you complete assessments and sign contracts.',
-    icon: BarChart3,
-    iconBg: 'bg-cyan-500/15',
-    iconColor: 'text-cyan-400',
-    route: '/reports',
-  },
-  {
-    id: 'settings',
-    title: 'Agency Settings',
-    description: 'Customize your experience. Set up your agency profile (logo, address, contact info), configure notification preferences, manage team members, and connect Google Calendar and Gmail.',
-    tip: 'Your agency profile appears on all generated contracts and proposals.',
+    id: 'user-menu',
+    target: 'user-menu',
+    title: 'Profile & Settings',
+    description: 'Access your profile, agency settings, and this tour anytime from here. Select "App Tour" to replay this walkthrough whenever you need a refresher.',
     icon: Settings,
     iconBg: 'bg-dark-600',
     iconColor: 'text-dark-300',
-    route: '/settings',
+    preferredSide: 'bottom',
   },
   {
     id: 'done',
     title: 'You\'re All Set!',
-    description: 'You now know the key features of Homecare AI. Start by adding your first client, then try recording an assessment. You can revisit this tour anytime from Help & Support.',
+    description: 'You now know your way around the dashboard. Start by adding a client or recording an assessment. Reopen this tour from the user menu or Help & Support anytime.',
     icon: CheckCircle,
     iconBg: 'bg-gradient-to-br from-green-500 to-emerald-500',
     iconColor: 'text-white',
-    illustration: 'done',
   },
 ];
 
+/* ─── Geometry ─── */
+interface Rect { top: number; left: number; width: number; height: number }
+
+const PAD = 10;
+const GAP = 14;
+const TIP_W = 370;
+
+function getRect(target?: string): Rect | null {
+  if (!target) return null;
+  const el = document.querySelector(`[data-tour="${target}"]`);
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  if (r.width === 0 && r.height === 0) return null;
+  return { top: r.top, left: r.left, width: r.width, height: r.height };
+}
+
+type Side = 'top' | 'bottom' | 'left' | 'right';
+
+function pickSide(r: Rect, pref?: Side): Side {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const space: Record<Side, number> = {
+    top: r.top,
+    bottom: vh - r.top - r.height,
+    left: r.left,
+    right: vw - r.left - r.width,
+  };
+  if (pref && space[pref] > 200) return pref;
+  return (Object.entries(space) as [Side, number][]).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function calcTipPos(r: Rect, side: Side) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let top = 0, left = 0;
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+
+  switch (side) {
+    case 'bottom':
+      top = r.top + r.height + PAD + GAP;
+      left = clamp(cx - TIP_W / 2, 8, vw - TIP_W - 8);
+      break;
+    case 'top':
+      top = r.top - PAD - GAP;
+      left = clamp(cx - TIP_W / 2, 8, vw - TIP_W - 8);
+      break;
+    case 'right':
+      top = clamp(cy - 80, 8, vh - 300);
+      left = r.left + r.width + PAD + GAP;
+      break;
+    case 'left':
+      top = clamp(cy - 80, 8, vh - 300);
+      left = r.left - PAD - GAP - TIP_W;
+      break;
+  }
+  return { top, left };
+}
+
+function clamp(v: number, min: number, max: number) {
+  return Math.max(min, Math.min(v, max));
+}
+
 /* ─── Component ─── */
 export default function WalkthroughGuide() {
-  const router = useRouter();
   const { isOpen, close } = useWalkthrough();
   const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState<'next' | 'prev'>('next');
-  const [animating, setAnimating] = useState(false);
+  const [rect, setRect] = useState<Rect | null>(null);
+  const [side, setSide] = useState<Side>('bottom');
+  const [tipPos, setTipPos] = useState({ top: 0, left: 0 });
+  const [fading, setFading] = useState(false);
+  const measuring = useRef(false);
 
-  // Reset step when opening
-  useEffect(() => {
-    if (isOpen) setStep(0);
-  }, [isOpen]);
+  const cur = STEPS[step];
+  const isFirst = step === 0;
+  const isLast = step === STEPS.length - 1;
+  const pct = ((step + 1) / STEPS.length) * 100;
 
-  const goNext = useCallback(() => {
-    if (step >= WALKTHROUGH_STEPS.length - 1) {
-      close();
-      return;
+  /* ── measure once per step ── */
+  const measure = useCallback(() => {
+    if (measuring.current) return;
+    measuring.current = true;
+    const r = getRect(STEPS[step]?.target);
+    setRect(r);
+    if (r) {
+      const s = pickSide(r, STEPS[step]?.preferredSide);
+      setSide(s);
+      setTipPos(calcTipPos(r, s));
     }
-    setDirection('next');
-    setAnimating(true);
-    setTimeout(() => {
-      setStep(s => s + 1);
-      setAnimating(false);
-    }, 150);
-  }, [step, close]);
-
-  const goPrev = useCallback(() => {
-    if (step <= 0) return;
-    setDirection('prev');
-    setAnimating(true);
-    setTimeout(() => {
-      setStep(s => s - 1);
-      setAnimating(false);
-    }, 150);
+    measuring.current = false;
   }, [step]);
 
-  const goToStep = useCallback((i: number) => {
-    setDirection(i > step ? 'next' : 'prev');
-    setAnimating(true);
-    setTimeout(() => {
-      setStep(i);
-      setAnimating(false);
-    }, 150);
-  }, [step]);
-
-  const goToPage = useCallback(() => {
-    const current = WALKTHROUGH_STEPS[step];
-    if (current.route) {
-      close();
-      router.push(current.route);
-    }
-  }, [step, router, close]);
-
-  // Keyboard navigation
+  /* ── scroll into view + measure on step change ── */
   useEffect(() => {
     if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
-      if (e.key === 'ArrowRight' || e.key === 'Enter') goNext();
-      if (e.key === 'ArrowLeft') goPrev();
+    const s = STEPS[step];
+    if (s?.target) {
+      const el = document.querySelector(`[data-tour="${s.target}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+    // Measure after any scroll settles
+    const t1 = setTimeout(measure, 100);
+    const t2 = setTimeout(measure, 450);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [step, isOpen, measure]);
+
+  /* ── resize only (no scroll listener!) ── */
+  useEffect(() => {
+    if (!isOpen) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const onResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(measure, 150);
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [isOpen, close, goNext, goPrev]);
+    window.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('resize', onResize); clearTimeout(timer); };
+  }, [isOpen, measure]);
+
+  /* ── reset on open ── */
+  useEffect(() => { if (isOpen) { setStep(0); setRect(null); } }, [isOpen]);
+
+  /* ── navigation ── */
+  const go = useCallback((dir: 1 | -1) => {
+    const next = step + dir;
+    if (next < 0) return;
+    if (next >= STEPS.length) { close(); return; }
+    setFading(true);
+    setTimeout(() => { setStep(next); setFading(false); }, 160);
+  }, [step, close]);
+
+  /* ── keyboard ── */
+  useEffect(() => {
+    if (!isOpen) return;
+    const h = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowRight' || e.key === 'Enter') go(1);
+      if (e.key === 'ArrowLeft') go(-1);
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [isOpen, close, go]);
 
   if (!isOpen) return null;
 
-  const current = WALKTHROUGH_STEPS[step];
-  const IconComponent = current.icon;
-  const isFirst = step === 0;
-  const isLast = step === WALKTHROUGH_STEPS.length - 1;
-  const progress = ((step + 1) / WALKTHROUGH_STEPS.length) * 100;
+  const hasTarget = !!rect && !!cur?.target;
+  const Icon = cur.icon;
+
+  // Cutout with padding
+  const cx = rect ? { x: rect.left - PAD, y: rect.top - PAD, w: rect.width + PAD * 2, h: rect.height + PAD * 2 } : null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={close} />
+    <div className="fixed inset-0 z-[100]">
+      {/* ── Dark overlay with spotlight hole ── */}
+      <svg className="fixed inset-0 w-full h-full" style={{ zIndex: 100 }}>
+        <defs>
+          <mask id="tour-mask">
+            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+            {cx && (
+              <rect
+                x={cx.x} y={cx.y} width={cx.w} height={cx.h}
+                rx="12" fill="black"
+                style={{ transition: 'all 400ms cubic-bezier(.4,0,.2,1)' }}
+              />
+            )}
+          </mask>
+        </defs>
+        <rect
+          x="0" y="0" width="100%" height="100%"
+          fill="rgba(0,0,0,0.6)"
+          mask="url(#tour-mask)"
+          onClick={close}
+          style={{ cursor: 'pointer' }}
+        />
+      </svg>
 
-      {/* Card */}
+      {/* ── Highlight ring around target ── */}
+      {cx && (
+        <div
+          className="fixed pointer-events-none rounded-xl"
+          style={{
+            top: cx.y, left: cx.x, width: cx.w, height: cx.h,
+            zIndex: 101,
+            boxShadow: '0 0 0 2px rgba(99,102,241,0.5), 0 0 16px rgba(99,102,241,0.15)',
+            transition: 'all 400ms cubic-bezier(.4,0,.2,1)',
+          }}
+        />
+      )}
+
+      {/* ── Tooltip ── */}
       <div
-        className={`relative w-full max-w-lg transition-all duration-150 ease-out ${
-          animating
-            ? direction === 'next'
-              ? 'opacity-0 translate-x-4'
-              : 'opacity-0 -translate-x-4'
-            : 'opacity-100 translate-x-0'
-        }`}
+        className={`fixed transition-all duration-200 ${fading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+        style={hasTarget ? {
+          top: side === 'top' ? undefined : tipPos.top,
+          bottom: side === 'top' ? `${window.innerHeight - tipPos.top}px` : undefined,
+          left: tipPos.left,
+          width: TIP_W,
+          maxWidth: 'calc(100vw - 16px)',
+          zIndex: 102,
+        } : {
+          top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: TIP_W,
+          maxWidth: 'calc(100vw - 16px)',
+          zIndex: 102,
+        }}
       >
-        <div className="bg-dark-800 border border-dark-600 rounded-2xl shadow-2xl overflow-hidden">
-
+        <div
+          className="bg-dark-800 border border-dark-600 rounded-2xl shadow-2xl overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Progress bar */}
           <div className="h-1 bg-dark-700">
-            <div
-              className="h-full bg-gradient-to-r from-primary-500 to-accent-cyan transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="h-full bg-gradient-to-r from-primary-500 to-accent-cyan transition-all duration-500" style={{ width: `${pct}%` }} />
           </div>
 
           {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-5 pb-0">
+          <div className="flex items-center justify-between px-5 pt-3.5 pb-0">
             <div className="flex items-center gap-2">
               <BookOpen className="w-3.5 h-3.5 text-dark-500" />
-              <span className="text-[11px] font-medium text-dark-500 uppercase tracking-wider">
-                Step {step + 1} of {WALKTHROUGH_STEPS.length}
-              </span>
+              <span className="text-[11px] font-medium text-dark-500 uppercase tracking-wider">{step + 1} / {STEPS.length}</span>
             </div>
-            <button
-              onClick={close}
-              className="p-1.5 text-dark-500 hover:text-white hover:bg-dark-700 rounded-lg transition-colors"
-              title="Close tour"
-            >
+            <button onClick={close} className="p-1.5 text-dark-500 hover:text-white hover:bg-dark-700 rounded-lg transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Content */}
-          <div className="px-6 py-5">
-            {/* Illustration area for welcome & done */}
-            {current.illustration === 'welcome' && (
-              <div className="flex items-center gap-3 mb-5 p-4 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-cyan/10 border border-primary-500/20">
-                <div className="flex -space-x-2">
-                  {[Home, Users, Mic, FileText, Calendar].map((Icon, i) => (
-                    <div key={i} className="w-9 h-9 rounded-full bg-dark-700 border-2 border-dark-800 flex items-center justify-center">
-                      <Icon className="w-4 h-4 text-primary-400" />
-                    </div>
-                  ))}
-                </div>
-                <div className="text-xs text-dark-400">
-                  <span className="text-white font-medium">{WALKTHROUGH_STEPS.length - 2} features</span> to explore
-                </div>
+          {/* Body */}
+          <div className="px-5 py-3.5">
+            <div className="flex items-center gap-3 mb-2.5">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cur.iconBg}`}>
+                <Icon className={`w-5 h-5 ${cur.iconColor}`} />
               </div>
-            )}
+              <h2 className={`text-base font-bold ${isLast ? 'text-green-400' : 'text-white'}`}>{cur.title}</h2>
+            </div>
 
-            {current.illustration === 'done' && (
-              <div className="flex justify-center mb-5">
-                <div className="relative">
-                  <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <CheckCircle className="w-10 h-10 text-green-400" />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-primary-500/20 flex items-center justify-center">
-                    <Sparkles className="w-3.5 h-3.5 text-primary-400" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Icon + Title (non-illustration steps) */}
-            {!current.illustration && (
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${current.iconBg}`}>
-                <IconComponent className={`w-7 h-7 ${current.iconColor}`} />
-              </div>
-            )}
-
-            {current.illustration && (
-              <div className="flex justify-center mb-2">
-                {!current.illustration.includes('done') && (
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${current.iconBg}`}>
-                    <IconComponent className={`w-7 h-7 ${current.iconColor}`} />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Title */}
-            <h2 className={`text-xl font-bold mb-2 ${current.illustration === 'done' ? 'text-green-400 text-center' : 'text-white'}`}>
-              {current.title}
-            </h2>
-
-            {/* Description with markdown-style bold */}
-            <p className={`text-dark-300 text-sm leading-relaxed mb-3 ${current.illustration === 'done' ? 'text-center' : ''}`}>
-              {current.description.split('**').map((part, i) =>
-                i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{part}</strong> : part
-              )}
+            <p className="text-dark-300 text-sm leading-relaxed mb-2.5">
+              {cur.description.split('**').map((p, i) => i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{p}</strong> : p)}
             </p>
 
-            {/* Tip */}
-            {current.tip && (
-              <div className="flex items-start gap-2.5 p-3 bg-primary-500/8 border border-primary-500/15 rounded-xl">
-                <HelpCircle className="w-4 h-4 text-primary-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-primary-300/80 leading-relaxed">{current.tip}</p>
+            {cur.tip && (
+              <div className="flex items-start gap-2 p-2.5 bg-primary-500/8 border border-primary-500/15 rounded-lg">
+                <HelpCircle className="w-3.5 h-3.5 text-primary-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-primary-300/80 leading-relaxed">{cur.tip}</p>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-dark-700/50 bg-dark-850/50">
-            {/* Left: Back or Skip */}
+          <div className="flex items-center justify-between px-5 py-3 border-t border-dark-700/50">
             <div>
               {isFirst ? (
-                <button onClick={close} className="text-xs text-dark-500 hover:text-dark-300 transition-colors">
-                  Skip tour
-                </button>
+                <button onClick={close} className="text-xs text-dark-500 hover:text-dark-300 transition-colors">Skip tour</button>
               ) : (
-                <button onClick={goPrev} className="flex items-center gap-1 text-xs text-dark-400 hover:text-white transition-colors">
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  Back
+                <button onClick={() => go(-1)} className="flex items-center gap-1 text-xs text-dark-400 hover:text-white transition-colors">
+                  <ChevronLeft className="w-3.5 h-3.5" /> Back
                 </button>
               )}
             </div>
 
-            {/* Center: Progress dots */}
             <div className="flex items-center gap-1">
-              {WALKTHROUGH_STEPS.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => goToStep(i)}
-                  className={`rounded-full transition-all duration-300 ${
-                    i === step
-                      ? 'w-5 h-1.5 bg-primary-500'
-                      : i < step
-                      ? 'w-1.5 h-1.5 bg-primary-500/40 hover:bg-primary-400/60'
-                      : 'w-1.5 h-1.5 bg-dark-600 hover:bg-dark-500'
-                  }`}
-                  title={WALKTHROUGH_STEPS[i].title}
-                />
+              {STEPS.map((_, i) => (
+                <div key={i} className={`rounded-full transition-all duration-300 ${i === step ? 'w-4 h-1.5 bg-primary-500' : i < step ? 'w-1.5 h-1.5 bg-primary-500/40' : 'w-1.5 h-1.5 bg-dark-600'}`} />
               ))}
             </div>
 
-            {/* Right: Navigate / Next / Finish */}
-            <div className="flex items-center gap-2">
-              {current.route && !isFirst && !isLast && (
-                <button
-                  onClick={goToPage}
-                  className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300 transition-colors"
-                  title={`Open ${current.title}`}
-                >
-                  <Navigation className="w-3 h-3" />
-                  Open
-                </button>
-              )}
-              <button
-                onClick={isLast ? close : goNext}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isLast
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : isFirst
-                    ? 'bg-primary-500 hover:bg-primary-600 text-white'
-                    : 'bg-dark-700 hover:bg-dark-600 text-white'
-                }`}
-              >
-                {isLast ? (
-                  <>
-                    Get Started
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </>
-                ) : isFirst ? (
-                  <>
-                    Start Tour
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </>
-                ) : (
-                  <>
-                    Next
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </>
-                )}
-              </button>
-            </div>
+            <button
+              onClick={isLast ? close : () => go(1)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                isLast ? 'bg-green-500 hover:bg-green-600 text-white'
+                : isFirst ? 'bg-primary-500 hover:bg-primary-600 text-white'
+                : 'bg-dark-700 hover:bg-dark-600 text-white'
+              }`}
+            >
+              {isLast ? <>Get Started <ArrowRight className="w-3.5 h-3.5" /></>
+               : isFirst ? <>Start Tour <ChevronRight className="w-3.5 h-3.5" /></>
+               : <>Next <ChevronRight className="w-3.5 h-3.5" /></>}
+            </button>
           </div>
         </div>
       </div>

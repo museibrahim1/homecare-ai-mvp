@@ -275,7 +275,7 @@ export default function TopBar() {
         {/* Right: Notifications + User */}
         <div className="flex items-center gap-3">
           {/* Notification Bell */}
-          <div className="relative" ref={notifRef}>
+          <div className="relative" ref={notifRef} data-tour="notifications">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               className={`relative p-2 rounded-lg transition-colors ${
@@ -297,7 +297,7 @@ export default function TopBar() {
           </div>
 
           {/* User Menu */}
-          <div className="relative" ref={menuRef}>
+          <div className="relative" ref={menuRef} data-tour="user-menu">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-lg hover:bg-dark-700 transition-colors"

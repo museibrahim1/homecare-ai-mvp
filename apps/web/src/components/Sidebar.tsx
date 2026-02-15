@@ -299,7 +299,7 @@ export default function Sidebar() {
         </div>
 
         {/* Main Navigation */}
-        <nav ref={navRef} className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
+        <nav ref={navRef} data-tour="sidebar-nav" className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
           <NavSection title="Sales" items={salesNavItems} pathname={pathname} onNavigate={handleNavigate} />
           <NavSection title="Clients" items={clientsNavItems} pathname={pathname} onNavigate={handleNavigate} />
           <NavSection title="Communication" items={communicationNavItems} pathname={pathname} onNavigate={handleNavigate} />

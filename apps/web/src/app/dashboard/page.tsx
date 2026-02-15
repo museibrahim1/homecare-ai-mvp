@@ -172,7 +172,7 @@ function TasksWidget() {
     TASK_CATEGORIES.find(c => c.value === cat) || TASK_CATEGORIES[4];
 
   return (
-    <div className="card p-4 lg:p-6">
+    <div data-tour="tasks" className="card p-4 lg:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -772,7 +772,7 @@ export default function DashboardPage() {
                 /* ─── Stats Grid ─── */
                 case 'stats':
                   return (
-                    <div key="stats" className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                    <div key="stats" data-tour="stats" className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
                       {[
                         { label: 'Total Assessments', value: stats.totalVisits, icon: Calendar, bgClass: 'bg-accent-primary/20', textClass: 'text-accent-primary' },
                         { label: 'Pending Proposals', value: stats.pendingReview, icon: AlertCircle, bgClass: 'bg-accent-orange/20', textClass: 'text-accent-orange' },
@@ -801,7 +801,7 @@ export default function DashboardPage() {
                 /* ─── Charts Row ─── */
                 case 'charts':
                   return (
-                    <div key="charts" className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                    <div key="charts" data-tour="pipeline" className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                       {/* Monthly Assessments Chart */}
                       <div className="card p-4 lg:p-6">
                         <div className="flex items-center justify-between mb-4">
@@ -928,7 +928,7 @@ export default function DashboardPage() {
                 /* ─── Activity Feed + Quick Actions ─── */
                 case 'activity':
                   return (
-                    <div key="activity" className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <div key="activity" data-tour="quick-actions" className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
                       {/* Recent Activity Feed */}
                       <div className="lg:col-span-2 card p-4 lg:p-6">
                         <div className="flex items-center justify-between mb-4">
