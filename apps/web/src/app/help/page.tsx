@@ -6,8 +6,11 @@ import Sidebar from '@/components/Sidebar';
 import { getStoredToken } from '@/lib/auth';
 import {
   HelpCircle, Send, Loader2, CheckCircle, MessageSquare,
-  AlertCircle, Book, FileQuestion, Bug, Lightbulb, Phone, Mail
+  AlertCircle, Book, FileQuestion, Bug, Lightbulb, Phone, Mail,
+  BookOpen, Play, Sparkles, ArrowRight
 } from 'lucide-react';
+import { useWalkthrough } from '@/lib/walkthrough';
+import TopBar from '@/components/TopBar';
 
 // Formspree form ID for support tickets
 const FORMSPREE_SUPPORT_ID = process.env.NEXT_PUBLIC_FORMSPREE_SUPPORT_ID || 'xaqbwpzy';
@@ -46,6 +49,7 @@ const FAQ_ITEMS = [
 
 export default function HelpPage() {
   const router = useRouter();
+  const { open: openTour } = useWalkthrough();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'faq' | 'ticket'>('faq');
@@ -139,16 +143,43 @@ export default function HelpPage() {
   return (
     <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
-      <main className="flex-1 p-8">
-        <div className="max-w-4xl mx-auto">
+      <main className="flex-1 min-w-0">
+        <TopBar />
+        <div className="max-w-4xl mx-auto p-8">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-white">Help & Support</h1>
             <p className="text-dark-400 mt-1">Find answers or get in touch with our team</p>
           </div>
 
+          {/* Guided Tour Banner */}
+          <div className="mb-8 relative overflow-hidden rounded-2xl border border-primary-500/30 bg-gradient-to-r from-primary-500/10 via-purple-500/10 to-accent-cyan/10">
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500 rounded-full blur-[80px]" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-cyan rounded-full blur-[80px]" />
+            </div>
+            <div className="relative p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              <div className="w-14 h-14 shrink-0 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+                <BookOpen className="w-7 h-7 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold text-white mb-1">Interactive App Tour</h2>
+                <p className="text-dark-300 text-sm leading-relaxed">
+                  New to Homecare AI? Take a guided walkthrough of all the key features — from client management and voice assessments to scheduling and care tracking. Takes about 2 minutes.
+                </p>
+              </div>
+              <button
+                onClick={openTour}
+                className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-all shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30"
+              >
+                <Play className="w-4 h-4" />
+                Start Tour
+              </button>
+            </div>
+          </div>
+
           {/* Quick Contact */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <a
               href="mailto:support@palmtai.com"
               className="flex items-center gap-4 p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-primary-500/50 transition"
@@ -353,6 +384,7 @@ export default function HelpPage() {
               )}
             </div>
           )}
+        </div>
         </div>
       </main>
     </div>

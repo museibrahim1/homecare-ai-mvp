@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/lib/theme';
 import { NotificationProvider } from '@/lib/notifications';
+import { WalkthroughProvider } from '@/lib/walkthrough';
+import WalkthroughGuide from '@/components/WalkthroughGuide';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -36,7 +38,10 @@ export default function RootLayout({
       <body className={`${inter.className} bg-dark-900 text-dark-100 min-h-screen`}>
         <ThemeProvider>
           <NotificationProvider>
-            {children}
+            <WalkthroughProvider>
+              {children}
+              <WalkthroughGuide />
+            </WalkthroughProvider>
           </NotificationProvider>
         </ThemeProvider>
       </body>

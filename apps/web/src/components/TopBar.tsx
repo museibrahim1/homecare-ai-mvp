@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import {
   Bell, Settings, ChevronDown, LogOut, User, X,
   CalendarDays, CheckSquare, MessageSquare, Mail, AlertTriangle,
-  Clock, ChevronRight, BellOff, Check
+  Clock, ChevronRight, BellOff, Check, BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useNotifications, type AppNotification, type NotificationCategory } from '@/lib/notifications';
+import { useWalkthrough } from '@/lib/walkthrough';
 
 /* ─── Category config ─── */
 const CATEGORY_META: Record<NotificationCategory, { label: string; icon: typeof Bell; color: string; bg: string }> = {
@@ -214,6 +215,7 @@ export default function TopBar() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { open: openTour } = useWalkthrough();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -325,6 +327,13 @@ export default function TopBar() {
                 >
                   <Settings className="w-4 h-4 text-dark-400" />
                   Settings
+                </button>
+                <button
+                  onClick={() => { setShowUserMenu(false); openTour(); }}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                >
+                  <BookOpen className="w-4 h-4 text-dark-400" />
+                  App Tour
                 </button>
                 <div className="border-t border-dark-600 my-1" />
                 <button
