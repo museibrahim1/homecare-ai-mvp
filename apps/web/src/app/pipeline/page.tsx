@@ -213,7 +213,19 @@ export default function PipelinePage() {
     }
   };
 
-  if (authLoading || loading) {
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+
+  if (authLoading && !hasStoredToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+        <RefreshCw className="w-8 h-8 text-primary-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!token && !hasStoredToken) return null;
+
+  if (loading) {
     return (
       <div className="flex min-h-screen bg-dark-900">
         <Sidebar />

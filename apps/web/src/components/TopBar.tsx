@@ -55,7 +55,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
   const handleClick = (notif: AppNotification) => {
     markRead(notif.id);
     if (notif.link) {
-      router.push(notif.link);
+      router.push(notif.link, { scroll: false });
       onClose();
     }
   };
@@ -199,7 +199,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
       {notifications.length > 0 && (
         <div className="px-4 py-2.5 border-t border-dark-700 text-center">
           <button
-            onClick={() => { router.push('/schedule'); onClose(); }}
+            onClick={() => { router.push('/schedule', { scroll: false }); onClose(); }}
             className="text-[11px] text-primary-400 hover:text-primary-300 font-medium transition-colors"
           >
             View full schedule
@@ -247,7 +247,7 @@ export default function TopBar() {
       }
     } catch { /* Best-effort */ }
     logout();
-    router.push('/login');
+    router.push('/login', { scroll: false });
   };
 
   const initials = (user?.full_name || 'U')
@@ -315,14 +315,14 @@ export default function TopBar() {
             {showUserMenu && (
               <div className="absolute right-0 top-full mt-2 w-48 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden">
                 <button
-                  onClick={() => { setShowUserMenu(false); router.push('/settings'); }}
+                  onClick={() => { setShowUserMenu(false); router.push('/settings', { scroll: false }); }}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
                 >
                   <User className="w-4 h-4 text-dark-400" />
                   Profile
                 </button>
                 <button
-                  onClick={() => { setShowUserMenu(false); router.push('/settings'); }}
+                  onClick={() => { setShowUserMenu(false); router.push('/settings', { scroll: false }); }}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
                 >
                   <Settings className="w-4 h-4 text-dark-400" />

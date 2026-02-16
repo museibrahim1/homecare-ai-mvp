@@ -304,13 +304,17 @@ export default function CareTrackerPage() {
     persist(items.map(i => i.id === id ? { ...i, stage: newStage } : i));
   };
 
-  if (authLoading) {
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+
+  if (authLoading && !hasStoredToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
       </div>
     );
   }
+
+  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

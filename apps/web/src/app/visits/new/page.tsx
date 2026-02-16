@@ -150,7 +150,9 @@ export default function NewVisitPage() {
     setStep(source === 'audio' ? 'audio' : 'transcript');
   };
 
-  if (authLoading) {
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+
+  if (authLoading && !hasStoredToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="flex items-center gap-3">
@@ -160,6 +162,8 @@ export default function NewVisitPage() {
       </div>
     );
   }
+
+  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

@@ -197,10 +197,10 @@ export default function Sidebar() {
   // Stable navigate callback that won't change on re-renders
   const handleNavigate = useCallback((href: string) => {
     setMobileOpen(false);
-    router.push(href);
+    router.push(href, { scroll: false });
   }, [router]);
 
-  // Preserve sidebar scroll position across navigations
+  // Preserve sidebar scroll position — only set up listener once (not on every pathname change)
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
@@ -209,10 +209,9 @@ export default function Sidebar() {
       scrollPositionRef.current = nav.scrollTop;
     };
     nav.addEventListener('scroll', handleScroll, { passive: true });
-    nav.scrollTop = scrollPositionRef.current;
 
     return () => nav.removeEventListener('scroll', handleScroll);
-  }, [pathname]);
+  }, []);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -247,7 +246,7 @@ export default function Sidebar() {
       // Best-effort — proceed with frontend logout regardless
     }
     logout();
-    router.push('/login');
+    router.push('/login', { scroll: false });
   }, [logout, router]);
 
   return (

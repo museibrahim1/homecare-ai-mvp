@@ -388,13 +388,31 @@ export default function VisitDetailPage() {
     return 'pending';
   };
 
-  if (authLoading || loading) {
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+
+  if (authLoading && !hasStoredToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-dark-300">Loading...</span>
         </div>
+      </div>
+    );
+  }
+
+  if (!token && !hasStoredToken) return null;
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-dark-900">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-dark-300">Loading visit details...</span>
+          </div>
+        </main>
       </div>
     );
   }

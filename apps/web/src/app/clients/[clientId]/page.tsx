@@ -484,7 +484,22 @@ export default function ClientDetailPage() {
   const currentStageIndex = PIPELINE_STAGES.findIndex(s => s.key === currentStageKey);
 
   /* ─── Loading / Error states ─── */
-  if (authLoading || loading) {
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+
+  if (authLoading && !hasStoredToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-dark-300">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!token && !hasStoredToken) return null;
+
+  if (loading) {
     return (
       <div className="flex min-h-screen bg-dark-900">
         <Sidebar />
