@@ -3,6 +3,7 @@ import { HelloWorld } from "./compositions/HelloWorld";
 import { DemoVideo } from "./compositions/DemoVideo";
 import { DemoVideoV2 } from "./compositions/DemoVideoV2";
 import { DemoVideoV3 } from "./compositions/DemoVideoV3";
+import { AdVideo } from "./compositions/AdVideo";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -91,6 +92,33 @@ export const RemotionRoot: React.FC = () => {
         id="QuickDemoWithAudio"
         component={DemoVideoV3}
         durationInFrames={2330}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{
+          showAudio: true,
+        }}
+      />
+
+      {/* ===== 45-SECOND AD VIDEO ===== */}
+      {/* Punchy ad for social media / paid campaigns */}
+      <Composition
+        id="AdVideo"
+        component={AdVideo}
+        durationInFrames={1350}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{
+          showAudio: false,
+        }}
+      />
+
+      {/* Ad Video with Audio */}
+      <Composition
+        id="AdVideoWithAudio"
+        component={AdVideo}
+        durationInFrames={1350}
         fps={30}
         width={1920}
         height={1080}
