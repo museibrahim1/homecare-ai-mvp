@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { 
   Mic, 
@@ -15,12 +15,19 @@ import {
   Shield,
   BarChart3,
   Calendar,
+  ChevronLeft,
   ChevronRight,
   Menu,
   X,
   Pause,
   SkipForward,
-  Volume2
+  Volume2,
+  Video,
+  Loader2,
+  Mail,
+  Building2,
+  Phone,
+  User
 } from 'lucide-react';
 
 const FEATURES = [
@@ -453,6 +460,340 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   );
 }
 
+// Book Demo Component
+function BookDemoSection() {
+  const API = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [step, setStep] = useState<'date' | 'form' | 'success'>('date');
+  const [submitting, setSubmitting] = useState(false);
+  const [meetLink, setMeetLink] = useState<string | null>(null);
+  const [confirmDate, setConfirmDate] = useState('');
+  const [confirmTime, setConfirmTime] = useState('');
+  const [form, setForm] = useState({ name: '', email: '', company_name: '', phone: '' });
+
+  // Generate next 14 weekdays
+  const dates = useMemo(() => {
+    const result: { date: Date; iso: string; label: string; dayName: string }[] = [];
+    const now = new Date();
+    let d = new Date(now);
+    d.setDate(d.getDate() + 1);
+    while (result.length < 14) {
+      if (d.getDay() !== 0 && d.getDay() !== 6) {
+        result.push({
+          date: new Date(d),
+          iso: d.toISOString().split('T')[0],
+          label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        });
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    return result;
+  }, []);
+
+  const [weekOffset, setWeekOffset] = useState(0);
+  const visibleDates = dates.slice(weekOffset * 5, weekOffset * 5 + 5);
+
+  const timeSlots = [
+    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+    '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+    '16:00', '16:30',
+  ];
+
+  const formatSlot = (slot: string) => {
+    const [h, m] = slot.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    return `${hour}:${m.toString().padStart(2, '0')} ${ampm}`;
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedDate || !selectedTime) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API}/demos/book`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          date: selectedDate,
+          time_slot: selectedTime,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMeetLink(data.meeting_link || null);
+        setConfirmDate(data.date);
+        setConfirmTime(data.time);
+        setStep('success');
+      } else {
+        alert(data.detail || 'Failed to book demo. Please try again.');
+      }
+    } catch {
+      alert('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <section id="book-demo" className="py-20 px-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full mb-6">
+            <Video className="w-4 h-4 text-green-400" />
+            <span className="text-sm text-green-400">Live Product Demo</span>
+          </div>
+          <h2 className="text-4xl font-bold text-white mb-4">
+            See Homecare AI in Action
+          </h2>
+          <p className="text-xl text-dark-400 max-w-2xl mx-auto">
+            Book a free 30-minute demo with our team. We'll show you how to turn assessments into contracts in minutes.
+          </p>
+        </div>
+
+        <div className="card p-8 border-primary-500/20">
+          {step === 'date' && (
+            <div className="space-y-8">
+              {/* Date Selection */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-primary-400" />
+                    Pick a Date
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setWeekOffset(Math.max(0, weekOffset - 1))}
+                      disabled={weekOffset === 0}
+                      className="p-1.5 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-sm text-dark-400 min-w-[80px] text-center">
+                      {weekOffset === 0 ? 'This week' : weekOffset === 1 ? 'Next week' : `Week ${weekOffset + 1}`}
+                    </span>
+                    <button
+                      onClick={() => setWeekOffset(Math.min(2, weekOffset + 1))}
+                      disabled={weekOffset >= 2}
+                      className="p-1.5 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-3">
+                  {visibleDates.map((d) => (
+                    <button
+                      key={d.iso}
+                      onClick={() => { setSelectedDate(d.iso); setSelectedTime(null); }}
+                      className={`p-4 rounded-xl border text-center transition-all ${
+                        selectedDate === d.iso
+                          ? 'bg-primary-500/20 border-primary-500 ring-2 ring-primary-500/30'
+                          : 'bg-dark-700/50 border-dark-600 hover:border-dark-500'
+                      }`}
+                    >
+                      <p className={`text-xs font-medium ${selectedDate === d.iso ? 'text-primary-400' : 'text-dark-400'}`}>
+                        {d.dayName}
+                      </p>
+                      <p className={`text-lg font-bold mt-1 ${selectedDate === d.iso ? 'text-white' : 'text-dark-200'}`}>
+                        {d.label}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Time Selection */}
+              {selectedDate && (
+                <div className="animate-fadeIn">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+                    <Clock className="w-5 h-5 text-primary-400" />
+                    Pick a Time <span className="text-sm font-normal text-dark-400">(Eastern Time)</span>
+                  </h3>
+                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                    {timeSlots.map((slot) => (
+                      <button
+                        key={slot}
+                        onClick={() => setSelectedTime(slot)}
+                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                          selectedTime === slot
+                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                            : 'bg-dark-700/50 text-dark-300 hover:bg-dark-700 hover:text-white border border-dark-600'
+                        }`}
+                      >
+                        {formatSlot(slot)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Continue Button */}
+              {selectedDate && selectedTime && (
+                <div className="flex justify-end animate-fadeIn">
+                  <button
+                    onClick={() => setStep('form')}
+                    className="btn-primary flex items-center gap-2 py-3 px-8"
+                  >
+                    Continue
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 'form' && (
+            <div className="max-w-lg mx-auto space-y-6 animate-fadeIn">
+              <button
+                onClick={() => setStep('date')}
+                className="text-sm text-dark-400 hover:text-white flex items-center gap-1 transition"
+              >
+                <ChevronLeft className="w-4 h-4" /> Back to calendar
+              </button>
+
+              <div className="bg-dark-700/50 border border-dark-600 rounded-xl p-4 flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-primary-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold">
+                    {dates.find(d => d.iso === selectedDate)?.date.toLocaleDateString('en-US', {
+                      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+                    })}
+                  </p>
+                  <p className="text-dark-400 text-sm">{formatSlot(selectedTime!)} ET — 30 min demo via Google Meet</p>
+                </div>
+              </div>
+
+              <h3 className="text-xl font-semibold text-white">Your Details</h3>
+
+              <div className="space-y-4">
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input
+                    type="text"
+                    placeholder="Full name *"
+                    value={form.name}
+                    onChange={e => setForm({ ...form, name: e.target.value })}
+                    className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input
+                    type="email"
+                    placeholder="Work email *"
+                    value={form.email}
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input
+                    type="text"
+                    placeholder="Company / Agency name *"
+                    value={form.company_name}
+                    onChange={e => setForm({ ...form, company_name: e.target.value })}
+                    className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input
+                    type="tel"
+                    placeholder="Phone number (optional)"
+                    value={form.phone}
+                    onChange={e => setForm({ ...form, phone: e.target.value })}
+                    className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                disabled={submitting || !form.name || !form.email || !form.company_name}
+                className="w-full btn-primary py-4 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Booking...
+                  </>
+                ) : (
+                  <>
+                    <Video className="w-5 h-5" />
+                    Book My Demo
+                  </>
+                )}
+              </button>
+
+              <p className="text-center text-dark-500 text-xs">
+                By booking, you agree to receive a calendar invite and follow-up emails.
+              </p>
+            </div>
+          )}
+
+          {step === 'success' && (
+            <div className="max-w-lg mx-auto text-center space-y-6 animate-fadeIn py-8">
+              <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle className="w-10 h-10 text-green-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">Demo Booked!</h3>
+              <p className="text-dark-300">
+                Your demo is confirmed for <span className="text-white font-semibold">{confirmDate}</span> at{' '}
+                <span className="text-white font-semibold">{confirmTime} ET</span>.
+              </p>
+
+              {meetLink && (
+                <a
+                  href={meetLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition shadow-lg shadow-green-500/30"
+                >
+                  <Video className="w-5 h-5" />
+                  Join Google Meet
+                </a>
+              )}
+
+              <div className="bg-dark-700/50 border border-dark-600 rounded-xl p-4">
+                <p className="text-dark-400 text-sm">
+                  Check your email at <span className="text-white">{form.email}</span> for the calendar invite and meeting details.
+                </p>
+              </div>
+
+              <button
+                onClick={() => { setStep('date'); setSelectedDate(null); setSelectedTime(null); setForm({ name: '', email: '', company_name: '', phone: '' }); }}
+                className="text-primary-400 hover:text-primary-300 text-sm font-medium transition"
+              >
+                Book another demo
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.4s ease-out forwards;
+        }
+      `}</style>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
@@ -474,7 +815,7 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-dark-300 hover:text-white transition">Features</a>
               <a href="#pricing" className="text-dark-300 hover:text-white transition">Pricing</a>
-              <a href="#testimonials" className="text-dark-300 hover:text-white transition">Testimonials</a>
+              <a href="#book-demo" className="text-dark-300 hover:text-white transition">Book Demo</a>
               <Link href="/login" className="text-dark-300 hover:text-white transition">Sign In</Link>
               <Link href="/register" className="btn-primary py-2 px-5 text-sm">
                 Get Started Free
@@ -495,7 +836,7 @@ export default function LandingPage() {
             <div className="md:hidden pt-4 pb-2 space-y-3">
               <a href="#features" className="block py-2 text-dark-300 hover:text-white">Features</a>
               <a href="#pricing" className="block py-2 text-dark-300 hover:text-white">Pricing</a>
-              <a href="#testimonials" className="block py-2 text-dark-300 hover:text-white">Testimonials</a>
+              <a href="#book-demo" className="block py-2 text-dark-300 hover:text-white">Book Demo</a>
               <Link href="/login" className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
               <Link href="/register" className="block btn-primary py-2 px-5 text-sm text-center mt-4">
                 Get Started Free
@@ -780,6 +1121,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Book a Demo Section */}
+      <BookDemoSection />
+
       {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
@@ -795,9 +1139,9 @@ export default function LandingPage() {
                 Start Your Free Trial
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link href="/contact" className="btn-secondary py-4 px-8 text-lg">
-                Contact Sales
-              </Link>
+              <a href="#book-demo" className="btn-secondary py-4 px-8 text-lg">
+                Book a Demo
+              </a>
             </div>
             <p className="text-dark-400 text-sm mt-6">
               No credit card required • 14-day free trial • Cancel anytime
