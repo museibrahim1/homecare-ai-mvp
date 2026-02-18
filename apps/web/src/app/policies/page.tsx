@@ -43,7 +43,7 @@ export default function PoliciesPage() {
 
   // Get user-specific storage key
   const getStorageKey = useCallback(() => {
-    return user?.id ? `homecare_policies_${user.id}` : null;
+    return user?.id ? `palmcare_policies_${user.id}` : null;
   }, [user?.id]);
 
   // Load policies from localStorage (user-specific)

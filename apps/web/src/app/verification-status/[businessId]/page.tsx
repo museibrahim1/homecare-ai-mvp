@@ -183,7 +183,7 @@ export default function VerificationStatusPage() {
             <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-semibold text-white">HomeCare AI</span>
+            <span className="text-lg font-semibold text-white">PalmCare AI</span>
           </Link>
           <button
             onClick={() => { loadStatus(); loadDocuments(); }}
@@ -386,7 +386,7 @@ export default function VerificationStatusPage() {
             <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Your Business is Approved!</h2>
             <p className="text-dark-300 mb-6">
-              You can now access all features of HomeCare AI.
+              You can now access all features of PalmCare AI.
             </p>
             <Link
               href="/login"

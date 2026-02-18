@@ -2,11 +2,11 @@
 Email Service using Resend
 
 Handles all transactional emails for the platform.
-
-IMPORTANT: You MUST set the EMAIL_FROM env var to a verified domain sender
-(e.g. "Homecare AI <welcome@palmtai.com>") for emails to reach real customers.
-The default "onboarding@resend.dev" is Resend's TEST domain and can ONLY
-deliver to the Resend account owner's email address.
+Each email category uses a dedicated sender address:
+  - onboarding@palmtai.com  → Registration, new user onboarding
+  - welcome@palmtai.com     → Approvals, team invites, account setup
+  - sales@palmtai.com       → Demo bookings, contracts, proposals
+  - support@palmtai.com     → Password resets, support tickets, reminders
 """
 
 import os
@@ -15,7 +15,6 @@ from typing import Optional, List
 
 logger = logging.getLogger(__name__)
 
-# Check if resend is available
 try:
     import resend
     RESEND_AVAILABLE = True
@@ -23,32 +22,38 @@ except ImportError:
     RESEND_AVAILABLE = False
     logger.warning("Resend not installed. Email functionality disabled.")
 
+BRAND = "PalmCare AI"
+
 
 class EmailService:
     """Service for sending transactional emails via Resend."""
-    
+
     def __init__(self):
         self.api_key = os.getenv("RESEND_API_KEY")
+        self.app_url = os.getenv("APP_URL", "https://palmtai.com")
+
+        # Dedicated sender addresses — each maps to a verified Resend identity
+        self.from_onboarding = os.getenv(
+            "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@palmtai.com>"
+        )
+        self.from_welcome = os.getenv(
+            "EMAIL_FROM_WELCOME", f"{BRAND} <welcome@palmtai.com>"
+        )
+        self.from_sales = os.getenv(
+            "EMAIL_FROM_SALES", f"{BRAND} <sales@palmtai.com>"
+        )
+        self.from_support = os.getenv(
+            "EMAIL_FROM_SUPPORT", f"{BRAND} <support@palmtai.com>"
+        )
+
+        # Legacy fallback (used by generic send_email when no sender specified)
+        self.from_email = os.getenv("EMAIL_FROM", self.from_onboarding)
         self.support_email = os.getenv("SUPPORT_EMAIL", "support@palmtai.com")
-        self.app_url = os.getenv("APP_URL", "https://app.palmtai.com")
-        
-        # EMAIL_FROM must be set to a verified domain for production use.
-        # "onboarding@resend.dev" only delivers to the Resend account owner.
-        custom_from = os.getenv("EMAIL_FROM")
-        if custom_from:
-            self.from_email = custom_from
-        else:
-            self.from_email = "Homecare AI <onboarding@resend.dev>"
-            logger.warning(
-                "EMAIL_FROM not set — using Resend test domain (onboarding@resend.dev). "
-                "Emails will ONLY be delivered to the Resend account owner. "
-                "Set EMAIL_FROM to a verified domain sender for production."
-            )
-        
+
         if self.api_key and RESEND_AVAILABLE:
             resend.api_key = self.api_key
             self.enabled = True
-            logger.info(f"Email service enabled (from={self.from_email})")
+            logger.info(f"Email service enabled (onboarding={self.from_onboarding})")
         else:
             self.enabled = False
             if not self.api_key:
@@ -62,62 +67,55 @@ class EmailService:
         text: Optional[str] = None,
         reply_to: Optional[str] = None,
         attachments: Optional[List[dict]] = None,
+        sender: Optional[str] = None,
     ) -> dict:
         """
         Send an email via Resend.
-        
+
         Args:
             to: Recipient email(s)
             subject: Email subject
             html: HTML body
-            text: Plain text body (optional)
-            reply_to: Reply-to address (optional)
-            attachments: List of attachments, each with 'filename' and 'content' (base64 or bytes)
-        
-        Returns:
-            dict with 'success' (bool), 'id' (str or None), and 'error' (str or None)
+            sender: Override from address (defaults to self.from_email)
         """
         recipients = [to] if isinstance(to, str) else to
-        
+        from_addr = sender or self.from_email
+
         if not self.enabled:
-            msg = f"Email disabled. Would have sent to {recipients}: {subject}"
-            logger.warning(msg)
+            logger.warning(f"Email disabled. Would have sent to {recipients}: {subject}")
             return {"success": False, "id": None, "error": "email_disabled"}
-        
+
         try:
             params: dict = {
-                "from": self.from_email,
+                "from": from_addr,
                 "to": recipients,
                 "subject": subject,
                 "html": html,
             }
-            
+
             if text:
                 params["text"] = text
             if reply_to:
                 params["reply_to"] = reply_to
             if attachments:
                 params["attachments"] = attachments
-            
+
             response = resend.Emails.send(params)
-            
-            # v2 SDK returns an object with .id; older dicts have 'id' key
+
             email_id = None
             if isinstance(response, dict):
                 email_id = response.get("id")
             elif hasattr(response, "id"):
                 email_id = response.id
-            
-            logger.info(
-                f"Email sent to {recipients}: {subject} (id={email_id or 'unknown'})"
-            )
+
+            logger.info(f"Email sent to {recipients}: {subject} (id={email_id or 'unknown'})")
             return {"success": True, "id": email_id, "error": None}
-            
+
         except Exception as e:
             error_str = str(e)
             logger.error(
                 f"Failed to send email to {recipients} "
-                f"(subject={subject}, from={self.from_email}): {error_str}",
+                f"(subject={subject}, from={from_addr}): {error_str}",
                 exc_info=True,
             )
             return {"success": False, "id": None, "error": error_str}
@@ -126,13 +124,13 @@ class EmailService:
     
     def send_password_reset(self, user_email: str, user_name: str, reset_url: str):
         """Send password reset email with link."""
-        subject = "Reset Your Password - Homecare AI"
+        subject = f"Reset Your Password - {BRAND}"
         html = f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
                 <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">
-                    Homecare AI
+                    PalmCare AI
                 </h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">
                     Password Reset Request
@@ -177,29 +175,29 @@ class EmailService:
             
             <!-- Footer -->
             <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">Homecare AI</p>
+                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">PalmCare AI</p>
                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">
                     AI-Powered CRM for Home Healthcare Agencies
                 </p>
                 <p style="color: #d1d5db; font-size: 11px; margin: 15px 0 0 0;">
-                    &copy; 2026 Homecare AI. All rights reserved.
+                    &copy; 2026 PalmCare AI. All rights reserved.
                 </p>
             </div>
         </div>
         """
-        return self.send_email(user_email, subject, html)
+        return self.send_email(user_email, subject, html, sender=self.from_support)
     
     # ==================== Business Emails ====================
     
     def send_business_registration_received(self, business_email: str, business_name: str):
         """Send welcome email after registration."""
-        subject = "Welcome to Homecare AI - Let's Get You to Revenue Faster!"
+        subject = f"Welcome to {BRAND} - Let's Get You to Revenue Faster!"
         html = f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
             <!-- Header with gradient -->
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
                 <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
-                    Homecare AI
+                    PalmCare AI
                 </h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px; font-weight: 500;">
                     The #1 CRM for Home Healthcare Agencies
@@ -298,26 +296,26 @@ class EmailService:
             
             <!-- Footer -->
             <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">Homecare AI</p>
+                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">PalmCare AI</p>
                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">
                     AI-Powered CRM for Home Healthcare Agencies
                 </p>
                 <p style="color: #d1d5db; font-size: 11px; margin: 15px 0 0 0;">
-                    © 2026 Homecare AI. All rights reserved.
+                    © 2026 PalmCare AI. All rights reserved.
                 </p>
             </div>
         </div>
         """
-        return self.send_email(business_email, subject, html)
+        return self.send_email(business_email, subject, html, sender=self.from_onboarding)
     
     def send_business_approved(self, business_email: str, business_name: str, login_url: str):
         """Send approval notification with login link."""
-        subject = "Your Account is Approved! - Homecare AI"
+        subject = f"Your Account is Approved! - {BRAND}"
         html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #10b981;">Account Approved!</h1>
             <p>Hello {business_name},</p>
-            <p>Great news! Your Homecare AI account has been approved and is now active.</p>
+            <p>Great news! Your PalmCare AI account has been approved and is now active.</p>
             <p>You can now log in and start using our platform to:</p>
             <ul>
                 <li>Upload care assessment recordings</li>
@@ -331,14 +329,14 @@ class EmailService:
             </p>
             <p>If you have any questions, please contact our support team.</p>
             <br>
-            <p>Best regards,<br>The Homecare AI Team</p>
+            <p>Best regards,<br>The PalmCare AI Team</p>
         </div>
         """
-        return self.send_email(business_email, subject, html)
+        return self.send_email(business_email, subject, html, sender=self.from_welcome)
     
     def send_business_rejected(self, business_email: str, business_name: str, reason: Optional[str] = None):
         """Send rejection notification."""
-        subject = "Registration Update - Homecare AI"
+        subject = f"Registration Update - {BRAND}"
         reason_text = f"<p><strong>Reason:</strong> {reason}</p>" if reason else ""
         html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -348,15 +346,15 @@ class EmailService:
             {reason_text}
             <p>If you believe this is an error or would like to provide additional information, please contact our support team.</p>
             <br>
-            <p>Best regards,<br>The Homecare AI Team</p>
+            <p>Best regards,<br>The PalmCare AI Team</p>
         </div>
         """
-        return self.send_email(business_email, subject, html)
+        return self.send_email(business_email, subject, html, sender=self.from_welcome)
     
     def send_business_pending_documents(self, business_email: str, business_name: str, missing_docs: List[str]):
         """Request additional documents from business."""
         docs_list = "".join([f"<li>{doc}</li>" for doc in missing_docs])
-        subject = "Additional Documents Required - Homecare AI"
+        subject = f"Additional Documents Required - {BRAND}"
         html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #f59e0b;">Additional Documents Required</h1>
@@ -367,10 +365,10 @@ class EmailService:
             </ul>
             <p>Please log in to your account and upload these documents at your earliest convenience.</p>
             <br>
-            <p>Best regards,<br>The Homecare AI Team</p>
+            <p>Best regards,<br>The PalmCare AI Team</p>
         </div>
         """
-        return self.send_email(business_email, subject, html)
+        return self.send_email(business_email, subject, html, sender=self.from_onboarding)
     
     # ==================== Admin Notifications ====================
     
@@ -386,7 +384,7 @@ class EmailService:
             <p>Please review their application in the admin dashboard.</p>
         </div>
         """
-        return self.send_email(admin_email, subject, html)
+        return self.send_email(admin_email, subject, html, sender=self.from_onboarding)
     
     # ==================== Support Emails ====================
     
@@ -405,7 +403,8 @@ class EmailService:
             self.support_email,
             f"Support Request: {subject}",
             html,
-            reply_to=user_email
+            reply_to=user_email,
+            sender=self.from_support,
         )
     
     # ==================== Client/Visit Notifications ====================
@@ -457,7 +456,7 @@ class EmailService:
             </div>
         </div>
         """
-        return self.send_email(user_email, subject, html)
+        return self.send_email(user_email, subject, html, sender=self.from_onboarding)
     
     def send_assessment_complete(
         self,
@@ -501,7 +500,7 @@ class EmailService:
             </div>
         </div>
         """
-        return self.send_email(user_email, subject, html)
+        return self.send_email(user_email, subject, html, sender=self.from_onboarding)
     
     def send_contract_ready(
         self,
@@ -539,7 +538,7 @@ class EmailService:
             </div>
         </div>
         """
-        return self.send_email(user_email, subject, html)
+        return self.send_email(user_email, subject, html, sender=self.from_sales)
     
     def send_follow_up_reminder(
         self,
@@ -576,7 +575,7 @@ class EmailService:
             </div>
         </div>
         """
-        return self.send_email(user_email, subject, html)
+        return self.send_email(user_email, subject, html, sender=self.from_support)
 
 
 # Singleton instance (lazy-loaded to avoid issues during module import)

@@ -1,5 +1,5 @@
 [project]
-name = "homecare-api"
+name = "palmcare-api"
 version = "0.1.0"
 description = "AI Voice Analyzer API for In-Home Healthcare"
 requires-python = ">=3.11"

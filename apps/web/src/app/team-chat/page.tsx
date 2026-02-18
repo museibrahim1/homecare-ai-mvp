@@ -37,7 +37,7 @@ export default function TeamChatPage() {
 
   // Get user-specific storage key for chat data
   const getChatStorageKey = useCallback(() => {
-    return user?.id ? `homecare_teamchat_${user.id}` : null;
+    return user?.id ? `palmcare_teamchat_${user.id}` : null;
   }, [user?.id]);
 
   // Load chat data from localStorage (user-specific)

@@ -464,18 +464,16 @@ async def email_contract(
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #999; font-size: 12px;">
-            This email was sent from Homecare AI on behalf of your care provider.
+            This email was sent from PalmCare AI on behalf of your care provider.
         </p>
     </div>
     """
     
-    # Prepare attachment
     attachments = [{
         "filename": f"Service_Agreement_{client_name.replace(' ', '_')}.pdf",
         "content": base64.b64encode(pdf_bytes).decode('utf-8'),
     }]
     
-    # Send email
     recipients = [email_request.recipient_email]
     if email_request.cc_email:
         recipients.append(email_request.cc_email)
@@ -486,6 +484,7 @@ async def email_contract(
         html=html,
         attachments=attachments,
         reply_to=current_user.email,
+        sender=email_service.from_sales,
     )
     
     if not result.get("success"):
@@ -558,7 +557,7 @@ async def email_note(
         </div>
         
         <p style="color: #999; font-size: 12px;">
-            This email was sent from Homecare AI on behalf of your care provider.
+            This email was sent from PalmCare AI on behalf of your care provider.
         </p>
     </div>
     """
@@ -578,6 +577,7 @@ async def email_note(
         html=html,
         attachments=attachments,
         reply_to=current_user.email,
+        sender=email_service.from_sales,
     )
     
     if not result.get("success"):

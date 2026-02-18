@@ -45,7 +45,7 @@ const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; bg: stri
   routine:  { label: 'Routine',  color: 'text-green-400',  bg: 'bg-green-500/15',  bar: 'bg-green-400' },
 };
 
-const STORAGE_KEY = 'homecare-care-tracker';
+const STORAGE_KEY = 'palmcare-care-tracker';
 const CARE_SPECIALTIES = ['General Care', 'Dementia Care', 'Post-Surgery', 'Cardiac Care', 'Diabetes Management', 'Hospice Support', 'Physical Therapy', 'Wound Care', 'Respiratory Care'];
 
 /* ─── Persistence ─── */
@@ -304,7 +304,7 @@ export default function CareTrackerPage() {
     persist(items.map(i => i.id === id ? { ...i, stage: newStage } : i));
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
 
   if (authLoading && !hasStoredToken) {
     return (

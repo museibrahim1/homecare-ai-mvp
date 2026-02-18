@@ -25,7 +25,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
       setLoadingAudio(true);
       setAudioUrl(null);
       try {
-        const token = JSON.parse(localStorage.getItem('homecare-auth') || '{}')?.state?.token;
+        const token = JSON.parse(localStorage.getItem('palmcare-auth') || '{}')?.state?.token;
         if (!token) { setLoadingAudio(false); return; }
         const res = await fetch(`${API_BASE}/visits/${visitId}`, {
           headers: { 'Authorization': `Bearer ${token}` },

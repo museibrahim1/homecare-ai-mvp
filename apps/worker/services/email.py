@@ -2,10 +2,10 @@
 Email Service for Worker
 
 Lightweight email service for sending notifications from Celery tasks.
-
-IMPORTANT: You MUST set the EMAIL_FROM env var to a verified domain sender
-for emails to reach real customers. The default "onboarding@resend.dev"
-can ONLY deliver to the Resend account owner's email.
+Uses dedicated sender addresses per category:
+  - onboarding@palmtai.com  → Registration, system notifications
+  - sales@palmtai.com       → Contracts, proposals
+  - support@palmtai.com     → Reminders, support follow-ups
 """
 
 import os
@@ -21,78 +21,79 @@ except ImportError:
     RESEND_AVAILABLE = False
     logger.warning("Resend not installed. Email functionality disabled.")
 
+BRAND = "PalmCare AI"
+
 
 class EmailService:
     """Service for sending emails via Resend."""
-    
+
     def __init__(self):
         self.api_key = os.getenv("RESEND_API_KEY")
-        self.app_url = os.getenv("APP_URL", "https://app.palmtai.com")
-        
-        custom_from = os.getenv("EMAIL_FROM")
-        if custom_from:
-            self.from_email = custom_from
-        else:
-            self.from_email = "Homecare AI <onboarding@resend.dev>"
-            logger.warning(
-                "EMAIL_FROM not set — using Resend test domain (onboarding@resend.dev). "
-                "Emails will ONLY be delivered to the Resend account owner."
-            )
-        
+        self.app_url = os.getenv("APP_URL", "https://palmtai.com")
+
+        self.from_onboarding = os.getenv(
+            "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@palmtai.com>"
+        )
+        self.from_sales = os.getenv(
+            "EMAIL_FROM_SALES", f"{BRAND} <sales@palmtai.com>"
+        )
+        self.from_support = os.getenv(
+            "EMAIL_FROM_SUPPORT", f"{BRAND} <support@palmtai.com>"
+        )
+        self.from_email = os.getenv("EMAIL_FROM", self.from_onboarding)
+
         if self.api_key and RESEND_AVAILABLE:
             resend.api_key = self.api_key
             self.enabled = True
-            logger.info(f"Worker email service enabled (from={self.from_email})")
+            logger.info(f"Worker email service enabled (onboarding={self.from_onboarding})")
         else:
             self.enabled = False
             if not self.api_key:
                 logger.warning("RESEND_API_KEY not set. Worker email disabled.")
-    
+
     def send_email(
         self,
         to: str | List[str],
         subject: str,
         html: str,
+        sender: Optional[str] = None,
     ) -> dict:
-        """Send an email via Resend.
-        
-        Returns:
-            dict with 'success' (bool), 'id' (str or None), and 'error' (str or None)
-        """
+        """Send an email via Resend."""
         recipients = [to] if isinstance(to, str) else to
-        
+        from_addr = sender or self.from_email
+
         if not self.enabled:
             logger.warning(f"Email disabled. Would have sent to {recipients}: {subject}")
             return {"success": False, "id": None, "error": "email_disabled"}
-        
+
         try:
             params = {
-                "from": self.from_email,
+                "from": from_addr,
                 "to": recipients,
                 "subject": subject,
                 "html": html,
             }
-            
+
             response = resend.Emails.send(params)
-            
+
             email_id = None
             if isinstance(response, dict):
                 email_id = response.get("id")
             elif hasattr(response, "id"):
                 email_id = response.id
-            
+
             logger.info(f"Email sent to {recipients}: {subject} (id={email_id or 'unknown'})")
             return {"success": True, "id": email_id, "error": None}
-            
+
         except Exception as e:
             error_str = str(e)
             logger.error(
                 f"Failed to send email to {recipients} "
-                f"(subject={subject}, from={self.from_email}): {error_str}",
+                f"(subject={subject}, from={from_addr}): {error_str}",
                 exc_info=True,
             )
             return {"success": False, "id": None, "error": error_str}
-    
+
     def send_contract_ready(
         self,
         user_email: str,
@@ -129,8 +130,8 @@ class EmailService:
             </div>
         </div>
         """
-        return self.send_email(user_email, subject, html)
-    
+        return self.send_email(user_email, subject, html, sender=self.from_sales)
+
     def send_assessment_complete(
         self,
         user_email: str,
@@ -142,7 +143,7 @@ class EmailService:
     ):
         """Notify when an assessment pipeline completes."""
         subject = f"Assessment Complete: {client_name}"
-        
+
         checkmark = "✓"
         items_html = ""
         if billables_count > 0:
@@ -151,7 +152,7 @@ class EmailService:
             items_html += f'<p style="color: #22C55E;">{checkmark} SOAP note generated</p>'
         if contract_generated:
             items_html += f'<p style="color: #22C55E;">{checkmark} Service contract created</p>'
-        
+
         html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 20px;">
@@ -173,10 +174,9 @@ class EmailService:
             </div>
         </div>
         """
-        return self.send_email(user_email, subject, html)
+        return self.send_email(user_email, subject, html, sender=self.from_onboarding)
 
 
-# Singleton instance
 _email_service = None
 
 def get_email_service() -> EmailService:

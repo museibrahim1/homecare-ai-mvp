@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-End-to-End Test Script for Homecare AI MVP
+End-to-End Test Script for PalmCare AI MVP
 
 Tests the complete flow from registration to contract generation.
 Run against the deployed API to verify everything works.
@@ -424,7 +424,7 @@ class E2ETest:
     def run_all_tests(self) -> bool:
         """Run all tests in sequence."""
         print("\n" + "="*60)
-        print("  HOMECARE AI - END-TO-END TEST")
+        print("  PALMCARE AI - END-TO-END TEST")
         print(f"  API: {self.api_url}")
         print("="*60 + "\n")
         
@@ -467,7 +467,7 @@ class E2ETest:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="E2E Test for Homecare AI")
+    parser = argparse.ArgumentParser(description="E2E Test for PalmCare AI")
     parser.add_argument("--api-url", default=DEFAULT_API_URL, help="API URL to test against")
     args = parser.parse_args()
     

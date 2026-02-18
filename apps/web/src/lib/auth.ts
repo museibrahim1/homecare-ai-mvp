@@ -33,7 +33,7 @@ const useAuthStore = create<AuthState>()(
       logout: () => set({ token: null, user: null, lastActivity: null }),
     }),
     {
-      name: 'homecare-auth',
+      name: 'palmcare-auth',
       storage: createJSONStorage(() => localStorage),
     }
   )
@@ -51,7 +51,7 @@ function hasStoredTokenCached(): boolean {
     return _cachedHasToken;
   }
   try {
-    const data = localStorage.getItem('homecare-auth');
+    const data = localStorage.getItem('palmcare-auth');
     if (data) {
       const parsed = JSON.parse(data);
       _cachedHasToken = !!parsed?.state?.token;
@@ -69,7 +69,7 @@ function hasStoredTokenCached(): boolean {
 export function getStoredToken(): string | null {
   if (typeof window === 'undefined') return null;
   try {
-    const data = localStorage.getItem('homecare-auth');
+    const data = localStorage.getItem('palmcare-auth');
     if (!data) return null;
     const parsed = JSON.parse(data);
     return parsed?.state?.token || null;

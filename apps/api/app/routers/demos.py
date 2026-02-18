@@ -197,7 +197,7 @@ async def book_demo(
         try:
             token = await _refresh_token_if_needed(admin_user, db)
 
-            summary = f"Homecare AI Demo — {booking.company_name}"
+            summary = f"PalmCare AI Demo — {booking.company_name}"
             description = (
                 f"Product demo for {booking.name} from {booking.company_name}\n"
                 f"Email: {booking.email}\n"
@@ -230,7 +230,7 @@ async def book_demo(
 
     # Send confirmation emails
     email_svc = get_email_service()
-    app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+    app_url = os.getenv("APP_URL", "https://palmtai.com")
 
     meet_section = ""
     if meeting_link:
@@ -253,14 +253,15 @@ async def book_demo(
             </div>
         """
 
-    # Email to prospect
+    # Email to prospect — from sales@
     email_svc.send_email(
         to=booking.email,
-        subject=f"Your Homecare AI Demo — {formatted_date} at {formatted_time}",
+        subject=f"Your PalmCare AI Demo — {formatted_date} at {formatted_time}",
+        sender=email_svc.from_sales,
         html=f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
-                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">Homecare AI</h1>
+                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">PalmCare AI</h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">Your Demo is Confirmed</p>
             </div>
             <div style="padding: 40px 30px;">
@@ -283,7 +284,7 @@ async def book_demo(
                 </div>
                 {meet_section}
                 <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
-                    During the demo we'll show you how Homecare AI can help {booking.company_name}
+                    During the demo we'll show you how PalmCare AI can help {booking.company_name}
                     turn care assessments into contracts in minutes, manage clients, and grow revenue.
                 </p>
                 <p style="color: #9ca3af; font-size: 13px; margin-top: 24px;">
@@ -291,18 +292,19 @@ async def book_demo(
                 </p>
             </div>
             <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6366f1; font-weight: 600; margin: 0 0 4px 0; font-size: 14px;">Homecare AI</p>
-                <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; 2026 Homecare AI. All rights reserved.</p>
+                <p style="color: #6366f1; font-weight: 600; margin: 0 0 4px 0; font-size: 14px;">PalmCare AI</p>
+                <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; 2026 PalmCare AI. All rights reserved.</p>
             </div>
         </div>
         """,
     )
 
-    # Notify admin
+    # Notify admin — from sales@
     admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "admin@palmtai.com")
     email_svc.send_email(
         to=admin_email,
         subject=f"New Demo Booked: {booking.company_name} — {formatted_date}",
+        sender=email_svc.from_sales,
         html=f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #6366f1;">New Demo Booking</h2>

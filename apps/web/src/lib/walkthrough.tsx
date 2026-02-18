@@ -17,14 +17,14 @@ const WalkthroughContext = createContext<WalkthroughContextType>({
   hasSeenTour: false,
 });
 
-const WALKTHROUGH_KEY = 'homecare-walkthrough-seen';
+const WALKTHROUGH_KEY = 'palmcare-walkthrough-seen';
 
 // Pages that are public (no auth required) — don't auto-show the tour here
 const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/pricing', '/welcome'];
 
 function isAuthenticated(): boolean {
   try {
-    const raw = localStorage.getItem('homecare-auth');
+    const raw = localStorage.getItem('palmcare-auth');
     if (!raw) return false;
     const parsed = JSON.parse(raw);
     return !!parsed?.state?.token;

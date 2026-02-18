@@ -10,7 +10,7 @@
         "s3:GetBucketLocation",
         "s3:ListBucket"
       ],
-      "Resource": ["arn:aws:s3:::homecare-audio"]
+      "Resource": ["arn:aws:s3:::palmcare-audio"]
     },
     {
       "Effect": "Allow",
@@ -18,7 +18,7 @@
         "AWS": ["*"]
       },
       "Action": ["s3:GetObject"],
-      "Resource": ["arn:aws:s3:::homecare-audio/*"]
+      "Resource": ["arn:aws:s3:::palmcare-audio/*"]
     }
   ]
 }

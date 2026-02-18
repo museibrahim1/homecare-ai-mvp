@@ -16,7 +16,7 @@ const ThemeContext = createContext<ThemeContextType>({
   setTheme: () => {},
 });
 
-const STORAGE_KEY = 'homecare-theme';
+const STORAGE_KEY = 'palmcare-theme';
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';

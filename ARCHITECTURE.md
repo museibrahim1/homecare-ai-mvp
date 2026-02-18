@@ -1,4 +1,4 @@
-2# Homecare AI - Technical Architecture
+2# PalmCare AI - Technical Architecture
 
 ## System Overview
 

@@ -383,7 +383,7 @@ export default function VisitsPage() {
     }
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
 
   if (authLoading && !hasStoredToken) {
     return (
@@ -597,7 +597,7 @@ export default function VisitsPage() {
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-white mb-2">Try a Sample Assessment</h3>
                     <p className="text-dark-300 mb-4">
-                      See how Homecare AI transforms a care assessment conversation into a proposal-ready contract in seconds.
+                      See how PalmCare AI transforms a care assessment conversation into a proposal-ready contract in seconds.
                     </p>
                     <button 
                       onClick={createSampleAssessment}

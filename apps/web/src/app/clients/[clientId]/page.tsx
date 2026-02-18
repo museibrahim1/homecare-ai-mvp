@@ -484,7 +484,7 @@ export default function ClientDetailPage() {
   const currentStageIndex = PIPELINE_STAGES.findIndex(s => s.key === currentStageKey);
 
   /* ─── Loading / Error states ─── */
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
 
   if (authLoading && !hasStoredToken) {
     return (

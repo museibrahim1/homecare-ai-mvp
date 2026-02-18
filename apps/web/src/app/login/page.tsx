@@ -80,7 +80,7 @@ export default function LoginPage() {
             <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
               <Mic className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Homecare AI</h1>
+            <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
           </div>
           <p className="text-dark-300 text-lg mt-4">
             Turn care assessments into proposal-ready contracts
@@ -127,7 +127,7 @@ export default function LoginPage() {
 
         <div className="relative z-10">
           <p className="text-dark-400 text-sm">
-            © {new Date().getFullYear()} Homecare AI. All rights reserved.
+            © {new Date().getFullYear()} PalmCare AI. All rights reserved.
           </p>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function LoginPage() {
             <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
               <Mic className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Homecare AI</h1>
+            <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
           </div>
 
           <div className="text-center mb-8">
@@ -214,7 +214,7 @@ export default function LoginPage() {
 
           <div className="mt-8 text-center">
             <p className="text-dark-400 text-sm">
-              New to Homecare AI?{' '}
+              New to PalmCare AI?{' '}
               <Link href="/register" className="text-primary-400 hover:underline font-medium">
                 Register your agency
               </Link>

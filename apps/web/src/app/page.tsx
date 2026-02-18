@@ -59,7 +59,7 @@ const FEATURES = [
 
 const TESTIMONIALS = [
   {
-    quote: "HomeCare AI cut our contract generation time from hours to minutes. Game changer.",
+    quote: "PalmCare AI cut our contract generation time from hours to minutes. Game changer.",
     author: "Sarah M.",
     role: "Agency Owner, Texas",
     rating: 5,
@@ -198,7 +198,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">Product Demo</h3>
-              <p className="text-sm text-dark-400">See how HomeCare AI works</p>
+              <p className="text-sm text-dark-400">See how PalmCare AI works</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-700">
@@ -547,7 +547,7 @@ function BookDemoSection() {
             <span className="text-sm text-green-400">Live Product Demo</span>
           </div>
           <h2 className="text-4xl font-bold text-white mb-4">
-            See Homecare AI in Action
+            See PalmCare AI in Action
           </h2>
           <p className="text-xl text-dark-400 max-w-2xl mx-auto">
             Book a free 30-minute demo with our team. We'll show you how to turn assessments into contracts in minutes.
@@ -808,7 +808,7 @@ export default function LandingPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
                 <Mic className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">HomeCare AI</span>
+              <span className="text-xl font-bold text-white">PalmCare AI</span>
             </Link>
 
             {/* Desktop Nav */}
@@ -1159,7 +1159,7 @@ export default function LandingPage() {
                 <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
                   <Mic className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-xl font-bold text-white">HomeCare AI</span>
+                <span className="text-xl font-bold text-white">PalmCare AI</span>
               </Link>
               <p className="text-dark-400 text-sm">
                 AI-powered home care management platform. Turn assessments into contracts.
@@ -1192,7 +1192,7 @@ export default function LandingPage() {
           </div>
           <div className="pt-8 border-t border-dark-700 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-dark-400 text-sm">
-              © 2026 HomeCare AI. All rights reserved.
+              © 2026 PalmCare AI. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <Shield className="w-5 h-5 text-dark-400" />

@@ -41,7 +41,7 @@ const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7am - 8pm
 const DURATION_OPTIONS = ['30 min', '45 min', '1 hour', '1.5 hours', '2 hours'];
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const STORAGE_KEY = 'homecare-schedule';
+const STORAGE_KEY = 'palmcare-schedule';
 
 /* ─── Persistence ─── */
 function loadAppointments(): Appointment[] {

@@ -150,7 +150,7 @@ export default function NewVisitPage() {
     setStep(source === 'audio' ? 'audio' : 'transcript');
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
 
   if (authLoading && !hasStoredToken) {
     return (

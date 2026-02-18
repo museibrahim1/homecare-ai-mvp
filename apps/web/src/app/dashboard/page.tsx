@@ -99,7 +99,7 @@ const TASK_CATEGORIES = [
   { value: 'general', label: 'General', bg: 'bg-dark-600', text: 'text-dark-300' },
 ];
 
-const TASK_STORAGE_KEY = 'homecare-tasks';
+const TASK_STORAGE_KEY = 'palmcare-tasks';
 
 function loadTasks(): Task[] {
   if (typeof window === 'undefined') return [];
@@ -337,7 +337,7 @@ const ALL_WIDGETS: WidgetDef[] = [
 ];
 
 const DEFAULT_ORDER = ['stats', 'charts', 'proposals', 'activity', 'tasks'];
-const WIDGET_PREFS_KEY = 'homecare-dashboard-widgets';
+const WIDGET_PREFS_KEY = 'palmcare-dashboard-widgets';
 
 interface WidgetPrefs {
   order: string[];
@@ -707,7 +707,7 @@ export default function DashboardPage() {
     }
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
   
   if (authLoading && !hasStoredToken) {
     return (

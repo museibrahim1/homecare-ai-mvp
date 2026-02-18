@@ -5,4 +5,4 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- This file is for any PostgreSQL-specific initialization
 
 -- Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE homecare TO homecare;
+GRANT ALL PRIVILEGES ON DATABASE palmcare TO palmcare;

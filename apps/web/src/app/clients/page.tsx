@@ -759,7 +759,7 @@ export default function ClientsPage() {
   const intakeCount = clients.filter(c => c.status === 'intake' || c.status === 'pending').length;
   const highCareCount = clients.filter(c => c.care_level === 'HIGH').length;
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
 
   if (authLoading && !hasStoredToken) {
     return (

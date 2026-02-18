@@ -25,7 +25,7 @@ interface SpotlightStep {
 const STEPS: SpotlightStep[] = [
   {
     id: 'welcome',
-    title: 'Welcome to Homecare AI',
+    title: 'Welcome to PalmCare AI',
     description: 'Let\'s take a quick tour of your dashboard. We\'ll highlight the key areas you\'ll use every day. Takes about a minute.',
     tip: 'Use arrow keys or click Next to navigate. Press Escape to exit anytime.',
     icon: Sparkles,

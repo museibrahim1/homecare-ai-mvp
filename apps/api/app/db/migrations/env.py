@@ -25,7 +25,7 @@ from app.models import (
 config = context.config
 
 # Override sqlalchemy.url with environment variable
-database_url = os.getenv("DATABASE_URL", "postgresql+psycopg://homecare:homecare@localhost:5432/homecare")
+database_url = os.getenv("DATABASE_URL", "postgresql+psycopg://palmcare:palmcare@localhost:5432/palmcare")
 config.set_main_option("sqlalchemy.url", database_url)
 
 if config.config_file_name is not None:

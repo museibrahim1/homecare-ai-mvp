@@ -1,4 +1,4 @@
-"""Test fixtures for the Homecare AI pipeline."""
+"""Test fixtures for the PalmCare AI pipeline."""
 
 import json
 from pathlib import Path

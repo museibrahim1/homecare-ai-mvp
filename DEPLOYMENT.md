@@ -73,12 +73,12 @@ railway up
 Create `.do/app.yaml`:
 
 ```yaml
-name: homecare-ai
+name: palmcare-ai
 region: nyc
 services:
   - name: web
     github:
-      repo: your-username/homecare-ai-mvp
+      repo: your-username/palmcare-ai-mvp
       branch: main
       deploy_on_push: true
     source_dir: /apps/web
@@ -93,7 +93,7 @@ services:
 
   - name: api
     github:
-      repo: your-username/homecare-ai-mvp
+      repo: your-username/palmcare-ai-mvp
       branch: main
     source_dir: /apps/api
     dockerfile_path: Dockerfile
@@ -106,7 +106,7 @@ services:
 
   - name: worker
     github:
-      repo: your-username/homecare-ai-mvp
+      repo: your-username/palmcare-ai-mvp
       branch: main
     source_dir: /apps/worker
     dockerfile_path: Dockerfile
@@ -117,7 +117,7 @@ databases:
   - name: db
     engine: PG
     production: false
-    cluster_name: homecare-db
+    cluster_name: palmcare-db
 ```
 
 **Estimated cost**: $30-60/month
@@ -134,15 +134,15 @@ curl -L https://fly.io/install.sh | sh
 fly auth login
 
 # Launch each service
-cd apps/api && fly launch --name homecare-api
-cd apps/web && fly launch --name homecare-web
-cd apps/worker && fly launch --name homecare-worker
+cd apps/api && fly launch --name palmcare-api
+cd apps/web && fly launch --name palmcare-web
+cd apps/worker && fly launch --name palmcare-worker
 
 # Create PostgreSQL
-fly postgres create --name homecare-db
+fly postgres create --name palmcare-db
 
 # Create Redis
-fly redis create --name homecare-redis
+fly redis create --name palmcare-redis
 ```
 
 **Estimated cost**: $10-40/month
@@ -169,7 +169,7 @@ HF_TOKEN=hf_...
 S3_ENDPOINT_URL=https://your-s3-endpoint
 S3_ACCESS_KEY=...
 S3_SECRET_KEY=...
-S3_BUCKET=homecare-audio
+S3_BUCKET=palmcare-audio
 ```
 
 ### Performance

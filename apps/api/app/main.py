@@ -81,8 +81,8 @@ from app.routers import (
 )
 
 app = FastAPI(
-    title="Homecare AI API",
-    description="AI Voice Analyzer for In-Home Healthcare Agencies",
+    title="PalmCare AI API",
+    description="AI-Powered CRM for Home Healthcare Agencies",
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -345,7 +345,7 @@ async def seed_database():
 
 @app.get("/", tags=["Health"])
 async def root():
-    return {"status": "healthy", "service": "homecare-ai-api"}
+    return {"status": "healthy", "service": "palmcare-ai-api"}
 
 
 @app.get("/health", tags=["Health"])

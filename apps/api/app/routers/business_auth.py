@@ -537,7 +537,7 @@ async def request_password_reset(
         user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=24)
         db.commit()
         
-        app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+        app_url = os.getenv("APP_URL", "https://palmtai.com")
         reset_url = f"{app_url}/reset-password?token={token}"
         
         email_svc = get_email_service()
@@ -871,15 +871,16 @@ async def invite_team_member(
     email_sent = False
     try:
         email_service = get_email_service()
-        app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+        app_url = os.getenv("APP_URL", "https://palmtai.com")
         invite_result = email_service.send_email(
             to=email,
-            subject=f"You've been invited to join {current_user.company_name} on Homecare AI",
+            subject=f"You've been invited to join {current_user.company_name} on PalmCare AI",
+            sender=email_service.from_welcome,
             html=f"""
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #6366f1;">You've Been Invited!</h2>
                 <p>Hi {full_name},</p>
-                <p>{current_user.full_name} has invited you to join <strong>{current_user.company_name}</strong> on Homecare AI.</p>
+                <p>{current_user.full_name} has invited you to join <strong>{current_user.company_name}</strong> on PalmCare AI.</p>
                 
                 <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0;">
                     <p style="margin: 0 0 10px 0;"><strong>Your login credentials:</strong></p>

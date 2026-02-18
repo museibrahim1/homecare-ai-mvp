@@ -8,7 +8,7 @@ _config_logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "postgresql+psycopg://homecare:homecare@localhost:5432/homecare"
+    database_url: str = "postgresql+psycopg://palmcare:palmcare@localhost:5432/palmcare"
     
     # Redis
     redis_url: str = "redis://localhost:6379/0"
@@ -17,11 +17,11 @@ class Settings(BaseSettings):
     s3_endpoint_url: str = "http://localhost:9000"
     s3_access_key: str = ""  # Set S3_ACCESS_KEY env var
     s3_secret_key: str = ""  # Set S3_SECRET_KEY env var
-    s3_bucket: str = "homecare-audio"
+    s3_bucket: str = "palmcare-audio"
     
     # JWT - HIPAA: Shorter token lifetime for security
     jwt_secret: str = ""  # REQUIRED: set JWT_SECRET env var
-    jwt_issuer: str = "homecare-ai"
+    jwt_issuer: str = "palmcare-ai"
     jwt_algorithm: str = "HS256"
     jwt_expiration_hours: int = 1  # HIPAA: 1 hour token lifetime (was 24)
     

@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
             <Mic className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Homecare AI</h1>
+          <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
         </div>
 
         {success ? (

@@ -1,4 +1,4 @@
-# Homecare AI (AI Voice Contractor)
+# PalmCare AI (AI Voice Contractor)
 
 An AI-powered care assessment engine for in-home healthcare agencies that turns intake/visit conversations (audio or transcripts) into **proposal-ready service contracts**—so agencies can send accurate contracts and pricing faster.
 

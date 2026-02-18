@@ -608,15 +608,16 @@ async def create_platform_user(
     db.commit()
     db.refresh(new_user)
     
-    app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+    app_url = os.getenv("APP_URL", "https://palmtai.com")
     invite_result = email_service.send_email(
         to=user_data.email,
-        subject="You've been added as a Platform Admin - Homecare AI",
+        subject="You've been added as a Platform Admin - PalmCare AI",
+        sender=email_service.from_welcome,
         html=f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #6366f1;">Welcome to Homecare AI Admin</h2>
+            <h2 style="color: #6366f1;">Welcome to PalmCare AI Admin</h2>
             <p>Hi {user_data.full_name},</p>
-            <p>You've been granted platform administrator access to Homecare AI.</p>
+            <p>You've been granted platform administrator access to PalmCare AI.</p>
             <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0;">
                 <p style="margin: 0 0 10px 0;"><strong>Your login credentials:</strong></p>
                 <p style="margin: 0 0 5px 0;">Email: {user_data.email}</p>
@@ -836,7 +837,8 @@ async def respond_to_ticket(
     if submitter:
         email_service.send_email(
             to=submitter.email,
-            subject=f"Update on your support ticket - Homecare AI",
+            subject=f"Update on your support ticket - PalmCare AI",
+            sender=email_service.from_support,
             html=f"""
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #6366f1;">Support Ticket Update</h2>
@@ -846,7 +848,7 @@ async def respond_to_ticket(
                     <p style="margin: 0; white-space: pre-wrap;">{response_data.message}</p>
                 </div>
                 <p style="color: #6b7280; font-size: 14px;">If you need further assistance, please reply to this ticket in the app.</p>
-                <p>Best regards,<br>The Homecare AI Support Team</p>
+                <p>Best regards,<br>The PalmCare AI Support Team</p>
             </div>
             """,
         )
@@ -982,7 +984,7 @@ async def get_system_health(
             aws_access_key_id=os.getenv("S3_ACCESS_KEY") or os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("S3_SECRET_KEY") or os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
-        bucket_name = os.getenv("S3_BUCKET", "homecare-audio")
+        bucket_name = os.getenv("S3_BUCKET", "palmcare-audio")
         s3.head_bucket(Bucket=bucket_name)
         storage_status = "healthy"
     except Exception as e:
@@ -1068,7 +1070,7 @@ async def get_system_metrics(
             aws_access_key_id=os.getenv("S3_ACCESS_KEY") or os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("S3_SECRET_KEY") or os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
-        bucket_name = os.getenv("S3_BUCKET", "homecare-audio")
+        bucket_name = os.getenv("S3_BUCKET", "palmcare-audio")
         
         total_size = 0
         paginator = s3.get_paginator('list_objects_v2')
@@ -1151,14 +1153,15 @@ async def send_announcement(
             # Send email
             result = email_service.send_email(
                 to=owner.email,
-                subject=f"[Homecare AI] {subject}",
+                subject=f"[PalmCare AI] {subject}",
+                sender=email_service.from_onboarding,
                 html=f"""
                 <div style="font-family: Arial, sans-serif;">
                     <h2>{subject}</h2>
                     <p>{message}</p>
                     <hr>
                     <p style="color: #666; font-size: 12px;">
-                        This is an announcement from Homecare AI platform.
+                        This is an announcement from PalmCare AI.
                     </p>
                 </div>
                 """,

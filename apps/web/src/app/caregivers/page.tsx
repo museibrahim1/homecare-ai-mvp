@@ -135,7 +135,7 @@ export default function CaregiversPage() {
     setPage(0);
   }, [searchQuery]);
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('homecare-auth');
+  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
 
   if (authLoading && !hasStoredToken) {
     return (

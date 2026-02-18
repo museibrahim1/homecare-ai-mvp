@@ -47,7 +47,7 @@ export default function LeadsPage() {
 
   // Get user-specific storage key
   const getStorageKey = useCallback(() => {
-    return user?.id ? `homecare_leads_${user.id}` : null;
+    return user?.id ? `palmcare_leads_${user.id}` : null;
   }, [user?.id]);
 
   // Load leads from localStorage (user-specific)

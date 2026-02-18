@@ -4,7 +4,7 @@ from app.core.config import settings
 
 # Create Celery app
 celery_app = Celery(
-    "homecare_worker",
+    "palmcare_worker",
     broker=settings.redis_url,
     backend=settings.redis_url,
 )

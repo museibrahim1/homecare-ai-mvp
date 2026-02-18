@@ -122,7 +122,7 @@ export default function PricingPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
               <Mic className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">Homecare AI</span>
+            <span className="text-xl font-bold text-white">PalmCare AI</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-dark-300 hover:text-white transition">
@@ -416,7 +416,7 @@ export default function PricingPage() {
             Questions & Answers
           </h2>
           <p className="text-dark-400 text-center mb-12">
-            Everything you need to know about Homecare AI
+            Everything you need to know about PalmCare AI
           </p>
 
           <div className="space-y-4">
@@ -476,7 +476,7 @@ export default function PricingPage() {
             Ready to transform your agency?
           </h2>
           <p className="text-dark-400 mb-8">
-            Join hundreds of home healthcare agencies using Homecare AI to streamline their operations.
+            Join hundreds of home healthcare agencies using PalmCare AI to streamline their operations.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
@@ -505,7 +505,7 @@ export default function PricingPage() {
             <span>256-bit Encryption</span>
           </div>
           <p className="text-dark-500 text-sm">
-            © 2026 Homecare AI. All rights reserved.
+            © 2026 PalmCare AI. All rights reserved.
           </p>
         </div>
       </footer>

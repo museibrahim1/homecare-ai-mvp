@@ -199,7 +199,7 @@ def _get_s3_public_url(audio_path: str) -> Optional[str]:
         s3_endpoint = os.getenv("S3_ENDPOINT_URL", "http://localhost:9000")
         s3_access_key = os.getenv("S3_ACCESS_KEY", "minio")
         s3_secret_key = os.getenv("S3_SECRET_KEY", "minio12345")
-        s3_bucket = os.getenv("S3_BUCKET", "homecare-audio")
+        s3_bucket = os.getenv("S3_BUCKET", "palmcare-audio")
         
         # Extract the S3 key from the path
         # audio_path might be like "/tmp/audio.wav" or "visits/123/audio.wav"

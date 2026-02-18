@@ -138,7 +138,7 @@ export default function RegisterPage() {
           <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-green-400" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Welcome to HomeCare AI!</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Welcome to PalmCare AI!</h1>
           <p className="text-dark-300 mb-6">Your account has been created. Redirecting to login...</p>
           <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
@@ -158,7 +158,7 @@ export default function RegisterPage() {
             <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
               <Building2 className="w-7 h-7 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white">HomeCare AI</span>
+            <span className="text-2xl font-bold text-white">PalmCare AI</span>
           </div>
           
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -200,7 +200,7 @@ export default function RegisterPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
               <Building2 className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">HomeCare AI</span>
+            <span className="text-xl font-bold text-white">PalmCare AI</span>
           </div>
 
           <div className="text-center mb-8">

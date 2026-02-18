@@ -6,7 +6,7 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "postgresql+psycopg://homecare:homecare@localhost:5432/homecare"
+    database_url: str = "postgresql+psycopg://palmcare:palmcare@localhost:5432/palmcare"
     
     # Redis
     redis_url: str = "redis://localhost:6379/0"
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     s3_endpoint_url: str = "http://localhost:9000"
     s3_access_key: str = "minio"
     s3_secret_key: str = "minio12345"
-    s3_bucket: str = "homecare-audio"
+    s3_bucket: str = "palmcare-audio"
     
     # ASR Configuration
     # Options: tiny, base, small, medium, large-v2, large-v3

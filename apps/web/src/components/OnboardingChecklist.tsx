@@ -162,7 +162,7 @@ export default function OnboardingChecklist() {
             </h3>
             <p className="text-dark-400 text-sm">
               {allComplete 
-                ? 'You\'re all set to use Homecare AI' 
+                ? 'You\'re all set to use PalmCare AI' 
                 : `${completedCount} of ${CHECKLIST_ITEMS.length} tasks completed`
               }
             </p>

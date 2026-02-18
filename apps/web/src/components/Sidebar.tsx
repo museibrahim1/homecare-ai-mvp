@@ -230,7 +230,7 @@ export default function Sidebar() {
   const handleLogout = useCallback(async () => {
     // Call backend to clear Google tokens so user must reconnect next login
     try {
-      const authData = localStorage.getItem('homecare-auth');
+      const authData = localStorage.getItem('palmcare-auth');
       if (authData) {
         const parsed = JSON.parse(authData);
         const token = parsed?.state?.token;
@@ -291,7 +291,7 @@ export default function Sidebar() {
               <Mic className="w-6 h-6 text-white" />
             </div>
             <div className="min-w-0">
-              <span className="text-xl font-bold text-white block">Homecare AI</span>
+              <span className="text-xl font-bold text-white block">PalmCare AI</span>
               <span className="text-xs text-dark-400">Contracts & proposals</span>
             </div>
           </Link>

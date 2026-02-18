@@ -165,7 +165,7 @@ export default function HelpPage() {
               <div className="flex-1 min-w-0">
                 <h2 className="text-lg font-bold text-white mb-1">Interactive App Tour</h2>
                 <p className="text-dark-300 text-sm leading-relaxed">
-                  New to Homecare AI? Take a guided walkthrough of all the key features — from client management and voice assessments to scheduling and care tracking. Takes about 2 minutes.
+                  New to PalmCare AI? Take a guided walkthrough of all the key features — from client management and voice assessments to scheduling and care tracking. Takes about 2 minutes.
                 </p>
               </div>
               <button

@@ -233,7 +233,7 @@ export default function TopBar() {
   const handleLogout = async () => {
     setShowUserMenu(false);
     try {
-      const authData = localStorage.getItem('homecare-auth');
+      const authData = localStorage.getItem('palmcare-auth');
       if (authData) {
         const parsed = JSON.parse(authData);
         const token = parsed?.state?.token;
@@ -257,7 +257,7 @@ export default function TopBar() {
     .toUpperCase()
     .slice(0, 2);
 
-  const agencyName = user?.agency_name || user?.business_name || 'Homecare AI';
+  const agencyName = user?.agency_name || user?.business_name || 'PalmCare AI';
 
   return (
     <div className="sticky top-0 z-20 bg-dark-900/95 backdrop-blur-sm border-b border-dark-700/50">

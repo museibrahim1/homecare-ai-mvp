@@ -33,8 +33,8 @@ interface NotificationContextValue {
 const NotificationContext = createContext<NotificationContextValue | null>(null);
 
 /* ─── Storage ─── */
-const NOTIF_STORAGE_KEY = 'homecare-notifications';
-const NOTIF_DISMISSED_KEY = 'homecare-notif-dismissed';
+const NOTIF_STORAGE_KEY = 'palmcare-notifications';
+const NOTIF_DISMISSED_KEY = 'palmcare-notif-dismissed';
 const SCAN_INTERVAL_MS = 30_000; // scan every 30s
 
 function loadDismissed(): Set<string> {
@@ -68,10 +68,10 @@ function saveReadSet(readIds: Set<string>) {
 
 /* ─── Scanning Functions ─── */
 
-/** Scan schedule (localStorage: homecare-schedule) for upcoming appointments */
+/** Scan schedule (localStorage: palmcare-schedule) for upcoming appointments */
 function scanSchedule(now: Date, dismissed: Set<string>): AppNotification[] {
   try {
-    const raw = localStorage.getItem('homecare-schedule');
+    const raw = localStorage.getItem('palmcare-schedule');
     if (!raw) return [];
     const appointments: any[] = JSON.parse(raw);
     const notifications: AppNotification[] = [];
@@ -170,10 +170,10 @@ function scanSchedule(now: Date, dismissed: Set<string>): AppNotification[] {
   } catch { return []; }
 }
 
-/** Scan tasks (localStorage: homecare-tasks) for overdue and due-today items */
+/** Scan tasks (localStorage: palmcare-tasks) for overdue and due-today items */
 function scanTasks(now: Date, dismissed: Set<string>): AppNotification[] {
   try {
-    const raw = localStorage.getItem('homecare-tasks');
+    const raw = localStorage.getItem('palmcare-tasks');
     if (!raw) return [];
     const tasks: any[] = JSON.parse(raw);
     const notifications: AppNotification[] = [];
@@ -260,14 +260,14 @@ function scanTasks(now: Date, dismissed: Set<string>): AppNotification[] {
   } catch { return []; }
 }
 
-/** Scan messages (localStorage: homecare_messages_*) for unread conversations */
+/** Scan messages (localStorage: palmcare_messages_*) for unread conversations */
 function scanMessages(dismissed: Set<string>): AppNotification[] {
   try {
     const notifications: AppNotification[] = [];
     // Scan all localStorage keys matching message patterns
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (!key || !key.startsWith('homecare_messages_')) continue;
+      if (!key || !key.startsWith('palmcare_messages_')) continue;
       try {
         const data = JSON.parse(localStorage.getItem(key) || '{}');
         const conversations = data.conversations || [];
@@ -303,13 +303,13 @@ function scanMessages(dismissed: Set<string>): AppNotification[] {
   } catch { return []; }
 }
 
-/** Scan team chat (localStorage: homecare_teamchat_*) for unread channels */
+/** Scan team chat (localStorage: palmcare_teamchat_*) for unread channels */
 function scanTeamChat(dismissed: Set<string>): AppNotification[] {
   try {
     const notifications: AppNotification[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (!key || !key.startsWith('homecare_teamchat_')) continue;
+      if (!key || !key.startsWith('palmcare_teamchat_')) continue;
       try {
         const data = JSON.parse(localStorage.getItem(key) || '{}');
         const channels = data.channels || [];
@@ -345,13 +345,13 @@ function scanTeamChat(dismissed: Set<string>): AppNotification[] {
   } catch { return []; }
 }
 
-/** Scan emails (localStorage: homecare_teamchat_* which includes gmail) for unread emails */
+/** Scan emails (localStorage: palmcare_teamchat_* which includes gmail) for unread emails */
 function scanEmails(dismissed: Set<string>): AppNotification[] {
   try {
     const notifications: AppNotification[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (!key || !key.startsWith('homecare_teamchat_')) continue;
+      if (!key || !key.startsWith('palmcare_teamchat_')) continue;
       try {
         const data = JSON.parse(localStorage.getItem(key) || '{}');
         const emails = data.emails || [];
@@ -466,10 +466,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
       if (
-        e.key === 'homecare-schedule' ||
-        e.key === 'homecare-tasks' ||
-        e.key?.startsWith('homecare_messages_') ||
-        e.key?.startsWith('homecare_teamchat_')
+        e.key === 'palmcare-schedule' ||
+        e.key === 'palmcare-tasks' ||
+        e.key?.startsWith('palmcare_messages_') ||
+        e.key?.startsWith('palmcare_teamchat_')
       ) {
         scan();
       }

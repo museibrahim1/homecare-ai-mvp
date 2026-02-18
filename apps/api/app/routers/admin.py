@@ -282,7 +282,7 @@ async def approve_business(
         
         # Send approval email
         if owner:
-            login_url = os.getenv("APP_URL", "https://app.palmtai.com") + "/login"
+            login_url = os.getenv("APP_URL", "https://palmtai.com") + "/login"
             email_service.send_business_approved(
                 business_email=owner.email,
                 business_name=business.name,
@@ -342,17 +342,18 @@ async def suspend_business(
     if owner:
         email_service.send_email(
             to=owner.email,
-            subject="Account Suspended - Homecare AI",
+            subject="Account Suspended - PalmCare AI",
+            sender=email_service.from_support,
             html=f"""
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #ef4444;">Account Suspended</h2>
                 <p>Hello {business.name},</p>
-                <p>Your Homecare AI account has been suspended.</p>
+                <p>Your PalmCare AI account has been suspended.</p>
                 <div style="background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 16px; margin: 20px 0;">
                     <p style="margin: 0; color: #991b1b;"><strong>Reason:</strong> {reason}</p>
                 </div>
                 <p>If you believe this is an error, please contact our support team to resolve this.</p>
-                <p>Best regards,<br>The Homecare AI Team</p>
+                <p>Best regards,<br>The PalmCare AI Team</p>
             </div>
             """,
         )

@@ -9,7 +9,7 @@ import WalkthroughGuide from '@/components/WalkthroughGuide';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Homecare AI',
+  title: 'PalmCare AI',
   description: 'Turn care assessments into proposal-ready service contracts',
 };
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 const themeInitScript = `
 (function() {
   try {
-    var theme = localStorage.getItem('homecare-theme');
+    var theme = localStorage.getItem('palmcare-theme');
     if (theme === 'light' || theme === 'dark') {
       document.documentElement.setAttribute('data-theme', theme);
     }

@@ -35,7 +35,7 @@ export default function MessagesPage() {
 
   // Get user-specific storage key
   const getStorageKey = useCallback(() => {
-    return user?.id ? `homecare_messages_${user.id}` : null;
+    return user?.id ? `palmcare_messages_${user.id}` : null;
   }, [user?.id]);
 
   // Load conversations from localStorage (user-specific)

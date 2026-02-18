@@ -156,7 +156,7 @@ export default function WelcomePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">
-                  Welcome to Homecare AI
+                  Welcome to PalmCare AI
                 </h1>
                 <p className="text-dark-400">
                   {agencyName || 'Let\'s get your agency set up'}
