@@ -5,6 +5,7 @@ Administrative endpoints for business approval and management.
 """
 
 import logging
+import os
 from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
@@ -281,7 +282,7 @@ async def approve_business(
         
         # Send approval email
         if owner:
-            login_url = "https://web-production-11611.up.railway.app/login"
+            login_url = os.getenv("APP_URL", "https://app.palmtai.com") + "/login"
             email_service.send_business_approved(
                 business_email=owner.email,
                 business_name=business.name,

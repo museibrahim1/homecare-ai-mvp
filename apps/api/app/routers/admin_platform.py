@@ -1080,7 +1080,7 @@ async def send_announcement(
         
         if owner:
             # Send email
-            email_service.send_email(
+            result = email_service.send_email(
                 to=owner.email,
                 subject=f"[Homecare AI] {subject}",
                 html=f"""
@@ -1094,6 +1094,7 @@ async def send_announcement(
                 </div>
                 """,
             )
-            sent_count += 1
+            if result.get("success"):
+                sent_count += 1
     
     return {"message": f"Announcement sent to {sent_count} businesses"}

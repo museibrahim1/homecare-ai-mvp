@@ -2,6 +2,11 @@
 Email Service using Resend
 
 Handles all transactional emails for the platform.
+
+IMPORTANT: You MUST set the EMAIL_FROM env var to a verified domain sender
+(e.g. "Homecare AI <welcome@palmtai.com>") for emails to reach real customers.
+The default "onboarding@resend.dev" is Resend's TEST domain and can ONLY
+deliver to the Resend account owner's email address.
 """
 
 import os
@@ -24,18 +29,26 @@ class EmailService:
     
     def __init__(self):
         self.api_key = os.getenv("RESEND_API_KEY")
-        # Use Resend's default sender if custom domain not verified
-        # To use custom domain: verify it at https://resend.com/domains
-        custom_from = os.getenv("EMAIL_FROM")
-        # Use Resend's test domain until palmtai.com is verified
-        # Change to "Homecare AI <welcome@palmtai.com>" once domain is verified
-        self.from_email = custom_from if custom_from else "Homecare AI <onboarding@resend.dev>"
         self.support_email = os.getenv("SUPPORT_EMAIL", "support@palmtai.com")
         self.app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+        
+        # EMAIL_FROM must be set to a verified domain for production use.
+        # "onboarding@resend.dev" only delivers to the Resend account owner.
+        custom_from = os.getenv("EMAIL_FROM")
+        if custom_from:
+            self.from_email = custom_from
+        else:
+            self.from_email = "Homecare AI <onboarding@resend.dev>"
+            logger.warning(
+                "EMAIL_FROM not set — using Resend test domain (onboarding@resend.dev). "
+                "Emails will ONLY be delivered to the Resend account owner. "
+                "Set EMAIL_FROM to a verified domain sender for production."
+            )
         
         if self.api_key and RESEND_AVAILABLE:
             resend.api_key = self.api_key
             self.enabled = True
+            logger.info(f"Email service enabled (from={self.from_email})")
         else:
             self.enabled = False
             if not self.api_key:
@@ -49,7 +62,7 @@ class EmailService:
         text: Optional[str] = None,
         reply_to: Optional[str] = None,
         attachments: Optional[List[dict]] = None,
-    ) -> bool:
+    ) -> dict:
         """
         Send an email via Resend.
         
@@ -62,16 +75,19 @@ class EmailService:
             attachments: List of attachments, each with 'filename' and 'content' (base64 or bytes)
         
         Returns:
-            True if sent successfully, False otherwise
+            dict with 'success' (bool), 'id' (str or None), and 'error' (str or None)
         """
+        recipients = [to] if isinstance(to, str) else to
+        
         if not self.enabled:
-            logger.warning(f"Email disabled. Would have sent to {to}: {subject}")
-            return False
+            msg = f"Email disabled. Would have sent to {recipients}: {subject}"
+            logger.warning(msg)
+            return {"success": False, "id": None, "error": "email_disabled"}
         
         try:
-            params = {
+            params: dict = {
                 "from": self.from_email,
-                "to": [to] if isinstance(to, str) else to,
+                "to": recipients,
                 "subject": subject,
                 "html": html,
             }
@@ -84,32 +100,27 @@ class EmailService:
                 params["attachments"] = attachments
             
             response = resend.Emails.send(params)
-            logger.info(f"Email sent to {to}: {subject} (id={response.get('id', 'unknown') if isinstance(response, dict) else response})")
-            return True
             
-        except resend.exceptions.ResendError as e:
-            logger.error(
-                f"Resend API error sending email to {to} (subject={subject}): {e}",
-                exc_info=True,
+            # v2 SDK returns an object with .id; older dicts have 'id' key
+            email_id = None
+            if isinstance(response, dict):
+                email_id = response.get("id")
+            elif hasattr(response, "id"):
+                email_id = response.id
+            
+            logger.info(
+                f"Email sent to {recipients}: {subject} (id={email_id or 'unknown'})"
             )
-            return False
-        except ConnectionError as e:
-            logger.error(
-                f"Network error sending email to {to} (subject={subject}): {e}",
-                exc_info=True,
-            )
-            return False
-        except TimeoutError as e:
-            logger.error(
-                f"Timeout sending email to {to} (subject={subject}): {e}",
-                exc_info=True,
-            )
-            return False
+            return {"success": True, "id": email_id, "error": None}
+            
         except Exception as e:
-            logger.exception(
-                f"Unexpected error sending email to {to} (subject={subject}): {e}"
+            error_str = str(e)
+            logger.error(
+                f"Failed to send email to {recipients} "
+                f"(subject={subject}, from={self.from_email}): {error_str}",
+                exc_info=True,
             )
-            return False
+            return {"success": False, "id": None, "error": error_str}
     
     # ==================== Password Reset ====================
     
@@ -568,10 +579,22 @@ class EmailService:
         return self.send_email(user_email, subject, html)
 
 
-# Singleton instance
-email_service = EmailService()
+# Singleton instance (lazy-loaded to avoid issues during module import)
+_email_service = None
 
 
 def get_email_service() -> EmailService:
     """Get the email service singleton."""
-    return email_service
+    global _email_service
+    if _email_service is None:
+        _email_service = EmailService()
+    return _email_service
+
+
+# Backward-compat alias used by some routers that import `email_service` directly
+class _LazyEmailProxy:
+    """Proxy that forwards calls to the lazily-initialized singleton."""
+    def __getattr__(self, name):
+        return getattr(get_email_service(), name)
+
+email_service = _LazyEmailProxy()

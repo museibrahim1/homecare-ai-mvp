@@ -2,6 +2,10 @@
 Email Service for Worker
 
 Lightweight email service for sending notifications from Celery tasks.
+
+IMPORTANT: You MUST set the EMAIL_FROM env var to a verified domain sender
+for emails to reach real customers. The default "onboarding@resend.dev"
+can ONLY deliver to the Resend account owner's email.
 """
 
 import os
@@ -23,41 +27,71 @@ class EmailService:
     
     def __init__(self):
         self.api_key = os.getenv("RESEND_API_KEY")
+        self.app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+        
         custom_from = os.getenv("EMAIL_FROM")
-        self.from_email = custom_from if custom_from else "Homecare AI <onboarding@resend.dev>"
+        if custom_from:
+            self.from_email = custom_from
+        else:
+            self.from_email = "Homecare AI <onboarding@resend.dev>"
+            logger.warning(
+                "EMAIL_FROM not set — using Resend test domain (onboarding@resend.dev). "
+                "Emails will ONLY be delivered to the Resend account owner."
+            )
         
         if self.api_key and RESEND_AVAILABLE:
             resend.api_key = self.api_key
             self.enabled = True
+            logger.info(f"Worker email service enabled (from={self.from_email})")
         else:
             self.enabled = False
+            if not self.api_key:
+                logger.warning("RESEND_API_KEY not set. Worker email disabled.")
     
     def send_email(
         self,
         to: str | List[str],
         subject: str,
         html: str,
-    ) -> bool:
-        """Send an email via Resend."""
+    ) -> dict:
+        """Send an email via Resend.
+        
+        Returns:
+            dict with 'success' (bool), 'id' (str or None), and 'error' (str or None)
+        """
+        recipients = [to] if isinstance(to, str) else to
+        
         if not self.enabled:
-            logger.warning(f"Email disabled. Would have sent to {to}: {subject}")
-            return False
+            logger.warning(f"Email disabled. Would have sent to {recipients}: {subject}")
+            return {"success": False, "id": None, "error": "email_disabled"}
         
         try:
             params = {
                 "from": self.from_email,
-                "to": [to] if isinstance(to, str) else to,
+                "to": recipients,
                 "subject": subject,
                 "html": html,
             }
             
             response = resend.Emails.send(params)
-            logger.info(f"Email sent to {to}: {subject}")
-            return True
+            
+            email_id = None
+            if isinstance(response, dict):
+                email_id = response.get("id")
+            elif hasattr(response, "id"):
+                email_id = response.id
+            
+            logger.info(f"Email sent to {recipients}: {subject} (id={email_id or 'unknown'})")
+            return {"success": True, "id": email_id, "error": None}
             
         except Exception as e:
-            logger.error(f"Failed to send email to {to}: {e}")
-            return False
+            error_str = str(e)
+            logger.error(
+                f"Failed to send email to {recipients} "
+                f"(subject={subject}, from={self.from_email}): {error_str}",
+                exc_info=True,
+            )
+            return {"success": False, "id": None, "error": error_str}
     
     def send_contract_ready(
         self,
@@ -88,7 +122,7 @@ class EmailService:
             </p>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://app.palmtai.com/visits/{visit_id}" 
+                <a href="{self.app_url}/visits/{visit_id}" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     Review & Send Contract
                 </a>
@@ -132,7 +166,7 @@ class EmailService:
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://app.palmtai.com/visits/{visit_id}" 
+                <a href="{self.app_url}/visits/{visit_id}" 
                    style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                     Review Results
                 </a>

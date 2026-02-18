@@ -480,7 +480,7 @@ async def email_contract(
     if email_request.cc_email:
         recipients.append(email_request.cc_email)
     
-    success = email_service.send_email(
+    result = email_service.send_email(
         to=recipients,
         subject=subject,
         html=html,
@@ -488,10 +488,10 @@ async def email_contract(
         reply_to=current_user.email,
     )
     
-    if not success:
+    if not result.get("success"):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send email. Please check your email configuration."
+            detail=f"Failed to send email. {result.get('error', 'Please check your email configuration.')}"
         )
     
     # Auto-move client to "proposal" status when contract/proposal is emailed
@@ -572,7 +572,7 @@ async def email_note(
     if email_request.cc_email:
         recipients.append(email_request.cc_email)
     
-    success = email_service.send_email(
+    result = email_service.send_email(
         to=recipients,
         subject=subject,
         html=html,
@@ -580,10 +580,10 @@ async def email_note(
         reply_to=current_user.email,
     )
     
-    if not success:
+    if not result.get("success"):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send email. Please check your email configuration."
+            detail=f"Failed to send email. {result.get('error', 'Please check your email configuration.')}"
         )
     
     return {

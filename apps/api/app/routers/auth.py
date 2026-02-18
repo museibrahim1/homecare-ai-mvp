@@ -243,12 +243,15 @@ async def forgot_password(
         
         # Send reset email
         try:
-            email_service.send_password_reset(
+            reset_result = email_service.send_password_reset(
                 user_email=user.email,
                 user_name=user.full_name,
                 reset_url=reset_url,
             )
-            logger.info(f"Password reset email sent to {email}")
+            if reset_result.get("success"):
+                logger.info(f"Password reset email sent to {email}")
+            else:
+                logger.error(f"Password reset email FAILED for {email}: {reset_result.get('error')}")
         except Exception as e:
             logger.error(f"Failed to send password reset email to {email}: {e}")
     else:

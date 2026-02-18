@@ -217,19 +217,34 @@ async def register_business(
     
     # Send registration confirmation email to the new user
     email_service = get_email_service()
-    email_service.send_business_registration_received(
+    welcome_result = email_service.send_business_registration_received(
         business_email=registration.owner_email,
         business_name=registration.name,
     )
+    if not welcome_result.get("success"):
+        logger.error(
+            f"Failed to send welcome email to {registration.owner_email} "
+            f"for business {registration.name}: {welcome_result.get('error')}"
+        )
     
     # Notify platform admin of new registration
     admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "admin@palmtai.com")
-    email_service.send_admin_new_registration(
+    admin_result = email_service.send_admin_new_registration(
         admin_email=admin_email,
         business_name=registration.name,
         business_id=str(business.id),
     )
-    logger.info(f"New business registered: {registration.name} - Admin notified at {admin_email}")
+    if not admin_result.get("success"):
+        logger.error(
+            f"Failed to send admin notification to {admin_email} "
+            f"for new registration {registration.name}: {admin_result.get('error')}"
+        )
+    
+    logger.info(
+        f"New business registered: {registration.name} "
+        f"(welcome_email={'sent' if welcome_result.get('success') else 'FAILED'}, "
+        f"admin_notif={'sent' if admin_result.get('success') else 'FAILED'})"
+    )
     
     return BusinessRegistrationResponse(
         business_id=business.id,
@@ -758,9 +773,11 @@ async def invite_team_member(
         raise HTTPException(status_code=500, detail="Failed to create team member. Please try again.")
     
     # Send invitation email
+    email_sent = False
     try:
         email_service = get_email_service()
-        email_service.send_email(
+        app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+        invite_result = email_service.send_email(
             to=email,
             subject=f"You've been invited to join {current_user.company_name} on Homecare AI",
             html=f"""
@@ -778,7 +795,7 @@ async def invite_team_member(
                 <p style="color: #dc2626; font-size: 14px;">Please change your password after your first login.</p>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <a href="https://app.palmtai.com/login" 
+                    <a href="{app_url}/login" 
                        style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
                         Login Now
                     </a>
@@ -786,6 +803,9 @@ async def invite_team_member(
             </div>
             """
         )
+        email_sent = invite_result.get("success", False)
+        if not email_sent:
+            logger.warning(f"Invitation email failed for {email}: {invite_result.get('error')}")
     except Exception as e:
         logger.warning(f"Failed to send invitation email: {e}")
     
@@ -794,7 +814,7 @@ async def invite_team_member(
         "email": new_user.email,
         "full_name": new_user.full_name,
         "role": new_user.role,
-        "message": f"Invitation sent to {email}",
+        "message": f"Invitation sent to {email}" if email_sent else f"Team member created but invitation email to {email} could not be sent. Please share credentials manually.",
     }
 
 
