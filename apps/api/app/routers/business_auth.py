@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from jose import jwt
 
-from app.core.deps import get_db
+from app.core.deps import get_db, get_current_user as get_current_api_user
 from app.core.config import settings
 from app.models.business import (
     Business, BusinessDocument, BusinessUser,
@@ -199,19 +199,26 @@ async def register_business(
         registration_number=registration.registration_number,
     )
     
-    # Auto-approve for MVP - skip verification workflow
-    # TODO: Re-enable verification for production
-    business.verification_status = 'approved'
-    business.approved_at = datetime.now(timezone.utc)
-    
     if sos_result.get("found"):
         business.sos_verification_data = sos_result
         business.sos_verified_at = datetime.now(timezone.utc)
     
-    next_steps = [
-        "Your account is ready! You can now log in.",
-        "Go to the login page and use your email and password.",
-    ]
+    auto_approve = os.getenv("AUTO_APPROVE_BUSINESSES", "true").lower() == "true"
+    
+    if auto_approve:
+        business.verification_status = 'approved'
+        business.approved_at = datetime.now(timezone.utc)
+        next_steps = [
+            "Your account is ready! You can now log in.",
+            "Go to the login page and use your email and password.",
+        ]
+    else:
+        business.verification_status = 'pending'
+        next_steps = [
+            "Your registration is under review.",
+            "We'll notify you by email once your account is approved.",
+            "This typically takes 1-2 business days.",
+        ]
     
     db.commit()
     
@@ -530,8 +537,19 @@ async def request_password_reset(
         user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=24)
         db.commit()
         
-        # TODO: Send email with reset link
-        logger.info(f"Password reset requested for {request.email}")
+        app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+        reset_url = f"{app_url}/reset-password?token={token}"
+        
+        email_svc = get_email_service()
+        result = email_svc.send_password_reset(
+            user_email=user.email,
+            user_name=user.full_name,
+            reset_url=reset_url,
+        )
+        if result.get("success"):
+            logger.info(f"Password reset email sent to {request.email}")
+        else:
+            logger.error(f"Password reset email FAILED for {request.email}: {result.get('error')}")
     
     # Always return success to prevent email enumeration
     return {"message": "If an account exists, a password reset email has been sent."}
@@ -565,28 +583,105 @@ async def confirm_password_reset(
 
 @router.get("/profile", response_model=BusinessProfile)
 async def get_business_profile(
-    token: str = Depends(lambda: None),  # Will be replaced with proper auth
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
 ):
     """Get current business profile."""
-    # For now, this is a placeholder - need proper token extraction
-    raise HTTPException(status_code=501, detail="Use login endpoint")
+    business = db.query(Business).filter(
+        Business.email == current_user.email
+    ).first()
+    if not business:
+        business = db.query(Business).filter(
+            Business.name == current_user.company_name
+        ).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business profile not found")
+    
+    ein_last4 = None
+    if business.ein:
+        ein_last4 = business.ein[-4:] if len(business.ein) >= 4 else business.ein
+    
+    return BusinessProfile(
+        id=business.id,
+        name=business.name,
+        dba_name=business.dba_name,
+        entity_type=EntityTypeEnum(business.entity_type.value if hasattr(business.entity_type, 'value') else business.entity_type),
+        state_of_incorporation=business.state_of_incorporation or "",
+        registration_number=business.registration_number,
+        ein_last_4=ein_last4,
+        address=business.address,
+        city=business.city,
+        state=business.state,
+        zip_code=business.zip_code,
+        phone=business.phone,
+        email=business.email,
+        website=business.website,
+        verification_status=VerificationStatusEnum(business.verification_status.value if hasattr(business.verification_status, 'value') else business.verification_status),
+        sos_verified_at=business.sos_verified_at,
+        approved_at=business.approved_at,
+        logo_url=getattr(business, 'logo_url', None),
+        primary_color=getattr(business, 'primary_color', None),
+        created_at=business.created_at,
+    )
 
 
 @router.put("/profile", response_model=BusinessProfile)
 async def update_business_profile(
     update: BusinessProfileUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
 ):
     """Update business profile."""
-    raise HTTPException(status_code=501, detail="Use login endpoint")
+    business = db.query(Business).filter(
+        Business.email == current_user.email
+    ).first()
+    if not business:
+        business = db.query(Business).filter(
+            Business.name == current_user.company_name
+        ).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business profile not found")
+    
+    update_data = update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        if hasattr(business, field):
+            setattr(business, field, value)
+    
+    db.commit()
+    db.refresh(business)
+    
+    ein_last4 = None
+    if business.ein:
+        ein_last4 = business.ein[-4:] if len(business.ein) >= 4 else business.ein
+    
+    return BusinessProfile(
+        id=business.id,
+        name=business.name,
+        dba_name=business.dba_name,
+        entity_type=EntityTypeEnum(business.entity_type.value if hasattr(business.entity_type, 'value') else business.entity_type),
+        state_of_incorporation=business.state_of_incorporation or "",
+        registration_number=business.registration_number,
+        ein_last_4=ein_last4,
+        address=business.address,
+        city=business.city,
+        state=business.state,
+        zip_code=business.zip_code,
+        phone=business.phone,
+        email=business.email,
+        website=business.website,
+        verification_status=VerificationStatusEnum(business.verification_status.value if hasattr(business.verification_status, 'value') else business.verification_status),
+        sos_verified_at=business.sos_verified_at,
+        approved_at=business.approved_at,
+        logo_url=getattr(business, 'logo_url', None),
+        primary_color=getattr(business, 'primary_color', None),
+        created_at=business.created_at,
+    )
 
 
 # =============================================================================
 # AUTHENTICATED - Team Management
 # =============================================================================
 
-from app.core.deps import get_current_user as get_current_api_user
 from app.models.subscription import Subscription, Plan
 
 def get_team_limits(db: Session, company_name: str):
@@ -905,5 +1000,5 @@ async def remove_user(
     user_id: UUID,
     db: Session = Depends(get_db),
 ):
-    """Remove a user from the business."""
-    raise HTTPException(status_code=501, detail="Requires authentication")
+    """Remove a user from the business. (Legacy - use /team/{user_id}/deactivate instead)"""
+    raise HTTPException(status_code=501, detail="Use /auth/business/team/{user_id}/deactivate endpoint instead")

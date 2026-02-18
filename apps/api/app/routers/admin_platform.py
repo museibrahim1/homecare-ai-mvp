@@ -608,8 +608,34 @@ async def create_platform_user(
     db.commit()
     db.refresh(new_user)
     
-    # TODO: Send invite email with temp password
-    logger.info(f"Created platform user {user_data.email} with temp password")
+    app_url = os.getenv("APP_URL", "https://app.palmtai.com")
+    invite_result = email_service.send_email(
+        to=user_data.email,
+        subject="You've been added as a Platform Admin - Homecare AI",
+        html=f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #6366f1;">Welcome to Homecare AI Admin</h2>
+            <p>Hi {user_data.full_name},</p>
+            <p>You've been granted platform administrator access to Homecare AI.</p>
+            <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0;"><strong>Your login credentials:</strong></p>
+                <p style="margin: 0 0 5px 0;">Email: {user_data.email}</p>
+                <p style="margin: 0;">Temporary Password: {temp_password}</p>
+            </div>
+            <p style="color: #dc2626; font-size: 14px;">Please change your password after your first login.</p>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{app_url}/login"
+                   style="background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+                    Login Now
+                </a>
+            </div>
+        </div>
+        """,
+    )
+    if invite_result.get("success"):
+        logger.info(f"Created platform user {user_data.email} — invite email sent")
+    else:
+        logger.error(f"Created platform user {user_data.email} — invite email FAILED: {invite_result.get('error')}")
     
     return PlatformUserResponse(
         id=new_user.id,
@@ -806,7 +832,24 @@ async def respond_to_ticket(
     
     db.commit()
     
-    # TODO: Send email notification to ticket submitter
+    submitter = db.query(User).filter(User.id == ticket.submitted_by_id).first()
+    if submitter:
+        email_service.send_email(
+            to=submitter.email,
+            subject=f"Update on your support ticket - Homecare AI",
+            html=f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #6366f1;">Support Ticket Update</h2>
+                <p>Hi {submitter.full_name},</p>
+                <p>Our team has responded to your support ticket:</p>
+                <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 20px 0; border-left: 4px solid #6366f1;">
+                    <p style="margin: 0; white-space: pre-wrap;">{response_data.message}</p>
+                </div>
+                <p style="color: #6b7280; font-size: 14px;">If you need further assistance, please reply to this ticket in the app.</p>
+                <p>Best regards,<br>The Homecare AI Support Team</p>
+            </div>
+            """,
+        )
     
     return {"message": "Response added"}
 
@@ -876,15 +919,27 @@ async def get_support_stats(
         SupportTicket.status.in_([TicketStatus.RESOLVED, TicketStatus.CLOSED])
     ).count()
     
-    # Average response time (simplified)
-    # In production, calculate from first_response_at - created_at
+    avg_response_hours = None
+    try:
+        responded_tickets = db.query(SupportTicket).filter(
+            SupportTicket.first_response_at.isnot(None),
+        ).all()
+        if responded_tickets:
+            total_seconds = sum(
+                (t.first_response_at - t.created_at).total_seconds()
+                for t in responded_tickets
+                if t.first_response_at and t.created_at
+            )
+            avg_response_hours = round(total_seconds / len(responded_tickets) / 3600, 1)
+    except Exception:
+        pass
     
     return {
         "total_tickets": total,
         "open": open_tickets,
         "in_progress": in_progress,
         "resolved": resolved,
-        "avg_response_time_hours": 4.5,  # Placeholder
+        "avg_response_time_hours": avg_response_hours,
     }
 
 
@@ -933,10 +988,17 @@ async def get_system_health(
     except Exception as e:
         storage_status = f"unhealthy: {str(e)}"
     
-    # Worker check (via Redis queue)
+    # Worker check via Celery inspect
     try:
-        # Check if there are workers registered
-        worker_status = "healthy"  # Simplified - in prod check Celery inspect
+        from celery import Celery
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        app = Celery(broker=redis_url)
+        inspector = app.control.inspect(timeout=2.0)
+        active = inspector.active()
+        if active:
+            worker_status = f"healthy ({len(active)} workers)"
+        else:
+            worker_status = "no workers connected"
     except Exception as e:
         worker_status = f"unknown: {str(e)}"
     
@@ -1065,8 +1127,15 @@ async def send_announcement(
     query = db.query(Business).filter(Business.verification_status == 'approved')
     
     if target == "trial":
-        # Would filter by subscription status
-        pass
+        trial_business_ids = [
+            s.business_id for s in db.query(Subscription).filter(
+                Subscription.status == SubscriptionStatus.TRIAL
+            ).all()
+        ]
+        if trial_business_ids:
+            query = query.filter(Business.id.in_(trial_business_ids))
+        else:
+            return {"message": "No trial businesses found"}
     
     businesses = query.all()
     

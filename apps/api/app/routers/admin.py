@@ -335,7 +335,27 @@ async def suspend_business(
     business.rejection_reason = reason
     db.commit()
     
-    # TODO: Send suspension email
+    owner = db.query(BusinessUser).filter(
+        BusinessUser.business_id == business_id,
+        BusinessUser.is_owner == True,
+    ).first()
+    if owner:
+        email_service.send_email(
+            to=owner.email,
+            subject="Account Suspended - Homecare AI",
+            html=f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #ef4444;">Account Suspended</h2>
+                <p>Hello {business.name},</p>
+                <p>Your Homecare AI account has been suspended.</p>
+                <div style="background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 16px; margin: 20px 0;">
+                    <p style="margin: 0; color: #991b1b;"><strong>Reason:</strong> {reason}</p>
+                </div>
+                <p>If you believe this is an error, please contact our support team to resolve this.</p>
+                <p>Best regards,<br>The Homecare AI Team</p>
+            </div>
+            """,
+        )
     
     return AdminApprovalResponse(
         business_id=business.id,
