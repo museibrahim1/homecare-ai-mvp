@@ -1,0 +1,507 @@
+================================================================================
+                         PALMCARE AI — COMPLETE APP BRIEF
+                   Everything you need to know to work with this app
+================================================================================
+
+
+================================================================================
+  1. WHAT IS PALMCARE AI?
+================================================================================
+
+PalmCare AI (also referred to as "AI Voice Contractor") is a B2B SaaS platform
+built specifically for in-home healthcare agencies (homecare companies).
+
+The core product turns a voice recording of a care assessment — the conversation
+a nurse or coordinator has with a new client — into a complete, ready-to-send
+service contract, a SOAP clinical note, and a full list of billable services.
+All automatically. No manual data entry.
+
+  ONE-LINE PITCH:
+  "Record the intake call. Get the contract, the note, and the billables — done."
+
+  TARGET CUSTOMER:
+  Home health, personal care, and homecare agencies that:
+  • Take on new clients through intake/assessment conversations
+  • Need to generate service contracts quickly
+  • Bill Medicaid, Medicare, or private pay clients
+  • Have coordinators or nurses spending hours on paperwork
+
+
+================================================================================
+  2. THE PROBLEM IT SOLVES
+================================================================================
+
+For a homecare agency, onboarding a new client today looks like this:
+
+  1. Nurse/coordinator does a 30–60 min in-home assessment (audio/verbal)
+  2. They go back to the office and manually write up:
+     - A SOAP clinical note
+     - A list of services and billable codes
+     - A service agreement / contract
+  3. That paperwork takes 3–6 hours per client
+  4. Missed billable items = lost revenue
+  5. Error-prone manual contracts = compliance risk
+
+PalmCare AI collapses steps 2–5 into a single automated pipeline.
+Upload the audio → review → send the contract. Done in minutes.
+
+
+================================================================================
+  3. CORE FEATURES
+================================================================================
+
+  PRIMARY
+  ───────
+  • Voice-to-Contract Pipeline
+    Upload an audio recording of any care assessment or intake call.
+    The system transcribes, analyzes, and generates a complete service contract.
+
+  • Billable Extraction
+    AI reads the transcript and extracts every billable service mentioned
+    (bathing, medication management, ADLs, transportation, etc.) with
+    service codes, quantities, unit prices, and totals.
+
+  • SOAP Note Generation
+    Auto-generates a structured clinical/visit note (Subjective, Objective,
+    Assessment, Plan) from the transcript, ready for medical records.
+
+  • Contract Generation
+    Produces a filled, professional service agreement (DOCX + PDF) using
+    the agency's contract template, pre-populated with client data,
+    care plan details, and pricing from the billables.
+
+  • Speaker Diarization
+    Identifies who said what in the recording — separates client voice
+    from coordinator/nurse voice for more accurate analysis.
+
+  • Voiceprint ID
+    Stores staff voice profiles so the system can auto-identify which
+    staff member conducted the visit without manual labeling.
+
+  SECONDARY FEATURES
+  ──────────────────
+  • Client CRM — manage client profiles, care needs, status, history
+  • Visit Management — track every assessment/visit with full pipeline history
+  • Contract Review UI — review, edit, and approve before sending
+  • PDF Export — download contract + supporting docs
+  • Email Sending — send contracts directly from the platform
+  • Reports & Analytics — billables captured, time saved, agency stats
+  • Google Calendar Integration — sync visits and appointments
+  • Google Drive Integration — store and share documents
+  • Gmail Integration — send from agency Gmail accounts
+  • Twilio Calls — in-app phone/calling features
+  • Stripe Billing — subscription and payment management for agencies
+  • Caregiver Management — track field staff and their visits
+  • Schedule Management — caregiver scheduling tied to client needs
+  • Document Management — store all client documents in one place
+  • Team Chat — internal messaging for agency staff
+  • Lead Management — track prospective clients in a pipeline
+  • Care Tracker — ongoing care monitoring per client
+  • Proposals — send service proposals before contracts are signed
+  • Admin Platform — super-admin tools for platform management
+
+
+================================================================================
+  4. HOW THE AI PIPELINE WORKS (Step by Step)
+================================================================================
+
+  STEP 1 — UPLOAD AUDIO
+  User uploads an audio file (MP3, WAV, M4A, etc.) from the assessment.
+  File is stored in S3-compatible object storage (MinIO or AWS S3).
+
+  STEP 2 — TRANSCRIBE
+  Service: OpenAI Whisper API (whisper-1 model)
+  Cost: ~$0.006/minute
+  Output: Full text transcript of the conversation, timestamped
+
+  STEP 3 — DIARIZE (Speaker Separation)
+  Service: Pyannote.ai API
+  Cost: ~$0.10/minute
+  Output: Timestamp segments labeled by speaker (Speaker A, Speaker B, etc.)
+
+  STEP 4 — IDENTIFY SPEAKERS (Optional)
+  Service: Pyannote.ai Voiceprints
+  Output: Speaker labels replaced with real names (e.g., "Nurse Sarah", "Client")
+  Requires: Staff to have registered voiceprints in the system
+
+  STEP 5 — EXTRACT BILLABLES
+  Service: Anthropic Claude (claude-3-haiku)
+  Cost: ~$0.25/1M tokens
+  Output: Structured list of services mentioned in the conversation:
+    - Service name + code
+    - Frequency/quantity
+    - Unit price
+    - Total per service
+
+  STEP 6 — GENERATE SOAP NOTE
+  Service: Anthropic Claude
+  Output: Structured clinical note with:
+    - Subjective: what the client reported
+    - Objective: observed findings
+    - Assessment: clinical summary
+    - Plan: recommended care plan
+
+  STEP 7 — GENERATE CONTRACT
+  Service: Anthropic Claude + python-docx (template rendering)
+  Output: Completed service agreement DOCX and PDF
+    - Pre-filled with client info, care plan, services, and pricing
+    - Based on the agency's own contract template
+    - Stored in S3, downloadable from the dashboard
+
+  TOTAL COST PER ASSESSMENT (~30 min audio): ~$3.27
+
+
+================================================================================
+  5. TECH STACK
+================================================================================
+
+  FRONTEND
+  ────────
+  • Framework:        Next.js 14 (React 18 + TypeScript)
+  • Styling:          Tailwind CSS
+  • State Management: Zustand
+  • Icons:            Lucide Icons
+  • Deployment:       Railway
+
+  BACKEND
+  ───────
+  • Framework:        FastAPI (Python)
+  • ORM:              SQLAlchemy
+  • Migrations:       Alembic
+  • Auth:             JWT (access + refresh tokens, bcrypt password hashing)
+  • Task Queue:       Celery
+  • Validation:       Pydantic
+  • Deployment:       Railway
+
+  INFRASTRUCTURE
+  ──────────────
+  • Database:         PostgreSQL (Railway managed)
+  • Cache / Queue:    Redis (Railway managed)
+  • File Storage:     MinIO (S3-compatible) / AWS S3 / Cloudflare R2
+  • Containers:       Docker Compose
+  • Workers:          Celery workers (background AI pipeline tasks)
+
+  AI & EXTERNAL SERVICES
+  ───────────────────────
+  • Transcription:    OpenAI Whisper API
+  • Diarization:      Pyannote.ai API
+  • Voiceprints:      Pyannote.ai
+  • AI Analysis:      Anthropic Claude (claude-3-haiku)
+  • Email:            Resend API
+  • Calling:          Twilio
+  • Payments:         Stripe
+  • Calendar:         Google Calendar API
+  • Drive:            Google Drive API
+  • Gmail:            Gmail API
+  • TTS (audio):      ElevenLabs via WaveSpeed AI
+  • Image Gen:        Nano Banana Pro via WaveSpeed AI
+
+
+================================================================================
+  6. FULL LIST OF FRONTEND PAGES
+================================================================================
+
+  /                       Landing / home page
+  /dashboard              Main agency dashboard (metrics, recent activity)
+  /clients                Client list + management
+  /visits                 Visit/assessment list + management
+  /pipeline               AI pipeline runner and status tracker
+  /contracts              Contract list, review, approve, send
+  /proposals              Pre-contract service proposals
+  /reports                Analytics (billables, revenue, time saved)
+  /schedule               Caregiver and visit scheduling
+  /caregivers             Caregiver profiles and management
+  /documents              Document storage and management
+  /leads                  Prospect/lead pipeline
+  /care-tracker           Ongoing care monitoring per client
+  /integrations           Connect Google, Twilio, Stripe, etc.
+  /messages               Internal messaging
+  /team-chat              Real-time team communication
+  /activity               Activity log / audit trail
+  /billing                Subscription and billing management
+  /settings               Agency settings, branding, preferences
+  /pricing                Subscription plan selection
+  /admin                  Admin panel (agency-level)
+  /login                  User login
+  /register               New agency signup
+  /forgot-password        Password reset flow
+  /reset-password         Password reset confirmation
+  /verification-status    Email/account verification status
+  /welcome                Post-signup onboarding
+  /help                   Help center / support
+  /policies               Terms, privacy policy
+  /contact                Contact form
+
+
+================================================================================
+  7. FULL LIST OF BACKEND API ROUTERS
+================================================================================
+
+  /auth               Login, signup, JWT token management
+  /users              User profile CRUD
+  /clients            Client CRUD, care needs, status
+  /visits             Assessment visits, restart pipeline
+  /pipeline           Run transcription, diarization, billing, notes, contracts
+  /contracts          Contract generation, review, email sending
+  /notes              SOAP note retrieval and management
+  /voiceprint         Staff voice ID creation and status
+  /calendar           Google Calendar integration
+  /reports            Agency analytics and statistics
+  /billing            Billable item management
+  /stripe_billing     Stripe subscription management
+  /uploads            Audio file upload handling
+  /exports            PDF/CSV export generation
+  /transcript         Transcript segment retrieval
+  /caregivers         Caregiver profiles
+  /documents          Document upload and management
+  /integrations       Third-party integration management
+  /gmail              Gmail API integration
+  /drive              Google Drive integration
+  /calls              Twilio call management
+  /agency             Agency profile management
+  /admin              Admin-level operations
+  /admin_platform     Super-admin / platform management
+  /business_auth      Business-level authentication
+  /demos              Demo/onboarding flows
+  /diarization        Speaker diarization endpoints
+
+
+================================================================================
+  8. DATABASE SCHEMA
+================================================================================
+
+  TABLE: users
+  ─────────────────────────────────────────────────
+  id (UUID, PK)          Unique user identifier
+  email                  Login email
+  hashed_password        Bcrypt hashed password
+  full_name              User's full name
+  company_name           Agency name
+  is_active              Account active flag
+  voiceprint             Stored voice profile data
+  voiceprint_created_at  When voiceprint was registered
+
+  TABLE: clients
+  ─────────────────────────────────────────────────
+  id (UUID, PK)          Unique client identifier
+  full_name              Client's full name
+  email                  Client email
+  phone                  Client phone number
+  address                Home address
+  care_needs             Text description of care needs
+  status                 (new / active / proposal / contracted)
+  user_id (FK → users)   Agency that owns this client
+  created_at             Record creation date
+
+  TABLE: visits
+  ─────────────────────────────────────────────────
+  id (UUID, PK)          Unique visit identifier
+  client_id (FK)         Associated client
+  user_id (FK)           Associated agency user
+  visit_date             Date of visit/assessment
+  audio_url              S3 URL of the recording
+  transcript             Full raw transcript text
+  status                 Visit status
+  pipeline_status        Stage of AI pipeline (pending/processing/complete)
+
+  TABLE: transcript_segments
+  ─────────────────────────────────────────────────
+  id (UUID, PK)
+  visit_id (FK)          Parent visit
+  speaker_label          "SPEAKER_00", "Nurse Sarah", etc.
+  text                   What was said
+  start_ms               Start timestamp in milliseconds
+  end_ms                 End timestamp in milliseconds
+
+  TABLE: billable_items
+  ─────────────────────────────────────────────────
+  id (UUID, PK)
+  visit_id (FK)          Parent visit
+  service_code           Billing code (e.g., G0156, T1019)
+  description            Service description
+  quantity               Units of service
+  unit_price             Price per unit
+  total                  Line item total
+
+  TABLE: notes
+  ─────────────────────────────────────────────────
+  id (UUID, PK)
+  visit_id (FK)          Parent visit
+  structured_data        JSON with S/O/A/P fields
+  narrative              Full narrative note text
+  created_at             Generation timestamp
+
+  TABLE: contracts
+  ─────────────────────────────────────────────────
+  id (UUID, PK)
+  visit_id (FK)          Source visit/assessment
+  client_id (FK)         Client the contract is for
+  user_id (FK)           Agency that owns it
+  content                Contract text/JSON content
+  pdf_url                S3 URL of generated PDF
+  status                 (draft / sent / signed)
+  created_at             Generation timestamp
+
+
+================================================================================
+  9. BACKEND SERVICES (Business Logic Layer)
+================================================================================
+
+  billing_rules.py        Rules-based detection of billable services from text
+  contract_generation.py  Fills contract DOCX templates with extracted data
+  document_generation.py  Handles DOCX/PDF creation
+  document_storage.py     Uploads and retrieves files from S3
+  note_generation.py      Generates SOAP notes via Claude
+  email.py                Sends contracts and notifications via Resend
+  storage.py              S3-compatible file storage abstraction
+  twilio_calls.py         Phone call management via Twilio
+  audit.py                Audit log for compliance tracking
+  sos_verification.py     Identity/compliance verification
+  jobs.py                 Celery background task definitions
+
+
+================================================================================
+  10. DEPLOYMENT INFRASTRUCTURE
+================================================================================
+
+  RECOMMENDED DEPLOYMENT: Railway
+  ─────────────────────────────────────────────────
+  Services deployed:
+    • web     — Next.js frontend        (Port 3000)
+    • api     — FastAPI backend         (Port 8000)
+    • worker  — Celery background jobs  (no port, background)
+    • db      — PostgreSQL              (Railway managed)
+    • redis   — Redis                   (Railway managed)
+
+  Monthly infrastructure cost: ~$25–$40/month base
+
+  ALTERNATIVE DEPLOYMENT OPTIONS:
+    • Render                (~$25–50/month)
+    • DigitalOcean App      (~$30–60/month)
+    • Fly.io                (~$10–40/month)
+    • Docker Compose        (self-hosted, any VPS)
+
+  FILE STORAGE OPTIONS:
+    • MinIO (self-hosted, local dev)
+    • AWS S3
+    • DigitalOcean Spaces
+    • Cloudflare R2 (cheapest)
+
+  LOCAL DEV:
+    docker compose up --build
+    API Docs: http://localhost:8000/docs
+    Admin UI: http://localhost:3000
+    MinIO Console: http://localhost:9001
+
+
+================================================================================
+  11. AUTHENTICATION & SECURITY
+================================================================================
+
+  • JWT tokens — access token (24h) + refresh token (7d)
+  • Passwords hashed with bcrypt
+  • User-scoped data — each agency only sees their own clients/data
+  • All API routes protected via Depends(get_current_user)
+  • Frontend route guards via useAuth hook
+  • HTTPS only (Railway provides SSL)
+  • CORS configured for allowed origins
+  • Input validation via Pydantic schemas
+  • No PII in application logs
+
+
+================================================================================
+  12. COST BREAKDOWN
+================================================================================
+
+  PER ASSESSMENT (~30 min audio):
+  ─────────────────────────────────────────────────
+  OpenAI Whisper (transcription)    $0.18
+  Pyannote.ai (diarization)         $3.00
+  Anthropic Claude (billables)      $0.05
+  Anthropic Claude (SOAP note)      $0.02
+  Anthropic Claude (contract)       $0.02
+  ─────────────────────────────────────────────────
+  TOTAL per assessment              ~$3.27
+
+  MONTHLY INFRASTRUCTURE (Railway):
+  ─────────────────────────────────────────────────
+  Web service                       $5–10
+  API service                       $5–10
+  Worker service                    $5–10
+  PostgreSQL                        $5
+  Redis                             $5
+  ─────────────────────────────────────────────────
+  TOTAL base infrastructure         ~$25–40/month
+
+
+================================================================================
+  13. PROJECT FOLDER STRUCTURE
+================================================================================
+
+  /
+  ├── apps/
+  │   ├── api/                FastAPI backend
+  │   │   └── app/
+  │   │       ├── routers/    API endpoint handlers
+  │   │       ├── services/   Business logic
+  │   │       ├── models/     SQLAlchemy DB models
+  │   │       ├── schemas/    Pydantic request/response schemas
+  │   │       ├── core/       Config, security, DB connection
+  │   │       └── middleware/ Auth middleware
+  │   ├── worker/             Celery background task worker
+  │   └── web/                Next.js frontend
+  │       └── src/app/        All frontend pages (see list above)
+  ├── infra/                  Infrastructure configs
+  ├── templates/
+  │   ├── contracts/          Contract DOCX templates
+  │   └── notes/              SOAP note templates
+  ├── scripts/
+  │   ├── seed.py             Database seeding
+  │   ├── generate_templates.py
+  │   ├── wavespeed_voiceover.py   ElevenLabs TTS via WaveSpeed
+  │   └── wavespeed_image.py       Image gen via WaveSpeed
+  ├── videos/                 Remotion video compositions (marketing)
+  ├── pitch_deck/             Investor pitch materials
+  ├── tests/                  Test suite
+  ├── docker-compose.yml      Full local dev stack
+  ├── .env.example            All required environment variables
+  ├── ARCHITECTURE.md         Full technical architecture diagram
+  └── DEPLOYMENT.md           Deployment guide for all platforms
+
+
+================================================================================
+  14. KEY ENVIRONMENT VARIABLES
+================================================================================
+
+  DATABASE_URL            PostgreSQL connection string
+  REDIS_URL               Redis connection string
+  JWT_SECRET              Secret key for JWT signing
+  OPENAI_API_KEY          OpenAI (Whisper transcription)
+  ANTHROPIC_API_KEY       Anthropic Claude (AI analysis + generation)
+  HF_TOKEN                HuggingFace token (Pyannote diarization)
+  PYANNOTE_API_KEY        Pyannote.ai API key
+  RESEND_API_KEY          Resend email API
+  S3_ENDPOINT_URL         S3-compatible storage endpoint
+  S3_ACCESS_KEY           Storage access key
+  S3_SECRET_KEY           Storage secret key
+  S3_BUCKET               Storage bucket name
+  TWILIO_*                Twilio calling credentials
+  STRIPE_*                Stripe payment keys
+  GOOGLE_*                Google OAuth + API credentials
+
+
+================================================================================
+  15. COMPANY / BRAND INFO
+================================================================================
+
+  Product Name:           PalmCare AI
+  Also known as:          AI Voice Contractor
+  Domain (planned):       palmcareai.app / homecareai.app
+  Industry:               Healthcare Technology (HealthTech) / SaaS
+  Category:               Vertical SaaS for homecare agencies
+  Stage:                  Beta (as of Feb 2026)
+  Business Model:         SaaS subscriptions (agency pays monthly)
+  Primary Market:         US-based home health and personal care agencies
+  Compliance relevance:   HIPAA (handles PHI), Medicaid/Medicare billing codes
+
+================================================================================
