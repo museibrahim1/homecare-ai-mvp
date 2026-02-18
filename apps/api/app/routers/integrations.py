@@ -20,10 +20,16 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 
 from app.core.deps import get_db, get_current_user
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.models.client import Client
 
 router = APIRouter()
+
+
+def _get_system_user_id(db: Session):
+    """Get admin user ID for webhook-created records (data isolation)."""
+    admin = db.query(User).filter(User.role == UserRole.admin).first()
+    return admin.id if admin else None
 
 
 # =============================================================================
@@ -473,7 +479,8 @@ async def monday_webhook(
             existing.updated_at = datetime.now(timezone.utc)
         else:
             # Create new client
-            create_client_from_import(db, client_data)
+            system_uid = _get_system_user_id(db)
+            create_client_from_import(db, client_data, system_uid)
         
         db.commit()
         return {"status": "success", "action": "update" if existing else "create"}
@@ -527,6 +534,7 @@ async def generic_webhook(
     
     imported = 0
     errors = []
+    system_uid = _get_system_user_id(db)
     
     for item in clients_data:
         try:
@@ -545,7 +553,7 @@ async def generic_webhook(
             )
             
             # Check for existing
-            existing = find_existing_client(db, client_data)
+            existing = find_existing_client(db, client_data, system_uid)
             if existing:
                 # Update
                 existing.full_name = client_data.full_name
@@ -557,7 +565,7 @@ async def generic_webhook(
                     existing.address = client_data.address
             else:
                 # Create
-                create_client_from_import(db, client_data)
+                create_client_from_import(db, client_data, system_uid)
             
             imported += 1
             

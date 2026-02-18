@@ -629,8 +629,10 @@ def generate_service_contract(self, visit_id: str):
         try:
             from models import Caregiver
             
-            # Build query for matching caregivers
+            # Build query for matching caregivers (filter by same owner for data isolation)
             caregiver_query = db.query(Caregiver).filter(Caregiver.status == 'active')
+            if hasattr(client, 'created_by') and client.created_by:
+                caregiver_query = caregiver_query.filter(Caregiver.created_by == client.created_by)
             
             # Filter by care level capability
             if care_need_level == "HIGH":

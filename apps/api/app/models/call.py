@@ -6,7 +6,7 @@ Database model for tracking Twilio call bridges and recordings.
 
 import uuid
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, String, Text, Boolean, Integer, DateTime, ForeignKey, Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
@@ -28,10 +28,14 @@ class CallStatus(str, enum.Enum):
     CANCELLED = "cancelled"
 
 
+def _utc_now():
+    return datetime.now(timezone.utc)
+
+
 class TimestampMixin:
     """Mixin for created_at and updated_at timestamps."""
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utc_now)
+    updated_at = Column(DateTime(timezone=True), default=_utc_now, onupdate=_utc_now)
 
 
 class Call(Base, TimestampMixin):

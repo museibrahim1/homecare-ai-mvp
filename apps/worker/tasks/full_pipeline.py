@@ -19,6 +19,7 @@ from tasks.transcribe import transcribe_visit
 from tasks.diarize import diarize_visit
 from tasks.align import align_visit
 from tasks.bill import generate_billables
+from tasks.generate_note import generate_visit_note
 from tasks.generate_contract import generate_service_contract
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ def run_steps_parallel(visit_id: str, steps: list):
 @celery_app.task(
     name="tasks.full_pipeline.run_full_pipeline",
     bind=True,
-    autoretry_for=(Exception,),
+    autoretry_for=(ConnectionError, TimeoutError, OSError),
     retry_backoff=True,
     retry_kwargs={"max_retries": 2},
 )
@@ -172,6 +173,9 @@ def run_full_pipeline(self, visit_id: str):
     
     # Run billing first
     run_step(visit_id, "billing", "bill", generate_billables)
+    
+    # Generate visit note
+    run_step(visit_id, "note", "generate_note", generate_visit_note)
     
     # Then generate contract (uses billing data)
     run_step(visit_id, "contract", "generate_contract", generate_service_contract)

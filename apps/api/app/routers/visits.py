@@ -279,7 +279,7 @@ async def delete_visit(
         raise
 
 
-@router.delete("", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("", status_code=status.HTTP_200_OK)
 async def delete_all_visits(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -383,8 +383,6 @@ async def restart_assessment(
     # Reset pipeline state completely
     visit.pipeline_state = {}
     visit.status = "pending"
-    visit.audio_url = None
-    
     db.commit()
     
     return {

@@ -28,7 +28,7 @@ class CatchAllMiddleware(BaseHTTPMiddleware):
             # Build response with CORS headers
             response = JSONResponse(
                 status_code=500,
-                content={"detail": f"Internal server error: {str(e)}"},
+                content={"detail": "Internal server error"},
             )
             
             # Add CORS headers manually
@@ -147,7 +147,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception: {type(exc).__name__}: {str(exc)}")
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal server error: {str(exc)}"},
+        content={"detail": "Internal server error"},
     )
 
 
@@ -200,20 +200,21 @@ async def seed_database():
     db = SessionLocal()
     
     try:
-        # Check if admin user exists
+        # Check if admin user exists — use ADMIN_PASSWORD env var or a secure default
         admin_exists = db.query(User).filter(User.email == "admin@palmtai.com").first()
         if not admin_exists:
+            admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
             logger.info("Creating admin user...")
             admin = User(
                 email="admin@palmtai.com",
-                hashed_password=get_password_hash("admin123"),
+                hashed_password=get_password_hash(admin_password),
                 full_name="Admin User",
                 role=UserRole.admin,
                 is_active=True,
             )
             db.add(admin)
             db.commit()
-            logger.info("Admin user created: admin@palmtai.com / admin123")
+            logger.info("Admin user created: admin@palmtai.com (password from ADMIN_PASSWORD env var)")
         
         # Force-logout demo account on startup so any existing sessions are invalidated
         demo_user = db.query(User).filter(User.email == "demo@agency.com").first()
@@ -228,6 +229,10 @@ async def seed_database():
                     demo_user.google_calendar_refresh_token = None
                     demo_user.google_calendar_token_expiry = None
                 db.commit()
+        
+        # Get admin user for associating seed data
+        admin_user = db.query(User).filter(User.email == "admin@palmtai.com").first()
+        admin_id = admin_user.id if admin_user else None
         
         # Check if any clients exist
         client_count = db.query(Client).count()
@@ -256,6 +261,7 @@ async def seed_database():
                     care_level="MODERATE",
                     status="active",
                     notes="Requires assistance with daily activities. Prefers morning visits.",
+                    created_by=admin_id,
                 ),
                 Client(
                     full_name="Robert Johnson",
@@ -278,6 +284,7 @@ async def seed_database():
                     care_level="HIGH",
                     status="active",
                     notes="Needs help with transfers. Enjoys conversation.",
+                    created_by=admin_id,
                 ),
             ]
             for client in clients:
@@ -303,6 +310,7 @@ async def seed_database():
                     years_experience=5,
                     can_handle_high_care=True,
                     notes="Experienced caregiver with 5 years in home health.",
+                    created_by=admin_id,
                 ),
                 Caregiver(
                     full_name="Michael Chen",
@@ -316,6 +324,7 @@ async def seed_database():
                     years_experience=8,
                     can_handle_high_care=True,
                     notes="Registered nurse specializing in geriatric care.",
+                    created_by=admin_id,
                 ),
             ]
             for caregiver in caregivers:

@@ -552,7 +552,11 @@ async def get_public_agency_settings(
     provided_key = request.headers.get("X-Internal-Key", "")
     if not expected_key or provided_key != expected_key:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing internal API key")
-    settings = get_or_create_settings(db)
+    
+    # For internal worker access, get the first available settings
+    settings = db.query(AgencySettings).first()
+    if not settings:
+        raise HTTPException(status_code=404, detail="No agency settings found")
     
     documents = []
     if hasattr(settings, 'documents') and settings.documents:

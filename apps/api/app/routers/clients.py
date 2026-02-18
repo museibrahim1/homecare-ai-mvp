@@ -10,6 +10,13 @@ from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.client import Client
 from app.models.contract import Contract
+from app.models.visit import Visit
+from app.models.transcript_segment import TranscriptSegment
+from app.models.diarization_turn import DiarizationTurn
+from app.models.billable_item import BillableItem
+from app.models.note import Note
+from app.models.audio_asset import AudioAsset
+from app.models.call import Call
 from app.schemas.client import ClientCreate, ClientUpdate, ClientResponse
 from app.services.email import get_email_service
 
@@ -119,7 +126,7 @@ async def delete_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a client (data isolation enforced)."""
+    """Delete a client and all related records (data isolation enforced)."""
     client = db.query(Client).filter(
         Client.id == client_id,
         Client.created_by == current_user.id
@@ -129,6 +136,20 @@ async def delete_client(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Client not found",
         )
+    
+    # Delete all related records to avoid FK violations
+    visits = db.query(Visit).filter(Visit.client_id == client_id).all()
+    for visit in visits:
+        db.query(TranscriptSegment).filter(TranscriptSegment.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(DiarizationTurn).filter(DiarizationTurn.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(BillableItem).filter(BillableItem.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(Note).filter(Note.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(AudioAsset).filter(AudioAsset.visit_id == visit.id).delete(synchronize_session=False)
+        db.query(Call).filter(Call.visit_id == visit.id).delete(synchronize_session=False)
+        db.delete(visit)
+    
+    # Delete contracts for this client
+    db.query(Contract).filter(Contract.client_id == client_id).delete(synchronize_session=False)
     
     db.delete(client)
     db.commit()

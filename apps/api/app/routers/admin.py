@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
@@ -319,7 +319,7 @@ async def approve_business(
 @router.post("/businesses/{business_id}/suspend", response_model=AdminApprovalResponse)
 async def suspend_business(
     business_id: UUID,
-    reason: str,
+    reason: str = Body(..., embed=True),
     db: Session = Depends(get_db),
     admin: User = Depends(require_platform_admin),
 ):

@@ -600,7 +600,7 @@ async def create_platform_user(
     new_user = User(
         email=user_data.email,
         full_name=user_data.full_name,
-        password_hash=get_password_hash(temp_password),
+        hashed_password=get_password_hash(temp_password),
         role=UserRole.admin,
         is_active=True,
     )

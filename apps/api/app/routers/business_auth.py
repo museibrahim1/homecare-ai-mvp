@@ -59,9 +59,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(hours=24))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(hours=24))
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+    return jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
 def get_current_business_user(
@@ -70,7 +70,7 @@ def get_current_business_user(
 ) -> BusinessUser:
     """Decode token and get current business user."""
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         user_id = payload.get("sub")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token")
@@ -152,7 +152,7 @@ async def register_business(
         entity_type=entity_type_value,
         state_of_incorporation=registration.state_of_incorporation.upper(),
         registration_number=registration.registration_number,
-        ein=registration.ein,  # TODO: Encrypt this
+        ein="***-**-" + registration.ein[-4:] if registration.ein and len(registration.ein) >= 4 else registration.ein,
         address=registration.address,
         city=registration.city,
         state=registration.state.upper(),
@@ -269,24 +269,32 @@ async def upload_document(
     """
     Upload a verification document for a business.
     
-    No auth required during registration flow (business_id acts as token).
+    Only allowed for businesses in pending/documents_submitted state.
     """
     # Get business
     business = db.query(Business).filter(Business.id == business_id).first()
     if not business:
         raise HTTPException(status_code=404, detail="Business not found")
     
-    if business.verification_status == 'approved':
-        raise HTTPException(status_code=400, detail="Business already approved")
+    allowed_statuses = ('pending', 'documents_submitted', 'rejected')
+    if business.verification_status not in allowed_statuses:
+        raise HTTPException(status_code=400, detail="Documents cannot be uploaded in current status")
+    
+    # File size limit (10MB)
+    content = await file.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+    
+    # File type validation
+    allowed_types = ('application/pdf', 'image/jpeg', 'image/png', 'image/webp')
+    if file.content_type and file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Only PDF and image files are accepted")
     
     # Validate document type
     try:
         doc_type = DocumentType(document_type)
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid document type: {document_type}")
-    
-    # Read file content
-    content = await file.read()
     
     # Upload to storage
     doc_service = get_document_service()
@@ -367,7 +375,7 @@ async def get_registration_status(
     
     # Determine missing required documents
     existing_types = {d.document_type for d in documents}
-    missing = [dt.value for dt in REQUIRED_DOCUMENTS if dt not in existing_types]
+    missing = [dt for dt in REQUIRED_DOCUMENTS if dt not in existing_types]
     
     # Estimate review time
     estimated_time = None
@@ -378,13 +386,13 @@ async def get_registration_status(
     
     return BusinessStatusResponse(
         business_id=business.id,
-        business_name=business.name,
+        business_name=business.name[:3] + "***" if business.name else "",
         verification_status=VerificationStatusEnum(business.verification_status),
         sos_verified=business.sos_verified_at is not None,
         documents_submitted=docs_submitted,
         documents_verified=docs_verified,
         documents_required=missing,
-        rejection_reason=business.rejection_reason,
+        rejection_reason=business.rejection_reason if business.verification_status in ('rejected', 'suspended') else None,
         estimated_review_time=estimated_time,
     )
 
@@ -787,7 +795,6 @@ async def invite_team_member(
         "full_name": new_user.full_name,
         "role": new_user.role,
         "message": f"Invitation sent to {email}",
-        "temp_password": temp_password,  # Return for display (remove in production)
     }
 
 
