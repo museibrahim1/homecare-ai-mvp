@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Check, X, Mic, ArrowRight, Building2, Users, 
-  Zap, Shield, Headphones, HelpCircle
+  Zap, Shield, Headphones, HelpCircle, Loader2
 } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 interface PricingPlan {
   name: string;
@@ -16,10 +19,50 @@ interface PricingPlan {
   highlighted: boolean;
   cta: string;
   href: string;
+  apiPlanId?: string;
 }
 
 export default function PricingPage() {
+  const { token, isAuthenticated } = useAuth();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [apiPlans, setApiPlans] = useState<any[]>([]);
+  const loggedIn = isAuthenticated();
+
+  useEffect(() => {
+    fetch(`${API_BASE}/billing/plans`)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setApiPlans(data || []))
+      .catch(() => {});
+  }, []);
+
+  const handleCheckout = useCallback(async (planName: string) => {
+    if (!token) return;
+    const matched = apiPlans.find((p: any) => p.name.toLowerCase() === planName.toLowerCase());
+    if (!matched) {
+      alert('Plan not configured for billing yet. Please contact support.');
+      return;
+    }
+    setCheckoutLoading(planName);
+    try {
+      const res = await fetch(`${API_BASE}/billing/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ plan_id: matched.id, billing_cycle: billingCycle }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        window.location.href = data.checkout_url;
+      } else {
+        const err = await res.json();
+        alert(err.detail || 'Failed to start checkout');
+      }
+    } catch {
+      alert('Failed to connect to billing service');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  }, [token, apiPlans, billingCycle]);
 
   const plans: PricingPlan[] = [
     {
@@ -125,15 +168,31 @@ export default function PricingPage() {
             <span className="text-xl font-bold text-white">PalmCare AI</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-dark-300 hover:text-white transition">
-              Log in
-            </Link>
-            <Link
-              href="/register"
-              className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition"
-            >
-              Get Started
-            </Link>
+            {loggedIn ? (
+              <>
+                <Link href="/billing" className="text-dark-300 hover:text-white transition">
+                  My Billing
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition"
+                >
+                  Dashboard
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-dark-300 hover:text-white transition">
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -227,16 +286,34 @@ export default function PricingPage() {
                     )}
                   </div>
 
-                  <Link
-                    href={plan.href}
-                    className={`block w-full py-3 rounded-xl font-medium text-center transition ${
-                      plan.highlighted
-                        ? 'bg-primary-500 text-white hover:bg-primary-600'
-                        : 'bg-dark-700 text-white hover:bg-dark-600'
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
+                  {loggedIn ? (
+                    <button
+                      onClick={() => handleCheckout(plan.name)}
+                      disabled={!!checkoutLoading}
+                      className={`block w-full py-3 rounded-xl font-medium text-center transition ${
+                        plan.highlighted
+                          ? 'bg-primary-500 text-white hover:bg-primary-600'
+                          : 'bg-dark-700 text-white hover:bg-dark-600'
+                      } disabled:opacity-50`}
+                    >
+                      {checkoutLoading === plan.name ? (
+                        <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                      ) : (
+                        'Subscribe Now'
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href={plan.href}
+                      className={`block w-full py-3 rounded-xl font-medium text-center transition ${
+                        plan.highlighted
+                          ? 'bg-primary-500 text-white hover:bg-primary-600'
+                          : 'bg-dark-700 text-white hover:bg-dark-600'
+                      }`}
+                    >
+                      {plan.cta}
+                    </Link>
+                  )}
                 </div>
               );
             })}

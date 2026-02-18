@@ -80,6 +80,7 @@ const resourcesNavItems: NavItemData[] = [
 // Agency Admin
 const agencyAdminNavItems: NavItemData[] = [
   { href: '/caregivers', label: 'Team Members', icon: UserCheck, description: 'Staff management' },
+  { href: '/billing', label: 'Billing', icon: CreditCard, description: 'Plans & payments' },
   { href: '/activity', label: 'Activity Monitor', icon: Eye, description: 'Track actions' },
   { href: '/integrations', label: 'Integrations', icon: Link2, description: 'Connect apps' },
   { href: '/settings', label: 'Settings', icon: Settings, description: 'Agency settings' },
