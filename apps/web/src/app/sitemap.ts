@@ -1,44 +1,33 @@
 import { MetadataRoute } from 'next';
+import { headers } from 'next/headers';
 
-const SITE_URL = 'https://palmcareai.com';
+function getSiteUrl(): string {
+  try {
+    const headersList = headers();
+    const host = headersList.get('host') || 'palmcareai.com';
+    const proto = headersList.get('x-forwarded-proto') || 'https';
+    return `${proto}://${host}`;
+  } catch {
+    return 'https://palmcareai.com';
+  }
+}
+
+const PAGES: { path: string; changeFrequency: 'weekly' | 'monthly'; priority: number }[] = [
+  { path: '', changeFrequency: 'weekly', priority: 1.0 },
+  { path: '/pricing', changeFrequency: 'weekly', priority: 0.9 },
+  { path: '/register', changeFrequency: 'monthly', priority: 0.8 },
+  { path: '/contact', changeFrequency: 'monthly', priority: 0.7 },
+  { path: '/help', changeFrequency: 'monthly', priority: 0.6 },
+  { path: '/login', changeFrequency: 'monthly', priority: 0.5 },
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: SITE_URL,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1.0,
-    },
-    {
-      url: `${SITE_URL}/pricing`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${SITE_URL}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${SITE_URL}/help`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${SITE_URL}/register`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${SITE_URL}/login`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-  ];
+  const base = getSiteUrl();
+
+  return PAGES.map(({ path, changeFrequency, priority }) => ({
+    url: `${base}${path}`,
+    lastModified: new Date(),
+    changeFrequency,
+    priority,
+  }));
 }

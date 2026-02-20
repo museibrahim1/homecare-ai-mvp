@@ -1,6 +1,20 @@
 import { MetadataRoute } from 'next';
+import { headers } from 'next/headers';
+
+function getSiteUrl(): string {
+  try {
+    const headersList = headers();
+    const host = headersList.get('host') || 'palmcareai.com';
+    const proto = headersList.get('x-forwarded-proto') || 'https';
+    return `${proto}://${host}`;
+  } catch {
+    return 'https://palmcareai.com';
+  }
+}
 
 export default function robots(): MetadataRoute.Robots {
+  const base = getSiteUrl();
+
   return {
     rules: [
       {
@@ -32,6 +46,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://palmcareai.com/sitemap.xml',
+    sitemap: `${base}/sitemap.xml`,
   };
 }
