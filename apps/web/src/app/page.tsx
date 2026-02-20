@@ -462,7 +462,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   );
 }
 
-// Book Demo Component
+// Book Demo Component — rectangular calendar layout
 function BookDemoSection() {
   const API = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
@@ -474,29 +474,69 @@ function BookDemoSection() {
   const [confirmDate, setConfirmDate] = useState('');
   const [confirmTime, setConfirmTime] = useState('');
   const [form, setForm] = useState({ name: '', email: '', company_name: '', phone: '' });
-
-  // Generate next 14 weekdays
-  const dates = useMemo(() => {
-    const result: { date: Date; iso: string; label: string; dayName: string }[] = [];
+  const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
-    let d = new Date(now);
-    d.setDate(d.getDate() + 1);
-    while (result.length < 14) {
-      if (d.getDay() !== 0 && d.getDay() !== 6) {
-        result.push({
-          date: new Date(d),
-          iso: d.toISOString().split('T')[0],
-          label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
-        });
-      }
-      d.setDate(d.getDate() + 1);
-    }
-    return result;
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
+
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
   }, []);
 
-  const [weekOffset, setWeekOffset] = useState(0);
-  const visibleDates = dates.slice(weekOffset * 5, weekOffset * 5 + 5);
+  const calendarDays = useMemo(() => {
+    const { year, month } = viewMonth;
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDow = firstDay.getDay();
+
+    const cells: (Date | null)[] = [];
+    for (let i = 0; i < startDow; i++) cells.push(null);
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      cells.push(new Date(year, month, d));
+    }
+    while (cells.length % 7 !== 0) cells.push(null);
+    return cells;
+  }, [viewMonth]);
+
+  const monthLabel = new Date(viewMonth.year, viewMonth.month).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const isSelectable = (d: Date) => {
+    const dow = d.getDay();
+    if (dow === 0 || dow === 6) return false;
+    if (d <= today) return false;
+    const diffMs = d.getTime() - today.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    return diffDays <= 30;
+  };
+
+  const toIso = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const canGoPrev = viewMonth.month > today.getMonth() || viewMonth.year > today.getFullYear();
+  const maxMonth = new Date(today.getFullYear(), today.getMonth() + 1);
+  const canGoNext = viewMonth.year < maxMonth.getFullYear() || viewMonth.month < maxMonth.getMonth();
+
+  const prevMonth = () => {
+    setViewMonth(prev => {
+      const d = new Date(prev.year, prev.month - 1);
+      return { year: d.getFullYear(), month: d.getMonth() };
+    });
+  };
+  const nextMonth = () => {
+    setViewMonth(prev => {
+      const d = new Date(prev.year, prev.month + 1);
+      return { year: d.getFullYear(), month: d.getMonth() };
+    });
+  };
 
   const timeSlots = [
     '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
@@ -510,6 +550,10 @@ function BookDemoSection() {
     const hour = h > 12 ? h - 12 : h === 0 ? 12 : h;
     return `${hour}:${m.toString().padStart(2, '0')} ${ampm}`;
   };
+
+  const selectedDateObj = selectedDate
+    ? new Date(selectedDate + 'T12:00:00')
+    : null;
 
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime) return;
@@ -540,9 +584,11 @@ function BookDemoSection() {
     }
   };
 
+  const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
   return (
-    <section id="book-demo" className="py-20 px-6">
-      <div className="max-w-5xl mx-auto">
+    <section id="book-demo" className="py-20 px-6 bg-dark-800/30">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full mb-6">
             <Video className="w-4 h-4 text-green-400" />
@@ -552,101 +598,129 @@ function BookDemoSection() {
             See PalmCare AI in Action
           </h2>
           <p className="text-xl text-dark-400 max-w-2xl mx-auto">
-            Book a free 30-minute demo with our team. We'll show you how to turn assessments into contracts in minutes.
+            Book a free 30-minute demo with our team. We&apos;ll show you how to turn assessments into contracts in minutes.
           </p>
         </div>
 
-        <div className="card p-8 border-primary-500/20">
+        <div className="card p-6 md:p-8 border-primary-500/20">
           {step === 'date' && (
-            <div className="space-y-8">
-              {/* Date Selection */}
+            <div className="grid md:grid-cols-[1fr_340px] gap-8">
+              {/* Left: Calendar */}
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-5">
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-primary-400" />
-                    Pick a Date
+                    {monthLabel}
                   </h3>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <button
-                      aria-label="Previous week"
-                      onClick={() => setWeekOffset(Math.max(0, weekOffset - 1))}
-                      disabled={weekOffset === 0}
-                      className="p-1.5 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+                      aria-label="Previous month"
+                      onClick={prevMonth}
+                      disabled={!canGoPrev}
+                      className="p-2 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="text-sm text-dark-400 min-w-[80px] text-center">
-                      {weekOffset === 0 ? 'This week' : weekOffset === 1 ? 'Next week' : `Week ${weekOffset + 1}`}
-                    </span>
                     <button
-                      aria-label="Next week"
-                      onClick={() => setWeekOffset(Math.min(2, weekOffset + 1))}
-                      disabled={weekOffset >= 2}
-                      className="p-1.5 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+                      aria-label="Next month"
+                      onClick={nextMonth}
+                      disabled={!canGoNext}
+                      className="p-2 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-3">
-                  {visibleDates.map((d) => (
-                    <button
-                      key={d.iso}
-                      onClick={() => { setSelectedDate(d.iso); setSelectedTime(null); }}
-                      className={`p-4 rounded-xl border text-center transition-all ${
-                        selectedDate === d.iso
-                          ? 'bg-primary-500/20 border-primary-500 ring-2 ring-primary-500/30'
-                          : 'bg-dark-700/50 border-dark-600 hover:border-dark-500'
-                      }`}
-                    >
-                      <p className={`text-xs font-medium ${selectedDate === d.iso ? 'text-primary-400' : 'text-dark-400'}`}>
-                        {d.dayName}
-                      </p>
-                      <p className={`text-lg font-bold mt-1 ${selectedDate === d.iso ? 'text-white' : 'text-dark-200'}`}>
-                        {d.label}
-                      </p>
-                    </button>
+
+                {/* Day-of-week header */}
+                <div className="grid grid-cols-7 mb-1">
+                  {DOW.map(d => (
+                    <div key={d} className="py-2 text-center text-xs font-semibold text-dark-400 uppercase tracking-wide">
+                      {d}
+                    </div>
                   ))}
                 </div>
+
+                {/* Calendar grid */}
+                <div className="grid grid-cols-7">
+                  {calendarDays.map((day, i) => {
+                    if (!day) {
+                      return <div key={`empty-${i}`} className="aspect-square" />;
+                    }
+                    const iso = toIso(day);
+                    const selectable = isSelectable(day);
+                    const isSelected = iso === selectedDate;
+                    const isToday = day.getTime() === today.getTime();
+
+                    return (
+                      <button
+                        key={iso}
+                        disabled={!selectable}
+                        onClick={() => { setSelectedDate(iso); setSelectedTime(null); }}
+                        className={`aspect-square flex items-center justify-center text-sm font-medium rounded-xl transition-all relative
+                          ${isSelected
+                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                            : selectable
+                              ? 'text-dark-200 hover:bg-dark-700 hover:text-white cursor-pointer'
+                              : 'text-dark-600 cursor-not-allowed'
+                          }
+                        `}
+                      >
+                        {day.getDate()}
+                        {isToday && !isSelected && (
+                          <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-400" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="text-xs text-dark-500 mt-3">Weekdays only, up to 30 days out</p>
               </div>
 
-              {/* Time Selection */}
-              {selectedDate && (
-                <div className="animate-fadeIn">
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-                    <Clock className="w-5 h-5 text-primary-400" />
-                    Pick a Time <span className="text-sm font-normal text-dark-400">(Eastern Time)</span>
-                  </h3>
-                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-                    {timeSlots.map((slot) => (
+              {/* Right: Time slots + continue */}
+              <div className="border-t md:border-t-0 md:border-l border-dark-600/50 pt-6 md:pt-0 md:pl-8">
+                {selectedDate && selectedDateObj ? (
+                  <div className="animate-fadeIn">
+                    <h3 className="text-lg font-semibold text-white mb-1">
+                      {selectedDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                    </h3>
+                    <p className="text-sm text-dark-400 mb-5 flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" />
+                      30 min &bull; Eastern Time
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1 scrollbar-hide">
+                      {timeSlots.map((slot) => (
+                        <button
+                          key={slot}
+                          onClick={() => setSelectedTime(slot)}
+                          className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-all ${
+                            selectedTime === slot
+                              ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                              : 'bg-dark-700/50 text-dark-300 hover:bg-dark-700 hover:text-white border border-dark-600'
+                          }`}
+                        >
+                          {formatSlot(slot)}
+                        </button>
+                      ))}
+                    </div>
+                    {selectedTime && (
                       <button
-                        key={slot}
-                        onClick={() => setSelectedTime(slot)}
-                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
-                          selectedTime === slot
-                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
-                            : 'bg-dark-700/50 text-dark-300 hover:bg-dark-700 hover:text-white border border-dark-600'
-                        }`}
+                        onClick={() => setStep('form')}
+                        className="w-full btn-primary flex items-center justify-center gap-2 py-3 mt-5"
                       >
-                        {formatSlot(slot)}
+                        Continue
+                        <ArrowRight className="w-4 h-4" />
                       </button>
-                    ))}
+                    )}
                   </div>
-                </div>
-              )}
-
-              {/* Continue Button */}
-              {selectedDate && selectedTime && (
-                <div className="flex justify-end animate-fadeIn">
-                  <button
-                    onClick={() => setStep('form')}
-                    className="btn-primary flex items-center gap-2 py-3 px-8"
-                  >
-                    Continue
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center py-12 md:py-0">
+                    <Calendar className="w-10 h-10 text-dark-600 mb-3" />
+                    <p className="text-dark-400 text-sm">Select a date to see available times</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -665,7 +739,7 @@ function BookDemoSection() {
                 </div>
                 <div>
                   <p className="text-white font-semibold">
-                    {dates.find(d => d.iso === selectedDate)?.date.toLocaleDateString('en-US', {
+                    {selectedDateObj?.toLocaleDateString('en-US', {
                       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
                     })}
                   </p>
@@ -964,6 +1038,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Book a Demo Section */}
+      <BookDemoSection />
+
       {/* Features Section */}
       <section id="features" className="py-20 px-6 bg-dark-800/30">
         <div className="max-w-7xl mx-auto">
@@ -1126,9 +1203,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* Book a Demo Section */}
-      <BookDemoSection />
 
       {/* CTA Section */}
       <section className="py-20 px-6">
