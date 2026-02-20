@@ -227,6 +227,28 @@ class ApiClient {
     return this.request<any>(`/visits/${visitId}/contract`, {}, token);
   }
 
+  async createContract(token: string, data: {
+    client_id: string;
+    title: string;
+    services?: { name: string; rate?: number; unit?: string }[];
+    schedule?: { days?: string[]; hours_per_week?: number; start_time?: string; end_time?: string };
+    hourly_rate?: number;
+    weekly_hours?: number;
+    start_date?: string;
+    end_date?: string;
+    cancellation_policy?: string;
+    terms_and_conditions?: string;
+  }) {
+    return this.request<any>('/visits/contracts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, token);
+  }
+
+  async listContracts(token: string) {
+    return this.request<any[]>('/visits/contracts', {}, token);
+  }
+
   // Pipeline
   async runPipelineStep(token: string, visitId: string, step: string) {
     return this.request<any>(

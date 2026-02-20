@@ -31,6 +31,7 @@ import {
   Eye,
   RefreshCw,
   HelpCircle,
+  FilePlus,
   Menu,
   X,
   Sun,
@@ -72,6 +73,7 @@ const communicationNavItems: NavItemData[] = [
 // Resources
 const resourcesNavItems: NavItemData[] = [
   { href: '/proposals', label: 'Proposals', icon: FileText, description: 'Contract proposals' },
+  { href: '/contracts/new', label: 'Create Contract', icon: FilePlus, description: 'Manual contract' },
   { href: '/documents', label: 'Documents', icon: FolderOpen, description: 'Files & contracts' },
   { href: '/reports', label: 'Reports', icon: BarChart3, description: 'Analytics' },
   { href: '/help', label: 'Help & Support', icon: HelpCircle, description: 'Get help' },

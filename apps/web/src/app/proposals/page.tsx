@@ -200,11 +200,18 @@ export default function ProposalsPage() {
           </div>
           <div className="flex gap-3">
             <Link
+              href="/contracts/new"
+              className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+            >
+              <Edit3 className="w-5 h-5" />
+              Create Contract
+            </Link>
+            <Link
               href="/visits/new"
               className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
             >
               <FileText className="w-5 h-5" />
-              New Proposal
+              New from Pipeline
             </Link>
           </div>
         </div>
@@ -291,15 +298,24 @@ export default function ProposalsPage() {
             <p className="text-dark-400 mb-6">
               {searchQuery || statusFilter !== 'all' 
                 ? 'Try adjusting your search or filters'
-                : 'Create a new visit and run the pipeline to generate contract proposals'}
+                : 'Create a contract manually or use the pipeline to generate one from an assessment'}
             </p>
-            <Link
-              href="/visits/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-            >
-              <FileText className="w-5 h-5" />
-              Create New Proposal
-            </Link>
+            <div className="flex items-center justify-center gap-4">
+              <Link
+                href="/contracts/new"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              >
+                <Edit3 className="w-5 h-5" />
+                Create Contract
+              </Link>
+              <Link
+                href="/visits/new"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors border border-dark-600"
+              >
+                <FileText className="w-5 h-5" />
+                New from Pipeline
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
