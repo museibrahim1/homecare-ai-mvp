@@ -537,7 +537,7 @@ async def request_password_reset(
         user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=24)
         db.commit()
         
-        app_url = os.getenv("APP_URL", "https://palmtai.com")
+        app_url = os.getenv("APP_URL", "https://palmcareai.com")
         reset_url = f"{app_url}/reset-password?token={token}"
         
         email_svc = get_email_service()
@@ -871,7 +871,7 @@ async def invite_team_member(
     email_sent = False
     try:
         email_service = get_email_service()
-        app_url = os.getenv("APP_URL", "https://palmtai.com")
+        app_url = os.getenv("APP_URL", "https://palmcareai.com")
         invite_result = email_service.send_email(
             to=email,
             subject=f"You've been invited to join {current_user.company_name} on PalmCare AI",

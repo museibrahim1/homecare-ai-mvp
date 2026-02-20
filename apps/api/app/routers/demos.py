@@ -230,7 +230,7 @@ async def book_demo(
 
     # Send confirmation emails
     email_svc = get_email_service()
-    app_url = os.getenv("APP_URL", "https://palmtai.com")
+    app_url = os.getenv("APP_URL", "https://palmcareai.com")
 
     meet_section = ""
     if meeting_link:

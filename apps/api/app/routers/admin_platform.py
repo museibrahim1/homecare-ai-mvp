@@ -608,7 +608,7 @@ async def create_platform_user(
     db.commit()
     db.refresh(new_user)
     
-    app_url = os.getenv("APP_URL", "https://palmtai.com")
+    app_url = os.getenv("APP_URL", "https://palmcareai.com")
     invite_result = email_service.send_email(
         to=user_data.email,
         subject="You've been added as a Platform Admin - PalmCare AI",

@@ -29,7 +29,7 @@ class EmailService:
 
     def __init__(self):
         self.api_key = os.getenv("RESEND_API_KEY")
-        self.app_url = os.getenv("APP_URL", "https://palmtai.com")
+        self.app_url = os.getenv("APP_URL", "https://palmcareai.com")
 
         self.from_onboarding = os.getenv(
             "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@palmtai.com>"

@@ -282,7 +282,7 @@ async def approve_business(
         
         # Send approval email
         if owner:
-            login_url = os.getenv("APP_URL", "https://palmtai.com") + "/login"
+            login_url = os.getenv("APP_URL", "https://palmcareai.com") + "/login"
             email_service.send_business_approved(
                 business_email=owner.email,
                 business_name=business.name,

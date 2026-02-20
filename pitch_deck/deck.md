@@ -338,9 +338,9 @@ Intake → Assessment → Proposal → Active → Completed
 
 ## Contact
 
-### Homecare AI
+### PalmCare AI
 
-**Website**: [palmtai.com](https://palmtai.com)
+**Website**: [palmcareai.com](https://palmcareai.com)
 **Demo**: [web-production-11611.up.railway.app](https://web-production-11611.up.railway.app)
 **Email**: contact@palmtai.com
 

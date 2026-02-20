@@ -40,6 +40,8 @@ class CatchAllMiddleware(BaseHTTPMiddleware):
                 "https://web-production-11611.up.railway.app",
                 "https://app.palmtai.com",
                 "https://palmtai.com",
+                "https://palmcareai.com",
+                "https://app.palmcareai.com",
             ]
             
             if origin in allowed_origins:
@@ -99,9 +101,11 @@ cors_origins = [
     # Railway deployments
     "https://web-production-11611.up.railway.app",
     "https://helcarai.up.railway.app",
-    # Custom domain
+    # Custom domains
     "https://app.palmtai.com",
     "https://palmtai.com",
+    "https://palmcareai.com",
+    "https://app.palmcareai.com",
 ]
 
 # Add any custom origins from environment

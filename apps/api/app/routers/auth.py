@@ -238,7 +238,7 @@ async def forgot_password(
         
         # Build reset URL
         import os
-        app_url = os.getenv("APP_URL", "https://palmtai.com")
+        app_url = os.getenv("APP_URL", "https://palmcareai.com")
         reset_url = f"{app_url}/reset-password?token={reset_token}"
         
         # Send reset email

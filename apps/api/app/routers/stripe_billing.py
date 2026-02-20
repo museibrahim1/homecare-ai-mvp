@@ -34,8 +34,8 @@ except ImportError:
 # Initialize Stripe
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
-STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "https://palmtai.com/billing/success")
-STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "https://palmtai.com/pricing")
+STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "https://palmcareai.com/billing/success")
+STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "https://palmcareai.com/pricing")
 
 if STRIPE_AVAILABLE and STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
