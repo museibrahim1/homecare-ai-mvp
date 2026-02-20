@@ -89,7 +89,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
 
 export default function BillingPage() {
   const router = useRouter();
-  const { user, token, isAuthenticated } = useAuth();
+  const { user, token } = useAuth();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [plan, setPlan] = useState<PlanData | null>(null);
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
@@ -102,10 +102,10 @@ export default function BillingPage() {
   const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
 
   useEffect(() => {
-    if (!hasStoredToken && !isAuthenticated()) {
+    if (!hasStoredToken && !token) {
       router.push('/login');
     }
-  }, [hasStoredToken, isAuthenticated, router]);
+  }, [hasStoredToken, token, router]);
 
   const fetchBilling = useCallback(async () => {
     if (!token) return;
@@ -194,7 +194,7 @@ export default function BillingPage() {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   };
 
-  if (!hasStoredToken && !isAuthenticated()) return null;
+  if (!hasStoredToken && !token) return null;
 
   if (loading) {
     return (

@@ -1,25 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, ArrowRight, Loader2, Sparkles, Zap, FileText, Users } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 export default function BillingSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+      </div>
+    }>
+      <BillingSuccessContent />
+    </Suspense>
+  );
+}
+
+function BillingSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { token } = useAuth();
   const [countdown, setCountdown] = useState(8);
   const sessionId = searchParams.get('session_id');
 
   const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
 
   useEffect(() => {
-    if (!hasStoredToken && !isAuthenticated()) {
+    if (!hasStoredToken && !token) {
       router.push('/login');
     }
-  }, [hasStoredToken, isAuthenticated, router]);
+  }, [hasStoredToken, token, router]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -35,7 +47,7 @@ export default function BillingSuccessPage() {
     return () => clearInterval(timer);
   }, [router]);
 
-  if (!hasStoredToken && !isAuthenticated()) return null;
+  if (!hasStoredToken && !token) return null;
 
   return (
     <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">

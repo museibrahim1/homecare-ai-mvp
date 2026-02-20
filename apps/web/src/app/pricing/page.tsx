@@ -23,11 +23,11 @@ interface PricingPlan {
 }
 
 export default function PricingPage() {
-  const { token, isAuthenticated } = useAuth();
+  const { token } = useAuth();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [apiPlans, setApiPlans] = useState<any[]>([]);
-  const loggedIn = isAuthenticated();
+  const loggedIn = !!token;
 
   useEffect(() => {
     fetch(`${API_BASE}/billing/plans`)
