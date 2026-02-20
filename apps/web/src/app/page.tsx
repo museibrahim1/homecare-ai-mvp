@@ -201,7 +201,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
               <p className="text-sm text-dark-400">See how PalmCare AI works</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-700">
+          <button aria-label="Close demo" onClick={onClose} className="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-700">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -409,12 +409,14 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
               ) : (
                 <>
                   <button 
+                    aria-label={isPlaying ? 'Pause demo' : 'Play demo'}
                     onClick={() => setIsPlaying(!isPlaying)}
                     className="p-2 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition"
                   >
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                   </button>
                   <button 
+                    aria-label="Skip to next step"
                     onClick={handleSkip}
                     className="p-2 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition"
                   >
@@ -566,6 +568,7 @@ function BookDemoSection() {
                   </h3>
                   <div className="flex items-center gap-2">
                     <button
+                      aria-label="Previous week"
                       onClick={() => setWeekOffset(Math.max(0, weekOffset - 1))}
                       disabled={weekOffset === 0}
                       className="p-1.5 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
@@ -576,6 +579,7 @@ function BookDemoSection() {
                       {weekOffset === 0 ? 'This week' : weekOffset === 1 ? 'Next week' : `Week ${weekOffset + 1}`}
                     </span>
                     <button
+                      aria-label="Next week"
                       onClick={() => setWeekOffset(Math.min(2, weekOffset + 1))}
                       disabled={weekOffset >= 2}
                       className="p-1.5 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
@@ -801,7 +805,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-dark-900">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
+      <nav aria-label="Main navigation" className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
@@ -824,6 +828,7 @@ export default function LandingPage() {
 
             {/* Mobile Menu Button */}
             <button 
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-dark-300 hover:text-white"
             >
@@ -846,6 +851,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      <main>
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
@@ -1149,6 +1155,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-dark-700">
@@ -1166,7 +1173,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Product</h4>
+              <h3 className="font-semibold text-white mb-4 text-base">Product</h3>
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><a href="#features" className="hover:text-white transition">Features</a></li>
                 <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
@@ -1174,7 +1181,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Company</h4>
+              <h3 className="font-semibold text-white mb-4 text-base">Company</h3>
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><a href="#" className="hover:text-white transition">About</a></li>
                 <li><a href="#" className="hover:text-white transition">Blog</a></li>
@@ -1182,7 +1189,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Legal</h4>
+              <h3 className="font-semibold text-white mb-4 text-base">Legal</h3>
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
                 <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
