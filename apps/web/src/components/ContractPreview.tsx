@@ -916,7 +916,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
               {(() => {
                 const fields = templatePreview.fields || [];
-                const sections = [...new Set(fields.map(f => f.section))];
+                const sections = Array.from(new Set(fields.map(f => f.section)));
                 const sectionLabels: Record<string, string> = {
                   client_info: 'Client Information',
                   agency_info: 'Agency Information',
