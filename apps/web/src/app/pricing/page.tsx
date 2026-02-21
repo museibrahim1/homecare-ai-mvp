@@ -64,12 +64,14 @@ export default function PricingPage() {
     }
   }, [token, apiPlans, billingCycle]);
 
+  const PRICE_PER_SEAT = 13;
+
   const plans: PricingPlan[] = [
     {
       name: 'Starter',
-      description: 'For small agencies getting organized',
-      monthlyPrice: 299,
-      annualPrice: 3049,
+      description: '29 seats · $13/seat',
+      monthlyPrice: 377,
+      annualPrice: 3845,
       setupFee: null,
       highlighted: false,
       cta: 'Get Started',
@@ -77,9 +79,9 @@ export default function PricingPage() {
     },
     {
       name: 'Growth',
-      description: 'For growing teams',
-      monthlyPrice: 599,
-      annualPrice: 6109,
+      description: '49 seats · $13/seat',
+      monthlyPrice: 637,
+      annualPrice: 6497,
       setupFee: null,
       highlighted: true,
       cta: 'Get Started',
@@ -87,9 +89,9 @@ export default function PricingPage() {
     },
     {
       name: 'Pro',
-      description: 'For high-volume teams',
-      monthlyPrice: 1299,
-      annualPrice: 13249,
+      description: '99 seats · $13/seat',
+      monthlyPrice: 1287,
+      annualPrice: 13127,
       setupFee: null,
       highlighted: false,
       cta: 'Get Started',
@@ -112,10 +114,11 @@ export default function PricingPage() {
     {
       name: 'Core Features',
       features: [
-        { name: 'Generated contracts / month', values: ['5', '25', 'Unlimited'] },
-        { name: 'Clients in CRM', values: ['50', '200', '1,000'] },
-        { name: 'Caregivers in CRM', values: ['25', '100', '500'] },
-        { name: 'Team seats', values: ['1', '10', 'Unlimited'] },
+        { name: 'Included seats', values: ['29', '49', '99'] },
+        { name: 'Price per seat', values: ['$13', '$13', '$13'] },
+        { name: 'Generated contracts / month', values: ['5', '15', 'Unlimited'] },
+        { name: 'Clients in CRM', values: ['20', '75', '500'] },
+        { name: 'Caregivers', values: ['10', '40', '200'] },
         { name: 'Assessment intake', values: [true, true, true] },
         { name: 'Transcript import/upload', values: [true, true, true] },
         { name: 'AI billables extraction', values: [true, true, true] },
