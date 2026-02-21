@@ -285,6 +285,69 @@ class ApiClient {
     }, token);
   }
 
+  // Contract Templates
+  async uploadContractTemplate(token: string, file: File, name: string, description?: string) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('name', name);
+    if (description) formData.append('description', description);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000);
+
+    try {
+      const response = await fetch(`${API_BASE}/contract-templates/upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
+        throw new Error(error.detail || 'Upload failed');
+      }
+      return response.json();
+    } catch (err: any) {
+      clearTimeout(timeout);
+      if (err.name === 'AbortError') throw new Error('Template upload timed out');
+      throw err;
+    }
+  }
+
+  async listContractTemplates(token: string) {
+    return this.request<any[]>('/contract-templates/', {}, token);
+  }
+
+  async getContractTemplate(token: string, templateId: string) {
+    return this.request<any>(`/contract-templates/${templateId}`, {}, token);
+  }
+
+  async deleteContractTemplate(token: string, templateId: string) {
+    return this.request<void>(`/contract-templates/${templateId}`, { method: 'DELETE' }, token);
+  }
+
+  async rescanTemplate(token: string, templateId: string) {
+    return this.request<any>(`/contract-templates/${templateId}/rescan`, { method: 'POST' }, token);
+  }
+
+  async updateTemplateMapping(token: string, templateId: string, updates: { field_id: string; mapped_to: string }[]) {
+    return this.request<any>(`/contract-templates/${templateId}/mapping`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    }, token);
+  }
+
+  async reconcileTemplates(token: string, newTemplateId: string, oldTemplateId: string) {
+    return this.request<any>(`/contract-templates/${newTemplateId}/reconcile/${oldTemplateId}`, {
+      method: 'POST',
+    }, token);
+  }
+
+  async getFieldRegistry(token: string) {
+    return this.request<any>('/contract-templates/registry/fields', {}, token);
+  }
+
   // Upload — uses longer timeout (5 minutes) for large audio files
   async uploadAudio(token: string, visitId: string, file: File, autoProcess: boolean = true) {
     const formData = new FormData();

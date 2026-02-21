@@ -32,6 +32,7 @@ import {
   RefreshCw,
   HelpCircle,
   FilePlus,
+  Layers,
   Menu,
   X,
   Sun,
@@ -74,6 +75,7 @@ const communicationNavItems: NavItemData[] = [
 const resourcesNavItems: NavItemData[] = [
   { href: '/proposals', label: 'Proposals', icon: FileText, description: 'Contract proposals' },
   { href: '/contracts/new', label: 'Create Contract', icon: FilePlus, description: 'Manual contract' },
+  { href: '/templates', label: 'OCR Templates', icon: Layers, description: 'Upload & scan templates' },
   { href: '/documents', label: 'Documents', icon: FolderOpen, description: 'Files & contracts' },
   { href: '/reports', label: 'Reports', icon: BarChart3, description: 'Analytics' },
   { href: '/help', label: 'Help & Support', icon: HelpCircle, description: 'Get help' },

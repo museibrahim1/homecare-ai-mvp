@@ -61,6 +61,7 @@ services:
       # LLM Configuration for document extraction
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      STIRLING_PDF_URL: ${STIRLING_PDF_URL:-http://stirling-pdf:8080}
     ports:
       - "8000:8000"
     volumes:
@@ -108,6 +109,21 @@ services:
       minio:
         condition: service_healthy
 
+  stirling-pdf:
+    image: docker.stirlingpdf.com/stirlingtools/stirling-pdf:latest
+    ports:
+      - "8080:8080"
+    environment:
+      DOCKER_ENABLE_SECURITY: "false"
+      SECURITY_ENABLELOGIN: "false"
+    volumes:
+      - stirling_data:/usr/share/tessdata
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/info/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   web:
     build: ./apps/web
     environment:
@@ -125,3 +141,4 @@ volumes:
   pgdata:
   miniodata:
   model_cache:
+  stirling_data:

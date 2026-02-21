@@ -17,6 +17,8 @@ import {
   Shield,
   ChevronDown,
   ChevronUp,
+  Layers,
+  Scan,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -75,6 +77,11 @@ export default function NewContractPage() {
   const [success, setSuccess] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
 
+  // Template state
+  const [templates, setTemplates] = useState<{ id: string; name: string; version: number; field_count?: number }[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+
   // Form state
   const [selectedClient, setSelectedClient] = useState('');
   const [title, setTitle] = useState('');
@@ -105,6 +112,7 @@ export default function NewContractPage() {
   useEffect(() => {
     if (token) {
       loadClients();
+      loadTemplates();
     }
   }, [token]);
 
@@ -116,6 +124,17 @@ export default function NewContractPage() {
       setError('Failed to load clients');
     } finally {
       setLoadingClients(false);
+    }
+  };
+
+  const loadTemplates = async () => {
+    try {
+      const data = await api.listContractTemplates(token!);
+      setTemplates(data);
+    } catch {
+      /* templates are optional */
+    } finally {
+      setLoadingTemplates(false);
     }
   };
 
@@ -358,6 +377,38 @@ export default function NewContractPage() {
                 </div>
               </div>
             </div>
+
+            {/* Section: Template Selection */}
+            {templates.length > 0 && (
+              <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-cyan-400" />
+                  OCR Template
+                </h2>
+                <p className="text-dark-400 text-sm mb-3">
+                  Select a scanned template to auto-fill the contract with OCR-mapped fields.
+                </p>
+                <select
+                  value={selectedTemplate}
+                  onChange={(e) => setSelectedTemplate(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                >
+                  <option value="">No template (manual entry)</option>
+                  {templates.map((tmpl) => (
+                    <option key={tmpl.id} value={tmpl.id}>
+                      {tmpl.name} v{tmpl.version}
+                      {tmpl.field_count ? ` (${tmpl.field_count} fields)` : ''}
+                    </option>
+                  ))}
+                </select>
+                {selectedTemplate && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-cyan-400">
+                    <Scan className="w-3.5 h-3.5" />
+                    Contract will use this template&apos;s field mapping when generating
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Section 2: Services */}
             <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl p-6">

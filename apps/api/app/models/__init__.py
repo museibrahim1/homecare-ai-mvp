@@ -12,6 +12,7 @@ from app.models.call import Call
 from app.models.subscription import Plan, Subscription, Invoice
 from app.models.support_ticket import SupportTicket, TicketResponse
 from app.models.incident import Incident, IncidentUpdate
+from app.models.contract_template import ContractTemplate
 
 __all__ = [
     "User",
@@ -32,4 +33,5 @@ __all__ = [
     "TicketResponse",
     "Incident",
     "IncidentUpdate",
+    "ContractTemplate",
 ]
