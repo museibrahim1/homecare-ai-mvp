@@ -81,22 +81,22 @@ const TESTIMONIALS = [
 const PRICING = [
   {
     name: 'Starter',
-    price: 377,
-    description: '29 seats · $13/seat',
+    price: 379.99,
+    description: '29 seats · $13.10/seat',
     features: ['5 contracts/month', '20 clients in CRM', '10 caregivers', '29 seats included', 'Email support'],
     popular: false,
   },
   {
     name: 'Growth',
-    price: 637,
-    description: '49 seats · $13/seat',
+    price: 639.99,
+    description: '49 seats · $13.06/seat',
     features: ['15 contracts/month', '75 clients in CRM', '40 caregivers', '49 seats included', 'Priority support'],
     popular: true,
   },
   {
     name: 'Pro',
-    price: 1287,
-    description: '99 seats · $13/seat',
+    price: 1299,
+    description: '99 seats · $13.13/seat',
     features: ['Unlimited contracts', '500 clients in CRM', '200 caregivers', '99 seats included', 'Advanced analytics'],
     popular: false,
   },

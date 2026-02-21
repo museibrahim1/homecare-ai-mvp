@@ -1,13 +1,13 @@
-"""Reprice plans to $13/seat model
+"""Reprice plans to per-seat model
 
 Revision ID: 021
 Revises: 020
 Create Date: 2026-02-21
 
-New pricing at $13/seat:
-- Starter: 29 seats, $377/mo, 5 contracts, 20 clients, 10 caregivers
-- Growth:  49 seats, $637/mo, 15 contracts, 75 clients, 40 caregivers
-- Pro:     99 seats, $1,287/mo, unlimited contracts, 500 clients, 200 caregivers
+New pricing:
+- Starter: 29 seats, $379.99/mo ($13.10/seat)
+- Growth:  49 seats, $639.99/mo ($13.06/seat)
+- Pro:     99 seats, $1,299/mo  ($13.13/seat)
 """
 from alembic import op
 
@@ -20,36 +20,36 @@ depends_on = None
 def upgrade() -> None:
     op.execute("""
         UPDATE plans SET
-            monthly_price = 377,
-            annual_price = 3845,
+            monthly_price = 379.99,
+            annual_price = 3876,
             max_users = 29,
             max_clients = 20,
             max_visits_per_month = 5,
-            description = '29 seats at $13/seat',
+            description = '29 seats at $13.10/seat',
             features = '["5 contracts per month", "20 clients in CRM", "10 caregivers", "29 seats included", "AI billable extraction", "Contract generation", "PDF exports", "Email support"]'
         WHERE name = 'Starter'
     """)
 
     op.execute("""
         UPDATE plans SET
-            monthly_price = 637,
-            annual_price = 6497,
+            monthly_price = 639.99,
+            annual_price = 6528,
             max_users = 49,
             max_clients = 75,
             max_visits_per_month = 15,
-            description = '49 seats at $13/seat',
+            description = '49 seats at $13.06/seat',
             features = '["15 contracts per month", "75 clients in CRM", "40 caregivers", "49 seats included", "Everything in Starter", "Advanced templates", "Timesheet exports", "Priority support"]'
         WHERE name = 'Growth'
     """)
 
     op.execute("""
         UPDATE plans SET
-            monthly_price = 1287,
-            annual_price = 13127,
+            monthly_price = 1299,
+            annual_price = 13250,
             max_users = 99,
             max_clients = 500,
             max_visits_per_month = 9999,
-            description = '99 seats at $13/seat',
+            description = '99 seats at $13.13/seat',
             features = '["Unlimited contracts", "500 clients in CRM", "200 caregivers", "99 seats included", "Everything in Growth", "Multi-location management", "Advanced analytics", "Integrations & API", "Dedicated onboarding"]'
         WHERE name = 'Pro'
     """)

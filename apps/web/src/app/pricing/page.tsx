@@ -64,14 +64,12 @@ export default function PricingPage() {
     }
   }, [token, apiPlans, billingCycle]);
 
-  const PRICE_PER_SEAT = 13;
-
   const plans: PricingPlan[] = [
     {
       name: 'Starter',
-      description: '29 seats · $13/seat',
-      monthlyPrice: 377,
-      annualPrice: 3845,
+      description: '29 seats · $13.10/seat',
+      monthlyPrice: 379.99,
+      annualPrice: 3876,
       setupFee: null,
       highlighted: false,
       cta: 'Get Started',
@@ -79,9 +77,9 @@ export default function PricingPage() {
     },
     {
       name: 'Growth',
-      description: '49 seats · $13/seat',
-      monthlyPrice: 637,
-      annualPrice: 6497,
+      description: '49 seats · $13.06/seat',
+      monthlyPrice: 639.99,
+      annualPrice: 6528,
       setupFee: null,
       highlighted: true,
       cta: 'Get Started',
@@ -89,9 +87,9 @@ export default function PricingPage() {
     },
     {
       name: 'Pro',
-      description: '99 seats · $13/seat',
-      monthlyPrice: 1287,
-      annualPrice: 13127,
+      description: '99 seats · $13.13/seat',
+      monthlyPrice: 1299,
+      annualPrice: 13250,
       setupFee: null,
       highlighted: false,
       cta: 'Get Started',
@@ -115,7 +113,7 @@ export default function PricingPage() {
       name: 'Core Features',
       features: [
         { name: 'Included seats', values: ['29', '49', '99'] },
-        { name: 'Price per seat', values: ['$13', '$13', '$13'] },
+        { name: 'Price per seat', values: ['$13.10', '$13.06', '$13.13'] },
         { name: 'Generated contracts / month', values: ['5', '15', 'Unlimited'] },
         { name: 'Clients in CRM', values: ['20', '75', '500'] },
         { name: 'Caregivers', values: ['10', '40', '200'] },
