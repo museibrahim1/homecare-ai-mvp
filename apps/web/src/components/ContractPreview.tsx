@@ -69,9 +69,19 @@ export default function ContractPreview({ contract, client, visitId, onContractU
   // Editable contract data
   const [editData, setEditData] = useState<any>({});
   
-  // Document type: proposal first, then service agreement
-  const [documentType, setDocumentType] = useState<'proposal' | 'agreement'>('proposal');
-  
+  // Document type: proposal first, then service agreement, or template preview
+  const [documentType, setDocumentType] = useState<'proposal' | 'agreement' | 'template'>('proposal');
+
+  // OCR template preview data
+  const [templatePreview, setTemplatePreview] = useState<{
+    has_template: boolean;
+    template_name?: string;
+    template_version?: number;
+    file_type?: string;
+    fields?: { field_id: string; label: string; section: string; type: string; required: boolean; value: string; is_mapped: boolean }[];
+  } | null>(null);
+  const [templateLoading, setTemplateLoading] = useState(false);
+
   // DOCX download state
   const [downloading, setDownloading] = useState(false);
   
@@ -134,6 +144,31 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     };
     loadAgencySettings();
   }, [token]);
+
+  // Load OCR template preview when contract is available
+  useEffect(() => {
+    const loadTemplatePreview = async () => {
+      if (!contract?.id || !token) return;
+      setTemplateLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/contract-templates/preview/${contract.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setTemplatePreview(data);
+          if (data.has_template) {
+            setDocumentType('template');
+          }
+        }
+      } catch {
+        // template preview is optional
+      } finally {
+        setTemplateLoading(false);
+      }
+    };
+    loadTemplatePreview();
+  }, [contract?.id, token]);
 
   // Initialize edit data when contract changes
   useEffect(() => {
@@ -749,6 +784,18 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
       {/* Document Type Selector */}
       <div className="flex items-center gap-2 px-4 py-2 border-b border-dark-700 bg-dark-800/50 flex-shrink-0">
+        {templatePreview?.has_template && (
+          <button
+            onClick={() => setDocumentType('template')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              documentType === 'template'
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                : 'text-dark-400 hover:text-white hover:bg-dark-700 border border-transparent'
+            }`}
+          >
+            {templatePreview.template_name || 'My Template'}
+          </button>
+        )}
         <button
           onClick={() => setDocumentType('proposal')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -770,7 +817,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           Service Agreement
         </button>
         <span className="text-dark-500 text-xs ml-2 hidden sm:inline">
-          {documentType === 'proposal' ? 'Send first to present care options' : 'Formal contract for signatures'}
+          {documentType === 'template' ? 'Preview of your uploaded template' : documentType === 'proposal' ? 'Send first to present care options' : 'Formal contract for signatures'}
         </span>
       </div>
 
@@ -788,7 +835,104 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto"
           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
         >
-          {documentType === 'agreement' ? (
+          {documentType === 'template' && templatePreview?.has_template ? (
+          /* ===== OCR TEMPLATE PREVIEW ===== */
+          <div className="contract-document">
+            <div
+              className="contract-header text-center p-6 border-b-4"
+              style={{ borderColor: agency.primary_color, background: 'linear-gradient(to right, #f0f4ff, #e0e7ff)' }}
+            >
+              {data.agency_logo && (
+                <img src={data.agency_logo} alt="Logo" className="mx-auto mb-3 rounded-lg bg-white p-2" style={{ maxWidth: '80px', maxHeight: '80px' }} />
+              )}
+              <h1 className="text-2xl font-bold mb-1" style={{ color: agency.primary_color }}>{data.agency_name}</h1>
+              <p className="text-gray-600 text-sm">{data.agency_full_address}</p>
+              <p className="text-gray-600 text-sm">Phone: {data.agency_phone} | Email: {data.agency_email}</p>
+            </div>
+
+            <div className="p-8 text-gray-800">
+              <h2 className="text-center text-xl font-bold pb-3 mb-2 border-b-2" style={{ color: agency.primary_color, borderColor: agency.primary_color }}>
+                CLIENT SERVICE CONTRACT
+              </h2>
+              <p className="text-center text-gray-500 italic mb-1">
+                Template: <strong className="text-gray-700">{templatePreview.template_name}</strong> (v{templatePreview.template_version})
+              </p>
+              <p className="text-center text-gray-500 italic mb-8">
+                Prepared for: <strong className="text-gray-800">{data.client_name}</strong> &mdash; {data.effective_date}
+              </p>
+
+              {(() => {
+                const fields = templatePreview.fields || [];
+                const sections = [...new Set(fields.map(f => f.section))];
+                const sectionLabels: Record<string, string> = {
+                  client_info: 'Client Information',
+                  agency_info: 'Agency Information',
+                  assessment: 'Care Assessment',
+                  services: 'Services',
+                  schedule: 'Schedule',
+                  rates: 'Rates & Fees',
+                  contract: 'Contract Terms',
+                  terms: 'Terms & Conditions',
+                  signatures: 'Signatures',
+                };
+                return sections.map((section) => {
+                  const sectionFields = fields.filter(f => f.section === section);
+                  return (
+                    <div key={section} className="mb-6">
+                      <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                        {(sectionLabels[section] || section.replace(/_/g, ' ')).toUpperCase()}
+                      </h3>
+                      <table className="w-full border-collapse mb-2">
+                        <tbody>
+                          {sectionFields.map((field) => (
+                            <tr key={field.field_id} className="border-b border-gray-100">
+                              <td className="py-2 px-3 text-sm font-medium text-gray-700 w-2/5 bg-gray-50">
+                                {field.label}
+                                {field.required && <span className="text-red-500 ml-1">*</span>}
+                              </td>
+                              <td className="py-2 px-3 text-sm">
+                                {field.value ? (
+                                  <span className="text-gray-900">{field.value}</span>
+                                ) : field.is_mapped ? (
+                                  <span className="text-amber-500 italic">No data in database</span>
+                                ) : (
+                                  <span className="text-red-400 italic">Unmapped field</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-1 w-6">
+                                {field.value ? (
+                                  <span className="text-green-500 text-xs" title="Populated">&#10003;</span>
+                                ) : field.is_mapped ? (
+                                  <span className="text-amber-400 text-xs" title="Mapped but empty">&#9888;</span>
+                                ) : (
+                                  <span className="text-red-400 text-xs" title="Not mapped">&#10007;</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                });
+              })()}
+
+              <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200 text-sm text-blue-800">
+                <strong>Template Summary:</strong>{' '}
+                {templatePreview.fields?.filter(f => f.value).length || 0} of {templatePreview.fields?.length || 0} fields populated.
+                {(templatePreview.fields?.filter(f => !f.is_mapped).length || 0) > 0 && (
+                  <span className="text-amber-600 ml-2">
+                    {templatePreview.fields?.filter(f => !f.is_mapped).length} unmapped fields will be blank in the export.
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="text-center py-4 px-6 text-sm text-gray-500 border-t border-gray-200">
+              {data.agency_name} | {data.agency_phone} | {data.agency_email}
+            </div>
+          </div>
+          ) : documentType === 'agreement' ? (
           <div className="contract-document">
             {/* Header */}
             <div 

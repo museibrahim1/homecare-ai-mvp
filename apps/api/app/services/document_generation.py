@@ -223,201 +223,183 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
     """
     try:
         from docx import Document
-        
+
         doc = Document(io.BytesIO(template_bytes))
-        
-        # Map common label patterns to placeholder keys
-        LABEL_MAPPINGS = {
-            # Client fields - "Person to Receive Services" section
-            'name:': 'client_name',
-            'client name:': 'client_name',
-            'patient name:': 'client_name',
-            'address:': 'client_address',
-            'client address:': 'client_address',
-            'city:': 'client_city',
-            'state:': 'client_state',
-            'zip:': 'client_zip',
-            'zip code:': 'client_zip',
-            'date of birth:': 'date_of_birth',
-            'dob:': 'date_of_birth',
-            'home phone:': 'client_phone',
-            'phone:': 'client_phone',
-            'work phone:': 'work_phone',
-            'cell phone:': 'client_phone',
-            'email:': 'client_email',
-            'emergency contact:': 'emergency_contact',
-            'emergency phone:': 'emergency_phone',
-            
-            # Rate fields
-            'hourly rate:': 'hourly_rate_value',
-            'hourly:': 'hourly_rate_value',
-            'weekly hours:': 'weekly_hours',
-            'hours per week:': 'weekly_hours',
-            
-            # Date fields
-            'date:': 'date',
-            'effective date:': 'effective_date',
-            'start date:': 'effective_date',
-        }
-        
-        def replace_placeholder_text(text: str, placeholders: Dict[str, str]) -> str:
-            """Replace placeholder patterns like {key}, {{key}}, [key]."""
+
+        # Ordered list of (label_pattern, placeholder_key).
+        # Longer/more-specific labels come first so they match before shorter ones.
+        LABEL_MAPPINGS = [
+            ('client name:', 'client_name'),
+            ('patient name:', 'client_name'),
+            ('client address:', 'client_address'),
+            ('client city:', 'client_city'),
+            ('client state:', 'client_state'),
+            ('client zip:', 'client_zip'),
+            ('emergency contact:', 'emergency_contact'),
+            ('emergency phone:', 'emergency_phone'),
+            ('date of birth:', 'date_of_birth'),
+            ('dob:', 'date_of_birth'),
+            ('home phone:', 'client_phone'),
+            ('work phone:', 'work_phone'),
+            ('cell phone:', 'client_phone'),
+            ('hourly rate:', 'hourly_rate_value'),
+            ('hourly:', 'hourly_rate_value'),
+            ('weekday:', 'hourly_rate_value'),
+            ('weekend:', 'weekend_rate'),
+            ('holiday:', 'holiday_rate'),
+            ('weekly hours:', 'weekly_hours'),
+            ('hours per week:', 'weekly_hours'),
+            ('effective date:', 'effective_date'),
+            ('start date:', 'effective_date'),
+            ('zip code:', 'client_zip'),
+            ('zip:', 'client_zip'),
+            ('name:', 'client_name'),
+            ('address:', 'client_address'),
+            ('city:', 'client_city'),
+            ('state:', 'client_state'),
+            ('phone:', 'client_phone'),
+            ('email:', 'client_email'),
+            ('date:', 'date'),
+        ]
+
+        def replace_placeholder_text(text: str, ph: Dict[str, str]) -> str:
+            """Replace {{key}}, {key}, [[key]], [key] patterns."""
             if not text:
                 return text
-            
             result = text
-            
-            for key, value in placeholders.items():
-                # Try multiple placeholder formats (case-insensitive)
-                patterns = [
-                    rf'\{{\{{\s*{re.escape(key)}\s*\}}\}}',  # {{key}}
-                    rf'\{{\s*{re.escape(key)}\s*\}}',        # {key}
-                    rf'\[\[\s*{re.escape(key)}\s*\]\]',      # [[key]]
-                    rf'\[\s*{re.escape(key)}\s*\]',          # [key]
-                ]
-                
-                for pattern in patterns:
-                    result = re.sub(pattern, str(value or ''), result, flags=re.IGNORECASE)
-            
+            for key, value in ph.items():
+                for pat in [
+                    rf'\{{\{{\s*{re.escape(key)}\s*\}}\}}',
+                    rf'\{{\s*{re.escape(key)}\s*\}}',
+                    rf'\[\[\s*{re.escape(key)}\s*\]\]',
+                    rf'\[\s*{re.escape(key)}\s*\]',
+                ]:
+                    result = re.sub(pat, str(value or ''), result, flags=re.IGNORECASE)
             return result
-        
-        def fill_label_fields(paragraph_texts: List[str], placeholders: Dict[str, str]) -> List[str]:
+
+        def fill_labels_in_text(text: str, ph: Dict[str, str]) -> str:
             """
-            Fill in fields that follow "Label:" pattern.
-            E.g., "Name: ___________" becomes "Name: John Smith"
+            Replace "Label: ___________" patterns on a single line.
+            Handles multiple labels on one line like
+            "City:_______ State:_______ Zip:_______"
             """
-            result = []
-            i = 0
-            while i < len(paragraph_texts):
-                text = paragraph_texts[i]
-                text_lower = text.lower().strip()
-                
-                # Check if this text ends with a label pattern
-                filled = False
-                for label, placeholder_key in LABEL_MAPPINGS.items():
-                    if text_lower.endswith(label) or text_lower == label.rstrip(':'):
-                        value = placeholders.get(placeholder_key, '')
-                        if value:
-                            # Check if next paragraph is blank/underscores (the field to fill)
-                            if i + 1 < len(paragraph_texts):
-                                next_text = paragraph_texts[i + 1].strip()
-                                # If next is blank, underscores, or very short, replace it
-                                if not next_text or all(c in '_ \t' for c in next_text) or len(next_text) < 3:
-                                    result.append(text)
-                                    result.append(str(value))
-                                    i += 2
-                                    filled = True
-                                    break
-                            # Or if same line has "Label: _____", fill the blanks
-                            if '_' in text:
-                                # Replace underscores with value
-                                new_text = re.sub(r'_+', str(value), text, count=1)
-                                result.append(new_text)
-                                i += 1
-                                filled = True
-                                break
-                
-                if not filled:
-                    result.append(text)
-                    i += 1
-            
+            if not text:
+                return text
+
+            result = text
+            text_lower = text.lower()
+
+            already_replaced = set()
+
+            for label, pk in LABEL_MAPPINGS:
+                idx = text_lower.find(label)
+                if idx == -1:
+                    continue
+                if idx in already_replaced:
+                    continue
+
+                value = ph.get(pk, '')
+                if not value:
+                    continue
+
+                label_end = idx + len(label)
+                # Find the span of underscores/spaces after the label
+                span_end = label_end
+                while span_end < len(result) and result[span_end] in '_ \t':
+                    span_end += 1
+
+                # Only replace if there are underscores/blanks (not already-filled text)
+                span_content = result[label_end:span_end]
+                if span_content and any(c == '_' for c in span_content):
+                    new_result = result[:label_end] + ' ' + str(value) + ' ' + result[span_end:]
+                    already_replaced.add(idx)
+                    shift = len(new_result) - len(result)
+                    result = new_result
+                    text_lower = result.lower()
+                elif span_end == label_end:
+                    # No underscores/spaces — just "Label:" with nothing after
+                    pass
+
             return result
-        
-        def process_paragraph(paragraph, placeholders: Dict[str, str]):
-            """Process a single paragraph, filling placeholders and label fields."""
+
+        def set_paragraph_text(paragraph, new_text: str):
+            """Overwrite a paragraph's text while keeping first run's formatting."""
+            for run in paragraph.runs:
+                run.text = ''
+            if paragraph.runs:
+                paragraph.runs[0].text = new_text
+            else:
+                paragraph.add_run(new_text)
+
+        def process_paragraph(paragraph, ph: Dict[str, str]):
             full_text = paragraph.text
             if not full_text:
                 return
-            
-            # First, try placeholder replacement
-            new_text = replace_placeholder_text(full_text, placeholders)
-            
-            # Then handle "Label: _____" patterns on single line
-            text_lower = new_text.lower()
-            for label, placeholder_key in LABEL_MAPPINGS.items():
-                if label in text_lower:
-                    value = placeholders.get(placeholder_key, '')
-                    if value:
-                        # Pattern: "Label:" followed by spaces/underscores/tabs
-                        pattern = rf'({re.escape(label)})\s*[_\s]*(?=\s|$|[A-Z]|\t)'
-                        new_text = re.sub(pattern, rf'\1 {value} ', new_text, flags=re.IGNORECASE)
-            
-            # Update paragraph text if changed
+            new_text = replace_placeholder_text(full_text, ph)
+            new_text = fill_labels_in_text(new_text, ph)
             if new_text != full_text:
-                # Clear existing runs and add new text
-                for run in paragraph.runs:
-                    run.text = ''
-                if paragraph.runs:
-                    paragraph.runs[0].text = new_text
-                else:
-                    paragraph.add_run(new_text)
-        
-        def process_table_cell(cell, placeholders: Dict[str, str]):
-            """Process a table cell - handle both label and value cells."""
+                set_paragraph_text(paragraph, new_text)
+
+        def process_cell_inline(cell, ph: Dict[str, str]):
+            """
+            Fill placeholders and label patterns within a cell.
+            Returns the placeholder_key if this cell is a pure label cell
+            (so the caller can fill the adjacent cell).
+            """
             cell_text = cell.text.strip()
+            if not cell_text:
+                return None
+
             cell_lower = cell_text.lower()
-            
-            # Check if this is a label cell followed by a value cell in the same row
-            # Or if this cell should have a placeholder filled
-            for label, placeholder_key in LABEL_MAPPINGS.items():
-                label_clean = label.rstrip(':')
-                if cell_lower == label_clean or cell_lower == label:
-                    # This is a label cell - the value should go in the next cell
-                    # We'll handle this at the row level
-                    return placeholder_key
-            
-            # Try placeholder replacement for cell content
-            new_text = replace_placeholder_text(cell_text, placeholders)
-            
-            # Handle "Label: value" in same cell
-            for label, placeholder_key in LABEL_MAPPINGS.items():
-                if label in cell_lower:
-                    value = placeholders.get(placeholder_key, '')
-                    if value:
-                        pattern = rf'({re.escape(label)})\s*[_\s]*$'
-                        new_text = re.sub(pattern, rf'\1 {value}', new_text, flags=re.IGNORECASE)
-            
+
+            # Check if this cell is a pure label like "Name:" or "Address:"
+            for label, pk in LABEL_MAPPINGS:
+                label_bare = label.rstrip(':')
+                if cell_lower == label or cell_lower == label_bare:
+                    return pk
+
+            # Fill {{placeholder}} patterns
+            new_text = replace_placeholder_text(cell_text, ph)
+
+            # Fill "Label: ___" patterns inside the cell
+            new_text = fill_labels_in_text(new_text, ph)
+
             if new_text != cell_text:
                 for paragraph in cell.paragraphs:
-                    for run in paragraph.runs:
-                        run.text = ''
-                    if paragraph.runs:
-                        paragraph.runs[0].text = new_text
-                    elif new_text:
-                        paragraph.add_run(new_text)
-            
+                    old = paragraph.text
+                    if old.strip():
+                        p_new = replace_placeholder_text(old, ph)
+                        p_new = fill_labels_in_text(p_new, ph)
+                        if p_new != old:
+                            set_paragraph_text(paragraph, p_new)
+
             return None
-        
-        # Process all paragraphs in document body
+
+        # --- Process document body paragraphs ---
         for paragraph in doc.paragraphs:
             process_paragraph(paragraph, placeholders)
-        
-        # Process tables
+
+        # --- Process tables ---
         for table in doc.tables:
             for row in table.rows:
                 cells = list(row.cells)
-                pending_placeholder = None
-                
+                pending_pk = None
+
                 for i, cell in enumerate(cells):
-                    if pending_placeholder:
-                        # Previous cell was a label, fill this cell with value
-                        value = placeholders.get(pending_placeholder, '')
+                    if pending_pk:
+                        value = placeholders.get(pending_pk, '')
                         if value:
                             cell_text = cell.text.strip()
-                            # Only fill if cell is empty or has underscores/blanks
-                            if not cell_text or all(c in '_ \t\n' for c in cell_text):
+                            is_blank = not cell_text or all(c in '_ \t\n' for c in cell_text)
+                            if is_blank:
                                 for paragraph in cell.paragraphs:
-                                    for run in paragraph.runs:
-                                        run.text = ''
-                                    if paragraph.runs:
-                                        paragraph.runs[0].text = str(value)
-                                    else:
-                                        paragraph.add_run(str(value))
-                        pending_placeholder = None
+                                    set_paragraph_text(paragraph, str(value))
+                                    break
+                        pending_pk = None
                     else:
-                        pending_placeholder = process_table_cell(cell, placeholders)
-        
-        # Process headers
+                        pending_pk = process_cell_inline(cell, placeholders)
+
+        # --- Process headers / footers ---
         for section in doc.sections:
             if section.header:
                 for paragraph in section.header.paragraphs:
@@ -425,19 +407,16 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
                 for table in section.header.tables:
                     for row in table.rows:
                         for cell in row.cells:
-                            process_table_cell(cell, placeholders)
-            
-            # Process footers
+                            process_cell_inline(cell, placeholders)
             if section.footer:
                 for paragraph in section.footer.paragraphs:
                     process_paragraph(paragraph, placeholders)
-        
-        # Save to bytes
+
         buffer = io.BytesIO()
         doc.save(buffer)
         buffer.seek(0)
         return buffer.getvalue()
-        
+
     except Exception as e:
         logger.error(f"Failed to fill DOCX template: {e}")
         raise

@@ -387,6 +387,83 @@ async def get_field_registry():
     }
 
 
+@router.get("/preview/{contract_id}")
+async def preview_template_with_data(
+    contract_id: UUID,
+    template_id: UUID = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Return the active OCR template's detected fields populated with
+    actual contract + client + agency data.  The frontend renders this
+    as a live preview so the user can see exactly what the exported
+    document will contain.
+    """
+    from app.models.contract import Contract
+    from app.models.client import Client
+    from app.models.agency_settings import AgencySettings
+    from app.services.document_generation import get_template_placeholders
+
+    contract = db.query(Contract).join(Client, Contract.client_id == Client.id).filter(
+        Contract.id == contract_id,
+        Client.created_by == current_user.id,
+    ).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    client = db.query(Client).filter(Client.id == contract.client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    if template_id:
+        template = db.query(ContractTemplate).filter(
+            ContractTemplate.id == template_id,
+            ContractTemplate.owner_id == current_user.id,
+        ).first()
+    else:
+        template = db.query(ContractTemplate).filter(
+            ContractTemplate.owner_id == current_user.id,
+            ContractTemplate.is_active == True,
+        ).order_by(ContractTemplate.version.desc()).first()
+
+    if not template:
+        return {"has_template": False, "fields": [], "template_name": None}
+
+    agency_settings = db.query(AgencySettings).filter(
+        AgencySettings.user_id == current_user.id,
+    ).first()
+
+    placeholders = get_template_placeholders(client, contract, agency_settings)
+
+    filled_fields = []
+    for field in (template.detected_fields or []):
+        fid = field.get("field_id", "")
+        value = placeholders.get(fid, "")
+        if not value and fid in (template.field_mapping or {}):
+            mapped_path = template.field_mapping[fid]
+            short_key = mapped_path.rsplit(".", 1)[-1] if "." in mapped_path else mapped_path
+            value = placeholders.get(short_key, "")
+
+        filled_fields.append({
+            "field_id": fid,
+            "label": field.get("label", fid),
+            "section": field.get("section", ""),
+            "type": field.get("type", "text"),
+            "required": field.get("required", False),
+            "value": str(value) if value else "",
+            "is_mapped": fid not in [u.get("field_id") for u in (template.unmapped_fields or [])],
+        })
+
+    return {
+        "has_template": True,
+        "template_name": template.name,
+        "template_version": template.version,
+        "file_type": template.file_type,
+        "fields": filled_fields,
+    }
+
+
 # ---------- Gallery: Pre-made starter templates ----------
 
 # Gallery templates live inside the API package at apps/api/templates/contracts/
