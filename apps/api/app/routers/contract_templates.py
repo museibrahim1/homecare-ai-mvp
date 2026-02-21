@@ -301,15 +301,102 @@ async def preview_template_with_data(
 
     placeholders = get_template_placeholders(client, contract, agency_settings)
 
+    # Alias table: maps OCR field_ids that don't directly exist in placeholders
+    # to the correct placeholder key. Handles "bill_to_*" -> "client_*", etc.
+    FIELD_ALIASES: dict[str, str] = {
+        "name": "client_name",
+        "address": "client_address",
+        "city": "client_city",
+        "state": "client_state",
+        "zip": "client_zip",
+        "zip_code": "client_zip",
+        "phone": "client_phone",
+        "home_phone": "client_phone",
+        "work_phone": "work_phone",
+        "cell_phone": "client_phone",
+        "email": "client_email",
+        "dob": "date_of_birth",
+        "bill_to_name": "client_name",
+        "bill_to_address": "client_address",
+        "bill_to_city": "client_city",
+        "bill_to_state": "client_state",
+        "bill_to_zip": "client_zip",
+        "bill_to_phone": "client_phone",
+        "bill_to_home_phone": "client_phone",
+        "bill_to_work_phone": "work_phone",
+        "bill_to_email": "client_email",
+        "administrative_fee": "admin_fee",
+        "total": "monthly_cost",
+        "total_cost": "monthly_cost",
+        "monthly_package": "monthly_cost",
+        "weekday_rate": "hourly_rate",
+        "client_rate": "hourly_rate",
+        "rate": "hourly_rate",
+        "services_provided": "services",
+        "services_list": "services",
+        "hours_per_week": "weekly_hours",
+        "days_of_service": "schedule_days",
+        "diagnosis": "primary_diagnosis",
+        "care_need_level": "care_level",
+        "effective_date": "contract_date",
+        "start_date": "effective_date",
+        "agreement_date": "contract_date",
+        "date": "date",
+        "signature": "",
+        "client_signature": "",
+        "agency_signature": "",
+        "signature_date": "date",
+        "client_signature_date": "date",
+        "agency_signature_date": "date",
+        "termination_policy": "cancellation_policy",
+        "policies_and_procedures": "policies_and_procedures",
+        "emergency_contact_name": "emergency_contact",
+        "social_security": "ssn",
+    }
+
+    def resolve_value(fid: str, field_mapping: dict) -> str:
+        """Try multiple strategies to find a value for a field_id."""
+        # Strategy 1: direct placeholder match
+        val = placeholders.get(fid, "")
+        if val:
+            return str(val)
+
+        # Strategy 2: check field_mapping -> db path -> short key
+        if fid in field_mapping:
+            mapped_path = field_mapping[fid]
+            short_key = mapped_path.rsplit(".", 1)[-1] if "." in mapped_path else mapped_path
+            val = placeholders.get(short_key, "")
+            if val:
+                return str(val)
+
+        # Strategy 3: alias table
+        alias_key = FIELD_ALIASES.get(fid, "")
+        if alias_key:
+            val = placeholders.get(alias_key, "")
+            if val:
+                return str(val)
+
+        # Strategy 4: strip common prefixes and retry
+        for prefix in ("client_", "bill_to_", "agency_", "contract_"):
+            if fid.startswith(prefix):
+                base = fid[len(prefix):]
+                val = placeholders.get(base, "") or placeholders.get(f"client_{base}", "")
+                if val:
+                    return str(val)
+
+        return ""
+
     if template:
+        mapping = template.field_mapping or {}
+        unmapped_ids = {u.get("field_id") for u in (template.unmapped_fields or [])}
         filled_fields = []
         for field in (template.detected_fields or []):
             fid = field.get("field_id", "")
-            value = placeholders.get(fid, "")
-            if not value and fid in (template.field_mapping or {}):
-                mapped_path = template.field_mapping[fid]
-                short_key = mapped_path.rsplit(".", 1)[-1] if "." in mapped_path else mapped_path
-                value = placeholders.get(short_key, "")
+            value = resolve_value(fid, mapping)
+            is_mapped = fid not in unmapped_ids
+            # If we found a value via alias, treat it as effectively mapped
+            if value and not is_mapped:
+                is_mapped = True
 
             filled_fields.append({
                 "field_id": fid,
@@ -317,8 +404,8 @@ async def preview_template_with_data(
                 "section": field.get("section", ""),
                 "type": field.get("type", "text"),
                 "required": field.get("required", False),
-                "value": str(value) if value else "",
-                "is_mapped": fid not in [u.get("field_id") for u in (template.unmapped_fields or [])],
+                "value": value,
+                "is_mapped": is_mapped,
             })
 
         return {

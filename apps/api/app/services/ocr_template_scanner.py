@@ -21,18 +21,50 @@ STIRLING_PDF_URL = os.getenv("STIRLING_PDF_URL", "http://stirling-pdf:8080")
 
 # All known contract database fields with their source paths
 DB_FIELD_REGISTRY: dict[str, dict[str, str]] = {
+    # Client fields
     "client_name": {"path": "client.full_name", "type": "text", "category": "client"},
+    "name": {"path": "client.full_name", "type": "text", "category": "client"},
     "client_first_name": {"path": "client.full_name.split()[0]", "type": "text", "category": "client"},
     "client_last_name": {"path": "client.full_name.split()[-1]", "type": "text", "category": "client"},
     "client_address": {"path": "client.address", "type": "text", "category": "client"},
+    "address": {"path": "client.address", "type": "text", "category": "client"},
     "client_city": {"path": "client.city", "type": "text", "category": "client"},
+    "city": {"path": "client.city", "type": "text", "category": "client"},
     "client_state": {"path": "client.state", "type": "text", "category": "client"},
+    "state": {"path": "client.state", "type": "text", "category": "client"},
     "client_zip": {"path": "client.zip_code", "type": "text", "category": "client"},
+    "zip": {"path": "client.zip_code", "type": "text", "category": "client"},
+    "zip_code": {"path": "client.zip_code", "type": "text", "category": "client"},
     "client_phone": {"path": "client.phone", "type": "phone", "category": "client"},
+    "phone": {"path": "client.phone", "type": "phone", "category": "client"},
+    "home_phone": {"path": "client.phone", "type": "phone", "category": "client"},
+    "work_phone": {"path": "client.work_phone", "type": "phone", "category": "client"},
+    "cell_phone": {"path": "client.phone", "type": "phone", "category": "client"},
     "client_email": {"path": "client.email", "type": "email", "category": "client"},
+    "email": {"path": "client.email", "type": "email", "category": "client"},
     "date_of_birth": {"path": "client.date_of_birth", "type": "date", "category": "client"},
+    "dob": {"path": "client.date_of_birth", "type": "date", "category": "client"},
     "emergency_contact": {"path": "client.emergency_contact_name", "type": "text", "category": "client"},
+    "emergency_contact_name": {"path": "client.emergency_contact_name", "type": "text", "category": "client"},
     "emergency_phone": {"path": "client.emergency_contact_phone", "type": "phone", "category": "client"},
+    "ssn": {"path": "client.ssn", "type": "text", "category": "client"},
+    "social_security": {"path": "client.ssn", "type": "text", "category": "client"},
+    "medicaid_number": {"path": "client.medicaid_number", "type": "text", "category": "client"},
+    "medicare_number": {"path": "client.medicare_number", "type": "text", "category": "client"},
+    "physician_name": {"path": "client.physician_name", "type": "text", "category": "client"},
+    "physician_phone": {"path": "client.physician_phone", "type": "phone", "category": "client"},
+
+    # Bill-To fields (alias to client — same person unless specified otherwise)
+    "bill_to_name": {"path": "client.full_name", "type": "text", "category": "billing"},
+    "bill_to_address": {"path": "client.address", "type": "text", "category": "billing"},
+    "bill_to_city": {"path": "client.city", "type": "text", "category": "billing"},
+    "bill_to_state": {"path": "client.state", "type": "text", "category": "billing"},
+    "bill_to_zip": {"path": "client.zip_code", "type": "text", "category": "billing"},
+    "bill_to_phone": {"path": "client.phone", "type": "phone", "category": "billing"},
+    "bill_to_home_phone": {"path": "client.phone", "type": "phone", "category": "billing"},
+    "bill_to_work_phone": {"path": "client.work_phone", "type": "phone", "category": "billing"},
+
+    # Agency fields
     "agency_name": {"path": "agency.name", "type": "text", "category": "agency"},
     "agency_address": {"path": "agency.address", "type": "text", "category": "agency"},
     "agency_city": {"path": "agency.city", "type": "text", "category": "agency"},
@@ -40,26 +72,70 @@ DB_FIELD_REGISTRY: dict[str, dict[str, str]] = {
     "agency_zip": {"path": "agency.zip_code", "type": "text", "category": "agency"},
     "agency_phone": {"path": "agency.phone", "type": "phone", "category": "agency"},
     "agency_email": {"path": "agency.email", "type": "email", "category": "agency"},
+
+    # Rates & billing
     "hourly_rate": {"path": "contract.hourly_rate", "type": "currency", "category": "rates"},
-    "weekly_hours": {"path": "contract.weekly_hours", "type": "number", "category": "schedule"},
+    "weekday_rate": {"path": "contract.hourly_rate", "type": "currency", "category": "rates"},
+    "weekend_rate": {"path": "computed.weekend_rate", "type": "currency", "category": "rates"},
+    "holiday_rate": {"path": "computed.holiday_rate", "type": "currency", "category": "rates"},
+    "client_rate": {"path": "contract.hourly_rate", "type": "currency", "category": "rates"},
     "weekly_cost": {"path": "computed.weekly_cost", "type": "currency", "category": "rates"},
     "monthly_cost": {"path": "computed.monthly_cost", "type": "currency", "category": "rates"},
+    "monthly_package": {"path": "computed.monthly_cost", "type": "currency", "category": "rates"},
+    "admin_fee": {"path": "computed.admin_fee", "type": "currency", "category": "rates"},
+    "administrative_fee": {"path": "computed.admin_fee", "type": "currency", "category": "rates"},
+    "deposit": {"path": "computed.deposit", "type": "currency", "category": "rates"},
+    "prepayment": {"path": "computed.prepayment", "type": "currency", "category": "rates"},
+    "total": {"path": "computed.monthly_cost", "type": "currency", "category": "rates"},
+    "total_cost": {"path": "computed.monthly_cost", "type": "currency", "category": "rates"},
+
+    # Schedule
+    "weekly_hours": {"path": "contract.weekly_hours", "type": "number", "category": "schedule"},
+    "hours_per_week": {"path": "contract.weekly_hours", "type": "number", "category": "schedule"},
     "schedule_days": {"path": "contract.schedule.days", "type": "text", "category": "schedule"},
+    "days_of_service": {"path": "contract.schedule.days", "type": "text", "category": "schedule"},
     "start_time": {"path": "contract.schedule.start_time", "type": "time", "category": "schedule"},
     "end_time": {"path": "contract.schedule.end_time", "type": "time", "category": "schedule"},
+    "frequency": {"path": "contract.schedule.frequency", "type": "text", "category": "schedule"},
+
+    # Assessment
     "care_level": {"path": "contract.schedule.care_need_level", "type": "text", "category": "assessment"},
+    "care_need_level": {"path": "contract.schedule.care_need_level", "type": "text", "category": "assessment"},
     "primary_diagnosis": {"path": "client.primary_diagnosis", "type": "text", "category": "assessment"},
+    "diagnosis": {"path": "client.primary_diagnosis", "type": "text", "category": "assessment"},
     "mobility_status": {"path": "client.mobility_status", "type": "text", "category": "assessment"},
     "cognitive_status": {"path": "client.cognitive_status", "type": "text", "category": "assessment"},
     "living_situation": {"path": "client.living_situation", "type": "text", "category": "assessment"},
+
+    # Services
+    "services": {"path": "contract.services", "type": "list", "category": "services"},
     "services_list": {"path": "contract.services", "type": "list", "category": "services"},
+    "services_provided": {"path": "contract.services", "type": "list", "category": "services"},
+
+    # Contract dates
     "start_date": {"path": "contract.start_date", "type": "date", "category": "contract"},
+    "effective_date": {"path": "contract.start_date", "type": "date", "category": "contract"},
     "end_date": {"path": "contract.end_date", "type": "date", "category": "contract"},
     "contract_date": {"path": "computed.today", "type": "date", "category": "contract"},
+    "date": {"path": "computed.today", "type": "date", "category": "contract"},
+    "agreement_date": {"path": "computed.today", "type": "date", "category": "contract"},
+    "contract_id": {"path": "contract.id", "type": "text", "category": "contract"},
+
+    # Terms / policies
     "cancellation_policy": {"path": "contract.cancellation_policy", "type": "text", "category": "terms"},
+    "termination_policy": {"path": "contract.cancellation_policy", "type": "text", "category": "terms"},
     "terms_and_conditions": {"path": "contract.terms_and_conditions", "type": "text", "category": "terms"},
+    "policies_and_procedures": {"path": "contract.policies_and_procedures", "type": "text", "category": "terms"},
     "special_requirements": {"path": "contract.schedule.special_requirements", "type": "list", "category": "assessment"},
     "safety_concerns": {"path": "contract.schedule.safety_concerns", "type": "list", "category": "assessment"},
+
+    # Signatures
+    "signature": {"path": "signature.client", "type": "signature", "category": "signatures"},
+    "client_signature": {"path": "signature.client", "type": "signature", "category": "signatures"},
+    "agency_signature": {"path": "signature.agency", "type": "signature", "category": "signatures"},
+    "client_signature_date": {"path": "computed.today", "type": "date", "category": "signatures"},
+    "agency_signature_date": {"path": "computed.today", "type": "date", "category": "signatures"},
+    "signature_date": {"path": "computed.today", "type": "date", "category": "signatures"},
 }
 
 
@@ -288,6 +364,38 @@ def _parse_json_array(text: str) -> list[dict]:
         return []
 
 
+def _fuzzy_match_registry(field_id: str) -> str | None:
+    """
+    Try to find a matching DB_FIELD_REGISTRY key for an unrecognized field_id.
+    Handles common patterns like bill_to_name -> client_name, etc.
+    """
+    # Normalize: lowercase, strip whitespace
+    fid = field_id.lower().strip()
+
+    # Direct match
+    if fid in DB_FIELD_REGISTRY:
+        return fid
+
+    # Strip "bill_to_" prefix and map to client equivalent
+    if fid.startswith("bill_to_"):
+        base = fid.replace("bill_to_", "")
+        candidate = f"client_{base}" if not base.startswith("client_") else base
+        if candidate in DB_FIELD_REGISTRY:
+            return candidate
+        if base in DB_FIELD_REGISTRY:
+            return base
+
+    # Try adding "client_" prefix
+    if f"client_{fid}" in DB_FIELD_REGISTRY:
+        return f"client_{fid}"
+
+    # Try removing "client_" prefix
+    if fid.startswith("client_") and fid[7:] in DB_FIELD_REGISTRY:
+        return fid[7:]
+
+    return None
+
+
 def build_field_mapping(detected_fields: list[dict]) -> tuple[dict, list[dict]]:
     """
     Build a mapping from detected template fields to database columns.
@@ -303,17 +411,26 @@ def build_field_mapping(detected_fields: list[dict]) -> tuple[dict, list[dict]]:
         field_id = field.get("field_id", "")
         mapped_to = field.get("mapped_to")
 
+        # Strategy 1: AI provided a mapped_to that exists in registry
         if mapped_to and mapped_to in DB_FIELD_REGISTRY:
             field_mapping[field_id] = DB_FIELD_REGISTRY[mapped_to]["path"]
+        # Strategy 2: field_id itself exists in registry
         elif field_id in DB_FIELD_REGISTRY:
             field_mapping[field_id] = DB_FIELD_REGISTRY[field_id]["path"]
         else:
-            unmapped.append({
-                "field_id": field_id,
-                "label": field.get("label", ""),
-                "type": field.get("type", "text"),
-                "section": field.get("section", "unknown"),
-            })
+            # Strategy 3: fuzzy match
+            matched_key = _fuzzy_match_registry(field_id)
+            if not matched_key and mapped_to:
+                matched_key = _fuzzy_match_registry(mapped_to)
+            if matched_key:
+                field_mapping[field_id] = DB_FIELD_REGISTRY[matched_key]["path"]
+            else:
+                unmapped.append({
+                    "field_id": field_id,
+                    "label": field.get("label", ""),
+                    "type": field.get("type", "text"),
+                    "section": field.get("section", "unknown"),
+                })
 
     return field_mapping, unmapped
 
