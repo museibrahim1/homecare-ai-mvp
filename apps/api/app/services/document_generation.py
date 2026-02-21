@@ -361,8 +361,10 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
                 ]:
                     result = re.sub(pat, str(value or ''), result, flags=re.IGNORECASE)
 
-            # Also replace (Label) patterns like (Client Rate), (Client Name)
-            result = re.sub(r'\(\s*Client\s+Rate\s*\)', ph.get('hourly_rate', ''), result, flags=re.IGNORECASE)
+            # Replace (Label) patterns like $ (Client Rate) -> $29.00
+            # Also remove the leading "$ " to avoid "$ $29.00"
+            result = re.sub(r'\$\s*\(\s*Client\s+Rate\s*\)', ph.get('hourly_rate', ''), result, flags=re.IGNORECASE)
+            result = re.sub(r'\(\s*Client\s+Rate\s*\)', ph.get('hourly_rate_value', ''), result, flags=re.IGNORECASE)
             result = re.sub(r'\(\s*Client\s+Name\s*\)', ph.get('client_name', ''), result, flags=re.IGNORECASE)
             result = re.sub(r'\(\s*Agency\s+Name\s*\)', ph.get('agency_name', ''), result, flags=re.IGNORECASE)
             return result
@@ -380,20 +382,33 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
 
             result = text
             text_lower = text.lower()
-            already_replaced = set()
+            # Track replaced ranges [start, end) to prevent overlapping fills
+            replaced_ranges: list = []
+
+            def overlaps(start: int, end: int) -> bool:
+                for rs, re_ in replaced_ranges:
+                    if start < re_ and end > rs:
+                        return True
+                return False
 
             for label, pk in LABEL_MAPPINGS:
                 idx = text_lower.find(label)
                 if idx == -1:
                     continue
-                if idx in already_replaced:
+
+                # Word boundary check: if char before match is a letter, skip
+                # (prevents "services:" matching inside "Person to Receive Services:")
+                if idx > 0 and result[idx - 1].isalpha():
+                    continue
+
+                # Check this position hasn't already been filled
+                label_end = idx + len(label)
+                if overlaps(idx, label_end):
                     continue
 
                 value = ph.get(pk, '')
                 if not value:
                     continue
-
-                label_end = idx + len(label)
 
                 # Find the span of underscores/spaces/$ after the label
                 span_end = label_end
@@ -402,29 +417,25 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
 
                 span_content = result[label_end:span_end]
 
-                # Determine if we should fill:
-                # 1) Has underscores -> fill (replace underscore span)
-                # 2) Label is at end of line or only whitespace/$ follows -> insert value
-                # 3) Only spaces follow before next label -> insert value
                 should_fill = False
                 if span_content and any(c == '_' for c in span_content):
                     should_fill = True
                 elif span_end >= len(result):
-                    # Label at end of text
                     should_fill = True
                 elif span_end == label_end:
-                    # Nothing after label — check if end of text or next char starts a new label
                     rest = result[label_end:].strip()
                     if not rest:
                         should_fill = True
                 else:
-                    # Only whitespace/$ after label
                     if not span_content.strip() or span_content.strip() == '$':
                         should_fill = True
 
                 if should_fill:
-                    new_result = result[:label_end] + ' ' + str(value) + result[span_end:]
-                    already_replaced.add(idx)
+                    insertion = ' ' + str(value)
+                    new_result = result[:label_end] + insertion + result[span_end:]
+                    replaced_ranges.append((idx, label_end + len(insertion)))
+                    shift = len(new_result) - len(result)
+                    # Adjust existing ranges after this point
                     result = new_result
                     text_lower = result.lower()
 
@@ -664,78 +675,155 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                 pass
             return ''
 
+        # Known multi-word labels for paragraph smart-fill (ordered long-first)
+        PARA_LABELS = [
+            ('person to receive services', None),  # skip — not a fillable field
+            ('date of birth', 'date_of_birth'),
+            ('home phone', 'client_phone'),
+            ('work phone', 'work_phone'),
+            ('cell phone', 'client_phone'),
+            ('emergency contact', 'emergency_contact'),
+            ('emergency phone', 'emergency_phone'),
+            ('zip code', 'client_zip'),
+            ('administrative fee', 'admin_fee'),
+            ('admin fee', 'admin_fee'),
+            ('monthly package', 'monthly_cost'),
+            ('agency visits', None),
+            ('hourly rate', 'hourly_rate'),
+            ('weekly hours', 'weekly_hours'),
+            ('bill to', None),  # section header
+            ('signature', None),  # render as line
+            ('name', 'client_name'),
+            ('address', 'client_address'),
+            ('city', 'client_city'),
+            ('state', 'client_state'),
+            ('zip', 'client_zip'),
+            ('phone', 'client_phone'),
+            ('email', 'client_email'),
+            ('date', 'date'),
+            ('hourly', 'hourly_rate'),
+            ('weekday', 'hourly_rate_value'),
+            ('weekend', 'weekend_rate'),
+            ('holiday', 'holiday_rate'),
+            ('prepayment', 'prepayment'),
+            ('deposit', 'deposit'),
+            ('total', 'monthly_cost'),
+        ]
+
         def smart_fill_paragraph(text: str) -> str:
             """
-            For paragraph text containing 'Label:' patterns, insert values.
-            Handles: 'Name:', 'City: State: Zip:', 'Date of Birth: Home Phone:'
-            Returns HTML with labels bold and values styled.
+            Parse paragraph with 'Label:' patterns using known label list.
+            Returns HTML with bold labels and filled/editable values.
             """
-            if not text or not ':' in text:
+            if not text or ':' not in text:
                 return esc(text)
 
-            # Split on label boundaries: find all "Label:" tokens
-            # Use regex to find "Word Word:" patterns
-            parts = re.split(r'(?<=[:\s])(?=[A-Z])', text)
+            # Find all label positions using the known label list
+            text_lower = text.lower()
+            found_labels = []  # [(start, end_of_label_colon, label_text, pk)]
 
-            # More robust: find all label:value segments
-            # Pattern: "Label:" followed by optional value until next label or end
-            segments = re.findall(
-                r'([A-Za-z][A-Za-z /\-]*?)\s*:\s*([^:]*?)(?=\s+[A-Z][A-Za-z /\-]*?:|$)',
-                text
-            )
+            for lbl, pk in PARA_LABELS:
+                search_from = 0
+                while True:
+                    idx = text_lower.find(lbl, search_from)
+                    if idx == -1:
+                        break
+                    # Must be preceded by start-of-string or non-alpha
+                    if idx > 0 and text_lower[idx - 1].isalpha():
+                        search_from = idx + 1
+                        continue
+                    # Find the colon after the label
+                    colon_pos = idx + len(lbl)
+                    while colon_pos < len(text) and text[colon_pos] in ' \t':
+                        colon_pos += 1
+                    if colon_pos < len(text) and text[colon_pos] == ':':
+                        found_labels.append((idx, colon_pos + 1, lbl, pk))
+                    search_from = idx + 1
 
-            if not segments:
+            if not found_labels:
                 return esc(text)
 
-            result_parts = []
-            for label, raw_value in segments:
-                label_clean = label.strip()
-                value = raw_value.strip()
+            # Sort by position, remove overlapping
+            found_labels.sort(key=lambda x: x[0])
+            filtered = []
+            last_end = -1
+            for start, end, lbl, pk in found_labels:
+                if start >= last_end:
+                    filtered.append((start, end, lbl, pk))
+                    last_end = end
 
-                # If value is empty, just $, underscores, or asterisks, try to fill
-                is_empty = (
-                    not value
-                    or all(c in '_ \t$*' for c in value)
-                    or value == '$'
-                )
+            # Build HTML segments
+            parts = []
+            for i, (start, end, lbl, pk) in enumerate(filtered):
+                # Get value text between this label's colon and next label's start
+                val_start = end
+                val_end = filtered[i + 1][0] if i + 1 < len(filtered) else len(text)
+                raw_value = text[val_start:val_end].strip()
 
-                if is_empty:
-                    resolved = resolve_label(label_clean)
-                    if resolved:
-                        value = resolved
+                # Clean value: strip leading $, underscores, asterisks
+                clean_val = raw_value.strip(' \t_*$')
 
-                label_esc = esc(label_clean)
-                value_esc = esc(value)
+                # Try to fill if empty
+                if not clean_val and pk:
+                    clean_val = placeholders.get(pk, '')
 
-                if value:
-                    result_parts.append(
+                label_display = text[start:end - 1].strip()  # original case
+                label_esc = esc(label_display)
+                val_esc = esc(clean_val)
+
+                if pk is None and lbl == 'signature':
+                    parts.append(
+                        f'<strong>{label_esc}:</strong> '
+                        f'<span style="display:inline-block; width:200px; '
+                        f'border-bottom:1px solid #374151; margin:0 8px;">&nbsp;</span>'
+                    )
+                elif pk is None:
+                    # Non-fillable label (section header like "Bill To", "Person to Receive Services")
+                    if clean_val:
+                        parts.append(
+                            f'<strong style="color:#374151;">{label_esc}:</strong> '
+                            f'<span style="color:#111827;">{val_esc}</span>'
+                        )
+                    else:
+                        parts.append(f'<strong style="color:#374151;">{label_esc}:</strong>')
+                elif clean_val:
+                    parts.append(
                         f'<strong style="color:#374151;">{label_esc}:</strong> '
                         f'<span contenteditable="true" '
                         f'style="color:#1e40af; border-bottom:1px dashed #93c5fd; '
-                        f'padding:1px 4px; min-width:60px; display:inline-block;">'
-                        f'{value_esc}</span>'
+                        f'padding:1px 4px;">{val_esc}</span>'
                     )
                 else:
-                    result_parts.append(
+                    parts.append(
                         f'<strong style="color:#374151;">{label_esc}:</strong> '
                         f'<span contenteditable="true" '
                         f'style="color:#9ca3af; border-bottom:1px dashed #d1d5db; '
-                        f'padding:1px 4px; min-width:80px; display:inline-block; '
-                        f'font-style:italic;">click to edit</span>'
+                        f'padding:1px 4px; min-width:80px; display:inline-block;">'
+                        f'&nbsp;</span>'
                     )
 
-            return '&nbsp; '.join(result_parts) if result_parts else esc(text)
+            return '&emsp;'.join(parts) if parts else esc(text)
 
         def para_to_html(para) -> str:
             text = para.text.strip()
             if not text:
-                return '<div style="height:8px;"></div>'
+                return '<div style="height:6px;"></div>'
 
             style_name = (para.style.name or '').lower() if para.style else ''
             align = get_align(para)
             inline = runs_to_html(para)
 
-            # Detect if this is a section heading (bold + ALL CAPS or heading style)
+            # --- Hide lines that are only underscores ---
+            if all(c in '_ \t\n' for c in text):
+                return '<hr style="border:none; border-top:1px solid #e5e7eb; margin:4px 0;"/>'
+
+            # --- Hide standalone "$" or "$ 25" lines (duplicate rate echoes) ---
+            stripped = text.strip()
+            if stripped == '$' or (stripped.startswith('$') and len(stripped) < 10
+                                  and all(c in '$ 0123456789.,\t' for c in stripped)):
+                return ''
+
+            # --- Section heading detection ---
             is_heading = 'heading' in style_name or 'title' in style_name
             if not is_heading and text.isupper() and len(text) > 3:
                 is_heading = True
@@ -755,27 +843,30 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                     f'color:#374151; font-size:13px; {align}">{inline}</div>'
                 )
 
-            # Check if paragraph has form fields (Label: patterns)
-            has_labels = bool(re.search(r'[A-Za-z]+\s*:', text))
-            # Only treat as form line if it's short-ish and has labels with no long content
+            # --- Determine if this is a short form-field line vs. a content paragraph ---
+            colon_count = text.count(':')
+            text_after_last_colon = text.rsplit(':', 1)[-1].strip() if ':' in text else ''
+            # It's a form line if: has colons, is short, and content after last colon is short
             is_form_line = (
-                has_labels
-                and len(text) < 200
+                colon_count > 0
+                and len(text) < 120
+                and len(text_after_last_colon) < 60
                 and not text.startswith('(')
-                and ':' in text
             )
 
             if is_form_line:
                 filled = smart_fill_paragraph(text)
-                return (
-                    f'<div style="margin:4px 0; padding:6px 8px; font-size:12px; '
-                    f'background:#fafafa; border-radius:4px; border-left:3px solid #e5e7eb; '
-                    f'{align}">{filled}</div>'
-                )
-            else:
-                return (
-                    f'<p style="margin:3px 0; font-size:12px; {align}">{inline}</p>'
-                )
+                if filled and filled != esc(text):
+                    return (
+                        f'<div style="margin:4px 0; padding:6px 8px; font-size:12px; '
+                        f'background:#fafafa; border-radius:4px; border-left:3px solid #e5e7eb; '
+                        f'{align}">{filled}</div>'
+                    )
+
+            # --- Default: regular paragraph ---
+            return (
+                f'<p style="margin:3px 0; font-size:12px; {align}">{inline}</p>'
+            )
 
         def table_to_html(table) -> str:
             rows_html = []
@@ -790,7 +881,6 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                     label_text = cells[0].text.strip()
                     value_text = cells[1].text.strip()
 
-                    # Smart fill: if value cell is blank/underscores, try to resolve
                     value_is_blank = (
                         not value_text
                         or all(c in '_ \t\n*$' for c in value_text)
@@ -799,6 +889,9 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                         resolved = resolve_label(label_text)
                         if resolved:
                             value_text = resolved
+
+                    # Signature rows get a line, not "click to edit"
+                    is_signature = 'signature' in label_text.lower()
 
                     label_esc = esc(label_text)
                     value_esc = esc(value_text)
@@ -809,11 +902,11 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                         f'background:#f9fafb; width:40%; vertical-align:top;">'
                         f'{label_esc}</td>'
                     )
-                    if value_text and not value_is_blank:
+                    if is_signature and not value_text:
                         cells_html.append(
-                            f'<td contenteditable="true" style="padding:8px 14px; border:1px solid #e5e7eb; '
-                            f'font-size:12px; color:#111827;">'
-                            f'{value_esc}</td>'
+                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; font-size:12px;">'
+                            f'<span style="display:inline-block; width:200px; '
+                            f'border-bottom:1px solid #374151;">&nbsp;</span></td>'
                         )
                     elif value_text:
                         cells_html.append(
@@ -824,19 +917,22 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                     else:
                         cells_html.append(
                             f'<td contenteditable="true" style="padding:8px 14px; border:1px solid #e5e7eb; '
-                            f'font-size:12px; color:#9ca3af; font-style:italic;">'
-                            f'click to edit</td>'
+                            f'font-size:12px; color:#9ca3af;">'
+                            f'&nbsp;</td>'
                         )
                 else:
                     for ci, cell in enumerate(cells):
                         ct = cell.text.strip()
+                        # Skip cells that are only $ or underscores
+                        if all(c in '_ \t\n$' for c in ct) and ct.strip() in ('$', ''):
+                            ct = ''
                         ct_esc = esc(ct)
                         bg = '#f9fafb' if row_idx == 0 else ('#ffffff' if row_idx % 2 == 1 else '#fafafa')
                         fw = '600' if row_idx == 0 else '400'
                         cells_html.append(
-                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                            f'<td contenteditable="true" style="padding:8px 14px; border:1px solid #e5e7eb; '
                             f'font-size:12px; font-weight:{fw}; background:{bg};">'
-                            f'{ct_esc}</td>'
+                            f'{ct_esc or "&nbsp;"}</td>'
                         )
 
                 rows_html.append(f'<tr>{"".join(cells_html)}</tr>')
