@@ -175,7 +175,8 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     if (templateLoading) return;
     if (templatePreview?.has_template) return;
 
-    const hasAgencyTemplate = !!(agency.contract_template_name || agency.contract_template);
+    const hasLegacyDoc = agency.documents?.some((d: any) => d.category === 'contract_template' && d.content);
+    const hasAgencyTemplate = !!(agency.contract_template_name || agency.contract_template || hasLegacyDoc);
     if (hasAgencyTemplate && contract) {
       const schedule = contract.schedule || {};
       const services = contract.services || [];
@@ -219,9 +220,10 @@ export default function ContractPreview({ contract, client, visitId, onContractU
         { field_id: 'policies_and_procedures', label: 'Policies & Procedures', section: 'policies', type: 'text', required: false, value: '', is_mapped: true },
       ];
 
+      const legacyDoc = agency.documents?.find((d: any) => d.category === 'contract_template' && d.content);
       setTemplatePreview({
         has_template: true,
-        template_name: agency.contract_template_name || 'Uploaded Template',
+        template_name: agency.contract_template_name || legacyDoc?.name || 'Uploaded Template',
         template_version: 1,
         file_type: agency.contract_template_type || 'docx',
         fields,

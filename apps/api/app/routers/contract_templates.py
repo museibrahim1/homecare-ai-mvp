@@ -92,7 +92,39 @@ class ReconciliationReport(BaseModel):
     summary: str
 
 
-# ---------- Endpoints ----------
+# ---------- Gallery setup ----------
+
+_API_ROOT = Path(__file__).resolve().parent.parent.parent  # apps/api
+_WORKDIR_ROOT = Path("/app")
+
+if (_API_ROOT / "templates" / "contracts").is_dir():
+    GALLERY_DIR = _API_ROOT / "templates" / "contracts"
+elif (_WORKDIR_ROOT / "templates" / "contracts").is_dir():
+    GALLERY_DIR = _WORKDIR_ROOT / "templates" / "contracts"
+else:
+    GALLERY_DIR = _API_ROOT / "templates" / "contracts"
+
+
+class GalleryItem(BaseModel):
+    slug: str
+    name: str
+    description: str
+    file_type: str
+    field_count: int
+    mapped_count: int
+    unmapped_count: int
+    sections: List[str]
+
+
+# ==========================================================================
+# IMPORTANT: All specific-path routes (e.g. /registry/..., /preview/...,
+# /gallery/...) MUST be declared BEFORE the catch-all /{template_id} route,
+# otherwise FastAPI tries to parse "preview", "registry", etc. as a UUID
+# and returns a 422 validation error.
+# ==========================================================================
+
+
+# ---------- Endpoints: specific paths first ----------
 
 @router.post("/upload", response_model=TemplateResponse)
 async def upload_and_scan_template(
@@ -109,11 +141,6 @@ async def upload_and_scan_template(
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
-    allowed_types = [
-        "application/pdf",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/msword",
-    ]
     content_type = file.content_type or ""
     is_pdf = file.filename.lower().endswith(".pdf") or "pdf" in content_type
     is_docx = file.filename.lower().endswith((".docx", ".doc")) or "word" in content_type
@@ -122,12 +149,11 @@ async def upload_and_scan_template(
         raise HTTPException(status_code=400, detail="Only PDF and DOCX files are supported")
 
     file_bytes = await file.read()
-    if len(file_bytes) > 20 * 1024 * 1024:  # 20MB limit
+    if len(file_bytes) > 20 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File too large (max 20MB)")
 
     file_hash = compute_file_hash(file_bytes)
 
-    # Check for duplicate upload
     existing = db.query(ContractTemplate).filter(
         ContractTemplate.owner_id == current_user.id,
         ContractTemplate.file_hash == file_hash,
@@ -138,14 +164,12 @@ async def upload_and_scan_template(
             detail=f"This file was already uploaded as template '{existing.name}' (v{existing.version})"
         )
 
-    # Determine next version for this template name
     latest = db.query(ContractTemplate).filter(
         ContractTemplate.owner_id == current_user.id,
         ContractTemplate.name == name,
     ).order_by(ContractTemplate.version.desc()).first()
     next_version = (latest.version + 1) if latest else 1
 
-    # Deactivate previous versions
     if latest:
         db.query(ContractTemplate).filter(
             ContractTemplate.owner_id == current_user.id,
@@ -153,16 +177,10 @@ async def upload_and_scan_template(
             ContractTemplate.is_active == True,
         ).update({"is_active": False})
 
-    # Step 1: Extract text via OCR
     ocr_text = await extract_text(file_bytes, file.filename, content_type)
-
-    # Step 2: Detect fields with AI
     detected_fields = await detect_fields_with_ai(ocr_text, file.filename)
-
-    # Step 3: Build field mapping
     field_mapping, unmapped_fields = build_field_mapping(detected_fields)
 
-    # Store template with base64 file data
     file_url = f"data:{content_type};base64,{base64.b64encode(file_bytes).decode()}"
 
     template = ContractTemplate(
@@ -215,156 +233,6 @@ async def list_templates(
         )
         for t in templates
     ]
-
-
-@router.get("/{template_id}", response_model=TemplateResponse)
-async def get_template(
-    template_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Get full template details including fields and mapping."""
-    template = db.query(ContractTemplate).filter(
-        ContractTemplate.id == template_id,
-        ContractTemplate.owner_id == current_user.id,
-    ).first()
-
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-
-    return _template_to_response(template)
-
-
-@router.delete("/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_template(
-    template_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Delete a template."""
-    template = db.query(ContractTemplate).filter(
-        ContractTemplate.id == template_id,
-        ContractTemplate.owner_id == current_user.id,
-    ).first()
-
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-
-    db.delete(template)
-    db.commit()
-
-
-@router.post("/{template_id}/rescan")
-async def rescan_template(
-    template_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Re-run OCR and field detection on an existing template."""
-    template = db.query(ContractTemplate).filter(
-        ContractTemplate.id == template_id,
-        ContractTemplate.owner_id == current_user.id,
-    ).first()
-
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-
-    if not template.file_url:
-        raise HTTPException(status_code=400, detail="No file stored for this template")
-
-    # Decode stored file
-    if template.file_url.startswith("data:"):
-        _, encoded = template.file_url.split(",", 1)
-        file_bytes = base64.b64decode(encoded)
-    else:
-        raise HTTPException(status_code=400, detail="Cannot rescan: file not stored inline")
-
-    content_type = "application/pdf" if template.file_type == "pdf" else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    filename = f"{template.name}.{template.file_type}"
-
-    ocr_text = await extract_text(file_bytes, filename, content_type)
-    detected_fields = await detect_fields_with_ai(ocr_text, filename)
-    field_mapping, unmapped_fields = build_field_mapping(detected_fields)
-
-    template.ocr_text = ocr_text
-    template.detected_fields = detected_fields
-    template.field_mapping = field_mapping
-    template.unmapped_fields = unmapped_fields
-
-    db.commit()
-    db.refresh(template)
-
-    return _template_to_response(template)
-
-
-@router.put("/{template_id}/mapping")
-async def update_field_mapping(
-    template_id: UUID,
-    updates: List[FieldMappingUpdate],
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Manually update field mappings — map unmapped template fields to DB paths.
-    This handles the case where a new template version has fields the DB doesn't
-    recognize yet.
-    """
-    template = db.query(ContractTemplate).filter(
-        ContractTemplate.id == template_id,
-        ContractTemplate.owner_id == current_user.id,
-    ).first()
-
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-
-    mapping = dict(template.field_mapping or {})
-    remaining_unmapped = list(template.unmapped_fields or [])
-
-    for update in updates:
-        mapping[update.field_id] = update.mapped_to
-        remaining_unmapped = [
-            f for f in remaining_unmapped if f.get("field_id") != update.field_id
-        ]
-
-    template.field_mapping = mapping
-    template.unmapped_fields = remaining_unmapped
-
-    db.commit()
-    db.refresh(template)
-
-    return _template_to_response(template)
-
-
-@router.post("/{template_id}/reconcile/{old_template_id}", response_model=ReconciliationReport)
-async def reconcile_template_versions(
-    template_id: UUID,
-    old_template_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Compare two template versions and report field differences.
-    Shows what fields were added, removed, or unchanged between versions.
-    """
-    new_template = db.query(ContractTemplate).filter(
-        ContractTemplate.id == template_id,
-        ContractTemplate.owner_id == current_user.id,
-    ).first()
-
-    old_template = db.query(ContractTemplate).filter(
-        ContractTemplate.id == old_template_id,
-        ContractTemplate.owner_id == current_user.id,
-    ).first()
-
-    if not new_template or not old_template:
-        raise HTTPException(status_code=404, detail="Template not found")
-
-    report = reconcile_versions(
-        old_template.detected_fields or [],
-        new_template.detected_fields or [],
-    )
-
-    return ReconciliationReport(**report)
 
 
 @router.get("/registry/fields")
@@ -433,7 +301,6 @@ async def preview_template_with_data(
 
     placeholders = get_template_placeholders(client, contract, agency_settings)
 
-    # If we have an OCR template, use its detected fields
     if template:
         filled_fields = []
         for field in (template.detected_fields or []):
@@ -483,7 +350,6 @@ async def preview_template_with_data(
     if not has_legacy:
         return {"has_template": False, "fields": [], "template_name": None}
 
-    # Build a preview from the placeholders themselves
     PREVIEW_FIELDS = [
         ("agency_name", "Agency Name", "agency_info", True),
         ("agency_address", "Agency Address", "agency_info", False),
@@ -547,32 +413,6 @@ async def preview_template_with_data(
     }
 
 
-# ---------- Gallery: Pre-made starter templates ----------
-
-# Gallery templates live inside the API package at apps/api/templates/contracts/
-# In Docker (WORKDIR /app) they land at /app/templates/contracts/
-_API_ROOT = Path(__file__).resolve().parent.parent.parent  # apps/api
-_WORKDIR_ROOT = Path("/app")
-
-if (_API_ROOT / "templates" / "contracts").is_dir():
-    GALLERY_DIR = _API_ROOT / "templates" / "contracts"
-elif (_WORKDIR_ROOT / "templates" / "contracts").is_dir():
-    GALLERY_DIR = _WORKDIR_ROOT / "templates" / "contracts"
-else:
-    GALLERY_DIR = _API_ROOT / "templates" / "contracts"
-
-
-class GalleryItem(BaseModel):
-    slug: str
-    name: str
-    description: str
-    file_type: str
-    field_count: int
-    mapped_count: int
-    unmapped_count: int
-    sections: List[str]
-
-
 @router.get("/gallery/list", response_model=List[GalleryItem])
 async def list_gallery_templates():
     """
@@ -627,7 +467,6 @@ async def clone_gallery_template(
     with open(meta_path) as f:
         meta = json.load(f)
 
-    # Check if user already has this template (by name)
     existing = db.query(ContractTemplate).filter(
         ContractTemplate.owner_id == current_user.id,
         ContractTemplate.name == meta["name"],
@@ -638,7 +477,6 @@ async def clone_gallery_template(
             detail=f"You already have a template named '{meta['name']}'. Delete it first or upload a new version."
         )
 
-    # Read the DOCX file
     if not docx_path.exists():
         raise HTTPException(status_code=404, detail="Template file missing from gallery")
 
@@ -649,7 +487,6 @@ async def clone_gallery_template(
     content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     file_url = f"data:{content_type};base64,{base64.b64encode(docx_bytes).decode()}"
 
-    # Extract text for display
     ocr_text = ""
     try:
         from docx import Document
@@ -688,6 +525,155 @@ async def clone_gallery_template(
     db.refresh(template)
 
     return _template_to_response(template)
+
+
+# ---------- Endpoints: catch-all /{template_id} routes LAST ----------
+
+@router.get("/{template_id}", response_model=TemplateResponse)
+async def get_template(
+    template_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get full template details including fields and mapping."""
+    template = db.query(ContractTemplate).filter(
+        ContractTemplate.id == template_id,
+        ContractTemplate.owner_id == current_user.id,
+    ).first()
+
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    return _template_to_response(template)
+
+
+@router.delete("/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_template(
+    template_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete a template."""
+    template = db.query(ContractTemplate).filter(
+        ContractTemplate.id == template_id,
+        ContractTemplate.owner_id == current_user.id,
+    ).first()
+
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    db.delete(template)
+    db.commit()
+
+
+@router.post("/{template_id}/rescan")
+async def rescan_template(
+    template_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Re-run OCR and field detection on an existing template."""
+    template = db.query(ContractTemplate).filter(
+        ContractTemplate.id == template_id,
+        ContractTemplate.owner_id == current_user.id,
+    ).first()
+
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    if not template.file_url:
+        raise HTTPException(status_code=400, detail="No file stored for this template")
+
+    if template.file_url.startswith("data:"):
+        _, encoded = template.file_url.split(",", 1)
+        file_bytes = base64.b64decode(encoded)
+    else:
+        raise HTTPException(status_code=400, detail="Cannot rescan: file not stored inline")
+
+    content_type = "application/pdf" if template.file_type == "pdf" else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    filename = f"{template.name}.{template.file_type}"
+
+    ocr_text = await extract_text(file_bytes, filename, content_type)
+    detected_fields = await detect_fields_with_ai(ocr_text, filename)
+    field_mapping, unmapped_fields = build_field_mapping(detected_fields)
+
+    template.ocr_text = ocr_text
+    template.detected_fields = detected_fields
+    template.field_mapping = field_mapping
+    template.unmapped_fields = unmapped_fields
+
+    db.commit()
+    db.refresh(template)
+
+    return _template_to_response(template)
+
+
+@router.put("/{template_id}/mapping")
+async def update_field_mapping(
+    template_id: UUID,
+    updates: List[FieldMappingUpdate],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Manually update field mappings — map unmapped template fields to DB paths.
+    """
+    template = db.query(ContractTemplate).filter(
+        ContractTemplate.id == template_id,
+        ContractTemplate.owner_id == current_user.id,
+    ).first()
+
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    mapping = dict(template.field_mapping or {})
+    remaining_unmapped = list(template.unmapped_fields or [])
+
+    for update in updates:
+        mapping[update.field_id] = update.mapped_to
+        remaining_unmapped = [
+            f for f in remaining_unmapped if f.get("field_id") != update.field_id
+        ]
+
+    template.field_mapping = mapping
+    template.unmapped_fields = remaining_unmapped
+
+    db.commit()
+    db.refresh(template)
+
+    return _template_to_response(template)
+
+
+@router.post("/{template_id}/reconcile/{old_template_id}", response_model=ReconciliationReport)
+async def reconcile_template_versions(
+    template_id: UUID,
+    old_template_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Compare two template versions and report field differences.
+    Shows what fields were added, removed, or unchanged between versions.
+    """
+    new_template = db.query(ContractTemplate).filter(
+        ContractTemplate.id == template_id,
+        ContractTemplate.owner_id == current_user.id,
+    ).first()
+
+    old_template = db.query(ContractTemplate).filter(
+        ContractTemplate.id == old_template_id,
+        ContractTemplate.owner_id == current_user.id,
+    ).first()
+
+    if not new_template or not old_template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    report = reconcile_versions(
+        old_template.detected_fields or [],
+        new_template.detected_fields or [],
+    )
+
+    return ReconciliationReport(**report)
 
 
 def _template_to_response(template: ContractTemplate) -> TemplateResponse:
