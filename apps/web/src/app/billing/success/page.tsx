@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, ArrowRight, Loader2, Sparkles, Zap, FileText, Users } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 
 export default function BillingSuccessPage() {
   return (
@@ -21,7 +21,7 @@ export default function BillingSuccessPage() {
 function BillingSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, isReady } = useRequireAuth();
   const [countdown, setCountdown] = useState(8);
   const sessionId = searchParams.get('session_id');
 
@@ -47,7 +47,13 @@ function BillingSuccessContent() {
     return () => clearInterval(timer);
   }, [router]);
 
-  if (!hasStoredToken && !token) return null;
+  if (!isReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">

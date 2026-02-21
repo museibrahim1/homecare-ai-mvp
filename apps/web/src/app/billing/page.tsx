@@ -22,7 +22,7 @@ import {
   Crown,
   Sparkles,
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -89,7 +89,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; i
 
 export default function BillingPage() {
   const router = useRouter();
-  const { user, token } = useAuth();
+  const { user, token, isReady } = useRequireAuth();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [plan, setPlan] = useState<PlanData | null>(null);
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
@@ -98,14 +98,6 @@ export default function BillingPage() {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  useEffect(() => {
-    if (!hasStoredToken && !token) {
-      router.push('/login');
-    }
-  }, [hasStoredToken, token, router]);
 
   const fetchBilling = useCallback(async () => {
     if (!token) return;
@@ -194,7 +186,13 @@ export default function BillingPage() {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
   };
 
-  if (!hasStoredToken && !token) return null;
+  if (!isReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

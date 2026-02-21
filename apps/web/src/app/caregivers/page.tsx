@@ -6,7 +6,7 @@ import {
   Users, Plus, Search, Phone, ChevronRight, ChevronLeft,
   MapPin, Star, Clock, Upload, AlertCircle
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 import CaregiverModal from '@/components/CaregiverModal';
 
@@ -39,7 +39,7 @@ interface Caregiver {
 
 export default function CaregiversPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
   const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,10 +48,6 @@ export default function CaregiversPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const pageSize = 25;
-
-  useEffect(() => {
-    if (!authLoading && !token) router.push('/login');
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     if (token) loadCaregivers();
@@ -135,17 +131,13 @@ export default function CaregiversPage() {
     setPage(0);
   }, [searchQuery]);
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

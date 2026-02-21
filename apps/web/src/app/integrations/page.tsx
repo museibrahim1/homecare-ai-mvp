@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Upload, Link2, Database, FileSpreadsheet, Webhook, 
   Check, AlertCircle, RefreshCw, Copy, ExternalLink,
   Plus, Users, ArrowRight
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 import { api } from '@/lib/api';
 
@@ -22,7 +22,7 @@ interface ImportResult {
 
 export default function IntegrationsPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
   const [activeTab, setActiveTab] = useState<'import' | 'monday' | 'webhook'>('import');
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
@@ -39,10 +39,6 @@ export default function IntegrationsPage() {
   // Webhook URLs
   const webhookUrl = `${API_BASE}/integrations/webhooks/generic`;
   const mondayWebhookUrl = `${API_BASE}/integrations/webhooks/monday`;
-
-  useEffect(() => {
-    if (!authLoading && !token) router.push('/login');
-  }, [token, authLoading, router]);
 
   const handleCsvUpload = async () => {
     if (!csvFile || !token) return;
@@ -117,17 +113,13 @@ export default function IntegrationsPage() {
     navigator.clipboard.writeText(text);
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   const tabs = [
     { id: 'import', label: 'CSV Import', icon: FileSpreadsheet },

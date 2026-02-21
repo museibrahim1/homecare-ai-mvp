@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Mic, Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle,
+  Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle,
   FileSignature, UserCheck, UserX, Loader2, Activity, BarChart3, ArrowUpRight, ArrowDownRight,
   Plus, Trash2, Circle, CheckCircle2, X, GripVertical, Tag, Settings2,
   LayoutGrid
