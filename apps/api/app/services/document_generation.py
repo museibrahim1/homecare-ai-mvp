@@ -435,12 +435,24 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
             if not cell_text:
                 return None
 
-            cell_lower = cell_text.lower()
+            # Strip trailing asterisks/required markers for matching
+            cell_clean = re.sub(r'[\s*]+$', '', cell_text)
+            cell_lower = cell_clean.lower().strip()
 
-            # Check if this cell is a pure label like "Name:" or "Address:"
+            # Check if this cell is a pure label like "Name:", "Address", "Date of Birth:"
             for label, pk in LABEL_MAPPINGS:
-                label_bare = label.rstrip(':')
-                if cell_lower == label or cell_lower == label_bare:
+                label_bare = label.rstrip(':').strip()
+                if cell_lower == label or cell_lower == label_bare or cell_lower == label_bare + ':':
+                    return pk
+
+            # Also check without trailing colon for labels like "Home Phone" (no colon)
+            if cell_lower.endswith(':'):
+                cell_no_colon = cell_lower[:-1].strip()
+            else:
+                cell_no_colon = cell_lower
+            for label, pk in LABEL_MAPPINGS:
+                label_bare = label.rstrip(':').strip()
+                if cell_no_colon == label_bare:
                     return pk
 
             # Fill {{placeholder}} patterns
@@ -471,11 +483,19 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
                         value = ph.get(pending_pk, '')
                         if value:
                             cell_text = cell.text.strip()
-                            is_blank = not cell_text or all(c in '_ \t\n' for c in cell_text)
+                            # Fill if cell is blank, has only underscores/spaces, or has placeholder patterns
+                            is_blank = (
+                                not cell_text
+                                or all(c in '_ \t\n*' for c in cell_text)
+                                or cell_text in ('*', '**')
+                            )
                             if is_blank:
                                 for paragraph in cell.paragraphs:
                                     set_paragraph_text(paragraph, str(value))
                                     break
+                            else:
+                                # Cell has content — still try placeholder/label fill
+                                process_cell_inline(cell, ph)
                         pending_pk = None
                     else:
                         pending_pk = process_cell_inline(cell, ph)
@@ -517,8 +537,8 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
 
 def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
     """
-    Convert a DOCX template to HTML with placeholders filled in.
-    Returns the full document as styled HTML for in-browser preview.
+    Convert a DOCX template to styled HTML with placeholders filled in.
+    Renders the full document for in-browser preview.
     """
     try:
         from docx import Document
@@ -527,30 +547,77 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
         filled_bytes = fill_docx_template(template_bytes, placeholders)
         doc = Document(io.BytesIO(filled_bytes))
 
-        html_parts = []
-        html_parts.append('<div class="docx-preview" style="font-family: Calibri, Arial, sans-serif; color: #1a1a1a; line-height: 1.6;">')
+        # Label -> placeholder key for second-pass smart fill in the HTML
+        LABEL_MAP = {}
+        for key in placeholders:
+            nice = key.replace('_', ' ').title()
+            LABEL_MAP[key.lower()] = key
+            LABEL_MAP[nice.lower()] = key
+            LABEL_MAP[nice.lower() + ':'] = key
+        # Explicit common labels
+        for lbl, pk in [
+            ('name', 'client_name'), ('address', 'client_address'),
+            ('city', 'client_city'), ('state', 'client_state'),
+            ('zip', 'client_zip'), ('zip code', 'client_zip'),
+            ('phone', 'client_phone'), ('home phone', 'client_phone'),
+            ('work phone', 'work_phone'), ('cell phone', 'client_phone'),
+            ('email', 'client_email'), ('date of birth', 'date_of_birth'),
+            ('dob', 'date_of_birth'), ('date', 'date'),
+            ('hourly rate', 'hourly_rate'), ('hourly', 'hourly_rate_value'),
+            ('weekday', 'hourly_rate_value'), ('weekend', 'weekend_rate'),
+            ('holiday', 'holiday_rate'), ('deposit', 'deposit'),
+            ('prepayment', 'prepayment'), ('total', 'monthly_cost'),
+            ('monthly package', 'monthly_cost'), ('administrative fee', 'admin_fee'),
+            ('admin fee', 'admin_fee'), ('weekly hours', 'weekly_hours'),
+            ('hours per week', 'weekly_hours'), ('effective date', 'effective_date'),
+            ('start date', 'effective_date'), ('contract date', 'contract_date'),
+            ('emergency contact', 'emergency_contact'), ('emergency phone', 'emergency_phone'),
+            ('signature', ''), ('client signature', ''), ('agency representative', ''),
+        ]:
+            LABEL_MAP[lbl] = pk
+            LABEL_MAP[lbl + ':'] = pk
 
-        def para_to_html(para) -> str:
-            text = para.text.strip()
+        def smart_fill_cell(text: str) -> str:
+            """Try to resolve a cell's content — if it's blank/underscores, keep as-is.
+            If it contains a label with blanks, fill the blanks."""
             if not text:
-                return '<br/>'
+                return text
+            clean = text.strip()
+            # Already has meaningful content (not just underscores)
+            if clean and not all(c in '_ \t\n*$' for c in clean):
+                return text
+            return text
 
-            style_name = (para.style.name or '').lower() if para.style else ''
-            align = ''
-            if para.alignment == WD_ALIGN_PARAGRAPH.CENTER:
-                align = ' style="text-align:center;"'
-            elif para.alignment == WD_ALIGN_PARAGRAPH.RIGHT:
-                align = ' style="text-align:right;"'
-            elif para.alignment == WD_ALIGN_PARAGRAPH.JUSTIFY:
-                align = ' style="text-align:justify;"'
+        def resolve_label(label_text: str) -> str:
+            """Given a label like 'Name:' or 'Home Phone *', find the value."""
+            clean = re.sub(r'[\s:*]+$', '', label_text).strip().lower()
+            pk = LABEL_MAP.get(clean, '') or LABEL_MAP.get(clean + ':', '')
+            if pk:
+                return placeholders.get(pk, '')
+            # Try partial
+            for key, pkey in LABEL_MAP.items():
+                if key and clean.endswith(key):
+                    val = placeholders.get(pkey, '')
+                    if val:
+                        return val
+            return ''
 
-            # Build inline HTML from runs to preserve bold/italic
-            inline = ''
+        def esc(text: str) -> str:
+            return (text or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+        html = []
+        html.append(
+            '<div style="font-family:Calibri,Arial,sans-serif; color:#1a1a1a; '
+            'line-height:1.6; max-width:100%;">'
+        )
+
+        def runs_to_html(para) -> str:
+            parts = []
             for run in para.runs:
                 t = run.text
                 if not t:
                     continue
-                t = t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                t = esc(t)
                 if run.bold and run.italic:
                     t = f'<strong><em>{t}</em></strong>'
                 elif run.bold:
@@ -559,63 +626,141 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                     t = f'<em>{t}</em>'
                 if run.underline:
                     t = f'<u>{t}</u>'
-                inline += t
+                parts.append(t)
+            return ''.join(parts) or esc(para.text)
 
-            if not inline:
-                inline = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        def get_align(para) -> str:
+            try:
+                if para.alignment == WD_ALIGN_PARAGRAPH.CENTER:
+                    return 'text-align:center;'
+                elif para.alignment == WD_ALIGN_PARAGRAPH.RIGHT:
+                    return 'text-align:right;'
+                elif para.alignment == WD_ALIGN_PARAGRAPH.JUSTIFY:
+                    return 'text-align:justify;'
+            except Exception:
+                pass
+            return ''
 
-            if 'heading 1' in style_name or 'title' in style_name:
-                return f'<h2{align} style="color:#1e3a8a; border-bottom:2px solid #1e3a8a; padding-bottom:4px; margin-top:24px; margin-bottom:12px;">{inline}</h2>'
-            elif 'heading 2' in style_name:
-                return f'<h3{align} style="color:#2c5282; margin-top:20px; margin-bottom:8px;">{inline}</h3>'
+        def para_to_html(para) -> str:
+            text = para.text.strip()
+            if not text:
+                return '<div style="height:8px;"></div>'
+
+            style_name = (para.style.name or '').lower() if para.style else ''
+            align = get_align(para)
+            inline = runs_to_html(para)
+
+            # Detect if this is a section heading (bold + ALL CAPS or heading style)
+            is_heading = 'heading' in style_name or 'title' in style_name
+            if not is_heading and text.isupper() and len(text) > 3:
+                is_heading = True
+
+            if is_heading or 'title' in style_name:
+                level = '1' if 'title' in style_name or 'heading 1' in style_name else '2'
+                return (
+                    f'<div style="margin-top:28px; margin-bottom:10px; padding:8px 12px; '
+                    f'background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%); '
+                    f'color:white; font-size:{"16px" if level == "1" else "14px"}; '
+                    f'font-weight:700; letter-spacing:0.5px; border-radius:4px; {align}">'
+                    f'{inline}</div>'
+                )
             elif 'heading 3' in style_name:
-                return f'<h4{align} style="color:#4a5568; margin-top:16px; margin-bottom:6px;">{inline}</h4>'
-            elif 'heading' in style_name:
-                return f'<h3{align} style="color:#2c5282; margin-top:20px; margin-bottom:8px;">{inline}</h3>'
+                return (
+                    f'<div style="margin-top:16px; margin-bottom:6px; font-weight:600; '
+                    f'color:#374151; font-size:13px; {align}">{inline}</div>'
+                )
             else:
-                return f'<p{align} style="margin:4px 0;">{inline}</p>'
+                return (
+                    f'<p style="margin:3px 0; font-size:12px; {align}">{inline}</p>'
+                )
 
         def table_to_html(table) -> str:
             rows_html = []
+            num_cols = max((len(row.cells) for row in table.rows), default=2)
+            is_form_table = num_cols == 2
+
             for row_idx, row in enumerate(table.rows):
+                cells = list(row.cells)
                 cells_html = []
-                for cell in row.cells:
-                    cell_text = cell.text.strip()
-                    cell_text_escaped = cell_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                    if row_idx == 0:
+
+                if is_form_table and len(cells) == 2:
+                    label_text = cells[0].text.strip()
+                    value_text = cells[1].text.strip()
+
+                    # Smart fill: if value cell is blank/underscores, try to resolve
+                    value_is_blank = (
+                        not value_text
+                        or all(c in '_ \t\n*$' for c in value_text)
+                    )
+                    if value_is_blank:
+                        resolved = resolve_label(label_text)
+                        if resolved:
+                            value_text = resolved
+
+                    label_esc = esc(label_text)
+                    value_esc = esc(value_text)
+
+                    cells_html.append(
+                        f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                        f'font-weight:600; font-size:12px; color:#374151; '
+                        f'background:#f9fafb; width:40%; vertical-align:top;">'
+                        f'{label_esc}</td>'
+                    )
+                    if value_text and not value_is_blank:
                         cells_html.append(
-                            f'<td style="padding:8px 12px; border:1px solid #d1d5db; font-weight:600; background:#f3f4f6;">'
-                            f'{cell_text_escaped}</td>'
+                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                            f'font-size:12px; color:#111827;">'
+                            f'{value_esc}</td>'
+                        )
+                    elif value_text:
+                        cells_html.append(
+                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                            f'font-size:12px; color:#1e40af; font-weight:500;">'
+                            f'{value_esc}</td>'
                         )
                     else:
                         cells_html.append(
-                            f'<td style="padding:8px 12px; border:1px solid #d1d5db;">'
-                            f'{cell_text_escaped}</td>'
+                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                            f'font-size:12px; color:#9ca3af; font-style:italic;">'
+                            f'_______________</td>'
                         )
+                else:
+                    for ci, cell in enumerate(cells):
+                        ct = cell.text.strip()
+                        ct_esc = esc(ct)
+                        bg = '#f9fafb' if row_idx == 0 else ('#ffffff' if row_idx % 2 == 1 else '#fafafa')
+                        fw = '600' if row_idx == 0 else '400'
+                        cells_html.append(
+                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                            f'font-size:12px; font-weight:{fw}; background:{bg};">'
+                            f'{ct_esc}</td>'
+                        )
+
                 rows_html.append(f'<tr>{"".join(cells_html)}</tr>')
+
             return (
-                '<table style="width:100%; border-collapse:collapse; margin:12px 0;">'
+                '<table style="width:100%; border-collapse:collapse; '
+                'margin:8px 0; border-radius:6px; overflow:hidden; '
+                'border:1px solid #e5e7eb;">'
                 f'{"".join(rows_html)}</table>'
             )
 
-        # Track which body elements appear in order (paragraphs + tables interleaved)
         body = doc.element.body
         for child in body:
             tag = child.tag.split('}')[-1] if '}' in child.tag else child.tag
             if tag == 'p':
-                # Find matching paragraph object
                 for para in doc.paragraphs:
                     if para._element is child:
-                        html_parts.append(para_to_html(para))
+                        html.append(para_to_html(para))
                         break
             elif tag == 'tbl':
                 for table in doc.tables:
                     if table._tbl is child:
-                        html_parts.append(table_to_html(table))
+                        html.append(table_to_html(table))
                         break
 
-        html_parts.append('</div>')
-        return '\n'.join(html_parts)
+        html.append('</div>')
+        return '\n'.join(html)
 
     except Exception as e:
         logger.error(f"DOCX to HTML conversion failed: {e}")
