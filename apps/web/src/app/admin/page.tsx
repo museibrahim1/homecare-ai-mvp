@@ -394,6 +394,13 @@ export default function AdminDashboardPage() {
                 <Users className="w-5 h-5 text-primary-400" />
                 <span className="text-white">Platform Users</span>
               </Link>
+              <Link
+                href="/admin/incidents"
+                className="p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-orange-500 transition flex items-center gap-3"
+              >
+                <AlertTriangle className="w-5 h-5 text-orange-400" />
+                <span className="text-white">Status & Incidents</span>
+              </Link>
             </div>
           </>
         )}

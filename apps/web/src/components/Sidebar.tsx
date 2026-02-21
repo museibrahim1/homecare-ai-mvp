@@ -98,6 +98,7 @@ const adminNavItems: NavItemData[] = [
   { href: '/admin/audit', label: 'Audit Logs', icon: FileText, description: 'Activity tracking' },
   { href: '/admin/users', label: 'Platform Users', icon: UserCheck, description: 'Admin accounts' },
   { href: '/admin/system', label: 'System Health', icon: Activity, description: 'Infrastructure' },
+  { href: '/admin/incidents', label: 'Status Page', icon: AlertTriangle, description: 'Incident management' },
 ];
 
 // NavItem defined OUTSIDE the Sidebar to prevent re-creation on every render

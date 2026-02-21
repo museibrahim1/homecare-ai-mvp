@@ -11,6 +11,7 @@ from app.models.audit_log import AuditLog
 from app.models.call import Call
 from app.models.subscription import Plan, Subscription, Invoice
 from app.models.support_ticket import SupportTicket, TicketResponse
+from app.models.incident import Incident, IncidentUpdate
 
 __all__ = [
     "User",
@@ -29,4 +30,6 @@ __all__ = [
     "Invoice",
     "SupportTicket",
     "TicketResponse",
+    "Incident",
+    "IncidentUpdate",
 ]
