@@ -91,23 +91,6 @@ let globalHydrated = false;
 // Also track if we've ever had a valid session (prevents flash on navigation)
 let hasEverHadSession = false;
 
-// Wrapper hook for protected pages — waits for hydration before allowing redirects
-export function useRequireAuth() {
-  const auth = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (auth.hydrated && !auth.token) {
-      router.push('/login');
-    }
-  }, [auth.hydrated, auth.token, router]);
-
-  return {
-    ...auth,
-    isReady: auth.hydrated && !!auth.token,
-  };
-}
-
 // Hook that handles hydration and session timeout
 export function useAuth() {
   const store = useAuthStore();
@@ -225,5 +208,22 @@ export function useAuth() {
     hydrated,
     sessionWarning,
     sessionTimeoutMs: SESSION_TIMEOUT_MS,
+  };
+}
+
+// Wrapper hook for protected pages — waits for hydration before allowing redirects
+export function useRequireAuth() {
+  const auth = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (auth.hydrated && !auth.token) {
+      router.push('/login');
+    }
+  }, [auth.hydrated, auth.token, router]);
+
+  return {
+    ...auth,
+    isReady: auth.hydrated && !!auth.token,
   };
 }
