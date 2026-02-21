@@ -348,7 +348,7 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
         ]
 
         def replace_placeholder_text(text: str, ph: Dict[str, str]) -> str:
-            """Replace {{key}}, {key}, [[key]], [key] patterns."""
+            """Replace {{key}}, {key}, [[key]], [key], (key) patterns."""
             if not text:
                 return text
             result = text
@@ -360,20 +360,26 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
                     rf'\[\s*{re.escape(key)}\s*\]',
                 ]:
                     result = re.sub(pat, str(value or ''), result, flags=re.IGNORECASE)
+
+            # Also replace (Label) patterns like (Client Rate), (Client Name)
+            result = re.sub(r'\(\s*Client\s+Rate\s*\)', ph.get('hourly_rate', ''), result, flags=re.IGNORECASE)
+            result = re.sub(r'\(\s*Client\s+Name\s*\)', ph.get('client_name', ''), result, flags=re.IGNORECASE)
+            result = re.sub(r'\(\s*Agency\s+Name\s*\)', ph.get('agency_name', ''), result, flags=re.IGNORECASE)
             return result
 
         def fill_labels_in_text(text: str, ph: Dict[str, str]) -> str:
             """
-            Replace "Label: ___________" patterns on a single line.
-            Handles multiple labels on one line like
-            "City:_______ State:_______ Zip:_______"
+            Replace "Label:" patterns with values.  Handles:
+            - "Label: ___________"  (underscores)
+            - "Label:  "           (just spaces)
+            - "Label:"             (nothing after, end of line)
+            - "City: State: Zip:"  (multiple labels on one line)
             """
             if not text:
                 return text
 
             result = text
             text_lower = text.lower()
-
             already_replaced = set()
 
             for label, pk in LABEL_MAPPINGS:
@@ -388,22 +394,39 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
                     continue
 
                 label_end = idx + len(label)
-                # Find the span of underscores/spaces after the label
+
+                # Find the span of underscores/spaces/$ after the label
                 span_end = label_end
-                while span_end < len(result) and result[span_end] in '_ \t':
+                while span_end < len(result) and result[span_end] in '_ \t$':
                     span_end += 1
 
-                # Only replace if there are underscores/blanks (not already-filled text)
                 span_content = result[label_end:span_end]
+
+                # Determine if we should fill:
+                # 1) Has underscores -> fill (replace underscore span)
+                # 2) Label is at end of line or only whitespace/$ follows -> insert value
+                # 3) Only spaces follow before next label -> insert value
+                should_fill = False
                 if span_content and any(c == '_' for c in span_content):
-                    new_result = result[:label_end] + ' ' + str(value) + ' ' + result[span_end:]
+                    should_fill = True
+                elif span_end >= len(result):
+                    # Label at end of text
+                    should_fill = True
+                elif span_end == label_end:
+                    # Nothing after label — check if end of text or next char starts a new label
+                    rest = result[label_end:].strip()
+                    if not rest:
+                        should_fill = True
+                else:
+                    # Only whitespace/$ after label
+                    if not span_content.strip() or span_content.strip() == '$':
+                        should_fill = True
+
+                if should_fill:
+                    new_result = result[:label_end] + ' ' + str(value) + result[span_end:]
                     already_replaced.add(idx)
-                    shift = len(new_result) - len(result)
                     result = new_result
                     text_lower = result.lower()
-                elif span_end == label_end:
-                    # No underscores/spaces — just "Label:" with nothing after
-                    pass
 
             return result
 
@@ -641,6 +664,68 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                 pass
             return ''
 
+        def smart_fill_paragraph(text: str) -> str:
+            """
+            For paragraph text containing 'Label:' patterns, insert values.
+            Handles: 'Name:', 'City: State: Zip:', 'Date of Birth: Home Phone:'
+            Returns HTML with labels bold and values styled.
+            """
+            if not text or not ':' in text:
+                return esc(text)
+
+            # Split on label boundaries: find all "Label:" tokens
+            # Use regex to find "Word Word:" patterns
+            parts = re.split(r'(?<=[:\s])(?=[A-Z])', text)
+
+            # More robust: find all label:value segments
+            # Pattern: "Label:" followed by optional value until next label or end
+            segments = re.findall(
+                r'([A-Za-z][A-Za-z /\-]*?)\s*:\s*([^:]*?)(?=\s+[A-Z][A-Za-z /\-]*?:|$)',
+                text
+            )
+
+            if not segments:
+                return esc(text)
+
+            result_parts = []
+            for label, raw_value in segments:
+                label_clean = label.strip()
+                value = raw_value.strip()
+
+                # If value is empty, just $, underscores, or asterisks, try to fill
+                is_empty = (
+                    not value
+                    or all(c in '_ \t$*' for c in value)
+                    or value == '$'
+                )
+
+                if is_empty:
+                    resolved = resolve_label(label_clean)
+                    if resolved:
+                        value = resolved
+
+                label_esc = esc(label_clean)
+                value_esc = esc(value)
+
+                if value:
+                    result_parts.append(
+                        f'<strong style="color:#374151;">{label_esc}:</strong> '
+                        f'<span contenteditable="true" '
+                        f'style="color:#1e40af; border-bottom:1px dashed #93c5fd; '
+                        f'padding:1px 4px; min-width:60px; display:inline-block;">'
+                        f'{value_esc}</span>'
+                    )
+                else:
+                    result_parts.append(
+                        f'<strong style="color:#374151;">{label_esc}:</strong> '
+                        f'<span contenteditable="true" '
+                        f'style="color:#9ca3af; border-bottom:1px dashed #d1d5db; '
+                        f'padding:1px 4px; min-width:80px; display:inline-block; '
+                        f'font-style:italic;">click to edit</span>'
+                    )
+
+            return '&nbsp; '.join(result_parts) if result_parts else esc(text)
+
         def para_to_html(para) -> str:
             text = para.text.strip()
             if not text:
@@ -668,6 +753,24 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                 return (
                     f'<div style="margin-top:16px; margin-bottom:6px; font-weight:600; '
                     f'color:#374151; font-size:13px; {align}">{inline}</div>'
+                )
+
+            # Check if paragraph has form fields (Label: patterns)
+            has_labels = bool(re.search(r'[A-Za-z]+\s*:', text))
+            # Only treat as form line if it's short-ish and has labels with no long content
+            is_form_line = (
+                has_labels
+                and len(text) < 200
+                and not text.startswith('(')
+                and ':' in text
+            )
+
+            if is_form_line:
+                filled = smart_fill_paragraph(text)
+                return (
+                    f'<div style="margin:4px 0; padding:6px 8px; font-size:12px; '
+                    f'background:#fafafa; border-radius:4px; border-left:3px solid #e5e7eb; '
+                    f'{align}">{filled}</div>'
                 )
             else:
                 return (
@@ -708,21 +811,21 @@ def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
                     )
                     if value_text and not value_is_blank:
                         cells_html.append(
-                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                            f'<td contenteditable="true" style="padding:8px 14px; border:1px solid #e5e7eb; '
                             f'font-size:12px; color:#111827;">'
                             f'{value_esc}</td>'
                         )
                     elif value_text:
                         cells_html.append(
-                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                            f'<td contenteditable="true" style="padding:8px 14px; border:1px solid #e5e7eb; '
                             f'font-size:12px; color:#1e40af; font-weight:500;">'
                             f'{value_esc}</td>'
                         )
                     else:
                         cells_html.append(
-                            f'<td style="padding:8px 14px; border:1px solid #e5e7eb; '
+                            f'<td contenteditable="true" style="padding:8px 14px; border:1px solid #e5e7eb; '
                             f'font-size:12px; color:#9ca3af; font-style:italic;">'
-                            f'_______________</td>'
+                            f'click to edit</td>'
                         )
                 else:
                     for ci, cell in enumerate(cells):
