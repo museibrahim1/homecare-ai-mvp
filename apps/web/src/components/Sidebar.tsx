@@ -189,6 +189,9 @@ const NavSection = memo(function NavSection({
   );
 });
 
+// Module-level: survives component remounts across page navigations
+let _sidebarScrollTop = 0;
+
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -196,23 +199,32 @@ export default function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
-  const scrollPositionRef = useRef<number>(0);
 
   const isAdmin = user?.role === 'admin';
 
   // Stable navigate callback that won't change on re-renders
   const handleNavigate = useCallback((href: string) => {
+    // Save scroll before navigating
+    if (navRef.current) {
+      _sidebarScrollTop = navRef.current.scrollTop;
+    }
     setMobileOpen(false);
     router.push(href, { scroll: false });
   }, [router]);
 
-  // Preserve sidebar scroll position — only set up listener once (not on every pathname change)
+  // Restore sidebar scroll position after mount / navigation
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
 
+    // Restore saved position
+    if (_sidebarScrollTop > 0) {
+      nav.scrollTop = _sidebarScrollTop;
+    }
+
+    // Track scroll changes
     const handleScroll = () => {
-      scrollPositionRef.current = nav.scrollTop;
+      _sidebarScrollTop = nav.scrollTop;
     };
     nav.addEventListener('scroll', handleScroll, { passive: true });
 

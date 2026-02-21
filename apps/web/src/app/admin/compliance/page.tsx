@@ -9,6 +9,7 @@ import {
   RefreshCw, CheckCircle, XCircle, Clock, Filter, ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
+import Sidebar from '@/components/Sidebar';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -100,14 +101,19 @@ export default function CompliancePage() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+      <div className="flex min-h-screen bg-dark-900">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-900 p-8">
+    <div className="flex min-h-screen bg-dark-900">
+      <Sidebar />
+      <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* HIPAA Notice */}
         <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
@@ -250,6 +256,7 @@ export default function CompliancePage() {
           )}
         </div>
       </div>
+      </main>
     </div>
   );
 }

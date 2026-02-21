@@ -1,6 +1,7 @@
 'use client';
 
 import { getStoredToken, useAuth } from '@/lib/auth';
+import Sidebar from '@/components/Sidebar';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -267,8 +268,11 @@ export default function AdminApprovalsPage() {
   // Only show loading during initial hydration
   if (!hydrated || authLoading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+      <div className="flex min-h-screen bg-dark-900">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+        </main>
       </div>
     );
   }
@@ -279,7 +283,9 @@ export default function AdminApprovalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-900 p-8">
+    <div className="flex min-h-screen bg-dark-900">
+      <Sidebar />
+      <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* HIPAA Notice */}
         <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
@@ -606,6 +612,7 @@ export default function AdminApprovalsPage() {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 }

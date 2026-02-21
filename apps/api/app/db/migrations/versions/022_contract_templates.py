@@ -15,27 +15,27 @@ depends_on = None
 
 
 def upgrade():
-    op.create_table(
-        "contract_templates",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("owner_id", UUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=False),
-        sa.Column("name", sa.String(255), nullable=False),
-        sa.Column("version", sa.Integer, nullable=False, server_default="1"),
-        sa.Column("description", sa.Text, nullable=True),
-        sa.Column("is_active", sa.Boolean, nullable=False, server_default="true"),
-        sa.Column("file_type", sa.String(20), nullable=False, server_default="'pdf'"),
-        sa.Column("file_url", sa.Text, nullable=True),
-        sa.Column("file_hash", sa.String(64), nullable=True),
-        sa.Column("ocr_text", sa.Text, nullable=True),
-        sa.Column("detected_fields", JSONB, nullable=False, server_default="'[]'::jsonb"),
-        sa.Column("field_mapping", JSONB, nullable=False, server_default="'{}'::jsonb"),
-        sa.Column("unmapped_fields", JSONB, nullable=False, server_default="'[]'::jsonb"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-    )
-
-    op.create_index("ix_contract_templates_owner_id", "contract_templates", ["owner_id"])
-    op.create_index("ix_contract_templates_active", "contract_templates", ["is_active"])
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS contract_templates (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            owner_id UUID NOT NULL REFERENCES users(id),
+            name VARCHAR(255) NOT NULL,
+            version INTEGER NOT NULL DEFAULT 1,
+            description TEXT,
+            is_active BOOLEAN NOT NULL DEFAULT true,
+            file_type VARCHAR(20) NOT NULL DEFAULT 'pdf',
+            file_url TEXT,
+            file_hash VARCHAR(64),
+            ocr_text TEXT,
+            detected_fields JSONB NOT NULL DEFAULT '[]'::jsonb,
+            field_mapping JSONB NOT NULL DEFAULT '{}'::jsonb,
+            unmapped_fields JSONB NOT NULL DEFAULT '[]'::jsonb,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """)
+    op.execute("CREATE INDEX IF NOT EXISTS ix_contract_templates_owner_id ON contract_templates (owner_id)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_contract_templates_active ON contract_templates (is_active)")
 
 
 def downgrade():

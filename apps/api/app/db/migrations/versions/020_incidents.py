@@ -15,33 +15,32 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        "incidents",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("title", sa.String(500), nullable=False),
-        sa.Column("status", sa.String(50), nullable=False, server_default="investigating"),
-        sa.Column("impact", sa.String(50), nullable=False, server_default="minor"),
-        sa.Column("service_name", sa.String(100), nullable=False, server_default="PalmCare AI Platform"),
-        sa.Column("resolved_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_index("ix_incidents_status", "incidents", ["status"])
-    op.create_index("ix_incidents_created_at", "incidents", ["created_at"])
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS incidents (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            title VARCHAR(500) NOT NULL,
+            status VARCHAR(50) NOT NULL DEFAULT 'investigating',
+            impact VARCHAR(50) NOT NULL DEFAULT 'minor',
+            service_name VARCHAR(100) NOT NULL DEFAULT 'PalmCare AI Platform',
+            resolved_at TIMESTAMPTZ,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """)
+    op.execute("CREATE INDEX IF NOT EXISTS ix_incidents_status ON incidents (status)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_incidents_created_at ON incidents (created_at)")
 
-    op.create_table(
-        "incident_updates",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("incident_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("status", sa.String(50), nullable=False),
-        sa.Column("message", sa.Text(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.ForeignKeyConstraint(["incident_id"], ["incidents.id"], ondelete="CASCADE"),
-    )
-    op.create_index("ix_incident_updates_incident_id", "incident_updates", ["incident_id"])
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS incident_updates (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            incident_id UUID NOT NULL REFERENCES incidents(id) ON DELETE CASCADE,
+            status VARCHAR(50) NOT NULL,
+            message TEXT NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """)
+    op.execute("CREATE INDEX IF NOT EXISTS ix_incident_updates_incident_id ON incident_updates (incident_id)")
 
 
 def downgrade() -> None:
