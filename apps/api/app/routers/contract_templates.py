@@ -514,8 +514,15 @@ async def preview_template_with_data(
         ("holiday_rate", "Holiday Rate", "rates", False),
         ("weekly_cost", "Weekly Cost", "rates", False),
         ("monthly_cost", "Monthly Cost", "rates", False),
+        ("admin_fee", "Administrative Fee", "rates", False),
+        ("deposit", "Deposit", "rates", False),
         ("contract_date", "Contract Date", "contract", True),
         ("effective_date", "Effective Date", "contract", False),
+        ("special_requirements", "Special Requirements", "requirements", False),
+        ("safety_concerns", "Safety Considerations", "requirements", False),
+        ("cancellation_policy", "Cancellation Policy", "policies", False),
+        ("terms_and_conditions", "Terms & Conditions", "policies", False),
+        ("policies_and_procedures", "Policies & Procedures", "policies", False),
     ]
 
     filled_fields = []

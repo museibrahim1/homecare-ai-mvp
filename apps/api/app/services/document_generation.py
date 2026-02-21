@@ -204,9 +204,24 @@ def get_template_placeholders(client: Any, contract: Any, agency_settings: Optio
         'requirements': reqs_text.strip() or 'None specified',
         'safety_concerns': safety_text.strip() or 'None noted',
         'safety': safety_text.strip() or 'None noted',
-        
+
         # Contract ID
         'contract_id': str(contract.id) if contract.id else '',
+
+        # Additional billing fields for custom templates
+        'admin_fee': '25',
+        'deposit': f"${weekly_cost:.2f}" if weekly_cost else '',
+        'prepayment': '',
+        'ssn': '',
+        'medicaid_number': '',
+        'medicare_number': '',
+        'physician_name': '',
+        'physician_phone': '',
+
+        # Cancellation / Terms / Policies (long text)
+        'cancellation_policy': getattr(contract, 'cancellation_policy', '') or 'Either party may terminate this agreement with 30 days written notice.',
+        'terms_and_conditions': getattr(contract, 'terms_and_conditions', '') or '',
+        'policies_and_procedures': getattr(contract, 'policies_and_procedures', '') or '',
     }
     
     return placeholders
@@ -229,12 +244,16 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
         # Ordered list of (label_pattern, placeholder_key).
         # Longer/more-specific labels come first so they match before shorter ones.
         LABEL_MAPPINGS = [
+            # Client / Patient fields (specific first)
             ('client name:', 'client_name'),
             ('patient name:', 'client_name'),
             ('client address:', 'client_address'),
             ('client city:', 'client_city'),
             ('client state:', 'client_state'),
             ('client zip:', 'client_zip'),
+            ('client phone:', 'client_phone'),
+            ('client email:', 'client_email'),
+            ('emergency contact name:', 'emergency_contact'),
             ('emergency contact:', 'emergency_contact'),
             ('emergency phone:', 'emergency_phone'),
             ('date of birth:', 'date_of_birth'),
@@ -242,15 +261,81 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
             ('home phone:', 'client_phone'),
             ('work phone:', 'work_phone'),
             ('cell phone:', 'client_phone'),
+            ('social security:', 'ssn'),
+            ('ssn:', 'ssn'),
+            ('medicaid #:', 'medicaid_number'),
+            ('medicaid number:', 'medicaid_number'),
+            ('medicare #:', 'medicare_number'),
+            ('medicare number:', 'medicare_number'),
+            ('physician name:', 'physician_name'),
+            ('physician phone:', 'physician_phone'),
+            ('physician:', 'physician_name'),
+
+            # Agency fields
+            ('agency name:', 'agency_name'),
+            ('agency address:', 'agency_address'),
+            ('agency phone:', 'agency_phone'),
+            ('agency email:', 'agency_email'),
+            ('agency rep name:', 'agency_name'),
+            ('agency rep signature:', 'agency_name'),
+
+            # Rate & billing fields (specific first)
             ('hourly rate:', 'hourly_rate_value'),
             ('hourly:', 'hourly_rate_value'),
+            ('weekday rate:', 'hourly_rate_value'),
             ('weekday:', 'hourly_rate_value'),
+            ('weekend rate:', 'weekend_rate'),
             ('weekend:', 'weekend_rate'),
+            ('holiday rate:', 'holiday_rate'),
             ('holiday:', 'holiday_rate'),
+            ('client rate:', 'hourly_rate_value'),
+            ('monthly package:', 'monthly_cost'),
+            ('monthly cost:', 'monthly_cost'),
+            ('monthly estimate:', 'monthly_cost'),
+            ('weekly cost:', 'weekly_cost'),
+            ('weekly estimate:', 'weekly_cost'),
+            ('administrative fee:', 'admin_fee'),
+            ('admin fee:', 'admin_fee'),
+            ('deposit:', 'deposit'),
+            ('prepayment:', 'prepayment'),
+            ('total:', 'monthly_cost'),
+
+            # Schedule fields
             ('weekly hours:', 'weekly_hours'),
             ('hours per week:', 'weekly_hours'),
+            ('days of service:', 'schedule_days'),
+            ('schedule:', 'schedule_days'),
+            ('frequency:', 'frequency'),
+            ('start time:', 'time'),
+            ('end time:', 'time'),
+
+            # Date fields
             ('effective date:', 'effective_date'),
+            ('contract date:', 'contract_date'),
             ('start date:', 'effective_date'),
+            ('end date:', 'effective_date'),
+            ('agreement date:', 'contract_date'),
+
+            # Services
+            ('services to be provided:', 'services'),
+            ('services provided:', 'services'),
+            ('services:', 'services'),
+
+            # Policy / Procedure / Terms fields
+            ('cancellation policy:', 'cancellation_policy'),
+            ('termination policy:', 'cancellation_policy'),
+            ('policies and procedures:', 'policies_and_procedures'),
+            ('policy and procedures:', 'policies_and_procedures'),
+            ('terms and conditions:', 'terms_and_conditions'),
+            ('terms of service:', 'terms_and_conditions'),
+            ('special requirements:', 'special_requirements'),
+            ('special instructions:', 'special_requirements'),
+            ('safety considerations:', 'safety_concerns'),
+            ('safety concerns:', 'safety_concerns'),
+            ('living situation:', 'living_situation'),
+            ('bill to:', 'client_name'),
+
+            # Generic fallbacks (must be last)
             ('zip code:', 'client_zip'),
             ('zip:', 'client_zip'),
             ('name:', 'client_name'),
@@ -375,19 +460,15 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
 
             return None
 
-        # --- Process document body paragraphs ---
-        for paragraph in doc.paragraphs:
-            process_paragraph(paragraph, placeholders)
-
-        # --- Process tables ---
-        for table in doc.tables:
+        def process_table(table, ph: Dict[str, str]):
+            """Process all rows/cells in a table, including nested tables."""
             for row in table.rows:
                 cells = list(row.cells)
                 pending_pk = None
 
                 for i, cell in enumerate(cells):
                     if pending_pk:
-                        value = placeholders.get(pending_pk, '')
+                        value = ph.get(pending_pk, '')
                         if value:
                             cell_text = cell.text.strip()
                             is_blank = not cell_text or all(c in '_ \t\n' for c in cell_text)
@@ -397,7 +478,19 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
                                     break
                         pending_pk = None
                     else:
-                        pending_pk = process_cell_inline(cell, placeholders)
+                        pending_pk = process_cell_inline(cell, ph)
+
+                    # Process nested tables inside this cell
+                    for nested_table in cell.tables:
+                        process_table(nested_table, ph)
+
+        # --- Process document body paragraphs ---
+        for paragraph in doc.paragraphs:
+            process_paragraph(paragraph, placeholders)
+
+        # --- Process tables (including nested) ---
+        for table in doc.tables:
+            process_table(table, placeholders)
 
         # --- Process headers / footers ---
         for section in doc.sections:
@@ -405,12 +498,12 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
                 for paragraph in section.header.paragraphs:
                     process_paragraph(paragraph, placeholders)
                 for table in section.header.tables:
-                    for row in table.rows:
-                        for cell in row.cells:
-                            process_cell_inline(cell, placeholders)
+                    process_table(table, placeholders)
             if section.footer:
                 for paragraph in section.footer.paragraphs:
                     process_paragraph(paragraph, placeholders)
+                for table in section.footer.tables:
+                    process_table(table, placeholders)
 
         buffer = io.BytesIO()
         doc.save(buffer)

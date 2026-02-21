@@ -210,6 +210,13 @@ export default function ContractPreview({ contract, client, visitId, onContractU
         { field_id: 'hourly_rate', label: 'Hourly Rate', section: 'rates', type: 'currency', required: true, value: hourlyRate ? `$${hourlyRate.toFixed(2)}` : '', is_mapped: true },
         { field_id: 'weekly_cost', label: 'Weekly Cost', section: 'rates', type: 'currency', required: false, value: hourlyRate && weeklyHours ? `$${(hourlyRate * weeklyHours).toFixed(2)}` : '', is_mapped: true },
         { field_id: 'monthly_cost', label: 'Monthly Cost', section: 'rates', type: 'currency', required: false, value: hourlyRate && weeklyHours ? `$${(hourlyRate * weeklyHours * 4.33).toFixed(2)}` : '', is_mapped: true },
+        { field_id: 'admin_fee', label: 'Administrative Fee', section: 'rates', type: 'currency', required: false, value: '$25', is_mapped: true },
+        { field_id: 'deposit', label: 'Deposit', section: 'rates', type: 'currency', required: false, value: hourlyRate && weeklyHours ? `$${(hourlyRate * weeklyHours).toFixed(2)}` : '', is_mapped: true },
+        { field_id: 'special_requirements', label: 'Special Requirements', section: 'requirements', type: 'text', required: false, value: '', is_mapped: true },
+        { field_id: 'safety_concerns', label: 'Safety Considerations', section: 'requirements', type: 'text', required: false, value: '', is_mapped: true },
+        { field_id: 'cancellation_policy', label: 'Cancellation Policy', section: 'policies', type: 'text', required: false, value: 'Either party may terminate this agreement with 30 days written notice.', is_mapped: true },
+        { field_id: 'terms_and_conditions', label: 'Terms & Conditions', section: 'policies', type: 'text', required: false, value: '', is_mapped: true },
+        { field_id: 'policies_and_procedures', label: 'Policies & Procedures', section: 'policies', type: 'text', required: false, value: '', is_mapped: true },
       ];
 
       setTemplatePreview({
@@ -925,6 +932,8 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   schedule: 'Schedule',
                   rates: 'Rates & Fees',
                   contract: 'Contract Terms',
+                  requirements: 'Special Requirements & Safety',
+                  policies: 'Policies & Procedures',
                   terms: 'Terms & Conditions',
                   signatures: 'Signatures',
                 };
