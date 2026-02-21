@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { FileText, Download, Edit3, Eye, Loader2, Search, Calendar, DollarSign, Clock, User, Filter, RefreshCw, Printer, Mail, AlertCircle, X } from 'lucide-react';
+import { FileText, Download, Edit3, Eye, Loader2, Search, Calendar, DollarSign, Clock, User, Filter, RefreshCw, Printer, Mail, AlertCircle, X, Layers } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { api } from '@/lib/api';
 import Link from 'next/link';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -122,28 +123,41 @@ export default function ProposalsPage() {
     
     setExporting(proposal.id);
     try {
-      // Find the visit associated with this contract's client
-      const visitsRes = await fetch(`${API_URL}/visits?client_id=${proposal.client_id}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      
-      if (visitsRes.ok) {
-        const data = await visitsRes.json();
-        const items = data?.items || data || [];
-        const visitList = Array.isArray(items) ? items : [];
-        // Use the most recent visit for this client
-        const visit = visitList[0];
+      // Try template-based export first (uses OCR template)
+      const blob = await api.exportContractWithTemplate(token, proposal.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const clientName = proposal.client?.full_name?.replace(/\s+/g, '_') || 'contract';
+      a.download = `${clientName}_Service_Agreement.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      // Fallback: open the visit contract view
+      try {
+        const visitsRes = await fetch(`${API_URL}/visits?client_id=${proposal.client_id}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
         
-        if (visit) {
-          window.open(`/visits/${visit.id}?tab=contract`, '_blank');
+        if (visitsRes.ok) {
+          const data = await visitsRes.json();
+          const items = data?.items || data || [];
+          const visitList = Array.isArray(items) ? items : [];
+          const visit = visitList[0];
+          
+          if (visit) {
+            window.open(`/visits/${visit.id}?tab=contract`, '_blank');
+          } else {
+            setError('No template found and no visit linked. Upload an OCR template in Templates first.');
+          }
         } else {
-          setError('No associated visit found. Please create a visit for this client first.');
+          setError('Export failed. Upload an OCR template in Templates.');
         }
-      } else {
-        setError('Failed to load visits. Please try again.');
+      } catch {
+        setError('Failed to export proposal');
       }
-    } catch (error) {
-      setError('Failed to export proposal');
     }
     setExporting(null);
   };

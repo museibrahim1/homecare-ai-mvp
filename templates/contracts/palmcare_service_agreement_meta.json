@@ -1,0 +1,502 @@
+{
+  "name": "PalmCare Service Agreement",
+  "version": 1,
+  "description": "Standard home care service agreement template with all fields for OCR extraction",
+  "file_type": "docx",
+  "detected_fields": [
+    {
+      "field_id": "agency_name",
+      "label": "Agency Name",
+      "type": "text",
+      "required": true,
+      "section": "agency_info",
+      "mapped_to": "agency_name",
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_address",
+      "label": "Agency Address",
+      "type": "text",
+      "required": false,
+      "section": "agency_info",
+      "mapped_to": "agency_address",
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_city",
+      "label": "Agency City",
+      "type": "text",
+      "required": false,
+      "section": "agency_info",
+      "mapped_to": "agency_city",
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_state",
+      "label": "Agency State",
+      "type": "text",
+      "required": false,
+      "section": "agency_info",
+      "mapped_to": "agency_state",
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_zip",
+      "label": "Agency ZIP",
+      "type": "text",
+      "required": false,
+      "section": "agency_info",
+      "mapped_to": "agency_zip",
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_phone",
+      "label": "Agency Phone",
+      "type": "phone",
+      "required": false,
+      "section": "agency_info",
+      "mapped_to": "agency_phone",
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_email",
+      "label": "Agency Email",
+      "type": "email",
+      "required": false,
+      "section": "agency_info",
+      "mapped_to": "agency_email",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_name",
+      "label": "Client Full Name",
+      "type": "text",
+      "required": true,
+      "section": "client_info",
+      "mapped_to": "client_name",
+      "is_filled": false
+    },
+    {
+      "field_id": "date_of_birth",
+      "label": "Date of Birth",
+      "type": "date",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "date_of_birth",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_address",
+      "label": "Client Address",
+      "type": "text",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_address",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_city",
+      "label": "Client City",
+      "type": "text",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_city",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_state",
+      "label": "Client State",
+      "type": "text",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_state",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_zip",
+      "label": "Client ZIP",
+      "type": "text",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_zip",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_phone",
+      "label": "Client Phone",
+      "type": "phone",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_phone",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_email",
+      "label": "Client Email",
+      "type": "email",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_email",
+      "is_filled": false
+    },
+    {
+      "field_id": "emergency_contact",
+      "label": "Emergency Contact",
+      "type": "text",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "emergency_contact",
+      "is_filled": false
+    },
+    {
+      "field_id": "emergency_phone",
+      "label": "Emergency Phone",
+      "type": "phone",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "emergency_phone",
+      "is_filled": false
+    },
+    {
+      "field_id": "care_level",
+      "label": "Care Need Level",
+      "type": "text",
+      "required": true,
+      "section": "assessment",
+      "mapped_to": "care_level",
+      "is_filled": false
+    },
+    {
+      "field_id": "primary_diagnosis",
+      "label": "Primary Diagnosis",
+      "type": "text",
+      "required": false,
+      "section": "assessment",
+      "mapped_to": "primary_diagnosis",
+      "is_filled": false
+    },
+    {
+      "field_id": "mobility_status",
+      "label": "Mobility Status",
+      "type": "text",
+      "required": false,
+      "section": "assessment",
+      "mapped_to": "mobility_status",
+      "is_filled": false
+    },
+    {
+      "field_id": "cognitive_status",
+      "label": "Cognitive Status",
+      "type": "text",
+      "required": false,
+      "section": "assessment",
+      "mapped_to": "cognitive_status",
+      "is_filled": false
+    },
+    {
+      "field_id": "living_situation",
+      "label": "Living Situation",
+      "type": "text",
+      "required": false,
+      "section": "assessment",
+      "mapped_to": "living_situation",
+      "is_filled": false
+    },
+    {
+      "field_id": "services_list",
+      "label": "Services List",
+      "type": "list",
+      "required": true,
+      "section": "services",
+      "mapped_to": "services_list",
+      "is_filled": false
+    },
+    {
+      "field_id": "schedule_days",
+      "label": "Days of Service",
+      "type": "text",
+      "required": false,
+      "section": "schedule",
+      "mapped_to": "schedule_days",
+      "is_filled": false
+    },
+    {
+      "field_id": "start_time",
+      "label": "Start Time",
+      "type": "time",
+      "required": false,
+      "section": "schedule",
+      "mapped_to": "start_time",
+      "is_filled": false
+    },
+    {
+      "field_id": "end_time",
+      "label": "End Time",
+      "type": "time",
+      "required": false,
+      "section": "schedule",
+      "mapped_to": "end_time",
+      "is_filled": false
+    },
+    {
+      "field_id": "weekly_hours",
+      "label": "Hours per Week",
+      "type": "number",
+      "required": false,
+      "section": "schedule",
+      "mapped_to": "weekly_hours",
+      "is_filled": false
+    },
+    {
+      "field_id": "frequency",
+      "label": "Service Frequency",
+      "type": "text",
+      "required": false,
+      "section": "schedule",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "hourly_rate",
+      "label": "Hourly Rate",
+      "type": "currency",
+      "required": true,
+      "section": "rates",
+      "mapped_to": "hourly_rate",
+      "is_filled": false
+    },
+    {
+      "field_id": "weekend_rate",
+      "label": "Weekend Rate",
+      "type": "currency",
+      "required": false,
+      "section": "rates",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "holiday_rate",
+      "label": "Holiday Rate",
+      "type": "currency",
+      "required": false,
+      "section": "rates",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "weekly_cost",
+      "label": "Weekly Cost",
+      "type": "currency",
+      "required": false,
+      "section": "rates",
+      "mapped_to": "weekly_cost",
+      "is_filled": false
+    },
+    {
+      "field_id": "monthly_cost",
+      "label": "Monthly Cost",
+      "type": "currency",
+      "required": false,
+      "section": "rates",
+      "mapped_to": "monthly_cost",
+      "is_filled": false
+    },
+    {
+      "field_id": "contract_date",
+      "label": "Contract Date",
+      "type": "date",
+      "required": true,
+      "section": "contract",
+      "mapped_to": "contract_date",
+      "is_filled": false
+    },
+    {
+      "field_id": "start_date",
+      "label": "Start Date",
+      "type": "date",
+      "required": false,
+      "section": "contract",
+      "mapped_to": "start_date",
+      "is_filled": false
+    },
+    {
+      "field_id": "end_date",
+      "label": "End Date",
+      "type": "date",
+      "required": false,
+      "section": "contract",
+      "mapped_to": "end_date",
+      "is_filled": false
+    },
+    {
+      "field_id": "contract_id",
+      "label": "Contract ID",
+      "type": "text",
+      "required": false,
+      "section": "contract",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "special_requirements",
+      "label": "Special Requirements",
+      "type": "list",
+      "required": false,
+      "section": "terms",
+      "mapped_to": "special_requirements",
+      "is_filled": false
+    },
+    {
+      "field_id": "safety_concerns",
+      "label": "Safety Considerations",
+      "type": "list",
+      "required": false,
+      "section": "terms",
+      "mapped_to": "safety_concerns",
+      "is_filled": false
+    },
+    {
+      "field_id": "cancellation_policy",
+      "label": "Cancellation Policy",
+      "type": "text",
+      "required": false,
+      "section": "terms",
+      "mapped_to": "cancellation_policy",
+      "is_filled": false
+    },
+    {
+      "field_id": "terms_and_conditions",
+      "label": "Terms and Conditions",
+      "type": "text",
+      "required": false,
+      "section": "terms",
+      "mapped_to": "terms_and_conditions",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_signature",
+      "label": "Client Signature",
+      "type": "signature",
+      "required": true,
+      "section": "signatures",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_signature",
+      "label": "Agency Signature",
+      "type": "signature",
+      "required": true,
+      "section": "signatures",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "client_signature_date",
+      "label": "Client Signature Date",
+      "type": "date",
+      "required": false,
+      "section": "signatures",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_signature_date",
+      "label": "Agency Signature Date",
+      "type": "date",
+      "required": false,
+      "section": "signatures",
+      "mapped_to": null,
+      "is_filled": false
+    }
+  ],
+  "field_mapping": {
+    "agency_name": "agency.name",
+    "agency_address": "agency.address",
+    "agency_city": "agency.city",
+    "agency_state": "agency.state",
+    "agency_zip": "agency.zip_code",
+    "agency_phone": "agency.phone",
+    "agency_email": "agency.email",
+    "client_name": "client.full_name",
+    "date_of_birth": "client.date_of_birth",
+    "client_address": "client.address",
+    "client_city": "client.city",
+    "client_state": "client.state",
+    "client_zip": "client.zip_code",
+    "client_phone": "client.phone",
+    "client_email": "client.email",
+    "emergency_contact": "client.emergency_contact_name",
+    "emergency_phone": "client.emergency_contact_phone",
+    "care_level": "contract.schedule.care_need_level",
+    "primary_diagnosis": "client.primary_diagnosis",
+    "mobility_status": "client.mobility_status",
+    "cognitive_status": "client.cognitive_status",
+    "living_situation": "client.living_situation",
+    "services_list": "contract.services",
+    "schedule_days": "contract.schedule.days",
+    "start_time": "contract.schedule.start_time",
+    "end_time": "contract.schedule.end_time",
+    "weekly_hours": "contract.weekly_hours",
+    "hourly_rate": "contract.hourly_rate",
+    "weekly_cost": "computed.weekly_cost",
+    "monthly_cost": "computed.monthly_cost",
+    "contract_date": "computed.today",
+    "start_date": "contract.start_date",
+    "end_date": "contract.end_date",
+    "special_requirements": "contract.schedule.special_requirements",
+    "safety_concerns": "contract.schedule.safety_concerns",
+    "cancellation_policy": "contract.cancellation_policy",
+    "terms_and_conditions": "contract.terms_and_conditions"
+  },
+  "unmapped_fields": [
+    {
+      "field_id": "frequency",
+      "label": "Service Frequency",
+      "type": "text",
+      "section": "schedule"
+    },
+    {
+      "field_id": "weekend_rate",
+      "label": "Weekend Rate",
+      "type": "currency",
+      "section": "rates"
+    },
+    {
+      "field_id": "holiday_rate",
+      "label": "Holiday Rate",
+      "type": "currency",
+      "section": "rates"
+    },
+    {
+      "field_id": "contract_id",
+      "label": "Contract ID",
+      "type": "text",
+      "section": "contract"
+    },
+    {
+      "field_id": "client_signature",
+      "label": "Client Signature",
+      "type": "signature",
+      "section": "signatures"
+    },
+    {
+      "field_id": "agency_signature",
+      "label": "Agency Signature",
+      "type": "signature",
+      "section": "signatures"
+    },
+    {
+      "field_id": "client_signature_date",
+      "label": "Client Signature Date",
+      "type": "date",
+      "section": "signatures"
+    },
+    {
+      "field_id": "agency_signature_date",
+      "label": "Agency Signature Date",
+      "type": "date",
+      "section": "signatures"
+    }
+  ]
+}

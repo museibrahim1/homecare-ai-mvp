@@ -1,6 +1,9 @@
+import base64
+import logging
 from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
@@ -8,6 +11,8 @@ from app.models.user import User
 from app.models.client import Client
 from app.models.contract import Contract
 from app.schemas.contract import ContractCreate, ContractUpdate, ContractResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -112,7 +117,9 @@ async def create_contract(
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
     
-    contract = Contract(**contract_in.model_dump())
+    # Exclude template_id (not a model column) before creating
+    contract_data = contract_in.model_dump(exclude={"template_id"})
+    contract = Contract(**contract_data)
     db.add(contract)
     db.commit()
     db.refresh(contract)
@@ -206,3 +213,81 @@ async def get_client_contracts(
     ).order_by(Contract.created_at.desc()).all()
     
     return contracts
+
+
+@router.post("/contracts/{contract_id}/export-template")
+async def export_contract_with_template(
+    contract_id: UUID,
+    template_id: UUID = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Export a contract as a filled DOCX using an OCR-scanned template.
+    Uses the template's field mapping to populate all detected fields
+    from the contract/client/agency data in the database.
+    """
+    from app.models.contract_template import ContractTemplate
+    from app.models.agency_settings import AgencySettings
+    from app.services.document_generation import get_template_placeholders, fill_docx_template
+
+    # Verify contract ownership
+    contract = db.query(Contract).join(Client, Contract.client_id == Client.id).filter(
+        Contract.id == contract_id,
+        Client.created_by == current_user.id,
+    ).first()
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    client = db.query(Client).filter(Client.id == contract.client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    # Get the template — either specified or the user's active template
+    if template_id:
+        template = db.query(ContractTemplate).filter(
+            ContractTemplate.id == template_id,
+            ContractTemplate.owner_id == current_user.id,
+        ).first()
+    else:
+        template = db.query(ContractTemplate).filter(
+            ContractTemplate.owner_id == current_user.id,
+            ContractTemplate.is_active == True,
+        ).order_by(ContractTemplate.version.desc()).first()
+
+    if not template:
+        raise HTTPException(status_code=404, detail="No contract template found. Upload one in Templates.")
+
+    if not template.file_url:
+        raise HTTPException(status_code=400, detail="Template has no file stored")
+
+    # Decode the stored template file
+    if template.file_url.startswith("data:"):
+        _, encoded = template.file_url.split(",", 1)
+        template_bytes = base64.b64decode(encoded)
+    else:
+        raise HTTPException(status_code=400, detail="Template file format not supported")
+
+    # Get agency settings
+    agency_settings = db.query(AgencySettings).filter(
+        AgencySettings.user_id == current_user.id,
+    ).first()
+
+    # Build placeholders from contract + client + agency data
+    placeholders = get_template_placeholders(client, contract, agency_settings)
+
+    # Fill the template
+    try:
+        filled_docx = fill_docx_template(template_bytes, placeholders)
+    except Exception as e:
+        logger.error(f"Template fill failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate contract from template")
+
+    safe_name = (client.full_name or "contract").replace(" ", "_")
+    filename = f"{safe_name}_Service_Agreement.docx"
+
+    return Response(
+        content=filled_docx,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

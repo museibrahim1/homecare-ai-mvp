@@ -348,6 +348,30 @@ class ApiClient {
     return this.request<any>('/contract-templates/registry/fields', {}, token);
   }
 
+  async exportContractWithTemplate(token: string, contractId: string, templateId?: string) {
+    const params = templateId ? `?template_id=${templateId}` : '';
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+
+    try {
+      const response = await fetch(`${API_BASE}/visits/contracts/${contractId}/export-template${params}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: 'Export failed' }));
+        throw new Error(error.detail || 'Export failed');
+      }
+      return response.blob();
+    } catch (err: any) {
+      clearTimeout(timeout);
+      if (err.name === 'AbortError') throw new Error('Export timed out');
+      throw err;
+    }
+  }
+
   // Upload — uses longer timeout (5 minutes) for large audio files
   async uploadAudio(token: string, visitId: string, file: File, autoProcess: boolean = true) {
     const formData = new FormData();
