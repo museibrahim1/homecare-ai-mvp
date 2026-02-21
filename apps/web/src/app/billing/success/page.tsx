@@ -25,14 +25,6 @@ function BillingSuccessContent() {
   const [countdown, setCountdown] = useState(8);
   const sessionId = searchParams.get('session_id');
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  useEffect(() => {
-    if (!hasStoredToken && !token) {
-      router.push('/login');
-    }
-  }, [hasStoredToken, token, router]);
-
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown(prev => {

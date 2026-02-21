@@ -8,7 +8,7 @@ import {
   Upload, Sparkles, Clock, Building2, Play, ChevronRight,
   FileCheck, Calendar, Mail, Settings, Loader2, AlertCircle
 } from 'lucide-react';
-import { useAuth, getStoredToken } from '@/lib/auth';
+import { useRequireAuth, getStoredToken } from '@/lib/auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -24,7 +24,7 @@ interface WalkthroughStep {
 
 export default function WelcomePage() {
   const router = useRouter();
-  const { token, user, isLoading } = useAuth();
+  const { token, user, isReady } = useRequireAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [showWalkthrough, setShowWalkthrough] = useState(true);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
@@ -71,12 +71,6 @@ export default function WelcomePage() {
       completed: completedSteps.includes('contract'),
     },
   ];
-
-  useEffect(() => {
-    if (!isLoading && !token) {
-      router.push('/login');
-    }
-  }, [token, isLoading, router]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -136,10 +130,10 @@ export default function WelcomePage() {
   const completedCount = steps.filter(s => completedSteps.includes(s.id)).length;
   const progress = (completedCount / steps.length) * 100;
 
-  if (isLoading || loading) {
+  if (!isReady || loading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
