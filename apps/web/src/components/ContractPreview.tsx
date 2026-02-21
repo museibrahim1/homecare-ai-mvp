@@ -79,6 +79,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     template_version?: number;
     file_type?: string;
     fields?: { field_id: string; label: string; section: string; type: string; required: boolean; value: string; is_mapped: boolean }[];
+    document_html?: string;
   } | null>(null);
   const [templateLoading, setTemplateLoading] = useState(false);
 
@@ -900,98 +901,103 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           {documentType === 'template' && templatePreview?.has_template ? (
           /* ===== OCR TEMPLATE PREVIEW ===== */
           <div className="contract-document">
-            <div
-              className="contract-header text-center p-6 border-b-4"
-              style={{ borderColor: agency.primary_color, background: 'linear-gradient(to right, #f0f4ff, #e0e7ff)' }}
-            >
-              {data.agency_logo && (
-                <img src={data.agency_logo} alt="Logo" className="mx-auto mb-3 rounded-lg bg-white p-2" style={{ maxWidth: '80px', maxHeight: '80px' }} />
-              )}
-              <h1 className="text-2xl font-bold mb-1" style={{ color: agency.primary_color }}>{data.agency_name}</h1>
-              <p className="text-gray-600 text-sm">{data.agency_full_address}</p>
-              <p className="text-gray-600 text-sm">Phone: {data.agency_phone} | Email: {data.agency_email}</p>
-            </div>
-
-            <div className="p-8 text-gray-800">
-              <h2 className="text-center text-xl font-bold pb-3 mb-2 border-b-2" style={{ color: agency.primary_color, borderColor: agency.primary_color }}>
-                CLIENT SERVICE CONTRACT
-              </h2>
-              <p className="text-center text-gray-500 italic mb-1">
-                Template: <strong className="text-gray-700">{templatePreview.template_name}</strong> (v{templatePreview.template_version})
-              </p>
-              <p className="text-center text-gray-500 italic mb-8">
-                Prepared for: <strong className="text-gray-800">{data.client_name}</strong> &mdash; {data.effective_date}
-              </p>
-
-              {(() => {
-                const fields = templatePreview.fields || [];
-                const sections = Array.from(new Set(fields.map(f => f.section)));
-                const sectionLabels: Record<string, string> = {
-                  client_info: 'Client Information',
-                  agency_info: 'Agency Information',
-                  assessment: 'Care Assessment',
-                  services: 'Services',
-                  schedule: 'Schedule',
-                  rates: 'Rates & Fees',
-                  contract: 'Contract Terms',
-                  requirements: 'Special Requirements & Safety',
-                  policies: 'Policies & Procedures',
-                  terms: 'Terms & Conditions',
-                  signatures: 'Signatures',
-                };
-                return sections.map((section) => {
-                  const sectionFields = fields.filter(f => f.section === section);
-                  return (
-                    <div key={section} className="mb-6">
-                      <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
-                        {(sectionLabels[section] || section.replace(/_/g, ' ')).toUpperCase()}
-                      </h3>
-                      <table className="w-full border-collapse mb-2">
-                        <tbody>
-                          {sectionFields.map((field) => (
-                            <tr key={field.field_id} className="border-b border-gray-100">
-                              <td className="py-2 px-3 text-sm font-medium text-gray-700 w-2/5 bg-gray-50">
-                                {field.label}
-                                {field.required && <span className="text-red-500 ml-1">*</span>}
-                              </td>
-                              <td className="py-2 px-3 text-sm">
-                                {field.value ? (
-                                  <span className="text-gray-900">{field.value}</span>
-                                ) : field.is_mapped ? (
-                                  <span className="text-amber-500 italic">No data in database</span>
-                                ) : (
-                                  <span className="text-red-400 italic">Unmapped field</span>
-                                )}
-                              </td>
-                              <td className="py-2 px-1 w-6">
-                                {field.value ? (
-                                  <span className="text-green-500 text-xs" title="Populated">&#10003;</span>
-                                ) : field.is_mapped ? (
-                                  <span className="text-amber-400 text-xs" title="Mapped but empty">&#9888;</span>
-                                ) : (
-                                  <span className="text-red-400 text-xs" title="Not mapped">&#10007;</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  );
-                });
-              })()}
-
-              <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200 text-sm text-blue-800">
-                <strong>Template Summary:</strong>{' '}
-                {templatePreview.fields?.filter(f => f.value).length || 0} of {templatePreview.fields?.length || 0} fields populated.
+            {/* Template header bar */}
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <span className="text-sm font-semibold text-gray-700">
+                  {templatePreview.template_name}
+                </span>
+                <span className="text-xs text-gray-400 ml-2">v{templatePreview.template_version}</span>
+              </div>
+              <div className="text-xs text-gray-500">
+                {templatePreview.fields?.filter(f => f.value).length || 0}/{templatePreview.fields?.length || 0} fields populated
                 {(templatePreview.fields?.filter(f => !f.is_mapped).length || 0) > 0 && (
-                  <span className="text-amber-600 ml-2">
-                    {templatePreview.fields?.filter(f => !f.is_mapped).length} unmapped fields will be blank in the export.
+                  <span className="text-amber-500 ml-2">
+                    ({templatePreview.fields?.filter(f => !f.is_mapped).length} unmapped)
                   </span>
                 )}
               </div>
             </div>
 
+            {/* Full document preview — rendered from actual DOCX */}
+            {templatePreview.document_html ? (
+              <div
+                className="p-8 text-gray-800"
+                style={{ fontFamily: 'Calibri, Arial, sans-serif', lineHeight: 1.6 }}
+                dangerouslySetInnerHTML={{ __html: templatePreview.document_html }}
+              />
+            ) : (
+              /* Fallback: structured field table if HTML not available */
+              <div className="p-8 text-gray-800">
+                <h2 className="text-center text-xl font-bold pb-3 mb-2 border-b-2" style={{ color: agency.primary_color, borderColor: agency.primary_color }}>
+                  CLIENT SERVICE CONTRACT
+                </h2>
+                <p className="text-center text-gray-500 italic mb-8">
+                  Prepared for: <strong className="text-gray-800">{data.client_name}</strong> &mdash; {data.effective_date}
+                </p>
+
+                {(() => {
+                  const fields = templatePreview.fields || [];
+                  const sections = Array.from(new Set(fields.map(f => f.section)));
+                  const sectionLabels: Record<string, string> = {
+                    client_info: 'Client Information',
+                    agency_info: 'Agency Information',
+                    assessment: 'Care Assessment',
+                    services: 'Services',
+                    schedule: 'Schedule',
+                    rates: 'Rates & Fees',
+                    billing: 'Billing',
+                    contract: 'Contract Terms',
+                    requirements: 'Special Requirements & Safety',
+                    policies: 'Policies & Procedures',
+                    terms: 'Terms & Conditions',
+                    signatures: 'Signatures',
+                  };
+                  return sections.map((section) => {
+                    const sectionFields = fields.filter(f => f.section === section);
+                    return (
+                      <div key={section} className="mb-6">
+                        <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
+                          {(sectionLabels[section] || section.replace(/_/g, ' ')).toUpperCase()}
+                        </h3>
+                        <table className="w-full border-collapse mb-2">
+                          <tbody>
+                            {sectionFields.map((field) => (
+                              <tr key={field.field_id} className="border-b border-gray-100">
+                                <td className="py-2 px-3 text-sm font-medium text-gray-700 w-2/5 bg-gray-50">
+                                  {field.label}
+                                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                                </td>
+                                <td className="py-2 px-3 text-sm">
+                                  {field.value ? (
+                                    <span className="text-gray-900">{field.value}</span>
+                                  ) : field.is_mapped ? (
+                                    <span className="text-amber-500 italic">No data in database</span>
+                                  ) : (
+                                    <span className="text-red-400 italic">Unmapped field</span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-1 w-6">
+                                  {field.value ? (
+                                    <span className="text-green-500 text-xs" title="Populated">&#10003;</span>
+                                  ) : field.is_mapped ? (
+                                    <span className="text-amber-400 text-xs" title="Mapped but empty">&#9888;</span>
+                                  ) : (
+                                    <span className="text-red-400 text-xs" title="Not mapped">&#10007;</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            )}
+
+            {/* Footer */}
             <div className="text-center py-4 px-6 text-sm text-gray-500 border-t border-gray-200">
               {data.agency_name} | {data.agency_phone} | {data.agency_email}
             </div>

@@ -271,7 +271,7 @@ async def preview_template_with_data(
     from app.models.contract import Contract
     from app.models.client import Client
     from app.models.agency_settings import AgencySettings
-    from app.services.document_generation import get_template_placeholders
+    from app.services.document_generation import get_template_placeholders, docx_to_html
 
     contract = db.query(Contract).join(Client, Contract.client_id == Client.id).filter(
         Contract.id == contract_id,
@@ -386,6 +386,18 @@ async def preview_template_with_data(
 
         return ""
 
+    def _get_template_html(file_url: str) -> str:
+        """Extract DOCX bytes from a data-URL and convert to filled HTML."""
+        if not file_url or not file_url.startswith("data:"):
+            return ""
+        try:
+            _, encoded = file_url.split(",", 1)
+            template_bytes = base64.b64decode(encoded)
+            return docx_to_html(template_bytes, placeholders)
+        except Exception as e:
+            logger.warning(f"HTML preview generation failed: {e}")
+            return ""
+
     if template:
         mapping = template.field_mapping or {}
         unmapped_ids = {u.get("field_id") for u in (template.unmapped_fields or [])}
@@ -394,7 +406,6 @@ async def preview_template_with_data(
             fid = field.get("field_id", "")
             value = resolve_value(fid, mapping)
             is_mapped = fid not in unmapped_ids
-            # If we found a value via alias, treat it as effectively mapped
             if value and not is_mapped:
                 is_mapped = True
 
@@ -408,17 +419,21 @@ async def preview_template_with_data(
                 "is_mapped": is_mapped,
             })
 
+        document_html = _get_template_html(template.file_url) if template.file_url else ""
+
         return {
             "has_template": True,
             "template_name": template.name,
             "template_version": template.version,
             "file_type": template.file_type,
             "fields": filled_fields,
+            "document_html": document_html,
         }
 
     # Fallback: check agency_settings for a legacy uploaded template
     has_legacy = False
     legacy_name = None
+    legacy_base64 = None
     if agency_settings:
         if agency_settings.documents:
             try:
@@ -427,15 +442,28 @@ async def preview_template_with_data(
                     if doc.get("category") == "contract_template" and doc.get("content"):
                         has_legacy = True
                         legacy_name = doc.get("name", "Uploaded Template")
+                        content = doc["content"]
+                        legacy_base64 = content.split(",", 1)[1] if "," in content else content
                         break
             except Exception:
                 pass
         if not has_legacy and getattr(agency_settings, "contract_template", None):
             has_legacy = True
             legacy_name = getattr(agency_settings, "contract_template_name", None) or "Uploaded Template"
+            content = agency_settings.contract_template
+            legacy_base64 = content.split(",", 1)[1] if "," in content else content
 
     if not has_legacy:
         return {"has_template": False, "fields": [], "template_name": None}
+
+    # Generate HTML from the legacy DOCX
+    legacy_html = ""
+    if legacy_base64:
+        try:
+            template_bytes = base64.b64decode(legacy_base64)
+            legacy_html = docx_to_html(template_bytes, placeholders)
+        except Exception as e:
+            logger.warning(f"Legacy template HTML generation failed: {e}")
 
     PREVIEW_FIELDS = [
         ("agency_name", "Agency Name", "agency_info", True),
@@ -497,6 +525,7 @@ async def preview_template_with_data(
         "template_version": 1,
         "file_type": "docx",
         "fields": filled_fields,
+        "document_html": legacy_html,
     }
 
 

@@ -515,6 +515,113 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
         raise
 
 
+def docx_to_html(template_bytes: bytes, placeholders: Dict[str, str]) -> str:
+    """
+    Convert a DOCX template to HTML with placeholders filled in.
+    Returns the full document as styled HTML for in-browser preview.
+    """
+    try:
+        from docx import Document
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+        filled_bytes = fill_docx_template(template_bytes, placeholders)
+        doc = Document(io.BytesIO(filled_bytes))
+
+        html_parts = []
+        html_parts.append('<div class="docx-preview" style="font-family: Calibri, Arial, sans-serif; color: #1a1a1a; line-height: 1.6;">')
+
+        def para_to_html(para) -> str:
+            text = para.text.strip()
+            if not text:
+                return '<br/>'
+
+            style_name = (para.style.name or '').lower() if para.style else ''
+            align = ''
+            if para.alignment == WD_ALIGN_PARAGRAPH.CENTER:
+                align = ' style="text-align:center;"'
+            elif para.alignment == WD_ALIGN_PARAGRAPH.RIGHT:
+                align = ' style="text-align:right;"'
+            elif para.alignment == WD_ALIGN_PARAGRAPH.JUSTIFY:
+                align = ' style="text-align:justify;"'
+
+            # Build inline HTML from runs to preserve bold/italic
+            inline = ''
+            for run in para.runs:
+                t = run.text
+                if not t:
+                    continue
+                t = t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                if run.bold and run.italic:
+                    t = f'<strong><em>{t}</em></strong>'
+                elif run.bold:
+                    t = f'<strong>{t}</strong>'
+                elif run.italic:
+                    t = f'<em>{t}</em>'
+                if run.underline:
+                    t = f'<u>{t}</u>'
+                inline += t
+
+            if not inline:
+                inline = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+            if 'heading 1' in style_name or 'title' in style_name:
+                return f'<h2{align} style="color:#1e3a8a; border-bottom:2px solid #1e3a8a; padding-bottom:4px; margin-top:24px; margin-bottom:12px;">{inline}</h2>'
+            elif 'heading 2' in style_name:
+                return f'<h3{align} style="color:#2c5282; margin-top:20px; margin-bottom:8px;">{inline}</h3>'
+            elif 'heading 3' in style_name:
+                return f'<h4{align} style="color:#4a5568; margin-top:16px; margin-bottom:6px;">{inline}</h4>'
+            elif 'heading' in style_name:
+                return f'<h3{align} style="color:#2c5282; margin-top:20px; margin-bottom:8px;">{inline}</h3>'
+            else:
+                return f'<p{align} style="margin:4px 0;">{inline}</p>'
+
+        def table_to_html(table) -> str:
+            rows_html = []
+            for row_idx, row in enumerate(table.rows):
+                cells_html = []
+                for cell in row.cells:
+                    cell_text = cell.text.strip()
+                    cell_text_escaped = cell_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    if row_idx == 0:
+                        cells_html.append(
+                            f'<td style="padding:8px 12px; border:1px solid #d1d5db; font-weight:600; background:#f3f4f6;">'
+                            f'{cell_text_escaped}</td>'
+                        )
+                    else:
+                        cells_html.append(
+                            f'<td style="padding:8px 12px; border:1px solid #d1d5db;">'
+                            f'{cell_text_escaped}</td>'
+                        )
+                rows_html.append(f'<tr>{"".join(cells_html)}</tr>')
+            return (
+                '<table style="width:100%; border-collapse:collapse; margin:12px 0;">'
+                f'{"".join(rows_html)}</table>'
+            )
+
+        # Track which body elements appear in order (paragraphs + tables interleaved)
+        body = doc.element.body
+        for child in body:
+            tag = child.tag.split('}')[-1] if '}' in child.tag else child.tag
+            if tag == 'p':
+                # Find matching paragraph object
+                for para in doc.paragraphs:
+                    if para._element is child:
+                        html_parts.append(para_to_html(para))
+                        break
+            elif tag == 'tbl':
+                for table in doc.tables:
+                    if table._tbl is child:
+                        html_parts.append(table_to_html(table))
+                        break
+
+        html_parts.append('</div>')
+        return '\n'.join(html_parts)
+
+    except Exception as e:
+        logger.error(f"DOCX to HTML conversion failed: {e}")
+        return ""
+
+
 def generate_contract_from_uploaded_template(
     client: Any, 
     contract: Any, 
