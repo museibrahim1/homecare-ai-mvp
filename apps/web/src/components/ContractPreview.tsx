@@ -145,7 +145,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     loadAgencySettings();
   }, [token]);
 
-  // Load OCR template preview when contract is available
+  // Load OCR template preview OR build preview from agency template
   useEffect(() => {
     const loadTemplatePreview = async () => {
       if (!contract?.id || !token) return;
@@ -169,6 +169,59 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     };
     loadTemplatePreview();
   }, [contract?.id, token]);
+
+  // Fallback: build preview from agency template when no OCR template exists
+  useEffect(() => {
+    if (templateLoading) return;
+    if (templatePreview?.has_template) return;
+
+    const hasAgencyTemplate = !!(agency.contract_template_name || agency.contract_template);
+    if (hasAgencyTemplate && contract) {
+      const schedule = contract.schedule || {};
+      const services = contract.services || [];
+      const clientProfile = schedule.client_profile || {};
+      const hourlyRate = parseFloat(contract.hourly_rate || 0);
+      const weeklyHours = parseFloat(contract.weekly_hours || 0);
+      const days = Array.isArray(schedule.preferred_days)
+        ? schedule.preferred_days.map((d: any) => (typeof d === 'string' ? d : d.day)).filter(Boolean).join(', ')
+        : '';
+
+      const fields = [
+        { field_id: 'agency_name', label: 'Agency Name', section: 'agency_info', type: 'text', required: true, value: agency.name || '', is_mapped: true },
+        { field_id: 'agency_address', label: 'Agency Address', section: 'agency_info', type: 'text', required: false, value: agency.address || '', is_mapped: true },
+        { field_id: 'agency_city', label: 'Agency City', section: 'agency_info', type: 'text', required: false, value: agency.city || '', is_mapped: true },
+        { field_id: 'agency_state', label: 'Agency State', section: 'agency_info', type: 'text', required: false, value: agency.state || '', is_mapped: true },
+        { field_id: 'agency_zip', label: 'Agency ZIP', section: 'agency_info', type: 'text', required: false, value: agency.zip_code || '', is_mapped: true },
+        { field_id: 'agency_phone', label: 'Agency Phone', section: 'agency_info', type: 'phone', required: false, value: agency.phone || '', is_mapped: true },
+        { field_id: 'agency_email', label: 'Agency Email', section: 'agency_info', type: 'email', required: false, value: agency.email || '', is_mapped: true },
+        { field_id: 'client_name', label: 'Client Name', section: 'client_info', type: 'text', required: true, value: client?.full_name || '', is_mapped: true },
+        { field_id: 'client_address', label: 'Client Address', section: 'client_info', type: 'text', required: false, value: client?.address || '', is_mapped: true },
+        { field_id: 'client_phone', label: 'Client Phone', section: 'client_info', type: 'phone', required: false, value: client?.phone || '', is_mapped: true },
+        { field_id: 'client_email', label: 'Client Email', section: 'client_info', type: 'email', required: false, value: client?.email || '', is_mapped: true },
+        { field_id: 'emergency_contact', label: 'Emergency Contact', section: 'client_info', type: 'text', required: false, value: client?.emergency_contact_name || '', is_mapped: true },
+        { field_id: 'emergency_phone', label: 'Emergency Phone', section: 'client_info', type: 'phone', required: false, value: client?.emergency_contact_phone || '', is_mapped: true },
+        { field_id: 'care_level', label: 'Care Need Level', section: 'assessment', type: 'text', required: true, value: schedule.care_need_level || '', is_mapped: true },
+        { field_id: 'primary_diagnosis', label: 'Primary Diagnosis', section: 'assessment', type: 'text', required: false, value: clientProfile.primary_diagnosis || '', is_mapped: true },
+        { field_id: 'mobility_status', label: 'Mobility Status', section: 'assessment', type: 'text', required: false, value: clientProfile.mobility_status || '', is_mapped: true },
+        { field_id: 'cognitive_status', label: 'Cognitive Status', section: 'assessment', type: 'text', required: false, value: clientProfile.cognitive_status || '', is_mapped: true },
+        { field_id: 'services_list', label: 'Services', section: 'services', type: 'list', required: true, value: services.map((s: any) => typeof s === 'string' ? s : s.name).filter(Boolean).join(', ') || '', is_mapped: true },
+        { field_id: 'schedule_days', label: 'Days of Service', section: 'schedule', type: 'text', required: false, value: days, is_mapped: true },
+        { field_id: 'weekly_hours', label: 'Hours per Week', section: 'schedule', type: 'number', required: false, value: weeklyHours ? String(weeklyHours) : '', is_mapped: true },
+        { field_id: 'hourly_rate', label: 'Hourly Rate', section: 'rates', type: 'currency', required: true, value: hourlyRate ? `$${hourlyRate.toFixed(2)}` : '', is_mapped: true },
+        { field_id: 'weekly_cost', label: 'Weekly Cost', section: 'rates', type: 'currency', required: false, value: hourlyRate && weeklyHours ? `$${(hourlyRate * weeklyHours).toFixed(2)}` : '', is_mapped: true },
+        { field_id: 'monthly_cost', label: 'Monthly Cost', section: 'rates', type: 'currency', required: false, value: hourlyRate && weeklyHours ? `$${(hourlyRate * weeklyHours * 4.33).toFixed(2)}` : '', is_mapped: true },
+      ];
+
+      setTemplatePreview({
+        has_template: true,
+        template_name: agency.contract_template_name || 'Uploaded Template',
+        template_version: 1,
+        file_type: agency.contract_template_type || 'docx',
+        fields,
+      });
+      setDocumentType('template');
+    }
+  }, [templateLoading, templatePreview?.has_template, agency, contract, client]);
 
   // Initialize edit data when contract changes
   useEffect(() => {

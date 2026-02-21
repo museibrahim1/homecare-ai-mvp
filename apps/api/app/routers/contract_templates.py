@@ -427,39 +427,115 @@ async def preview_template_with_data(
             ContractTemplate.is_active == True,
         ).order_by(ContractTemplate.version.desc()).first()
 
-    if not template:
-        return {"has_template": False, "fields": [], "template_name": None}
-
     agency_settings = db.query(AgencySettings).filter(
         AgencySettings.user_id == current_user.id,
     ).first()
 
     placeholders = get_template_placeholders(client, contract, agency_settings)
 
-    filled_fields = []
-    for field in (template.detected_fields or []):
-        fid = field.get("field_id", "")
-        value = placeholders.get(fid, "")
-        if not value and fid in (template.field_mapping or {}):
-            mapped_path = template.field_mapping[fid]
-            short_key = mapped_path.rsplit(".", 1)[-1] if "." in mapped_path else mapped_path
-            value = placeholders.get(short_key, "")
+    # If we have an OCR template, use its detected fields
+    if template:
+        filled_fields = []
+        for field in (template.detected_fields or []):
+            fid = field.get("field_id", "")
+            value = placeholders.get(fid, "")
+            if not value and fid in (template.field_mapping or {}):
+                mapped_path = template.field_mapping[fid]
+                short_key = mapped_path.rsplit(".", 1)[-1] if "." in mapped_path else mapped_path
+                value = placeholders.get(short_key, "")
 
+            filled_fields.append({
+                "field_id": fid,
+                "label": field.get("label", fid),
+                "section": field.get("section", ""),
+                "type": field.get("type", "text"),
+                "required": field.get("required", False),
+                "value": str(value) if value else "",
+                "is_mapped": fid not in [u.get("field_id") for u in (template.unmapped_fields or [])],
+            })
+
+        return {
+            "has_template": True,
+            "template_name": template.name,
+            "template_version": template.version,
+            "file_type": template.file_type,
+            "fields": filled_fields,
+        }
+
+    # Fallback: check agency_settings for a legacy uploaded template
+    has_legacy = False
+    legacy_name = None
+    if agency_settings:
+        if agency_settings.documents:
+            try:
+                docs = json.loads(agency_settings.documents) if isinstance(agency_settings.documents, str) else agency_settings.documents
+                for doc in (docs or []):
+                    if doc.get("category") == "contract_template" and doc.get("content"):
+                        has_legacy = True
+                        legacy_name = doc.get("name", "Uploaded Template")
+                        break
+            except Exception:
+                pass
+        if not has_legacy and getattr(agency_settings, "contract_template", None):
+            has_legacy = True
+            legacy_name = getattr(agency_settings, "contract_template_name", None) or "Uploaded Template"
+
+    if not has_legacy:
+        return {"has_template": False, "fields": [], "template_name": None}
+
+    # Build a preview from the placeholders themselves
+    PREVIEW_FIELDS = [
+        ("agency_name", "Agency Name", "agency_info", True),
+        ("agency_address", "Agency Address", "agency_info", False),
+        ("agency_city", "Agency City", "agency_info", False),
+        ("agency_state", "Agency State", "agency_info", False),
+        ("agency_zip", "Agency ZIP", "agency_info", False),
+        ("agency_phone", "Agency Phone", "agency_info", False),
+        ("agency_email", "Agency Email", "agency_info", False),
+        ("client_name", "Client Name", "client_info", True),
+        ("date_of_birth", "Date of Birth", "client_info", False),
+        ("client_address", "Client Address", "client_info", False),
+        ("client_city", "Client City", "client_info", False),
+        ("client_state", "Client State", "client_info", False),
+        ("client_zip", "Client ZIP", "client_info", False),
+        ("client_phone", "Client Phone", "client_info", False),
+        ("client_email", "Client Email", "client_info", False),
+        ("emergency_contact", "Emergency Contact", "client_info", False),
+        ("emergency_phone", "Emergency Phone", "client_info", False),
+        ("care_level", "Care Need Level", "assessment", True),
+        ("primary_diagnosis", "Primary Diagnosis", "assessment", False),
+        ("mobility_status", "Mobility Status", "assessment", False),
+        ("cognitive_status", "Cognitive Status", "assessment", False),
+        ("services", "Services", "services", True),
+        ("schedule_days", "Days of Service", "schedule", False),
+        ("weekly_hours", "Hours per Week", "schedule", False),
+        ("hourly_rate", "Hourly Rate", "rates", True),
+        ("weekend_rate", "Weekend Rate", "rates", False),
+        ("holiday_rate", "Holiday Rate", "rates", False),
+        ("weekly_cost", "Weekly Cost", "rates", False),
+        ("monthly_cost", "Monthly Cost", "rates", False),
+        ("contract_date", "Contract Date", "contract", True),
+        ("effective_date", "Effective Date", "contract", False),
+    ]
+
+    filled_fields = []
+    for fid, label, section, required in PREVIEW_FIELDS:
+        value = placeholders.get(fid, "")
         filled_fields.append({
             "field_id": fid,
-            "label": field.get("label", fid),
-            "section": field.get("section", ""),
-            "type": field.get("type", "text"),
-            "required": field.get("required", False),
+            "label": label,
+            "section": section,
+            "type": "text",
+            "required": required,
             "value": str(value) if value else "",
-            "is_mapped": fid not in [u.get("field_id") for u in (template.unmapped_fields or [])],
+            "is_mapped": True,
         })
 
     return {
         "has_template": True,
-        "template_name": template.name,
-        "template_version": template.version,
-        "file_type": template.file_type,
+        "template_name": legacy_name,
+        "template_version": 1,
+        "file_type": "docx",
         "fields": filled_fields,
     }
 
