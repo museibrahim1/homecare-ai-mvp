@@ -23,6 +23,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
+import Sidebar from '@/components/Sidebar';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -188,16 +189,22 @@ export default function BillingPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-screen bg-dark-900">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        </main>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+      <div className="flex min-h-screen bg-dark-950">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+        </main>
       </div>
     );
   }
@@ -220,7 +227,9 @@ export default function BillingPage() {
   });
 
   return (
-    <div className="min-h-screen bg-dark-950 p-4 md:p-8">
+    <div className="flex min-h-screen bg-dark-950">
+      <Sidebar />
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -538,6 +547,7 @@ export default function BillingPage() {
           </div>
         )}
       </div>
+      </main>
     </div>
   );
 }
