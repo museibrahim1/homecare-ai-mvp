@@ -13,7 +13,7 @@ import {
   FileText,
   Upload
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import AudioUploader from '@/components/AudioUploader';
@@ -31,7 +31,7 @@ type SourceType = 'audio' | 'transcript';
 
 export default function NewVisitPage() {
   const router = useRouter();
-  const { token, user, isLoading: authLoading } = useAuth();
+  const { token, user, isReady } = useRequireAuth();
   
   const [step, setStep] = useState<Step>('details');
   const [sourceType, setSourceType] = useState<SourceType>('audio');
@@ -55,12 +55,6 @@ export default function NewVisitPage() {
   // Usage / upgrade
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [usage, setUsage] = useState<any>(null);
-
-  useEffect(() => {
-    if (!authLoading && !token) {
-      router.push('/login');
-    }
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     if (token) {
@@ -150,20 +144,13 @@ export default function NewVisitPage() {
     setStep(source === 'audio' ? 'audio' : 'transcript');
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-dark-300">Loading...</span>
-        </div>
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

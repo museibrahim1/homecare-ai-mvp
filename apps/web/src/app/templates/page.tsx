@@ -24,7 +24,7 @@ import {
   BookOpen,
   Sparkles,
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 
@@ -89,7 +89,7 @@ type TabId = 'my-templates' | 'gallery';
 
 export default function TemplatesPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState<TabId>('my-templates');
@@ -115,10 +115,6 @@ export default function TemplatesPage() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [galleryLoading, setGalleryLoading] = useState(true);
   const [cloning, setCloning] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!authLoading && !token) router.push('/login');
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     if (token) {
@@ -246,15 +242,13 @@ export default function TemplatesPage() {
     }
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

@@ -31,7 +31,7 @@ import {
   Save,
   Check,
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -328,7 +328,7 @@ export default function ClientDetailPage() {
   const router = useRouter();
   const params = useParams();
   const clientId = params.clientId as string;
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
 
   const [client, setClient] = useState<Client | null>(null);
   const [editData, setEditData] = useState<Client | null>(null);
@@ -343,12 +343,6 @@ export default function ClientDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-
-  useEffect(() => {
-    if (!authLoading && !token) {
-      router.push('/login');
-    }
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     if (token && clientId) {
@@ -484,20 +478,13 @@ export default function ClientDetailPage() {
   const currentStageIndex = PIPELINE_STAGES.findIndex(s => s.key === currentStageKey);
 
   /* ─── Loading / Error states ─── */
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-dark-300">Loading...</span>
-        </div>
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   if (loading) {
     return (

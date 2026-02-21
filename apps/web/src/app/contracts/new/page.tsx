@@ -20,7 +20,7 @@ import {
   Layers,
   Scan,
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 
@@ -68,7 +68,7 @@ const DAYS_OF_WEEK = [
 
 export default function NewContractPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
 
   const [clients, setClients] = useState<Client[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
@@ -102,12 +102,6 @@ export default function NewContractPage() {
   const [termsAndConditions, setTermsAndConditions] = useState(
     'Services will be provided in accordance with the agreed-upon care plan. Rates are subject to review annually. The agency maintains appropriate insurance and bonding. All caregivers are background-checked and trained per state requirements.'
   );
-
-  useEffect(() => {
-    if (!authLoading && !token) {
-      router.push('/login');
-    }
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     if (token) {
@@ -232,18 +226,13 @@ export default function NewContractPage() {
     }
   };
 
-  const hasStoredToken =
-    typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   if (success) {
     return (

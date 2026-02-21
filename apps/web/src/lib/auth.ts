@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 
 // HIPAA Compliance: Session timeout after 15 minutes of inactivity
 const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
@@ -89,6 +90,23 @@ let globalHydrated = false;
 
 // Also track if we've ever had a valid session (prevents flash on navigation)
 let hasEverHadSession = false;
+
+// Wrapper hook for protected pages — waits for hydration before allowing redirects
+export function useRequireAuth() {
+  const auth = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (auth.hydrated && !auth.token) {
+      router.push('/login');
+    }
+  }, [auth.hydrated, auth.token, router]);
+
+  return {
+    ...auth,
+    isReady: auth.hydrated && !!auth.token,
+  };
+}
 
 // Hook that handles hydration and session timeout
 export function useAuth() {

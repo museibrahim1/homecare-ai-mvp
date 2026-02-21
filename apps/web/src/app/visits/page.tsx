@@ -22,7 +22,7 @@ import {
   Trash2,
   X
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api, formatLocalDate } from '@/lib/api';
 import { Visit } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
@@ -81,7 +81,7 @@ Client: Thank you so much. This gives me such peace of mind.`;
 
 export default function VisitsPage() {
   const router = useRouter();
-  const { token, user, isLoading: authLoading } = useAuth();
+  const { token, user, isReady } = useRequireAuth();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -110,12 +110,6 @@ export default function VisitsPage() {
       (v.status || '').toLowerCase().includes(q)
     );
   }, [visits, searchQuery]);
-
-  useEffect(() => {
-    if (!authLoading && !token) {
-      router.push('/login');
-    }
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     if (token) {
@@ -383,20 +377,13 @@ export default function VisitsPage() {
     }
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-dark-300">Loading...</span>
-        </div>
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

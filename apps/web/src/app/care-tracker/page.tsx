@@ -9,7 +9,7 @@ import {
   Loader2, CalendarDays, Heart, Activity, MapPin, Phone, Filter,
   GripVertical, ArrowRight, MoreHorizontal, Pencil, Trash2, UserCheck
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api, formatLocalDate } from '@/lib/api';
 
 /* ─── Types ─── */
@@ -225,7 +225,7 @@ function CareItemForm({
 /* ─── Main Page ─── */
 export default function CareTrackerPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
   const [items, setItems] = useState<CareItem[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [view, setView] = useState<'timeline' | 'board'>('timeline');
@@ -253,8 +253,6 @@ export default function CareTrackerPage() {
       api.getClients(token).then(setClients).catch(() => {});
     }
   }, [token]);
-  useEffect(() => { if (!authLoading && !token) router.push('/login'); }, [token, authLoading, router]);
-
   const persist = useCallback((updated: CareItem[]) => { setItems(updated); saveItems(updated); }, []);
 
   // Filtered & grouped
@@ -304,17 +302,13 @@ export default function CareTrackerPage() {
     persist(items.map(i => i.id === id ? { ...i, stage: newStage } : i));
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

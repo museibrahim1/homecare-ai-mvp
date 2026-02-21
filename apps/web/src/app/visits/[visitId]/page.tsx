@@ -27,7 +27,7 @@ import {
   RotateCcw,
   Maximize2
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Visit, TranscriptSegment, BillableItem } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
@@ -53,7 +53,7 @@ export default function VisitDetailPage() {
   const router = useRouter();
   const params = useParams();
   const visitId = params.visitId as string;
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
   
   const [visit, setVisit] = useState<Visit | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -121,12 +121,6 @@ export default function VisitDetailPage() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showExportMenu]);
-
-  useEffect(() => {
-    if (!authLoading && !token) {
-      router.push('/login');
-    }
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -388,20 +382,13 @@ export default function VisitDetailPage() {
     return 'pending';
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-dark-300">Loading...</span>
-        </div>
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   if (loading) {
     return (

@@ -8,7 +8,7 @@ import {
   Plus, Trash2, Circle, CheckCircle2, X, GripVertical, Tag, Settings2,
   LayoutGrid
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
@@ -561,7 +561,7 @@ function CustomizePanel({
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
   const [stats, setStats] = useState({ totalVisits: 0, pendingReview: 0, totalClients: 0, hoursThisWeek: 0 });
   const [recentVisits, setRecentVisits] = useState<any[]>([]);
   const [allVisits, setAllVisits] = useState<any[]>([]);
@@ -585,12 +585,6 @@ export default function DashboardPage() {
   }, []);
 
   const isWidgetVisible = useCallback((id: string) => !widgetPrefs.hidden.includes(id), [widgetPrefs.hidden]);
-
-  useEffect(() => {
-    if (!authLoading && !token) {
-      router.push('/login');
-    }
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     if (token) {
@@ -707,19 +701,13 @@ export default function DashboardPage() {
     }
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-  
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-2xl flex items-center justify-center animate-pulse-glow">
-          <Mic className="w-8 h-8 text-white" />
-        </div>
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { Target, Plus, DollarSign, Clock, CheckCircle, X, User, Phone, Mail, RefreshCw, FileText, GripVertical } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
@@ -30,7 +30,7 @@ const stages = [
 ];
 
 export default function PipelinePage() {
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
   const router = useRouter();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,10 +88,10 @@ export default function PipelinePage() {
   };
 
   useEffect(() => {
-    if (!authLoading && token) {
+    if (isReady) {
       loadPipelineData();
     }
-  }, [token, authLoading]);
+  }, [isReady]);
 
   const loadPipelineData = async () => {
     if (!token) return;
@@ -213,17 +213,13 @@ export default function PipelinePage() {
     }
   };
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <RefreshCw className="w-8 h-8 text-primary-500 animate-spin" />
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   if (loading) {
     return (

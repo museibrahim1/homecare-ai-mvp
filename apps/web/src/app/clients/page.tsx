@@ -32,7 +32,7 @@ import {
   UserPlus,
   FolderUp
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
+import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
@@ -534,7 +534,7 @@ function ClientRow({
 
 export default function ClientsPage() {
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isReady } = useRequireAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -581,12 +581,6 @@ export default function ClientsPage() {
       a.id === id ? { ...a, enabled: !a.enabled } : a
     ));
   };
-
-  useEffect(() => {
-    if (!authLoading && !token) {
-      router.push('/login');
-    }
-  }, [token, authLoading, router]);
 
   useEffect(() => {
     if (token) {
@@ -759,20 +753,13 @@ export default function ClientsPage() {
   const intakeCount = clients.filter(c => c.status === 'intake' || c.status === 'pending').length;
   const highCareCount = clients.filter(c => c.care_level === 'HIGH').length;
 
-  const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('palmcare-auth');
-
-  if (authLoading && !hasStoredToken) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-dark-300">Loading...</span>
-        </div>
+        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-
-  if (!token && !hasStoredToken) return null;
 
   return (
     <div className="flex min-h-screen bg-dark-900">
