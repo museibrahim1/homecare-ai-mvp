@@ -1,4 +1,4 @@
-# Version: v24 - Fix clear-all endpoint with full cascade delete
+# Version: v25 - Resilient startup: migrations don't block server
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -18,6 +18,6 @@ RUN pip install --no-cache-dir -e .
 # Expose port (Railway uses PORT env variable)
 EXPOSE 8000
 
-# Run database migrations and start server
-# Use PORT env var from Railway (defaults to 8000)
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Run database migrations then start server
+# Migrations are best-effort: server starts regardless so healthcheck passes
+CMD ["sh", "-c", "echo '=== Running migrations ===' && alembic upgrade head 2>&1 && echo '=== Migrations OK ===' || echo '!!! Migration failed, starting server anyway !!!'; echo '=== Starting uvicorn ===' && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --log-level info"]

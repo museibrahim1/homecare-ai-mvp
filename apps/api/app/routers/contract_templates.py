@@ -389,7 +389,15 @@ async def get_field_registry():
 
 # ---------- Gallery: Pre-made starter templates ----------
 
-GALLERY_DIR = Path(__file__).parent.parent.parent.parent.parent / "templates" / "contracts"
+# Resolve gallery path: try repo root first, then fall back relative to WORKDIR
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
+_WORKDIR_ROOT = Path("/app")
+if (_REPO_ROOT / "templates" / "contracts").is_dir():
+    GALLERY_DIR = _REPO_ROOT / "templates" / "contracts"
+elif (_WORKDIR_ROOT / "templates" / "contracts").is_dir():
+    GALLERY_DIR = _WORKDIR_ROOT / "templates" / "contracts"
+else:
+    GALLERY_DIR = Path(__file__).resolve().parent.parent.parent / "templates" / "contracts"
 
 
 class GalleryItem(BaseModel):
@@ -411,6 +419,8 @@ async def list_gallery_templates():
     No authentication required to browse.
     """
     items = []
+    if not GALLERY_DIR.is_dir():
+        return items
     for meta_path in sorted(GALLERY_DIR.glob("*_meta.json")):
         try:
             with open(meta_path) as f:

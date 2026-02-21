@@ -194,21 +194,28 @@ app.include_router(contract_templates.router, prefix="/contract-templates", tags
 @app.on_event("startup")
 async def seed_database():
     """Create default admin user and test data if database is empty."""
-    # Skip seeding during tests
     if os.getenv("TESTING"):
         return
-    
-    from app.db.session import SessionLocal
-    from app.models.user import User, UserRole
-    from app.models.client import Client
-    from app.models.caregiver import Caregiver
-    from app.core.security import get_password_hash
-    from datetime import date, datetime, timezone
-    import logging
-    
-    logger = logging.getLogger(__name__)
-    db = SessionLocal()
-    
+
+    logger.info("=== API startup: seeding database ===")
+
+    try:
+        from app.db.session import SessionLocal
+        from app.models.user import User, UserRole
+        from app.models.client import Client
+        from app.models.caregiver import Caregiver
+        from app.core.security import get_password_hash
+        from datetime import date, datetime, timezone
+    except Exception as e:
+        logger.error(f"Failed to import models during startup: {e}")
+        return
+
+    try:
+        db = SessionLocal()
+    except Exception as e:
+        logger.error(f"Failed to create database session during startup: {e}")
+        return
+
     try:
         # Check if admin user exists — use ADMIN_PASSWORD env var or a secure default
         admin_exists = db.query(User).filter(User.email == "admin@palmtai.com").first()
@@ -345,10 +352,20 @@ async def seed_database():
         logger.info("Database seeding complete")
             
     except Exception as e:
-        logger.error(f"Error seeding database: {e}")
-        db.rollback()
+        logger.error(f"Error seeding database: {type(e).__name__}: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        try:
+            db.rollback()
+        except Exception:
+            pass
     finally:
-        db.close()
+        try:
+            db.close()
+        except Exception:
+            pass
+    
+    logger.info("=== API startup complete ===")
 
 
 @app.get("/", tags=["Health"])
