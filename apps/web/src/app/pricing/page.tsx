@@ -67,7 +67,7 @@ export default function PricingPage() {
   const plans: PricingPlan[] = [
     {
       name: 'Starter',
-      description: '29 seats · $13.10/seat',
+      description: 'For small agencies getting organized',
       monthlyPrice: 379.99,
       annualPrice: 3876,
       setupFee: null,
@@ -77,7 +77,7 @@ export default function PricingPage() {
     },
     {
       name: 'Growth',
-      description: '49 seats · $13.06/seat',
+      description: 'For growing teams',
       monthlyPrice: 639.99,
       annualPrice: 6528,
       setupFee: null,
@@ -87,7 +87,7 @@ export default function PricingPage() {
     },
     {
       name: 'Pro',
-      description: '99 seats · $13.13/seat',
+      description: 'For high-volume teams',
       monthlyPrice: 1299,
       annualPrice: 13250,
       setupFee: null,
@@ -112,8 +112,7 @@ export default function PricingPage() {
     {
       name: 'Core Features',
       features: [
-        { name: 'Included seats', values: ['29', '49', '99'] },
-        { name: 'Price per seat', values: ['$13.10', '$13.06', '$13.13'] },
+        { name: 'Team seats', values: ['29', '49', '99'] },
         { name: 'Generated contracts / month', values: ['5', '15', 'Unlimited'] },
         { name: 'Clients in CRM', values: ['20', '75', '500'] },
         { name: 'Caregivers', values: ['10', '40', '200'] },
