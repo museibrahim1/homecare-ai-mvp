@@ -348,6 +348,14 @@ class ApiClient {
     return this.request<any>('/contract-templates/registry/fields', {}, token);
   }
 
+  async listGalleryTemplates() {
+    return this.request<any[]>('/contract-templates/gallery/list', {});
+  }
+
+  async cloneGalleryTemplate(token: string, slug: string) {
+    return this.request<any>(`/contract-templates/gallery/clone/${slug}`, { method: 'POST' }, token);
+  }
+
   async exportContractWithTemplate(token: string, contractId: string, templateId?: string) {
     const params = templateId ? `?template_id=${templateId}` : '';
     const controller = new AbortController();

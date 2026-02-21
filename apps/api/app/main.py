@@ -342,9 +342,6 @@ async def seed_database():
             db.commit()
             logger.info(f"Created {len(caregivers)} sample caregivers")
             
-        # Seed default contract template for the admin user
-        _seed_contract_template(db, admin_id, logger)
-        
         logger.info("Database seeding complete")
             
     except Exception as e:
@@ -352,88 +349,6 @@ async def seed_database():
         db.rollback()
     finally:
         db.close()
-
-
-def _seed_contract_template(db, admin_id, logger):
-    """Create the default OCR-scanned contract template if none exists."""
-    try:
-        from app.models.contract_template import ContractTemplate
-        import json
-        import base64
-        from pathlib import Path
-
-        if not admin_id:
-            return
-
-        existing = db.query(ContractTemplate).filter(
-            ContractTemplate.owner_id == admin_id,
-        ).first()
-        if existing:
-            return
-
-        # Load template DOCX and metadata from templates directory
-        template_dir = Path(__file__).parent.parent.parent.parent / "templates" / "contracts"
-        docx_path = template_dir / "palmcare_service_agreement.docx"
-        meta_path = template_dir / "palmcare_service_agreement_meta.json"
-
-        if not docx_path.exists() or not meta_path.exists():
-            logger.warning("Contract template files not found, skipping template seed")
-            return
-
-        with open(meta_path) as f:
-            meta = json.load(f)
-
-        with open(docx_path, "rb") as f:
-            docx_bytes = f.read()
-
-        import hashlib
-        file_hash = hashlib.sha256(docx_bytes).hexdigest()
-        file_url = f"data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{base64.b64encode(docx_bytes).decode()}"
-
-        # Extract OCR text from the DOCX for display
-        ocr_text = ""
-        try:
-            from docx import Document
-            import io
-            doc = Document(io.BytesIO(docx_bytes))
-            parts = []
-            for para in doc.paragraphs:
-                if para.text.strip():
-                    parts.append(para.text.strip())
-            for table in doc.tables:
-                for row in table.rows:
-                    cells = [c.text.strip() for c in row.cells if c.text.strip()]
-                    if cells:
-                        parts.append(" | ".join(cells))
-            ocr_text = "\n".join(parts)
-        except Exception:
-            ocr_text = "[DOCX text extraction not available]"
-
-        template = ContractTemplate(
-            owner_id=admin_id,
-            name=meta["name"],
-            version=meta["version"],
-            description=meta["description"],
-            is_active=True,
-            file_type=meta["file_type"],
-            file_url=file_url,
-            file_hash=file_hash,
-            ocr_text=ocr_text,
-            detected_fields=meta["detected_fields"],
-            field_mapping=meta["field_mapping"],
-            unmapped_fields=meta["unmapped_fields"],
-        )
-
-        db.add(template)
-        db.commit()
-        logger.info(
-            f"Seeded contract template: {meta['name']} "
-            f"({len(meta['detected_fields'])} fields, {len(meta['field_mapping'])} mapped)"
-        )
-
-    except Exception as e:
-        logger.warning(f"Failed to seed contract template: {e}")
-        db.rollback()
 
 
 @app.get("/", tags=["Health"])
