@@ -389,15 +389,17 @@ async def get_field_registry():
 
 # ---------- Gallery: Pre-made starter templates ----------
 
-# Resolve gallery path: try repo root first, then fall back relative to WORKDIR
-_REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
+# Gallery templates live inside the API package at apps/api/templates/contracts/
+# In Docker (WORKDIR /app) they land at /app/templates/contracts/
+_API_ROOT = Path(__file__).resolve().parent.parent.parent  # apps/api
 _WORKDIR_ROOT = Path("/app")
-if (_REPO_ROOT / "templates" / "contracts").is_dir():
-    GALLERY_DIR = _REPO_ROOT / "templates" / "contracts"
+
+if (_API_ROOT / "templates" / "contracts").is_dir():
+    GALLERY_DIR = _API_ROOT / "templates" / "contracts"
 elif (_WORKDIR_ROOT / "templates" / "contracts").is_dir():
     GALLERY_DIR = _WORKDIR_ROOT / "templates" / "contracts"
 else:
-    GALLERY_DIR = Path(__file__).resolve().parent.parent.parent / "templates" / "contracts"
+    GALLERY_DIR = _API_ROOT / "templates" / "contracts"
 
 
 class GalleryItem(BaseModel):

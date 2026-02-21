@@ -1,0 +1,232 @@
+{
+  "name": "Basic Home Care Contract",
+  "version": 1,
+  "description": "Simple one-page home care contract. Great for quick setup with essential fields only.",
+  "file_type": "docx",
+  "detected_fields": [
+    {
+      "field_id": "agency_name",
+      "label": "Agency Name",
+      "type": "text",
+      "required": true,
+      "section": "agency_info",
+      "mapped_to": "agency_name",
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_phone",
+      "label": "Agency Phone",
+      "type": "phone",
+      "required": false,
+      "section": "agency_info",
+      "mapped_to": "agency_phone",
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_email",
+      "label": "Agency Email",
+      "type": "email",
+      "required": false,
+      "section": "agency_info",
+      "mapped_to": "agency_email",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_name",
+      "label": "Client Name",
+      "type": "text",
+      "required": true,
+      "section": "client_info",
+      "mapped_to": "client_name",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_address",
+      "label": "Client Address",
+      "type": "text",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_address",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_phone",
+      "label": "Client Phone",
+      "type": "phone",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_phone",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_email",
+      "label": "Client Email",
+      "type": "email",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "client_email",
+      "is_filled": false
+    },
+    {
+      "field_id": "emergency_contact",
+      "label": "Emergency Contact",
+      "type": "text",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "emergency_contact",
+      "is_filled": false
+    },
+    {
+      "field_id": "emergency_phone",
+      "label": "Emergency Phone",
+      "type": "phone",
+      "required": false,
+      "section": "client_info",
+      "mapped_to": "emergency_phone",
+      "is_filled": false
+    },
+    {
+      "field_id": "services_list",
+      "label": "Services",
+      "type": "list",
+      "required": true,
+      "section": "services",
+      "mapped_to": "services_list",
+      "is_filled": false
+    },
+    {
+      "field_id": "schedule_days",
+      "label": "Days",
+      "type": "text",
+      "required": false,
+      "section": "schedule",
+      "mapped_to": "schedule_days",
+      "is_filled": false
+    },
+    {
+      "field_id": "weekly_hours",
+      "label": "Hours/Week",
+      "type": "number",
+      "required": false,
+      "section": "schedule",
+      "mapped_to": "weekly_hours",
+      "is_filled": false
+    },
+    {
+      "field_id": "hourly_rate",
+      "label": "Hourly Rate",
+      "type": "currency",
+      "required": true,
+      "section": "rates",
+      "mapped_to": "hourly_rate",
+      "is_filled": false
+    },
+    {
+      "field_id": "monthly_cost",
+      "label": "Monthly Estimate",
+      "type": "currency",
+      "required": false,
+      "section": "rates",
+      "mapped_to": "monthly_cost",
+      "is_filled": false
+    },
+    {
+      "field_id": "start_date",
+      "label": "Start Date",
+      "type": "date",
+      "required": false,
+      "section": "contract",
+      "mapped_to": "start_date",
+      "is_filled": false
+    },
+    {
+      "field_id": "end_date",
+      "label": "End Date",
+      "type": "date",
+      "required": false,
+      "section": "contract",
+      "mapped_to": "end_date",
+      "is_filled": false
+    },
+    {
+      "field_id": "client_signature",
+      "label": "Client Signature",
+      "type": "signature",
+      "required": true,
+      "section": "signatures",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_signature",
+      "label": "Agency Signature",
+      "type": "signature",
+      "required": true,
+      "section": "signatures",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "client_signature_date",
+      "label": "Client Signature Date",
+      "type": "date",
+      "required": false,
+      "section": "signatures",
+      "mapped_to": null,
+      "is_filled": false
+    },
+    {
+      "field_id": "agency_signature_date",
+      "label": "Agency Signature Date",
+      "type": "date",
+      "required": false,
+      "section": "signatures",
+      "mapped_to": null,
+      "is_filled": false
+    }
+  ],
+  "field_mapping": {
+    "agency_name": "agency.name",
+    "agency_phone": "agency.phone",
+    "agency_email": "agency.email",
+    "client_name": "client.full_name",
+    "client_address": "client.address",
+    "client_phone": "client.phone",
+    "client_email": "client.email",
+    "emergency_contact": "client.emergency_contact_name",
+    "emergency_phone": "client.emergency_contact_phone",
+    "services_list": "contract.services",
+    "schedule_days": "contract.schedule.days",
+    "weekly_hours": "contract.weekly_hours",
+    "hourly_rate": "contract.hourly_rate",
+    "monthly_cost": "computed.monthly_cost",
+    "start_date": "contract.start_date",
+    "end_date": "contract.end_date"
+  },
+  "unmapped_fields": [
+    {
+      "field_id": "client_signature",
+      "label": "Client Signature",
+      "type": "signature",
+      "section": "signatures"
+    },
+    {
+      "field_id": "agency_signature",
+      "label": "Agency Signature",
+      "type": "signature",
+      "section": "signatures"
+    },
+    {
+      "field_id": "client_signature_date",
+      "label": "Client Signature Date",
+      "type": "date",
+      "section": "signatures"
+    },
+    {
+      "field_id": "agency_signature_date",
+      "label": "Agency Signature Date",
+      "type": "date",
+      "section": "signatures"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ from typing import Optional
 import io
 import csv
 import base64
+import logging
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
@@ -22,8 +23,12 @@ from app.services.document_generation import (
     generate_note_docx,
     generate_contract_docx,
     generate_contract_from_uploaded_template,
+    get_template_placeholders,
+    fill_docx_template,
 )
 from app.services.email import get_email_service
+
+logger = logging.getLogger(__name__)
 
 
 class EmailContractRequest(BaseModel):
@@ -224,9 +229,6 @@ async def export_contract_from_template(
     Export contract using the uploaded agency template (data isolation enforced).
     Falls back to default DOCX if no template is uploaded.
     """
-    import logging
-    logger = logging.getLogger(__name__)
-    
     visit = get_user_visit(db, visit_id, current_user)
     
     contract = db.query(Contract).filter(
@@ -236,100 +238,84 @@ async def export_contract_from_template(
     if not contract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
     
-    # Get agency settings for current user to check for uploaded template
+    # --- Priority 1: Check OCR-scanned templates from contract_templates table ---
+    try:
+        from app.models.contract_template import ContractTemplate
+        ocr_template = db.query(ContractTemplate).filter(
+            ContractTemplate.owner_id == current_user.id,
+            ContractTemplate.is_active == True,
+        ).order_by(ContractTemplate.version.desc()).first()
+
+        if ocr_template and ocr_template.file_url:
+            logger.info(f"Using OCR template: {ocr_template.name} v{ocr_template.version}")
+            if ocr_template.file_url.startswith("data:"):
+                _, encoded = ocr_template.file_url.split(",", 1)
+                template_bytes = base64.b64decode(encoded)
+
+                agency_settings = db.query(AgencySettings).filter(
+                    AgencySettings.user_id == current_user.id
+                ).first()
+
+                placeholders = get_template_placeholders(visit.client, contract, agency_settings)
+                filled_docx = fill_docx_template(template_bytes, placeholders)
+
+                client_name = (visit.client.full_name or 'Client').replace(' ', '_')
+                filename = f"Contract_{client_name}.docx"
+
+                return StreamingResponse(
+                    iter([filled_docx]),
+                    media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    headers={"Content-Disposition": f"attachment; filename={filename}"},
+                )
+    except Exception as e:
+        logger.warning(f"OCR template export failed, falling back: {e}")
+
+    # --- Priority 2: Check agency settings documents / legacy template ---
     agency_settings = db.query(AgencySettings).filter(
         AgencySettings.user_id == current_user.id
     ).first()
-    
-    logger.info(f"Agency settings found: {agency_settings is not None}")
-    
-    # Check for uploaded template in documents array
+
     template_base64 = None
-    template_name = None
-    
+
     if agency_settings and agency_settings.documents:
         import json
         try:
             documents = json.loads(agency_settings.documents) if isinstance(agency_settings.documents, str) else agency_settings.documents
-            logger.info(f"Found {len(documents)} documents in agency settings")
             for doc in documents:
-                logger.info(f"Document: category={doc.get('category')}, name={doc.get('name')}, has_content={bool(doc.get('content'))}")
                 if doc.get('category') == 'contract_template' and doc.get('content'):
                     template_base64 = doc['content']
-                    template_name = doc.get('name', 'template')
-                    # Remove data URL prefix if present
                     if ',' in template_base64:
                         template_base64 = template_base64.split(',')[1]
-                    logger.info(f"Using template from documents: {template_name}")
                     break
         except Exception as e:
             logger.error(f"Failed to parse documents: {e}")
-    
-    # Also check legacy template field
+
     if not template_base64 and agency_settings and agency_settings.contract_template:
         template_base64 = agency_settings.contract_template
-        template_name = agency_settings.contract_template_name or "legacy_template"
         if ',' in template_base64:
             template_base64 = template_base64.split(',')[1]
-        logger.info(f"Using legacy template: {template_name}")
-    
-    if not template_base64:
-        logger.warning("No template found - returning error to user")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="No contract template uploaded. Please go to Settings > Documents and upload a Contract Template, then click Save Changes."
-        )
-    
-    # Validate the template is actually a DOCX file
-    try:
-        import base64
-        decoded_bytes = base64.b64decode(template_base64)
-        
-        # Check file signature - DOCX files are ZIP archives starting with PK\x03\x04
-        if decoded_bytes[:4] == b'PK\x03\x04':
-            logger.info("Template file signature: ZIP/DOCX (valid)")
-        else:
-            # Invalid file type - log and fall back to default
-            if decoded_bytes[:2] == b'\xff\xd8':
-                file_type = "JPEG image"
-            elif decoded_bytes[:4] == b'%PDF':
-                file_type = "PDF"
-            elif decoded_bytes[:3] == b'\x89PN':
-                file_type = "PNG image"
-            elif decoded_bytes[:8] == b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1':
-                file_type = "Old DOC format"
-            else:
-                file_type = "unknown format"
-            
-            logger.warning(f"Uploaded template is a {file_type}, not DOCX. Falling back to default template.")
-            # Skip the uploaded template and use default
-            template_base64 = None
-    except Exception as e:
-        logger.error(f"Failed to validate template: {e}")
-        template_base64 = None
-    
+
     if template_base64:
-        # Use the uploaded template
         try:
-            docx_bytes = generate_contract_from_uploaded_template(
-                client=visit.client,
-                contract=contract,
-                template_base64=template_base64,
-                agency_settings=agency_settings
-            )
-            
-            client_name = (visit.client.full_name or 'Client').replace(' ', '_')
-            filename = f"Contract_{client_name}.docx"
-            
-            return StreamingResponse(
-                iter([docx_bytes]),
-                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                headers={"Content-Disposition": f"attachment; filename={filename}"},
-            )
+            decoded_bytes = base64.b64decode(template_base64)
+            if decoded_bytes[:4] == b'PK\x03\x04':
+                docx_bytes = generate_contract_from_uploaded_template(
+                    client=visit.client,
+                    contract=contract,
+                    template_base64=template_base64,
+                    agency_settings=agency_settings,
+                )
+                client_name = (visit.client.full_name or 'Client').replace(' ', '_')
+                filename = f"Contract_{client_name}.docx"
+                return StreamingResponse(
+                    iter([docx_bytes]),
+                    media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    headers={"Content-Disposition": f"attachment; filename={filename}"},
+                )
         except Exception as e:
-            logger.error(f"Template filling failed: {e}")
-    
-    # Fall back to default DOCX generation
+            logger.error(f"Agency template filling failed: {e}")
+
+    # --- Priority 3: Fall back to default DOCX generation ---
     docx_bytes = generate_contract_docx(visit.client, contract)
     
     return StreamingResponse(
