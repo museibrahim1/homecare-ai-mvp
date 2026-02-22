@@ -33,10 +33,10 @@
   1. Field-level encryption for voiceprints (~2 hours dev)
   2. Enforce MFA for admin accounts (~1-2 hours dev)
   3. Password history — prevent reuse of last 5 passwords (~1-2 hours dev)
-- **BAAs needed (emails drafted, pending send by CEO):**
-  - OpenAI: email baa@openai.com (free, 2-5 day response)
-  - Anthropic: contact sales via anthropic.com (free)
-  - Railway: email solutions@railway.app (enterprise tier)
+- **BAAs requested (emails sent by CEO Feb 22, 2026):**
+  - OpenAI: emailed baa@openai.com — awaiting response
+  - Anthropic: contacted sales via anthropic.com — awaiting response
+  - Railway: emailed solutions@railway.app — awaiting response
 - **BAAs NOT needed:** Resend (no PHI in emails), Stripe (no PHI), Stirling-PDF (self-hosted), Twilio (not used)
 - **Compliance docs location:** /compliance/ directory (8 documents)
 

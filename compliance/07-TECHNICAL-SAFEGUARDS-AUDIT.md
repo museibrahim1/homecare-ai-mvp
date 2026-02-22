@@ -96,7 +96,7 @@
 - [ ] **Implement field-level encryption** for voiceprints (~2 hours dev)
 - [ ] **Enforce MFA for admin accounts** (~1-2 hours dev)
 - [ ] **Implement password history** — prevent reuse of last 5 passwords (~1-2 hours dev)
-- [ ] **Execute BAAs** with OpenAI, Anthropic, Railway (emails drafted, pending send)
+- [x] **Execute BAAs** with OpenAI, Anthropic, Railway (emails sent Feb 22, 2026 — awaiting responses)
 
 ---
 

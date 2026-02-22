@@ -8,9 +8,9 @@
 
 | Vendor | Service | PHI Transmitted | BAA Available? | BAA Status | Action Required | Priority |
 |--------|---------|----------------|----------------|------------|-----------------|----------|
-| Railway | Cloud hosting | All ePHI | Yes (enterprise) | NOT SIGNED | Email solutions@railway.app | CRITICAL |
-| OpenAI | Voice transcription + LLM | Voice recordings, transcripts | Yes (API) | NOT SIGNED | Email baa@openai.com | CRITICAL |
-| Anthropic | LLM processing | Transcripts, documents | Yes (API) | NOT SIGNED | Contact sales via anthropic.com | CRITICAL |
+| Railway | Cloud hosting | All ePHI | Yes (enterprise) | REQUESTED | Emailed solutions@railway.app Feb 22, 2026 | CRITICAL |
+| OpenAI | Voice transcription + LLM | Voice recordings, transcripts | Yes (API) | REQUESTED | Emailed baa@openai.com Feb 22, 2026 | CRITICAL |
+| Anthropic | LLM processing | Transcripts, documents | Yes (API) | REQUESTED | Contacted sales Feb 22, 2026 | CRITICAL |
 | Twilio | Voice calls | N/A — not in use | N/A | N/A | Removed from stack | N/A |
 | Resend | Transactional email | Client names, contracts | **NO** | N/A | **SWITCH PROVIDER** | CRITICAL |
 | Pyannote.ai | Speaker diarization | Voice recordings, voiceprints | Unknown | NOT SIGNED | Contact vendor | HIGH |
