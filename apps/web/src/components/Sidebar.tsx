@@ -31,6 +31,7 @@ import {
   Eye,
   RefreshCw,
   HelpCircle,
+  HeartPulse,
   FilePlus,
   Layers,
   Menu,
@@ -63,6 +64,7 @@ const clientsNavItems: NavItemData[] = [
   { href: '/clients', label: 'All Clients', icon: Users, description: 'Client records' },
   { href: '/visits', label: 'Assessments', icon: Calendar, description: 'Intakes & visits' },
   { href: '/care-tracker', label: 'Care Tracker', icon: Activity, description: 'Post-visit follow-ups' },
+  { href: '/adl-logging', label: 'ADL Logging', icon: HeartPulse, description: 'Activities of daily living' },
   { href: '/policies', label: 'Policies & Renewals', icon: RefreshCw, description: 'Care agreements' },
 ];
 

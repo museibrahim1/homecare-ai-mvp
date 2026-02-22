@@ -91,7 +91,7 @@ const FEATURE_SECTIONS = [
         title: 'Automatic Billing Extraction',
         description: 'Our AI extracts billable items directly from care assessments. Hours, rates, services, and special charges are calculated automatically — reducing billing errors by up to 80%.',
         highlights: ['80% fewer errors', 'Auto-calculated rates', 'Service verification'],
-        image: '/screenshots/billing.png',
+        image: '/screenshots/billing-extraction.png',
       },
       {
         icon: PieChart,
@@ -163,7 +163,7 @@ const FEATURE_SECTIONS = [
         title: 'Dedicated Support',
         description: 'All plans include email support with same-day response. Growth and Pro plans get priority phone and live chat support with sub-15-minute response times.',
         highlights: ['Same-day email', '<15 min response', 'Dedicated manager'],
-        image: '/screenshots/data-extraction.png',
+        image: '/screenshots/help-support.png',
       },
     ],
   },
