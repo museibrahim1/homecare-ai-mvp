@@ -11,7 +11,7 @@
 | Railway | Cloud hosting | All ePHI | Yes (enterprise) | NOT SIGNED | Email solutions@railway.app | CRITICAL |
 | OpenAI | Voice transcription + LLM | Voice recordings, transcripts | Yes (API) | NOT SIGNED | Email baa@openai.com | CRITICAL |
 | Anthropic | LLM processing | Transcripts, documents | Yes (API) | NOT SIGNED | Contact sales via anthropic.com | CRITICAL |
-| Twilio | Voice calls | Phone numbers, recordings | Yes (HIPAA Editions) | NOT SIGNED | Purchase HIPAA Editions | CRITICAL |
+| Twilio | Voice calls | N/A — not in use | N/A | N/A | Removed from stack | N/A |
 | Resend | Transactional email | Client names, contracts | **NO** | N/A | **SWITCH PROVIDER** | CRITICAL |
 | Pyannote.ai | Speaker diarization | Voice recordings, voiceprints | Unknown | NOT SIGNED | Contact vendor | HIGH |
 | Stirling-PDF | OCR processing | Contract templates | N/A (self-hosted) | N/A | None | N/A |

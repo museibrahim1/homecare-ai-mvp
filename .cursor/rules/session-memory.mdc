@@ -1,0 +1,85 @@
+# Session Memory — PalmCare AI
+
+## Company Info
+- **Legal Entity:** PalmTai Inc. (C Corporation, incorporated in Nebraska)
+- **DBA:** PalmCare AI
+- **Headquarters:** Omaha, Nebraska
+- **CEO:** Muse Ibrahim
+- **CEO Email:** museibrahim@palmtai.com (NEVER use as sender for transactional emails)
+- **CEO Phone:** (213) 569-7693
+- **Domains:** palmcareai.com (primary website), palmtai.com (app/API)
+
+## Tech Stack
+- **Frontend:** Next.js 14, React, Tailwind CSS, deployed on Railway
+- **Backend:** FastAPI, SQLAlchemy, PostgreSQL, Redis, Celery workers
+- **AI:** OpenAI (Whisper transcription, GPT), Anthropic (Claude for contracts/notes)
+- **Email:** Resend (onboarding@, welcome@, sales@, support@ palmtai.com) — NO PHI in emails
+- **Payments:** Stripe integration
+- **OCR:** Stirling-PDF (self-hosted)
+- **Diarization:** Pyannote.ai
+- **Hosting:** Railway (SOC 2 Type II, encryption at rest confirmed)
+- **NOT using:** Twilio (removed from stack), Medicaid billing (not EVS)
+- **No EIN encryption needed** — not doing EVS
+
+## Pricing
+- Starter: $379.99/mo — per-seat price NOT public facing
+- Growth: $639.99/mo
+- Pro: $1,299/mo
+- All tiers based on $13/seat internally
+
+## HIPAA Compliance Status — 89%
+- **Completed:** Risk assessment, privacy policy, security policy, breach notification, BAA template, vendor tracker, technical audit, training plan, PHI log sanitization, SSL on Postgres, encryption at rest verified, session timeout verified, emergency access documented, audit log review scheduled
+- **Remaining to 100%:**
+  1. Field-level encryption for voiceprints (~2 hours dev)
+  2. Enforce MFA for admin accounts (~1-2 hours dev)
+  3. Password history — prevent reuse of last 5 passwords (~1-2 hours dev)
+- **BAAs needed (emails drafted, pending send by CEO):**
+  - OpenAI: email baa@openai.com (free, 2-5 day response)
+  - Anthropic: contact sales via anthropic.com (free)
+  - Railway: email solutions@railway.app (enterprise tier)
+- **BAAs NOT needed:** Resend (no PHI in emails), Stripe (no PHI), Stirling-PDF (self-hosted), Twilio (not used)
+- **Compliance docs location:** /compliance/ directory (8 documents)
+
+## Features Page Screenshot Mapping (all verified Feb 22, 2026)
+- Voice-Powered Assessments → voice-assessment.png
+- Smart Contract Generation → contract-preview.png
+- Intelligent Data Extraction → transcript.png
+- OCR Template Engine → templates-gallery.png
+- Client Management (CRM) → client-crm.png
+- Contract Management → contract-form.png (actual creation form)
+- Scheduling & Visits → scheduling.png
+- Custom Forms & Templates → settings.png
+- Automatic Billing Extraction → billing-extraction.png
+- Revenue Analytics → dashboard.png
+- Custom Reporting → reports.png
+- Caregiver Mobile App → care-tracker.png
+- ADL & Care Logging → adl-logging.png (kept for web providers)
+- Agency Dashboard → pipeline.png
+- HIPAA Compliance → hipaa-compliance.png (generated infographic)
+- Data Encryption → data-encryption.png (generated infographic)
+- Dedicated Support → help-support.png
+
+## Key Decisions
+- ADL Logging stays on web app for providers (was briefly removed, then re-added)
+- Resend stays — no PHI in emails, no migration needed
+- Twilio removed from stack entirely
+- No EIN field encryption needed (not doing EVS)
+- Vanta too expensive for now — doing DIY HIPAA compliance
+- Mobile companion app planned (React Native/Expo) for caregivers (clock in/out, ADL logging) and agencies (assessments, caregiver tracking)
+- Status page created for downtime updates (like Airtable's)
+- Contract system has both pipeline-generated and standalone creation paths
+
+## Sidebar Navigation Structure
+- Dashboard, Deals Pipeline, Leads, My Schedule
+- All Clients, Assessments, Care Tracker, ADL Logging, Policies & Renewals
+- Team Chat
+- Proposals, Create Contract, OCR Templates, Documents
+- Reports, Help & Support, Team Members, Billing
+- Activity Monitor, Integrations, Settings
+- Admin section: Dashboard, Approvals, Subscriptions, Stripe Config, Compliance, Support, Audit Logs, Platform Users, System Health, Status Page
+
+## Known Issues / Technical Debt
+- Page bouncing when clicking sidebar nav items (was reported, needs verification)
+- Contract preview had multiple issues (fixed: service text placement, phone duplication, dollar signs, policy styling, signature fields)
+- useRequireAuth() returns { isLoading } not { loading }
+- Set iteration needs Array.from(new Set(...)) for TypeScript downlevelIteration

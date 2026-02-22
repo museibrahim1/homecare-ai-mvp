@@ -93,10 +93,10 @@
 
 ### Remaining (to reach 100%)
 
-- [ ] **Implement field-level encryption** for voiceprints and EIN (~2-3 hours dev)
+- [ ] **Implement field-level encryption** for voiceprints (~2 hours dev)
 - [ ] **Enforce MFA for admin accounts** (~1-2 hours dev)
 - [ ] **Implement password history** — prevent reuse of last 5 passwords (~1-2 hours dev)
-- [ ] **Execute BAAs** with OpenAI, Anthropic, Railway, Twilio (emails drafted, pending send)
+- [ ] **Execute BAAs** with OpenAI, Anthropic, Railway (emails drafted, pending send)
 
 ---
 
