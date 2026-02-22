@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Mic, FileText, Users, CheckCircle, ArrowRight, ArrowLeft,
   Upload, Sparkles, Clock, Building2, Play, ChevronRight,
@@ -145,8 +146,8 @@ export default function WelcomePage() {
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
-                <Mic className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden">
+                <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">

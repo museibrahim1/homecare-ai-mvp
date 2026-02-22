@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Mic, Send, Building2, Mail, Phone, User, MessageSquare,
   Loader2, CheckCircle, ArrowLeft
@@ -93,8 +94,8 @@ function ContactForm() {
       <header className="border-b border-dark-700/50 bg-dark-800/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
-              <Mic className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden">
+              <Image src="/hand-icon-white.png" alt="PalmCare AI" width={28} height={28} className="object-contain" />
             </div>
             <span className="text-xl font-bold text-white">PalmCare AI</span>
           </Link>

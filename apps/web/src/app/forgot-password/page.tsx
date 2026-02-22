@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Mic, ArrowLeft, Mail, CheckCircle, Loader2 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -42,8 +43,8 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8 justify-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
-            <Mic className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
+            <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
         </div>

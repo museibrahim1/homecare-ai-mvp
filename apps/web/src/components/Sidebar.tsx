@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
   Home, 
@@ -307,8 +308,8 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="px-6 py-6 flex-shrink-0">
           <Link href="/dashboard" className="flex items-center gap-4" onClick={(e) => { e.preventDefault(); handleNavigate('/dashboard'); }}>
-            <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-              <Mic className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 overflow-hidden">
+              <Image src="/hand-icon-white.png" alt="Palm Technologies" width={36} height={36} className="object-contain" />
             </div>
             <div className="min-w-0">
               <span className="text-xl font-bold text-white block">PalmCare AI</span>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { Mic, Waves, Shield, Zap } from 'lucide-react';
@@ -77,8 +78,8 @@ export default function LoginPage() {
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
-              <Mic className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
+              <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
             </div>
             <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
           </div>
@@ -137,8 +138,8 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
-              <Mic className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
+              <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
             </div>
             <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
           </div>
