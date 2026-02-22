@@ -127,7 +127,7 @@ const FEATURE_SECTIONS = [
         title: 'ADL & Care Logging',
         description: 'Simple tap-to-log interface for Activities of Daily Living. Track bathing, dressing, medication reminders, meals, mobility, and more per visit.',
         highlights: ['Tap-to-log', 'Per-visit tracking', 'Custom ADL categories'],
-        image: '/screenshots/assessments.png',
+        image: '/screenshots/adl-logging.png',
       },
       {
         icon: Globe,
