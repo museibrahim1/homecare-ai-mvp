@@ -149,14 +149,14 @@ const FEATURE_SECTIONS = [
         title: 'HIPAA Compliance',
         description: 'Full compliance with HIPAA regulations including administrative, physical, and technical safeguards. Regular third-party audits ensure ongoing compliance.',
         highlights: ['BAA available', 'Regular audits', 'Staff training'],
-        image: '/screenshots/security-settings.png',
+        image: '/screenshots/hipaa-compliance.png',
       },
       {
         icon: Lock,
         title: 'Data Encryption',
         description: '256-bit AES encryption for data at rest and TLS 1.3 for data in transit. Your voice recordings, transcripts, and client data are always protected.',
         highlights: ['256-bit AES', 'TLS 1.3', 'Key management'],
-        image: '/screenshots/security-settings.png',
+        image: '/screenshots/data-encryption.png',
       },
       {
         icon: Headphones,
