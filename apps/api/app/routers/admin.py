@@ -48,7 +48,7 @@ def require_platform_admin(current_user: User = Depends(get_current_user)) -> Us
     # Check if this is a platform admin (not associated with a business)
     # Platform admins have email ending in @palmtai.com
     if not current_user.email.endswith("@palmtai.com"):
-        logger.warning(f"Non-platform user {current_user.email} attempted admin access")
+        logger.warning(f"Non-platform user {current_user.id} attempted admin access")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Platform admin access required"
@@ -549,7 +549,7 @@ async def clear_all_businesses(
     
     db.commit()
     
-    logger.info(f"Admin {admin.email} cleared all businesses: {business_count} businesses, {user_count} business users, {doc_count} documents, {deleted_users} user records")
+    logger.info(f"Admin {admin.id} cleared all businesses: {business_count} businesses, {user_count} business users, {doc_count} documents, {deleted_users} user records")
     
     return {
         "message": "All businesses cleared successfully",
@@ -643,7 +643,7 @@ async def cleanup_orphaned_visits(
     
     db.commit()
     
-    logger.info(f"Admin {admin.email} cleaned up {deleted_count} orphaned visits")
+    logger.info(f"Admin {admin.id} cleaned up {deleted_count} orphaned visits")
     
     return {
         "message": f"Cleaned up {deleted_count} visits",

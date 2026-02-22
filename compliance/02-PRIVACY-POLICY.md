@@ -12,7 +12,7 @@
 
 This policy establishes the requirements for protecting the privacy of Protected Health Information (PHI) in compliance with the HIPAA Privacy Rule (45 CFR Part 160 and Part 164, Subparts A and E).
 
-PalmCare AI operates as a **Business Associate** under HIPAA, processing PHI on behalf of Covered Entities (home care agencies) that use our platform.
+PalmCare AI (PalmTai Inc., a C Corporation incorporated in Nebraska) operates as a **Business Associate** under HIPAA, processing PHI on behalf of Covered Entities (home care agencies) that use our platform.
 
 ---
 

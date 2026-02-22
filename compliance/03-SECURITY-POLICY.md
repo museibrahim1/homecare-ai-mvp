@@ -107,8 +107,12 @@ See Breach Notification Policy (Document 04) for incident response procedures.
 - Service accounts documented and reviewed quarterly
 
 **Emergency Access Procedure:**
-- Break-glass procedure documented for emergency PHI access
-- Emergency access logged and reviewed within 24 hours
+- In an emergency requiring immediate PHI access (e.g., system outage affecting patient safety), the CEO/Security Officer may authorize direct database access
+- Authorization must be verbal or written and documented within 4 hours
+- All emergency access is logged in the audit system with reason code "EMERGENCY"
+- Emergency access events are reviewed within 24 hours by the Security Officer
+- A post-incident report is filed documenting: who accessed what, why, duration, and whether the access was appropriate
+- Emergency access credentials are rotated after each use
 
 **Automatic Logoff:**
 - JWT tokens expire after 1 hour
@@ -132,6 +136,13 @@ See Breach Notification Policy (Document 04) for incident response procedures.
 - Administrative actions (user provisioning, role changes)
 - Data exports (contract downloads, report generation)
 - Failed authorization attempts
+
+**Audit Log Review Schedule:**
+- **Monthly:** CEO/Security Officer reviews audit logs for anomalies — unusual access patterns, off-hours PHI access, bulk data exports, failed login spikes
+- **Quarterly:** Comprehensive access review — verify all active users still require their access level, remove stale accounts
+- **Annually:** Full audit log analysis as part of the annual security evaluation
+- **On-demand:** Triggered by any suspected incident or breach
+- Review findings are documented and retained for 6 years
 
 ### 3.3 Integrity Controls (§ 164.312(c))
 

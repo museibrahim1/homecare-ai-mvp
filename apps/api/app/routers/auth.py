@@ -249,14 +249,13 @@ async def forgot_password(
                 reset_url=reset_url,
             )
             if reset_result.get("success"):
-                logger.info(f"Password reset email sent to {email}")
+                logger.info("Password reset email sent successfully")
             else:
-                logger.error(f"Password reset email FAILED for {email}: {reset_result.get('error')}")
+                logger.error(f"Password reset email FAILED: {reset_result.get('error')}")
         except Exception as e:
-            logger.error(f"Failed to send password reset email to {email}: {e}")
+            logger.error(f"Failed to send password reset email: {e}")
     else:
-        # Log but don't reveal whether user exists
-        logger.info(f"Password reset requested for unknown/inactive email: {email}")
+        logger.info("Password reset requested for unknown/inactive account")
     
     # Always return success to prevent email enumeration
     return {
@@ -324,7 +323,7 @@ async def reset_password(
     
     db.commit()
     
-    logger.info(f"Password successfully reset for {user.email}")
+    logger.info(f"Password successfully reset for user {user.id}")
     
     return {
         "success": True,

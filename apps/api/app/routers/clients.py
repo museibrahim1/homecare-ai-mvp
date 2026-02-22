@@ -200,7 +200,7 @@ async def activate_client_policy(
     
     db.commit()
     
-    logger.info(f"Policy activated for client {client.full_name} (contract {contract.id})")
+    logger.info(f"Policy activated for client {client.id} (contract {contract.id})")
     
     return {
         "success": True,

@@ -82,7 +82,7 @@ class EmailService:
         from_addr = sender or self.from_email
 
         if not self.enabled:
-            logger.warning(f"Email disabled. Would have sent to {recipients}: {subject}")
+            logger.warning(f"Email disabled. Would have sent to [REDACTED]: {subject}")
             return {"success": False, "id": None, "error": "email_disabled"}
 
         try:
@@ -108,7 +108,7 @@ class EmailService:
             elif hasattr(response, "id"):
                 email_id = response.id
 
-            logger.info(f"Email sent to {recipients}: {subject} (id={email_id or 'unknown'})")
+            logger.info(f"Email sent to [REDACTED]: {subject} (id={email_id or 'unknown'})")
             return {"success": True, "id": email_id, "error": None}
 
         except Exception as e:

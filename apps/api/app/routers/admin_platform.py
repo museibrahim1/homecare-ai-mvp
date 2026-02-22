@@ -634,9 +634,9 @@ async def create_platform_user(
         """,
     )
     if invite_result.get("success"):
-        logger.info(f"Created platform user {user_data.email} — invite email sent")
+        logger.info(f"Created platform user {new_user.id} — invite email sent")
     else:
-        logger.error(f"Created platform user {user_data.email} — invite email FAILED: {invite_result.get('error')}")
+        logger.error(f"Created platform user {new_user.id} — invite email FAILED: {invite_result.get('error')}")
     
     return PlatformUserResponse(
         id=new_user.id,
@@ -711,7 +711,7 @@ async def force_logout_user(
     
     db.commit()
     
-    logger.info(f"Admin {admin.email} force-logged out user {user.email}")
+    logger.info(f"Admin {admin.id} force-logged out user {user.id}")
     return {
         "success": True,
         "message": f"{user.email} has been logged out of all devices",

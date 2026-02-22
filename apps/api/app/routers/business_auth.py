@@ -547,9 +547,9 @@ async def request_password_reset(
             reset_url=reset_url,
         )
         if result.get("success"):
-            logger.info(f"Password reset email sent to {request.email}")
+            logger.info("Business password reset email sent successfully")
         else:
-            logger.error(f"Password reset email FAILED for {request.email}: {result.get('error')}")
+            logger.error(f"Business password reset email FAILED: {result.get('error')}")
     
     # Always return success to prevent email enumeration
     return {"message": "If an account exists, a password reset email has been sent."}
@@ -901,7 +901,7 @@ async def invite_team_member(
         )
         email_sent = invite_result.get("success", False)
         if not email_sent:
-            logger.warning(f"Invitation email failed for {email}: {invite_result.get('error')}")
+            logger.warning(f"Invitation email failed: {invite_result.get('error')}")
     except Exception as e:
         logger.warning(f"Failed to send invitation email: {e}")
     

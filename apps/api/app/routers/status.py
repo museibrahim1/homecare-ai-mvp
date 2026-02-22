@@ -165,7 +165,7 @@ def create_incident(
     db.commit()
     db.refresh(incident)
 
-    logger.info("Incident created: %s by %s", incident.title, admin.email)
+    logger.info("Incident created: %s by admin %s", incident.title, admin.id)
     return incident
 
 
@@ -201,7 +201,7 @@ def add_incident_update(
     db.commit()
     db.refresh(update)
 
-    logger.info("Incident update added to %s by %s", incident.title, admin.email)
+    logger.info("Incident update added to %s by admin %s", incident.title, admin.id)
     return update
 
 
@@ -218,4 +218,4 @@ def delete_incident(
 
     db.delete(incident)
     db.commit()
-    logger.info("Incident deleted: %s by %s", incident.title, admin.email)
+    logger.info("Incident deleted: %s by admin %s", incident.title, admin.id)

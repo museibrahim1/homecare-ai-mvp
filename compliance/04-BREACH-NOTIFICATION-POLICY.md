@@ -32,10 +32,10 @@ A breach does NOT include:
 
 | Role | Responsibility | Contact |
 |------|---------------|---------|
-| Security Officer (CEO) | Leads response, makes notification decisions | [CEO Email] |
-| Technical Lead | Investigates technical aspects, contains breach | [CTO/Dev Lead Email] |
-| Privacy Officer | Assesses PHI impact, manages notifications | [Privacy Officer Email] |
-| Legal Counsel | Advises on regulatory obligations | [Legal Contact] |
+| Security Officer (CEO) | Leads response, makes notification decisions | museibrahim@palmtai.com / (213) 569-7693 |
+| Technical Lead | Investigates technical aspects, contains breach | [CTO/Dev Lead — TBD] |
+| Privacy Officer | Assesses PHI impact, manages notifications | museibrahim@palmtai.com (interim) |
+| Legal Counsel | Advises on regulatory obligations | [Legal Contact — TBD] |
 
 ---
 

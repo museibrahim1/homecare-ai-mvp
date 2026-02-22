@@ -8,9 +8,9 @@ This Business Associate Agreement ("Agreement") is entered into as of __________
 **Address:** _________________________________
 **Contact:** _________________________________
 
-**Business Associate:** PalmCare AI (PalmTai LLC) ("Business Associate")
-**Address:** _________________________________
-**Contact:** support@palmcareai.com
+**Business Associate:** PalmCare AI (PalmTai Inc., a C Corporation, Nebraska) ("Business Associate")
+**Address:** Omaha, Nebraska
+**Contact:** Muse Ibrahim, CEO — museibrahim@palmtai.com — (213) 569-7693
 
 (collectively referred to as the "Parties")
 

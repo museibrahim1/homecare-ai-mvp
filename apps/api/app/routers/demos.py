@@ -223,7 +223,7 @@ async def book_demo(
                     break
 
             calendar_created = True
-            logger.info(f"Demo booked: {booking.email} on {formatted_date} at {formatted_time} — Meet: {meeting_link}")
+            logger.info(f"Demo booked on {formatted_date} at {formatted_time} — Meet link created")
 
         except Exception as e:
             logger.error(f"Failed to create calendar event for demo: {e}")
