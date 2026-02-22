@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 import {
@@ -95,8 +95,7 @@ const DEMO_VISITS: VisitLog[] = [
 ];
 
 export default function ADLLoggingPage() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useRequireAuth();
+  const { user, isLoading: authLoading } = useRequireAuth();
   const [visits, setVisits] = useState<VisitLog[]>([]);
   const [selectedVisit, setSelectedVisit] = useState<VisitLog | null>(null);
   const [filterDate, setFilterDate] = useState('2026-01-29');
