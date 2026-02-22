@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Mic, ArrowRight, Shield, Lock, Zap, Brain, FileText, Users, BarChart3, Calendar, 
   Smartphone, PieChart, Settings, HeartPulse, Globe, Headphones, ClipboardList, TrendingUp, CheckCircle 
@@ -18,24 +19,28 @@ const FEATURE_SECTIONS = [
         title: 'Voice-Powered Assessments',
         description: 'Record care assessments naturally — in person, over the phone, or upload existing recordings. Our AI transcribes conversations with 98%+ accuracy, identifies individual speakers, and understands care-specific terminology that generic transcription services miss.',
         highlights: ['98%+ transcription accuracy', 'Multi-speaker identification', 'Care-specific vocabulary'],
+        image: '/screenshots/voice-assessment.png',
       },
       {
         icon: Brain,
         title: 'Smart Contract Generation',
         description: 'AI reads your assessment transcripts and automatically generates professional, proposal-ready contracts. Services, schedules, rates, policies, and billing terms are all populated — saving hours of manual work per client.',
         highlights: ['Auto-populated fields', 'Professional formatting', 'Customizable templates'],
+        image: '/screenshots/contract-preview.png',
       },
       {
         icon: Zap,
         title: 'Intelligent Data Extraction',
         description: 'Every voice recording is analyzed for billable items, care needs, medications, special requirements, and safety concerns. The extracted data flows directly into your CRM, contracts, and billing — no double entry.',
         highlights: ['Billable item detection', 'Medication tracking', 'Safety concern flagging'],
+        image: '/screenshots/data-extraction.png',
       },
       {
         icon: FileText,
         title: 'OCR Template Engine',
         description: 'Upload your existing contract templates (Word or PDF) and our OCR engine scans every field, maps it to your database schema, and auto-fills contracts with real client data. When you update your template, the engine reconciles changes automatically.',
         highlights: ['Auto field mapping', 'Version reconciliation', 'Template gallery'],
+        image: '/screenshots/contract-form.png',
       },
     ],
   },
@@ -50,24 +55,28 @@ const FEATURE_SECTIONS = [
         title: 'Client Management (CRM)',
         description: 'Track every client from first contact through active care. Our pipeline view shows leads, assessments in progress, pending contracts, and active clients — giving you full visibility into your agency\'s growth.',
         highlights: ['Visual pipeline', 'Custom stages', 'Notes & history'],
+        image: '/screenshots/client-crm.png',
       },
       {
         icon: ClipboardList,
         title: 'Contract Management',
         description: 'Create, manage, and track all service agreements from a central hub. Upload templates, preview with live data, export to DOCX, and track contract status — all in one place.',
         highlights: ['Template library', 'Live preview', 'DOCX export'],
+        image: '/screenshots/contract-preview.png',
       },
       {
         icon: Calendar,
         title: 'Scheduling & Visits',
         description: 'Schedule caregiver visits with drag-and-drop simplicity. Track clock-in/out, manage care plans, and get real-time visibility into every shift across your agency.',
         highlights: ['Drag-and-drop scheduling', 'GPS clock-in/out', 'Real-time tracking'],
+        image: '/screenshots/scheduling.png',
       },
       {
         icon: Settings,
         title: 'Custom Forms & Templates',
         description: 'Build customized intake forms, assessments, and contracts. Upload your own templates or choose from our professional gallery — all with auto-populating fields from your client database.',
         highlights: ['Form builder', 'Auto-populate', 'Template gallery'],
+        image: '/screenshots/settings.png',
       },
     ],
   },
@@ -82,18 +91,21 @@ const FEATURE_SECTIONS = [
         title: 'Automatic Billing Extraction',
         description: 'Our AI extracts billable items directly from care assessments. Hours, rates, services, and special charges are calculated automatically — reducing billing errors by up to 80%.',
         highlights: ['80% fewer errors', 'Auto-calculated rates', 'Service verification'],
+        image: '/screenshots/billing.png',
       },
       {
         icon: PieChart,
         title: 'Revenue Analytics',
         description: 'Real-time dashboards showing revenue, client hours, caregiver utilization, pipeline value, and growth trends. Make data-driven decisions with confidence.',
         highlights: ['Real-time dashboards', 'KPI tracking', 'Growth trends'],
+        image: '/screenshots/dashboard.png',
       },
       {
         icon: TrendingUp,
         title: 'Custom Reporting',
         description: 'Generate detailed reports on any metric: billing, payroll, hours billed, referrals, caregiver performance, and more. Export to PDF or Excel for stakeholders and audits.',
         highlights: ['70+ report types', 'PDF/Excel export', 'Audit-ready'],
+        image: '/screenshots/reports.png',
       },
     ],
   },
@@ -108,18 +120,21 @@ const FEATURE_SECTIONS = [
         title: 'Caregiver Mobile App',
         description: 'Caregivers clock in/out via GPS, log ADLs, view schedules, and receive real-time updates — all from their phone. Works offline and syncs when connected.',
         highlights: ['GPS verification', 'Offline capable', '15-min training'],
+        image: '/screenshots/care-tracker.png',
       },
       {
         icon: HeartPulse,
         title: 'ADL & Care Logging',
         description: 'Simple tap-to-log interface for Activities of Daily Living. Track bathing, dressing, medication reminders, meals, mobility, and more per visit.',
         highlights: ['Tap-to-log', 'Per-visit tracking', 'Custom ADL categories'],
+        image: '/screenshots/assessments.png',
       },
       {
         icon: Globe,
         title: 'Agency Dashboard',
         description: 'Agencies get real-time visibility into every caregiver shift, client status, and care delivery metric. Track performance across all locations from a single login.',
         highlights: ['Multi-location view', 'Real-time alerts', 'Performance metrics'],
+        image: '/screenshots/pipeline.png',
       },
     ],
   },
@@ -134,18 +149,21 @@ const FEATURE_SECTIONS = [
         title: 'HIPAA Compliance',
         description: 'Full compliance with HIPAA regulations including administrative, physical, and technical safeguards. Regular third-party audits ensure ongoing compliance.',
         highlights: ['BAA available', 'Regular audits', 'Staff training'],
+        image: '/screenshots/settings.png',
       },
       {
         icon: Lock,
         title: 'Data Encryption',
         description: '256-bit AES encryption for data at rest and TLS 1.3 for data in transit. Your voice recordings, transcripts, and client data are always protected.',
         highlights: ['256-bit AES', 'TLS 1.3', 'Key management'],
+        image: '/screenshots/billing.png',
       },
       {
         icon: Headphones,
         title: 'Dedicated Support',
         description: 'All plans include email support with same-day response. Growth and Pro plans get priority phone and live chat support with sub-15-minute response times.',
         highlights: ['Same-day email', '<15 min response', 'Dedicated manager'],
+        image: '/screenshots/transcript.png',
       },
     ],
   },
@@ -222,9 +240,15 @@ export default function FeaturesPage() {
                         ))}
                       </div>
                     </div>
-                    <div className={`card p-8 ${fIdx % 2 === 1 ? 'md:order-1' : ''}`}>
-                      <div className="aspect-video bg-dark-700 rounded-xl flex items-center justify-center">
-                        <feature.icon className="w-16 h-16 text-dark-500" />
+                    <div className={`card p-3 ${fIdx % 2 === 1 ? 'md:order-1' : ''}`}>
+                      <div className="aspect-video bg-dark-700 rounded-xl overflow-hidden relative">
+                        <Image
+                          src={feature.image}
+                          alt={`${feature.title} screenshot`}
+                          fill
+                          className="object-cover object-top"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
                       </div>
                     </div>
                   </div>
