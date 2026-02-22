@@ -416,6 +416,100 @@ class ApiClient {
       throw err;
     }
   }
+  // ─── Smart Notes ───
+
+  async getNotes(token: string, params?: { search?: string; tag?: string; client_id?: string; pinned?: boolean }) {
+    const query = new URLSearchParams();
+    if (params?.search) query.set('search', params.search);
+    if (params?.tag) query.set('tag', params.tag);
+    if (params?.client_id) query.set('client_id', params.client_id);
+    if (params?.pinned !== undefined) query.set('pinned', String(params.pinned));
+    return this.request<any[]>(`/notes?${query}`, {}, token);
+  }
+
+  async getNote(token: string, noteId: string) {
+    return this.request<any>(`/notes/${noteId}`, {}, token);
+  }
+
+  async createNote(token: string, data: { title: string; content: string; tags?: string[]; is_pinned?: boolean; color?: string; related_client_id?: string; source?: string }, extract?: boolean) {
+    const query = extract !== undefined ? `?extract=${extract}` : '';
+    return this.request<any>(`/notes${query}`, { method: 'POST', body: JSON.stringify(data) }, token);
+  }
+
+  async updateNote(token: string, noteId: string, data: any) {
+    return this.request<any>(`/notes/${noteId}`, { method: 'PUT', body: JSON.stringify(data) }, token);
+  }
+
+  async deleteNote(token: string, noteId: string) {
+    return this.request<void>(`/notes/${noteId}`, { method: 'DELETE' }, token);
+  }
+
+  async extractTasksFromNote(token: string, noteId: string) {
+    return this.request<{ summary: string | null; tasks_created: number; reminders_created: number }>(
+      `/notes/${noteId}/extract-tasks`, { method: 'POST' }, token
+    );
+  }
+
+  // ─── Tasks ───
+
+  async getTasks(token: string, params?: { status?: string; priority?: string; due_before?: string; note_id?: string }) {
+    const query = new URLSearchParams();
+    if (params?.status) query.set('status', params.status);
+    if (params?.priority) query.set('priority', params.priority);
+    if (params?.due_before) query.set('due_before', params.due_before);
+    if (params?.note_id) query.set('note_id', params.note_id);
+    return this.request<any[]>(`/notes/tasks?${query}`, {}, token);
+  }
+
+  async createTask(token: string, data: any) {
+    return this.request<any>('/notes/tasks', { method: 'POST', body: JSON.stringify(data) }, token);
+  }
+
+  async updateTask(token: string, taskId: string, data: any) {
+    return this.request<any>(`/notes/tasks/${taskId}`, { method: 'PUT', body: JSON.stringify(data) }, token);
+  }
+
+  async completeTask(token: string, taskId: string) {
+    return this.request<any>(`/notes/tasks/${taskId}/complete`, { method: 'PUT' }, token);
+  }
+
+  async deleteTask(token: string, taskId: string) {
+    return this.request<void>(`/notes/tasks/${taskId}`, { method: 'DELETE' }, token);
+  }
+
+  // ─── Reminders ───
+
+  async getReminders(token: string, params?: { upcoming?: boolean; dismissed?: boolean }) {
+    const query = new URLSearchParams();
+    if (params?.upcoming) query.set('upcoming', 'true');
+    if (params?.dismissed !== undefined) query.set('dismissed', String(params.dismissed));
+    return this.request<any[]>(`/notes/reminders?${query}`, {}, token);
+  }
+
+  async createReminder(token: string, data: any) {
+    return this.request<any>('/notes/reminders', { method: 'POST', body: JSON.stringify(data) }, token);
+  }
+
+  async dismissReminder(token: string, reminderId: string) {
+    return this.request<any>(`/notes/reminders/${reminderId}/dismiss`, { method: 'PUT' }, token);
+  }
+
+  async deleteReminder(token: string, reminderId: string) {
+    return this.request<void>(`/notes/reminders/${reminderId}`, { method: 'DELETE' }, token);
+  }
+
+  async sendDueNotifications(token: string) {
+    return this.request<{ due_count: number; emails_sent: number }>(
+      '/notes/reminders/send-due-notifications', { method: 'POST' }, token
+    );
+  }
+
+  // ─── Caregiver Cert Expiry ───
+
+  async getExpiringCertifications(token: string, days?: number) {
+    const query = days ? `?days=${days}` : '';
+    return this.request<any[]>(`/caregivers/expiring${query}`, {}, token);
+  }
 }
 
 export const api = new ApiClient();

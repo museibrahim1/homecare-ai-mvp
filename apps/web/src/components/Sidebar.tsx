@@ -72,6 +72,7 @@ const clientsNavItems: NavItemData[] = [
 // Communication
 const communicationNavItems: NavItemData[] = [
   { href: '/team-chat', label: 'Team Chat', icon: MessagesSquare, description: 'Internal chat' },
+  { href: '/notes', label: 'Notes & Tasks', icon: FileText, description: 'AI-powered notes' },
 ];
 
 // Resources

@@ -68,6 +68,9 @@ class Caregiver(Base, TimestampMixin):
     background_check_date = Column(Date)
     background_check_status = Column(String(50))  # passed, pending, failed
     
+    # Certification expiry tracking — maps cert name -> expiry date string (YYYY-MM-DD)
+    certification_expiry_dates = Column(JSONB, default=dict)
+
     # External Integration
     external_id = Column(String(255))
     external_source = Column(String(100))  # e.g., "monday", "workday", "csv"

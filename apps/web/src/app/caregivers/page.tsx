@@ -21,6 +21,8 @@ interface Caregiver {
   city?: string;
   state?: string;
   certification_level?: string;
+  certifications?: string[];
+  certification_expiry_dates?: Record<string, string>;
   specializations?: string[];
   languages?: string[];
   can_handle_high_care?: boolean;
@@ -37,6 +39,39 @@ interface Caregiver {
   background_check_status?: string;
 }
 
+interface ExpiringCert {
+  caregiver_id: string;
+  caregiver_name: string;
+  certification: string;
+  expiry_date: string;
+  days_until_expiry: number;
+  badge: 'expired' | 'expiring_soon' | 'warning';
+}
+
+function getCertBadge(caregiver: Caregiver): { badge: 'expired' | 'expiring_soon' | 'current' | null; label: string | null } {
+  const expiry = caregiver.certification_expiry_dates;
+  if (!expiry || Object.keys(expiry).length === 0) return { badge: null, label: null };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let worstBadge: 'expired' | 'expiring_soon' | 'current' = 'current';
+  let worstLabel = '';
+  for (const [cert, dateStr] of Object.entries(expiry)) {
+    try {
+      const d = new Date(dateStr + 'T00:00:00');
+      const daysLeft = Math.round((d.getTime() - today.getTime()) / 86400000);
+      if (daysLeft < 0 && (worstBadge === 'current' || worstBadge === 'expiring_soon')) {
+        worstBadge = 'expired';
+        worstLabel = `${cert} expired`;
+      } else if (daysLeft >= 0 && daysLeft <= 30 && worstBadge === 'current') {
+        worstBadge = 'expiring_soon';
+        worstLabel = `${cert} expires in ${daysLeft}d`;
+      }
+    } catch { /* skip */ }
+  }
+  if (worstBadge === 'current') return { badge: null, label: null };
+  return { badge: worstBadge, label: worstLabel };
+}
+
 export default function CaregiversPage() {
   const router = useRouter();
   const { token, isReady } = useRequireAuth();
@@ -47,11 +82,26 @@ export default function CaregiversPage() {
   const [selectedCaregiver, setSelectedCaregiver] = useState<Caregiver | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
+  const [expiringCerts, setExpiringCerts] = useState<ExpiringCert[]>([]);
   const pageSize = 25;
 
   useEffect(() => {
-    if (token) loadCaregivers();
+    if (token) {
+      loadCaregivers();
+      loadExpiringCerts();
+    }
   }, [token]);
+
+  const loadExpiringCerts = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/caregivers/expiring?days=90`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (response.ok) {
+        setExpiringCerts(await response.json());
+      }
+    } catch { /* ignore */ }
+  };
 
   const loadCaregivers = async () => {
     try {
@@ -168,6 +218,35 @@ export default function CaregiversPage() {
             </div>
           )}
 
+          {/* Certification Compliance Alert */}
+          {expiringCerts.length > 0 && (
+            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                <h3 className="text-sm font-semibold text-amber-400">Certification Compliance Alert</h3>
+                <span className="text-xs text-amber-400/70 ml-auto">{expiringCerts.length} cert{expiringCerts.length > 1 ? 's' : ''} need attention</span>
+              </div>
+              <div className="space-y-1.5">
+                {expiringCerts.slice(0, 5).map((cert, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <span className={`px-1.5 py-0.5 rounded font-medium ${
+                      cert.badge === 'expired' ? 'bg-red-500/20 text-red-400' :
+                      cert.badge === 'expiring_soon' ? 'bg-amber-500/20 text-amber-400' :
+                      'bg-yellow-500/15 text-yellow-400'
+                    }`}>
+                      {cert.badge === 'expired' ? 'EXPIRED' : cert.days_until_expiry <= 30 ? 'EXPIRING SOON' : `${cert.days_until_expiry}d left`}
+                    </span>
+                    <span className="text-white font-medium">{cert.caregiver_name}</span>
+                    <span className="text-dark-400">— {cert.certification} (expires {cert.expiry_date})</span>
+                  </div>
+                ))}
+                {expiringCerts.length > 5 && (
+                  <p className="text-xs text-amber-400/60">+{expiringCerts.length - 5} more</p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
@@ -260,6 +339,17 @@ export default function CaregiversPage() {
                         }`}>
                           {caregiver.status || 'active'}
                         </span>
+                        {(() => {
+                          const { badge, label } = getCertBadge(caregiver);
+                          if (!badge) return null;
+                          return (
+                            <span title={label || ''} className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              badge === 'expired' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                            }`}>
+                              {badge === 'expired' ? 'Cert Expired' : 'Cert Expiring'}
+                            </span>
+                          );
+                        })()}
                       </div>
                       <div className="flex items-center gap-4 text-sm text-dark-400">
                         {caregiver.phone && (

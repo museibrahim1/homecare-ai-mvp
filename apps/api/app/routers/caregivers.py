@@ -73,6 +73,50 @@ async def create_caregiver(
     return caregiver
 
 
+@router.get("/expiring", response_model=List[dict])
+async def get_expiring_certifications(
+    days: int = Query(30, description="Show certs expiring within N days"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Return caregivers with certifications expiring within the given window."""
+    from datetime import date, timedelta
+
+    cutoff = date.today() + timedelta(days=days)
+    caregivers = db.query(Caregiver).filter(
+        Caregiver.created_by == current_user.id,
+        Caregiver.status == "active",
+    ).all()
+
+    results = []
+    for cg in caregivers:
+        expiry_map = cg.certification_expiry_dates or {}
+        for cert_name, expiry_str in expiry_map.items():
+            try:
+                expiry = date.fromisoformat(expiry_str)
+            except (ValueError, TypeError):
+                continue
+            if expiry <= cutoff:
+                days_left = (expiry - date.today()).days
+                if days_left < 0:
+                    badge = "expired"
+                elif days_left <= 30:
+                    badge = "expiring_soon"
+                else:
+                    badge = "warning"
+                results.append({
+                    "caregiver_id": str(cg.id),
+                    "caregiver_name": cg.full_name,
+                    "certification": cert_name,
+                    "expiry_date": expiry_str,
+                    "days_until_expiry": days_left,
+                    "badge": badge,
+                })
+
+    results.sort(key=lambda r: r["days_until_expiry"])
+    return results
+
+
 @router.get("/{caregiver_id}", response_model=CaregiverResponse)
 async def get_caregiver(
     caregiver_id: UUID,

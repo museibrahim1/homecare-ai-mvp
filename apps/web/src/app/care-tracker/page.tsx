@@ -27,6 +27,7 @@ interface CareItem {
   startDate: string;       // YYYY-MM-DD
   targetDate: string;       // YYYY-MM-DD
   lastContact: string;      // YYYY-MM-DD
+  nextFollowUp: string;    // YYYY-MM-DD
   notes: string;
   phone?: string;
 }
@@ -191,7 +192,7 @@ function CareItemForm({
             </select>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-dark-400 mb-1.5">Start Date</label>
               <input type="date" value={data.startDate} onChange={e => onChange({ ...data, startDate: e.target.value })} className={INPUT} />
@@ -203,6 +204,10 @@ function CareItemForm({
             <div>
               <label className="block text-xs font-medium text-dark-400 mb-1.5">Last Contact</label>
               <input type="date" value={data.lastContact} onChange={e => onChange({ ...data, lastContact: e.target.value })} className={INPUT} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Next Follow-Up</label>
+              <input type="date" value={data.nextFollowUp} onChange={e => onChange({ ...data, nextFollowUp: e.target.value })} className={INPUT} />
             </div>
           </div>
 
@@ -241,7 +246,7 @@ export default function CareTrackerPage() {
   const emptyForm = useCallback((): Omit<CareItem, 'id'> => ({
     clientId: '', clientName: '', stage: 'follow_up', priority: 'moderate',
     assignedTo: '', careSpecialty: '', startDate: today, targetDate: '',
-    lastContact: today, notes: '', phone: '',
+    lastContact: today, nextFollowUp: '', notes: '', phone: '',
   }), [today]);
 
   const [formData, setFormData] = useState<Omit<CareItem, 'id'>>(emptyForm());
@@ -279,6 +284,7 @@ export default function CareTrackerPage() {
   const overdueCount = items.filter(i => daysUntil(i.targetDate) < 0).length;
   const criticalCount = items.filter(i => i.priority === 'critical' || i.priority === 'high').length;
   const noContactCount = items.filter(i => daysAgo(i.lastContact) > 7).length;
+  const overdueFollowUpCount = items.filter(i => i.nextFollowUp && daysUntil(i.nextFollowUp) < 0).length;
 
   // CRUD
   const handleAdd = () => {
@@ -334,10 +340,11 @@ export default function CareTrackerPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
               {[
                 { label: 'Total Tracking', value: items.length, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/15' },
                 { label: 'Overdue', value: overdueCount, icon: AlertCircle, color: overdueCount > 0 ? 'text-red-400' : 'text-dark-400', bg: overdueCount > 0 ? 'bg-red-500/15' : 'bg-dark-700/50' },
+                { label: 'Follow-Up Due', value: overdueFollowUpCount, icon: Clock, color: overdueFollowUpCount > 0 ? 'text-purple-400' : 'text-dark-400', bg: overdueFollowUpCount > 0 ? 'bg-purple-500/15' : 'bg-dark-700/50' },
                 { label: 'High Priority', value: criticalCount, icon: Heart, color: criticalCount > 0 ? 'text-orange-400' : 'text-dark-400', bg: criticalCount > 0 ? 'bg-orange-500/15' : 'bg-dark-700/50' },
                 { label: 'No Contact 7d+', value: noContactCount, icon: Phone, color: noContactCount > 0 ? 'text-amber-400' : 'text-dark-400', bg: noContactCount > 0 ? 'bg-amber-500/15' : 'bg-dark-700/50' },
               ].map((s, i) => (
@@ -397,6 +404,8 @@ export default function CareTrackerPage() {
                             const pCfg = PRIORITY_CONFIG[item.priority];
                             const overdue = daysUntil(item.targetDate) < 0;
                             const noContact = daysAgo(item.lastContact) > 7;
+                            const followUpOverdue = item.nextFollowUp && daysUntil(item.nextFollowUp) < 0;
+                            const followUpSoon = item.nextFollowUp && !followUpOverdue && daysUntil(item.nextFollowUp) <= 3;
 
                             return (
                               <div key={item.id} className="flex items-center gap-3 lg:gap-4 px-4 lg:px-5 py-3 hover:bg-dark-700/20 transition-colors group">
@@ -417,6 +426,16 @@ export default function CareTrackerPage() {
                                   {/* Priority */}
                                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${pCfg.bg} ${pCfg.color}`}>{pCfg.label}</span>
                                   {overdue && <span title="Overdue"><AlertCircle className="w-3.5 h-3.5 text-red-400" /></span>}
+                                  {followUpOverdue && (
+                                    <span title={`Follow-up overdue (${item.nextFollowUp})`} className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-purple-500/15 text-purple-400">
+                                      F/U overdue
+                                    </span>
+                                  )}
+                                  {followUpSoon && !followUpOverdue && (
+                                    <span title={`Follow-up on ${item.nextFollowUp}`} className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-purple-500/10 text-purple-300">
+                                      F/U {daysUntil(item.nextFollowUp)}d
+                                    </span>
+                                  )}
                                   {noContact && <span title="No contact 7d+"><Phone className="w-3.5 h-3.5 text-amber-400" /></span>}
 
                                   {/* Actions */}
@@ -488,6 +507,9 @@ export default function CareTrackerPage() {
                                 <p className="text-xs font-medium text-white truncate">{item.clientName}</p>
                                 <div className="flex items-center gap-1">
                                   {overdue && <AlertCircle className="w-3 h-3 text-red-400" />}
+                                  {item.nextFollowUp && daysUntil(item.nextFollowUp) < 0 && (
+                                    <span title="Follow-up overdue" className="text-[8px] px-1 py-0.5 rounded bg-purple-500/15 text-purple-400 font-medium">F/U</span>
+                                  )}
                                   <button onClick={() => setEditItem({ ...item })} className="p-0.5 text-dark-600 hover:text-white opacity-0 group-hover:opacity-100 transition-all"><Pencil className="w-3 h-3" /></button>
                                 </div>
                               </div>

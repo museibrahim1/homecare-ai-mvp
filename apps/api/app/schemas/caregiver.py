@@ -24,6 +24,7 @@ class CaregiverBase(BaseModel):
     hire_date: Optional[date] = None
     certification_level: Optional[str] = None
     certifications: Optional[List[Any]] = []
+    certification_expiry_dates: Optional[dict] = {}
     specializations: Optional[List[str]] = []
     languages: Optional[List[str]] = []
     can_handle_high_care: Optional[bool] = False
@@ -66,6 +67,7 @@ class CaregiverUpdate(BaseModel):
     hire_date: Optional[date] = None
     certification_level: Optional[str] = None
     certifications: Optional[List[Any]] = None
+    certification_expiry_dates: Optional[dict] = None
     specializations: Optional[List[str]] = None
     languages: Optional[List[str]] = None
     can_handle_high_care: Optional[bool] = None
@@ -101,6 +103,8 @@ class CaregiverListResponse(BaseModel):
     phone: Optional[str] = None
     email: Optional[str] = None
     certification_level: Optional[str] = None
+    certifications: Optional[List[Any]] = []
+    certification_expiry_dates: Optional[dict] = {}
     specializations: Optional[List[str]] = []
     can_handle_high_care: Optional[bool] = False
     status: Optional[str] = 'active'
