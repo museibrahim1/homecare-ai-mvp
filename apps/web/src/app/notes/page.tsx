@@ -141,7 +141,7 @@ export default function NotesPage() {
   const loadNoteDetail = useCallback(async (noteId: string) => {
     if (!token) return;
     try {
-      const detail = await api.getNote(token, noteId);
+      const detail = await api.getSmartNote(token, noteId);
       setSelectedNote(detail);
       setEditTitle(detail.title);
       setEditContent(detail.content);
@@ -160,7 +160,7 @@ export default function NotesPage() {
       if (!token || !selectedNote) return;
       setSaving(true);
       try {
-        await api.updateNote(token, selectedNote.id, { content, title: editTitle, tags: editTags });
+        await api.updateSmartNote(token, selectedNote.id, { content, title: editTitle, tags: editTags });
         loadNotes();
       } catch { /* ignore */ }
       setSaving(false);
@@ -174,7 +174,7 @@ export default function NotesPage() {
       if (!token || !selectedNote) return;
       setSaving(true);
       try {
-        await api.updateNote(token, selectedNote.id, { title, content: editContent, tags: editTags });
+        await api.updateSmartNote(token, selectedNote.id, { title, content: editContent, tags: editTags });
         loadNotes();
       } catch { /* ignore */ }
       setSaving(false);
@@ -208,7 +208,7 @@ export default function NotesPage() {
   const handleTogglePin = async () => {
     if (!token || !selectedNote) return;
     try {
-      await api.updateNote(token, selectedNote.id, { is_pinned: !selectedNote.is_pinned });
+      await api.updateSmartNote(token, selectedNote.id, { is_pinned: !selectedNote.is_pinned });
       setSelectedNote({ ...selectedNote, is_pinned: !selectedNote.is_pinned });
       loadNotes();
     } catch { /* ignore */ }
@@ -219,7 +219,7 @@ export default function NotesPage() {
     setExtracting(true);
     try {
       // Save current content first
-      await api.updateNote(token, selectedNote.id, { title: editTitle, content: editContent, tags: editTags });
+      await api.updateSmartNote(token, selectedNote.id, { title: editTitle, content: editContent, tags: editTags });
       const result = await api.extractTasksFromNote(token, selectedNote.id);
       await loadNoteDetail(selectedNote.id);
       loadNotes();
@@ -232,7 +232,7 @@ export default function NotesPage() {
     const newTags = editTags.includes(tag) ? editTags.filter(t => t !== tag) : [...editTags, tag];
     setEditTags(newTags);
     try {
-      await api.updateNote(token, selectedNote.id, { tags: newTags });
+      await api.updateSmartNote(token, selectedNote.id, { tags: newTags });
       loadNotes();
     } catch { /* ignore */ }
   };

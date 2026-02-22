@@ -427,7 +427,7 @@ class ApiClient {
     return this.request<any[]>(`/notes?${query}`, {}, token);
   }
 
-  async getNote(token: string, noteId: string) {
+  async getSmartNote(token: string, noteId: string) {
     return this.request<any>(`/notes/${noteId}`, {}, token);
   }
 
@@ -436,7 +436,7 @@ class ApiClient {
     return this.request<any>(`/notes${query}`, { method: 'POST', body: JSON.stringify(data) }, token);
   }
 
-  async updateNote(token: string, noteId: string, data: any) {
+  async updateSmartNote(token: string, noteId: string, data: any) {
     return this.request<any>(`/notes/${noteId}`, { method: 'PUT', body: JSON.stringify(data) }, token);
   }
 
