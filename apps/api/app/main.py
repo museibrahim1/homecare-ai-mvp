@@ -81,6 +81,7 @@ from app.routers import (
     demos,
     status,
     contract_templates,
+    sales_leads,
     # calls,  # Twilio integration disabled for MVP - re-enable when needed
 )
 
@@ -188,6 +189,7 @@ app.include_router(documents.router, prefix="/documents", tags=["Documents"])
 app.include_router(demos.router, prefix="/demos", tags=["Demo Booking"])
 app.include_router(status.router, prefix="/status", tags=["Status Page"])
 app.include_router(contract_templates.router, prefix="/contract-templates", tags=["Contract Templates"])
+app.include_router(sales_leads.router, prefix="/platform/sales", tags=["Sales Leads (CEO Only)"])
 # app.include_router(calls.router, prefix="/calls", tags=["Calls"])  # Twilio disabled for MVP
 
 

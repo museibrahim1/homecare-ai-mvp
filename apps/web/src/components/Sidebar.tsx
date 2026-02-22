@@ -104,6 +104,7 @@ const adminNavItems: NavItemData[] = [
   { href: '/admin/users', label: 'Platform Users', icon: UserCheck, description: 'Admin accounts' },
   { href: '/admin/system', label: 'System Health', icon: Activity, description: 'Infrastructure' },
   { href: '/admin/incidents', label: 'Status Page', icon: AlertTriangle, description: 'Incident management' },
+  { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target, description: 'Outbound CRM' },
 ];
 
 // NavItem defined OUTSIDE the Sidebar to prevent re-creation on every render

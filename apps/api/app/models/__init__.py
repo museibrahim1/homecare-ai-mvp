@@ -13,6 +13,7 @@ from app.models.subscription import Plan, Subscription, Invoice
 from app.models.support_ticket import SupportTicket, TicketResponse
 from app.models.incident import Incident, IncidentUpdate
 from app.models.contract_template import ContractTemplate
+from app.models.sales_lead import SalesLead
 
 __all__ = [
     "User",
@@ -34,4 +35,5 @@ __all__ = [
     "Incident",
     "IncidentUpdate",
     "ContractTemplate",
+    "SalesLead",
 ]
