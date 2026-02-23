@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, asc, or_, and_
 from pydantic import BaseModel, EmailStr
@@ -148,6 +148,122 @@ class LeadStats(BaseModel):
 
 class ImportRequest(BaseModel):
     states: List[str] = ["NE", "IA"]
+
+
+class CampaignSendRequest(BaseModel):
+    template_id: str
+    campaign_name: str
+    state: Optional[str] = None
+    status: Optional[str] = None
+    has_email: Optional[bool] = True
+    priority: Optional[str] = None
+    max_years: Optional[float] = None
+    exclude_already_emailed: bool = True
+
+
+EMAIL_TEMPLATES = {
+    "ai_advantage": {
+        "id": "ai_advantage",
+        "name": "The AI Advantage",
+        "subject": "Cut your admin hours in half, {provider_name}",
+        "description": "Leads with the pain of paperwork and admin overhead. Best for newer agencies drowning in documentation.",
+        "body": """<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
+  <p style="font-size: 16px; line-height: 1.7;">Hi there,</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">I noticed <strong>{provider_name}</strong> in {city} — congrats on running a home care agency in such a competitive market.</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">I'm reaching out because we built <strong>PalmCare AI</strong> specifically for agencies like yours. It&rsquo;s an AI-powered CRM that handles the busywork so you can focus on patients:</p>
+
+  <ul style="font-size: 15px; line-height: 2; color: #374151;">
+    <li><strong>Record a care assessment</strong> &rarr; AI transcribes it and writes SOAP notes in seconds</li>
+    <li><strong>Auto-generate service contracts</strong> &rarr; ready to sign, not hours of typing</li>
+    <li><strong>Caregiver scheduling &amp; tracking</strong> &rarr; manage your entire team from one dashboard</li>
+  </ul>
+
+  <p style="font-size: 16px; line-height: 1.7;">Agencies using PalmCare AI save an average of <strong>12+ hours per week</strong> on documentation alone.</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">Would you be open to a quick 15-minute demo? No pressure — I'll show you exactly how it works for a {state_full} agency.</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">Best,<br>
+  <strong>Musa Ibrahim</strong><br>
+  <span style="color: #6366f1;">Founder, PalmCare AI</span><br>
+  <a href="https://palmcareai.com" style="color: #6366f1;">palmcareai.com</a></p>
+</div>""",
+    },
+    "revenue_growth": {
+        "id": "revenue_growth",
+        "name": "Revenue Growth",
+        "subject": "How {city} agencies are closing clients same-day",
+        "description": "Focused on revenue and speed-to-close. Best for agencies looking to grow their client base.",
+        "body": """<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
+  <p style="font-size: 16px; line-height: 1.7;">Hi,</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">Quick question — how long does it take {provider_name} to go from a new patient inquiry to a signed service agreement?</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">For most agencies we talk to, it&rsquo;s <strong>3-5 days</strong>. A lot of potential revenue slips away in that window.</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">We built <strong>PalmCare AI</strong> to shrink that to <strong>same-day</strong>. Here&rsquo;s how it works:</p>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+    <tr>
+      <td style="padding: 12px; background: #f5f3ff; border-radius: 8px;">
+        <strong style="color: #6366f1;">Step 1:</strong> Record the assessment on your phone
+      </td>
+    </tr>
+    <tr><td style="padding: 4px;"></td></tr>
+    <tr>
+      <td style="padding: 12px; background: #f5f3ff; border-radius: 8px;">
+        <strong style="color: #6366f1;">Step 2:</strong> AI transcribes, writes the care plan, and extracts billable services
+      </td>
+    </tr>
+    <tr><td style="padding: 4px;"></td></tr>
+    <tr>
+      <td style="padding: 12px; background: #f5f3ff; border-radius: 8px;">
+        <strong style="color: #6366f1;">Step 3:</strong> Service contract auto-generates — send it for signature right then
+      </td>
+    </tr>
+  </table>
+
+  <p style="font-size: 16px; line-height: 1.7;">The result? You close clients while your competitors are still writing up paperwork.</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">Want to see a live demo with your actual workflow? Takes 15 minutes — <a href="https://palmcareai.com" style="color: #6366f1; font-weight: 600;">book a time here</a> or just reply to this email.</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">Cheers,<br>
+  <strong>Musa Ibrahim</strong><br>
+  <span style="color: #6366f1;">Founder, PalmCare AI</span><br>
+  <a href="https://palmcareai.com" style="color: #6366f1;">palmcareai.com</a></p>
+</div>""",
+    },
+    "simplicity": {
+        "id": "simplicity",
+        "name": "Keep It Simple",
+        "subject": "A simpler way to run {provider_name}",
+        "description": "Short, casual, human tone. Best for smaller agencies and owner-operators who are busy.",
+        "body": """<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
+  <p style="font-size: 16px; line-height: 1.7;">Hey,</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">Running a home care agency is hard enough without fighting your own software. If you&rsquo;re still juggling spreadsheets, paper forms, or clunky systems at <strong>{provider_name}</strong>, I think you'd like what we've built.</p>
+
+  <p style="font-size: 16px; line-height: 1.7;"><strong>PalmCare AI</strong> is a dead-simple CRM made specifically for home care agencies in {state_full}:</p>
+
+  <p style="font-size: 15px; line-height: 2; margin-left: 10px;">
+    &#10003; Talk into your phone &rarr; get a complete care assessment<br>
+    &#10003; One click &rarr; professional service contract ready to sign<br>
+    &#10003; All your clients, caregivers, and schedules in one place<br>
+    &#10003; No training needed — if you can use a phone, you can use PalmCare
+  </p>
+
+  <p style="font-size: 16px; line-height: 1.7;">It&rsquo;s free to try. I&rsquo;d love to give you a quick walkthrough — just reply with &ldquo;<strong>show me</strong>&rdquo; and I&rsquo;ll set something up.</p>
+
+  <p style="font-size: 16px; line-height: 1.7;">Talk soon,<br>
+  <strong>Musa Ibrahim</strong><br>
+  <span style="color: #6366f1;">Founder, PalmCare AI</span><br>
+  <a href="https://palmcareai.com" style="color: #6366f1;">palmcareai.com</a></p>
+</div>""",
+    },
+}
+
+STATE_NAMES = {"NE": "Nebraska", "IA": "Iowa"}
 
 
 # =============================================================================
@@ -627,3 +743,271 @@ async def list_campaigns(
         SalesLead.campaign_tag.isnot(None)
     ).distinct().all()
     return [t[0] for t in tags if t[0]]
+
+
+# =============================================================================
+# EMAIL TEMPLATES & BULK CAMPAIGNS
+# =============================================================================
+
+@router.get("/leads/email-templates")
+async def list_email_templates(
+    admin: User = Depends(require_ceo),
+):
+    """Return available email pitch templates."""
+    return [
+        {
+            "id": t["id"],
+            "name": t["name"],
+            "subject": t["subject"],
+            "description": t["description"],
+            "body": t["body"],
+        }
+        for t in EMAIL_TEMPLATES.values()
+    ]
+
+
+@router.post("/leads/email-templates/{template_id}/preview")
+async def preview_template(
+    template_id: str,
+    lead_id: Optional[UUID] = None,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Render a template with sample or actual lead data."""
+    tmpl = EMAIL_TEMPLATES.get(template_id)
+    if not tmpl:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    if lead_id:
+        lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
+        if not lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        data = {
+            "provider_name": lead.provider_name,
+            "city": lead.city or "your city",
+            "state": lead.state,
+            "state_full": STATE_NAMES.get(lead.state, lead.state),
+        }
+    else:
+        data = {
+            "provider_name": "ABC Home Care",
+            "city": "Omaha",
+            "state": "NE",
+            "state_full": "Nebraska",
+        }
+
+    return {
+        "subject": _render_template(tmpl["subject"], data),
+        "body": _render_template(tmpl["body"], data),
+    }
+
+
+def _render_template(template_str: str, data: dict) -> str:
+    """Replace merge tags like {provider_name} with actual values."""
+    result = template_str
+    for key, value in data.items():
+        result = result.replace("{" + key + "}", str(value))
+    return result
+
+
+@router.post("/leads/campaigns/send")
+async def send_campaign(
+    req: CampaignSendRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Send a bulk email campaign to filtered leads."""
+    tmpl = EMAIL_TEMPLATES.get(req.template_id)
+    if not tmpl:
+        raise HTTPException(status_code=400, detail="Invalid template_id")
+
+    query = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+    )
+
+    if req.state:
+        query = query.filter(SalesLead.state == req.state.upper())
+    if req.status:
+        query = query.filter(SalesLead.status == req.status)
+    if req.priority:
+        query = query.filter(SalesLead.priority == req.priority)
+    if req.max_years is not None:
+        query = query.filter(SalesLead.years_in_operation <= req.max_years)
+    if req.exclude_already_emailed:
+        query = query.filter(SalesLead.email_send_count == 0)
+
+    leads = query.all()
+
+    if not leads:
+        raise HTTPException(status_code=400, detail="No eligible leads match the filters")
+
+    now = datetime.now(timezone.utc)
+    sent = 0
+    failed = 0
+    errors = []
+
+    for lead in leads:
+        data = {
+            "provider_name": lead.provider_name,
+            "city": lead.city or "your area",
+            "state": lead.state,
+            "state_full": STATE_NAMES.get(lead.state, lead.state),
+        }
+
+        subject = _render_template(tmpl["subject"], data)
+        body = _render_template(tmpl["body"], data)
+
+        result = email_service.send_email(
+            to=lead.contact_email,
+            subject=subject,
+            sender=email_service.from_sales,
+            html=body,
+        )
+
+        if result.get("success"):
+            lead.last_email_sent_at = now
+            lead.last_email_subject = subject
+            lead.email_send_count = (lead.email_send_count or 0) + 1
+            lead.is_contacted = True
+            lead.campaign_tag = req.campaign_name
+
+            if lead.status == LeadStatus.new.value:
+                lead.status = LeadStatus.email_sent.value
+
+            if result.get("id"):
+                lead.resend_email_id = result["id"]
+
+            activity = lead.activity_log or []
+            activity.append({
+                "action": "Campaign email sent",
+                "campaign": req.campaign_name,
+                "template": req.template_id,
+                "subject": subject,
+                "to": lead.contact_email,
+                "resend_id": result.get("id"),
+                "at": now.isoformat(),
+            })
+            lead.activity_log = activity
+            sent += 1
+        else:
+            failed += 1
+            errors.append({"lead": lead.provider_name, "error": result.get("error")})
+
+    db.commit()
+
+    return {
+        "message": f"Campaign '{req.campaign_name}' complete",
+        "sent": sent,
+        "failed": failed,
+        "total_eligible": len(leads),
+        "template": req.template_id,
+        "errors": errors[:10],
+    }
+
+
+@router.get("/leads/campaigns/send/preview")
+async def preview_campaign_recipients(
+    template_id: str,
+    campaign_name: str = "preview",
+    state: Optional[str] = None,
+    status: Optional[str] = None,
+    priority: Optional[str] = None,
+    max_years: Optional[float] = None,
+    exclude_already_emailed: bool = True,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Preview how many leads a campaign would reach."""
+    query = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+    )
+
+    if state:
+        query = query.filter(SalesLead.state == state.upper())
+    if status:
+        query = query.filter(SalesLead.status == status)
+    if priority:
+        query = query.filter(SalesLead.priority == priority)
+    if max_years is not None:
+        query = query.filter(SalesLead.years_in_operation <= max_years)
+    if exclude_already_emailed:
+        query = query.filter(SalesLead.email_send_count == 0)
+
+    count = query.count()
+    sample = query.limit(5).all()
+
+    return {
+        "total_recipients": count,
+        "sample": [
+            {
+                "provider_name": l.provider_name,
+                "city": l.city,
+                "state": l.state,
+                "contact_email": l.contact_email,
+            }
+            for l in sample
+        ],
+    }
+
+
+# =============================================================================
+# RESEND WEBHOOK — auto-track opens, deliveries, bounces
+# =============================================================================
+
+@router.post("/webhooks/resend")
+async def resend_webhook(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """
+    Receives Resend webhook events for email tracking.
+    No auth required (Resend sends these directly).
+    Events: email.delivered, email.opened, email.clicked, email.bounced, email.complained.
+    """
+    try:
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+
+    event_type = payload.get("type", "")
+    data = payload.get("data", {})
+    email_id = data.get("email_id")
+
+    if not email_id:
+        return {"status": "ignored", "reason": "no email_id"}
+
+    lead = db.query(SalesLead).filter(SalesLead.resend_email_id == email_id).first()
+    if not lead:
+        return {"status": "ignored", "reason": "no matching lead"}
+
+    now = datetime.now(timezone.utc)
+    activity = lead.activity_log or []
+
+    if event_type == "email.opened":
+        lead.email_open_count = (lead.email_open_count or 0) + 1
+        lead.last_email_opened_at = now
+        if lead.status == LeadStatus.email_sent.value:
+            lead.status = LeadStatus.email_opened.value
+        activity.append({"action": "Email opened (auto)", "at": now.isoformat()})
+
+    elif event_type == "email.delivered":
+        activity.append({"action": "Email delivered", "at": now.isoformat()})
+
+    elif event_type == "email.bounced":
+        activity.append({
+            "action": "Email bounced",
+            "reason": data.get("bounce", {}).get("message", "unknown"),
+            "at": now.isoformat(),
+        })
+
+    elif event_type == "email.complained":
+        lead.status = "not_interested"
+        activity.append({"action": "Spam complaint received", "at": now.isoformat()})
+
+    lead.activity_log = activity
+    db.commit()
+
+    return {"status": "processed", "event": event_type, "lead": str(lead.id)}

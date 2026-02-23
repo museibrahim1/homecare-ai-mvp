@@ -11,6 +11,7 @@ import {
   Check, X, Send, Clock, ArrowUpDown, Download, Upload,
   Target, TrendingUp, Users, Calendar, ExternalLink, Eye,
   CheckCircle2, Circle, AlertCircle, ChevronLeft, ChevronRight,
+  Rocket, Sparkles, FileText, Zap,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -94,6 +95,31 @@ interface Stats {
   has_website: number;
 }
 
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  description: string;
+  body: string;
+}
+
+interface CampaignPreview {
+  total_recipients: number;
+  sample: { provider_name: string; city: string; state: string; contact_email: string }[];
+}
+
+const TEMPLATE_ICONS: Record<string, any> = {
+  ai_advantage: Sparkles,
+  revenue_growth: Zap,
+  simplicity: FileText,
+};
+
+const TEMPLATE_COLORS: Record<string, string> = {
+  ai_advantage: 'from-indigo-500 to-purple-500',
+  revenue_growth: 'from-emerald-500 to-cyan-500',
+  simplicity: 'from-amber-500 to-orange-500',
+};
+
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   new: { label: 'New', color: 'bg-slate-500/20 text-slate-300', icon: Circle },
   contacted: { label: 'Contacted', color: 'bg-blue-500/20 text-blue-400', icon: Phone },
@@ -146,6 +172,23 @@ export default function SalesLeadsPage() {
   // Email compose
   const [showEmailCompose, setShowEmailCompose] = useState(false);
   const [emailForm, setEmailForm] = useState({ subject: '', body: '', to: '' });
+
+  // Campaign launcher
+  const [showCampaign, setShowCampaign] = useState(false);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
+  const [campaignName, setCampaignName] = useState('');
+  const [campaignFilters, setCampaignFilters] = useState({
+    state: '',
+    priority: '',
+    max_years: '',
+    exclude_already_emailed: true,
+  });
+  const [campaignPreview, setCampaignPreview] = useState<CampaignPreview | null>(null);
+  const [previewHtml, setPreviewHtml] = useState({ subject: '', body: '' });
+  const [campaignSending, setCampaignSending] = useState(false);
+  const [campaignResult, setCampaignResult] = useState<any>(null);
+  const [campaignStep, setCampaignStep] = useState(0); // 0=template, 1=filters, 2=preview, 3=sending/done
 
   // Edit fields
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -305,6 +348,72 @@ export default function SalesLeadsPage() {
     }
   };
 
+  const openCampaign = async () => {
+    setShowCampaign(true);
+    setCampaignStep(0);
+    setSelectedTemplate(null);
+    setCampaignResult(null);
+    setCampaignName(`campaign-${new Date().toISOString().slice(0, 10)}`);
+    try {
+      const data = await fetchWithAuth('/platform/sales/leads/email-templates');
+      setTemplates(data);
+    } catch (e: any) {
+      alert(`Failed to load templates: ${e.message}`);
+    }
+  };
+
+  const loadCampaignPreview = async () => {
+    const params = new URLSearchParams();
+    params.set('template_id', selectedTemplate?.id || '');
+    params.set('campaign_name', campaignName);
+    if (campaignFilters.state) params.set('state', campaignFilters.state);
+    if (campaignFilters.priority) params.set('priority', campaignFilters.priority);
+    if (campaignFilters.max_years) params.set('max_years', campaignFilters.max_years);
+    params.set('exclude_already_emailed', String(campaignFilters.exclude_already_emailed));
+
+    try {
+      const [preview, rendered] = await Promise.all([
+        fetchWithAuth(`/platform/sales/leads/campaigns/send/preview?${params}`),
+        fetchWithAuth(`/platform/sales/leads/email-templates/${selectedTemplate?.id}/preview`, {
+          method: 'POST',
+          body: JSON.stringify({}),
+        }),
+      ]);
+      setCampaignPreview(preview);
+      setPreviewHtml(rendered);
+    } catch (e: any) {
+      alert(`Preview failed: ${e.message}`);
+    }
+  };
+
+  const sendCampaign = async () => {
+    if (!selectedTemplate) return;
+    setCampaignSending(true);
+    setCampaignResult(null);
+    try {
+      const result = await fetchWithAuth('/platform/sales/leads/campaigns/send', {
+        method: 'POST',
+        body: JSON.stringify({
+          template_id: selectedTemplate.id,
+          campaign_name: campaignName,
+          state: campaignFilters.state || null,
+          priority: campaignFilters.priority || null,
+          max_years: campaignFilters.max_years ? parseFloat(campaignFilters.max_years) : null,
+          exclude_already_emailed: campaignFilters.exclude_already_emailed,
+          has_email: true,
+        }),
+      });
+      setCampaignResult(result);
+      setCampaignStep(3);
+      loadData();
+    } catch (e: any) {
+      setCampaignResult({ error: e.message });
+      setCampaignStep(3);
+    } finally {
+      setCampaignSending(false);
+    }
+  };
+
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
@@ -337,12 +446,11 @@ export default function SalesLeadsPage() {
               Refresh
             </button>
             <button
-              onClick={importCMS}
-              disabled={importing}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2 text-sm disabled:opacity-50"
+              onClick={openCampaign}
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 flex items-center gap-2 text-sm font-medium shadow-lg shadow-indigo-500/25"
             >
-              {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              {importing ? 'Importing...' : 'Import from CMS'}
+              <Rocket className="w-4 h-4" />
+              Launch Campaign
             </button>
           </div>
         </div>
@@ -826,6 +934,300 @@ export default function SalesLeadsPage() {
                     <p className="text-gray-600 text-sm">No activity yet</p>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Campaign Launcher Modal */}
+        {showCampaign && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCampaign(false)} />
+            <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#12122a] border border-gray-700 rounded-2xl overflow-hidden flex flex-col">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                    <Rocket className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Launch Email Campaign</h2>
+                    <p className="text-xs text-gray-400">
+                      {['Choose Template', 'Set Filters', 'Preview & Send', 'Results'][campaignStep]}
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setShowCampaign(false)} className="text-gray-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Step indicator */}
+              <div className="px-6 py-3 border-b border-gray-800 flex gap-1">
+                {['Template', 'Filters', 'Preview', 'Done'].map((label, i) => (
+                  <div key={label} className="flex-1 flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                      i < campaignStep ? 'bg-green-500 text-white' :
+                      i === campaignStep ? 'bg-indigo-500 text-white' :
+                      'bg-gray-700 text-gray-500'
+                    }`}>
+                      {i < campaignStep ? <Check className="w-3 h-3" /> : i + 1}
+                    </div>
+                    <span className={`text-xs ${i <= campaignStep ? 'text-white' : 'text-gray-600'}`}>{label}</span>
+                    {i < 3 && <div className={`flex-1 h-px ${i < campaignStep ? 'bg-green-500' : 'bg-gray-700'}`} />}
+                  </div>
+                ))}
+              </div>
+
+              {/* Step Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {/* Step 0: Choose Template */}
+                {campaignStep === 0 && (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-400">Select an email pitch template for your campaign:</p>
+                    <div className="grid gap-4">
+                      {templates.map((tmpl) => {
+                        const Icon = TEMPLATE_ICONS[tmpl.id] || FileText;
+                        const gradient = TEMPLATE_COLORS[tmpl.id] || 'from-gray-500 to-gray-600';
+                        const isSelected = selectedTemplate?.id === tmpl.id;
+                        return (
+                          <button
+                            key={tmpl.id}
+                            onClick={() => setSelectedTemplate(tmpl)}
+                            className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                              isSelected
+                                ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
+                                : 'border-gray-700 bg-[#0a0a1a] hover:border-gray-600'
+                            }`}
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center shrink-0`}>
+                                <Icon className="w-6 h-6 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="text-white font-semibold">{tmpl.name}</h3>
+                                  {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-400" />}
+                                </div>
+                                <p className="text-sm text-gray-400 mt-0.5">{tmpl.description}</p>
+                                <p className="text-xs text-gray-500 mt-2 font-mono bg-[#1a1a2e] rounded px-2 py-1 inline-block">
+                                  Subject: {tmpl.subject}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 1: Campaign Filters */}
+                {campaignStep === 1 && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1.5">Campaign Name</label>
+                      <input
+                        value={campaignName}
+                        onChange={(e) => setCampaignName(e.target.value)}
+                        placeholder="e.g., feb-2026-ai-advantage"
+                        className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-1.5">State</label>
+                        <select
+                          value={campaignFilters.state}
+                          onChange={(e) => setCampaignFilters({ ...campaignFilters, state: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                        >
+                          <option value="">All States</option>
+                          <option value="NE">Nebraska</option>
+                          <option value="IA">Iowa</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-1.5">Priority</label>
+                        <select
+                          value={campaignFilters.priority}
+                          onChange={(e) => setCampaignFilters({ ...campaignFilters, priority: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                        >
+                          <option value="">All Priorities</option>
+                          <option value="high">High (newer agencies)</option>
+                          <option value="medium">Medium</option>
+                          <option value="low">Low</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-1.5">Max Age (years)</label>
+                        <select
+                          value={campaignFilters.max_years}
+                          onChange={(e) => setCampaignFilters({ ...campaignFilters, max_years: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                        >
+                          <option value="">Any</option>
+                          <option value="5">Under 5 years</option>
+                          <option value="10">Under 10 years</option>
+                          <option value="20">Under 20 years</option>
+                        </select>
+                      </div>
+                      <div className="flex items-end">
+                        <label className="flex items-center gap-2 cursor-pointer pb-2.5">
+                          <input
+                            type="checkbox"
+                            checked={campaignFilters.exclude_already_emailed}
+                            onChange={(e) => setCampaignFilters({ ...campaignFilters, exclude_already_emailed: e.target.checked })}
+                            className="w-4 h-4 rounded border-gray-600 text-indigo-500 focus:ring-indigo-500 bg-[#0a0a1a]"
+                          />
+                          <span className="text-sm text-gray-300">Skip already emailed</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Preview */}
+                {campaignStep === 2 && (
+                  <div className="space-y-5">
+                    {/* Recipient count */}
+                    {campaignPreview && (
+                      <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-xl p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center">
+                            <Users className="w-6 h-6 text-indigo-400" />
+                          </div>
+                          <div>
+                            <p className="text-2xl font-bold text-white">{campaignPreview.total_recipients}</p>
+                            <p className="text-sm text-gray-400">recipients will receive this email</p>
+                          </div>
+                        </div>
+                        {campaignPreview.sample.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-indigo-500/20">
+                            <p className="text-xs text-gray-500 mb-1.5">Sample recipients:</p>
+                            <div className="space-y-1">
+                              {campaignPreview.sample.map((s, i) => (
+                                <p key={i} className="text-xs text-gray-300">
+                                  {s.provider_name} — <span className="text-gray-500">{s.contact_email}</span>
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Email preview */}
+                    <div>
+                      <p className="text-sm font-medium text-gray-300 mb-2">Email Preview</p>
+                      <div className="bg-white rounded-xl overflow-hidden border border-gray-600">
+                        <div className="bg-gray-100 px-4 py-2 border-b">
+                          <p className="text-xs text-gray-500">From: PalmCare AI &lt;sales@palmtai.com&gt;</p>
+                          <p className="text-sm font-medium text-gray-800">Subject: {previewHtml.subject}</p>
+                        </div>
+                        <div
+                          className="p-4"
+                          dangerouslySetInnerHTML={{ __html: previewHtml.body }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Results */}
+                {campaignStep === 3 && campaignResult && (
+                  <div className="space-y-5">
+                    {campaignResult.error ? (
+                      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
+                        <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
+                        <h3 className="text-lg font-semibold text-white mb-1">Campaign Failed</h3>
+                        <p className="text-sm text-gray-400">{campaignResult.error}</p>
+                      </div>
+                    ) : (
+                      <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center">
+                        <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-3" />
+                        <h3 className="text-lg font-semibold text-white mb-1">Campaign Sent!</h3>
+                        <p className="text-sm text-gray-400 mb-4">{campaignResult.message}</p>
+                        <div className="flex justify-center gap-6">
+                          <div>
+                            <p className="text-3xl font-bold text-green-400">{campaignResult.sent}</p>
+                            <p className="text-xs text-gray-500">Sent</p>
+                          </div>
+                          {campaignResult.failed > 0 && (
+                            <div>
+                              <p className="text-3xl font-bold text-red-400">{campaignResult.failed}</p>
+                              <p className="text-xs text-gray-500">Failed</p>
+                            </div>
+                          )}
+                        </div>
+                        {campaignResult.errors?.length > 0 && (
+                          <div className="mt-4 text-left bg-[#0a0a1a] rounded-lg p-3">
+                            <p className="text-xs text-gray-500 mb-1">Errors:</p>
+                            {campaignResult.errors.map((err: any, i: number) => (
+                              <p key={i} className="text-xs text-red-400">{err.lead}: {err.error}</p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="border-t border-gray-700 px-6 py-4 flex items-center justify-between bg-[#0d0d1f]">
+                <button
+                  onClick={() => {
+                    if (campaignStep === 0) setShowCampaign(false);
+                    else setCampaignStep(campaignStep - 1);
+                  }}
+                  className="px-4 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-white text-sm"
+                >
+                  {campaignStep === 0 ? 'Cancel' : 'Back'}
+                </button>
+
+                {campaignStep === 0 && (
+                  <button
+                    onClick={() => setCampaignStep(1)}
+                    disabled={!selectedTemplate}
+                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium disabled:opacity-40 flex items-center gap-2"
+                  >
+                    Next <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
+
+                {campaignStep === 1 && (
+                  <button
+                    onClick={() => { setCampaignStep(2); loadCampaignPreview(); }}
+                    disabled={!campaignName}
+                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium disabled:opacity-40 flex items-center gap-2"
+                  >
+                    Preview <Eye className="w-4 h-4" />
+                  </button>
+                )}
+
+                {campaignStep === 2 && (
+                  <button
+                    onClick={sendCampaign}
+                    disabled={campaignSending || !campaignPreview || campaignPreview.total_recipients === 0}
+                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 text-sm font-medium disabled:opacity-40 flex items-center gap-2 shadow-lg shadow-indigo-500/25"
+                  >
+                    {campaignSending ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+                    ) : (
+                      <><Rocket className="w-4 h-4" /> Send to {campaignPreview?.total_recipients || 0} recipients</>
+                    )}
+                  </button>
+                )}
+
+                {campaignStep === 3 && (
+                  <button
+                    onClick={() => setShowCampaign(false)}
+                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium"
+                  >
+                    Done
+                  </button>
+                )}
               </div>
             </div>
           </div>
