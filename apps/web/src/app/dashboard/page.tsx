@@ -334,9 +334,10 @@ const ALL_WIDGETS: WidgetDef[] = [
   { id: 'charts', label: 'Charts', description: 'Trend & pipeline charts' },
   { id: 'proposals', label: 'Proposal Follow-Up', description: 'Pending proposals' },
   { id: 'activity', label: 'Activity & Actions', description: 'Recent activity + quick actions' },
+  { id: 'usage', label: 'My Activity', description: 'Your usage trends & engagement' },
 ];
 
-const DEFAULT_ORDER = ['stats', 'charts', 'proposals', 'activity', 'tasks'];
+const DEFAULT_ORDER = ['stats', 'charts', 'proposals', 'activity', 'tasks', 'usage'];
 const WIDGET_PREFS_KEY = 'palmcare-dashboard-widgets';
 
 interface WidgetPrefs {
@@ -372,6 +373,7 @@ const WIDGET_ICONS: Record<string, typeof CheckCircle2> = {
   tasks: CheckCircle2,
   stats: BarChart3,
   charts: Activity,
+  usage: TrendingUp,
   proposals: FileSignature,
   activity: Calendar,
 };
@@ -570,6 +572,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [updatingClientId, setUpdatingClientId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [myUsage, setMyUsage] = useState<any>(null);
 
   /* ─── Widget preferences ─── */
   const [widgetPrefs, setWidgetPrefs] = useState<WidgetPrefs>({ order: DEFAULT_ORDER, hidden: [] });
@@ -622,6 +625,9 @@ export default function DashboardPage() {
         hoursThisWeek: thisWeekCount,
       });
       setRecentVisits(items.slice(0, 6));
+
+      api.trackUsageEvent(token!, { event_type: 'login', page_path: '/dashboard' }).catch(() => {});
+      api.getMyUsage(token!, 30).then(setMyUsage).catch(() => {});
     } catch (err: any) {
       setError(err?.message || 'Something went wrong');
     } finally {
@@ -1053,6 +1059,83 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  );
+
+                case 'usage':
+                  return (
+                    <div key="usage" className="card p-4 lg:p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5 text-primary-400" />
+                          <h2 className="text-base lg:text-lg font-semibold text-white">My Activity</h2>
+                        </div>
+                        <span className="text-xs text-dark-400">Last 30 days</span>
+                      </div>
+                      {myUsage ? (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-dark-700/30 rounded-lg p-3 text-center">
+                              <p className="text-xs text-dark-400">Logins</p>
+                              <p className="text-xl font-bold text-primary-400">{myUsage.logins || 0}</p>
+                            </div>
+                            <div className="bg-dark-700/30 rounded-lg p-3 text-center">
+                              <p className="text-xs text-dark-400">Total Events</p>
+                              <p className="text-xl font-bold text-accent-green">{myUsage.total_events || 0}</p>
+                            </div>
+                            <div className="bg-dark-700/30 rounded-lg p-3 text-center">
+                              <p className="text-xs text-dark-400">Top Pages</p>
+                              <p className="text-xl font-bold text-accent-cyan">{myUsage.top_pages?.length || 0}</p>
+                            </div>
+                          </div>
+                          {myUsage.daily_activity?.length > 0 && (
+                            <div>
+                              <p className="text-xs text-dark-400 mb-2">Daily Activity</p>
+                              <div className="flex items-end gap-0.5 h-16">
+                                {myUsage.daily_activity.slice(-14).map((d: any, i: number) => {
+                                  const maxVal = Math.max(...myUsage.daily_activity.map((x: any) => x.count), 1);
+                                  const h = Math.max((d.count / maxVal) * 100, 4);
+                                  return (
+                                    <div key={i} className="flex-1 group relative">
+                                      <div
+                                        className="w-full bg-primary-500/80 rounded-t hover:bg-primary-400 transition-colors"
+                                        style={{ height: `${h}%` }}
+                                        title={`${d.date}: ${d.count}`}
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                          {myUsage.event_breakdown && Object.keys(myUsage.event_breakdown).length > 0 && (
+                            <div>
+                              <p className="text-xs text-dark-400 mb-2">Activity Breakdown</p>
+                              <div className="space-y-1.5">
+                                {Object.entries(myUsage.event_breakdown)
+                                  .sort(([,a]: any, [,b]: any) => b - a)
+                                  .slice(0, 5)
+                                  .map(([event, count]: any) => (
+                                    <div key={event} className="flex items-center justify-between text-xs">
+                                      <span className="text-dark-300 capitalize">{event.replace(/_/g, ' ')}</span>
+                                      <span className="text-dark-400 font-mono">{count}</span>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+                          {myUsage.total_events === 0 && (
+                            <p className="text-dark-500 text-sm text-center py-4">
+                              Activity tracking has started. Check back tomorrow for your trends.
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6">
+                          <Activity className="w-8 h-8 text-dark-600 mx-auto mb-2" />
+                          <p className="text-dark-500 text-sm">Loading your activity data...</p>
+                        </div>
+                      )}
                     </div>
                   );
 

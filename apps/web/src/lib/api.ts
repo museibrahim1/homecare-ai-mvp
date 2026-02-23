@@ -510,6 +510,82 @@ class ApiClient {
     const query = days ? `?days=${days}` : '';
     return this.request<any[]>(`/caregivers/expiring${query}`, {}, token);
   }
+
+  // ─── Sales Campaign Analytics ───
+
+  async getCampaignAnalytics(token: string, params?: { campaign_tag?: string; days?: number }) {
+    const query = new URLSearchParams();
+    if (params?.campaign_tag) query.set('campaign_tag', params.campaign_tag);
+    if (params?.days) query.set('days', String(params.days));
+    return this.request<any>(`/platform/sales/leads/campaigns/analytics?${query}`, {}, token);
+  }
+
+  async getSequenceStatus(token: string) {
+    return this.request<any>('/platform/sales/leads/campaigns/sequence/status', {}, token);
+  }
+
+  async launchSequence(token: string, data: {
+    campaign_name: string;
+    state?: string;
+    priority?: string;
+    max_years?: number;
+    exclude_already_emailed?: boolean;
+  }) {
+    return this.request<any>('/platform/sales/leads/campaigns/sequence/launch', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, token);
+  }
+
+  async processScheduledEmails(token: string) {
+    return this.request<any>('/platform/sales/leads/campaigns/sequence/process', {
+      method: 'POST',
+    }, token);
+  }
+
+  // ─── Churn & Usage Analytics ───
+
+  async trackUsageEvent(token: string, data: {
+    event_type: string;
+    event_data?: Record<string, any>;
+    page_path?: string;
+    session_id?: string;
+  }) {
+    return this.request<any>('/analytics/track', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, token);
+  }
+
+  async getMyUsage(token: string, days?: number) {
+    const query = days ? `?days=${days}` : '';
+    return this.request<any>(`/analytics/my-usage${query}`, {}, token);
+  }
+
+  async getChurnOverview(token: string) {
+    return this.request<any>('/analytics/churn/overview', {}, token);
+  }
+
+  async getChurnProviders(token: string, params?: { risk?: string; sort_by?: string; sort_order?: string }) {
+    const query = new URLSearchParams();
+    if (params?.risk) query.set('risk', params.risk);
+    if (params?.sort_by) query.set('sort_by', params.sort_by);
+    if (params?.sort_order) query.set('sort_order', params.sort_order);
+    return this.request<any[]>(`/analytics/churn/providers?${query}`, {}, token);
+  }
+
+  async refreshEngagementScores(token: string) {
+    return this.request<any>('/analytics/churn/refresh', { method: 'POST' }, token);
+  }
+
+  async getLeadFunnel(token: string) {
+    return this.request<any>('/analytics/leads/funnel', {}, token);
+  }
+
+  async getPlatformActivity(token: string, days?: number) {
+    const query = days ? `?days=${days}` : '';
+    return this.request<any>(`/analytics/platform/activity${query}`, {}, token);
+  }
 }
 
 export const api = new ApiClient();

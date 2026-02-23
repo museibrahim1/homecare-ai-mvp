@@ -11,7 +11,7 @@ import {
   Check, X, Send, Clock, ArrowUpDown, Download, Upload,
   Target, TrendingUp, Users, Calendar, ExternalLink, Eye,
   CheckCircle2, Circle, AlertCircle, ChevronLeft, ChevronRight,
-  Rocket, Sparkles, FileText, Zap,
+  Rocket, Sparkles, FileText, Zap, BarChart3, Play, Activity,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -194,6 +194,29 @@ export default function SalesLeadsPage() {
   const [campaignSending, setCampaignSending] = useState(false);
   const [campaignResult, setCampaignResult] = useState<any>(null);
   const [campaignStep, setCampaignStep] = useState(0); // 0=template, 1=filters, 2=preview, 3=sending/done
+
+  // Tab view
+  const [activeTab, setActiveTab] = useState<'leads' | 'analytics' | 'sequences'>('leads');
+
+  // Analytics data
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsDays, setAnalyticsDays] = useState(30);
+
+  // Sequence data
+  const [sequenceStatus, setSequenceStatus] = useState<any>(null);
+  const [sequenceLoading, setSequenceLoading] = useState(false);
+  const [sequenceLaunching, setSequenceLaunching] = useState(false);
+  const [sequenceProcessing, setSequenceProcessing] = useState(false);
+  const [sequenceResult, setSequenceResult] = useState<any>(null);
+  const [showSequenceLauncher, setShowSequenceLauncher] = useState(false);
+  const [sequenceFilters, setSequenceFilters] = useState({
+    campaign_name: `sequence-${new Date().toISOString().slice(0, 10)}`,
+    state: '',
+    priority: '',
+    max_years: '',
+    exclude_already_emailed: true,
+  });
 
   // Edit fields
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -419,6 +442,76 @@ export default function SalesLeadsPage() {
     }
   };
 
+  const loadAnalytics = async () => {
+    setAnalyticsLoading(true);
+    try {
+      const data = await fetchWithAuth(`/platform/sales/leads/campaigns/analytics?days=${analyticsDays}`);
+      setAnalyticsData(data);
+    } catch (e: any) {
+      console.error('Analytics load failed:', e.message);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  const loadSequenceStatus = async () => {
+    setSequenceLoading(true);
+    try {
+      const data = await fetchWithAuth('/platform/sales/leads/campaigns/sequence/status');
+      setSequenceStatus(data);
+    } catch (e: any) {
+      console.error('Sequence status load failed:', e.message);
+    } finally {
+      setSequenceLoading(false);
+    }
+  };
+
+  const launchSequence = async () => {
+    setSequenceLaunching(true);
+    setSequenceResult(null);
+    try {
+      const result = await fetchWithAuth('/platform/sales/leads/campaigns/sequence/launch', {
+        method: 'POST',
+        body: JSON.stringify({
+          campaign_name: sequenceFilters.campaign_name,
+          state: sequenceFilters.state || null,
+          priority: sequenceFilters.priority || null,
+          max_years: sequenceFilters.max_years ? parseFloat(sequenceFilters.max_years) : null,
+          exclude_already_emailed: sequenceFilters.exclude_already_emailed,
+        }),
+      });
+      setSequenceResult(result);
+      loadSequenceStatus();
+      loadData();
+    } catch (e: any) {
+      setSequenceResult({ error: e.message });
+    } finally {
+      setSequenceLaunching(false);
+    }
+  };
+
+  const processScheduledEmails = async () => {
+    setSequenceProcessing(true);
+    try {
+      const result = await fetchWithAuth('/platform/sales/leads/campaigns/sequence/process', { method: 'POST' });
+      setSequenceResult(result);
+      loadSequenceStatus();
+      loadData();
+    } catch (e: any) {
+      alert(`Process failed: ${e.message}`);
+    } finally {
+      setSequenceProcessing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthorized && activeTab === 'analytics') loadAnalytics();
+  }, [activeTab, analyticsDays]);
+
+  useEffect(() => {
+    if (isAuthorized && activeTab === 'sequences') loadSequenceStatus();
+  }, [activeTab]);
+
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
@@ -432,7 +525,7 @@ export default function SalesLeadsPage() {
       <Sidebar />
       <main className="flex-1 ml-64 p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
               <Target className="w-6 h-6 text-indigo-400" />
@@ -444,22 +537,53 @@ export default function SalesLeadsPage() {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => loadData()}
+              onClick={() => { if (activeTab === 'leads') loadData(); else if (activeTab === 'analytics') loadAnalytics(); else loadSequenceStatus(); }}
               className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-white flex items-center gap-2 text-sm"
             >
               <RefreshCw className="w-4 h-4" />
               Refresh
             </button>
             <button
+              onClick={() => { setShowSequenceLauncher(true); setSequenceResult(null); }}
+              className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 flex items-center gap-2 text-sm font-semibold shadow-lg shadow-indigo-500/20 transition-all"
+            >
+              <Rocket className="w-4 h-4" />
+              Send All Emails
+            </button>
+            <button
               onClick={openCampaign}
-              className="px-5 py-2.5 bg-white text-[#0d0d1f] rounded-lg hover:bg-gray-100 flex items-center gap-2 text-sm font-semibold shadow-lg transition-colors"
+              className="px-4 py-2.5 bg-white text-[#0d0d1f] rounded-lg hover:bg-gray-100 flex items-center gap-2 text-sm font-semibold shadow-lg transition-colors"
             >
               <Send className="w-4 h-4" />
-              Email Campaign
+              Single Email
             </button>
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex gap-1 mb-4 bg-[#1a1a2e] border border-gray-700/50 rounded-lg p-1 w-fit">
+          {([
+            { id: 'leads' as const, label: 'Leads', icon: Users },
+            { id: 'analytics' as const, label: 'Campaign Analytics', icon: BarChart3 },
+            { id: 'sequences' as const, label: 'Email Sequences', icon: Activity },
+          ]).map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-all ${
+                activeTab === id
+                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* ========== LEADS TAB ========== */}
+        {activeTab === 'leads' && (<>
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
@@ -943,6 +1067,408 @@ export default function SalesLeadsPage() {
             </div>
           </div>
         )}
+        </>)}
+
+        {/* ========== ANALYTICS TAB ========== */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            {/* Period selector */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">Campaign Performance</h2>
+              <select
+                value={analyticsDays}
+                onChange={(e) => setAnalyticsDays(Number(e.target.value))}
+                className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white text-sm"
+              >
+                <option value={7}>Last 7 days</option>
+                <option value={30}>Last 30 days</option>
+                <option value={90}>Last 90 days</option>
+                <option value={365}>Last year</option>
+              </select>
+            </div>
+
+            {analyticsLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+              </div>
+            ) : analyticsData ? (
+              <>
+                {/* Overall stats */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  {[
+                    { label: 'Sent', value: analyticsData.totals?.total_sent || 0, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+                    { label: 'Delivered', value: analyticsData.totals?.total_delivered || 0, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                    { label: 'Opened', value: analyticsData.totals?.total_opened || 0, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+                    { label: 'Clicked', value: analyticsData.totals?.total_clicked || 0, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+                    { label: 'Replied', value: analyticsData.totals?.total_replied || 0, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                    { label: 'Bounced', value: analyticsData.totals?.total_bounced || 0, color: 'text-red-400', bg: 'bg-red-500/10' },
+                  ].map(({ label, value, color, bg }) => (
+                    <div key={label} className={`${bg} border border-gray-700/30 rounded-xl p-4`}>
+                      <p className="text-xs text-gray-400">{label}</p>
+                      <p className={`text-2xl font-bold ${color} mt-1`}>{value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Key rates */}
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { label: 'Open Rate', value: `${analyticsData.totals?.overall_open_rate || 0}%`, target: '40%+', color: (analyticsData.totals?.overall_open_rate || 0) >= 40 ? 'text-emerald-400' : 'text-amber-400' },
+                    { label: 'Click Rate', value: `${analyticsData.totals?.overall_click_rate || 0}%`, target: '3%+', color: (analyticsData.totals?.overall_click_rate || 0) >= 3 ? 'text-emerald-400' : 'text-amber-400' },
+                    { label: 'Reply Rate', value: `${analyticsData.totals?.overall_reply_rate || 0}%`, target: '5%+', color: (analyticsData.totals?.overall_reply_rate || 0) >= 5 ? 'text-emerald-400' : 'text-amber-400' },
+                  ].map(({ label, value, target, color }) => (
+                    <div key={label} className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5 text-center">
+                      <p className="text-xs text-gray-500 mb-2">{label}</p>
+                      <p className={`text-3xl font-bold ${color}`}>{value}</p>
+                      <p className="text-xs text-gray-600 mt-1">Target: {target}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Funnel */}
+                {analyticsData.funnel && (
+                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
+                    <h3 className="text-sm font-medium text-gray-400 mb-4">Email Funnel</h3>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Sent', value: analyticsData.funnel.sent, color: 'bg-indigo-500' },
+                        { label: 'Delivered', value: analyticsData.funnel.delivered, color: 'bg-blue-500' },
+                        { label: 'Opened', value: analyticsData.funnel.opened, color: 'bg-purple-500' },
+                        { label: 'Clicked', value: analyticsData.funnel.clicked, color: 'bg-cyan-500' },
+                        { label: 'Replied', value: analyticsData.funnel.replied, color: 'bg-emerald-500' },
+                        { label: 'Meeting Scheduled', value: analyticsData.funnel.meeting_scheduled, color: 'bg-amber-500' },
+                        { label: 'Converted', value: analyticsData.funnel.converted, color: 'bg-green-500' },
+                      ].map(({ label, value, color }) => {
+                        const maxVal = analyticsData.funnel.sent || 1;
+                        const pct = Math.round((value / maxVal) * 100);
+                        return (
+                          <div key={label} className="flex items-center gap-3">
+                            <span className="text-xs text-gray-400 w-32 shrink-0">{label}</span>
+                            <div className="flex-1 bg-gray-800 rounded-full h-4 overflow-hidden">
+                              <div className={`${color} h-full rounded-full transition-all`} style={{ width: `${Math.max(pct, 1)}%` }} />
+                            </div>
+                            <span className="text-xs text-gray-300 w-12 text-right font-mono">{value}</span>
+                            <span className="text-xs text-gray-600 w-10 text-right">{pct}%</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Per-template performance */}
+                <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
+                  <h3 className="text-sm font-medium text-gray-400 mb-4">Performance by Email Template</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-700/50">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Template</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Day</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Sent</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Opened</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Open %</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Clicked</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Replied</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Reply %</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Bounced</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(analyticsData.per_template || []).map((t: any) => {
+                          const Icon = TEMPLATE_ICONS[t.template_id] || FileText;
+                          const gradient = TEMPLATE_COLORS[t.template_id] || 'from-gray-500 to-gray-600';
+                          return (
+                            <tr key={t.template_id} className="border-b border-gray-800/50 hover:bg-[#12122a]">
+                              <td className="px-3 py-3">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-7 h-7 bg-gradient-to-br ${gradient} rounded-md flex items-center justify-center`}>
+                                    <Icon className="w-3.5 h-3.5 text-white" />
+                                  </div>
+                                  <span className="text-sm text-white font-medium">{t.name}</span>
+                                </div>
+                              </td>
+                              <td className="px-3 py-3 text-right text-xs text-gray-500 font-mono">Day {t.sequence_day}</td>
+                              <td className="px-3 py-3 text-right text-sm text-indigo-400 font-medium">{t.sent}</td>
+                              <td className="px-3 py-3 text-right text-sm text-purple-400">{t.opened}</td>
+                              <td className="px-3 py-3 text-right text-sm">
+                                <span className={t.open_rate >= 40 ? 'text-emerald-400' : t.open_rate >= 20 ? 'text-amber-400' : 'text-gray-500'}>
+                                  {t.open_rate}%
+                                </span>
+                              </td>
+                              <td className="px-3 py-3 text-right text-sm text-cyan-400">{t.clicked}</td>
+                              <td className="px-3 py-3 text-right text-sm text-emerald-400">{t.replied}</td>
+                              <td className="px-3 py-3 text-right text-sm">
+                                <span className={t.reply_rate >= 5 ? 'text-emerald-400' : t.reply_rate >= 2 ? 'text-amber-400' : 'text-gray-500'}>
+                                  {t.reply_rate}%
+                                </span>
+                              </td>
+                              <td className="px-3 py-3 text-right text-sm text-red-400">{t.bounced}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* No data state */}
+                {analyticsData.totals?.total_sent === 0 && (
+                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
+                    <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-white mb-2">No campaign data yet</h3>
+                    <p className="text-sm text-gray-500 max-w-md mx-auto">
+                      Launch your first email sequence or send a campaign to start tracking performance.
+                      Analytics will show open rates, click rates, and reply rates for each template.
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
+                <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">Loading analytics...</h3>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========== SEQUENCES TAB ========== */}
+        {activeTab === 'sequences' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">Email Sequence Status</h2>
+              <button
+                onClick={processScheduledEmails}
+                disabled={sequenceProcessing}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2 text-sm font-medium disabled:opacity-50"
+              >
+                {sequenceProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                Process Due Emails
+              </button>
+            </div>
+
+            {sequenceLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+              </div>
+            ) : sequenceStatus ? (
+              <>
+                {/* Overview cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
+                    <p className="text-xs text-gray-500">In Sequence</p>
+                    <p className="text-3xl font-bold text-white mt-1">{sequenceStatus.total_in_sequence}</p>
+                  </div>
+                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
+                    <p className="text-xs text-gray-500">Completed</p>
+                    <p className="text-3xl font-bold text-emerald-400 mt-1">{sequenceStatus.completed_sequences}</p>
+                  </div>
+                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
+                    <p className="text-xs text-gray-500">Ready to Send</p>
+                    <p className="text-3xl font-bold text-amber-400 mt-1">{sequenceStatus.pending_send_now}</p>
+                    {sequenceStatus.pending_send_now > 0 && (
+                      <p className="text-xs text-amber-400/70 mt-1">Click "Process Due Emails" to send</p>
+                    )}
+                  </div>
+                  <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-xl p-5">
+                    <p className="text-xs text-indigo-300">5-Email Sequence</p>
+                    <p className="text-sm text-gray-400 mt-1">Day 1, 3, 7, 14, 28</p>
+                    <p className="text-xs text-gray-500 mt-1">Auto-scheduled after launch</p>
+                  </div>
+                </div>
+
+                {/* Step breakdown */}
+                <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
+                  <h3 className="text-sm font-medium text-gray-400 mb-4">Leads at Each Sequence Step</h3>
+                  <div className="grid grid-cols-5 gap-3">
+                    {[
+                      { id: 'warm_open', label: 'Warm Open', day: 1 },
+                      { id: 'pattern_interrupt', label: 'Pattern Interrupt', day: 3 },
+                      { id: 'aspiration', label: 'Aspiration', day: 7 },
+                      { id: 'proof_point', label: 'Proof Point', day: 14 },
+                      { id: 'graceful_exit', label: 'Graceful Exit', day: 28 },
+                    ].map(({ id, label, day }, i) => {
+                      const Icon = TEMPLATE_ICONS[id] || FileText;
+                      const gradient = TEMPLATE_COLORS[id] || 'from-gray-500 to-gray-600';
+                      const count = sequenceStatus.step_breakdown?.[id] || 0;
+                      return (
+                        <div key={id} className="text-center">
+                          <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center mx-auto mb-2`}>
+                            <Icon className="w-5 h-5 text-white" />
+                          </div>
+                          <p className="text-xl font-bold text-white">{count}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+                          <p className="text-[10px] text-gray-600 font-mono">Day {day}</p>
+                          {i < 4 && (
+                            <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2">
+                              <ChevronRight className="w-4 h-4 text-gray-700" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {sequenceResult && (
+                  <div className={`border rounded-xl p-4 ${sequenceResult.error ? 'bg-red-500/5 border-red-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+                    {sequenceResult.error ? (
+                      <div className="flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-400" />
+                        <p className="text-sm text-red-400">{sequenceResult.error}</p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <div>
+                          <p className="text-sm text-emerald-400 font-medium">
+                            {sequenceResult.message || `Processed: ${sequenceResult.sent || 0} sent, ${sequenceResult.skipped || 0} skipped`}
+                          </p>
+                          {sequenceResult.sent !== undefined && (
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {sequenceResult.sent} sent, {sequenceResult.failed || sequenceResult.skipped || 0} skipped
+                              {sequenceResult.sequences_completed ? `, ${sequenceResult.sequences_completed} sequences completed` : ''}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
+                <Activity className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-white mb-2">No active sequences</h3>
+                <p className="text-sm text-gray-500 mb-4">Launch a 5-email sequence to start automating your outreach.</p>
+                <button
+                  onClick={() => { setShowSequenceLauncher(true); setSequenceResult(null); }}
+                  className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 text-sm font-semibold mx-auto"
+                >
+                  <Rocket className="w-4 h-4 inline mr-2" />
+                  Launch Sequence
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========== SEQUENCE LAUNCHER MODAL ========== */}
+        {showSequenceLauncher && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowSequenceLauncher(false)} />
+            <div className="relative w-full max-w-lg bg-[#0d0d1f] border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+              <div className="border-b border-gray-800 px-6 py-5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <Rocket className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Launch Full Sequence</h2>
+                    <p className="text-xs text-gray-500">5 emails over 28 days, fully automated</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowSequenceLauncher(false)} className="text-gray-500 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                {/* Timeline preview */}
+                <div className="bg-[#0a0a18] rounded-xl p-4 border border-gray-800">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Sequence Timeline</p>
+                  <div className="space-y-2">
+                    {[
+                      { day: 1, name: 'The Warm Open', desc: 'Personal intro, no pitch' },
+                      { day: 3, name: 'The Pattern Interrupt', desc: 'One data point, soft CTA' },
+                      { day: 7, name: 'The Aspiration', desc: 'Paint the picture' },
+                      { day: 14, name: 'The Proof Point', desc: 'Data-driven follow-up' },
+                      { day: 28, name: 'The Graceful Exit', desc: 'Respectful close' },
+                    ].map(({ day, name, desc }) => (
+                      <div key={day} className="flex items-center gap-3">
+                        <span className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 rounded px-2 py-0.5 w-14 text-center">Day {day}</span>
+                        <span className="text-sm text-white font-medium">{name}</span>
+                        <span className="text-xs text-gray-600 ml-auto">{desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Campaign Name</label>
+                  <input
+                    value={sequenceFilters.campaign_name}
+                    onChange={(e) => setSequenceFilters({ ...sequenceFilters, campaign_name: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">State</label>
+                    <select
+                      value={sequenceFilters.state}
+                      onChange={(e) => setSequenceFilters({ ...sequenceFilters, state: e.target.value })}
+                      className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm"
+                    >
+                      <option value="">All States</option>
+                      <option value="NE">Nebraska</option>
+                      <option value="IA">Iowa</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Priority</label>
+                    <select
+                      value={sequenceFilters.priority}
+                      onChange={(e) => setSequenceFilters({ ...sequenceFilters, priority: e.target.value })}
+                      className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm"
+                    >
+                      <option value="">All</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sequenceFilters.exclude_already_emailed}
+                    onChange={(e) => setSequenceFilters({ ...sequenceFilters, exclude_already_emailed: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-600 text-indigo-500"
+                  />
+                  <span className="text-sm text-gray-300">Skip leads already in a sequence</span>
+                </label>
+
+                {sequenceResult && (
+                  <div className={`rounded-lg p-3 ${sequenceResult.error ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'} text-sm`}>
+                    {sequenceResult.error || `${sequenceResult.message} (${sequenceResult.sent} emails sent)`}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-gray-800 px-6 py-4 flex justify-between">
+                <button
+                  onClick={() => setShowSequenceLauncher(false)}
+                  className="px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={launchSequence}
+                  disabled={sequenceLaunching || !sequenceFilters.campaign_name}
+                  className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 text-sm font-semibold flex items-center gap-2 disabled:opacity-50 shadow-lg shadow-indigo-500/20"
+                >
+                  {sequenceLaunching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
+                  {sequenceLaunching ? 'Launching...' : 'Launch Sequence'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Campaign Launcher Modal */}
         {showCampaign && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
