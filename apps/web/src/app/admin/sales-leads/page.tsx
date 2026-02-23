@@ -101,6 +101,7 @@ interface EmailTemplate {
   subject: string;
   description: string;
   body: string;
+  sequence_day?: number;
 }
 
 interface CampaignPreview {
@@ -109,15 +110,19 @@ interface CampaignPreview {
 }
 
 const TEMPLATE_ICONS: Record<string, any> = {
-  ai_advantage: Sparkles,
-  revenue_growth: Zap,
-  simplicity: FileText,
+  warm_open: Mail,
+  pattern_interrupt: Zap,
+  aspiration: Sparkles,
+  proof_point: TrendingUp,
+  graceful_exit: Send,
 };
 
 const TEMPLATE_COLORS: Record<string, string> = {
-  ai_advantage: 'from-indigo-500 to-purple-500',
-  revenue_growth: 'from-emerald-500 to-cyan-500',
-  simplicity: 'from-amber-500 to-orange-500',
+  warm_open: 'from-amber-500 to-orange-400',
+  pattern_interrupt: 'from-violet-500 to-fuchsia-500',
+  aspiration: 'from-indigo-500 to-purple-500',
+  proof_point: 'from-emerald-500 to-cyan-500',
+  graceful_exit: 'from-slate-500 to-gray-500',
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
@@ -447,10 +452,10 @@ export default function SalesLeadsPage() {
             </button>
             <button
               onClick={openCampaign}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 flex items-center gap-2 text-sm font-medium shadow-lg shadow-indigo-500/25"
+              className="px-5 py-2.5 bg-white text-[#0d0d1f] rounded-lg hover:bg-gray-100 flex items-center gap-2 text-sm font-semibold shadow-lg transition-colors"
             >
-              <Rocket className="w-4 h-4" />
-              Launch Campaign
+              <Send className="w-4 h-4" />
+              Email Campaign
             </button>
           </div>
         </div>
@@ -942,38 +947,40 @@ export default function SalesLeadsPage() {
         {showCampaign && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCampaign(false)} />
-            <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#12122a] border border-gray-700 rounded-2xl overflow-hidden flex flex-col">
-              {/* Modal Header */}
-              <div className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+            <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#0d0d1f] border border-gray-700/50 rounded-2xl overflow-hidden flex flex-col shadow-2xl shadow-black/50">
+              {/* Modal Header with Palm branding */}
+              <div className="border-b border-gray-800 px-6 py-5 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                     <Rocket className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Launch Email Campaign</h2>
-                    <p className="text-xs text-gray-400">
-                      {['Choose Template', 'Set Filters', 'Preview & Send', 'Results'][campaignStep]}
+                    <h2 className="text-lg font-semibold text-white tracking-tight">Email Campaign</h2>
+                    <p className="text-xs text-gray-500">
+                      {['Choose Email', 'Configure', 'Preview & Send', 'Results'][campaignStep]}
+                      <span className="text-gray-700 mx-1.5">/</span>
+                      <span className="text-indigo-400">PalmCare AI</span>
                     </p>
                   </div>
                 </div>
-                <button onClick={() => setShowCampaign(false)} className="text-gray-400 hover:text-white">
+                <button onClick={() => setShowCampaign(false)} className="text-gray-500 hover:text-white transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Step indicator */}
-              <div className="px-6 py-3 border-b border-gray-800 flex gap-1">
+              <div className="px-6 py-3 border-b border-gray-800/50 flex gap-1">
                 {['Template', 'Filters', 'Preview', 'Done'].map((label, i) => (
                   <div key={label} className="flex-1 flex items-center gap-2">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      i < campaignStep ? 'bg-green-500 text-white' :
-                      i === campaignStep ? 'bg-indigo-500 text-white' :
-                      'bg-gray-700 text-gray-500'
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                      i < campaignStep ? 'bg-indigo-500 text-white' :
+                      i === campaignStep ? 'bg-white text-[#0d0d1f]' :
+                      'bg-gray-800 text-gray-600'
                     }`}>
                       {i < campaignStep ? <Check className="w-3 h-3" /> : i + 1}
                     </div>
-                    <span className={`text-xs ${i <= campaignStep ? 'text-white' : 'text-gray-600'}`}>{label}</span>
-                    {i < 3 && <div className={`flex-1 h-px ${i < campaignStep ? 'bg-green-500' : 'bg-gray-700'}`} />}
+                    <span className={`text-xs font-medium ${i <= campaignStep ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span>
+                    {i < 3 && <div className={`flex-1 h-px ${i < campaignStep ? 'bg-indigo-500/50' : 'bg-gray-800'}`} />}
                   </div>
                 ))}
               </div>
@@ -982,9 +989,12 @@ export default function SalesLeadsPage() {
               <div className="flex-1 overflow-y-auto p-6">
                 {/* Step 0: Choose Template */}
                 {campaignStep === 0 && (
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-400">Select an email pitch template for your campaign:</p>
-                    <div className="grid gap-4">
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-sm text-gray-400">Select an email from the 5-email outreach sequence:</p>
+                      <p className="text-xs text-gray-600 mt-1">Based on research from Apple, Nike, Tesla, and 7 other world-class brands.</p>
+                    </div>
+                    <div className="grid gap-3">
                       {templates.map((tmpl) => {
                         const Icon = TEMPLATE_ICONS[tmpl.id] || FileText;
                         const gradient = TEMPLATE_COLORS[tmpl.id] || 'from-gray-500 to-gray-600';
@@ -993,25 +1003,32 @@ export default function SalesLeadsPage() {
                           <button
                             key={tmpl.id}
                             onClick={() => setSelectedTemplate(tmpl)}
-                            className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                            className={`w-full text-left p-4 rounded-xl border transition-all ${
                               isSelected
-                                ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10'
-                                : 'border-gray-700 bg-[#0a0a1a] hover:border-gray-600'
+                                ? 'border-indigo-500 bg-indigo-500/5 ring-1 ring-indigo-500/30'
+                                : 'border-gray-800 bg-[#0a0a18] hover:border-gray-700 hover:bg-[#0e0e22]'
                             }`}
                           >
                             <div className="flex items-start gap-4">
-                              <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center shrink-0`}>
-                                <Icon className="w-6 h-6 text-white" />
+                              <div className="flex flex-col items-center gap-1 shrink-0">
+                                <div className={`w-10 h-10 bg-gradient-to-br ${gradient} rounded-lg flex items-center justify-center`}>
+                                  <Icon className="w-5 h-5 text-white" />
+                                </div>
+                                {tmpl.sequence_day && (
+                                  <span className="text-[10px] font-mono text-gray-600">Day {tmpl.sequence_day}</span>
+                                )}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="text-white font-semibold">{tmpl.name}</h3>
+                                  <h3 className="text-white font-medium text-sm">{tmpl.name}</h3>
                                   {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-400" />}
                                 </div>
-                                <p className="text-sm text-gray-400 mt-0.5">{tmpl.description}</p>
-                                <p className="text-xs text-gray-500 mt-2 font-mono bg-[#1a1a2e] rounded px-2 py-1 inline-block">
-                                  Subject: {tmpl.subject}
-                                </p>
+                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{tmpl.description}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className="text-[11px] text-gray-600 bg-gray-800/50 rounded px-2 py-0.5 font-mono truncate">
+                                    {tmpl.subject}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </button>
@@ -1092,24 +1109,25 @@ export default function SalesLeadsPage() {
                   <div className="space-y-5">
                     {/* Recipient count */}
                     {campaignPreview && (
-                      <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-xl p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center">
-                            <Users className="w-6 h-6 text-indigo-400" />
+                      <div className="bg-[#0a0a18] border border-gray-800 rounded-xl p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center">
+                            <Users className="w-5 h-5 text-indigo-400" />
                           </div>
                           <div>
-                            <p className="text-2xl font-bold text-white">{campaignPreview.total_recipients}</p>
-                            <p className="text-sm text-gray-400">recipients will receive this email</p>
+                            <p className="text-2xl font-bold text-white tracking-tight">{campaignPreview.total_recipients}</p>
+                            <p className="text-xs text-gray-500">agencies will receive this email</p>
                           </div>
                         </div>
                         {campaignPreview.sample.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-indigo-500/20">
-                            <p className="text-xs text-gray-500 mb-1.5">Sample recipients:</p>
-                            <div className="space-y-1">
+                          <div className="mt-3 pt-3 border-t border-gray-800">
+                            <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Sample recipients</p>
+                            <div className="space-y-1.5">
                               {campaignPreview.sample.map((s, i) => (
-                                <p key={i} className="text-xs text-gray-300">
-                                  {s.provider_name} — <span className="text-gray-500">{s.contact_email}</span>
-                                </p>
+                                <div key={i} className="flex items-center justify-between">
+                                  <span className="text-xs text-gray-300 font-medium">{s.provider_name}</span>
+                                  <span className="text-[11px] text-gray-600 font-mono">{s.contact_email}</span>
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -1117,16 +1135,31 @@ export default function SalesLeadsPage() {
                       </div>
                     )}
 
-                    {/* Email preview */}
+                    {/* Email preview — realistic email client mockup */}
                     <div>
-                      <p className="text-sm font-medium text-gray-300 mb-2">Email Preview</p>
-                      <div className="bg-white rounded-xl overflow-hidden border border-gray-600">
-                        <div className="bg-gray-100 px-4 py-2 border-b">
-                          <p className="text-xs text-gray-500">From: PalmCare AI &lt;sales@palmtai.com&gt;</p>
-                          <p className="text-sm font-medium text-gray-800">Subject: {previewHtml.subject}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Email Preview</p>
+                      <div className="bg-white rounded-xl overflow-hidden border border-gray-300 shadow-lg">
+                        {/* Email client toolbar */}
+                        <div className="bg-[#f8f9fa] px-4 py-3 border-b border-gray-200">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                            <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                            <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-[11px] text-gray-400 w-12 shrink-0">From</span>
+                              <span className="text-xs text-gray-700">Muse Ibrahim &lt;sales@palmtai.com&gt;</span>
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-[11px] text-gray-400 w-12 shrink-0">Subject</span>
+                              <span className="text-xs text-gray-900 font-medium">{previewHtml.subject}</span>
+                            </div>
+                          </div>
                         </div>
+                        {/* Email body */}
                         <div
-                          className="p-4"
+                          className="px-6 py-5"
                           dangerouslySetInnerHTML={{ __html: previewHtml.body }}
                         />
                       </div>
@@ -1138,33 +1171,37 @@ export default function SalesLeadsPage() {
                 {campaignStep === 3 && campaignResult && (
                   <div className="space-y-5">
                     {campaignResult.error ? (
-                      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-                        <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
+                      <div className="bg-[#0a0a18] border border-red-500/20 rounded-xl p-8 text-center">
+                        <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                          <AlertCircle className="w-7 h-7 text-red-400" />
+                        </div>
                         <h3 className="text-lg font-semibold text-white mb-1">Campaign Failed</h3>
-                        <p className="text-sm text-gray-400">{campaignResult.error}</p>
+                        <p className="text-sm text-gray-500">{campaignResult.error}</p>
                       </div>
                     ) : (
-                      <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center">
-                        <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                        <h3 className="text-lg font-semibold text-white mb-1">Campaign Sent!</h3>
-                        <p className="text-sm text-gray-400 mb-4">{campaignResult.message}</p>
-                        <div className="flex justify-center gap-6">
+                      <div className="bg-[#0a0a18] border border-gray-800 rounded-xl p-8 text-center">
+                        <div className="w-14 h-14 rounded-full bg-indigo-500/10 flex items-center justify-center mx-auto mb-4">
+                          <Check className="w-7 h-7 text-indigo-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-white mb-1">Campaign Sent</h3>
+                        <p className="text-sm text-gray-500 mb-6">{campaignResult.message}</p>
+                        <div className="flex justify-center gap-10">
                           <div>
-                            <p className="text-3xl font-bold text-green-400">{campaignResult.sent}</p>
-                            <p className="text-xs text-gray-500">Sent</p>
+                            <p className="text-4xl font-bold text-white tracking-tight">{campaignResult.sent}</p>
+                            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wider">Delivered</p>
                           </div>
                           {campaignResult.failed > 0 && (
                             <div>
-                              <p className="text-3xl font-bold text-red-400">{campaignResult.failed}</p>
-                              <p className="text-xs text-gray-500">Failed</p>
+                              <p className="text-4xl font-bold text-red-400 tracking-tight">{campaignResult.failed}</p>
+                              <p className="text-xs text-gray-600 mt-1 uppercase tracking-wider">Failed</p>
                             </div>
                           )}
                         </div>
                         {campaignResult.errors?.length > 0 && (
-                          <div className="mt-4 text-left bg-[#0a0a1a] rounded-lg p-3">
-                            <p className="text-xs text-gray-500 mb-1">Errors:</p>
+                          <div className="mt-6 text-left bg-[#060612] rounded-lg p-4 border border-gray-800">
+                            <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Errors</p>
                             {campaignResult.errors.map((err: any, i: number) => (
-                              <p key={i} className="text-xs text-red-400">{err.lead}: {err.error}</p>
+                              <p key={i} className="text-xs text-red-400/80 py-0.5">{err.lead}: {err.error}</p>
                             ))}
                           </div>
                         )}
@@ -1175,13 +1212,13 @@ export default function SalesLeadsPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="border-t border-gray-700 px-6 py-4 flex items-center justify-between bg-[#0d0d1f]">
+              <div className="border-t border-gray-800 px-6 py-4 flex items-center justify-between bg-[#09091a]">
                 <button
                   onClick={() => {
                     if (campaignStep === 0) setShowCampaign(false);
                     else setCampaignStep(campaignStep - 1);
                   }}
-                  className="px-4 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-white text-sm"
+                  className="px-4 py-2.5 bg-transparent border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-600 text-sm transition-colors"
                 >
                   {campaignStep === 0 ? 'Cancel' : 'Back'}
                 </button>
@@ -1190,9 +1227,9 @@ export default function SalesLeadsPage() {
                   <button
                     onClick={() => setCampaignStep(1)}
                     disabled={!selectedTemplate}
-                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium disabled:opacity-40 flex items-center gap-2"
+                    className="px-6 py-2.5 bg-white text-[#0d0d1f] rounded-lg hover:bg-gray-100 text-sm font-semibold disabled:opacity-30 flex items-center gap-2 transition-colors"
                   >
-                    Next <ChevronRight className="w-4 h-4" />
+                    Continue <ChevronRight className="w-4 h-4" />
                   </button>
                 )}
 
@@ -1200,7 +1237,7 @@ export default function SalesLeadsPage() {
                   <button
                     onClick={() => { setCampaignStep(2); loadCampaignPreview(); }}
                     disabled={!campaignName}
-                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium disabled:opacity-40 flex items-center gap-2"
+                    className="px-6 py-2.5 bg-white text-[#0d0d1f] rounded-lg hover:bg-gray-100 text-sm font-semibold disabled:opacity-30 flex items-center gap-2 transition-colors"
                   >
                     Preview <Eye className="w-4 h-4" />
                   </button>
@@ -1210,12 +1247,12 @@ export default function SalesLeadsPage() {
                   <button
                     onClick={sendCampaign}
                     disabled={campaignSending || !campaignPreview || campaignPreview.total_recipients === 0}
-                    className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 text-sm font-medium disabled:opacity-40 flex items-center gap-2 shadow-lg shadow-indigo-500/25"
+                    className="px-6 py-2.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 text-sm font-semibold disabled:opacity-30 flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-colors"
                   >
                     {campaignSending ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
                     ) : (
-                      <><Rocket className="w-4 h-4" /> Send to {campaignPreview?.total_recipients || 0} recipients</>
+                      <><Send className="w-4 h-4" /> Send to {campaignPreview?.total_recipients || 0} agencies</>
                     )}
                   </button>
                 )}
@@ -1223,7 +1260,7 @@ export default function SalesLeadsPage() {
                 {campaignStep === 3 && (
                   <button
                     onClick={() => setShowCampaign(false)}
-                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium"
+                    className="px-6 py-2.5 bg-white text-[#0d0d1f] rounded-lg hover:bg-gray-100 text-sm font-semibold transition-colors"
                   >
                     Done
                   </button>

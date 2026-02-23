@@ -161,105 +161,129 @@ class CampaignSendRequest(BaseModel):
     exclude_already_emailed: bool = True
 
 
+_EMAIL_STYLE = (
+    'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, '
+    '"Helvetica Neue", sans-serif; max-width: 580px; margin: 0 auto; '
+    "color: #1a1a1a; font-size: 15px; line-height: 1.8;"
+)
+_P = "margin: 0 0 16px 0;"
+_SITE = "https://palmcareai.com"
+_SIG = (
+    '<p style="margin-top: 28px; margin-bottom: 0; font-weight: 600;">Muse Ibrahim</p>'
+    '<p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">President &amp; CEO</p>'
+    '<p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">Palm Technologies, INC.</p>'
+    '<p style="margin: 6px 0 0;"><a href="https://palmcareai.com" '
+    'style="color: #6366f1; text-decoration: none; font-size: 13px;">palmcareai.com</a></p>'
+)
+_PRODUCT_IMG = (
+    '<div style="margin-top: 32px; text-align: center;">'
+    '<a href="https://palmcareai.com" style="text-decoration: none;">'
+    '<img src="https://palmcareai.com/product-showcase.png" '
+    'alt="PalmCare AI - Voice-powered home care management" '
+    'style="max-width: 480px; width: 100%; border-radius: 12px; border: 1px solid #e5e5e5;" />'
+    "</a></div>"
+)
+_FOOTER = (
+    '<div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; '
+    'text-align: center; font-size: 11px; color: #999; line-height: 1.6;">'
+    '<a href="https://palmcareai.com" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">'
+    '<img src="https://palmcareai.com/qr-code.png" '
+    'alt="Scan to visit palmcareai.com" '
+    'style="width: 72px; height: 72px; border-radius: 6px;" />'
+    "</a><br>"
+    "Palm Technologies &middot; Omaha, NE<br>"
+    "You received this because {provider_name} is listed in public agency directories.<br>"
+    '<a href="https://palmcareai.com/unsubscribe" style="color: #999;">Unsubscribe</a>'
+    "</div>"
+)
+
+
+def _wrap(body_html: str) -> str:
+    return f'<div style="{_EMAIL_STYLE}">{body_html}{_SIG}{_PRODUCT_IMG}{_FOOTER}</div>'
+
+
 EMAIL_TEMPLATES = {
-    "ai_advantage": {
-        "id": "ai_advantage",
-        "name": "The AI Advantage",
-        "subject": "Cut your admin hours in half, {provider_name}",
-        "description": "Leads with the pain of paperwork and admin overhead. Best for newer agencies drowning in documentation.",
-        "body": """<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
-  <p style="font-size: 16px; line-height: 1.7;">Hi there,</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">I noticed <strong>{provider_name}</strong> in {city} — congrats on running a home care agency in such a competitive market.</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">I'm reaching out because we built <strong>PalmCare AI</strong> specifically for agencies like yours. It&rsquo;s an AI-powered CRM that handles the busywork so you can focus on patients:</p>
-
-  <ul style="font-size: 15px; line-height: 2; color: #374151;">
-    <li><strong>Record a care assessment</strong> &rarr; AI transcribes it and writes SOAP notes in seconds</li>
-    <li><strong>Auto-generate service contracts</strong> &rarr; ready to sign, not hours of typing</li>
-    <li><strong>Caregiver scheduling &amp; tracking</strong> &rarr; manage your entire team from one dashboard</li>
-  </ul>
-
-  <p style="font-size: 16px; line-height: 1.7;">Agencies using PalmCare AI save an average of <strong>12+ hours per week</strong> on documentation alone.</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">Would you be open to a quick 15-minute demo? No pressure — I'll show you exactly how it works for a {state_full} agency.</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">Best,<br>
-  <strong>Musa Ibrahim</strong><br>
-  <span style="color: #6366f1;">Founder, PalmCare AI</span><br>
-  <a href="https://palmcareai.com" style="color: #6366f1;">palmcareai.com</a></p>
-</div>""",
+    "warm_open": {
+        "id": "warm_open",
+        "name": "The Warm Open",
+        "subject": "quick question, {provider_name}",
+        "sequence_day": 1,
+        "description": "Day 1 — Warm, personal introduction. No pitch, just genuine curiosity. Opens the relationship.",
+        "body": _wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">I came across {{provider_name}} while looking at home care agencies in '
+            f"{{city}}. Building something in this industry takes real grit, and I respect it.</p>"
+            f'<p style="{_P}">I&rsquo;m genuinely curious: how are you handling client assessments and '
+            f"documentation right now? Mostly paper, or have you found something digital that works?</p>"
+            f'<p style="{_P}">No pitch, just trying to understand how agency owners in {{state_full}} '
+            f"actually run things day to day.</p>"
+        ),
     },
-    "revenue_growth": {
-        "id": "revenue_growth",
-        "name": "Revenue Growth",
-        "subject": "How {city} agencies are closing clients same-day",
-        "description": "Focused on revenue and speed-to-close. Best for agencies looking to grow their client base.",
-        "body": """<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
-  <p style="font-size: 16px; line-height: 1.7;">Hi,</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">Quick question — how long does it take {provider_name} to go from a new patient inquiry to a signed service agreement?</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">For most agencies we talk to, it&rsquo;s <strong>3-5 days</strong>. A lot of potential revenue slips away in that window.</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">We built <strong>PalmCare AI</strong> to shrink that to <strong>same-day</strong>. Here&rsquo;s how it works:</p>
-
-  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-    <tr>
-      <td style="padding: 12px; background: #f5f3ff; border-radius: 8px;">
-        <strong style="color: #6366f1;">Step 1:</strong> Record the assessment on your phone
-      </td>
-    </tr>
-    <tr><td style="padding: 4px;"></td></tr>
-    <tr>
-      <td style="padding: 12px; background: #f5f3ff; border-radius: 8px;">
-        <strong style="color: #6366f1;">Step 2:</strong> AI transcribes, writes the care plan, and extracts billable services
-      </td>
-    </tr>
-    <tr><td style="padding: 4px;"></td></tr>
-    <tr>
-      <td style="padding: 12px; background: #f5f3ff; border-radius: 8px;">
-        <strong style="color: #6366f1;">Step 3:</strong> Service contract auto-generates — send it for signature right then
-      </td>
-    </tr>
-  </table>
-
-  <p style="font-size: 16px; line-height: 1.7;">The result? You close clients while your competitors are still writing up paperwork.</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">Want to see a live demo with your actual workflow? Takes 15 minutes — <a href="https://palmcareai.com" style="color: #6366f1; font-weight: 600;">book a time here</a> or just reply to this email.</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">Cheers,<br>
-  <strong>Musa Ibrahim</strong><br>
-  <span style="color: #6366f1;">Founder, PalmCare AI</span><br>
-  <a href="https://palmcareai.com" style="color: #6366f1;">palmcareai.com</a></p>
-</div>""",
+    "pattern_interrupt": {
+        "id": "pattern_interrupt",
+        "name": "The Pattern Interrupt",
+        "subject": "not another software pitch",
+        "sequence_day": 3,
+        "description": "Day 3 — Honest, self-aware, cuts through inbox noise. One data point, one soft CTA.",
+        "body": _wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">I know, your inbox is full of people trying to sell you things. '
+            f"This isn&rsquo;t that. (Well, not yet.)</p>"
+            f'<p style="{_P}">Here&rsquo;s what I actually wanted to share: agencies using '
+            f"voice-to-documentation tools are cutting <strong>12+ hours of admin work per week</strong>. "
+            f"That&rsquo;s a nurse and a half worth of time going back to patient care.</p>"
+            f'<p style="{_P}">If that number sounds interesting, I&rsquo;d love to show you how it works. '
+            f"10 minutes, no slides.</p>"
+            f'<p style="{_P}">Worth a quick chat?</p>'
+        ),
     },
-    "simplicity": {
-        "id": "simplicity",
-        "name": "Keep It Simple",
-        "subject": "A simpler way to run {provider_name}",
-        "description": "Short, casual, human tone. Best for smaller agencies and owner-operators who are busy.",
-        "body": """<div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
-  <p style="font-size: 16px; line-height: 1.7;">Hey,</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">Running a home care agency is hard enough without fighting your own software. If you&rsquo;re still juggling spreadsheets, paper forms, or clunky systems at <strong>{provider_name}</strong>, I think you'd like what we've built.</p>
-
-  <p style="font-size: 16px; line-height: 1.7;"><strong>PalmCare AI</strong> is a dead-simple CRM made specifically for home care agencies in {state_full}:</p>
-
-  <p style="font-size: 15px; line-height: 2; margin-left: 10px;">
-    &#10003; Talk into your phone &rarr; get a complete care assessment<br>
-    &#10003; One click &rarr; professional service contract ready to sign<br>
-    &#10003; All your clients, caregivers, and schedules in one place<br>
-    &#10003; No training needed — if you can use a phone, you can use PalmCare
-  </p>
-
-  <p style="font-size: 16px; line-height: 1.7;">It&rsquo;s free to try. I&rsquo;d love to give you a quick walkthrough — just reply with &ldquo;<strong>show me</strong>&rdquo; and I&rsquo;ll set something up.</p>
-
-  <p style="font-size: 16px; line-height: 1.7;">Talk soon,<br>
-  <strong>Musa Ibrahim</strong><br>
-  <span style="color: #6366f1;">Founder, PalmCare AI</span><br>
-  <a href="https://palmcareai.com" style="color: #6366f1;">palmcareai.com</a></p>
-</div>""",
+    "aspiration": {
+        "id": "aspiration",
+        "name": "The Aspiration",
+        "subject": "imagine finishing paperwork before lunch",
+        "sequence_day": 7,
+        "description": "Day 7 — Paints the picture of who they become. Identity-focused, not feature-focused.",
+        "body": _wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">Picture this: you sit down with a new client, talk through the '
+            f"assessment on your phone for a few minutes, and a complete care plan, SOAP notes, "
+            f"and service contract are ready before you leave their home.</p>"
+            f'<p style="{_P}">That&rsquo;s what PalmCare AI does for providers in {{state_full}}.</p>'
+            f'<p style="{_P}">No training manuals. No data entry. Just talk and it&rsquo;s done.</p>'
+            f'<p style="{_P}">Want to see it work with your actual workflow?</p>'
+        ),
+    },
+    "proof_point": {
+        "id": "proof_point",
+        "name": "The Proof Point",
+        "subject": "12 hours back every week",
+        "sequence_day": 14,
+        "description": "Day 14 — Data-driven, concrete. One stat translated into their language.",
+        "body": _wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">Quick number for you: the average home care agency spends '
+            f"<strong>15+ hours per week</strong> on documentation alone. PalmCare AI brings that "
+            f"down to about 3.</p>"
+            f'<p style="{_P}">For {{provider_name}}, that could mean 12 hours back. Every '
+            f"single week. Time for more client visits, caregiver training, or honestly just getting "
+            f"home at a reasonable hour.</p>"
+            f'<p style="{_P}">Would that kind of time savings make a difference for your team?</p>'
+        ),
+    },
+    "graceful_exit": {
+        "id": "graceful_exit",
+        "name": "The Graceful Exit",
+        "subject": "closing the loop",
+        "sequence_day": 28,
+        "description": "Day 28 — Short, respectful, no pressure. Ferrari-level restraint that signals confidence.",
+        "body": _wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">I&rsquo;ve reached out a couple of times and I know you&rsquo;re busy. '
+            f"Running {{provider_name}} in {{city}} is a full-time-and-a-half job.</p>"
+            f'<p style="{_P}">I won&rsquo;t keep filling your inbox. If the timing is ever right for '
+            f"a simpler way to handle documentation, I&rsquo;m here.</p>"
+            f'<p style="{_P}">No worries either way. Wishing you and your team the best.</p>'
+        ),
     },
 }
 
@@ -423,6 +447,7 @@ async def list_email_templates(
             "subject": t["subject"],
             "description": t["description"],
             "body": t["body"],
+            "sequence_day": t.get("sequence_day"),
         }
         for t in EMAIL_TEMPLATES.values()
     ]

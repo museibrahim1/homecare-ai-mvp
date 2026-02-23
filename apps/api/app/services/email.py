@@ -40,7 +40,7 @@ class EmailService:
             "EMAIL_FROM_WELCOME", f"{BRAND} <welcome@palmtai.com>"
         )
         self.from_sales = os.getenv(
-            "EMAIL_FROM_SALES", f"{BRAND} <sales@palmtai.com>"
+            "EMAIL_FROM_SALES", "Muse Ibrahim <sales@palmtai.com>"
         )
         self.from_support = os.getenv(
             "EMAIL_FROM_SUPPORT", f"{BRAND} <support@palmtai.com>"
