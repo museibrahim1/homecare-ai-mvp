@@ -87,5 +87,12 @@ class SalesLead(Base, TimestampMixin):
     is_converted = Column(Boolean, default=False)
     converted_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Email sequence tracking
+    sequence_step = Column(Integer, default=0)
+    sequence_started_at = Column(DateTime(timezone=True), nullable=True)
+    sequence_completed = Column(Boolean, default=False)
+    next_email_scheduled_at = Column(DateTime(timezone=True), nullable=True)
+    last_template_sent = Column(String(100), nullable=True)
+
     # Activity log stored as JSON array
     activity_log = Column(JSON, default=list)

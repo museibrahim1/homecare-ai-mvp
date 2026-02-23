@@ -9,18 +9,19 @@ Data sourced from CMS Provider Data API.
 import logging
 import json
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, asc, or_, and_
+from sqlalchemy import func, desc, asc, or_, and_, cast, Date, extract
 from pydantic import BaseModel, EmailStr
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User, UserRole
 from app.models.sales_lead import SalesLead, LeadStatus
+from app.models.analytics import EmailCampaignEvent
 from app.services.email import email_service
 
 logger = logging.getLogger(__name__)
@@ -156,6 +157,14 @@ class CampaignSendRequest(BaseModel):
     state: Optional[str] = None
     status: Optional[str] = None
     has_email: Optional[bool] = True
+    priority: Optional[str] = None
+    max_years: Optional[float] = None
+    exclude_already_emailed: bool = True
+
+
+class SequenceLaunchRequest(BaseModel):
+    campaign_name: str
+    state: Optional[str] = None
     priority: Optional[str] = None
     max_years: Optional[float] = None
     exclude_already_emailed: bool = True
@@ -559,12 +568,24 @@ async def send_campaign(
             lead.email_send_count = (lead.email_send_count or 0) + 1
             lead.is_contacted = True
             lead.campaign_tag = req.campaign_name
+            lead.last_template_sent = req.template_id
 
             if lead.status == LeadStatus.new.value:
                 lead.status = LeadStatus.email_sent.value
 
             if result.get("id"):
                 lead.resend_email_id = result["id"]
+
+            db.add(EmailCampaignEvent(
+                lead_id=lead.id,
+                template_id=req.template_id,
+                campaign_tag=req.campaign_name,
+                event_type="sent",
+                resend_email_id=result.get("id"),
+                subject=subject,
+                to_email=lead.contact_email,
+                created_at=now,
+            ))
 
             activity = lead.activity_log or []
             activity.append({
@@ -650,6 +671,375 @@ async def list_campaigns(
         SalesLead.campaign_tag.isnot(None)
     ).distinct().all()
     return [t[0] for t in tags if t[0]]
+
+
+SEQUENCE_ORDER = ["warm_open", "pattern_interrupt", "aspiration", "proof_point", "graceful_exit"]
+SEQUENCE_DAYS = {
+    "warm_open": 0,
+    "pattern_interrupt": 2,
+    "aspiration": 6,
+    "proof_point": 13,
+    "graceful_exit": 27,
+}
+
+
+@router.post("/leads/campaigns/sequence/launch")
+async def launch_email_sequence(
+    req: SequenceLaunchRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Launch the full 5-email sequence for matching leads.
+
+    Sends Email 1 (warm_open) immediately and schedules the remaining 4
+    using the sequence_step / next_email_scheduled_at fields.
+    """
+    query = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+    )
+
+    if req.state:
+        query = query.filter(SalesLead.state == req.state.upper())
+    if req.priority:
+        query = query.filter(SalesLead.priority == req.priority)
+    if req.max_years is not None:
+        query = query.filter(SalesLead.years_in_operation <= req.max_years)
+    if req.exclude_already_emailed:
+        query = query.filter(
+            SalesLead.sequence_step.is_(None) | (SalesLead.sequence_step == 0),
+            SalesLead.email_send_count == 0,
+        )
+
+    leads = query.all()
+    if not leads:
+        raise HTTPException(status_code=400, detail="No eligible leads match the filters")
+
+    now = datetime.now(timezone.utc)
+    tmpl = EMAIL_TEMPLATES["warm_open"]
+    sent = 0
+    failed = 0
+
+    for lead in leads:
+        data = {
+            "provider_name": lead.provider_name,
+            "city": lead.city or "your area",
+            "state": lead.state,
+            "state_full": STATE_NAMES.get(lead.state, lead.state),
+        }
+
+        subject = _render_template(tmpl["subject"], data)
+        body = _render_template(tmpl["body"], data)
+
+        result = email_service.send_email(
+            to=lead.contact_email,
+            subject=subject,
+            sender=email_service.from_sales,
+            html=body,
+        )
+
+        if result.get("success"):
+            lead.last_email_sent_at = now
+            lead.last_email_subject = subject
+            lead.email_send_count = (lead.email_send_count or 0) + 1
+            lead.is_contacted = True
+            lead.campaign_tag = req.campaign_name
+            lead.sequence_step = 1
+            lead.sequence_started_at = now
+            lead.sequence_completed = False
+            lead.last_template_sent = "warm_open"
+            lead.next_email_scheduled_at = now + timedelta(days=SEQUENCE_DAYS["pattern_interrupt"])
+
+            if lead.status == LeadStatus.new.value:
+                lead.status = LeadStatus.email_sent.value
+            if result.get("id"):
+                lead.resend_email_id = result["id"]
+
+            db.add(EmailCampaignEvent(
+                lead_id=lead.id,
+                template_id="warm_open",
+                campaign_tag=req.campaign_name,
+                event_type="sent",
+                resend_email_id=result.get("id"),
+                subject=subject,
+                to_email=lead.contact_email,
+                created_at=now,
+            ))
+
+            activity = lead.activity_log or []
+            activity.append({
+                "action": "Sequence started (Email 1/5)",
+                "campaign": req.campaign_name,
+                "template": "warm_open",
+                "subject": subject,
+                "at": now.isoformat(),
+            })
+            lead.activity_log = activity
+            sent += 1
+        else:
+            failed += 1
+
+    db.commit()
+
+    return {
+        "message": f"Sequence '{req.campaign_name}' launched",
+        "sent": sent,
+        "failed": failed,
+        "total_eligible": len(leads),
+        "next_batch": "pattern_interrupt in 2 days",
+    }
+
+
+@router.post("/leads/campaigns/sequence/process")
+async def process_scheduled_emails(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Process all leads that have a scheduled next email due now or in the past.
+
+    Call this endpoint periodically (cron, manual, or on-demand) to advance
+    leads through the 5-email sequence.
+    """
+    now = datetime.now(timezone.utc)
+
+    due = db.query(SalesLead).filter(
+        SalesLead.next_email_scheduled_at.isnot(None),
+        SalesLead.next_email_scheduled_at <= now,
+        SalesLead.sequence_completed == False,
+        SalesLead.status.notin_(["not_interested", "converted", "responded"]),
+    ).all()
+
+    sent = 0
+    skipped = 0
+    completed = 0
+
+    for lead in due:
+        step = lead.sequence_step or 1
+        if step >= len(SEQUENCE_ORDER):
+            lead.sequence_completed = True
+            lead.next_email_scheduled_at = None
+            completed += 1
+            continue
+
+        template_id = SEQUENCE_ORDER[step]
+        tmpl = EMAIL_TEMPLATES.get(template_id)
+        if not tmpl:
+            skipped += 1
+            continue
+
+        data = {
+            "provider_name": lead.provider_name,
+            "city": lead.city or "your area",
+            "state": lead.state,
+            "state_full": STATE_NAMES.get(lead.state, lead.state),
+        }
+
+        subject = _render_template(tmpl["subject"], data)
+        body = _render_template(tmpl["body"], data)
+
+        result = email_service.send_email(
+            to=lead.contact_email,
+            subject=subject,
+            sender=email_service.from_sales,
+            html=body,
+        )
+
+        if result.get("success"):
+            lead.last_email_sent_at = now
+            lead.last_email_subject = subject
+            lead.email_send_count = (lead.email_send_count or 0) + 1
+            lead.sequence_step = step + 1
+            lead.last_template_sent = template_id
+
+            if result.get("id"):
+                lead.resend_email_id = result["id"]
+
+            next_step = step + 1
+            if next_step < len(SEQUENCE_ORDER):
+                next_template = SEQUENCE_ORDER[next_step]
+                days_offset = SEQUENCE_DAYS[next_template]
+                lead.next_email_scheduled_at = lead.sequence_started_at + timedelta(days=days_offset)
+            else:
+                lead.sequence_completed = True
+                lead.next_email_scheduled_at = None
+                completed += 1
+
+            db.add(EmailCampaignEvent(
+                lead_id=lead.id,
+                template_id=template_id,
+                campaign_tag=lead.campaign_tag,
+                event_type="sent",
+                resend_email_id=result.get("id"),
+                subject=subject,
+                to_email=lead.contact_email,
+                created_at=now,
+            ))
+
+            activity = lead.activity_log or []
+            activity.append({
+                "action": f"Sequence email {step + 1}/5 sent",
+                "template": template_id,
+                "subject": subject,
+                "at": now.isoformat(),
+            })
+            lead.activity_log = activity
+            sent += 1
+        else:
+            skipped += 1
+
+    db.commit()
+
+    return {
+        "processed": len(due),
+        "sent": sent,
+        "skipped": skipped,
+        "sequences_completed": completed,
+    }
+
+
+@router.get("/leads/campaigns/sequence/status")
+async def sequence_status(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Overview of all active sequences: how many leads at each step."""
+    total_in_sequence = db.query(SalesLead).filter(
+        SalesLead.sequence_step.isnot(None),
+        SalesLead.sequence_step > 0,
+    ).count()
+
+    completed = db.query(SalesLead).filter(SalesLead.sequence_completed == True).count()
+
+    step_counts = {}
+    for i, tid in enumerate(SEQUENCE_ORDER):
+        count = db.query(SalesLead).filter(
+            SalesLead.sequence_step == i + 1,
+            SalesLead.sequence_completed == False,
+        ).count()
+        step_counts[tid] = count
+
+    pending_send = db.query(SalesLead).filter(
+        SalesLead.next_email_scheduled_at.isnot(None),
+        SalesLead.next_email_scheduled_at <= datetime.now(timezone.utc),
+        SalesLead.sequence_completed == False,
+    ).count()
+
+    return {
+        "total_in_sequence": total_in_sequence,
+        "completed_sequences": completed,
+        "pending_send_now": pending_send,
+        "step_breakdown": step_counts,
+    }
+
+
+# =============================================================================
+# CAMPAIGN ANALYTICS
+# =============================================================================
+
+@router.get("/leads/campaigns/analytics")
+async def campaign_analytics(
+    campaign_tag: Optional[str] = None,
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Per-template performance analytics with funnel data."""
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    query = db.query(EmailCampaignEvent).filter(EmailCampaignEvent.created_at >= since)
+    if campaign_tag:
+        query = query.filter(EmailCampaignEvent.campaign_tag == campaign_tag)
+
+    events = query.all()
+
+    templates_data = {}
+    for tid in EMAIL_TEMPLATES:
+        templates_data[tid] = {
+            "template_id": tid,
+            "name": EMAIL_TEMPLATES[tid]["name"],
+            "sequence_day": EMAIL_TEMPLATES[tid].get("sequence_day", 0),
+            "sent": 0,
+            "delivered": 0,
+            "opened": 0,
+            "clicked": 0,
+            "replied": 0,
+            "bounced": 0,
+            "complained": 0,
+            "open_rate": 0,
+            "click_rate": 0,
+            "reply_rate": 0,
+            "bounce_rate": 0,
+        }
+
+    for ev in events:
+        tid = ev.template_id
+        if tid not in templates_data:
+            continue
+        if ev.event_type in templates_data[tid]:
+            templates_data[tid][ev.event_type] += 1
+
+    for tid, d in templates_data.items():
+        if d["sent"] > 0:
+            d["open_rate"] = round(d["opened"] / d["sent"] * 100, 1)
+            d["click_rate"] = round(d["clicked"] / d["sent"] * 100, 1)
+            d["reply_rate"] = round(d["replied"] / d["sent"] * 100, 1)
+            d["bounce_rate"] = round(d["bounced"] / d["sent"] * 100, 1)
+
+    totals = {
+        "total_sent": sum(d["sent"] for d in templates_data.values()),
+        "total_delivered": sum(d["delivered"] for d in templates_data.values()),
+        "total_opened": sum(d["opened"] for d in templates_data.values()),
+        "total_clicked": sum(d["clicked"] for d in templates_data.values()),
+        "total_replied": sum(d["replied"] for d in templates_data.values()),
+        "total_bounced": sum(d["bounced"] for d in templates_data.values()),
+    }
+    if totals["total_sent"] > 0:
+        totals["overall_open_rate"] = round(totals["total_opened"] / totals["total_sent"] * 100, 1)
+        totals["overall_click_rate"] = round(totals["total_clicked"] / totals["total_sent"] * 100, 1)
+        totals["overall_reply_rate"] = round(totals["total_replied"] / totals["total_sent"] * 100, 1)
+    else:
+        totals["overall_open_rate"] = 0
+        totals["overall_click_rate"] = 0
+        totals["overall_reply_rate"] = 0
+
+    daily_sends = db.query(
+        cast(EmailCampaignEvent.created_at, Date).label("day"),
+        func.count().label("count"),
+    ).filter(
+        EmailCampaignEvent.event_type == "sent",
+        EmailCampaignEvent.created_at >= since,
+    ).group_by("day").order_by("day").all()
+
+    daily_opens = db.query(
+        cast(EmailCampaignEvent.created_at, Date).label("day"),
+        func.count().label("count"),
+    ).filter(
+        EmailCampaignEvent.event_type == "opened",
+        EmailCampaignEvent.created_at >= since,
+    ).group_by("day").order_by("day").all()
+
+    funnel = {
+        "sent": totals["total_sent"],
+        "delivered": totals["total_delivered"],
+        "opened": totals["total_opened"],
+        "clicked": totals["total_clicked"],
+        "replied": totals["total_replied"],
+        "meeting_scheduled": db.query(SalesLead).filter(
+            SalesLead.status == "meeting_scheduled"
+        ).count(),
+        "converted": db.query(SalesLead).filter(
+            SalesLead.status == "converted"
+        ).count(),
+    }
+
+    return {
+        "period_days": days,
+        "totals": totals,
+        "funnel": funnel,
+        "per_template": list(templates_data.values()),
+        "daily_sends": [{"date": str(d.day), "count": d.count} for d in daily_sends],
+        "daily_opens": [{"date": str(d.day), "count": d.count} for d in daily_opens],
+    }
 
 
 @router.post("/leads/import-cms")
@@ -1008,6 +1398,26 @@ async def resend_webhook(
     now = datetime.now(timezone.utc)
     activity = lead.activity_log or []
 
+    event_map = {
+        "email.opened": "opened",
+        "email.delivered": "delivered",
+        "email.bounced": "bounced",
+        "email.complained": "complained",
+        "email.clicked": "clicked",
+    }
+    analytics_type = event_map.get(event_type)
+
+    if analytics_type:
+        db.add(EmailCampaignEvent(
+            lead_id=lead.id,
+            template_id=lead.last_template_sent or "unknown",
+            campaign_tag=lead.campaign_tag,
+            event_type=analytics_type,
+            resend_email_id=email_id,
+            to_email=lead.contact_email,
+            created_at=now,
+        ))
+
     if event_type == "email.opened":
         lead.email_open_count = (lead.email_open_count or 0) + 1
         lead.last_email_opened_at = now
@@ -1025,8 +1435,13 @@ async def resend_webhook(
             "at": now.isoformat(),
         })
 
+    elif event_type == "email.clicked":
+        activity.append({"action": "Email link clicked", "at": now.isoformat()})
+
     elif event_type == "email.complained":
         lead.status = "not_interested"
+        lead.sequence_completed = True
+        lead.next_email_scheduled_at = None
         activity.append({"action": "Spam complaint received", "at": now.isoformat()})
 
     lead.activity_log = activity
