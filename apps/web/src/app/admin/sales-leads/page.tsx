@@ -90,6 +90,8 @@ interface Stats {
   iowa_count: number;
   last_5_years: number;
   last_10_years: number;
+  has_email: number;
+  has_website: number;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
@@ -350,7 +352,7 @@ export default function SalesLeadsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
             {[
               { label: 'Total', value: stats.total, color: 'text-white' },
-              { label: 'New', value: stats.new, color: 'text-slate-300' },
+              { label: 'Has Email', value: stats.has_email, color: 'text-emerald-400' },
               { label: 'Email Sent', value: stats.email_sent, color: 'text-indigo-400' },
               { label: 'Opened', value: stats.email_opened, color: 'text-purple-400' },
               { label: 'Responded', value: stats.responded, color: 'text-emerald-400' },
@@ -416,6 +418,15 @@ export default function SalesLeadsPage() {
               <option value="5">Last 5 years</option>
               <option value="10">Last 10 years</option>
               <option value="20">Last 20 years</option>
+            </select>
+            <select
+              value={filters.has_email}
+              onChange={(e) => setFilters({ ...filters, has_email: e.target.value })}
+              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+            >
+              <option value="">All Contacts</option>
+              <option value="true">Has Email</option>
+              <option value="false">No Email</option>
             </select>
             <button
               onClick={() => setFilters({ state: '', status: '', priority: '', ownership: '', search: '', max_years: '', contacted: '', has_email: '' })}
@@ -484,7 +495,18 @@ export default function SalesLeadsPage() {
                         >
                           <td className="px-4 py-3">
                             <div>
-                              <p className="text-sm font-medium text-white">{lead.provider_name}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-white">{lead.provider_name}</p>
+                                {lead.contact_email ? (
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                    <Mail className="w-2.5 h-2.5" /> email
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-500/15 text-gray-500 border border-gray-600/30">
+                                    <Phone className="w-2.5 h-2.5" /> phone only
+                                  </span>
+                                )}
+                              </div>
                               <div className="flex items-center gap-2 mt-0.5">
                                 {lead.phone && <span className="text-xs text-gray-500">{lead.phone}</span>}
                                 <span className={`text-xs px-1.5 py-0.5 rounded border ${PRIORITY_COLORS[lead.priority] || PRIORITY_COLORS.low}`}>

@@ -142,6 +142,8 @@ class LeadStats(BaseModel):
     iowa_count: int
     last_5_years: int
     last_10_years: int
+    has_email: int
+    has_website: int
 
 
 class ImportRequest(BaseModel):
@@ -260,6 +262,15 @@ async def get_lead_stats(
         SalesLead.years_in_operation <= 10,
     ).count()
 
+    has_email_count = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+    ).count()
+    has_website_count = db.query(SalesLead).filter(
+        SalesLead.website.isnot(None),
+        SalesLead.website != "",
+    ).count()
+
     return LeadStats(
         total=total,
         new=count_status("new"),
@@ -274,6 +285,8 @@ async def get_lead_stats(
         iowa_count=ia_count,
         last_5_years=last_5,
         last_10_years=last_10,
+        has_email=has_email_count,
+        has_website=has_website_count,
     )
 
 
