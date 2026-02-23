@@ -407,7 +407,326 @@ async def get_lead_stats(
 
 
 # =============================================================================
-# CRUD
+# EMAIL TEMPLATES & BULK CAMPAIGNS
+# (Must be defined BEFORE /leads/{lead_id} to avoid route shadowing)
+# =============================================================================
+
+@router.get("/leads/email-templates")
+async def list_email_templates(
+    admin: User = Depends(require_ceo),
+):
+    """Return available email pitch templates."""
+    return [
+        {
+            "id": t["id"],
+            "name": t["name"],
+            "subject": t["subject"],
+            "description": t["description"],
+            "body": t["body"],
+        }
+        for t in EMAIL_TEMPLATES.values()
+    ]
+
+
+@router.post("/leads/email-templates/{template_id}/preview")
+async def preview_template(
+    template_id: str,
+    lead_id: Optional[UUID] = None,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Render a template with sample or actual lead data."""
+    tmpl = EMAIL_TEMPLATES.get(template_id)
+    if not tmpl:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    if lead_id:
+        lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
+        if not lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        data = {
+            "provider_name": lead.provider_name,
+            "city": lead.city or "your city",
+            "state": lead.state,
+            "state_full": STATE_NAMES.get(lead.state, lead.state),
+        }
+    else:
+        data = {
+            "provider_name": "ABC Home Care",
+            "city": "Omaha",
+            "state": "NE",
+            "state_full": "Nebraska",
+        }
+
+    return {
+        "subject": _render_template(tmpl["subject"], data),
+        "body": _render_template(tmpl["body"], data),
+    }
+
+
+def _render_template(template_str: str, data: dict) -> str:
+    """Replace merge tags like {provider_name} with actual values."""
+    result = template_str
+    for key, value in data.items():
+        result = result.replace("{" + key + "}", str(value))
+    return result
+
+
+@router.post("/leads/campaigns/send")
+async def send_campaign(
+    req: CampaignSendRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Send a bulk email campaign to filtered leads."""
+    tmpl = EMAIL_TEMPLATES.get(req.template_id)
+    if not tmpl:
+        raise HTTPException(status_code=400, detail="Invalid template_id")
+
+    query = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+    )
+
+    if req.state:
+        query = query.filter(SalesLead.state == req.state.upper())
+    if req.status:
+        query = query.filter(SalesLead.status == req.status)
+    if req.priority:
+        query = query.filter(SalesLead.priority == req.priority)
+    if req.max_years is not None:
+        query = query.filter(SalesLead.years_in_operation <= req.max_years)
+    if req.exclude_already_emailed:
+        query = query.filter(SalesLead.email_send_count == 0)
+
+    leads = query.all()
+
+    if not leads:
+        raise HTTPException(status_code=400, detail="No eligible leads match the filters")
+
+    now = datetime.now(timezone.utc)
+    sent = 0
+    failed = 0
+    errors = []
+
+    for lead in leads:
+        data = {
+            "provider_name": lead.provider_name,
+            "city": lead.city or "your area",
+            "state": lead.state,
+            "state_full": STATE_NAMES.get(lead.state, lead.state),
+        }
+
+        subject = _render_template(tmpl["subject"], data)
+        body = _render_template(tmpl["body"], data)
+
+        result = email_service.send_email(
+            to=lead.contact_email,
+            subject=subject,
+            sender=email_service.from_sales,
+            html=body,
+        )
+
+        if result.get("success"):
+            lead.last_email_sent_at = now
+            lead.last_email_subject = subject
+            lead.email_send_count = (lead.email_send_count or 0) + 1
+            lead.is_contacted = True
+            lead.campaign_tag = req.campaign_name
+
+            if lead.status == LeadStatus.new.value:
+                lead.status = LeadStatus.email_sent.value
+
+            if result.get("id"):
+                lead.resend_email_id = result["id"]
+
+            activity = lead.activity_log or []
+            activity.append({
+                "action": "Campaign email sent",
+                "campaign": req.campaign_name,
+                "template": req.template_id,
+                "subject": subject,
+                "to": lead.contact_email,
+                "resend_id": result.get("id"),
+                "at": now.isoformat(),
+            })
+            lead.activity_log = activity
+            sent += 1
+        else:
+            failed += 1
+            errors.append({"lead": lead.provider_name, "error": result.get("error")})
+
+    db.commit()
+
+    return {
+        "message": f"Campaign '{req.campaign_name}' complete",
+        "sent": sent,
+        "failed": failed,
+        "total_eligible": len(leads),
+        "template": req.template_id,
+        "errors": errors[:10],
+    }
+
+
+@router.get("/leads/campaigns/send/preview")
+async def preview_campaign_recipients(
+    template_id: str,
+    campaign_name: str = "preview",
+    state: Optional[str] = None,
+    status: Optional[str] = None,
+    priority: Optional[str] = None,
+    max_years: Optional[float] = None,
+    exclude_already_emailed: bool = True,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Preview how many leads a campaign would reach."""
+    query = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+    )
+
+    if state:
+        query = query.filter(SalesLead.state == state.upper())
+    if status:
+        query = query.filter(SalesLead.status == status)
+    if priority:
+        query = query.filter(SalesLead.priority == priority)
+    if max_years is not None:
+        query = query.filter(SalesLead.years_in_operation <= max_years)
+    if exclude_already_emailed:
+        query = query.filter(SalesLead.email_send_count == 0)
+
+    count = query.count()
+    sample = query.limit(5).all()
+
+    return {
+        "total_recipients": count,
+        "sample": [
+            {
+                "provider_name": l.provider_name,
+                "city": l.city,
+                "state": l.state,
+                "contact_email": l.contact_email,
+            }
+            for l in sample
+        ],
+    }
+
+
+@router.get("/leads/campaigns/list")
+async def list_campaigns(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Get all unique campaign tags."""
+    tags = db.query(SalesLead.campaign_tag).filter(
+        SalesLead.campaign_tag.isnot(None)
+    ).distinct().all()
+    return [t[0] for t in tags if t[0]]
+
+
+@router.post("/leads/import-cms")
+async def import_cms_data(
+    req: ImportRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Pull home health agency data from CMS Provider Data API and import as leads."""
+    CMS_API = "https://data.cms.gov/provider-data/api/1/datastore/query/6jpm-sxkc/0"
+
+    imported = 0
+    skipped = 0
+
+    for state in req.states:
+        payload = json.dumps({
+            "conditions": [{"property": "state", "value": state.upper(), "operator": "="}],
+            "limit": 500,
+            "keys": True,
+        }).encode()
+
+        try:
+            request = urllib.request.Request(
+                CMS_API, data=payload, headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(request, timeout=30) as resp:
+                data = json.loads(resp.read())
+        except Exception as e:
+            logger.error(f"Failed to pull CMS data for {state}: {e}")
+            continue
+
+        results = data.get("results", [])
+
+        for r in results:
+            ccn = r.get("cms_certification_number_ccn")
+            if not ccn:
+                continue
+
+            existing = db.query(SalesLead).filter(SalesLead.ccn == ccn).first()
+            if existing:
+                skipped += 1
+                continue
+
+            cert_date_str = r.get("certification_date", "")
+            years_old = None
+            if cert_date_str and cert_date_str != "-":
+                try:
+                    from datetime import datetime as dt
+                    cert_dt = dt.strptime(cert_date_str, "%m/%d/%Y")
+                    years_old = round((dt.now() - cert_dt).days / 365.25, 1)
+                except Exception:
+                    pass
+
+            phone_raw = r.get("telephone_number", "")
+            phone = None
+            if phone_raw and phone_raw != "-":
+                phone_raw = phone_raw.strip().replace("-", "").replace("(", "").replace(")", "").replace(" ", "")
+                if len(phone_raw) == 10:
+                    phone = f"({phone_raw[:3]}) {phone_raw[3:6]}-{phone_raw[6:]}"
+                else:
+                    phone = phone_raw
+
+            priority = "high" if (years_old is not None and years_old <= 5) else (
+                "medium" if (years_old is not None and years_old <= 10) else "low"
+            )
+
+            lead = SalesLead(
+                provider_name=(r.get("provider_name") or "").strip().title(),
+                state=r.get("state", state),
+                city=(r.get("citytown") or "").strip().title(),
+                address=(r.get("address") or "").strip().title(),
+                zip_code=(r.get("zip_code") or "").strip(),
+                phone=phone,
+                ownership_type=(r.get("type_of_ownership") or "").strip().title() or None,
+                ccn=ccn,
+                certification_date=cert_date_str if cert_date_str != "-" else None,
+                years_in_operation=years_old,
+                star_rating=r.get("quality_of_patient_care_star_rating"),
+                offers_nursing=r.get("offers_nursing_care_services") == "Yes",
+                offers_pt=r.get("offers_physical_therapy_services") == "Yes",
+                offers_ot=r.get("offers_occupational_therapy_services") == "Yes",
+                offers_speech=r.get("offers_speech_pathology_services") == "Yes",
+                offers_social=r.get("offers_medical_social_services") == "Yes",
+                offers_aide=r.get("offers_home_health_aide_services") == "Yes",
+                priority=priority,
+                source="cms_provider_data",
+            )
+            db.add(lead)
+            imported += 1
+
+    db.commit()
+
+    return {
+        "message": f"Import complete: {imported} new leads, {skipped} duplicates skipped",
+        "imported": imported,
+        "skipped": skipped,
+        "states": req.states,
+    }
+
+
+# =============================================================================
+# CRUD (dynamic {lead_id} routes — MUST come after all static /leads/* routes)
 # =============================================================================
 
 @router.get("/leads/{lead_id}", response_model=LeadDetail)
@@ -629,328 +948,6 @@ async def log_response(
     db.commit()
 
     return {"message": "Response logged"}
-
-
-# =============================================================================
-# IMPORT FROM CMS
-# =============================================================================
-
-@router.post("/leads/import-cms")
-async def import_cms_data(
-    req: ImportRequest,
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
-):
-    """Pull home health agency data from CMS Provider Data API and import as leads."""
-    CMS_API = "https://data.cms.gov/provider-data/api/1/datastore/query/6jpm-sxkc/0"
-
-    imported = 0
-    skipped = 0
-
-    for state in req.states:
-        payload = json.dumps({
-            "conditions": [{"property": "state", "value": state.upper(), "operator": "="}],
-            "limit": 500,
-            "keys": True,
-        }).encode()
-
-        try:
-            request = urllib.request.Request(
-                CMS_API, data=payload, headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(request, timeout=30) as resp:
-                data = json.loads(resp.read())
-        except Exception as e:
-            logger.error(f"Failed to pull CMS data for {state}: {e}")
-            continue
-
-        results = data.get("results", [])
-
-        for r in results:
-            ccn = r.get("cms_certification_number_ccn")
-            if not ccn:
-                continue
-
-            existing = db.query(SalesLead).filter(SalesLead.ccn == ccn).first()
-            if existing:
-                skipped += 1
-                continue
-
-            cert_date_str = r.get("certification_date", "")
-            years_old = None
-            if cert_date_str and cert_date_str != "-":
-                try:
-                    from datetime import datetime as dt
-                    cert_dt = dt.strptime(cert_date_str, "%m/%d/%Y")
-                    years_old = round((dt.now() - cert_dt).days / 365.25, 1)
-                except Exception:
-                    pass
-
-            phone_raw = r.get("telephone_number", "")
-            phone = None
-            if phone_raw and phone_raw != "-":
-                phone_raw = phone_raw.strip().replace("-", "").replace("(", "").replace(")", "").replace(" ", "")
-                if len(phone_raw) == 10:
-                    phone = f"({phone_raw[:3]}) {phone_raw[3:6]}-{phone_raw[6:]}"
-                else:
-                    phone = phone_raw
-
-            priority = "high" if (years_old is not None and years_old <= 5) else (
-                "medium" if (years_old is not None and years_old <= 10) else "low"
-            )
-
-            lead = SalesLead(
-                provider_name=(r.get("provider_name") or "").strip().title(),
-                state=r.get("state", state),
-                city=(r.get("citytown") or "").strip().title(),
-                address=(r.get("address") or "").strip().title(),
-                zip_code=(r.get("zip_code") or "").strip(),
-                phone=phone,
-                ownership_type=(r.get("type_of_ownership") or "").strip().title() or None,
-                ccn=ccn,
-                certification_date=cert_date_str if cert_date_str != "-" else None,
-                years_in_operation=years_old,
-                star_rating=r.get("quality_of_patient_care_star_rating"),
-                offers_nursing=r.get("offers_nursing_care_services") == "Yes",
-                offers_pt=r.get("offers_physical_therapy_services") == "Yes",
-                offers_ot=r.get("offers_occupational_therapy_services") == "Yes",
-                offers_speech=r.get("offers_speech_pathology_services") == "Yes",
-                offers_social=r.get("offers_medical_social_services") == "Yes",
-                offers_aide=r.get("offers_home_health_aide_services") == "Yes",
-                priority=priority,
-                source="cms_provider_data",
-            )
-            db.add(lead)
-            imported += 1
-
-    db.commit()
-
-    return {
-        "message": f"Import complete: {imported} new leads, {skipped} duplicates skipped",
-        "imported": imported,
-        "skipped": skipped,
-        "states": req.states,
-    }
-
-
-@router.get("/leads/campaigns/list")
-async def list_campaigns(
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
-):
-    """Get all unique campaign tags."""
-    tags = db.query(SalesLead.campaign_tag).filter(
-        SalesLead.campaign_tag.isnot(None)
-    ).distinct().all()
-    return [t[0] for t in tags if t[0]]
-
-
-# =============================================================================
-# EMAIL TEMPLATES & BULK CAMPAIGNS
-# =============================================================================
-
-@router.get("/leads/email-templates")
-async def list_email_templates(
-    admin: User = Depends(require_ceo),
-):
-    """Return available email pitch templates."""
-    return [
-        {
-            "id": t["id"],
-            "name": t["name"],
-            "subject": t["subject"],
-            "description": t["description"],
-            "body": t["body"],
-        }
-        for t in EMAIL_TEMPLATES.values()
-    ]
-
-
-@router.post("/leads/email-templates/{template_id}/preview")
-async def preview_template(
-    template_id: str,
-    lead_id: Optional[UUID] = None,
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
-):
-    """Render a template with sample or actual lead data."""
-    tmpl = EMAIL_TEMPLATES.get(template_id)
-    if not tmpl:
-        raise HTTPException(status_code=404, detail="Template not found")
-
-    if lead_id:
-        lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
-        if not lead:
-            raise HTTPException(status_code=404, detail="Lead not found")
-        data = {
-            "provider_name": lead.provider_name,
-            "city": lead.city or "your city",
-            "state": lead.state,
-            "state_full": STATE_NAMES.get(lead.state, lead.state),
-        }
-    else:
-        data = {
-            "provider_name": "ABC Home Care",
-            "city": "Omaha",
-            "state": "NE",
-            "state_full": "Nebraska",
-        }
-
-    return {
-        "subject": _render_template(tmpl["subject"], data),
-        "body": _render_template(tmpl["body"], data),
-    }
-
-
-def _render_template(template_str: str, data: dict) -> str:
-    """Replace merge tags like {provider_name} with actual values."""
-    result = template_str
-    for key, value in data.items():
-        result = result.replace("{" + key + "}", str(value))
-    return result
-
-
-@router.post("/leads/campaigns/send")
-async def send_campaign(
-    req: CampaignSendRequest,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
-):
-    """Send a bulk email campaign to filtered leads."""
-    tmpl = EMAIL_TEMPLATES.get(req.template_id)
-    if not tmpl:
-        raise HTTPException(status_code=400, detail="Invalid template_id")
-
-    query = db.query(SalesLead).filter(
-        SalesLead.contact_email.isnot(None),
-        SalesLead.contact_email != "",
-    )
-
-    if req.state:
-        query = query.filter(SalesLead.state == req.state.upper())
-    if req.status:
-        query = query.filter(SalesLead.status == req.status)
-    if req.priority:
-        query = query.filter(SalesLead.priority == req.priority)
-    if req.max_years is not None:
-        query = query.filter(SalesLead.years_in_operation <= req.max_years)
-    if req.exclude_already_emailed:
-        query = query.filter(SalesLead.email_send_count == 0)
-
-    leads = query.all()
-
-    if not leads:
-        raise HTTPException(status_code=400, detail="No eligible leads match the filters")
-
-    now = datetime.now(timezone.utc)
-    sent = 0
-    failed = 0
-    errors = []
-
-    for lead in leads:
-        data = {
-            "provider_name": lead.provider_name,
-            "city": lead.city or "your area",
-            "state": lead.state,
-            "state_full": STATE_NAMES.get(lead.state, lead.state),
-        }
-
-        subject = _render_template(tmpl["subject"], data)
-        body = _render_template(tmpl["body"], data)
-
-        result = email_service.send_email(
-            to=lead.contact_email,
-            subject=subject,
-            sender=email_service.from_sales,
-            html=body,
-        )
-
-        if result.get("success"):
-            lead.last_email_sent_at = now
-            lead.last_email_subject = subject
-            lead.email_send_count = (lead.email_send_count or 0) + 1
-            lead.is_contacted = True
-            lead.campaign_tag = req.campaign_name
-
-            if lead.status == LeadStatus.new.value:
-                lead.status = LeadStatus.email_sent.value
-
-            if result.get("id"):
-                lead.resend_email_id = result["id"]
-
-            activity = lead.activity_log or []
-            activity.append({
-                "action": "Campaign email sent",
-                "campaign": req.campaign_name,
-                "template": req.template_id,
-                "subject": subject,
-                "to": lead.contact_email,
-                "resend_id": result.get("id"),
-                "at": now.isoformat(),
-            })
-            lead.activity_log = activity
-            sent += 1
-        else:
-            failed += 1
-            errors.append({"lead": lead.provider_name, "error": result.get("error")})
-
-    db.commit()
-
-    return {
-        "message": f"Campaign '{req.campaign_name}' complete",
-        "sent": sent,
-        "failed": failed,
-        "total_eligible": len(leads),
-        "template": req.template_id,
-        "errors": errors[:10],
-    }
-
-
-@router.get("/leads/campaigns/send/preview")
-async def preview_campaign_recipients(
-    template_id: str,
-    campaign_name: str = "preview",
-    state: Optional[str] = None,
-    status: Optional[str] = None,
-    priority: Optional[str] = None,
-    max_years: Optional[float] = None,
-    exclude_already_emailed: bool = True,
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
-):
-    """Preview how many leads a campaign would reach."""
-    query = db.query(SalesLead).filter(
-        SalesLead.contact_email.isnot(None),
-        SalesLead.contact_email != "",
-    )
-
-    if state:
-        query = query.filter(SalesLead.state == state.upper())
-    if status:
-        query = query.filter(SalesLead.status == status)
-    if priority:
-        query = query.filter(SalesLead.priority == priority)
-    if max_years is not None:
-        query = query.filter(SalesLead.years_in_operation <= max_years)
-    if exclude_already_emailed:
-        query = query.filter(SalesLead.email_send_count == 0)
-
-    count = query.count()
-    sample = query.limit(5).all()
-
-    return {
-        "total_recipients": count,
-        "sample": [
-            {
-                "provider_name": l.provider_name,
-                "city": l.city,
-                "state": l.state,
-                "contact_email": l.contact_email,
-            }
-            for l in sample
-        ],
-    }
 
 
 # =============================================================================
