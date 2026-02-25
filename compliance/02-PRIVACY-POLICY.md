@@ -27,7 +27,7 @@ This policy applies to:
 
 ## 3. Definitions
 
-- **PHI (Protected Health Information):** Individually identifiable health information transmitted or maintained in any form, including client names, addresses, dates of birth, medical conditions, care plans, voice recordings, and billing data.
+- **PHI (Protected Health Information):** Individually identifiable health information transmitted or maintained in any form, including client names, addresses, dates of birth, medical conditions, care plans, care assessments, visit notes, voice recordings, and transcripts.
 - **ePHI (Electronic PHI):** PHI in electronic form.
 - **Covered Entity:** Home care agencies and healthcare providers that use PalmCare AI.
 - **Business Associate:** PalmCare AI and any subcontractors that access PHI.
@@ -103,8 +103,8 @@ PalmCare AI will:
 | Railway | Cloud hosting | All ePHI | Pending |
 | OpenAI | Voice transcription, AI processing | Voice recordings, transcripts | Pending |
 | Anthropic | AI processing, document analysis | Transcripts, document content | Pending |
-| Twilio | Voice calls | Phone numbers, voice recordings | Pending |
-| Email Provider | Transactional email | Client names, contract content | Must switch to HIPAA-compliant provider |
+| Stripe | Payment processing | Billing data only (no PHI) | BAA available |
+| Email Provider | Transactional email | Client names, contract content | Must use HIPAA-compliant provider |
 
 ### 6.3 Breach Notification
 - PalmCare AI will report any breach of unsecured PHI to the Covered Entity within 60 days of discovery
@@ -112,7 +112,34 @@ PalmCare AI will:
 
 ---
 
-## 7. De-identification
+## 7. Audio Recording Consent
+
+### 7.1 Recording Consent Requirements
+PalmCare AI processes audio recordings of care assessments. Recording consent requirements vary by state:
+
+**Two-Party (All-Party) Consent States:**
+All parties must consent before recording in these 13 states:
+- California, Connecticut, Delaware, Florida, Illinois, Maryland, Massachusetts, Michigan, Montana, New Hampshire, Oregon (in-person), Pennsylvania, Washington
+
+**One-Party Consent States:**
+All remaining 37 states + DC follow federal one-party consent (18 U.S.C. §2511).
+
+### 7.2 Provider Obligations
+- The Covered Entity (home care agency) is responsible for obtaining valid recording consent from all parties
+- PalmCare AI provides consent notification features to assist with compliance
+- Cross-state recordings should follow the stricter jurisdiction's law
+- Consent should be documented in writing as part of intake or service agreements
+
+### 7.3 How Recordings Are Processed
+- Audio is transcribed using AI speech-to-text technology
+- Speaker identification distinguishes providers from clients
+- Transcripts generate visit notes, extract billable services, and create service agreements
+- Recordings are encrypted at rest (AES-256) and in transit (TLS 1.2+)
+- Audio is never used to train third-party AI models
+
+---
+
+## 8. De-identification
 
 When PHI must be used for analytics, product development, or demonstrations:
 - All 18 HIPAA identifiers must be removed per the Safe Harbor method (45 CFR § 164.514(b))
@@ -121,9 +148,9 @@ When PHI must be used for analytics, product development, or demonstrations:
 
 ---
 
-## 8. Data Retention and Disposal
+## 9. Data Retention and Disposal
 
-### 8.1 Retention Schedule
+### 9.1 Retention Schedule
 | Data Type | Retention Period | Justification |
 |-----------|-----------------|---------------|
 | Client records | Duration of BAA + 6 years | HIPAA requirement |
@@ -133,7 +160,7 @@ When PHI must be used for analytics, product development, or demonstrations:
 | Audit logs | 6 years | HIPAA requirement |
 | Billing records | 6 years | Legal/regulatory |
 
-### 8.2 Disposal Procedures
+### 9.2 Disposal Procedures
 - Electronic PHI: Secure deletion using cryptographic erasure or multi-pass overwrite
 - Database records: Permanent deletion with verification
 - Storage objects: Deletion from all replicas and backups within 90 days
@@ -141,14 +168,14 @@ When PHI must be used for analytics, product development, or demonstrations:
 
 ---
 
-## 9. Workforce Training
+## 10. Workforce Training
 
-### 9.1 Requirements
+### 10.1 Requirements
 - All workforce members receive HIPAA privacy training within 30 days of hire
 - Annual refresher training required for all workforce members
 - Training records maintained for 6 years
 
-### 9.2 Training Topics
+### 10.2 Training Topics
 - What constitutes PHI
 - Permitted and prohibited uses/disclosures
 - Minimum necessary standard
@@ -158,7 +185,7 @@ When PHI must be used for analytics, product development, or demonstrations:
 
 ---
 
-## 10. Sanctions
+## 11. Sanctions
 
 Violations of this policy may result in:
 - Verbal warning (first minor offense)
@@ -169,7 +196,7 @@ Violations of this policy may result in:
 
 ---
 
-## 11. Complaints
+## 12. Complaints
 
 Complaints regarding privacy practices should be directed to:
 - **Privacy Officer:** support@palmcareai.com
@@ -178,7 +205,7 @@ Complaints regarding privacy practices should be directed to:
 
 ---
 
-## 12. Policy Review
+## 13. Policy Review
 
 This policy is reviewed annually and updated as needed when:
 - Regulatory changes occur

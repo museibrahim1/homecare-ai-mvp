@@ -15,7 +15,7 @@ from worker import app
 from db import get_db
 from storage import download_file_to_path, get_presigned_url
 from config import settings
-from libs.pyannote_diar import diarize_audio, identify_speakers_with_voiceprints
+from libs.pyannote_diar import diarize_audio
 
 logger = logging.getLogger(__name__)
 
@@ -322,38 +322,8 @@ def diarize_visit(self, visit_id: str):
             # Align diarization with transcript segments
             aligned_count = align_diarization_with_transcript(db, visit.id, turns)
             
-            # =====================================================================
-            # VOICEPRINT IDENTIFICATION - Try to identify staff members by voice
-            # =====================================================================
-            from models import User
-            
-            # Fetch all users with voiceprints
-            users_with_voiceprints = db.query(User).filter(
-                User._voiceprint_encrypted.isnot(None),
-                User.is_active == True
-            ).all()
-            
+            # Voiceprint identification disabled
             voiceprint_speaker_names = {}
-            
-            if users_with_voiceprints and audio_url:
-                logger.info(f"Attempting voiceprint identification with {len(users_with_voiceprints)} voiceprints")
-                
-                # Build voiceprints list for API
-                voiceprints_list = [
-                    {"label": user.full_name, "voiceprint": user.voiceprint}
-                    for user in users_with_voiceprints
-                ]
-                
-                # Try to identify speakers by voice
-                voiceprint_speaker_names = identify_speakers_with_voiceprints(
-                    audio_url=audio_url,
-                    voiceprints=voiceprints_list,
-                )
-                
-                if voiceprint_speaker_names:
-                    logger.info(f"Voiceprint identification matched {len(voiceprint_speaker_names)} speaker(s)")
-                    # Update segments with voiceprint-identified names
-                    update_speaker_names(db, visit.id, voiceprint_speaker_names)
             
             # =====================================================================
             # CLAUDE ANALYSIS - For remaining speakers + billables extraction

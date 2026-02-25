@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Mic, ArrowLeft, Shield } from 'lucide-react';
 
-const LAST_UPDATED = 'February 21, 2026';
+const LAST_UPDATED = 'February 22, 2026';
 const COMPANY = 'PalmCare AI';
 const WEBSITE = 'palmcareai.com';
 const SUPPORT_EMAIL = 'support@palmtai.com';
@@ -52,17 +52,19 @@ export default function PrivacyPolicyPage() {
             <Subsection title="Information You Provide">
               <ul className="list-disc list-inside space-y-2 text-dark-300">
                 <li><strong className="text-white">Account Information:</strong> Name, email address, phone number, company/agency name, and password when you register for an account.</li>
+                <li><strong className="text-white">Business Information:</strong> Agency name, state of incorporation, business registration number, address, and licensing details.</li>
                 <li><strong className="text-white">Client & Care Data:</strong> Client names, care assessments, caregiver information, visit records, and related care documentation that you input into the platform.</li>
-                <li><strong className="text-white">Audio & Transcripts:</strong> Audio recordings and transcripts of care assessments that you upload for AI processing.</li>
+                <li><strong className="text-white">Audio Recordings & Transcripts:</strong> Audio recordings of care assessments that you upload for AI-powered transcription, speaker identification, and documentation generation. See Section 4 for recording consent requirements.</li>
+                <li><strong className="text-white">Assessment Data:</strong> Structured assessment information including ADLs, IADLs, cognitive screening results, medical conditions, and care needs as captured during provider assessments.</li>
                 <li><strong className="text-white">Payment Information:</strong> Billing details processed securely through our third-party payment processor (Stripe). We do not store full credit card numbers on our servers.</li>
                 <li><strong className="text-white">Communications:</strong> Support tickets, emails, and other correspondence you send to us.</li>
               </ul>
             </Subsection>
             <Subsection title="Information Collected Automatically">
               <ul className="list-disc list-inside space-y-2 text-dark-300">
-                <li><strong className="text-white">Usage Data:</strong> Pages visited, features used, timestamps, session duration, and interaction patterns.</li>
+                <li><strong className="text-white">Usage & Engagement Data:</strong> Pages visited, features used, timestamps, session duration, login frequency, and interaction patterns used for platform analytics and engagement scoring.</li>
                 <li><strong className="text-white">Device Information:</strong> Browser type, operating system, IP address, and device identifiers.</li>
-                <li><strong className="text-white">Cookies:</strong> We use essential cookies for authentication and session management. See Section 7 for details.</li>
+                <li><strong className="text-white">Cookies:</strong> We use essential cookies for authentication and session management. See Section 8 for details.</li>
               </ul>
             </Subsection>
           </Section>
@@ -101,7 +103,55 @@ export default function PrivacyPolicyPage() {
             </ul>
           </Section>
 
-          <Section title="5. Data Retention">
+          <Section title="5. Audio Recording & Consent Disclosures">
+            <p className="text-dark-300 mb-4">
+              {COMPANY} processes audio recordings of care assessments to generate transcripts, visit notes, service contracts, and billable item documentation. Recording consent requirements vary by state.
+            </p>
+            <Subsection title="Two-Party (All-Party) Consent States">
+              <p className="text-dark-300 mb-3">
+                If you or your clients are located in any of the following states, <strong className="text-white">all parties must consent</strong> before any audio recording takes place:
+              </p>
+              <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-dark-300 text-sm">
+                  <span>California</span>
+                  <span>Connecticut</span>
+                  <span>Delaware</span>
+                  <span>Florida</span>
+                  <span>Illinois</span>
+                  <span>Maryland</span>
+                  <span>Massachusetts</span>
+                  <span>Michigan</span>
+                  <span>Montana</span>
+                  <span>New Hampshire</span>
+                  <span>Oregon (in-person)</span>
+                  <span>Pennsylvania</span>
+                  <span>Washington</span>
+                </div>
+              </div>
+              <p className="text-dark-300 text-sm">
+                All other states follow one-party consent rules under federal law (18 U.S.C. &sect;2511), meaning at least one participant (typically the person recording) must consent.
+              </p>
+            </Subsection>
+            <Subsection title="Your Consent Obligations">
+              <ul className="list-disc list-inside space-y-2 text-dark-300">
+                <li><strong className="text-white">Provider Responsibility:</strong> As the agency using {COMPANY}, you are responsible for obtaining appropriate consent from clients and caregivers before recording assessments.</li>
+                <li><strong className="text-white">Cross-State Calls:</strong> When participants are in different states, the stricter state&apos;s consent law applies. When in doubt, obtain consent from all parties.</li>
+                <li><strong className="text-white">Consent Documentation:</strong> We recommend documenting consent in writing as part of your intake or service agreement process.</li>
+                <li><strong className="text-white">Platform Support:</strong> {COMPANY} provides consent notification features to assist with compliance, but does not replace your legal obligation to obtain valid consent.</li>
+              </ul>
+            </Subsection>
+            <Subsection title="How We Process Recordings">
+              <ul className="list-disc list-inside space-y-2 text-dark-300">
+                <li><strong className="text-white">Transcription:</strong> Audio is converted to text using AI speech-to-text technology.</li>
+                <li><strong className="text-white">Speaker Identification:</strong> AI identifies different speakers in the recording (provider vs. client).</li>
+                <li><strong className="text-white">Documentation:</strong> Transcripts are analyzed to generate visit notes, extract billable services, and create service agreements.</li>
+                <li><strong className="text-white">Storage:</strong> Recordings are encrypted at rest (AES-256) and in transit (TLS 1.2+). Audio is retained according to the schedule in Section 6.</li>
+                <li><strong className="text-white">No Third-Party Training:</strong> Your audio recordings are never used to train third-party AI models.</li>
+              </ul>
+            </Subsection>
+          </Section>
+
+          <Section title="6. Data Retention">
             <ul className="list-disc list-inside space-y-2 text-dark-300">
               <li>Account data is retained for the duration of your active subscription and for 90 days following account closure.</li>
               <li>Audio recordings are retained for 30 days after processing, then permanently deleted unless you choose to retain them.</li>
@@ -111,7 +161,7 @@ export default function PrivacyPolicyPage() {
             </ul>
           </Section>
 
-          <Section title="6. Data Security">
+          <Section title="7. Data Security">
             <p className="text-dark-300 mb-4">We implement industry-standard technical and organizational measures to protect your data, including:</p>
             <ul className="list-disc list-inside space-y-2 text-dark-300">
               <li>256-bit AES encryption for data at rest</li>
@@ -124,7 +174,7 @@ export default function PrivacyPolicyPage() {
             <p className="text-dark-300 mt-4">While we strive to protect your information, no method of electronic storage or transmission is 100% secure. We cannot guarantee absolute security.</p>
           </Section>
 
-          <Section title="7. Cookies & Tracking">
+          <Section title="8. Cookies & Tracking">
             <p className="text-dark-300 mb-4">We use the following types of cookies:</p>
             <ul className="list-disc list-inside space-y-2 text-dark-300">
               <li><strong className="text-white">Essential Cookies:</strong> Required for authentication, session management, and security. These cannot be disabled.</li>
@@ -133,7 +183,7 @@ export default function PrivacyPolicyPage() {
             <p className="text-dark-300 mt-4">We do not use advertising cookies or sell data to advertisers.</p>
           </Section>
 
-          <Section title="8. Your Rights">
+          <Section title="9. Your Rights">
             <p className="text-dark-300 mb-4">Depending on your jurisdiction, you may have the following rights:</p>
             <ul className="list-disc list-inside space-y-2 text-dark-300">
               <li><strong className="text-white">Access:</strong> Request a copy of the personal data we hold about you.</li>
@@ -145,23 +195,23 @@ export default function PrivacyPolicyPage() {
             <p className="text-dark-300 mt-4">To exercise any of these rights, contact us at <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a>. We will respond within 30 days.</p>
           </Section>
 
-          <Section title="9. California Privacy Rights (CCPA)">
+          <Section title="10. California Privacy Rights (CCPA)">
             <p className="text-dark-300">If you are a California resident, you have the right to know what personal information we collect, request its deletion, and opt out of any sale of personal information. We do not sell personal information. To make a request, contact <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a>.</p>
           </Section>
 
-          <Section title="10. Children's Privacy">
+          <Section title="11. Children&apos;s Privacy">
             <p className="text-dark-300">The Service is not directed to individuals under 18 years of age. We do not knowingly collect personal information from children. If we learn we have collected information from a child under 18, we will promptly delete it.</p>
           </Section>
 
-          <Section title="11. Third-Party Links">
+          <Section title="12. Third-Party Links">
             <p className="text-dark-300">The Service may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies.</p>
           </Section>
 
-          <Section title="12. Changes to This Policy">
+          <Section title="13. Changes to This Policy">
             <p className="text-dark-300">We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy on this page with a new &quot;Last updated&quot; date. For significant changes, we will also send a notification to the email associated with your account.</p>
           </Section>
 
-          <Section title="13. Contact Us">
+          <Section title="14. Contact Us">
             <p className="text-dark-300 mb-4">If you have questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
             <div className="bg-dark-800 rounded-xl border border-dark-700 p-5 space-y-2">
               <p className="text-white font-medium">{COMPANY}</p>
