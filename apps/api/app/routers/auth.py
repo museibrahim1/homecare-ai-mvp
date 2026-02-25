@@ -7,14 +7,17 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
+import pyotp
+
 from app.core.deps import get_db, get_current_user
 from app.core.security import (
     verify_password, create_access_token, get_password_hash,
     check_account_lockout, record_failed_login, clear_login_attempts,
+    check_password_history, record_password_in_history,
     _get_redis,
 )
 from app.models.user import User
-from app.schemas.auth import LoginRequest, Token
+from app.schemas.auth import LoginRequest, Token, MFALoginRequest
 from app.schemas.user import UserResponse
 from app.services.audit import log_action
 from app.services.email import email_service
@@ -147,6 +150,24 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
     # Clear failed attempts on successful login
     clear_login_attempts(email)
     
+    # HIPAA: If MFA is enabled, require a second factor before issuing a token
+    if getattr(user, "mfa_enabled", False) and user.mfa_secret:
+        log_action(
+            db=db, user_id=user.id, action="login_mfa_required",
+            entity_type="user", entity_id=user.id,
+            description="Login successful, MFA verification required",
+            ip_address=client_ip,
+        )
+        mfa_token = create_access_token(
+            data={"sub": str(user.id), "mfa_pending": True},
+        )
+        return Token(
+            access_token="",
+            token_type="bearer",
+            requires_mfa=True,
+            mfa_token=mfa_token,
+        )
+    
     access_token = create_access_token(data={"sub": str(user.id)})
     
     # HIPAA: Audit log successful login
@@ -264,6 +285,62 @@ async def forgot_password(
     }
 
 
+@router.post("/mfa/login", response_model=Token)
+async def mfa_login(
+    request: MFALoginRequest,
+    req: Request,
+    db: Session = Depends(get_db),
+):
+    """
+    Complete login with MFA code.
+
+    After a normal login returns requires_mfa=True, the client
+    must submit email + password + mfa_code to this endpoint.
+    """
+    email = request.email.lower().strip()
+    client_ip = req.client.host if req.client else "unknown"
+
+    _check_rate_limit(f"mfa_login:{client_ip}")
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not verify_password(request.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not user.mfa_enabled or not user.mfa_secret:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="MFA is not enabled for this account",
+        )
+
+    totp = pyotp.TOTP(user.mfa_secret)
+    if not totp.verify(request.mfa_code, valid_window=1):
+        log_action(
+            db=db, user_id=user.id, action="mfa_login_failed",
+            entity_type="security", entity_id=user.id,
+            description="Invalid MFA code during login",
+            ip_address=client_ip,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid MFA code",
+        )
+
+    access_token = create_access_token(data={"sub": str(user.id)})
+
+    log_action(
+        db=db, user_id=user.id, action="user_login",
+        entity_type="user", entity_id=user.id,
+        description="Successful login with MFA",
+        ip_address=client_ip,
+    )
+
+    return Token(access_token=access_token)
+
+
 @router.post("/reset-password")
 async def reset_password(
     request: ResetPasswordRequest,
@@ -315,8 +392,17 @@ async def reset_password(
             detail="Password must be at least 6 characters long.",
         )
     
+    # HIPAA: Prevent reuse of last 5 passwords
+    if check_password_history(user, request.new_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot reuse any of your last 5 passwords.",
+        )
+    
     # Atomically: clear token + update password + invalidate sessions
-    user.hashed_password = get_password_hash(request.new_password)
+    new_hash = get_password_hash(request.new_password)
+    user.hashed_password = new_hash
+    record_password_in_history(user, new_hash)
     user.password_reset_token = None
     user.password_reset_expires = None
     user.force_logout_at = datetime.now(timezone.utc)

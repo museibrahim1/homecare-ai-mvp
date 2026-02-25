@@ -22,9 +22,19 @@ class User(Base):
     role = Column(String(50), default="caregiver")
     is_active = Column(Boolean, default=True)
     force_logout_at = Column(DateTime(timezone=True), nullable=True)
-    # Voiceprint for speaker identification
-    voiceprint = Column(Text, nullable=True)
+    # Voiceprint for speaker identification (encrypted at rest)
+    _voiceprint_encrypted = Column("voiceprint", Text, nullable=True)
     voiceprint_created_at = Column(DateTime(timezone=True), nullable=True)
+
+    @property
+    def voiceprint(self):
+        from encryption import decrypt_field
+        return decrypt_field(self._voiceprint_encrypted)
+
+    @voiceprint.setter
+    def voiceprint(self, value):
+        from encryption import encrypt_field
+        self._voiceprint_encrypted = encrypt_field(value)
 
 
 class Client(Base):

@@ -151,6 +151,29 @@ def clear_login_attempts(email: str) -> None:
         del _login_attempts[email]
 
 
+PASSWORD_HISTORY_SIZE = 5
+
+
+def check_password_history(user, new_password: str) -> bool:
+    """Return True if the new password matches any of the last N stored hashes.
+
+    The caller should reject the password change if this returns True.
+    """
+    history = getattr(user, "password_history", None) or []
+    for old_hash in history:
+        if pwd_context.verify(new_password, old_hash):
+            return True
+    return False
+
+
+def record_password_in_history(user, new_hash: str) -> None:
+    """Append the new password hash to the user's password_history JSONB field,
+    keeping only the last PASSWORD_HISTORY_SIZE entries."""
+    history = list(getattr(user, "password_history", None) or [])
+    history.append(new_hash)
+    user.password_history = history[-PASSWORD_HISTORY_SIZE:]
+
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create a JWT access token."""
     to_encode = data.copy()

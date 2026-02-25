@@ -13,6 +13,7 @@ from sqlalchemy.orm import relationship
 import enum
 
 from app.db.base import Base, TimestampMixin
+from app.core.encryption import encrypt_field, decrypt_field
 
 
 class VerificationStatus(str, enum.Enum):
@@ -75,7 +76,7 @@ class Business(Base, TimestampMixin):
     # State Registration
     state_of_incorporation = Column(String(2), nullable=False)  # State code (NE, IA, etc.)
     registration_number = Column(String(100))  # SOS registration/file number
-    ein = Column(String(255))  # Encrypted EIN (Employer Identification Number)
+    _ein_encrypted = Column("ein", String(255))  # Encrypted EIN (Employer Identification Number)
     
     # Contact Information
     address = Column(Text)
@@ -105,6 +106,14 @@ class Business(Base, TimestampMixin):
     documents = relationship("BusinessDocument", back_populates="business", cascade="all, delete-orphan")
     subscription = relationship("Subscription", back_populates="business", uselist=False)
     
+    @property
+    def ein(self):
+        return decrypt_field(self._ein_encrypted)
+
+    @ein.setter
+    def ein(self, value):
+        self._ein_encrypted = encrypt_field(value)
+
     def __repr__(self):
         return f"<Business {self.name} ({self.verification_status})>"
 

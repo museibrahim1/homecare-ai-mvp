@@ -75,9 +75,7 @@ def generate_service_contract(self, visit_id: str):
         is_medicaid = bool(client.medicaid_id)
         is_medicare = bool(client.medicare_id)
         insurance_type = "medicaid" if is_medicaid else ("medicare" if is_medicare else "private")
-        logger.info(f"Client insurance type: {insurance_type}" + 
-                    (f" (Medicaid ID: {client.medicaid_id})" if is_medicaid else "") +
-                    (f" (Medicare ID: {client.medicare_id})" if is_medicare else ""))
+        logger.info(f"Client insurance type: {insurance_type} (client_id={client.id})")
         
         # Prepare client info
         client_info = {
@@ -254,7 +252,7 @@ def generate_service_contract(self, visit_id: str):
             # MEDICAID RATES - Fixed rates based on service type
             # Companion Care: $25/hr | Personal Care (incl hospice/respite): $28/hr
             # ============================================================
-            logger.info(f"Applying MEDICAID rates for client {client.full_name}")
+            logger.info(f"Applying MEDICAID rates for client_id={client.id}")
             
             # Determine if this is personal care or companion care
             # Personal care = any ADL assistance, medication, health monitoring, hospice, respite
@@ -273,14 +271,13 @@ def generate_service_contract(self, visit_id: str):
                 rate_type = "Medicaid Companion Care"
             
             logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type})")
-            logger.info(f"  Medicaid ID: {client.medicaid_id}")
             logger.info(f"  Services: {', '.join(service_names[:5])}")
             
         elif is_medicare:
             # ============================================================
             # MEDICARE RATES
             # ============================================================
-            logger.info(f"Applying MEDICARE rates for client {client.full_name}")
+            logger.info(f"Applying MEDICARE rates for client_id={client.id}")
             
             has_skilled = any(x in service_text for x in ['nursing', 'wound', 'catheter', 'skilled'])
             
@@ -297,7 +294,7 @@ def generate_service_contract(self, visit_id: str):
             # ============================================================
             # PRIVATE PAY RATES - Dynamic based on care needs
             # ============================================================
-            logger.info(f"Applying PRIVATE PAY rates for client {client.full_name}")
+            logger.info(f"Applying PRIVATE PAY rates for client_id={client.id}")
             
             # Base rate by care level
             base_rate_map = {
@@ -610,7 +607,7 @@ def generate_service_contract(self, visit_id: str):
                 client.care_plan = "\n\n".join(care_plan_parts)
                 updates_made.append("care_plan")
         
-        logger.info(f"Client {client.full_name} updated - fields: {', '.join(updates_made)}")
+        logger.info(f"Client client_id={client.id} updated - fields: {', '.join(updates_made)}")
         
         # =====================================================================
         # Auto-update client status to "proposal" (pending signature) after contract generated
@@ -702,7 +699,7 @@ def generate_service_contract(self, visit_id: str):
                     best_match = cg
             
             if best_match:
-                logger.info(f"Best caregiver match: {best_match.full_name} (score: {best_score})")
+                logger.info(f"Best caregiver match: caregiver_id={best_match.id} (score: {best_score})")
                 extended_schedule["recommended_caregiver"] = {
                     "id": str(best_match.id),
                     "name": best_match.full_name,

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_admin_user
-from app.core.security import get_password_hash, validate_password
+from app.core.security import get_password_hash, validate_password, record_password_in_history
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate, UserResponse
 
@@ -46,13 +46,15 @@ async def create_user(
             detail=error_msg,
         )
     
+    hashed_pw = get_password_hash(user_in.password)
     user = User(
         email=user_in.email,
-        hashed_password=get_password_hash(user_in.password),
+        hashed_password=hashed_pw,
         full_name=user_in.full_name,
         role=user_in.role,
         phone=user_in.phone,
     )
+    record_password_in_history(user, hashed_pw)
     db.add(user)
     db.commit()
     db.refresh(user)

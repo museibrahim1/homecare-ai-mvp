@@ -1,8 +1,9 @@
 import uuid
 from sqlalchemy import Column, String, Boolean, Enum, DateTime, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from app.db.base import Base, TimestampMixin
+from app.core.encryption import encrypt_field, decrypt_field
 import enum
 
 
@@ -37,10 +38,25 @@ class User(Base, TimestampMixin):
     password_reset_token = Column(String(255), nullable=True, index=True)
     password_reset_expires = Column(DateTime(timezone=True), nullable=True)
     
-    # Voiceprint for speaker identification
-    voiceprint = Column(Text, nullable=True)  # Base64-encoded voiceprint from pyannote
+    # Voiceprint for speaker identification (encrypted at rest)
+    _voiceprint_encrypted = Column("voiceprint", Text, nullable=True)
     voiceprint_created_at = Column(DateTime(timezone=True), nullable=True)
     
+    # MFA (TOTP)
+    mfa_secret = Column(String(255), nullable=True)
+    mfa_enabled = Column(Boolean, default=False, nullable=False, server_default="false")
+    
+    # Password history (last 5 hashes) for HIPAA password reuse prevention
+    password_history = Column(JSONB, default=list, server_default="[]")
+    
+    @property
+    def voiceprint(self):
+        return decrypt_field(self._voiceprint_encrypted)
+
+    @voiceprint.setter
+    def voiceprint(self, value):
+        self._voiceprint_encrypted = encrypt_field(value)
+
     # Relationships
     visits_as_caregiver = relationship("Visit", back_populates="caregiver", foreign_keys="Visit.caregiver_id")
     audit_logs = relationship("AuditLog", back_populates="user")

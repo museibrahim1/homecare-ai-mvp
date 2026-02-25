@@ -329,7 +329,7 @@ def diarize_visit(self, visit_id: str):
             
             # Fetch all users with voiceprints
             users_with_voiceprints = db.query(User).filter(
-                User.voiceprint.isnot(None),
+                User._voiceprint_encrypted.isnot(None),
                 User.is_active == True
             ).all()
             

@@ -53,6 +53,7 @@ class CatchAllMiddleware(BaseHTTPMiddleware):
             return response
 from app.routers import (
     auth,
+    mfa,
     users,
     clients,
     visits,
@@ -163,6 +164,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(mfa.router, prefix="/auth/mfa", tags=["MFA"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(clients.router, prefix="/clients", tags=["Clients"])
 app.include_router(visits.router, prefix="/visits", tags=["Visits"])
