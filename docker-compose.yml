@@ -58,14 +58,25 @@ services:
       JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
       DEBUG: ${DEBUG:-false}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      # LLM Configuration for document extraction
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       STIRLING_PDF_URL: ${STIRLING_PDF_URL:-http://stirling-pdf:8080}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     ports:
       - "8000:8000"
     volumes:
       - ./apps/api:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,17 +96,13 @@ services:
       S3_BUCKET: ${S3_BUCKET:-palmcare-audio}
       ASR_MODEL_SIZE: small
       USE_GPU: "false"
-      # Enable OpenAI Whisper API for fast transcription
       USE_OPENAI_WHISPER: "true"
-      # LLM Configuration - set these in your .env file or export them
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-claude-sonnet-4-20250514}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.7}
-      # Speaker diarization - pyannote.ai API (preferred) or HF token
       PYANNOTE_API_KEY: ${PYANNOTE_API_KEY:-}
       HF_TOKEN: ${HF_TOKEN:-}
-      # Pipeline optimization settings
       SKIP_DIARIZATION: ${SKIP_DIARIZATION:-false}
       PARALLEL_PIPELINE: ${PARALLEL_PIPELINE:-true}
     volumes:
@@ -134,6 +141,12 @@ services:
       - ./apps/web:/app
       - /app/node_modules
       - /app/.next
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
     depends_on:
       - api
 

@@ -1,3 +1,4 @@
+import os
 import secrets
 import logging
 import time
@@ -257,8 +258,6 @@ async def forgot_password(
         user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=PASSWORD_RESET_EXPIRY_HOURS)
         db.commit()
         
-        # Build reset URL
-        import os
         app_url = os.getenv("APP_URL", "https://palmcareai.com")
         reset_url = f"{app_url}/reset-password?token={reset_token}"
         

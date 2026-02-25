@@ -6,6 +6,7 @@ data extracted from care assessment conversations via Claude LLM.
 """
 
 import logging
+import traceback
 from datetime import datetime, timezone
 from uuid import UUID
 from decimal import Decimal
@@ -143,29 +144,6 @@ def generate_service_contract(self, visit_id: str):
         
         # If still no hours, calculate from services using consolidated categories
         if weekly_hours == 0 and services:
-            # Consolidated service categories (moderate need level defaults)
-            service_hour_defaults = {
-                "personal care": 8,       # Bathing, dressing, grooming combined
-                "toileting": 6,           # Toileting/incontinence care
-                "incontinence": 6,
-                "meal": 12,               # Meal prep, cooking, feeding
-                "food": 12,
-                "nutrition": 12,
-                "medication": 4,          # Medication management
-                "homemaker": 6,           # Housekeeping, laundry combined
-                "housekeeping": 6,
-                "companion": 10,          # Companion care
-                "supervision": 15,        # Safety supervision
-                "safety": 15,
-                "dementia": 20,           # Dementia care (high supervision)
-                "mobility": 5,            # Mobility/transfer assistance
-                "transfer": 5,
-                "transportation": 4,      # Transportation/escort
-                "respite": 12,            # Respite care
-                "nursing": 5,             # Skilled nursing
-                "wound": 5,
-            }
-            
             # Track which consolidated categories we've already counted
             counted_categories = set()
             
@@ -771,7 +749,6 @@ def generate_service_contract(self, visit_id: str):
         
     except Exception as e:
         logger.error(f"Contract generation failed for visit {visit_id}: {str(e)}")
-        import traceback
         logger.error(traceback.format_exc())
         
         if visit:

@@ -5,7 +5,7 @@ Generates clean, organized reports from assessment data with LLM summarization.
 """
 
 from uuid import UUID
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
@@ -14,7 +14,6 @@ from sqlalchemy import func, and_
 from pydantic import BaseModel
 import io
 import csv
-import json
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
@@ -151,7 +150,7 @@ async def get_overview_stats(
     """
     Get quick overview stats for the reports dashboard (data isolation enforced).
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     week_start = now - timedelta(days=now.weekday())
     week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
     
@@ -204,7 +203,7 @@ async def get_weekly_timesheet(
     Get weekly timesheet report with all billable services identified in assessments (data isolation enforced).
     """
     # Calculate date range
-    today = datetime.now()
+    today = datetime.now(timezone.utc)
     start_of_week = today - timedelta(days=today.weekday() + (weeks_back * 7))
     start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_week = start_of_week + timedelta(days=7)
@@ -282,7 +281,7 @@ async def get_weekly_timesheet(
         total_services=len(billables),
         services_by_category=services_summary,
         assessments=assessments,
-        generated_at=datetime.now().isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -298,7 +297,7 @@ async def get_monthly_summary(
     """
     Get monthly summary with assessment statistics and service breakdown (data isolation enforced).
     """
-    today = datetime.now()
+    today = datetime.now(timezone.utc)
     target_month = month or today.month
     target_year = year or today.year
     
@@ -404,7 +403,7 @@ async def get_monthly_summary(
         services_breakdown=services_breakdown,
         weekly_trend=weekly_trend,
         summary=summary,
-        generated_at=datetime.now().isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -419,7 +418,7 @@ async def get_billing_report(
     """
     Get detailed billing report with services breakdown per client (data isolation enforced).
     """
-    start_date = datetime.now() - timedelta(days=days)
+    start_date = datetime.now(timezone.utc) - timedelta(days=days)
     
     # Get client IDs belonging to this user
     user_client_ids = db.query(Client.id).filter(
@@ -509,7 +508,7 @@ async def get_billing_report(
         services_by_type=services_by_type,
         client_billing=client_billing,
         summary=summary,
-        generated_at=datetime.now().isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -583,7 +582,7 @@ async def get_client_activity(
         clients_pending=len(clients) - clients_with_contracts,
         clients=client_items,
         summary=summary,
-        generated_at=datetime.now().isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -668,7 +667,7 @@ async def export_billing_csv(
         ])
     
     output.seek(0)
-    filename = f"billing_report_{datetime.now().strftime('%Y%m%d')}.csv"
+    filename = f"billing_report_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv"
     
     return StreamingResponse(
         iter([output.getvalue()]),

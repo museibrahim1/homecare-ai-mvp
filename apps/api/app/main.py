@@ -50,6 +50,8 @@ class CatchAllMiddleware(BaseHTTPMiddleware):
                 response.headers["Access-Control-Allow-Headers"] = "*"
             
             return response
+
+
 from app.routers import (
     auth,
     mfa,

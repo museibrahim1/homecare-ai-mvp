@@ -60,7 +60,7 @@ def seed_database():
             admin = User(
                 id=uuid4(),
                 email=admin_email,
-                hashed_password=get_password_hash("HomeHealthCareAi13"),
+                hashed_password=get_password_hash(os.environ.get("ADMIN_PASSWORD", "change-me-in-production")),
                 full_name="Musa Ibrahim",
                 role="admin",
                 is_active=True,
@@ -80,7 +80,7 @@ def seed_database():
             demo_user = User(
                 id=uuid4(),
                 email=demo_agency_email,
-                hashed_password=get_password_hash("demo1234"),
+                hashed_password=get_password_hash(os.environ.get("DEMO_PASSWORD", "demo1234")),
                 full_name="Demo Agency",
                 role="owner",  # Agency owner role - no platform admin access
                 is_active=True,
@@ -111,7 +111,7 @@ def seed_database():
             caregiver = User(
                 id=uuid4(),
                 email=cg_data["email"],
-                hashed_password=get_password_hash("password123"),
+                hashed_password=get_password_hash(os.environ.get("SEED_CAREGIVER_PASSWORD", "password123")),
                 full_name=cg_data["full_name"],
                 role="caregiver",
                 is_active=True,
@@ -307,9 +307,9 @@ def seed_database():
         print(f"  • {caregiver_count} Caregiver records (for assignment)")
         print(f"  • {client_count} Clients")
         print("\nLogin credentials:")
-        print("  Platform Admin: museibrahim@palmtai.com / [your password]")
-        print("  Demo Agency:    demo@agency.com / demo1234")
-        print("  Caregiver:      sarah@palmtai.com / password123")
+        print("  Platform Admin: museibrahim@palmtai.com / (ADMIN_PASSWORD env var)")
+        print("  Demo Agency:    demo@agency.com / (DEMO_PASSWORD env var)")
+        print("  Caregiver:      sarah@palmtai.com / (SEED_CAREGIVER_PASSWORD env var)")
         print("="*50)
         
     except Exception as e:

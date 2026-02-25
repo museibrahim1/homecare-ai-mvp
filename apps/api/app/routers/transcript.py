@@ -1,3 +1,4 @@
+import json
 import re
 import logging
 from uuid import UUID, uuid4
@@ -590,7 +591,6 @@ def detect_transcript_format(content: str) -> tuple[str, str]:
     # Check for JSON
     if content.startswith('[') or content.startswith('{'):
         try:
-            import json
             parsed = json.loads(content)
             if isinstance(parsed, (list, dict)):
                 return 'json', ''
@@ -674,7 +674,6 @@ async def import_transcript_auto(
     # Parse based on detected format
     try:
         if format_type == 'json':
-            import json
             parsed = json.loads(content)
             segments_data = parsed if isinstance(parsed, list) else parsed.get('segments', [parsed])
             
