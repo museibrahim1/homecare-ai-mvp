@@ -23,6 +23,13 @@ export interface Client {
   updated_at: string;
 }
 
+export interface PipelineStepState {
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  started_at?: string;
+  completed_at?: string;
+  error?: string;
+}
+
 export interface Visit {
   id: string;
   client_id: string;
@@ -32,12 +39,15 @@ export interface Visit {
   actual_start?: string;
   actual_end?: string;
   status: string;
-  pipeline_state: Record<string, any>;
+  pipeline_state: Record<string, PipelineStepState>;
+  audio_assets?: { id: string; url: string; filename?: string }[];
   admin_notes?: string;
   created_at: string;
   updated_at: string;
   client?: Client;
   caregiver?: User;
+  contract_generated?: boolean;
+  note_generated?: boolean;
 }
 
 export interface TranscriptSegment {

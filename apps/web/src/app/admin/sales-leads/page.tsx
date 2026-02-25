@@ -6,10 +6,10 @@ import Sidebar from '@/components/Sidebar';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Building2, Mail, MailOpen, MessageSquare, Phone, MapPin, Star,
-  Filter, Search, RefreshCw, Loader2, ChevronDown, ChevronUp,
-  Check, X, Send, Clock, ArrowUpDown, Download, Upload,
-  Target, TrendingUp, Users, Calendar, ExternalLink, Eye,
+  Mail, MailOpen, MessageSquare, Phone, MapPin, Star,
+  Search, RefreshCw, Loader2, ChevronDown, ChevronUp,
+  Check, X, Send, Clock,
+  Target, TrendingUp, Users, Calendar, Eye,
   CheckCircle2, Circle, AlertCircle, ChevronLeft, ChevronRight,
   Rocket, Sparkles, FileText, Zap, BarChart3, Play, Activity,
 } from 'lucide-react';
@@ -109,7 +109,7 @@ interface CampaignPreview {
   sample: { provider_name: string; city: string; state: string; contact_email: string }[];
 }
 
-const TEMPLATE_ICONS: Record<string, any> = {
+const TEMPLATE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   warm_open: Mail,
   pattern_interrupt: Zap,
   aspiration: Sparkles,
@@ -125,7 +125,7 @@ const TEMPLATE_COLORS: Record<string, string> = {
   graceful_exit: 'from-slate-500 to-gray-500',
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   new: { label: 'New', color: 'bg-slate-500/20 text-slate-300', icon: Circle },
   contacted: { label: 'Contacted', color: 'bg-blue-500/20 text-blue-400', icon: Phone },
   email_sent: { label: 'Email Sent', color: 'bg-indigo-500/20 text-indigo-400', icon: Mail },
@@ -193,17 +193,14 @@ export default function SalesLeadsPage() {
   const [previewHtml, setPreviewHtml] = useState({ subject: '', body: '' });
   const [campaignSending, setCampaignSending] = useState(false);
   const [campaignResult, setCampaignResult] = useState<any>(null);
-  const [campaignStep, setCampaignStep] = useState(0); // 0=template, 1=filters, 2=preview, 3=sending/done
+  const [campaignStep, setCampaignStep] = useState(0);
 
-  // Tab view
   const [activeTab, setActiveTab] = useState<'leads' | 'analytics' | 'sequences'>('leads');
 
-  // Analytics data
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsDays, setAnalyticsDays] = useState(30);
 
-  // Sequence data
   const [sequenceStatus, setSequenceStatus] = useState<any>(null);
   const [sequenceLoading, setSequenceLoading] = useState(false);
   const [sequenceLaunching, setSequenceLaunching] = useState(false);
@@ -282,8 +279,8 @@ export default function SalesLeadsPage() {
       ]);
       setLeads(leadsData);
       setStats(statsData);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -302,8 +299,8 @@ export default function SalesLeadsPage() {
       });
       alert(`Imported ${result.imported} leads, ${result.skipped} duplicates skipped`);
       loadData();
-    } catch (e: any) {
-      alert(`Import failed: ${e.message}`);
+    } catch (e) {
+      alert(`Import failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     } finally {
       setImporting(false);
     }
@@ -314,12 +311,12 @@ export default function SalesLeadsPage() {
       const data = await fetchWithAuth(`/platform/sales/leads/${id}`);
       setSelectedLead(data);
       setShowDetail(true);
-    } catch (e: any) {
-      alert(`Failed to load: ${e.message}`);
+    } catch (e) {
+      alert(`Failed to load: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
   };
 
-  const updateLead = async (id: string, update: any) => {
+  const updateLead = async (id: string, update: Record<string, unknown>) => {
     try {
       await fetchWithAuth(`/platform/sales/leads/${id}`, {
         method: 'PUT',
@@ -330,8 +327,8 @@ export default function SalesLeadsPage() {
         const refreshed = await fetchWithAuth(`/platform/sales/leads/${id}`);
         setSelectedLead(refreshed);
       }
-    } catch (e: any) {
-      alert(`Update failed: ${e.message}`);
+    } catch (e) {
+      alert(`Update failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
   };
 
@@ -357,8 +354,8 @@ export default function SalesLeadsPage() {
       } else {
         alert(`Failed: ${result.error}`);
       }
-    } catch (e: any) {
-      alert(`Error: ${e.message}`);
+    } catch (e) {
+      alert(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`);
     } finally {
       setSendingEmail(false);
     }
@@ -371,8 +368,8 @@ export default function SalesLeadsPage() {
       const refreshed = await fetchWithAuth(`/platform/sales/leads/${selectedLead.id}`);
       setSelectedLead(refreshed);
       loadData();
-    } catch (e: any) {
-      alert(`Failed: ${e.message}`);
+    } catch (e) {
+      alert(`Failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
   };
 
@@ -385,8 +382,8 @@ export default function SalesLeadsPage() {
     try {
       const data = await fetchWithAuth('/platform/sales/leads/email-templates');
       setTemplates(data);
-    } catch (e: any) {
-      alert(`Failed to load templates: ${e.message}`);
+    } catch (e) {
+      alert(`Failed to load templates: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
   };
 
@@ -409,8 +406,8 @@ export default function SalesLeadsPage() {
       ]);
       setCampaignPreview(preview);
       setPreviewHtml(rendered);
-    } catch (e: any) {
-      alert(`Preview failed: ${e.message}`);
+    } catch (e) {
+      alert(`Preview failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
   };
 
@@ -434,8 +431,8 @@ export default function SalesLeadsPage() {
       setCampaignResult(result);
       setCampaignStep(3);
       loadData();
-    } catch (e: any) {
-      setCampaignResult({ error: e.message });
+    } catch (e) {
+      setCampaignResult({ error: e instanceof Error ? e.message : 'Campaign failed' });
       setCampaignStep(3);
     } finally {
       setCampaignSending(false);
@@ -447,8 +444,8 @@ export default function SalesLeadsPage() {
     try {
       const data = await fetchWithAuth(`/platform/sales/leads/campaigns/analytics?days=${analyticsDays}`);
       setAnalyticsData(data);
-    } catch (e: any) {
-      console.error('Analytics load failed:', e.message);
+    } catch {
+      // Analytics load is non-critical; silently continue
     } finally {
       setAnalyticsLoading(false);
     }
@@ -459,8 +456,8 @@ export default function SalesLeadsPage() {
     try {
       const data = await fetchWithAuth('/platform/sales/leads/campaigns/sequence/status');
       setSequenceStatus(data);
-    } catch (e: any) {
-      console.error('Sequence status load failed:', e.message);
+    } catch {
+      // Sequence status load is non-critical; silently continue
     } finally {
       setSequenceLoading(false);
     }
@@ -483,8 +480,8 @@ export default function SalesLeadsPage() {
       setSequenceResult(result);
       loadSequenceStatus();
       loadData();
-    } catch (e: any) {
-      setSequenceResult({ error: e.message });
+    } catch (e) {
+      setSequenceResult({ error: e instanceof Error ? e.message : 'Launch failed' });
     } finally {
       setSequenceLaunching(false);
     }
@@ -497,8 +494,8 @@ export default function SalesLeadsPage() {
       setSequenceResult(result);
       loadSequenceStatus();
       loadData();
-    } catch (e: any) {
-      alert(`Process failed: ${e.message}`);
+    } catch (e) {
+      alert(`Process failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     } finally {
       setSequenceProcessing(false);
     }

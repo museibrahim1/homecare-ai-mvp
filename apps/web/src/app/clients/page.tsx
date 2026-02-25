@@ -6,11 +6,8 @@ import {
   Users, 
   Plus, 
   Search,
-  Phone,
-  MapPin,
   AlertCircle,
   ChevronRight,
-  ChevronLeft,
   Heart,
   LayoutGrid,
   List,
@@ -18,8 +15,6 @@ import {
   Zap,
   Link2,
   X,
-  Mail,
-  User,
   Loader2,
   Filter,
   MoreHorizontal,
@@ -27,7 +22,6 @@ import {
   Trash2,
   Building2,
   Shield,
-  Upload,
   FileSpreadsheet,
   UserPlus,
   FolderUp
@@ -178,8 +172,8 @@ function QuickAddModal({
         medicaid_id: '', medicare_id: '' 
       });
       onClose();
-    } catch (err) {
-      console.error('Failed to save:', err);
+    } catch {
+      // Error is handled by onSave caller
     } finally {
       setLoading(false);
     }
@@ -593,8 +587,8 @@ export default function ClientsPage() {
       setLoading(true);
       const data = await api.getClients(token!);
       setClients(data);
-    } catch (err) {
-      console.error('Failed to load clients:', err);
+    } catch {
+      // Failed to load clients — empty list will be shown
     } finally {
       setLoading(false);
     }
@@ -679,8 +673,8 @@ export default function ClientsPage() {
       try {
         await handleDeleteClient(clientId);
         setDeleteConfirm(null);
-      } catch (err) {
-        console.error('Delete failed:', err);
+      } catch {
+        // Delete failed — state remains unchanged
       }
     } else {
       // First click - show confirmation
@@ -743,8 +737,9 @@ export default function ClientsPage() {
           c.id === clientId ? { ...c, status: newStatus } : c
         ));
       }
-    } catch (err) {
-      console.error('Failed to move client:', err);
+    } catch {
+      // Failed to move client — reload to restore correct state
+      loadClients();
     }
   };
 

@@ -74,14 +74,11 @@ export default function PlatformUsersPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log('[Admin Users] Fetched users:', data?.length);
         setUsers(data || []);
       } else {
-        const errorText = await response.text();
-        console.error('[Admin Users] API error:', response.status, errorText);
+        setError(`Failed to load users (${response.status})`);
       }
     } catch (err) {
-      console.error('[Admin Users] Failed to fetch users:', err);
       setError(err instanceof Error ? err.message : 'Failed to load users');
     } finally {
       setLoading(false);

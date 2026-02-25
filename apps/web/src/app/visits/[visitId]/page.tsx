@@ -16,7 +16,6 @@ import {
   X,
   ChevronRight,
   PanelRightOpen,
-  Upload,
   Sparkles,
   FileSpreadsheet,
   File,
@@ -29,7 +28,7 @@ import {
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
-import { Visit, TranscriptSegment, BillableItem } from '@/lib/types';
+import { Visit, TranscriptSegment, BillableItem, Contract, Note } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 import AudioPlayer from '@/components/AudioPlayer';
 import AudioUploader from '@/components/AudioUploader';
@@ -59,8 +58,8 @@ export default function VisitDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptSegment[]>([]);
   const [billables, setBillables] = useState<BillableItem[]>([]);
-  const [contract, setContract] = useState<any>(null);
-  const [note, setNote] = useState<any>(null);
+  const [contract, setContract] = useState<Contract | null>(null);
+  const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<'transcript' | 'billables' | 'notes' | 'contract'>('transcript');
@@ -219,8 +218,8 @@ export default function VisitDetailPage() {
       }
       
       await loadVisitData();
-    } catch (err) {
-      console.error(`Pipeline step ${step} failed:`, err);
+    } catch {
+      setError(`Pipeline step "${step}" failed. Please try again.`);
     } finally {
       setProcessingStep(null);
     }
@@ -251,8 +250,7 @@ export default function VisitDetailPage() {
       await loadVisitData();
       
       setShowRestartModal(false);
-    } catch (error) {
-      console.error('Failed to restart assessment:', error);
+    } catch {
       setError('Failed to restart assessment. Please try again.');
     } finally {
       setRestarting(false);
@@ -304,9 +302,8 @@ export default function VisitDetailPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
-    } catch (err) {
-      console.error(`Export ${type} failed:`, err);
-      setError(`Failed to export ${type}`);
+    } catch {
+      setError(`Failed to export ${type}. Please try again.`);
     }
     
     setShowExportMenu(false);
@@ -365,8 +362,7 @@ export default function VisitDetailPage() {
       setActivePanel('contract');
       setSidebarOpen(true);
       
-    } catch (err) {
-      console.error('Generate proposal failed:', err);
+    } catch {
       setError('Failed to generate proposal. Please try again.');
     } finally {
       setGeneratingProposal(false);

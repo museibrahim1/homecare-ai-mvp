@@ -7,14 +7,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BarChart3, TrendingUp, Users, AlertTriangle, Activity,
-  RefreshCw, Loader2, Shield, ChevronDown, ArrowUpRight,
-  ArrowDownRight, Clock, Target, Zap, CheckCircle2, XCircle,
-  User, Building2, Calendar, Star,
+  RefreshCw, Loader2, Clock, Target, Zap, CheckCircle2, XCircle,
+  Building2,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-const RISK_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
+const RISK_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ComponentType<{ className?: string }> }> = {
   low: { label: 'Low Risk', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
   medium: { label: 'Medium', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', icon: Clock },
   high: { label: 'High Risk', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20', icon: AlertTriangle },
@@ -84,8 +83,8 @@ export default function AnalyticsPage() {
       setProviders(providerList);
       setFunnel(funnelData);
       setPlatformActivity(activity);
-    } catch (e: any) {
-      console.error('Analytics load failed:', e.message);
+    } catch {
+      // Non-critical: analytics data will show as empty
     } finally {
       setLoading(false);
     }
@@ -96,8 +95,8 @@ export default function AnalyticsPage() {
     try {
       await fetchWithAuth('/analytics/churn/refresh', { method: 'POST' });
       await loadData();
-    } catch (e: any) {
-      alert(`Refresh failed: ${e.message}`);
+    } catch (e) {
+      alert(`Refresh failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     } finally {
       setRefreshing(false);
     }

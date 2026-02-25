@@ -4,8 +4,8 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Calendar, Users, Clock, TrendingUp, ChevronRight, CheckCircle, AlertCircle,
-  FileSignature, UserCheck, UserX, Loader2, Activity, BarChart3, ArrowUpRight, ArrowDownRight,
-  Plus, Trash2, Circle, CheckCircle2, X, GripVertical, Tag, Settings2,
+  FileSignature, Loader2, Activity, BarChart3, ArrowUpRight, ArrowDownRight,
+  Plus, Trash2, Circle, CheckCircle2, X, GripVertical, Settings2,
   LayoutGrid
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
@@ -628,8 +628,8 @@ export default function DashboardPage() {
 
       api.trackUsageEvent(token!, { event_type: 'login', page_path: '/dashboard' }).catch(() => {});
       api.getMyUsage(token!, 30).then(setMyUsage).catch(() => {});
-    } catch (err: any) {
-      setError(err?.message || 'Something went wrong');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
