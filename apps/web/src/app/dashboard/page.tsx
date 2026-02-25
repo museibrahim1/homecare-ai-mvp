@@ -565,14 +565,37 @@ export default function DashboardPage() {
   const router = useRouter();
   const { token, isReady } = useRequireAuth();
   const [stats, setStats] = useState({ totalVisits: 0, pendingReview: 0, totalClients: 0, hoursThisWeek: 0 });
-  const [recentVisits, setRecentVisits] = useState<any[]>([]);
-  const [allVisits, setAllVisits] = useState<any[]>([]);
-  const [allClients, setAllClients] = useState<any[]>([]);
-  const [proposalClients, setProposalClients] = useState<any[]>([]);
+  interface DashboardVisit {
+    id: string;
+    created_at?: string;
+    scheduled_start?: string;
+    status?: string;
+    client_name?: string;
+    client?: { full_name?: string };
+    contract_generated?: boolean;
+    note_generated?: boolean;
+  }
+  interface DashboardClient {
+    id: string;
+    full_name: string;
+    status?: string;
+    updated_at?: string;
+  }
+  const [recentVisits, setRecentVisits] = useState<DashboardVisit[]>([]);
+  const [allVisits, setAllVisits] = useState<DashboardVisit[]>([]);
+  const [allClients, setAllClients] = useState<DashboardClient[]>([]);
+  const [proposalClients, setProposalClients] = useState<DashboardClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingClientId, setUpdatingClientId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [myUsage, setMyUsage] = useState<any>(null);
+  interface UsageData {
+    logins: number;
+    total_events: number;
+    top_pages?: { path: string; count: number }[];
+    daily_activity?: { date: string; count: number }[];
+    event_breakdown?: Record<string, number>;
+  }
+  const [myUsage, setMyUsage] = useState<UsageData | null>(null);
 
   /* ─── Widget preferences ─── */
   const [widgetPrefs, setWidgetPrefs] = useState<WidgetPrefs>({ order: DEFAULT_ORDER, hidden: [] });
@@ -610,12 +633,12 @@ export default function DashboardPage() {
 
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const thisWeekCount = items.filter((v: any) => {
+      const thisWeekCount = items.filter((v: DashboardVisit) => {
         const created = new Date(v.created_at || v.scheduled_start || 0);
         return created >= weekAgo;
       }).length;
       
-      const proposalList = clients.filter((c: any) => c.status === 'proposal');
+      const proposalList = clients.filter((c: DashboardClient) => c.status === 'proposal');
       setProposalClients(proposalList);
       
       setStats({
@@ -642,7 +665,7 @@ export default function DashboardPage() {
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
-      const count = allVisits.filter((v: any) => {
+      const count = allVisits.filter((v) => {
         const created = new Date(v.created_at || 0);
         return created >= d && created <= monthEnd;
       }).length;
@@ -661,8 +684,8 @@ export default function DashboardPage() {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-    const thisWeek = allVisits.filter((v: any) => new Date(v.created_at || 0) >= weekAgo).length;
-    const lastWeek = allVisits.filter((v: any) => {
+    const thisWeek = allVisits.filter((v) => new Date(v.created_at || 0) >= weekAgo).length;
+    const lastWeek = allVisits.filter((v) => {
       const d = new Date(v.created_at || 0);
       return d >= twoWeeksAgo && d < weekAgo;
     }).length;
@@ -1092,8 +1115,8 @@ export default function DashboardPage() {
                             <div>
                               <p className="text-xs text-dark-400 mb-2">Daily Activity</p>
                               <div className="flex items-end gap-0.5 h-16">
-                                {myUsage.daily_activity.slice(-14).map((d: any, i: number) => {
-                                  const maxVal = Math.max(...myUsage.daily_activity.map((x: any) => x.count), 1);
+                                {myUsage.daily_activity.slice(-14).map((d, i) => {
+                                  const maxVal = Math.max(...myUsage.daily_activity!.map((x) => x.count), 1);
                                   const h = Math.max((d.count / maxVal) * 100, 4);
                                   return (
                                     <div key={i} className="flex-1 group relative">
@@ -1113,12 +1136,12 @@ export default function DashboardPage() {
                               <p className="text-xs text-dark-400 mb-2">Activity Breakdown</p>
                               <div className="space-y-1.5">
                                 {Object.entries(myUsage.event_breakdown)
-                                  .sort(([,a]: any, [,b]: any) => b - a)
+                                  .sort(([, a], [, b]) => (b as number) - (a as number))
                                   .slice(0, 5)
-                                  .map(([event, count]: any) => (
+                                  .map(([event, count]) => (
                                     <div key={event} className="flex items-center justify-between text-xs">
                                       <span className="text-dark-300 capitalize">{event.replace(/_/g, ' ')}</span>
-                                      <span className="text-dark-400 font-mono">{count}</span>
+                                      <span className="text-dark-400 font-mono">{count as number}</span>
                                     </div>
                                   ))}
                               </div>

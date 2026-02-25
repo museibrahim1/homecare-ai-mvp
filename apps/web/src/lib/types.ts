@@ -72,6 +72,13 @@ export interface DiarizationTurn {
   created_at: string;
 }
 
+export interface BillableEvidence {
+  text: string;
+  start_ms?: number;
+  end_ms?: number;
+  speaker?: string;
+}
+
 export interface BillableItem {
   id: string;
   visit_id: string;
@@ -81,7 +88,7 @@ export interface BillableItem {
   start_ms: number;
   end_ms: number;
   minutes: number;
-  evidence: any[];
+  evidence: BillableEvidence[];
   is_approved: boolean;
   is_flagged: boolean;
   flag_reason?: string;
@@ -90,10 +97,19 @@ export interface BillableItem {
   created_at: string;
 }
 
+export interface NoteStructuredData {
+  subjective?: string;
+  objective?: string;
+  assessment?: string;
+  plan?: string;
+  tasks_performed?: (string | { task?: string; duration_minutes?: number; details?: string; client_response?: string })[];
+  [key: string]: unknown;
+}
+
 export interface Note {
   id: string;
   visit_id: string;
-  structured_data: Record<string, any>;
+  structured_data: NoteStructuredData;
   narrative?: string;
   is_approved: boolean;
   approved_by_id?: string;
@@ -102,13 +118,28 @@ export interface Note {
   updated_at: string;
 }
 
+export interface ContractService {
+  name: string;
+  rate?: number;
+  unit?: string;
+  description?: string;
+}
+
+export interface ContractSchedule {
+  days?: string[];
+  hours_per_week?: number;
+  start_time?: string;
+  end_time?: string;
+  [key: string]: unknown;
+}
+
 export interface Contract {
   id: string;
   client_id: string;
   contract_number?: string;
   title: string;
-  services: any[];
-  schedule: Record<string, any>;
+  services: ContractService[];
+  schedule: ContractSchedule;
   hourly_rate?: number;
   weekly_hours?: number;
   start_date?: string;

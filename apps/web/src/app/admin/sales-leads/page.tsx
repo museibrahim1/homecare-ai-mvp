@@ -74,7 +74,7 @@ interface LeadDetail {
   source: string | null;
   is_contacted: boolean;
   is_converted: boolean;
-  activity_log: any[];
+  activity_log: { action: string; subject?: string; notes?: string; at?: string }[];
 }
 
 interface Stats {
@@ -170,7 +170,6 @@ export default function SalesLeadsPage() {
     contacted: '',
     has_email: '',
   });
-  const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('years_in_operation');
   const [sortOrder, setSortOrder] = useState('asc');
 
@@ -192,20 +191,60 @@ export default function SalesLeadsPage() {
   const [campaignPreview, setCampaignPreview] = useState<CampaignPreview | null>(null);
   const [previewHtml, setPreviewHtml] = useState({ subject: '', body: '' });
   const [campaignSending, setCampaignSending] = useState(false);
-  const [campaignResult, setCampaignResult] = useState<any>(null);
+  const [campaignResult, setCampaignResult] = useState<{ message?: string; sent?: number; failed?: number; errors?: { lead: string; error: string }[]; error?: string } | null>(null);
   const [campaignStep, setCampaignStep] = useState(0);
 
   const [activeTab, setActiveTab] = useState<'leads' | 'analytics' | 'sequences'>('leads');
 
-  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  interface AnalyticsData {
+    totals?: {
+      total_sent: number;
+      total_delivered: number;
+      total_opened: number;
+      total_clicked: number;
+      total_replied: number;
+      total_bounced: number;
+      overall_open_rate: number;
+      overall_click_rate: number;
+      overall_reply_rate: number;
+    };
+    funnel?: {
+      sent: number;
+      delivered: number;
+      opened: number;
+      clicked: number;
+      replied: number;
+      meeting_scheduled: number;
+      converted: number;
+    };
+    per_template?: {
+      template_id: string;
+      name: string;
+      sequence_day: number;
+      sent: number;
+      opened: number;
+      open_rate: number;
+      clicked: number;
+      replied: number;
+      reply_rate: number;
+      bounced: number;
+    }[];
+  }
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsDays, setAnalyticsDays] = useState(30);
 
-  const [sequenceStatus, setSequenceStatus] = useState<any>(null);
+  interface SequenceStatus {
+    total_in_sequence: number;
+    completed_sequences: number;
+    pending_send_now: number;
+    step_breakdown?: Record<string, number>;
+  }
+  const [sequenceStatus, setSequenceStatus] = useState<SequenceStatus | null>(null);
   const [sequenceLoading, setSequenceLoading] = useState(false);
   const [sequenceLaunching, setSequenceLaunching] = useState(false);
   const [sequenceProcessing, setSequenceProcessing] = useState(false);
-  const [sequenceResult, setSequenceResult] = useState<any>(null);
+  const [sequenceResult, setSequenceResult] = useState<{ message?: string; sent?: number; failed?: number; skipped?: number; sequences_completed?: number; error?: string } | null>(null);
   const [showSequenceLauncher, setShowSequenceLauncher] = useState(false);
   const [sequenceFilters, setSequenceFilters] = useState({
     campaign_name: `sequence-${new Date().toISOString().slice(0, 10)}`,
@@ -943,10 +982,10 @@ export default function SalesLeadsPage() {
                         </div>
                       ) : (
                         <span
-                          onClick={() => { setEditingField(field); setEditValue((selectedLead as any)[field] || ''); }}
+                          onClick={() => { setEditingField(field); setEditValue(selectedLead[field as keyof LeadDetail] as string || ''); }}
                           className="text-white text-sm cursor-pointer hover:text-indigo-400"
                         >
-                          {(selectedLead as any)[field] || <span className="text-gray-600 italic">Click to add</span>}
+                          {(selectedLead[field as keyof LeadDetail] as string) || <span className="text-gray-600 italic">Click to add</span>}
                         </span>
                       )}
                     </div>
@@ -1042,7 +1081,7 @@ export default function SalesLeadsPage() {
                   <h3 className="text-sm font-medium text-gray-400 mb-3">Activity Log</h3>
                   {selectedLead.activity_log && selectedLead.activity_log.length > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {[...selectedLead.activity_log].reverse().map((entry: any, i: number) => (
+                      {[...selectedLead.activity_log].reverse().map((entry, i) => (
                         <div key={i} className="flex items-start gap-2 text-xs">
                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
                           <div>
@@ -1172,7 +1211,7 @@ export default function SalesLeadsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {(analyticsData.per_template || []).map((t: any) => {
+                        {(analyticsData.per_template || []).map((t) => {
                           const Icon = TEMPLATE_ICONS[t.template_id] || FileText;
                           const gradient = TEMPLATE_COLORS[t.template_id] || 'from-gray-500 to-gray-600';
                           return (
@@ -1723,7 +1762,7 @@ export default function SalesLeadsPage() {
                         {campaignResult.errors?.length > 0 && (
                           <div className="mt-6 text-left bg-[#060612] rounded-lg p-4 border border-gray-800">
                             <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Errors</p>
-                            {campaignResult.errors.map((err: any, i: number) => (
+                            {campaignResult.errors.map((err, i) => (
                               <p key={i} className="text-xs text-red-400/80 py-0.5">{err.lead}: {err.error}</p>
                             ))}
                           </div>

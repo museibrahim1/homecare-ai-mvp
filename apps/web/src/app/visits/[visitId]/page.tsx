@@ -970,7 +970,7 @@ export default function VisitDetailPage() {
                     <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
                       <h3 className="text-lg font-semibold text-white mb-2">Tasks Performed</h3>
                       <ul className="space-y-3">
-                        {note.structured_data.tasks_performed.map((task: any, i: number) => (
+                        {note.structured_data.tasks_performed.map((task, i) => (
                           <li key={i} className="bg-dark-700/50 rounded-lg p-3">
                             {typeof task === 'string' ? (
                               <p className="text-dark-200 text-sm">{task}</p>
@@ -1147,7 +1147,7 @@ export default function VisitDetailPage() {
                         <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
                           <h3 className="text-xl font-semibold text-white mb-2">Tasks Performed</h3>
                           <ul className="space-y-3">
-                            {note.structured_data.tasks_performed.map((task: any, i: number) => (
+                            {note.structured_data.tasks_performed.map((task, i) => (
                               <li key={i} className="bg-dark-700/50 rounded-lg p-3">
                                 {typeof task === 'string' ? (
                                   <p className="text-dark-200 text-sm">{task}</p>

@@ -48,8 +48,7 @@ class ApiClient {
           if (typeof error.detail === 'string') {
             errorMessage = error.detail;
           } else if (Array.isArray(error.detail)) {
-            // Validation errors come as array
-            errorMessage = error.detail.map((e: any) => e.msg || e.message || JSON.stringify(e)).join(', ');
+            errorMessage = error.detail.map((e: { msg?: string; message?: string }) => e.msg || e.message || JSON.stringify(e)).join(', ');
           } else if (error.detail?.msg) {
             errorMessage = error.detail.msg;
           } else if (error.message) {
@@ -120,7 +119,14 @@ class ApiClient {
   }
 
   async getMe(token: string) {
-    return this.request<any>('/auth/me', {}, token);
+    return this.request<{
+      id: string;
+      email: string;
+      full_name: string;
+      role: string;
+      is_active: boolean;
+      business_id?: string;
+    }>('/auth/me', {}, token);
   }
 
   // Usage / Subscription

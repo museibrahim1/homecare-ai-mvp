@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  BarChart3, TrendingUp, Users, AlertTriangle, Activity,
+  BarChart3, Users, AlertTriangle, Activity,
   RefreshCw, Loader2, Clock, Target, Zap, CheckCircle2, XCircle,
   Building2,
 } from 'lucide-react';
@@ -26,11 +26,43 @@ export default function AnalyticsPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [activeView, setActiveView] = useState<'churn' | 'funnel' | 'activity'>('churn');
 
-  const [churnOverview, setChurnOverview] = useState<any>(null);
-  const [providers, setProviders] = useState<any[]>([]);
+  interface ChurnOverview {
+    total_users: number;
+    active_users_30d: number;
+    active_users_7d: number;
+    retention_rate_30d: number;
+    at_risk_mrr: number;
+    risk_breakdown?: Record<string, number>;
+  }
+  interface ProviderEngagement {
+    id: string;
+    business_name: string;
+    engagement_score: number;
+    churn_risk: string;
+    days_since_last_activity: number;
+    logins_last_30d: number;
+    assessments_created: number;
+    clients_added: number;
+    contracts_generated: number;
+    plan_tier?: string;
+    last_login_at?: string;
+  }
+  const [churnOverview, setChurnOverview] = useState<ChurnOverview | null>(null);
+  const [providers, setProviders] = useState<ProviderEngagement[]>([]);
   const [riskFilter, setRiskFilter] = useState('');
-  const [funnel, setFunnel] = useState<any>(null);
-  const [platformActivity, setPlatformActivity] = useState<any>(null);
+  interface FunnelData {
+    total_leads: number;
+    conversion_rate: number;
+    lost: number;
+    lost_percentage: number;
+    funnel?: { stage: string; count: number; percentage: number }[];
+  }
+  interface PlatformActivityData {
+    daily_activity?: { date: string; total: number; unique_users: number }[];
+    top_features?: { feature: string; count: number }[];
+  }
+  const [funnel, setFunnel] = useState<FunnelData | null>(null);
+  const [platformActivity, setPlatformActivity] = useState<PlatformActivityData | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activityDays, setActivityDays] = useState(30);
 
@@ -111,7 +143,7 @@ export default function AnalyticsPage() {
   }, [activityDays]);
 
   const filteredProviders = riskFilter
-    ? providers.filter((p: any) => p.churn_risk === riskFilter)
+    ? providers.filter((p) => p.churn_risk === riskFilter)
     : providers;
 
   if (!isAuthorized) {
@@ -272,7 +304,7 @@ export default function AnalyticsPage() {
                             </td>
                           </tr>
                         ) : (
-                          filteredProviders.map((p: any) => {
+                          filteredProviders.map((p) => {
                             const risk = RISK_CONFIG[p.churn_risk] || RISK_CONFIG.low;
                             const RiskIcon = risk.icon;
                             return (
@@ -357,12 +389,12 @@ export default function AnalyticsPage() {
                 <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-6">
                   <h3 className="text-sm font-medium text-gray-400 mb-5">Sales Pipeline</h3>
                   <div className="space-y-4">
-                    {(funnel.funnel || []).map((stage: any, i: number) => {
+                    {(funnel.funnel || []).map((stage, i) => {
                       const colors = [
                         'bg-slate-500', 'bg-blue-500', 'bg-indigo-500', 'bg-purple-500',
                         'bg-emerald-500', 'bg-cyan-500', 'bg-amber-500', 'bg-orange-500', 'bg-green-500',
                       ];
-                      const maxCount = Math.max(...(funnel.funnel || []).map((s: any) => s.count), 1);
+                      const maxCount = Math.max(...(funnel.funnel || []).map((s) => s.count), 1);
                       return (
                         <div key={stage.stage} className="flex items-center gap-4">
                           <span className="text-xs text-gray-400 w-36 shrink-0 capitalize">
@@ -410,8 +442,8 @@ export default function AnalyticsPage() {
                       <h3 className="text-sm font-medium text-gray-400 mb-4">Daily Events</h3>
                       {platformActivity.daily_activity?.length > 0 ? (
                         <div className="flex items-end gap-1 h-40">
-                          {platformActivity.daily_activity.map((d: any, i: number) => {
-                            const maxVal = Math.max(...platformActivity.daily_activity.map((x: any) => x.total), 1);
+                          {platformActivity.daily_activity.map((d, i) => {
+                            const maxVal = Math.max(...platformActivity.daily_activity!.map((x) => x.total), 1);
                             const height = (d.total / maxVal) * 100;
                             return (
                               <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
@@ -441,7 +473,7 @@ export default function AnalyticsPage() {
                       <h3 className="text-sm font-medium text-gray-400 mb-4">Most Used Features</h3>
                       {platformActivity.top_features?.length > 0 ? (
                         <div className="space-y-3">
-                          {platformActivity.top_features.map((f: any, i: number) => {
+                          {platformActivity.top_features.map((f, i) => {
                             const maxCount = platformActivity.top_features[0]?.count || 1;
                             return (
                               <div key={f.feature} className="flex items-center gap-3">

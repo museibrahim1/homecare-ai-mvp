@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 // HIPAA Compliance: Session timeout after 15 minutes of inactivity
@@ -12,12 +12,21 @@ const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'touchstart'] as const;
 // Throttle activity updates to prevent excessive state changes
 const ACTIVITY_THROTTLE_MS = 30000; // Only update every 30 seconds max (was 5s - way too frequent)
 
+interface AuthUser {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  is_active: boolean;
+  business_id?: string;
+}
+
 interface AuthState {
   token: string | null;
-  user: any | null;
+  user: AuthUser | null;
   lastActivity: number | null;
   setToken: (token: string | null) => void;
-  setUser: (user: any | null) => void;
+  setUser: (user: AuthUser | null) => void;
   updateLastActivity: () => void;
   logout: () => void;
 }
@@ -149,7 +158,6 @@ export function useAuth() {
 
     const checkTimeout = () => {
       if (isSessionExpired(store.lastActivity)) {
-        console.log('Session timeout - logging out for security');
         store.logout();
       } else {
         const timeLeft = SESSION_TIMEOUT_MS - (Date.now() - (store.lastActivity || 0));
@@ -181,7 +189,6 @@ export function useAuth() {
       
       const state = useAuthStore.getState();
       if (state.token && isSessionExpired(state.lastActivity)) {
-        console.log('Session expired during reload - logging out');
         state.logout();
       }
     });
