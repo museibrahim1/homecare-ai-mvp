@@ -20,12 +20,12 @@
 ## Executive Summary
 
 PalmCare AI currently operates as a web-based SaaS platform with:
-- **Existing Voice Capabilities**: Twilio call bridging (disabled), browser-based audio recording, Whisper speech-to-text, AI-powered diarization and transcript analysis
+- **Existing Voice Capabilities**: Browser-based audio recording, Whisper speech-to-text, AI-powered diarization and transcript analysis
 - **Existing Mobile Support**: Responsive web design, PWA manifest (no service worker), mobile-optimized UI components
 
 This plan outlines the path to:
 1. A **production-ready AI Voice Agent** that can conduct care assessments conversationally
-2. A **native mobile app** (React Native) for caregivers and providers in the field
+2. A **native companion mobile app** (React Native) for caregivers and providers in the field
 
 ---
 
@@ -44,11 +44,11 @@ An AI voice agent that can:
 
 #### Architecture
 ```
-Caller → Twilio → WebSocket → PalmCare Voice Agent
-                                    ├── Real-time STT (Deepgram/Whisper)
-                                    ├── AI Conversation Engine (Claude/GPT-4)
-                                    ├── Assessment State Machine
-                                    └── Real-time TTS (ElevenLabs)
+Caller → Voice Provider (Vapi/Bland/LiveKit) → WebSocket → PalmCare Voice Agent
+                                                              ├── Real-time STT (Deepgram/Whisper)
+                                                              ├── AI Conversation Engine (Claude/GPT-4)
+                                                              ├── Assessment State Machine
+                                                              └── Real-time TTS (ElevenLabs)
 ```
 
 #### Components to Build
@@ -74,13 +74,13 @@ Caller → Twilio → WebSocket → PalmCare Voice Agent
    - Low-latency response (<500ms)
    - File: `apps/api/app/services/realtime_tts.py`
 
-4. **Twilio Integration (Re-enable and Enhance)**
+4. **Voice Provider Integration (Vapi, Bland AI, or LiveKit)**
    - WebSocket media streams for real-time audio
-   - Two-party consent handling (already built)
-   - Call status webhooks (already built)
-   - Conference recording (already built)
-   - New: Real-time audio streaming endpoint
-   - File: `apps/api/app/services/twilio_calls.py` (enhance existing)
+   - Two-party consent handling for recording states
+   - Call status webhooks
+   - Call recording and storage
+   - Real-time audio streaming endpoint
+   - File: `apps/api/app/services/voice_provider.py` (new)
 
 5. **Assessment Progress UI**
    - Real-time dashboard showing assessment progress during call
@@ -149,10 +149,10 @@ Caller → Twilio → WebSocket → PalmCare Voice Agent
 
 ---
 
-## Mobile App Plan
+## Mobile Companion App Plan
 
 ### Vision
-A native mobile app for caregivers and providers that enables:
+A native companion app for caregivers and providers that enables:
 - In-field voice assessments (tap to record, AI processes automatically)
 - Real-time documentation during home visits
 - ADL logging and check-ins
@@ -304,8 +304,8 @@ A native mobile app for caregivers and providers that enables:
               ┌───────┼───────┐
               │       │       │
         ┌─────▼─┐ ┌──▼───┐ ┌─▼──────┐
-        │Twilio │ │Deep- │ │Eleven- │
-        │(Calls)│ │gram  │ │Labs    │
+        │Voice  │ │Deep- │ │Eleven- │
+        │Provider│ │gram  │ │Labs    │
         │       │ │(STT) │ │(TTS)   │
         └───────┘ └──────┘ └────────┘
 ```
@@ -317,7 +317,7 @@ A native mobile app for caregivers and providers that enables:
 | Mobile App | React Native + Expo | Code sharing with web, mature ecosystem |
 | Real-time STT | Deepgram | Lowest latency streaming STT, HIPAA eligible |
 | Real-time TTS | ElevenLabs (via WaveSpeed) | Already integrated, natural voice |
-| Voice Calls | Twilio | Already integrated, WebSocket media streams |
+| Voice Calls | Vapi / Bland AI / LiveKit | Modern voice AI platform with WebSocket streams |
 | Conversation AI | Claude 3.5 | Best reasoning for complex assessments |
 | Offline Storage | SQLite (expo-sqlite) | Reliable local database |
 | Push Notifications | Expo Notifications + FCM/APNs | Cross-platform push |
@@ -356,7 +356,7 @@ POST   /mobile/push/register     — Register push token
 | 1.1 | Deepgram streaming STT integration | Week 1-2 | Deepgram API key |
 | 1.2 | Assessment conversation engine | Week 2-4 | State knowledge base |
 | 1.3 | ElevenLabs streaming TTS | Week 3-4 | Already have API |
-| 1.4 | Twilio WebSocket media streams | Week 4-5 | Existing Twilio account |
+| 1.4 | Voice provider integration (Vapi/Bland/LiveKit) | Week 4-5 | Provider API key |
 | 1.5 | Live assessment dashboard UI | Week 5-6 | Frontend work |
 | 1.6 | Integration testing + pilot | Week 7-8 | Test accounts |
 | 2.0 | Multi-language support | Week 9-12 | Translation services |
@@ -389,7 +389,7 @@ POST   /mobile/push/register     — Register push token
 ### Infrastructure
 - Deepgram API account (streaming STT) — ~$0.0059/min
 - ElevenLabs API (already have via WaveSpeed)
-- Twilio (already have account) — ~$0.013/min for calls
+- Voice provider (Vapi/Bland/LiveKit) — ~$0.05-0.10/min for AI calls
 - Apple Developer Program ($99/year)
 - Google Play Developer ($25 one-time)
 - Expo EAS Build (free tier may suffice initially)
@@ -399,7 +399,7 @@ POST   /mobile/push/register     — Register push token
 |---------|--------------------------|
 | Deepgram STT | ~$200 |
 | ElevenLabs TTS | ~$150 |
-| Twilio calls | ~$300 |
+| Voice provider calls | ~$500 |
 | Infrastructure | ~$200 |
 | App store fees | ~$10 |
 | **Total** | **~$860/month** |
@@ -409,7 +409,7 @@ POST   /mobile/push/register     — Register push token
 ## Next Steps (Immediate)
 
 1. **Set up Expo project** in `/mobile/` directory
-2. **Enable Twilio integration** and test existing call flows
+2. **Evaluate voice providers** (Vapi, Bland AI, LiveKit) and set up integration
 3. **Prototype streaming STT** with Deepgram
 4. **Build assessment state machine** using existing Iowa/Nebraska templates
 5. **Design mobile app screens** in Figma or directly in code

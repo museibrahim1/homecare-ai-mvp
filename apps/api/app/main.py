@@ -86,7 +86,6 @@ from app.routers import (
     sales_leads,
     smart_notes,
     analytics,
-    # calls,  # Twilio integration disabled for MVP - re-enable when needed
 )
 
 app = FastAPI(
@@ -182,7 +181,6 @@ app.include_router(contract_templates.router, prefix="/contract-templates", tags
 app.include_router(sales_leads.router, prefix="/platform/sales", tags=["Sales Leads (CEO Only)"])
 app.include_router(smart_notes.router, prefix="/notes", tags=["Smart Notes & Tasks"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics & Churn"])
-# app.include_router(calls.router, prefix="/calls", tags=["Calls"])  # Twilio disabled for MVP
 
 
 @app.on_event("startup")

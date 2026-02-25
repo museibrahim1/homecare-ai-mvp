@@ -57,27 +57,3 @@ def get_task_status(task_id: str) -> dict:
     }
 
 
-def submit_call_recording_for_processing(call_id: str) -> str:
-    """
-    Submit a Twilio call recording for processing through the audio pipeline.
-    
-    This will:
-    1. Download the recording from Twilio
-    2. Create an audio asset
-    3. Run the full transcription/contract pipeline
-    
-    Args:
-        call_id: The Call record ID (UUID)
-        
-    Returns:
-        task_id: The Celery task ID for tracking
-    """
-    task_id = str(uuid.uuid4())
-    
-    celery_app.send_task(
-        "tasks.process_call_recording.process_call_recording",
-        kwargs={"call_id": call_id},
-        task_id=task_id,
-    )
-    
-    return task_id

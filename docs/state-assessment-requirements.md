@@ -873,7 +873,7 @@ All remaining 37 states + DC follow federal one-party consent (one participant m
 
 ### Recording Consent Implementation
 - **13 Two-Party Consent States**: CA, CT, DE, FL, IL, MD, MA, MI, MT, NH, OR (in-person), PA, WA
-- PalmCare AI's Twilio integration already handles consent notifications for these states
+- PalmCare AI's voice integration will handle consent notifications for these states
 - For voice assessments, always obtain explicit consent before recording
 
 ### Billing Code Strategy

@@ -46,7 +46,6 @@ class Visit(Base, TimestampMixin):
     diarization_turns = relationship("DiarizationTurn", back_populates="visit", order_by="DiarizationTurn.start_ms")
     billable_items = relationship("BillableItem", back_populates="visit")
     note = relationship("Note", back_populates="visit", uselist=False)
-    calls = relationship("Call", back_populates="visit")
 
     __table_args__ = (
         Index('ix_visits_client_id', 'client_id'),

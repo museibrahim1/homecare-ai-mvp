@@ -16,7 +16,6 @@ from app.models.diarization_turn import DiarizationTurn
 from app.models.billable_item import BillableItem
 from app.models.note import Note
 from app.models.audio_asset import AudioAsset
-from app.models.call import Call
 from app.schemas.client import ClientCreate, ClientUpdate, ClientResponse
 from app.services.email import get_email_service
 
@@ -145,7 +144,6 @@ async def delete_client(
         db.query(BillableItem).filter(BillableItem.visit_id == visit.id).delete(synchronize_session=False)
         db.query(Note).filter(Note.visit_id == visit.id).delete(synchronize_session=False)
         db.query(AudioAsset).filter(AudioAsset.visit_id == visit.id).delete(synchronize_session=False)
-        db.query(Call).filter(Call.visit_id == visit.id).delete(synchronize_session=False)
         db.delete(visit)
     
     # Delete contracts for this client

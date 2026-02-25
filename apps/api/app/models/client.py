@@ -79,7 +79,6 @@ class Client(Base, TimestampMixin):
     # === RELATIONSHIPS ===
     visits = relationship("Visit", back_populates="client")
     contracts = relationship("Contract", back_populates="client")
-    calls = relationship("Call", back_populates="client")
     
     # Indexes for faster lookups
     __table_args__ = (

@@ -624,7 +624,6 @@ async def cleanup_orphaned_visits(
     from app.models.billable_item import BillableItem
     from app.models.note import Note
     from app.models.audio_asset import AudioAsset
-    from app.models.call import Call
     
     # Get all visit IDs
     all_visits = db.query(Visit).all()
@@ -637,7 +636,6 @@ async def cleanup_orphaned_visits(
         db.query(BillableItem).filter(BillableItem.visit_id == visit.id).delete(synchronize_session=False)
         db.query(Note).filter(Note.visit_id == visit.id).delete(synchronize_session=False)
         db.query(AudioAsset).filter(AudioAsset.visit_id == visit.id).delete(synchronize_session=False)
-        db.query(Call).filter(Call.visit_id == visit.id).delete(synchronize_session=False)
         db.delete(visit)
         deleted_count += 1
     

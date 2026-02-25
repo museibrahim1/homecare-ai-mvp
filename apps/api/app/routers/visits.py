@@ -14,7 +14,6 @@ from app.models.note import Note
 from app.models.contract import Contract
 from app.models.audio_asset import AudioAsset
 from app.models.diarization_turn import DiarizationTurn
-from app.models.call import Call
 from app.models.subscription import Subscription, SubscriptionStatus
 from app.models.business import BusinessUser
 from app.schemas.visit import VisitCreate, VisitUpdate, VisitResponse, VisitListResponse
@@ -269,7 +268,6 @@ async def delete_visit(
         db.query(BillableItem).filter(BillableItem.visit_id == visit_id).delete(synchronize_session=False)
         db.query(Note).filter(Note.visit_id == visit_id).delete(synchronize_session=False)
         db.query(AudioAsset).filter(AudioAsset.visit_id == visit_id).delete(synchronize_session=False)
-        db.query(Call).filter(Call.visit_id == visit_id).delete(synchronize_session=False)
         
         # Now delete the visit itself
         db.delete(visit)
@@ -301,7 +299,6 @@ async def delete_all_visits(
         db.query(BillableItem).filter(BillableItem.visit_id == visit.id).delete(synchronize_session=False)
         db.query(Note).filter(Note.visit_id == visit.id).delete(synchronize_session=False)
         db.query(AudioAsset).filter(AudioAsset.visit_id == visit.id).delete(synchronize_session=False)
-        db.query(Call).filter(Call.visit_id == visit.id).delete(synchronize_session=False)
         db.delete(visit)
         deleted_count += 1
     
@@ -373,11 +370,6 @@ async def restart_assessment(
                 logger.warning(f"Failed to delete S3 file {audio.s3_key}: {e}")
         db.delete(audio)
     
-    # Delete calls if any
-    deleted_calls = db.query(Call).filter(
-        Call.visit_id == visit_id
-    ).delete()
-    
     # Reset pipeline state completely
     visit.pipeline_state = {}
     visit.status = "pending"
@@ -393,6 +385,5 @@ async def restart_assessment(
             "notes": deleted_notes,
             "contracts": deleted_contracts,
             "audio_files": deleted_audio,
-            "calls": deleted_calls,
         }
     }
