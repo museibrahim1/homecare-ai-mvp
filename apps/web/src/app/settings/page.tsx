@@ -60,8 +60,6 @@ interface AgencySettings {
   documents: UploadedDocument[];
   cancellation_policy: string;
   terms_and_conditions: string;
-  // Extracted from documents
-  tax_id: string;
   license_number: string;
   npi_number: string;
   contact_person: string;
@@ -83,7 +81,6 @@ const defaultAgency: AgencySettings = {
   documents: [],
   cancellation_policy: '',
   terms_and_conditions: '',
-  tax_id: '',
   license_number: '',
   npi_number: '',
   contact_person: '',
@@ -343,7 +340,6 @@ export default function SettingsPage() {
           phone: extracted.phone || prev.phone,
           email: extracted.email || prev.email,
           website: extracted.website || prev.website,
-          tax_id: extracted.tax_id || prev.tax_id,
           license_number: extracted.license_number || prev.license_number,
           npi_number: extracted.npi_number || prev.npi_number,
           contact_person: extracted.contact_person || prev.contact_person,
@@ -759,17 +755,7 @@ export default function SettingsPage() {
               {/* Business Identifiers */}
               <div className="card p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Business Identifiers</h2>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-dark-300 text-sm mb-1">Tax ID / EIN</label>
-                    <input
-                      type="text"
-                      value={agency.tax_id}
-                      onChange={(e) => setAgency(prev => ({ ...prev, tax_id: e.target.value }))}
-                      className="input-dark w-full"
-                      placeholder="XX-XXXXXXX"
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-dark-300 text-sm mb-1">License Number</label>
                     <input

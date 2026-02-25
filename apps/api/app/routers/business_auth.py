@@ -152,7 +152,6 @@ async def register_business(
         entity_type=entity_type_value,
         state_of_incorporation=registration.state_of_incorporation.upper(),
         registration_number=registration.registration_number,
-        ein="***-**-" + registration.ein[-4:] if registration.ein and len(registration.ein) >= 4 else registration.ein,
         address=registration.address,
         city=registration.city,
         state=registration.state.upper(),
@@ -475,11 +474,6 @@ async def login(
     # Create token
     token = create_access_token({"sub": str(user.id), "business_id": str(business.id)})
     
-    # Format EIN (show only last 4)
-    ein_last_4 = None
-    if business.ein:
-        ein_last_4 = business.ein[-4:] if len(business.ein) >= 4 else business.ein
-    
     return BusinessLoginResponse(
         access_token=token,
         token_type="bearer",
@@ -502,7 +496,6 @@ async def login(
             entity_type=EntityTypeEnum(business.entity_type),
             state_of_incorporation=business.state_of_incorporation,
             registration_number=business.registration_number,
-            ein_last_4=ein_last_4,
             address=business.address,
             city=business.city,
             state=business.state,
@@ -597,10 +590,6 @@ async def get_business_profile(
     if not business:
         raise HTTPException(status_code=404, detail="Business profile not found")
     
-    ein_last4 = None
-    if business.ein:
-        ein_last4 = business.ein[-4:] if len(business.ein) >= 4 else business.ein
-    
     return BusinessProfile(
         id=business.id,
         name=business.name,
@@ -608,7 +597,6 @@ async def get_business_profile(
         entity_type=EntityTypeEnum(business.entity_type.value if hasattr(business.entity_type, 'value') else business.entity_type),
         state_of_incorporation=business.state_of_incorporation or "",
         registration_number=business.registration_number,
-        ein_last_4=ein_last4,
         address=business.address,
         city=business.city,
         state=business.state,
@@ -650,10 +638,6 @@ async def update_business_profile(
     db.commit()
     db.refresh(business)
     
-    ein_last4 = None
-    if business.ein:
-        ein_last4 = business.ein[-4:] if len(business.ein) >= 4 else business.ein
-    
     return BusinessProfile(
         id=business.id,
         name=business.name,
@@ -661,7 +645,6 @@ async def update_business_profile(
         entity_type=EntityTypeEnum(business.entity_type.value if hasattr(business.entity_type, 'value') else business.entity_type),
         state_of_incorporation=business.state_of_incorporation or "",
         registration_number=business.registration_number,
-        ein_last_4=ein_last4,
         address=business.address,
         city=business.city,
         state=business.state,

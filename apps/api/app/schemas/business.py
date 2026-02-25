@@ -59,7 +59,6 @@ class BusinessRegistrationStep1(BaseModel):
     entity_type: EntityTypeEnum
     state_of_incorporation: str = Field(..., min_length=2, max_length=2)
     registration_number: Optional[str] = None
-    ein: Optional[str] = None  # Will be encrypted
     
     # Contact
     address: str
@@ -138,7 +137,6 @@ class BusinessProfile(BaseModel):
     entity_type: EntityTypeEnum
     state_of_incorporation: str
     registration_number: Optional[str] = None
-    ein_last_4: Optional[str] = None  # Only show last 4 digits
     
     address: Optional[str] = None
     city: Optional[str] = None
