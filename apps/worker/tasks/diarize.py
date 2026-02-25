@@ -135,7 +135,7 @@ JSON response:"""
             response_text = response_text.strip()
         
         speaker_names = json.loads(response_text)
-        logger.info(f"Identified speaker names: {speaker_names}")
+        logger.info(f"Identified {len(speaker_names)} speaker names from transcript")
         return speaker_names
         
     except Exception as e:
@@ -351,7 +351,7 @@ def diarize_visit(self, visit_id: str):
                 )
                 
                 if voiceprint_speaker_names:
-                    logger.info(f"Voiceprint identification found: {voiceprint_speaker_names}")
+                    logger.info(f"Voiceprint identification matched {len(voiceprint_speaker_names)} speaker(s)")
                     # Update segments with voiceprint-identified names
                     update_speaker_names(db, visit.id, voiceprint_speaker_names)
             

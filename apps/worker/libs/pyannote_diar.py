@@ -397,7 +397,7 @@ def identify_speakers_with_voiceprints(
             if speaker_label and matched_name:
                 # Get confidence score for the match
                 conf_score = confidence.get(matched_name, 0)
-                logger.info(f"Speaker {speaker_label} identified as {matched_name} ({conf_score}% confidence)")
+                logger.info(f"Speaker {speaker_label} identified via voiceprint ({conf_score}% confidence)")
                 speaker_names[speaker_label] = matched_name
         
         return speaker_names
