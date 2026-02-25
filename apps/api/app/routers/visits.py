@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.deps import get_db, get_current_user
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
 from app.models.transcript_segment import TranscriptSegment
@@ -370,9 +370,7 @@ async def restart_assessment(
                 from app.services.storage import delete_file_from_s3
                 delete_file_from_s3(audio.s3_key)
             except Exception as e:
-                # Log but don't fail - S3 cleanup is best-effort
-                import logging
-                logging.getLogger(__name__).warning(f"Failed to delete S3 file {audio.s3_key}: {e}")
+                logger.warning(f"Failed to delete S3 file {audio.s3_key}: {e}")
         db.delete(audio)
     
     # Delete calls if any

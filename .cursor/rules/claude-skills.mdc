@@ -12,7 +12,7 @@ Before performing any of these tasks, **always read `/Claude.MD`** for the lates
 
 ### WaveSpeed AI
 ```
-API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+API Key: Set WAVESPEED_API_KEY in .env
 Endpoint: https://api.wavespeed.ai/v1/generate
 ```
 

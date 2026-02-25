@@ -70,14 +70,14 @@ When the user asks to generate voiceovers, narration, speech, or audio from text
 ```
 Provider: WaveSpeed AI
 Model: ElevenLabs Eleven V3
-API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+API Key: Set WAVESPEED_API_KEY in .env
 ```
 
 ### API Endpoints
 ```
 # Submit task
 POST https://api.wavespeed.ai/api/v3/elevenlabs/eleven-v3
-Authorization: Bearer 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+Authorization: Bearer $WAVESPEED_API_KEY
 
 # Get result (poll until status=completed)
 GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
@@ -130,13 +130,13 @@ When the user asks to generate images, pictures, illustrations, or graphics.
 ```
 Provider: WaveSpeed AI
 Model: Nano Banana Pro (fal-ai/nano-banana-pro)
-API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+API Key: Set WAVESPEED_API_KEY in .env
 ```
 
 ### API Endpoint
 ```
 POST https://api.wavespeed.ai/v1/generate
-Authorization: Bearer 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+Authorization: Bearer $WAVESPEED_API_KEY
 ```
 
 ### Request Format

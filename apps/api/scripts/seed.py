@@ -11,6 +11,8 @@ Usage:
 
 from __future__ import annotations
 
+import logging
+import os
 from datetime import datetime, timezone
 
 from app.core.security import get_password_hash
@@ -18,6 +20,8 @@ from app.db.session import SessionLocal
 from app.models.business import Business  # noqa: F401 (ensure mapper registry is fully configured)
 from app.models.client import Client
 from app.models.user import User, UserRole
+
+logger = logging.getLogger(__name__)
 
 
 def seed() -> None:
@@ -30,7 +34,7 @@ def seed() -> None:
         if not admin:
             admin = User(
                 email="admin@palmtai.com",
-                hashed_password=get_password_hash("admin123"),
+                hashed_password=get_password_hash(os.environ.get("ADMIN_PASSWORD", "admin123")),
                 full_name="Admin User",
                 role=UserRole.admin,
                 is_active=True,
@@ -62,8 +66,7 @@ def seed() -> None:
             )
 
         db.commit()
-        print("✅ Seed complete.")
-        print("Login: admin@palmtai.com / admin123")
+        logger.info("Seed complete. Login: admin@palmtai.com (password from ADMIN_PASSWORD env var)")
     finally:
         db.close()
 

@@ -594,7 +594,7 @@ def detect_transcript_format(content: str) -> tuple[str, str]:
             parsed = json.loads(content)
             if isinstance(parsed, (list, dict)):
                 return 'json', ''
-        except:
+        except (json.JSONDecodeError, ValueError):
             pass
     
     # Check for WebVTT

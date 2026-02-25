@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
-import json
 import logging
 import re
 from jose import JWTError, jwt

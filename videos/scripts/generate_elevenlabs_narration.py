@@ -9,12 +9,13 @@ Voices: Rachel, Domi, Bella, Antoni, Josh, Arnold, Adam, Sam
 """
 
 import argparse
+import os
 import requests
 import time
 import sys
 from pathlib import Path
 
-WAVESPEED_API_KEY = "42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7"
+WAVESPEED_API_KEY = os.environ.get("WAVESPEED_API_KEY", "")
 WAVESPEED_SUBMIT_ENDPOINT = "https://api.wavespeed.ai/api/v3/elevenlabs/eleven-v3"
 WAVESPEED_RESULT_ENDPOINT = "https://api.wavespeed.ai/api/v3/predictions"
 

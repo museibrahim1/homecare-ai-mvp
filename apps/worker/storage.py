@@ -1,10 +1,15 @@
 """S3/MinIO storage utilities for worker."""
 
+import logging
 import uuid
+from typing import Optional
+
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 
 def get_s3_client():
@@ -34,7 +39,7 @@ def download_file_to_path(key: str, local_path: str):
     return local_path
 
 
-def get_presigned_url(key: str, expires_in: int = 3600) -> str:
+def get_presigned_url(key: str, expires_in: int = 3600) -> Optional[str]:
     """
     Generate a presigned URL for an S3/MinIO object.
     
@@ -54,7 +59,7 @@ def get_presigned_url(key: str, expires_in: int = 3600) -> str:
         )
         return url
     except ClientError as e:
-        print(f"Error generating presigned URL: {e}")
+        logger.error(f"Error generating presigned URL: {e}")
         return None
 
 
@@ -63,7 +68,7 @@ def upload_audio_file(
     filename: str,
     content_type: str = "audio/wav",
     folder: str = "audio",
-) -> str:
+) -> Optional[str]:
     """
     Upload audio data to S3/MinIO.
     
@@ -91,5 +96,5 @@ def upload_audio_file(
         )
         return key
     except ClientError as e:
-        print(f"Error uploading file: {e}")
+        logger.error(f"Error uploading file: {e}")
         return None

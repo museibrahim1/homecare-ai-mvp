@@ -11,6 +11,20 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
+_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "https://web-production-11611.up.railway.app",
+    "https://helcarai.up.railway.app",
+    "https://app.palmtai.com",
+    "https://palmtai.com",
+    "https://palmcareai.com",
+    "https://app.palmcareai.com",
+]
+
+
 class CatchAllMiddleware(BaseHTTPMiddleware):
     """Middleware to catch all exceptions and ensure CORS headers are always sent."""
     
@@ -22,29 +36,14 @@ class CatchAllMiddleware(BaseHTTPMiddleware):
             logger.error(f"Unhandled exception in middleware: {type(e).__name__}: {str(e)}")
             logger.error(traceback.format_exc())
             
-            # Get origin from request
             origin = request.headers.get("origin", "")
             
-            # Build response with CORS headers
             response = JSONResponse(
                 status_code=500,
                 content={"detail": "Internal server error"},
             )
             
-            # Add CORS headers manually
-            allowed_origins = [
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "http://localhost:3001",
-                "http://127.0.0.1:3001",
-                "https://web-production-11611.up.railway.app",
-                "https://app.palmtai.com",
-                "https://palmtai.com",
-                "https://palmcareai.com",
-                "https://app.palmcareai.com",
-            ]
-            
-            if origin in allowed_origins:
+            if origin in _ALLOWED_ORIGINS:
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "*"
@@ -96,25 +95,10 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS middleware - allow frontend origins
-# Get additional origins from environment (comma-separated)
-cors_origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    # Local dev (when 3000 is occupied)
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-    # Railway deployments
-    "https://web-production-11611.up.railway.app",
-    "https://helcarai.up.railway.app",
-    # Custom domains
-    "https://app.palmtai.com",
-    "https://palmtai.com",
-    "https://palmcareai.com",
-    "https://app.palmcareai.com",
-]
+# CORS middleware - allow frontend origins (reuse the shared list)
+cors_origins = list(_ALLOWED_ORIGINS)
 
-# Add any custom origins from environment
+# Add any custom origins from environment (comma-separated)
 extra_origins = os.getenv("CORS_ORIGINS", "")
 if extra_origins:
     cors_origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
@@ -361,7 +345,6 @@ async def seed_database():
             
     except Exception as e:
         logger.error(f"Error seeding database: {type(e).__name__}: {e}")
-        import traceback
         logger.error(traceback.format_exc())
         try:
             db.rollback()

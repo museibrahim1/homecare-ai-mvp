@@ -10,11 +10,12 @@ Sizes: square_hd, square, portrait_4_3, portrait_16_9, landscape_4_3, landscape_
 """
 
 import argparse
+import os
 import requests
 import sys
 from pathlib import Path
 
-WAVESPEED_API_KEY = "42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7"
+WAVESPEED_API_KEY = os.environ.get("WAVESPEED_API_KEY", "")
 WAVESPEED_ENDPOINT = "https://api.wavespeed.ai/v1/generate"
 
 SIZES = ["square_hd", "square", "portrait_4_3", "portrait_16_9", "landscape_4_3", "landscape_16_9"]
