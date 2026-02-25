@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Upload, Mic, FileAudio, CheckCircle, AlertCircle, X, Loader2, Sparkles, Square, Play, Pause, Clock, RotateCcw, ChevronRight } from 'lucide-react';
+import { Upload, Mic, FileAudio, CheckCircle, AlertCircle, X, Loader2, Sparkles, Square, Play, Pause, Clock, RotateCcw, ChevronRight, Zap, Timer } from 'lucide-react';
 import { api } from '@/lib/api';
 
 interface AudioUploaderProps {
@@ -23,12 +23,12 @@ interface PipelineStepState {
 }
 
 const PIPELINE_STEPS = [
-  { key: 'transcription', label: 'Transcribing Audio', description: 'Converting speech to text', estimatedSeconds: 90, icon: '🎤' },
-  { key: 'diarization', label: 'Identifying Speakers', description: 'Detecting who\'s speaking', estimatedSeconds: 45, icon: '👥' },
-  { key: 'alignment', label: 'Aligning Transcript', description: 'Matching words to speakers', estimatedSeconds: 10, icon: '🔗' },
-  { key: 'billing', label: 'Extracting Billables', description: 'Finding billable services', estimatedSeconds: 15, icon: '💰' },
-  { key: 'note', label: 'Generating Visit Note', description: 'Creating SOAP note', estimatedSeconds: 20, icon: '📝' },
-  { key: 'contract', label: 'Creating Contract', description: 'Building service agreement', estimatedSeconds: 20, icon: '📄' },
+  { key: 'transcription', label: 'Transcribing Audio', description: 'Converting speech to text', estimatedSeconds: 90, timeRange: '~30s-2min' },
+  { key: 'diarization', label: 'Identifying Speakers', description: 'Detecting who\'s speaking', estimatedSeconds: 45, timeRange: '~30s-1min' },
+  { key: 'alignment', label: 'Aligning Transcript', description: 'Matching words to speakers', estimatedSeconds: 10, timeRange: '~10s' },
+  { key: 'billing', label: 'Extracting Billables', description: 'Finding billable services', estimatedSeconds: 15, timeRange: '~15s' },
+  { key: 'note', label: 'Generating Visit Note', description: 'Creating SOAP note', estimatedSeconds: 20, timeRange: '~20s' },
+  { key: 'contract', label: 'Creating Contract', description: 'Building service agreement', estimatedSeconds: 20, timeRange: '~20s' },
 ];
 
 function formatEstimate(seconds: number): string {
@@ -47,6 +47,35 @@ function formatElapsed(ms: number): string {
   return `${mins}m ${secs}s`;
 }
 
+function StepIcon({ status, index }: { status: StepStatus; index: number }) {
+  if (status === 'completed') {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center animate-check-bounce">
+        <CheckCircle className="w-5 h-5 text-emerald-400" />
+      </div>
+    );
+  }
+  if (status === 'running') {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-primary-500/20 border border-primary-500/40 flex items-center justify-center animate-step-glow">
+        <Loader2 className="w-5 h-5 text-primary-400 animate-spin" />
+      </div>
+    );
+  }
+  if (status === 'failed') {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+        <AlertCircle className="w-5 h-5 text-red-400" />
+      </div>
+    );
+  }
+  return (
+    <div className="w-10 h-10 rounded-xl bg-dark-700/80 border border-dark-600 flex items-center justify-center">
+      <span className="text-sm font-bold text-dark-500">{index + 1}</span>
+    </div>
+  );
+}
+
 export default function AudioUploader({ visitId, token, onUploadComplete, onClose, autoProcess = true }: AudioUploaderProps) {
   const [state, setState] = useState<'idle' | 'dragging' | 'uploading' | 'processing' | 'success' | 'error'>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -57,6 +86,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollCountRef = useRef(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const uploadStartRef = useRef<number>(0);
   const MAX_POLL_COUNT = 200;
 
   const [stepStates, setStepStates] = useState<Record<string, PipelineStepState>>(() => {
@@ -80,10 +110,9 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
-  // Live timer for elapsed time display during processing
   useEffect(() => {
-    if (state === 'processing') {
-      timerRef.current = setInterval(() => setNow(Date.now()), 1000);
+    if (state === 'processing' || state === 'uploading') {
+      timerRef.current = setInterval(() => setNow(Date.now()), 500);
       return () => { if (timerRef.current) clearInterval(timerRef.current); };
     }
     if (timerRef.current) clearInterval(timerRef.current);
@@ -95,7 +124,6 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   };
 
   const estimateDuration = (bytes: number): string => {
-    // ~1MB per minute at 128kbps, ~10MB per minute for WAV
     const mbSize = bytes / (1024 * 1024);
     const estimatedMinutes = Math.max(1, Math.round(mbSize / 1.5));
     if (estimatedMinutes <= 1) return '~1 min';
@@ -330,6 +358,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   const performUpload = async (file: File) => {
     setState('uploading');
     setUploadProgress(0);
+    uploadStartRef.current = Date.now();
 
     const steps = [10, 25, 40, 55, 65, 75, 82, 88, 92, 95];
     let stepIndex = 0;
@@ -347,7 +376,6 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
 
       if (autoProcess) {
         resetStepStates();
-        // Mark first step as running
         setStepStates(prev => ({
           ...prev,
           transcription: { status: 'running', startedAt: Date.now(), completedAt: null, error: null },
@@ -397,6 +425,17 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
   const completedCount = PIPELINE_STEPS.filter(s => stepStates[s.key]?.status === 'completed').length;
   const totalSteps = PIPELINE_STEPS.length;
   const overallPercent = Math.round((completedCount / totalSteps) * 100);
+
+  const estimatedTimeRemaining = PIPELINE_STEPS
+    .filter(s => stepStates[s.key]?.status === 'pending' || stepStates[s.key]?.status === 'running')
+    .reduce((sum, s) => {
+      const ss = stepStates[s.key];
+      if (ss.status === 'running' && ss.startedAt) {
+        const elapsed = (now - ss.startedAt) / 1000;
+        return sum + Math.max(0, s.estimatedSeconds - elapsed);
+      }
+      return sum + s.estimatedSeconds;
+    }, 0);
 
   return (
     <div className="card p-6">
@@ -448,153 +487,152 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
 
       {/* ==================== PIPELINE PROCESSING UI ==================== */}
       {state === 'processing' && (
-        <div className="space-y-5">
+        <div className="space-y-5 animate-fade-in">
           {/* Overall progress header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Sparkles className="w-6 h-6 text-primary-400" />
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary-400 rounded-full animate-ping" />
+          <div className="bg-gradient-to-r from-primary-500/10 via-indigo-500/5 to-transparent rounded-xl p-4 border border-primary-500/20">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-11 h-11 rounded-xl bg-primary-500/20 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-primary-400" />
+                  </div>
+                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary-400 rounded-full animate-ping opacity-75" />
+                  <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary-400 rounded-full" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold">AI Processing</p>
+                  <p className="text-dark-400 text-xs flex items-center gap-1.5">
+                    Step {Math.min(completedCount + 1, totalSteps)} of {totalSteps}
+                    {estimatedTimeRemaining > 0 && (
+                      <>
+                        <span className="text-dark-600">·</span>
+                        <Timer className="w-3 h-3" />
+                        {formatEstimate(Math.round(estimatedTimeRemaining))} remaining
+                      </>
+                    )}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-white font-semibold">AI Processing</p>
-                <p className="text-dark-400 text-xs">Step {completedCount + (completedCount < totalSteps ? 1 : 0)} of {totalSteps}</p>
+              <div className="text-right">
+                <span className="text-3xl font-bold bg-gradient-to-r from-primary-400 to-indigo-400 bg-clip-text text-transparent">
+                  {overallPercent}%
+                </span>
               </div>
             </div>
-            <div className="text-right">
-              <span className="text-2xl font-bold text-primary-400">{overallPercent}%</span>
-            </div>
-          </div>
 
-          {/* Overall progress bar */}
-          <div className="relative h-2 bg-dark-700 rounded-full overflow-hidden">
-            <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-500 via-indigo-500 to-accent-cyan rounded-full transition-all duration-700 ease-out"
-              style={{ width: `${overallPercent}%` }}
-            />
-            {overallPercent < 100 && (
+            {/* Overall progress bar */}
+            <div className="relative h-2.5 bg-dark-700/80 rounded-full overflow-hidden">
               <div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-white/20 to-transparent rounded-full animate-pulse"
-                style={{ width: `${Math.min(overallPercent + 8, 100)}%` }}
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-500 via-indigo-500 to-accent-cyan rounded-full transition-all duration-700 ease-out progress-stripe"
+                style={{ width: `${overallPercent}%` }}
               />
-            )}
+            </div>
           </div>
 
-          {/* Step-by-step list */}
-          <div className="space-y-2">
-            {PIPELINE_STEPS.map((step, index) => {
-              const ss = stepStates[step.key];
-              const isCompleted = ss.status === 'completed';
-              const isRunning = ss.status === 'running';
-              const isFailed = ss.status === 'failed';
-              const isPending = ss.status === 'pending';
-              const elapsed = isRunning && ss.startedAt ? now - ss.startedAt : 0;
-              const completedElapsed = isCompleted && ss.startedAt && ss.completedAt ? ss.completedAt - ss.startedAt : 0;
+          {/* Step-by-step timeline */}
+          <div className="relative">
+            {/* Vertical connector line */}
+            <div className="absolute left-[19px] top-5 bottom-5 w-px bg-dark-700" />
+            {/* Completed portion of connector */}
+            <div
+              className="absolute left-[19px] top-5 w-px bg-gradient-to-b from-emerald-500/60 to-primary-500/40 transition-all duration-700"
+              style={{ height: `${Math.max(0, (completedCount / totalSteps) * 100)}%` }}
+            />
 
-              return (
-                <div
-                  key={step.key}
-                  className={`relative rounded-xl border transition-all duration-500 ${
-                    isCompleted
-                      ? 'bg-emerald-500/5 border-emerald-500/20'
-                      : isRunning
-                      ? 'bg-primary-500/10 border-primary-500/30 shadow-lg shadow-primary-500/5'
-                      : isFailed
-                      ? 'bg-red-500/10 border-red-500/30'
-                      : 'bg-dark-800/50 border-dark-700/50'
-                  }`}
-                >
-                  {/* Running step progress bar background */}
-                  {isRunning && (
-                    <div className="absolute inset-0 rounded-xl overflow-hidden">
-                      <div
-                        className="h-full bg-primary-500/5 transition-all duration-1000 ease-linear"
-                        style={{ width: `${Math.min((elapsed / (step.estimatedSeconds * 1000)) * 100, 95)}%` }}
-                      />
-                    </div>
-                  )}
+            <div className="space-y-1.5">
+              {PIPELINE_STEPS.map((step, index) => {
+                const ss = stepStates[step.key];
+                const isCompleted = ss.status === 'completed';
+                const isRunning = ss.status === 'running';
+                const isFailed = ss.status === 'failed';
+                const isPending = ss.status === 'pending';
+                const elapsed = isRunning && ss.startedAt ? now - ss.startedAt : 0;
+                const completedElapsed = isCompleted && ss.startedAt && ss.completedAt ? ss.completedAt - ss.startedAt : 0;
+                const stepPercent = isRunning ? Math.min(Math.round((elapsed / (step.estimatedSeconds * 1000)) * 100), 95) : 0;
 
-                  <div className="relative flex items-center gap-3 p-3.5">
-                    {/* Step number / status icon */}
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-500 ${
+                return (
+                  <div
+                    key={step.key}
+                    className={`relative rounded-xl border transition-all duration-500 ${
                       isCompleted
-                        ? 'bg-emerald-500/20'
+                        ? 'bg-emerald-500/5 border-emerald-500/20'
                         : isRunning
-                        ? 'bg-primary-500/20'
+                        ? 'bg-primary-500/[0.07] border-primary-500/30 shadow-lg shadow-primary-500/5'
                         : isFailed
-                        ? 'bg-red-500/20'
-                        : 'bg-dark-700'
-                    }`}>
-                      {isCompleted ? (
-                        <CheckCircle className="w-5 h-5 text-emerald-400 animate-[scaleIn_0.3s_ease-out]" />
-                      ) : isRunning ? (
-                        <Loader2 className="w-5 h-5 text-primary-400 animate-spin" />
-                      ) : isFailed ? (
-                        <AlertCircle className="w-5 h-5 text-red-400" />
-                      ) : (
-                        <span className="text-xs font-bold text-dark-500">{index + 1}</span>
-                      )}
-                    </div>
+                        ? 'bg-red-500/10 border-red-500/30'
+                        : 'bg-dark-800/40 border-dark-700/40'
+                    }`}
+                    style={{ animationDelay: `${index * 60}ms` }}
+                  >
+                    <div className="relative flex items-center gap-3.5 p-3.5">
+                      {/* Step icon with timeline dot */}
+                      <div className="relative z-10 flex-shrink-0">
+                        <StepIcon status={ss.status} index={index} />
+                      </div>
 
-                    {/* Step info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`font-medium text-sm transition-colors duration-300 ${
-                          isCompleted ? 'text-emerald-400' : isRunning ? 'text-white' : isFailed ? 'text-red-400' : 'text-dark-500'
-                        }`}>
-                          {step.label}
-                        </span>
-                        {isRunning && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-500/20 text-primary-300 text-[10px] font-medium uppercase tracking-wider">
-                            Processing
+                      {/* Step info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-medium text-sm transition-colors duration-300 ${
+                            isCompleted ? 'text-emerald-400' : isRunning ? 'text-white' : isFailed ? 'text-red-400' : 'text-dark-500'
+                          }`}>
+                            {step.label}
                           </span>
+                          {isRunning && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-500/20 text-primary-300 text-[10px] font-medium uppercase tracking-wider">
+                              <Zap className="w-2.5 h-2.5" />
+                              {stepPercent}%
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-xs mt-0.5 transition-colors duration-300 ${
+                          isCompleted ? 'text-emerald-400/60' : isRunning ? 'text-dark-300' : isFailed ? 'text-red-400/70' : 'text-dark-600'
+                        }`}>
+                          {isFailed ? (ss.error || 'Step failed') : step.description}
+                        </p>
+
+                        {/* Per-step progress bar (running only) */}
+                        {isRunning && (
+                          <div className="mt-2 h-1 bg-dark-700/60 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-primary-500 to-indigo-400 rounded-full transition-all duration-1000 ease-linear progress-stripe"
+                              style={{ width: `${stepPercent}%` }}
+                            />
+                          </div>
                         )}
                       </div>
-                      <p className={`text-xs mt-0.5 transition-colors duration-300 ${
-                        isCompleted ? 'text-emerald-400/60' : isRunning ? 'text-dark-300' : isFailed ? 'text-red-400/70' : 'text-dark-600'
-                      }`}>
-                        {isFailed ? (ss.error || 'Step failed') : step.description}
-                      </p>
-                    </div>
 
-                    {/* Timing info */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {isCompleted && completedElapsed > 0 && (
-                        <span className="text-xs text-emerald-400/70 font-mono">{formatElapsed(completedElapsed)}</span>
-                      )}
-                      {isRunning && (
-                        <div className="text-right">
-                          <span className="text-xs text-primary-300 font-mono block">{formatElapsed(elapsed)}</span>
-                          <span className="text-[10px] text-dark-500">{formatEstimate(step.estimatedSeconds)}</span>
-                        </div>
-                      )}
-                      {isPending && (
-                        <span className="text-[10px] text-dark-600">{formatEstimate(step.estimatedSeconds)}</span>
-                      )}
-                      {isFailed && (
-                        <button
-                          onClick={handleRetry}
-                          className="flex items-center gap-1 px-2.5 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-400 text-xs font-medium transition-colors"
-                        >
-                          <RotateCcw className="w-3 h-3" />
-                          Retry
-                        </button>
-                      )}
+                      {/* Timing info */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {isCompleted && completedElapsed > 0 && (
+                          <span className="text-xs text-emerald-400/70 font-mono bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                            {formatElapsed(completedElapsed)}
+                          </span>
+                        )}
+                        {isRunning && (
+                          <div className="text-right">
+                            <span className="text-xs text-primary-300 font-mono block">{formatElapsed(elapsed)}</span>
+                            <span className="text-[10px] text-dark-500">{step.timeRange}</span>
+                          </div>
+                        )}
+                        {isPending && (
+                          <span className="text-[10px] text-dark-600">{step.timeRange}</span>
+                        )}
+                        {isFailed && (
+                          <button
+                            onClick={handleRetry}
+                            className="flex items-center gap-1 px-2.5 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-400 text-xs font-medium transition-colors"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            Retry
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-
-                  {/* Running step: animated progress bar at bottom */}
-                  {isRunning && (
-                    <div className="h-0.5 mx-3.5 mb-1 bg-dark-700 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary-500 to-indigo-400 rounded-full transition-all duration-1000 ease-linear"
-                        style={{ width: `${Math.min((elapsed / (step.estimatedSeconds * 1000)) * 100, 95)}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {/* Footer */}
@@ -696,12 +734,12 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             selectedFile || state === 'uploading' ? 'cursor-default' : 'cursor-pointer'
           } ${
             state === 'dragging'
-              ? 'border-primary-400 bg-primary-500/10 scale-[1.01] shadow-lg shadow-primary-500/10'
+              ? 'border-primary-400 bg-primary-500/10 scale-[1.02] shadow-xl shadow-primary-500/10 ring-2 ring-primary-400/20'
               : state === 'error'
               ? 'border-red-400/50 bg-red-500/5'
               : selectedFile
               ? 'border-dark-600 bg-dark-700/30'
-              : 'border-dark-600 hover:border-dark-500 hover:bg-dark-700/20 bg-dark-700/30'
+              : 'border-dark-600 hover:border-primary-500/40 hover:bg-dark-700/20 bg-dark-700/30 group'
           }`}
         >
           <input
@@ -714,7 +752,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
 
           {/* Uploading state */}
           {state === 'uploading' ? (
-            <div className="p-8 space-y-5">
+            <div className="p-8 space-y-5 animate-fade-in">
               <div className="flex items-center justify-center gap-3">
                 <div className="relative">
                   <div className="w-14 h-14 rounded-2xl bg-primary-500/20 flex items-center justify-center">
@@ -727,41 +765,46 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
               </div>
               <div className="text-center">
                 <p className="text-white font-medium mb-1">Uploading audio...</p>
-                <p className="text-dark-400 text-xs">{selectedFile?.name}</p>
+                <p className="text-dark-400 text-xs truncate max-w-[280px] mx-auto">{selectedFile?.name}</p>
               </div>
               <div className="relative">
-                <div className="w-full bg-dark-600 rounded-full h-2.5 overflow-hidden">
+                <div className="w-full bg-dark-600 rounded-full h-3 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-primary-500 via-indigo-500 to-accent-cyan rounded-full transition-all duration-500 ease-out"
+                    className="h-full bg-gradient-to-r from-primary-500 via-indigo-500 to-accent-cyan rounded-full transition-all duration-500 ease-out progress-stripe"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
                 <div className="flex justify-between mt-2">
                   <span className="text-xs text-dark-400">{formatFileSize(selectedFile?.size || 0)}</span>
-                  <span className="text-xs text-primary-400 font-medium">{uploadProgress}%</span>
+                  <span className="text-xs text-primary-400 font-bold">{uploadProgress}%</span>
                 </div>
               </div>
+              {uploadProgress < 100 && (
+                <p className="text-dark-500 text-xs text-center">
+                  {uploadProgress < 50 ? 'Preparing file...' : uploadProgress < 90 ? 'Transferring...' : 'Almost done...'}
+                </p>
+              )}
             </div>
           ) : selectedFile ? (
             /* File selected - show preview */
-            <div className="p-8 space-y-4">
+            <div className="p-8 space-y-4 animate-fade-in">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center flex-shrink-0 border border-emerald-500/20">
                   <FileAudio className="w-7 h-7 text-emerald-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-medium truncate">{selectedFile.name}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-dark-400 text-xs flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-dark-500" />
+                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                    <span className="text-dark-400 text-xs flex items-center gap-1.5 bg-dark-700/60 px-2 py-0.5 rounded-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                       {formatFileSize(selectedFile.size)}
                     </span>
-                    <span className="text-dark-400 text-xs flex items-center gap-1">
+                    <span className="text-dark-400 text-xs flex items-center gap-1.5 bg-dark-700/60 px-2 py-0.5 rounded-md">
                       <Clock className="w-3 h-3" />
                       Est. {estimateDuration(selectedFile.size)}
                     </span>
-                    <span className="text-dark-500 text-xs">
-                      {selectedFile.type || selectedFile.name.split('.').pop()?.toUpperCase()}
+                    <span className="text-dark-500 text-xs bg-dark-700/60 px-2 py-0.5 rounded-md uppercase">
+                      {selectedFile.type?.split('/')[1] || selectedFile.name.split('.').pop()}
                     </span>
                   </div>
                 </div>
@@ -786,10 +829,10 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             /* Empty state - drag drop zone */
             <div className="p-10">
               <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-all duration-300 ${
-                state === 'dragging' ? 'bg-primary-500/30 scale-110' : 'bg-dark-600'
+                state === 'dragging' ? 'bg-primary-500/30 scale-110 shadow-lg shadow-primary-500/20' : 'bg-dark-600 group-hover:bg-primary-500/20'
               }`}>
                 <Upload className={`w-8 h-8 transition-all duration-300 ${
-                  state === 'dragging' ? 'text-primary-400 -translate-y-1' : 'text-dark-400'
+                  state === 'dragging' ? 'text-primary-400 -translate-y-1' : 'text-dark-400 group-hover:text-primary-400'
                 }`} />
               </div>
               <p className="text-white font-medium mb-1 text-center">
@@ -798,9 +841,9 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
               <p className="text-dark-400 text-sm mb-5 text-center">or click to browse files</p>
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 {['MP3', 'WAV', 'M4A', 'OGG', 'WebM'].map(fmt => (
-                  <span key={fmt} className="px-2 py-0.5 bg-dark-700 rounded text-[10px] text-dark-400 font-medium">{fmt}</span>
+                  <span key={fmt} className="px-2.5 py-0.5 bg-dark-700 rounded-md text-[10px] text-dark-400 font-medium border border-dark-600/50">{fmt}</span>
                 ))}
-                <span className="text-dark-500 text-[10px]">• Max 100MB</span>
+                <span className="text-dark-500 text-[10px]">· Max 100MB</span>
               </div>
             </div>
           )}
@@ -809,11 +852,11 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
 
       {/* ==================== SUCCESS STATE ==================== */}
       {state === 'success' && (
-        <div className="text-center py-8">
+        <div className="text-center py-8 animate-fade-in">
           <div className="relative w-16 h-16 mx-auto mb-4">
             <div className="absolute inset-0 bg-emerald-500/20 rounded-2xl animate-ping opacity-30" />
             <div className="relative w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
-              <CheckCircle className="w-8 h-8 text-emerald-400" />
+              <CheckCircle className="w-8 h-8 text-emerald-400 animate-check-bounce" />
             </div>
           </div>
           <p className="text-white font-medium text-lg">Processing Complete!</p>
@@ -829,7 +872,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
 
       {/* ==================== ERROR DISPLAY ==================== */}
       {error && (
-        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
+        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3 animate-fade-in">
           <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-red-400 text-sm">{error}</p>
