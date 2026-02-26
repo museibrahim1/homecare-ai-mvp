@@ -626,7 +626,7 @@ function BookDemoSection() {
                     className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-dark-300 mb-1.5">First Name<span className="text-red-400">*</span></label>
                   <input type="text" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} placeholder="First name"
@@ -795,7 +795,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 landing-dark">
+    <div className="min-h-screen bg-dark-900 landing-dark pb-20 lg:pb-0">
       {/* ── NAVIGATION ── */}
       <nav aria-label="Main navigation" className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -820,7 +820,7 @@ export default function LandingPage() {
                   aria-controls="features-menu"
                   onClick={() => toggleDropdown('features')}
                   onKeyDown={(e) => handleDropdownKeyDown(e, 'features')}
-                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg"
+                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60"
                 >
                   Features <ChevronDown className="w-4 h-4" />
                 </button>
@@ -862,7 +862,7 @@ export default function LandingPage() {
                   aria-controls="solutions-menu"
                   onClick={() => toggleDropdown('solutions')}
                   onKeyDown={(e) => handleDropdownKeyDown(e, 'solutions')}
-                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg"
+                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60"
                 >
                   Solutions <ChevronDown className="w-4 h-4" />
                 </button>
@@ -896,7 +896,7 @@ export default function LandingPage() {
                   aria-controls="resources-menu"
                   onClick={() => toggleDropdown('resources')}
                   onKeyDown={(e) => handleDropdownKeyDown(e, 'resources')}
-                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg"
+                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60"
                 >
                   Resources <ChevronDown className="w-4 h-4" />
                 </button>
@@ -922,7 +922,7 @@ export default function LandingPage() {
               <a href="#book-demo" className="btn-primary py-2 px-5 text-sm">Schedule Demo</a>
             </div>
 
-            <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="block lg:hidden p-2 text-dark-300 hover:text-white">
+            <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="block lg:hidden p-2 text-dark-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60 rounded-md">
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -962,11 +962,11 @@ export default function LandingPage() {
               </p>
               
               <div className="flex flex-wrap gap-4">
-                <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></a>
-                <button onClick={() => setDemoOpen(true)} className="btn-secondary flex items-center gap-2 py-4 px-8 text-lg"><Play className="w-5 h-5" />Watch Demo</button>
+                <a href="#book-demo" className="btn-primary w-full sm:w-auto justify-center flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></a>
+                <button onClick={() => setDemoOpen(true)} className="btn-secondary w-full sm:w-auto justify-center flex items-center gap-2 py-4 px-8 text-lg"><Play className="w-5 h-5" />Watch Demo</button>
               </div>
 
-              <div className="flex items-center gap-4 mt-10">
+              <div className="flex flex-wrap items-center gap-4 mt-10">
                 <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full">
                   <Shield className="w-4 h-4 text-green-400" />
                   <span className="text-sm text-green-400 font-medium">HIPAA Compliant</span>

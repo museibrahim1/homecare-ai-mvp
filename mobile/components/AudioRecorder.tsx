@@ -2,11 +2,17 @@ import { useState, useRef, useEffect } from 'react';
 import { View, Text, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-let Audio: typeof import('expo-av').Audio | null = null;
+let useAudioRecorder: (() => unknown) | null = null;
+let AudioModule: { requestRecordingPermissionsAsync?: () => Promise<{ granted: boolean }> } | null = null;
+let RecordingPresets: Record<string, unknown> | null = null;
+
 try {
-  Audio = require('expo-av').Audio;
+  const expoAudio = require('expo-audio');
+  useAudioRecorder = expoAudio.useAudioRecorder;
+  AudioModule = expoAudio.AudioModule;
+  RecordingPresets = expoAudio.RecordingPresets;
 } catch {
-  // expo-av not available (Expo Go without native module)
+  // expo-audio not available
 }
 
 interface Props {
@@ -15,11 +21,14 @@ interface Props {
 }
 
 export default function AudioRecorder({ onRecordingComplete, disabled }: Props) {
-  const [recording, setRecording] = useState<InstanceType<NonNullable<typeof Audio>['Recording']> | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [unavailable, setUnavailable] = useState(!Audio);
+  const [unavailable, setUnavailable] = useState(!useAudioRecorder);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const recorder = useAudioRecorder ? (useAudioRecorder as Function)(
+    RecordingPresets ? (RecordingPresets as Record<string, unknown>)['HIGH_QUALITY'] : {}
+  ) : null;
 
   useEffect(() => {
     return () => {
@@ -28,15 +37,13 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
   }, []);
 
   const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, '0');
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
 
   const startRecording = async () => {
-    if (!Audio) {
+    if (!recorder || !AudioModule) {
       setUnavailable(true);
       Alert.alert(
         'Development Build Required',
@@ -46,39 +53,30 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
     }
 
     try {
-      const permission = await Audio.requestPermissionsAsync();
+      const permission = await AudioModule.requestRecordingPermissionsAsync!();
       if (!permission.granted) {
         Alert.alert('Permission Required', 'Microphone access is needed to record assessments.');
         return;
       }
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY,
-      );
-
-      setRecording(newRecording);
+      recorder.record();
       setIsRecording(true);
       setDuration(0);
 
       intervalRef.current = setInterval(() => {
-        setDuration((d) => d + 1);
+        setDuration((d: number) => d + 1);
       }, 1000);
     } catch {
       setUnavailable(true);
       Alert.alert(
         'Recording Unavailable',
-        'Audio recording is not available in Expo Go. Use a development build instead.',
+        'Audio recording is not available. Use a development build instead of Expo Go.',
       );
     }
   };
 
   const stopRecording = async () => {
-    if (!recording) return;
+    if (!recorder) return;
 
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -88,9 +86,8 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
     setIsRecording(false);
 
     try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      setRecording(null);
+      await recorder.stop();
+      const uri = recorder.uri;
       setDuration(0);
 
       if (uri) {

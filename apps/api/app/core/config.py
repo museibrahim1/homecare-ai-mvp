@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 import logging
 import secrets
@@ -7,6 +7,12 @@ _config_logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
     # Database
     database_url: str = "postgresql+psycopg://palmcare:palmcare@localhost:5432/palmcare"
     
@@ -46,11 +52,6 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
-
-
 @lru_cache()
 def get_settings() -> Settings:
     s = Settings()
