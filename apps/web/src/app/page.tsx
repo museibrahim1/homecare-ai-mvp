@@ -222,12 +222,7 @@ const TESTIMONIALS = [
   },
 ];
 
-const STATS = [
-  { value: '500+', label: 'Agencies Served', suffix: '' },
-  { value: '50K+', label: 'Contracts Generated', suffix: '' },
-  { value: '2M+', label: 'Care Hours Tracked', suffix: '' },
-  { value: '99.9%', label: 'Uptime Guaranteed', suffix: '' },
-];
+/* Stats bar removed — will re-add when we have real traction numbers */
 
 const SOLUTIONS = [
   {
@@ -900,18 +895,14 @@ export default function LandingPage() {
                 <button onClick={() => setDemoOpen(true)} className="btn-secondary flex items-center gap-2 py-4 px-8 text-lg"><Play className="w-5 h-5" />Watch Demo</button>
               </div>
 
-              <div className="flex items-center gap-6 mt-10">
-                <div className="flex -space-x-3">
-                  {['S', 'M', 'J', 'R', 'D'].map((initial, i) => (
-                    <div key={i} className={`w-10 h-10 rounded-full border-2 border-dark-900 flex items-center justify-center text-white font-semibold text-sm ${['bg-blue-500','bg-purple-500','bg-green-500','bg-orange-500','bg-pink-500'][i]}`}>{initial}</div>
-                  ))}
+              <div className="flex items-center gap-4 mt-10">
+                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full">
+                  <Shield className="w-4 h-4 text-green-400" />
+                  <span className="text-sm text-green-400 font-medium">HIPAA Compliant</span>
                 </div>
-                <div>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
-                    <span className="text-sm text-dark-300 ml-1">4.9/5</span>
-                  </div>
-                  <p className="text-sm text-dark-400">Trusted by 500+ home care agencies</p>
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                  <Lock className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm text-blue-400 font-medium">256-bit Encrypted</span>
                 </div>
               </div>
             </div>
@@ -942,20 +933,6 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── TRUST BAR ── */}
-      <section className="py-8 px-6 border-y border-dark-700/50 bg-dark-800/20">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {STATS.map((stat, i) => (
-              <div key={i}>
-                <p className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan">{stat.value}</p>
-                <p className="text-sm text-dark-400 mt-1">{stat.label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -1149,7 +1126,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-500/30">
             <h2 className="text-4xl font-bold text-white mb-4">Ready to Transform Your Agency?</h2>
-            <p className="text-xl text-dark-300 mb-8">Join 500+ home care agencies using AI to streamline their operations.</p>
+            <p className="text-xl text-dark-300 mb-8">See how AI can streamline your agency&apos;s operations in a free demo.</p>
             <div className="flex flex-wrap justify-center gap-4">
               <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule Your Demo<ArrowRight className="w-5 h-5" /></a>
             </div>
@@ -1172,10 +1149,10 @@ export default function LandingPage() {
                 AI-powered home care management platform. Turn voice assessments into professional contracts in minutes, not hours.
               </p>
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-green-400" />
+                  <span className="text-dark-400 text-sm">HIPAA Compliant</span>
                 </div>
-                <span className="text-dark-400 text-sm">4.9/5 rating</span>
               </div>
             </div>
             <div>
