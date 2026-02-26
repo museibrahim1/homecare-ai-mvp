@@ -44,7 +44,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
   try {
     await api.post('/auth/push-token', { push_token: token, platform: Platform.OS });
   } catch {
-    // endpoint may not exist yet
+    // endpoint not yet implemented
   }
 
   return token;

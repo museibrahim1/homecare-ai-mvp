@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List, Literal
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from enum import Enum
 
 
@@ -27,8 +27,7 @@ class TranscriptSegmentResponse(BaseModel):
     source: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TranscriptResponse(BaseModel):
@@ -60,8 +59,7 @@ class TranscriptImportRequest(BaseModel):
     replace_existing: bool = Field(default=False, description="If true, replace existing transcript segments")
     skip_further_processing: bool = Field(default=False, description="If true, skip billing/note generation")
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "segments": [
                     {"start_ms": 0, "end_ms": 5000, "text": "Hello, how are you today?", "speaker_label": "Caregiver"},
@@ -70,7 +68,7 @@ class TranscriptImportRequest(BaseModel):
                 "source": "import_json",
                 "replace_existing": True
             }
-        }
+        })
 
 
 class TranscriptImportResponse(BaseModel):
@@ -92,13 +90,12 @@ class SRTImportRequest(BaseModel):
     )
     replace_existing: bool = Field(default=False)
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "srt_content": "1\n00:00:00,000 --> 00:00:05,000\nHello, how are you?\n\n2\n00:00:05,000 --> 00:00:10,000\nI'm doing well.",
                 "replace_existing": True
             }
-        }
+        })
 
 
 class VTTImportRequest(BaseModel):
@@ -118,14 +115,13 @@ class PlainTextImportRequest(BaseModel):
     estimated_duration_ms: Optional[int] = Field(None, description="Estimated total duration if no timestamps")
     replace_existing: bool = Field(default=False)
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "text_content": "Caregiver: Hello, how are you feeling today?\nClient: I'm feeling much better, thank you.",
                 "format_hint": "dialogue",
                 "replace_existing": True
             }
-        }
+        })
 
 
 class TranscriptExportFormat(str, Enum):

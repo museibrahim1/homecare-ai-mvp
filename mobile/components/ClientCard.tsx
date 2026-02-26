@@ -22,27 +22,19 @@ export default function ClientCard({ client }: { client: Client }) {
   return (
     <Pressable
       onPress={() => router.push(`/client/${client.id}`)}
-      className="flex-row items-center bg-dark-800 rounded-xl px-4 py-3.5 mb-2.5 active:opacity-80"
+      className="flex-row items-center bg-dark-800 rounded-2xl px-4 py-3.5 mb-2 active:opacity-80"
     >
-      <View className="w-11 h-11 rounded-full bg-palm-500/20 items-center justify-center mr-3">
+      <View className="w-10 h-10 rounded-full bg-palm-500/15 items-center justify-center mr-3">
         <Text className="text-palm-400 font-bold text-sm">{initials}</Text>
       </View>
       <View className="flex-1">
-        <Text className="text-white font-semibold text-[15px]">{client.full_name}</Text>
-        <Text className="text-dark-400 text-xs mt-0.5">
-          {client.phone || 'No phone'} {client.city ? `· ${client.city}, ${client.state}` : ''}
+        <Text className="text-white font-medium text-[15px]">{client.full_name}</Text>
+        <Text className="text-dark-500 text-xs mt-0.5">
+          {client.phone || 'No phone'}
         </Text>
       </View>
-      <View className="items-end">
-        <View className="flex-row items-center">
-          <View
-            className="w-2 h-2 rounded-full mr-1.5"
-            style={{ backgroundColor: STATUS_COLORS[client.status] || '#94a3b8' }}
-          />
-          <Text className="text-dark-400 text-xs capitalize">{client.status}</Text>
-        </View>
-      </View>
-      <Ionicons name="chevron-forward" size={16} color="#829bcd" style={{ marginLeft: 8 }} />
+      <View className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: STATUS_COLORS[client.status] || '#94a3b8' }} />
+      <Ionicons name="chevron-forward" size={14} color="#4b5563" />
     </Pressable>
   );
 }

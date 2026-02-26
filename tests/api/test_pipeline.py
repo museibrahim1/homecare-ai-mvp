@@ -108,7 +108,7 @@ class TestTranscriptionPipeline:
         assert response.status_code == 400
         assert "No audio uploaded" in response.json()["detail"]
 
-    @patch("app.services.jobs.enqueue_task")
+    @patch("app.routers.pipeline.enqueue_task")
     def test_transcribe_with_audio(self, mock_enqueue, client, auth_headers, test_visit_with_audio):
         """Test starting transcription with audio."""
         mock_enqueue.return_value = "mock-task-id"
@@ -135,7 +135,7 @@ class TestTranscriptionPipeline:
 class TestDiarizationPipeline:
     """Tests for diarization pipeline step."""
 
-    @patch("app.services.jobs.enqueue_task")
+    @patch("app.routers.pipeline.enqueue_task")
     def test_diarize(self, mock_enqueue, client, auth_headers, test_visit):
         """Test starting diarization."""
         mock_enqueue.return_value = "diar-task-id"
@@ -162,7 +162,7 @@ class TestDiarizationPipeline:
 class TestAlignmentPipeline:
     """Tests for alignment pipeline step."""
 
-    @patch("app.services.jobs.enqueue_task")
+    @patch("app.routers.pipeline.enqueue_task")
     def test_align(self, mock_enqueue, client, auth_headers, test_visit):
         """Test starting alignment."""
         mock_enqueue.return_value = "align-task-id"
@@ -180,7 +180,7 @@ class TestAlignmentPipeline:
 class TestBillingPipeline:
     """Tests for billing pipeline step."""
 
-    @patch("app.services.jobs.enqueue_task")
+    @patch("app.routers.pipeline.enqueue_task")
     def test_bill(self, mock_enqueue, client, auth_headers, test_visit):
         """Test starting billing generation."""
         mock_enqueue.return_value = "bill-task-id"
@@ -198,7 +198,7 @@ class TestBillingPipeline:
 class TestNotePipeline:
     """Tests for note generation pipeline step."""
 
-    @patch("app.services.jobs.enqueue_task")
+    @patch("app.routers.pipeline.enqueue_task")
     def test_generate_note(self, mock_enqueue, client, auth_headers, test_visit):
         """Test starting note generation."""
         mock_enqueue.return_value = "note-task-id"
@@ -216,7 +216,7 @@ class TestNotePipeline:
 class TestContractPipeline:
     """Tests for contract generation pipeline step."""
 
-    @patch("app.services.jobs.enqueue_task")
+    @patch("app.routers.pipeline.enqueue_task")
     def test_generate_contract(self, mock_enqueue, client, auth_headers, test_visit):
         """Test starting contract generation."""
         mock_enqueue.return_value = "contract-task-id"
@@ -234,7 +234,7 @@ class TestContractPipeline:
 class TestPipelineStateTracking:
     """Tests for pipeline state tracking."""
 
-    @patch("app.services.jobs.enqueue_task")
+    @patch("app.routers.pipeline.enqueue_task")
     def test_pipeline_state_updates(self, mock_enqueue, client, auth_headers, test_visit):
         """Test that pipeline state is updated after each step."""
         mock_enqueue.return_value = "test-task-id"
@@ -255,7 +255,7 @@ class TestPipelineStateTracking:
         assert data["pipeline_state"]["diarization"]["status"] == "queued"
         assert data["pipeline_state"]["diarization"]["task_id"] == "test-task-id"
 
-    @patch("app.services.jobs.enqueue_task")
+    @patch("app.routers.pipeline.enqueue_task")
     def test_multiple_pipeline_steps(self, mock_enqueue, client, auth_headers, test_visit):
         """Test running multiple pipeline steps."""
         mock_enqueue.side_effect = ["task-1", "task-2", "task-3"]

@@ -41,13 +41,10 @@ export default function RecordScreen() {
       } as unknown as Blob);
       formData.append('visit_id', visit.id);
 
-      await api.upload('/uploads', formData);
+      await api.upload('/uploads/audio', formData);
 
-      Alert.alert('Upload Complete', 'Your assessment has been uploaded. Starting pipeline...', [
-        {
-          text: 'View Pipeline',
-          onPress: () => router.push(`/pipeline/${visit.id}`),
-        },
+      Alert.alert('Uploaded', 'Assessment uploaded successfully.', [
+        { text: 'View Pipeline', onPress: () => router.push(`/pipeline/${visit.id}`) },
       ]);
     } catch (err: unknown) {
       Alert.alert('Upload Failed', err instanceof Error ? err.message : 'Please try again.');
@@ -59,28 +56,20 @@ export default function RecordScreen() {
   return (
     <SafeAreaView className="flex-1 bg-dark-900" edges={['top']}>
       <View className="px-5 pt-4 pb-3">
-        <Text className="text-white text-2xl font-bold">Record Assessment</Text>
-        <Text className="text-dark-400 text-sm mt-1">Select a client, then tap to record</Text>
+        <Text className="text-white text-2xl font-bold">Record</Text>
       </View>
 
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32 }}>
-        {/* Client Selector */}
         <View className="px-5 mb-8">
-          <Text className="text-dark-300 text-sm font-medium mb-2">Client</Text>
           <Pressable
             onPress={() => setShowPicker(!showPicker)}
-            className="bg-dark-800 rounded-xl border border-dark-700 px-4 py-3.5 flex-row items-center justify-between active:opacity-80"
+            className="bg-dark-800 rounded-2xl px-4 py-3.5 flex-row items-center justify-between active:opacity-80"
           >
             {selectedClient ? (
               <View className="flex-row items-center flex-1">
                 <View className="w-8 h-8 rounded-full bg-palm-500/20 items-center justify-center mr-3">
                   <Text className="text-palm-400 font-bold text-xs">
-                    {selectedClient.full_name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .toUpperCase()
-                      .slice(0, 2)}
+                    {selectedClient.full_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
                   </Text>
                 </View>
                 <Text className="text-white text-[15px]">{selectedClient.full_name}</Text>
@@ -88,30 +77,25 @@ export default function RecordScreen() {
             ) : (
               <Text className="text-dark-500 text-[15px]">Select a client...</Text>
             )}
-            <Ionicons name="chevron-down" size={18} color="#829bcd" />
+            <Ionicons name={showPicker ? 'chevron-up' : 'chevron-down'} size={18} color="#829bcd" />
           </Pressable>
 
           {showPicker && (
-            <View className="bg-dark-800 rounded-xl border border-dark-700 mt-2 max-h-52 overflow-hidden">
+            <View className="bg-dark-800 rounded-2xl mt-2 max-h-52 overflow-hidden">
               <ScrollView>
                 {clients.map((c) => (
                   <Pressable
                     key={c.id}
-                    onPress={() => {
-                      setSelectedClient(c);
-                      setShowPicker(false);
-                    }}
-                    className="px-4 py-3 border-b border-dark-700 flex-row items-center active:bg-dark-700"
+                    onPress={() => { setSelectedClient(c); setShowPicker(false); }}
+                    className="px-4 py-3 border-b border-dark-700/50 flex-row items-center active:bg-dark-700"
                   >
                     <Text className="text-white text-sm flex-1">{c.full_name}</Text>
-                    {selectedClient?.id === c.id && (
-                      <Ionicons name="checkmark" size={18} color="#0d9488" />
-                    )}
+                    {selectedClient?.id === c.id && <Ionicons name="checkmark" size={18} color="#0d9488" />}
                   </Pressable>
                 ))}
                 {clients.length === 0 && (
                   <View className="px-4 py-6 items-center">
-                    <Text className="text-dark-400 text-sm">No clients. Add one first.</Text>
+                    <Text className="text-dark-400 text-sm">No clients yet</Text>
                   </View>
                 )}
               </ScrollView>
@@ -119,37 +103,15 @@ export default function RecordScreen() {
           )}
         </View>
 
-        {/* Recorder */}
         <View className="items-center px-5">
           {uploading ? (
             <View className="items-center py-8">
               <ActivityIndicator size="large" color="#0d9488" />
-              <Text className="text-dark-400 mt-4 text-sm">Uploading assessment...</Text>
+              <Text className="text-dark-400 mt-4 text-sm">Uploading...</Text>
             </View>
           ) : (
-            <AudioRecorder
-              onRecordingComplete={handleRecordingComplete}
-              disabled={!selectedClient}
-            />
+            <AudioRecorder onRecordingComplete={handleRecordingComplete} disabled={!selectedClient} />
           )}
-        </View>
-
-        {/* Info */}
-        <View className="px-5 mt-10">
-          <View className="bg-dark-800 rounded-xl p-4">
-            <Text className="text-white font-semibold text-sm mb-2">How it works</Text>
-            {[
-              'Select a client above',
-              'Tap the mic to start recording the assessment',
-              'Speak naturally — AI handles the rest',
-              'Upload triggers the full pipeline: transcription, billing, contract',
-            ].map((step, i) => (
-              <View key={i} className="flex-row items-start mb-1.5">
-                <Text className="text-palm-400 text-sm font-bold mr-2">{i + 1}.</Text>
-                <Text className="text-dark-400 text-sm flex-1 leading-5">{step}</Text>
-              </View>
-            ))}
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

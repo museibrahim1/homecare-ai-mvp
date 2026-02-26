@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.schemas.client import ClientResponse
 from app.schemas.user import UserResponse
@@ -44,8 +44,7 @@ class VisitResponse(BaseModel):
     client: Optional[ClientResponse] = None
     caregiver: Optional[UserResponse] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class VisitListResponse(BaseModel):

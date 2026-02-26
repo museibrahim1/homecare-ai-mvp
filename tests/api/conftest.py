@@ -41,6 +41,15 @@ def _reset_rate_limiters():
     # --- security module login-attempt tracker ---
     import app.core.security as sec
     sec._login_attempts.clear()
+    redis_client = sec._get_redis()
+    if redis_client is not None:
+        # Clear Redis-backed counters used by auth rate-limiting/lockout.
+        for key in redis_client.scan_iter("ratelimit:*"):
+            redis_client.delete(key)
+        for key in redis_client.scan_iter("login_attempts:*"):
+            redis_client.delete(key)
+        for key in redis_client.scan_iter("lockout:*"):
+            redis_client.delete(key)
     sec._redis_client = None          # force fresh Redis probe each test
 
     yield
@@ -48,6 +57,14 @@ def _reset_rate_limiters():
     # clean up again after the test (belt-and-suspenders)
     _rate_limit_store.clear()
     sec._login_attempts.clear()
+    redis_client = sec._get_redis()
+    if redis_client is not None:
+        for key in redis_client.scan_iter("ratelimit:*"):
+            redis_client.delete(key)
+        for key in redis_client.scan_iter("login_attempts:*"):
+            redis_client.delete(key)
+        for key in redis_client.scan_iter("lockout:*"):
+            redis_client.delete(key)
     sec._redis_client = None
 
 

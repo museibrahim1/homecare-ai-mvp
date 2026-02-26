@@ -5,7 +5,7 @@ Caregiver Schemas
 from datetime import datetime, date
 from typing import Optional, List, Any
 from uuid import UUID
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class CaregiverBase(BaseModel):
@@ -93,8 +93,7 @@ class CaregiverResponse(CaregiverBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CaregiverListResponse(BaseModel):
@@ -112,8 +111,7 @@ class CaregiverListResponse(BaseModel):
     max_clients: Optional[int] = 5
     rating: Optional[float] = 5.0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CaregiverMatchRequest(BaseModel):

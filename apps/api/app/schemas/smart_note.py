@@ -5,7 +5,7 @@ SmartNote, Task, and Reminder Schemas
 from datetime import datetime, date
 from typing import Optional, List
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 # ── SmartNote ──
@@ -43,8 +43,7 @@ class SmartNoteResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SmartNoteDetail(SmartNoteResponse):
@@ -90,8 +89,7 @@ class TaskResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── Reminder ──
@@ -125,8 +123,7 @@ class ReminderResponse(BaseModel):
     notification_sent: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Forward ref resolution

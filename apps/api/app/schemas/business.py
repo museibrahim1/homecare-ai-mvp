@@ -7,7 +7,7 @@ Pydantic schemas for business registration, verification, and management.
 from datetime import datetime, date
 from typing import Optional, List, Any
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from enum import Enum
 
 
@@ -113,8 +113,7 @@ class DocumentResponse(BaseModel):
     verified_at: Optional[datetime] = None
     expiration_date: Optional[date] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BusinessRegistrationResponse(BaseModel):
@@ -155,8 +154,7 @@ class BusinessProfile(BaseModel):
     
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BusinessProfileUpdate(BaseModel):
@@ -218,8 +216,7 @@ class BusinessUserResponse(BaseModel):
     last_login: Optional[datetime] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BusinessUserInviteResponse(BaseModel):
@@ -273,8 +270,7 @@ class AdminBusinessListItem(BaseModel):
     documents_count: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AdminBusinessDetail(BaseModel):
@@ -303,8 +299,7 @@ class AdminBusinessDetail(BaseModel):
     
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AdminApprovalRequest(BaseModel):

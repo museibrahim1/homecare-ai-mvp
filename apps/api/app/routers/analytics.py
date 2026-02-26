@@ -181,8 +181,8 @@ async def churn_overview(
 @router.get("/churn/providers")
 async def churn_providers(
     risk: Optional[str] = None,
-    sort_by: str = Query("engagement_score", regex="^(engagement_score|days_since_last_activity|mrr|logins_last_30d)$"),
-    sort_order: str = Query("asc", regex="^(asc|desc)$"),
+    sort_by: str = Query("engagement_score", pattern="^(engagement_score|days_since_last_activity|mrr|logins_last_30d)$"),
+    sort_order: str = Query("asc", pattern="^(asc|desc)$"),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     admin: User = Depends(require_admin),
