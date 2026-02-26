@@ -440,7 +440,7 @@ export default function AnalyticsPage() {
                     {/* Daily activity chart (bar chart using divs) */}
                     <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                       <h3 className="text-sm font-medium text-gray-400 mb-4">Daily Events</h3>
-                      {platformActivity.daily_activity?.length > 0 ? (
+                      {(platformActivity.daily_activity?.length ?? 0) > 0 ? (
                         <div className="flex items-end gap-1 h-40">
                           {platformActivity.daily_activity.map((d, i) => {
                             const maxVal = Math.max(...platformActivity.daily_activity!.map((x) => x.total), 1);
@@ -471,7 +471,7 @@ export default function AnalyticsPage() {
                     {/* Top features */}
                     <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                       <h3 className="text-sm font-medium text-gray-400 mb-4">Most Used Features</h3>
-                      {platformActivity.top_features?.length > 0 ? (
+                      {(platformActivity.top_features?.length ?? 0) > 0 ? (
                         <div className="space-y-3">
                           {platformActivity.top_features.map((f, i) => {
                             const maxCount = platformActivity.top_features[0]?.count || 1;
