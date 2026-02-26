@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, User, Loader2, Hand } from 'lucide-react';
+import { MessageCircle, X, Send, User, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -106,10 +107,8 @@ export default function ChatWidget() {
             style={{ borderBottom: '1px solid rgba(45, 84, 148, 0.3)' }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #0d9488, #06b6d4)' }}
-              >
-                <Hand className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 ring-2 ring-teal-500/30">
+                <Image src="/palm-avatar.png" alt="Palm" width={36} height={36} className="w-full h-full object-cover" />
               </div>
               <div>
                 <p className="text-sm font-semibold" style={{ color: '#ffffff' }}>Palm</p>
@@ -136,10 +135,8 @@ export default function ChatWidget() {
             {messages.map((msg, i) => (
               <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold"
-                    style={{ background: 'linear-gradient(135deg, #0d9488, #06b6d4)', color: '#ffffff' }}
-                  >
-                    P
+                  <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mt-0.5">
+                    <Image src="/palm-avatar.png" alt="Palm" width={28} height={28} className="w-full h-full object-cover" />
                   </div>
                 )}
                 <div
@@ -168,10 +165,8 @@ export default function ChatWidget() {
 
             {loading && (
               <div className="flex gap-2.5">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
-                  style={{ background: 'linear-gradient(135deg, #0d9488, #06b6d4)', color: '#ffffff' }}
-                >
-                  P
+                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
+                  <Image src="/palm-avatar.png" alt="Palm" width={28} height={28} className="w-full h-full object-cover" />
                 </div>
                 <div className="rounded-2xl px-4 py-3"
                   style={{ background: 'rgba(30, 63, 118, 0.4)', borderBottomLeftRadius: '6px' }}
