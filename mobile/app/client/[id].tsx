@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '@/lib/api';
 import type { Client } from '@/lib/types';
@@ -65,15 +66,7 @@ export default function ClientProfileScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: '',
-          headerStyle: { backgroundColor: '#0a1628' },
-          headerTintColor: '#ffffff',
-          headerShadowVisible: false,
-        }}
-      />
+      <Stack.Screen options={{ title: client.full_name }} />
       <ScrollView className="flex-1 bg-dark-900" contentContainerStyle={{ paddingBottom: 32 }}>
         {/* Header Card */}
         <View className="px-5 pt-2 pb-4">

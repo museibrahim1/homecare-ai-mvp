@@ -79,15 +79,7 @@ export default function PipelineScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Pipeline',
-          headerStyle: { backgroundColor: '#0a1628' },
-          headerTintColor: '#ffffff',
-          headerShadowVisible: false,
-        }}
-      />
+      <Stack.Screen options={{ title: 'Pipeline' }} />
       <ScrollView
         className="flex-1 bg-dark-900 px-5"
         contentContainerStyle={{ paddingBottom: 32, paddingTop: 8 }}

@@ -72,15 +72,7 @@ export default function TeamChatScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Team Chat',
-          headerStyle: { backgroundColor: '#0a1628' },
-          headerTintColor: '#ffffff',
-          headerShadowVisible: false,
-        }}
-      />
+      <Stack.Screen options={{ title: 'Team Chat' }} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1 bg-dark-900"

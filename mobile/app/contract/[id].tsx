@@ -43,7 +43,7 @@ export default function ContractDetailScreen() {
   if (!contract) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: true, title: 'Contract', headerStyle: { backgroundColor: '#0a1628' }, headerTintColor: '#fff', headerShadowVisible: false }} />
+        <Stack.Screen options={{ title: 'Contract' }} />
         <View className="flex-1 bg-dark-900 items-center justify-center">
           <Text className="text-white">Contract not found</Text>
         </View>
@@ -55,15 +55,7 @@ export default function ContractDetailScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Contract',
-          headerStyle: { backgroundColor: '#0a1628' },
-          headerTintColor: '#ffffff',
-          headerShadowVisible: false,
-        }}
-      />
+      <Stack.Screen options={{ title: 'Contract' }} />
       <ScrollView className="flex-1 bg-dark-900 px-5" contentContainerStyle={{ paddingBottom: 32, paddingTop: 8 }}>
         {/* Header */}
         <View className="bg-dark-800 rounded-xl p-5 mb-4 items-center">

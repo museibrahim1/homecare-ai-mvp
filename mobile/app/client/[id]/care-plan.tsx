@@ -36,15 +36,7 @@ export default function CarePlanScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Care Plan',
-          headerStyle: { backgroundColor: '#0a1628' },
-          headerTintColor: '#ffffff',
-          headerShadowVisible: false,
-        }}
-      />
+      <Stack.Screen options={{ title: 'Care Plan' }} />
       <ScrollView className="flex-1 bg-dark-900 px-5" contentContainerStyle={{ paddingBottom: 32, paddingTop: 8 }}>
         {/* Client name */}
         <View className="bg-dark-800 rounded-xl p-4 mb-4 flex-row items-center">

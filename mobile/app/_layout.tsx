@@ -8,6 +8,15 @@ import { registerForPushNotifications } from '@/lib/notifications';
 import LoadingScreen from '@/components/LoadingScreen';
 import '../global.css';
 
+const DARK_BG = '#0a1628';
+
+const stackHeaderOptions = {
+  headerStyle: { backgroundColor: DARK_BG },
+  headerTintColor: '#ffffff',
+  headerShadowVisible: false,
+  headerBackTitleVisible: false,
+};
+
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
@@ -57,7 +66,7 @@ export default function RootLayout() {
 
   if (!ready) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0a1628' }}>
+      <View style={{ flex: 1, backgroundColor: DARK_BG }}>
         <LoadingScreen message="Loading PalmCare AI..." />
         <StatusBar style="light" />
       </View>
@@ -70,12 +79,41 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#0a1628' },
+          contentStyle: { backgroundColor: DARK_BG },
           animation: 'slide_from_right',
         }}
       >
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
+
+        <Stack.Screen
+          name="client/[id]"
+          options={{ headerShown: true, title: 'Client', ...stackHeaderOptions }}
+        />
+        <Stack.Screen
+          name="client/[id]/care-plan"
+          options={{ headerShown: true, title: 'Care Plan', ...stackHeaderOptions }}
+        />
+        <Stack.Screen
+          name="client/[id]/contracts"
+          options={{ headerShown: true, title: 'Contracts', ...stackHeaderOptions }}
+        />
+        <Stack.Screen
+          name="contract/[id]"
+          options={{ headerShown: true, title: 'Contract', ...stackHeaderOptions }}
+        />
+        <Stack.Screen
+          name="pipeline/[visitId]"
+          options={{ headerShown: true, title: 'Pipeline', ...stackHeaderOptions }}
+        />
+        <Stack.Screen
+          name="chat"
+          options={{ headerShown: true, title: 'Team Chat', ...stackHeaderOptions }}
+        />
+        <Stack.Screen
+          name="settings"
+          options={{ headerShown: true, title: 'Settings', ...stackHeaderOptions }}
+        />
       </Stack>
     </>
   );
