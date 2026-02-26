@@ -39,6 +39,7 @@ import {
   X,
   Sun,
   Moon,
+  Zap,
   LucideIcon
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
@@ -96,6 +97,7 @@ const agencyAdminNavItems: NavItemData[] = [
 
 const adminNavItems: NavItemData[] = [
   { href: '/admin', label: 'Dashboard', icon: BarChart3, description: 'Platform overview' },
+  { href: '/admin/quick-setup', label: 'Quick Setup', icon: Zap, description: 'Onboard new agency' },
   { href: '/admin/approvals', label: 'Approvals', icon: Building2, description: 'Review applications' },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard, description: 'Active subs' },
   { href: '/admin/billing', label: 'Stripe Config', icon: DollarSign, description: 'Price IDs' },
