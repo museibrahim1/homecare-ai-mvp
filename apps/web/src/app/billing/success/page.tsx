@@ -3,14 +3,14 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle2, ArrowRight, Loader2, Sparkles, Zap, FileText, Users } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Loader2, Zap, FileText, Users } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 
 export default function BillingSuccessPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
       </div>
     }>
       <BillingSuccessContent />
@@ -42,7 +42,7 @@ function BillingSuccessContent() {
   if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
       </div>
     );
   }
@@ -50,36 +50,28 @@ function BillingSuccessContent() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-lg w-full text-center">
-        {/* Success animation */}
         <div className="relative mb-8">
-          <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center animate-pulse">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/30 to-green-500/30 flex items-center justify-center">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400" />
-            </div>
+          <div className="w-20 h-20 mx-auto rounded-full bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center">
+            <CheckCircle2 className="w-10 h-10 text-emerald-500" />
           </div>
-          <Sparkles className="w-6 h-6 text-amber-600 absolute top-0 right-1/3 animate-bounce" />
-          <Sparkles className="w-5 h-5 text-primary-400 absolute bottom-2 left-1/3 animate-bounce delay-300" />
         </div>
 
-        <h1 className="text-3xl font-bold text-slate-900 mb-3">
-          Payment Successful!
-        </h1>
-        <p className="text-slate-600 text-lg mb-8">
-          Your subscription is now active. Welcome to the next level of home healthcare management.
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">Payment Successful</h1>
+        <p className="text-slate-600 mb-8">
+          Your subscription is now active. You have full access to all plan features.
         </p>
 
-        {/* What's unlocked */}
-        <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl p-6 mb-8 text-left">
-          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">What&apos;s Unlocked</h3>
-          <div className="space-y-3">
+        <div className="bg-white border border-slate-200 rounded-lg p-5 mb-8 text-left">
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">What&apos;s Unlocked</h3>
+          <div className="space-y-2.5">
             {[
               { icon: Zap, label: 'AI-Powered Assessments', desc: 'Turn conversations into contracts' },
               { icon: FileText, label: 'Automated Proposals', desc: 'Send professional proposals instantly' },
               { icon: Users, label: 'Full Team Access', desc: 'Invite your team and assign roles' },
             ].map(({ icon: Icon, label, desc }) => (
-              <div key={label} className="flex items-center gap-3 p-3 bg-white rounded-xl">
-                <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-primary-400" />
+              <div key={label} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                <div className="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-4 h-4 text-primary-600" />
                 </div>
                 <div>
                   <p className="text-slate-900 text-sm font-medium">{label}</p>
@@ -90,16 +82,16 @@ function BillingSuccessContent() {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/billing"
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 text-slate-900 font-semibold rounded-xl transition-all shadow-lg shadow-primary-500/20"
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors text-sm"
           >
-            Go to Billing <ArrowRight className="w-4 h-4" />
+            View Subscription <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium rounded-xl transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-medium rounded-lg transition-colors text-sm"
           >
             Back to Dashboard
           </Link>
