@@ -442,7 +442,7 @@ export default function AnalyticsPage() {
                       <h3 className="text-sm font-medium text-gray-400 mb-4">Daily Events</h3>
                       {(platformActivity.daily_activity?.length ?? 0) > 0 ? (
                         <div className="flex items-end gap-1 h-40">
-                          {platformActivity.daily_activity.map((d, i) => {
+                          {platformActivity.daily_activity!.map((d, i) => {
                             const maxVal = Math.max(...platformActivity.daily_activity!.map((x) => x.total), 1);
                             const height = (d.total / maxVal) * 100;
                             return (
@@ -454,7 +454,7 @@ export default function AnalyticsPage() {
                                   className="w-full bg-indigo-500 rounded-t hover:bg-indigo-400 transition-colors"
                                   style={{ height: `${Math.max(height, 2)}%` }}
                                 />
-                                {platformActivity.daily_activity.length <= 14 && (
+                                {platformActivity.daily_activity!.length <= 14 && (
                                   <span className="text-[8px] text-gray-600 rotate-45 origin-left mt-1">
                                     {d.date.slice(5)}
                                   </span>
@@ -473,8 +473,8 @@ export default function AnalyticsPage() {
                       <h3 className="text-sm font-medium text-gray-400 mb-4">Most Used Features</h3>
                       {(platformActivity.top_features?.length ?? 0) > 0 ? (
                         <div className="space-y-3">
-                          {platformActivity.top_features.map((f, i) => {
-                            const maxCount = platformActivity.top_features[0]?.count || 1;
+                          {platformActivity.top_features!.map((f, i) => {
+                            const maxCount = platformActivity.top_features![0]?.count || 1;
                             return (
                               <div key={f.feature} className="flex items-center gap-3">
                                 <span className="text-xs text-gray-500 w-5">{i + 1}.</span>
