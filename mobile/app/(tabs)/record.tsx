@@ -40,6 +40,7 @@ export default function RecordScreen() {
         type: 'audio/m4a',
       } as unknown as Blob);
       formData.append('visit_id', visit.id);
+      formData.append('auto_process', 'true');
 
       await api.upload('/uploads/audio', formData);
 
