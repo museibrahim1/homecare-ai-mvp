@@ -11,7 +11,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: 'light',
   toggleTheme: () => {},
   setTheme: () => {},
 });
@@ -19,13 +19,11 @@ const ThemeContext = createContext<ThemeContextType>({
 const STORAGE_KEY = 'palmcare-theme';
 
 function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   
-  // First check data-theme attribute (set by inline script)
   const attr = document.documentElement.getAttribute('data-theme');
   if (attr === 'light' || attr === 'dark') return attr;
   
-  // Then check localStorage
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === 'light' || stored === 'dark') return stored;
@@ -33,13 +31,13 @@ function getInitialTheme(): Theme {
     // ignore
   }
   
-  return 'dark';
+  return 'light';
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('light');
   const [mounted, setMounted] = useState(false);
-  const themeRef = useRef<Theme>('dark');
+  const themeRef = useRef<Theme>('light');
 
   // On mount, sync React state with what the inline script already applied
   useEffect(() => {

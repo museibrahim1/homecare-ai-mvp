@@ -30,16 +30,14 @@ const PIPELINE_STAGES = [
 function MiniBarChart({ data, maxValue }: { data: { label: string; value: number }[]; maxValue: number }) {
   const safeMax = Math.max(maxValue, 1);
   return (
-    <div className="flex items-end gap-1.5 h-32">
+    <div className="flex items-end gap-2 h-32">
       {data.map((item, i) => {
         const heightPct = Math.max((item.value / safeMax) * 100, 4);
         return (
           <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-            <span className="text-xs text-dark-300 font-medium">{item.value}</span>
-            <div className="w-full relative rounded-t-md overflow-hidden" style={{ height: `${heightPct}%` }}>
-              <div className="absolute inset-0 bg-gradient-to-t from-primary-600 to-primary-400 opacity-80 hover:opacity-100 transition-opacity rounded-t-md" />
-            </div>
-            <span className="text-[10px] text-dark-400 truncate w-full text-center">{item.label}</span>
+            <span className="text-xs text-slate-500 font-medium">{item.value}</span>
+            <div className="w-full rounded-t" style={{ height: `${heightPct}%`, backgroundColor: '#0d9488' }} />
+            <span className="text-[10px] text-slate-400 truncate w-full text-center">{item.label}</span>
           </div>
         );
       })}
@@ -53,7 +51,7 @@ function PipelineBar({ stages }: { stages: { label: string; count: number; color
   return (
     <div className="space-y-3">
       {/* Stacked bar */}
-      <div className="flex h-3 rounded-full overflow-hidden bg-dark-600">
+      <div className="flex h-3 rounded-full overflow-hidden bg-slate-100">
         {stages.map((stage, i) => {
           const pct = (stage.count / total) * 100;
           if (pct === 0) return null;
@@ -72,7 +70,7 @@ function PipelineBar({ stages }: { stages: { label: string; count: number; color
         {stages.map((stage, i) => (
           <div key={i} className="flex items-center gap-1.5">
             <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
-            <span className="text-xs text-dark-300">{stage.label}</span>
+            <span className="text-xs text-slate-600">{stage.label}</span>
             <span className={`text-xs font-semibold ${stage.text}`}>{stage.count}</span>
           </div>
         ))}
@@ -92,11 +90,11 @@ interface Task {
 }
 
 const TASK_CATEGORIES = [
-  { value: 'assessment', label: 'Assessment', bg: 'bg-primary-500/20', text: 'text-primary-400' },
-  { value: 'follow_up', label: 'Follow-up', bg: 'bg-orange-500/20', text: 'text-orange-400' },
-  { value: 'documentation', label: 'Documentation', bg: 'bg-purple-500/20', text: 'text-purple-400' },
-  { value: 'billing', label: 'Billing', bg: 'bg-green-500/20', text: 'text-green-400' },
-  { value: 'general', label: 'General', bg: 'bg-dark-600', text: 'text-dark-300' },
+  { value: 'assessment', label: 'Assessment', bg: 'bg-teal-50', text: 'text-teal-700' },
+  { value: 'follow_up', label: 'Follow-up', bg: 'bg-amber-50', text: 'text-amber-700' },
+  { value: 'documentation', label: 'Documentation', bg: 'bg-purple-50', text: 'text-purple-700' },
+  { value: 'billing', label: 'Billing', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  { value: 'general', label: 'General', bg: 'bg-slate-100', text: 'text-slate-600' },
 ];
 
 const TASK_STORAGE_KEY = 'palmcare-tasks';
@@ -176,9 +174,9 @@ function TasksWidget() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 text-primary-400" />
-          <h2 className="text-base lg:text-lg font-semibold text-white">Tasks</h2>
-          <span className="text-xs bg-dark-600 text-dark-300 px-2 py-0.5 rounded-full">{tasks.length}</span>
+          <CheckCircle2 className="w-5 h-5 text-primary-500" />
+          <h2 className="text-base lg:text-lg font-semibold text-slate-800">Tasks</h2>
+          <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{tasks.length}</span>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
@@ -191,21 +189,21 @@ function TasksWidget() {
 
       {/* Add Task Form */}
       {showAddForm && (
-        <div className="mb-4 p-3 bg-dark-700/50 rounded-xl border border-dark-600 space-y-3">
+        <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
           <input
             type="text"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addTask()}
             placeholder="What needs to be done?"
-            className="w-full px-3 py-2 bg-dark-700 border border-dark-500 rounded-lg text-white text-sm placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             autoFocus
           />
           <div className="flex items-center gap-2">
             <select
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
-              className="flex-1 px-3 py-1.5 bg-dark-700 border border-dark-500 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               {TASK_CATEGORIES.map(c => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -215,12 +213,13 @@ function TasksWidget() {
               type="date"
               value={newDueDate}
               onChange={(e) => setNewDueDate(e.target.value)}
-              className="px-3 py-1.5 bg-dark-700 border border-dark-500 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             <button
               onClick={addTask}
               disabled={!newTitle.trim()}
-              className="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 disabled:bg-dark-600 disabled:text-dark-400 text-white text-xs font-medium rounded-lg transition-colors"
+              className="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 disabled:bg-slate-200 disabled:text-slate-400 text-xs font-medium rounded-lg transition-colors"
+              style={{ color: newTitle.trim() ? '#fff' : undefined }}
             >
               Add
             </button>
@@ -229,7 +228,7 @@ function TasksWidget() {
       )}
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 mb-3 bg-dark-700/30 rounded-lg p-0.5">
+      <div className="flex items-center gap-1 mb-3 bg-slate-100 rounded-lg p-0.5">
         {[
           { key: 'all' as const, label: 'All', count: tasks.length },
           { key: 'todo' as const, label: 'To Do', count: todoCount },
@@ -241,11 +240,11 @@ function TasksWidget() {
             onClick={() => setFilter(f.key)}
             className={`flex-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
               filter === f.key
-                ? 'bg-dark-700 text-white'
-                : 'text-dark-400 hover:text-white'
+                ? 'bg-white text-slate-800 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {f.label} {f.count > 0 && <span className="text-dark-500 ml-0.5">{f.count}</span>}
+            {f.label} {f.count > 0 && <span className="text-slate-400 ml-0.5">{f.count}</span>}
           </button>
         ))}
       </div>
@@ -267,7 +266,7 @@ function TasksWidget() {
               <div
                 key={task.id}
                 className={`flex items-start gap-2.5 p-2.5 rounded-lg transition-colors group ${
-                  task.status === 'completed' ? 'bg-dark-700/20 opacity-60' : 'bg-dark-700/30 hover:bg-dark-700/50'
+                  task.status === 'completed' ? 'bg-slate-50 opacity-60' : 'hover:bg-slate-50'
                 }`}
               >
                 {/* Status toggle */}
@@ -289,7 +288,7 @@ function TasksWidget() {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm leading-tight ${task.status === 'completed' ? 'text-dark-400 line-through' : 'text-white'}`}>
+                  <p className={`text-sm leading-tight ${task.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
                     {task.title}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
@@ -457,22 +456,22 @@ function CustomizePanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-dark-800 border border-dark-600 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white border border-slate-200 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-dark-700">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <LayoutGrid className="w-5 h-5 text-primary-400" />
-            <h2 className="text-base font-semibold text-white">Customize Dashboard</h2>
+            <LayoutGrid className="w-5 h-5 text-primary-500" />
+            <h2 className="text-base font-semibold text-slate-800">Customize Dashboard</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 text-dark-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Widget List */}
         <div className="p-4 space-y-1.5">
-          <p className="text-xs text-dark-400 mb-3">Drag to reorder. Toggle to show or hide.</p>
+          <p className="text-xs text-slate-400 mb-3">Drag to reorder. Toggle to show or hide.</p>
           {orderedWidgets.map((widget) => {
             const isHidden = localPrefs.hidden.includes(widget.id);
             const isDragging = draggedId === widget.id;
@@ -487,32 +486,32 @@ function CustomizePanel({
                 onDragOver={(e) => handleDragOver(e, widget.id)}
                 onDrop={(e) => handleDrop(e, widget.id)}
                 onDragEnd={handleDragEnd}
-                className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-150 select-none ${
+                className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-150 select-none ${
                   isDragging
-                    ? 'opacity-40 scale-[0.98] border-primary-500/40 bg-primary-500/5'
+                    ? 'opacity-40 scale-[0.98] border-primary-500/40 bg-primary-50'
                     : isDragOver
-                    ? 'border-primary-500/60 bg-primary-500/10 scale-[1.01]'
+                    ? 'border-primary-500 bg-primary-50 scale-[1.01]'
                     : isHidden
-                    ? 'bg-dark-700/20 border-dark-700/30'
-                    : 'bg-dark-700/40 border-dark-600/50 hover:border-dark-500'
+                    ? 'bg-slate-50 border-slate-100'
+                    : 'bg-white border-slate-200 hover:border-slate-300'
                 }`}
               >
                 {/* Drag handle */}
-                <div className="cursor-grab active:cursor-grabbing p-1 text-dark-500 hover:text-dark-300 transition-colors shrink-0">
+                <div className="cursor-grab active:cursor-grabbing p-1 text-slate-300 hover:text-slate-500 transition-colors shrink-0">
                   <GripVertical className="w-4 h-4" />
                 </div>
 
                 {/* Icon */}
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                  isHidden ? 'bg-dark-700/30' : 'bg-primary-500/10'
+                  isHidden ? 'bg-slate-100' : 'bg-primary-50'
                 }`}>
-                  <WidgetIcon className={`w-4 h-4 transition-colors ${isHidden ? 'text-dark-500' : 'text-primary-400'}`} />
+                  <WidgetIcon className={`w-4 h-4 transition-colors ${isHidden ? 'text-slate-400' : 'text-primary-500'}`} />
                 </div>
 
                 {/* Info */}
                 <div className={`flex-1 min-w-0 transition-opacity ${isHidden ? 'opacity-40' : ''}`}>
-                  <p className="text-sm font-medium text-white">{widget.label}</p>
-                  <p className="text-[11px] text-dark-400 leading-tight">{widget.description}</p>
+                  <p className="text-sm font-medium text-slate-800">{widget.label}</p>
+                  <p className="text-[11px] text-slate-400 leading-tight">{widget.description}</p>
                 </div>
 
                 {/* Toggle switch */}
@@ -534,23 +533,24 @@ function CustomizePanel({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-4 border-t border-dark-700 bg-dark-800/50">
+        <div className="flex items-center justify-between px-5 py-4 border-t border-slate-100 bg-slate-50">
           <button
             onClick={handleReset}
-            className="text-xs text-dark-400 hover:text-white transition-colors"
+            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
             Reset to defaults
           </button>
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-3 py-1.5 text-sm text-dark-300 hover:text-white transition-colors"
+              className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors"
+              className="px-4 py-1.5 bg-primary-500 hover:bg-primary-600 text-sm font-medium rounded-lg transition-colors"
+              style={{ color: '#fff' }}
             >
               Save Layout
             </button>
@@ -732,14 +732,14 @@ export default function DashboardPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 min-w-0 flex flex-col">
         <TopBar />
@@ -748,12 +748,12 @@ export default function DashboardPage() {
           {/* Header */}
           <div className="flex items-start justify-between mb-6 lg:mb-8">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">Dashboard</h1>
-              <p className="text-dark-300 text-sm lg:text-base">Care assessments in, proposal-ready contracts out.</p>
+              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-1">Dashboard</h1>
+              <p className="text-slate-500 text-sm lg:text-base">Care assessments in, proposal-ready contracts out.</p>
             </div>
             <button
               onClick={() => setShowCustomize(true)}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-dark-300 hover:text-white bg-dark-700/50 hover:bg-dark-700 border border-dark-600 rounded-lg transition-colors shrink-0"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500 hover:text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors shrink-0 shadow-sm"
             >
               <Settings2 className="w-4 h-4" />
               <span className="hidden sm:inline">Customize</span>
@@ -791,14 +791,14 @@ export default function DashboardPage() {
                   return (
                     <div key="stats" data-tour="stats" className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
                       {[
-                        { label: 'Total Assessments', value: stats.totalVisits, icon: Calendar, bgClass: 'bg-accent-primary/20', textClass: 'text-accent-primary' },
-                        { label: 'Pending Proposals', value: stats.pendingReview, icon: AlertCircle, bgClass: 'bg-accent-orange/20', textClass: 'text-accent-orange' },
-                        { label: 'Total Clients', value: stats.totalClients, icon: Users, bgClass: 'bg-accent-green/20', textClass: 'text-accent-green' },
-                        { label: 'This Week', value: stats.hoursThisWeek, icon: Clock, bgClass: 'bg-accent-cyan/20', textClass: 'text-accent-cyan', trend: weekOverWeek },
+                        { label: 'Total Assessments', value: stats.totalVisits, icon: Calendar, bgClass: 'bg-teal-50', textClass: 'text-teal-600' },
+                        { label: 'Pending Proposals', value: stats.pendingReview, icon: AlertCircle, bgClass: 'bg-amber-50', textClass: 'text-amber-600' },
+                        { label: 'Total Clients', value: stats.totalClients, icon: Users, bgClass: 'bg-emerald-50', textClass: 'text-emerald-600' },
+                        { label: 'This Week', value: stats.hoursThisWeek, icon: Clock, bgClass: 'bg-sky-50', textClass: 'text-sky-600', trend: weekOverWeek },
                       ].map((stat, i) => (
-                        <div key={i} className="card p-3 lg:p-5">
+                        <div key={i} className="bg-white rounded-xl border border-slate-200 p-3 lg:p-5 shadow-sm">
                           <div className="flex items-center justify-between mb-2 lg:mb-3">
-                            <div className={`w-8 h-8 lg:w-10 lg:h-10 ${stat.bgClass} rounded-lg lg:rounded-xl flex items-center justify-center`}>
+                            <div className={`w-8 h-8 lg:w-10 lg:h-10 ${stat.bgClass} rounded-lg flex items-center justify-center`}>
                               <stat.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${stat.textClass}`} />
                             </div>
                             {'trend' in stat && stat.trend !== undefined && stat.trend !== 0 && (
@@ -808,8 +808,8 @@ export default function DashboardPage() {
                               </div>
                             )}
                           </div>
-                          <p className="text-dark-400 text-xs lg:text-sm mb-1 truncate">{stat.label}</p>
-                          <p className={`text-xl lg:text-3xl font-bold ${stat.textClass}`}>{stat.value}</p>
+                          <p className="text-slate-500 text-xs lg:text-sm mb-1 truncate">{stat.label}</p>
+                          <p className={`text-xl lg:text-3xl font-bold text-slate-900`}>{stat.value}</p>
                         </div>
                       ))}
                     </div>
@@ -824,9 +824,9 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
                             <BarChart3 className="w-5 h-5 text-primary-400" />
-                            <h2 className="text-sm lg:text-base font-semibold text-white">Assessments Trend</h2>
+                            <h2 className="text-sm lg:text-base font-semibold text-slate-800">Assessments Trend</h2>
                           </div>
-                          <span className="text-xs text-dark-400">Last 6 months</span>
+                          <span className="text-xs text-slate-400">Last 6 months</span>
                         </div>
                         {loading ? (
                           <div className="h-32 flex items-center justify-center">
@@ -842,7 +842,7 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
                             <Activity className="w-5 h-5 text-green-400" />
-                            <h2 className="text-sm lg:text-base font-semibold text-white">Client Pipeline</h2>
+                            <h2 className="text-sm lg:text-base font-semibold text-slate-800">Client Pipeline</h2>
                           </div>
                           <button
                             onClick={() => router.push('/clients')}
@@ -863,8 +863,8 @@ export default function DashboardPage() {
                         ) : (
                           <div>
                             <div className="flex items-baseline gap-2 mb-4">
-                              <span className="text-3xl font-bold text-white">{allClients.length}</span>
-                              <span className="text-sm text-dark-400">total clients</span>
+                              <span className="text-3xl font-bold text-slate-900">{allClients.length}</span>
+                              <span className="text-sm text-slate-400">total clients</span>
                             </div>
                             <PipelineBar stages={pipelineStages} />
                           </div>
@@ -880,12 +880,12 @@ export default function DashboardPage() {
                     <div key="proposals" className="card p-4 lg:p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                            <FileSignature className="w-5 h-5 text-orange-400" />
+                          <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                            <FileSignature className="w-5 h-5 text-amber-600" />
                           </div>
                           <div>
-                            <h2 className="text-lg font-semibold text-white">Proposal Follow-Up</h2>
-                            <p className="text-dark-400 text-sm">{proposalClients.length} client{proposalClients.length !== 1 ? 's' : ''} awaiting response</p>
+                            <h2 className="text-lg font-semibold text-slate-800">Proposal Follow-Up</h2>
+                            <p className="text-slate-500 text-sm">{proposalClients.length} client{proposalClients.length !== 1 ? 's' : ''} awaiting response</p>
                           </div>
                         </div>
                         <button
@@ -900,18 +900,18 @@ export default function DashboardPage() {
                         {proposalClients.map((client) => (
                           <div
                             key={client.id}
-                            className="flex items-center gap-3 p-3 bg-dark-700/30 rounded-xl border border-dark-700/50 hover:border-dark-600 transition-colors"
+                            className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
                           >
-                            <div className="w-9 h-9 bg-orange-500/15 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-orange-400 font-semibold text-sm">
+                            <div className="w-9 h-9 bg-amber-50 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-amber-600 font-semibold text-sm">
                                 {(client.full_name || 'U')[0].toUpperCase()}
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-white text-sm font-medium truncate">{client.full_name}</p>
-                              <p className="text-dark-400 text-xs">Sent {client.updated_at ? format(new Date(client.updated_at), 'MMM d, yyyy') : 'recently'}</p>
+                              <p className="text-slate-800 text-sm font-medium truncate">{client.full_name}</p>
+                              <p className="text-slate-400 text-xs">Sent {client.updated_at ? format(new Date(client.updated_at), 'MMM d, yyyy') : 'recently'}</p>
                             </div>
-                            <span className="hidden sm:inline-flex px-2 py-0.5 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-md text-[11px] font-medium">
+                            <span className="hidden sm:inline-flex px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-md text-[11px] font-medium">
                               Pending
                             </span>
                             <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -951,7 +951,7 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
                             <Activity className="w-5 h-5 text-primary-400" />
-                            <h2 className="text-base lg:text-lg font-semibold text-white">Recent Activity</h2>
+                            <h2 className="text-base lg:text-lg font-semibold text-slate-800">Recent Activity</h2>
                           </div>
                           <button onClick={() => router.push('/visits')} className="text-primary-400 text-xs lg:text-sm hover:text-primary-300 flex items-center gap-1">
                             View all <ChevronRight className="w-4 h-4" />
@@ -971,7 +971,7 @@ export default function DashboardPage() {
                           </div>
                         ) : (
                           <>
-                            <div className="hidden sm:grid grid-cols-12 gap-3 px-3 pb-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700/50">
+                            <div className="hidden sm:grid grid-cols-12 gap-3 px-3 pb-2 text-xs font-medium text-slate-400 uppercase tracking-wider border-b border-slate-100">
                               <div className="col-span-2">Date</div>
                               <div className="col-span-4">Client</div>
                               <div className="col-span-2">Status</div>
@@ -980,33 +980,33 @@ export default function DashboardPage() {
                             </div>
                             <div className="space-y-1 mt-1">
                               {recentVisits.map((visit) => {
-                                const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-                                  completed: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Completed' },
-                                  approved: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Approved' },
-                                  processing: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', label: 'Processing' },
-                                  pending: { bg: 'bg-dark-600', text: 'text-dark-300', label: 'Pending' },
-                                  failed: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Failed' },
-                                  uploaded: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Uploaded' },
+                                  const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+                                  completed: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Completed' },
+                                  approved: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Approved' },
+                                  processing: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Processing' },
+                                  pending: { bg: 'bg-slate-100', text: 'text-slate-600', label: 'Pending' },
+                                  failed: { bg: 'bg-red-50', text: 'text-red-700', label: 'Failed' },
+                                  uploaded: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'Uploaded' },
                                 };
                                 const status = visit.status || 'pending';
                                 const cfg = statusConfig[status] || statusConfig.pending;
                                 let typeLabel = 'Assessment';
-                                let typeBg = 'bg-primary-500/20';
-                                let typeText = 'text-primary-400';
+                                let typeBg = 'bg-teal-50';
+                                let typeText = 'text-teal-700';
                                 if (visit.contract_generated) {
-                                  typeLabel = 'Contract'; typeBg = 'bg-green-500/20'; typeText = 'text-green-400';
+                                  typeLabel = 'Contract'; typeBg = 'bg-emerald-50'; typeText = 'text-emerald-700';
                                 } else if (visit.note_generated) {
-                                  typeLabel = 'Visit Note'; typeBg = 'bg-purple-500/20'; typeText = 'text-purple-400';
+                                  typeLabel = 'Visit Note'; typeBg = 'bg-purple-50'; typeText = 'text-purple-700';
                                 } else if (status === 'processing') {
-                                  typeLabel = 'Processing'; typeBg = 'bg-yellow-500/20'; typeText = 'text-yellow-400';
+                                  typeLabel = 'Processing'; typeBg = 'bg-amber-50'; typeText = 'text-amber-700';
                                 }
                                 return (
                                   <div
                                     key={visit.id}
                                     onClick={() => router.push(`/visits/${visit.id}`)}
-                                    className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 p-3 rounded-xl bg-dark-700/30 hover:bg-dark-700/50 cursor-pointer transition group items-center"
+                                    className="grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition group items-center border-b border-slate-50"
                                   >
-                                    <div className="sm:col-span-2 text-xs text-dark-400">
+                                    <div className="sm:col-span-2 text-xs text-slate-400">
                                       {visit.created_at ? format(new Date(visit.created_at), 'MMM d, h:mm a') : '-'}
                                     </div>
                                     <div className="sm:col-span-4 flex items-center gap-2 min-w-0">
@@ -1015,7 +1015,7 @@ export default function DashboardPage() {
                                           {((visit.client_name || visit.client?.full_name || 'U')[0] || 'U').toUpperCase()}
                                         </span>
                                       </div>
-                                      <span className="text-sm text-white font-medium truncate">
+                                      <span className="text-sm text-slate-800 font-medium truncate">
                                         {visit.client_name || visit.client?.full_name || 'Unknown'}
                                       </span>
                                     </div>
@@ -1042,21 +1042,21 @@ export default function DashboardPage() {
 
                       {/* Quick Actions */}
                       <div className="card p-4 lg:p-6">
-                        <h2 className="text-base lg:text-lg font-semibold text-white mb-3 lg:mb-4">Quick Actions</h2>
+                        <h2 className="text-base lg:text-lg font-semibold text-slate-800 mb-3 lg:mb-4">Quick Actions</h2>
                         <div className="space-y-2 lg:space-y-3">
                           {[
-                            { label: 'New Assessment', desc: 'Start a new intake/visit', icon: Calendar, href: '/visits/new', bgClass: 'bg-accent-primary/20', textClass: 'text-accent-primary' },
-                            { label: 'Add Client', desc: 'Register new client', icon: Users, href: '/clients', bgClass: 'bg-accent-green/20', textClass: 'text-accent-green' },
-                            { label: 'Export Proposals', desc: 'View & export contracts', icon: TrendingUp, href: '/proposals', bgClass: 'bg-accent-cyan/20', textClass: 'text-accent-cyan' },
+                            { label: 'New Assessment', desc: 'Start a new intake/visit', icon: Calendar, href: '/visits/new', bgClass: 'bg-teal-50', textClass: 'text-teal-600' },
+                            { label: 'Add Client', desc: 'Register new client', icon: Users, href: '/clients', bgClass: 'bg-emerald-50', textClass: 'text-emerald-600' },
+                            { label: 'Export Proposals', desc: 'View & export contracts', icon: TrendingUp, href: '/proposals', bgClass: 'bg-sky-50', textClass: 'text-sky-600' },
                           ].map((action, i) => (
-                            <button key={i} onClick={() => router.push(action.href)} className="w-full p-3 lg:p-4 bg-dark-700/50 hover:bg-dark-700 rounded-lg lg:rounded-xl text-left transition group">
+                            <button key={i} onClick={() => router.push(action.href)} className="w-full p-3 lg:p-4 bg-slate-50 hover:bg-slate-100 rounded-lg text-left transition group border border-slate-100 hover:border-slate-200">
                               <div className="flex items-center gap-2 lg:gap-3">
-                                <div className={`w-8 h-8 lg:w-10 lg:h-10 ${action.bgClass} rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0`}>
+                                <div className={`w-8 h-8 lg:w-10 lg:h-10 ${action.bgClass} rounded-lg flex items-center justify-center flex-shrink-0`}>
                                   <action.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${action.textClass}`} />
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="text-white font-medium text-sm lg:text-base">{action.label}</p>
-                                  <p className="text-dark-400 text-xs lg:text-sm truncate">{action.desc}</p>
+                                  <p className="text-slate-800 font-medium text-sm lg:text-base">{action.label}</p>
+                                  <p className="text-slate-400 text-xs lg:text-sm truncate">{action.desc}</p>
                                 </div>
                               </div>
                             </button>
@@ -1064,20 +1064,20 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Pipeline Summary (compact) */}
-                        <div className="mt-5 pt-5 border-t border-dark-700">
-                          <h3 className="text-sm font-medium text-dark-400 mb-3">Pipeline Summary</h3>
+                        <div className="mt-5 pt-5 border-t border-slate-100">
+                          <h3 className="text-sm font-medium text-slate-500 mb-3">Pipeline Summary</h3>
                           <div className="space-y-2">
                             {pipelineStages.filter(s => s.count > 0).map((stage, i) => (
                               <div key={i} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <div className={`w-2 h-2 rounded-full ${stage.color}`} />
-                                  <span className="text-xs text-dark-300">{stage.label}</span>
+                                  <span className="text-xs text-slate-600">{stage.label}</span>
                                 </div>
-                                <span className={`text-xs font-semibold ${stage.text}`}>{stage.count}</span>
+                                <span className="text-xs font-semibold text-slate-700">{stage.count}</span>
                               </div>
                             ))}
                             {pipelineStages.every(s => s.count === 0) && (
-                              <p className="text-xs text-dark-500">No clients in pipeline</p>
+                              <p className="text-xs text-slate-400">No clients in pipeline</p>
                             )}
                           </div>
                         </div>
@@ -1090,30 +1090,30 @@ export default function DashboardPage() {
                     <div key="usage" className="card p-4 lg:p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                          <TrendingUp className="w-5 h-5 text-primary-400" />
-                          <h2 className="text-base lg:text-lg font-semibold text-white">My Activity</h2>
+                          <TrendingUp className="w-5 h-5 text-primary-500" />
+                          <h2 className="text-base lg:text-lg font-semibold text-slate-800">My Activity</h2>
                         </div>
-                        <span className="text-xs text-dark-400">Last 30 days</span>
+                        <span className="text-xs text-slate-400">Last 30 days</span>
                       </div>
                       {myUsage ? (
                         <div className="space-y-4">
                           <div className="grid grid-cols-3 gap-3">
-                            <div className="bg-dark-700/30 rounded-lg p-3 text-center">
-                              <p className="text-xs text-dark-400">Logins</p>
-                              <p className="text-xl font-bold text-primary-400">{myUsage.logins || 0}</p>
+                            <div className="bg-slate-50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-slate-500">Logins</p>
+                              <p className="text-xl font-bold text-slate-800">{myUsage.logins || 0}</p>
                             </div>
-                            <div className="bg-dark-700/30 rounded-lg p-3 text-center">
-                              <p className="text-xs text-dark-400">Total Events</p>
-                              <p className="text-xl font-bold text-accent-green">{myUsage.total_events || 0}</p>
+                            <div className="bg-slate-50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-slate-500">Total Events</p>
+                              <p className="text-xl font-bold text-slate-800">{myUsage.total_events || 0}</p>
                             </div>
-                            <div className="bg-dark-700/30 rounded-lg p-3 text-center">
-                              <p className="text-xs text-dark-400">Top Pages</p>
-                              <p className="text-xl font-bold text-accent-cyan">{myUsage.top_pages?.length || 0}</p>
+                            <div className="bg-slate-50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-slate-500">Top Pages</p>
+                              <p className="text-xl font-bold text-slate-800">{myUsage.top_pages?.length || 0}</p>
                             </div>
                           </div>
                           {(myUsage.daily_activity?.length ?? 0) > 0 && (
                             <div>
-                              <p className="text-xs text-dark-400 mb-2">Daily Activity</p>
+                              <p className="text-xs text-slate-500 mb-2">Daily Activity</p>
                               <div className="flex items-end gap-0.5 h-16">
                                 {myUsage.daily_activity!.slice(-14).map((d, i) => {
                                   const maxVal = Math.max(...myUsage.daily_activity!.map((x) => x.count), 1);
@@ -1133,15 +1133,15 @@ export default function DashboardPage() {
                           )}
                           {myUsage.event_breakdown && Object.keys(myUsage.event_breakdown).length > 0 && (
                             <div>
-                              <p className="text-xs text-dark-400 mb-2">Activity Breakdown</p>
+                              <p className="text-xs text-slate-500 mb-2">Activity Breakdown</p>
                               <div className="space-y-1.5">
                                 {Object.entries(myUsage.event_breakdown)
                                   .sort(([, a], [, b]) => (b as number) - (a as number))
                                   .slice(0, 5)
                                   .map(([event, count]) => (
                                     <div key={event} className="flex items-center justify-between text-xs">
-                                      <span className="text-dark-300 capitalize">{event.replace(/_/g, ' ')}</span>
-                                      <span className="text-dark-400 font-mono">{count as number}</span>
+                                      <span className="text-slate-600 capitalize">{event.replace(/_/g, ' ')}</span>
+                                      <span className="text-slate-400 font-mono">{count as number}</span>
                                     </div>
                                   ))}
                               </div>

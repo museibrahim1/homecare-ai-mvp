@@ -61,14 +61,14 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-[380px] max-w-[calc(100vw-2rem)] bg-dark-800 border border-dark-600 rounded-2xl shadow-2xl z-50 overflow-hidden">
+    <div className="absolute right-0 top-full mt-1 w-[380px] max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-dark-700">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
         <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4 text-primary-400" />
-          <h3 className="text-sm font-semibold text-white">Notifications</h3>
+          <Bell className="w-4 h-4 text-primary-500" />
+          <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
           {unreadCount > 0 && (
-            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary-500 text-white rounded-full min-w-[18px] text-center">
+            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary-500 rounded-full min-w-[18px] text-center" style={{ color: '#fff' }}>
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
@@ -77,7 +77,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
-              className="p-1.5 text-dark-400 hover:text-primary-400 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-1.5 text-slate-400 hover:text-primary-500 hover:bg-slate-50 rounded-lg transition-colors"
               title="Mark all as read"
             >
               <Check className="w-3.5 h-3.5" />
@@ -86,7 +86,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
           {notifications.length > 0 && (
             <button
               onClick={clearAll}
-              className="p-1.5 text-dark-400 hover:text-red-400 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
               title="Clear all"
             >
               <BellOff className="w-3.5 h-3.5" />
@@ -94,7 +94,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
           )}
           <button
             onClick={onClose}
-            className="p-1.5 text-dark-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -102,11 +102,11 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Category filter tabs */}
-      <div className="flex items-center gap-1 px-3 py-2 border-b border-dark-700/50 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-100 overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setFilter('all')}
           className={`shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
-            filter === 'all' ? 'bg-dark-700 text-white' : 'text-dark-400 hover:text-white hover:bg-dark-700/50'
+            filter === 'all' ? 'bg-slate-100 text-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
           }`}
         >
           All{unreadCount > 0 ? ` (${unreadCount})` : ''}
@@ -120,7 +120,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
               key={key}
               onClick={() => setFilter(key)}
               className={`shrink-0 flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
-                filter === key ? 'bg-dark-700 text-white' : 'text-dark-400 hover:text-white hover:bg-dark-700/50'
+                filter === key ? 'bg-slate-100 text-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
               }`}
             >
               <meta.icon className={`w-3 h-3 ${filter === key ? meta.color : ''}`} />
@@ -135,9 +135,9 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
       <div className="max-h-[400px] overflow-y-auto">
         {filtered.length === 0 ? (
           <div className="py-10 text-center">
-            <Bell className="w-8 h-8 text-dark-600 mx-auto mb-2" />
-            <p className="text-sm text-dark-400">No notifications</p>
-            <p className="text-[11px] text-dark-500 mt-0.5">
+            <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-500">No notifications</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
               {filter === 'all' ? "You're all caught up!" : `No ${CATEGORY_META[filter as NotificationCategory]?.label.toLowerCase()} notifications`}
             </p>
           </div>
@@ -150,8 +150,8 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
                 <div
                   key={notif.id}
                   onClick={() => handleClick(notif)}
-                  className={`flex items-start gap-3 px-4 py-3 cursor-pointer border-b border-dark-700/30 transition-colors hover:bg-dark-700/30 ${
-                    !notif.read ? 'bg-dark-700/15' : ''
+                  className={`flex items-start gap-3 px-4 py-3 cursor-pointer border-b border-slate-50 transition-colors hover:bg-slate-50 ${
+                    !notif.read ? 'bg-primary-50/50' : ''
                   }`}
                 >
                   {/* Icon */}
@@ -165,13 +165,13 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
                       {!notif.read && (
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${PRIORITY_INDICATOR[notif.priority || 'low']}`} />
                       )}
-                      <p className={`text-xs font-medium truncate ${!notif.read ? 'text-white' : 'text-dark-300'}`}>
+                      <p className={`text-xs font-medium truncate ${!notif.read ? 'text-slate-800' : 'text-slate-500'}`}>
                         {notif.title}
                       </p>
                     </div>
-                    <p className="text-[11px] text-dark-400 mt-0.5 line-clamp-2">{notif.message}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2">{notif.message}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] text-dark-500">{timeAgo(notif.timestamp)}</span>
+                      <span className="text-[10px] text-slate-400">{timeAgo(notif.timestamp)}</span>
                       {notif.link && (
                         <span className="text-[10px] text-primary-400 flex items-center gap-0.5">
                           View <ChevronRight className="w-2.5 h-2.5" />
@@ -183,7 +183,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
                   {/* Dismiss */}
                   <button
                     onClick={(e) => { e.stopPropagation(); dismiss(notif.id); }}
-                    className="shrink-0 p-1 text-dark-600 hover:text-dark-300 transition-colors opacity-0 group-hover:opacity-100"
+                    className="shrink-0 p-1 text-slate-300 hover:text-slate-500 transition-colors"
                     title="Dismiss"
                   >
                     <X className="w-3 h-3" />
@@ -197,10 +197,10 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
 
       {/* Footer */}
       {notifications.length > 0 && (
-        <div className="px-4 py-2.5 border-t border-dark-700 text-center">
+        <div className="px-4 py-2.5 border-t border-slate-100 text-center">
           <button
             onClick={() => { router.push('/schedule', { scroll: false }); onClose(); }}
-            className="text-[11px] text-primary-400 hover:text-primary-300 font-medium transition-colors"
+            className="text-[11px] text-primary-500 hover:text-primary-600 font-medium transition-colors"
           >
             View full schedule
           </button>
@@ -260,32 +260,32 @@ export default function TopBar() {
   const agencyName = user?.agency_name || user?.business_name || 'PalmCare AI';
 
   return (
-    <div className="sticky top-0 z-20 bg-dark-900/95 backdrop-blur-sm border-b border-dark-700/50">
-      <div className="flex items-center justify-between px-4 lg:px-8 py-3">
-        {/* Left: Agency Logo / Name */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-sm">
+    <div className="sticky top-0 z-20 bg-white border-b border-slate-200">
+      <div className="flex items-center justify-between px-4 lg:px-6 py-2.5">
+        {/* Left: Agency Name */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 bg-primary-500 rounded flex items-center justify-center">
+            <span className="font-bold text-xs" style={{ color: '#fff' }}>
               {agencyName.charAt(0).toUpperCase()}
             </span>
           </div>
-          <span className="text-sm font-semibold text-white hidden sm:block">{agencyName}</span>
+          <span className="text-sm font-semibold text-slate-800 hidden sm:block">{agencyName}</span>
         </div>
 
         {/* Right: Notifications + User */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Notification Bell */}
           <div className="relative" ref={notifRef} data-tour="notifications">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               className={`relative p-2 rounded-lg transition-colors ${
-                showNotifications ? 'text-white bg-dark-700' : 'text-dark-400 hover:text-white hover:bg-dark-700'
+                showNotifications ? 'text-slate-700 bg-slate-100' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
               }`}
               title="Notifications"
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-dark-900">
+                <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-bold bg-red-500 rounded-full border-2 border-white" style={{ color: '#fff' }}>
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
@@ -300,45 +300,45 @@ export default function TopBar() {
           <div className="relative" ref={menuRef} data-tour="user-menu">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-lg hover:bg-dark-700 transition-colors"
+              className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-full flex items-center justify-center">
-                <span className="text-white font-semibold text-xs">{initials}</span>
+              <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                <span className="font-semibold text-xs" style={{ color: '#fff' }}>{initials}</span>
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-white leading-tight">{user?.full_name || 'User'}</p>
-                <p className="text-[11px] text-dark-400 leading-tight">{user?.role === 'admin' ? 'Admin' : 'Manager'}</p>
+                <p className="text-sm font-medium text-slate-800 leading-tight">{user?.full_name || 'User'}</p>
+                <p className="text-[11px] text-slate-400 leading-tight">{user?.role === 'admin' ? 'Admin' : 'Manager'}</p>
               </div>
-              <ChevronDown className={`w-4 h-4 text-dark-400 hidden sm:block transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-4 h-4 text-slate-400 hidden sm:block transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
             </button>
 
             {showUserMenu && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 overflow-hidden">
                 <button
                   onClick={() => { setShowUserMenu(false); router.push('/settings', { scroll: false }); }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
                 >
-                  <User className="w-4 h-4 text-dark-400" />
+                  <User className="w-4 h-4 text-slate-400" />
                   Profile
                 </button>
                 <button
                   onClick={() => { setShowUserMenu(false); router.push('/settings', { scroll: false }); }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
                 >
-                  <Settings className="w-4 h-4 text-dark-400" />
+                  <Settings className="w-4 h-4 text-slate-400" />
                   Settings
                 </button>
                 <button
                   onClick={() => { setShowUserMenu(false); openTour(); }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
                 >
-                  <BookOpen className="w-4 h-4 text-dark-400" />
+                  <BookOpen className="w-4 h-4 text-slate-400" />
                   App Tour
                 </button>
-                <div className="border-t border-dark-600 my-1" />
+                <div className="border-t border-slate-100 my-1" />
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out

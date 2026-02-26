@@ -135,8 +135,8 @@ const themeInitScript = `
 (function() {
   try {
     var theme = localStorage.getItem('palmcare-theme');
-    if (theme === 'light' || theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
     }
   } catch(e) {}
 })();

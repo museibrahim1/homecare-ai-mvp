@@ -69,57 +69,56 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-dark-800 via-dark-900 to-dark-950 p-12 flex-col justify-between relative overflow-hidden">
-        {/* Background decoration */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary-700 p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent-cyan/10 rounded-full blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center overflow-hidden">
               <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
             </div>
-            <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
+            <h1 className="text-2xl font-bold" style={{ color: '#fff' }}>PalmCare AI</h1>
           </div>
-          <p className="text-dark-300 text-lg mt-4">
+          <p className="text-lg mt-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
             Turn care assessments into proposal-ready contracts
           </p>
         </div>
 
         <div className="relative z-10 space-y-8">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Waves className="w-6 h-6 text-primary-400" />
+            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Waves className="w-6 h-6" style={{ color: '#fff' }} />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Care Assessment Capture</h3>
-              <p className="text-dark-300 text-sm">
+              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Care Assessment Capture</h3>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 Convert intake calls or transcripts into structured assessment signals
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-accent-green/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Zap className="w-6 h-6 text-accent-green" />
+            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Zap className="w-6 h-6" style={{ color: '#fff' }} />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Proposal-Ready Contracts</h3>
-              <p className="text-dark-300 text-sm">
+              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Proposal-Ready Contracts</h3>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 Generate service contracts faster with AI-assisted drafting and templates
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-accent-purple/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Shield className="w-6 h-6 text-accent-purple" />
+            <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Shield className="w-6 h-6" style={{ color: '#fff' }} />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Human-in-the-Loop Review</h3>
-              <p className="text-dark-300 text-sm">
+              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Human-in-the-Loop Review</h3>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 Review, edit, approve, and export contracts (plus notes/billing when needed)
               </p>
             </div>
@@ -127,37 +126,37 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10">
-          <p className="text-dark-400 text-sm">
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
             © {new Date().getFullYear()} PalmCare AI. All rights reserved.
           </p>
         </div>
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-dark-900">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
+            <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center overflow-hidden">
               <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
             </div>
-            <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
+            <h1 className="text-2xl font-bold text-slate-900">PalmCare AI</h1>
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">Welcome back</h2>
-            <p className="text-dark-300">Sign in to generate contracts from care assessments</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome back</h2>
+            <p className="text-slate-500">Sign in to generate contracts from care assessments</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-dark-200 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                 Email address
               </label>
               <input
@@ -167,17 +166,17 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input-dark w-full"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="you@company.com"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-sm font-medium text-dark-200">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700">
                   Password
                 </label>
-                <Link href="/forgot-password" className="text-sm text-primary-400 hover:text-primary-300 hover:underline">
+                <Link href="/forgot-password" className="text-sm text-primary-500 hover:text-primary-600 hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -188,7 +187,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="input-dark w-full"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="••••••••"
               />
             </div>
@@ -196,7 +195,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-6 py-3 bg-primary-500 hover:bg-primary-600 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ color: '#fff' }}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -214,9 +214,9 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-8 text-center">
-            <p className="text-dark-400 text-sm">
+            <p className="text-slate-400 text-sm">
               New to PalmCare AI?{' '}
-              <Link href="/#book-demo" className="text-primary-400 hover:underline font-medium">
+              <Link href="/#book-demo" className="text-primary-500 hover:underline font-medium">
                 Schedule a demo
               </Link>
             </p>

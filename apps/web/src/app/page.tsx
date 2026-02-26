@@ -768,7 +768,7 @@ export default function LandingPage() {
   const [navDropdown, setNavDropdown] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-dark-900 landing-dark">
       {/* ── NAVIGATION ── */}
       <nav aria-label="Main navigation" className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">

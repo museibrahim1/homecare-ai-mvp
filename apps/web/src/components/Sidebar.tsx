@@ -135,27 +135,18 @@ const NavItem = memo(function NavItem({
       scroll={false}
       prefetch={true}
       onClick={handleClick}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group cursor-pointer select-none ${
+      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group cursor-pointer select-none ${
         isActive 
-          ? 'bg-primary-500/15 text-white border border-primary-500/30' 
-          : 'text-dark-300 hover:bg-dark-700/50 hover:text-white border border-transparent'
+          ? 'bg-primary-50 text-primary-700 border-l-[3px] border-l-primary-500 -ml-px' 
+          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
       }`}
     >
-      <div className={`w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center ${
-        isActive 
-          ? 'bg-primary-500/20' 
-          : 'bg-dark-700/50 group-hover:bg-dark-600/50'
-      }`}>
-        <ItemIcon className={`w-4 h-4 ${
-          isActive ? 'text-primary-400' : 'text-dark-400 group-hover:text-white'
-        }`} />
-      </div>
-      <span className={`font-medium text-sm truncate ${isActive ? 'text-white' : ''}`}>
+      <ItemIcon className={`w-[18px] h-[18px] flex-shrink-0 ${
+        isActive ? 'text-primary-500' : 'text-slate-400 group-hover:text-slate-600'
+      }`} />
+      <span className={`text-[13px] truncate ${isActive ? 'font-semibold' : 'font-medium'}`}>
         {item.label}
       </span>
-      {isActive && (
-        <ChevronRight className="w-3.5 h-3.5 text-primary-400 flex-shrink-0 ml-auto" />
-      )}
     </Link>
   );
 });
@@ -173,13 +164,13 @@ const NavSection = memo(function NavSection({
   onNavigate: (href: string) => void;
 }) {
   return (
-    <div className="mb-5">
-      <div className="px-4 py-2 mb-2">
-        <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider">
+    <div className="mb-4">
+      <div className="px-3 py-1.5 mb-1">
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
           {title}
         </span>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {items.map((item) => {
           const isActive = pathname === item.href || 
             (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -280,23 +271,23 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-dark-800 border border-dark-700 rounded-lg text-white hover:bg-dark-700 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
         aria-label="Open menu"
       >
-        <Menu className="w-6 h-6" />
+        <Menu className="w-5 h-5" />
       </button>
 
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/60 z-[55]"
+          className="lg:hidden fixed inset-0 bg-black/30 z-[55]"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        w-72 bg-dark-800 border-r border-dark-700/50 flex flex-col h-screen flex-shrink-0
+        w-64 bg-white border-r border-slate-200 flex flex-col h-screen flex-shrink-0
         fixed lg:sticky top-0 left-0 z-[60] pointer-events-auto
         transition-transform duration-300 ease-in-out
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -304,27 +295,27 @@ export default function Sidebar() {
         {/* Mobile Close Button */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="lg:hidden absolute top-4 right-4 p-2 text-dark-400 hover:text-white transition-colors"
+          className="lg:hidden absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
           aria-label="Close menu"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Logo */}
-        <div className="px-6 py-6 flex-shrink-0">
-          <Link href="/dashboard" className="flex items-center gap-4" onClick={(e) => { e.preventDefault(); handleNavigate('/dashboard'); }}>
-            <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 overflow-hidden">
-              <Image src="/hand-icon-white.png" alt="Palm Technologies" width={36} height={36} className="object-contain" />
+        <div className="px-5 py-5 flex-shrink-0 border-b border-slate-100">
+          <Link href="/dashboard" className="flex items-center gap-3" onClick={(e) => { e.preventDefault(); handleNavigate('/dashboard'); }}>
+            <div className="w-9 h-9 flex-shrink-0 bg-primary-500 rounded-lg flex items-center justify-center overflow-hidden">
+              <Image src="/hand-icon-white.png" alt="Palm Technologies" width={26} height={26} className="object-contain" />
             </div>
             <div className="min-w-0">
-              <span className="text-xl font-bold text-white block">PalmCare AI</span>
-              <span className="text-xs text-dark-400">Contracts & proposals</span>
+              <span className="text-base font-bold text-slate-900 block leading-tight">PalmCare AI</span>
+              <span className="text-[11px] text-slate-400 leading-tight">Home Care Platform</span>
             </div>
           </Link>
         </div>
 
         {/* Main Navigation */}
-        <nav ref={navRef} data-tour="sidebar-nav" className="flex-1 px-4 pb-4 overflow-y-auto overflow-x-hidden min-h-0">
+        <nav ref={navRef} data-tour="sidebar-nav" className="flex-1 px-3 py-3 overflow-y-auto overflow-x-hidden min-h-0">
           <NavSection title="Sales" items={salesNavItems} pathname={pathname} onNavigate={handleNavigate} />
           <NavSection title="Clients" items={clientsNavItems} pathname={pathname} onNavigate={handleNavigate} />
           <NavSection title="Communication" items={communicationNavItems} pathname={pathname} onNavigate={handleNavigate} />
@@ -333,14 +324,14 @@ export default function Sidebar() {
 
           {/* Platform Admin Section */}
           {isAdmin && (
-            <div className="mb-6">
-              <div className="px-4 py-2 mb-2">
-                <span className="text-[11px] font-semibold text-dark-500 uppercase tracking-wider flex items-center gap-2">
+            <div className="mb-4">
+              <div className="px-3 py-2 mb-1">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <Shield className="w-3 h-3" />
                   Platform Admin
                 </span>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-0.5">
                 {adminNavItems.map((item) => {
                   const isActive = pathname === item.href || 
                     (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -354,38 +345,34 @@ export default function Sidebar() {
         </nav>
 
         {/* Theme Toggle */}
-        <div className="px-4 pb-2 flex-shrink-0">
+        <div className="px-3 pb-2 flex-shrink-0">
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-dark-300 hover:bg-dark-700/50 hover:text-white transition-all duration-200 border border-dark-700/50 hover:border-dark-600"
+            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors text-[13px] font-medium"
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-dark-700/50">
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-indigo-400" />
-              )}
-            </div>
-            <span className="text-sm font-medium">
-              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-            </span>
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-500" />
+            ) : (
+              <Moon className="w-4 h-4 text-slate-400" />
+            )}
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
           </button>
         </div>
 
         {/* User Section */}
-        <div className="p-4 border-t border-dark-700/50 bg-dark-800/50 flex-shrink-0">
-          <div className="flex items-center gap-4 px-3 py-3 mb-3 bg-dark-700/30 rounded-xl">
-            <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-lg">
+        <div className="px-3 pb-3 pt-2 border-t border-slate-100 flex-shrink-0">
+          <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-lg bg-slate-50">
+            <div className="w-9 h-9 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-semibold text-sm" style={{ color: '#fff' }}>
                 {user?.full_name?.charAt(0) || 'A'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white font-medium truncate text-sm">
+              <p className="text-slate-900 font-medium truncate text-[13px]">
                 {user?.full_name || 'Admin User'}
               </p>
-              <p className="text-dark-400 text-xs truncate">
+              <p className="text-slate-400 text-[11px] truncate">
                 {user?.email || 'admin@palmtai.com'}
               </p>
             </div>
@@ -393,10 +380,10 @@ export default function Sidebar() {
           
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 w-full rounded-xl text-dark-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 border border-dark-700/50 hover:border-red-500/30"
+            className="flex items-center justify-center gap-2 px-3 py-2 w-full rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors text-[13px] font-medium"
           >
             <LogOut className="w-4 h-4" />
-            <span className="text-sm font-medium">Sign Out</span>
+            Sign Out
           </button>
         </div>
       </aside>
