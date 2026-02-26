@@ -22,9 +22,9 @@ type Lead = {
 };
 
 const statusColors: Record<string, string> = {
-  'New': 'bg-blue-500/20 text-blue-400',
-  'Contacted': 'bg-yellow-500/20 text-yellow-400',
-  'Qualified': 'bg-green-500/20 text-green-400',
+  'New': 'bg-blue-50 text-blue-600',
+  'Contacted': 'bg-amber-50 text-amber-600',
+  'Qualified': 'bg-emerald-50 text-emerald-600',
 };
 
 const sources = ['Website', 'Referral', 'Google Ads', 'Facebook', 'Instagram', 'Phone Call', 'Other'];
@@ -198,7 +198,7 @@ export default function LeadsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Leads</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Leads</h1>
             <p className="text-slate-500">Manage and track potential clients</p>
           </div>
           <button 
@@ -222,7 +222,7 @@ export default function LeadsPage() {
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-white transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
             <Filter className="w-5 h-5" />
             Filter
           </button>
@@ -232,7 +232,7 @@ export default function LeadsPage() {
         {leads.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
             <UserPlus className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Leads Yet</h3>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">No Leads Yet</h3>
             <p className="text-slate-500 mb-6">Start tracking potential clients by adding your first lead</p>
             <button 
               onClick={() => setShowAddModal(true)}
@@ -265,7 +265,7 @@ export default function LeadsPage() {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                           <span className="text-primary-400 font-medium">{lead.name.charAt(0)}</span>
                         </div>
                         <span className="font-medium text-white">{lead.name}</span>
@@ -294,12 +294,12 @@ export default function LeadsPage() {
                       <button 
                         onClick={() => handleDeleteLead(lead.id)}
                         disabled={deletingId === lead.id}
-                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         {deletingId === lead.id ? (
-                          <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
+                          <Loader2 className="w-5 h-5 text-red-600 animate-spin" />
                         ) : (
-                          <Trash2 className="w-5 h-5 text-slate-500 hover:text-red-400" />
+                          <Trash2 className="w-5 h-5 text-slate-500 hover:text-red-600" />
                         )}
                       </button>
                     </td>
@@ -315,7 +315,7 @@ export default function LeadsPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Add New Lead</h2>
+                <h2 className="text-xl font-bold text-slate-900">Add New Lead</h2>
                 <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
@@ -383,7 +383,7 @@ export default function LeadsPage() {
                       onClick={() => setNewLead({ ...newLead, insurance_type: 'medicaid' })}
                       className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         newLead.insurance_type === 'medicaid'
-                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
+                          ? 'bg-blue-50 text-blue-600 border border-blue-500/50'
                           : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
                       }`}
                     >
@@ -394,7 +394,7 @@ export default function LeadsPage() {
                       onClick={() => setNewLead({ ...newLead, insurance_type: 'medicare' })}
                       className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         newLead.insurance_type === 'medicare'
-                          ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                          ? 'bg-emerald-50 text-emerald-600 border border-green-500/50'
                           : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
                       }`}
                     >
@@ -405,7 +405,7 @@ export default function LeadsPage() {
                       onClick={() => setNewLead({ ...newLead, insurance_type: 'private' })}
                       className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         newLead.insurance_type === 'private'
-                          ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50'
+                          ? 'bg-purple-50 text-purple-600 border border-purple-500/50'
                           : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
                       }`}
                     >
@@ -447,7 +447,7 @@ export default function LeadsPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">{selectedLead.name}</h2>
+                <h2 className="text-xl font-bold text-slate-900">{selectedLead.name}</h2>
                 <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
@@ -487,7 +487,7 @@ export default function LeadsPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => handleDeleteLead(selectedLead.id)}
-                  className="flex-1 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors font-medium"
+                  className="flex-1 px-4 py-2.5 bg-red-50 hover:bg-red-500/30 text-red-600 rounded-lg transition-colors font-medium"
                 >
                   Delete Lead
                 </button>
@@ -508,14 +508,14 @@ export default function LeadsPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Convert to Client</h2>
+                <h2 className="text-xl font-bold text-slate-900">Convert to Client</h2>
                 <button onClick={() => setShowConvertModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               
               <div className="mb-6 p-4 bg-slate-50 rounded-lg">
-                <p className="text-white font-medium">{selectedLead.name}</p>
+                <p className="text-slate-900 font-medium">{selectedLead.name}</p>
                 <p className="text-slate-500 text-sm">{selectedLead.email || 'No email'}</p>
                 <p className="text-slate-500 text-sm">{selectedLead.phone || 'No phone'}</p>
               </div>
@@ -529,7 +529,7 @@ export default function LeadsPage() {
                       onClick={() => setConvertData(prev => ({ ...prev, insurance_type: 'medicaid' }))}
                       className={`flex flex-col items-center gap-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${
                         convertData.insurance_type === 'medicaid'
-                          ? 'bg-blue-500/20 text-blue-400 border-2 border-blue-500/50'
+                          ? 'bg-blue-50 text-blue-600 border-2 border-blue-500/50'
                           : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:border-slate-300'
                       }`}
                     >
@@ -541,7 +541,7 @@ export default function LeadsPage() {
                       onClick={() => setConvertData(prev => ({ ...prev, insurance_type: 'medicare' }))}
                       className={`flex flex-col items-center gap-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${
                         convertData.insurance_type === 'medicare'
-                          ? 'bg-green-500/20 text-green-400 border-2 border-green-500/50'
+                          ? 'bg-emerald-50 text-emerald-600 border-2 border-green-500/50'
                           : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:border-slate-300'
                       }`}
                     >
@@ -553,7 +553,7 @@ export default function LeadsPage() {
                       onClick={() => setConvertData(prev => ({ ...prev, insurance_type: 'private' }))}
                       className={`flex flex-col items-center gap-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${
                         convertData.insurance_type === 'private'
-                          ? 'bg-purple-500/20 text-purple-400 border-2 border-purple-500/50'
+                          ? 'bg-purple-50 text-purple-600 border-2 border-purple-500/50'
                           : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:border-slate-300'
                       }`}
                     >

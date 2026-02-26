@@ -50,18 +50,18 @@ interface TicketDetail {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  open: 'bg-yellow-500/20 text-yellow-400',
-  in_progress: 'bg-blue-500/20 text-blue-400',
-  waiting_on_customer: 'bg-purple-500/20 text-purple-400',
-  resolved: 'bg-green-500/20 text-green-400',
+  open: 'bg-amber-50 text-amber-600',
+  in_progress: 'bg-blue-50 text-blue-600',
+  waiting_on_customer: 'bg-purple-50 text-purple-600',
+  resolved: 'bg-emerald-50 text-emerald-600',
   closed: 'bg-slate-200/20 text-slate-500',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
   low: 'text-slate-500',
-  medium: 'text-blue-400',
-  high: 'text-orange-400',
-  urgent: 'text-red-400',
+  medium: 'text-blue-600',
+  high: 'text-orange-600',
+  urgent: 'text-red-600',
 };
 
 export default function SupportTicketsPage() {
@@ -218,10 +218,10 @@ export default function SupportTicketsPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Support Ticket Management</p>
+            <p className="text-blue-600 font-medium">Support Ticket Management</p>
             <p className="text-blue-300/70 text-sm mt-1">
               Handle support requests from businesses. No client data is shared in tickets.
             </p>
@@ -238,7 +238,7 @@ export default function SupportTicketsPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Support Tickets</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Support Tickets</h1>
               <p className="text-slate-500 mt-1">Manage support requests</p>
             </div>
           </div>
@@ -252,10 +252,10 @@ export default function SupportTicketsPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -314,7 +314,7 @@ export default function SupportTicketsPage() {
                         {ticket.status.replace(/_/g, ' ')}
                       </span>
                     </div>
-                    <p className="text-white text-sm font-medium truncate">{ticket.subject}</p>
+                    <p className="text-slate-900 text-sm font-medium truncate">{ticket.subject}</p>
                     <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
                       <span className={PRIORITY_COLORS[ticket.priority]}>{ticket.priority}</span>
                       <span>{ticket.business_name || 'Unknown'}</span>
@@ -362,7 +362,7 @@ export default function SupportTicketsPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-slate-400 text-xs font-mono mb-1">{selectedTicket.ticket_number}</p>
-                      <h2 className="text-lg font-medium text-white">{selectedTicket.subject}</h2>
+                      <h2 className="text-lg font-medium text-slate-900">{selectedTicket.subject}</h2>
                       <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
                         <span>{selectedTicket.business_name || 'No Business'}</span>
                         <span className={PRIORITY_COLORS[selectedTicket.priority]}>
@@ -374,7 +374,7 @@ export default function SupportTicketsPage() {
                       <select
                         value={selectedTicket.status}
                         onChange={e => updateStatus(e.target.value)}
-                        className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-white text-sm focus:outline-none"
+                        className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none"
                       >
                         <option value="open">Open</option>
                         <option value="in_progress">In Progress</option>
@@ -392,7 +392,7 @@ export default function SupportTicketsPage() {
                   <div className="p-4 bg-slate-50 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <User className="w-4 h-4 text-slate-500" />
-                      <span className="text-white text-sm font-medium">
+                      <span className="text-slate-900 text-sm font-medium">
                         {selectedTicket.submitted_by_name || selectedTicket.submitted_by_email}
                       </span>
                       <span className="text-slate-400 text-xs">
@@ -408,7 +408,7 @@ export default function SupportTicketsPage() {
                       key={response.id}
                       className={`p-4 rounded-lg ${
                         response.is_admin 
-                          ? 'bg-primary-500/10 border border-primary-500/30 ml-8' 
+                          ? 'bg-primary-50 border border-primary-200 ml-8' 
                           : 'bg-slate-50 mr-8'
                       }`}
                     >

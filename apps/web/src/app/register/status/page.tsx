@@ -24,13 +24,13 @@ interface StatusData {
 const STATUS_CONFIG: Record<string, { icon: any; color: string; label: string; message: string }> = {
   pending: {
     icon: Clock,
-    color: 'text-yellow-400',
+    color: 'text-amber-600',
     label: 'Pending',
     message: 'Please complete document upload to proceed with verification.',
   },
   sos_verified: {
     icon: Shield,
-    color: 'text-blue-400',
+    color: 'text-blue-600',
     label: 'State Verified',
     message: 'Your business has been verified with state records. Please upload required documents.',
   },
@@ -42,19 +42,19 @@ const STATUS_CONFIG: Record<string, { icon: any; color: string; label: string; m
   },
   approved: {
     icon: CheckCircle,
-    color: 'text-green-400',
+    color: 'text-emerald-600',
     label: 'Approved',
     message: 'Congratulations! Your business has been approved. You can now log in.',
   },
   rejected: {
     icon: XCircle,
-    color: 'text-red-400',
+    color: 'text-red-600',
     label: 'Rejected',
     message: 'Your registration was not approved. Please see the reason below.',
   },
   suspended: {
     icon: AlertCircle,
-    color: 'text-orange-400',
+    color: 'text-orange-600',
     label: 'Suspended',
     message: 'Your account has been suspended. Please contact support.',
   },
@@ -105,7 +105,7 @@ function StatusContent() {
         <div className="mb-8">
           <button
             onClick={() => router.push('/register')}
-            className="flex items-center gap-2 text-slate-500 hover:text-white transition"
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Registration
@@ -114,7 +114,7 @@ function StatusContent() {
 
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
           <div className="p-6 border-b border-slate-200">
-            <h1 className="text-2xl font-bold text-white">Registration Status</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Registration Status</h1>
             <p className="text-slate-500 mt-1">Track your business verification progress</p>
           </div>
 
@@ -125,7 +125,7 @@ function StatusContent() {
               </div>
             ) : error ? (
               <div className="text-center py-12">
-                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
                 <p className="text-slate-600">{error}</p>
                 <button
                   onClick={fetchStatus}
@@ -138,14 +138,14 @@ function StatusContent() {
               <div className="space-y-6">
                 {/* Status Badge */}
                 <div className={`p-6 rounded-xl ${
-                  status.verification_status === 'approved' ? 'bg-green-500/10' :
-                  status.verification_status === 'rejected' ? 'bg-red-500/10' :
+                  status.verification_status === 'approved' ? 'bg-emerald-50' :
+                  status.verification_status === 'rejected' ? 'bg-red-50' :
                   'bg-slate-50'
                 }`}>
                   <div className="flex items-center gap-4">
                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                      status.verification_status === 'approved' ? 'bg-green-500/20' :
-                      status.verification_status === 'rejected' ? 'bg-red-500/20' :
+                      status.verification_status === 'approved' ? 'bg-emerald-50' :
+                      status.verification_status === 'rejected' ? 'bg-red-50' :
                       'bg-slate-100'
                     }`}>
                       <StatusIcon className={`w-8 h-8 ${statusConfig?.color}`} />
@@ -163,7 +163,7 @@ function StatusContent() {
                 {/* Business Info */}
                 <div className="p-4 bg-slate-50 rounded-xl">
                   <p className="text-sm text-slate-500">Business Name</p>
-                  <p className="text-white font-medium">{status.business_name}</p>
+                  <p className="text-slate-900 font-medium">{status.business_name}</p>
                 </div>
 
                 {/* Verification Steps */}
@@ -174,7 +174,7 @@ function StatusContent() {
                   
                   <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                     {status.sos_verified ? (
-                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <CheckCircle className="w-5 h-5 text-emerald-600" />
                     ) : (
                       <Clock className="w-5 h-5 text-slate-500" />
                     )}
@@ -185,7 +185,7 @@ function StatusContent() {
 
                   <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                     {status.documents_submitted > 0 ? (
-                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <CheckCircle className="w-5 h-5 text-emerald-600" />
                     ) : (
                       <Clock className="w-5 h-5 text-slate-500" />
                     )}
@@ -196,7 +196,7 @@ function StatusContent() {
 
                   <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                     {status.verification_status === 'approved' ? (
-                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <CheckCircle className="w-5 h-5 text-emerald-600" />
                     ) : (
                       <Clock className="w-5 h-5 text-slate-500" />
                     )}
@@ -208,8 +208,8 @@ function StatusContent() {
 
                 {/* Missing Documents */}
                 {status.documents_required.length > 0 && (
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-                    <p className="text-yellow-400 font-medium mb-2">Missing Documents</p>
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <p className="text-amber-600 font-medium mb-2">Missing Documents</p>
                     <ul className="space-y-1">
                       {status.documents_required.map(doc => (
                         <li key={doc} className="text-slate-600 text-sm flex items-center gap-2">
@@ -223,8 +223,8 @@ function StatusContent() {
 
                 {/* Rejection Reason */}
                 {status.rejection_reason && (
-                  <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                    <p className="text-red-400 font-medium mb-2">Rejection Reason</p>
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-red-600 font-medium mb-2">Rejection Reason</p>
                     <p className="text-slate-600">{status.rejection_reason}</p>
                   </div>
                 )}

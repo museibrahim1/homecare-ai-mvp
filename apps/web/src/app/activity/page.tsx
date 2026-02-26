@@ -16,12 +16,12 @@ const mockActivities = [
 ];
 
 const typeConfig: Record<string, { color: string; bgColor: string }> = {
-  create: { color: 'text-green-400', bgColor: 'bg-green-500/20' },
-  update: { color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  complete: { color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
-  generate: { color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
-  schedule: { color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
-  message: { color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
+  create: { color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
+  update: { color: 'text-blue-600', bgColor: 'bg-blue-50' },
+  complete: { color: 'text-purple-600', bgColor: 'bg-purple-50' },
+  generate: { color: 'text-orange-600', bgColor: 'bg-orange-50' },
+  schedule: { color: 'text-cyan-600', bgColor: 'bg-cyan-50' },
+  message: { color: 'text-pink-600', bgColor: 'bg-pink-500/20' },
 };
 
 export default function ActivityPage() {
@@ -34,10 +34,10 @@ export default function ActivityPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Activity Monitor</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Activity Monitor</h1>
             <p className="text-slate-500">Track team actions and system activity</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-white transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
             <Clock className="w-5 h-5" />
             Last 24 hours
           </button>
@@ -50,31 +50,31 @@ export default function ActivityPage() {
               <Activity className="w-5 h-5 text-primary-400" />
               <span className="text-slate-500 text-sm">Total Actions</span>
             </div>
-            <p className="text-2xl font-bold text-white">156</p>
-            <span className="text-xs text-green-400">+12% from yesterday</span>
+            <p className="text-2xl font-bold text-slate-900">156</p>
+            <span className="text-xs text-emerald-600">+12% from yesterday</span>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
-              <User className="w-5 h-5 text-blue-400" />
+              <User className="w-5 h-5 text-blue-600" />
               <span className="text-slate-500 text-sm">Active Users</span>
             </div>
-            <p className="text-2xl font-bold text-white">8</p>
+            <p className="text-2xl font-bold text-slate-900">8</p>
             <span className="text-xs text-slate-400">out of 12 team members</span>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
-              <FileText className="w-5 h-5 text-green-400" />
+              <FileText className="w-5 h-5 text-emerald-600" />
               <span className="text-slate-500 text-sm">Documents Created</span>
             </div>
-            <p className="text-2xl font-bold text-white">23</p>
+            <p className="text-2xl font-bold text-slate-900">23</p>
             <span className="text-xs text-slate-400">contracts & care plans</span>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
-              <Calendar className="w-5 h-5 text-purple-400" />
+              <Calendar className="w-5 h-5 text-purple-600" />
               <span className="text-slate-500 text-sm">Visits Scheduled</span>
             </div>
-            <p className="text-2xl font-bold text-white">45</p>
+            <p className="text-2xl font-bold text-slate-900">45</p>
             <span className="text-xs text-slate-400">for this week</span>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function ActivityPage() {
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-white transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
             <Filter className="w-5 h-5" />
             Filter
           </button>
@@ -98,7 +98,7 @@ export default function ActivityPage() {
         {/* Activity Feed */}
         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="p-4 border-b border-slate-200">
-            <h2 className="font-semibold text-white">Recent Activity</h2>
+            <h2 className="font-semibold text-slate-900">Recent Activity</h2>
           </div>
           <div className="divide-y divide-slate-200/30">
             {activities.map(activity => {

@@ -57,11 +57,11 @@ function BillingSuccessContent() {
               <CheckCircle2 className="w-12 h-12 text-emerald-400" />
             </div>
           </div>
-          <Sparkles className="w-6 h-6 text-amber-400 absolute top-0 right-1/3 animate-bounce" />
+          <Sparkles className="w-6 h-6 text-amber-600 absolute top-0 right-1/3 animate-bounce" />
           <Sparkles className="w-5 h-5 text-primary-400 absolute bottom-2 left-1/3 animate-bounce delay-300" />
         </div>
 
-        <h1 className="text-3xl font-bold text-white mb-3">
+        <h1 className="text-3xl font-bold text-slate-900 mb-3">
           Payment Successful!
         </h1>
         <p className="text-slate-600 text-lg mb-8">
@@ -78,11 +78,11 @@ function BillingSuccessContent() {
               { icon: Users, label: 'Full Team Access', desc: 'Invite your team and assign roles' },
             ].map(({ icon: Icon, label, desc }) => (
               <div key={label} className="flex items-center gap-3 p-3 bg-white rounded-xl">
-                <div className="w-10 h-10 rounded-xl bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
                   <Icon className="w-5 h-5 text-primary-400" />
                 </div>
                 <div>
-                  <p className="text-white text-sm font-medium">{label}</p>
+                  <p className="text-slate-900 text-sm font-medium">{label}</p>
                   <p className="text-slate-500 text-xs">{desc}</p>
                 </div>
               </div>
@@ -93,13 +93,13 @@ function BillingSuccessContent() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/billing"
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-primary-500/20"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 text-slate-900 font-semibold rounded-xl transition-all shadow-lg shadow-primary-500/20"
           >
             Go to Billing <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-white font-medium rounded-xl transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-900 font-medium rounded-xl transition-all"
           >
             Back to Dashboard
           </Link>

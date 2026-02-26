@@ -185,7 +185,7 @@ function QuickAddModal({
     <div className="fixed inset-0 z-50 flex items-start justify-end p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
-      <div className="relative bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 mt-20 mr-4 max-h-[85vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl w-full max-w-md shadow-lg border border-slate-200 mt-20 mr-4 max-h-[85vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-slate-200 sticky top-0 bg-white z-10">
           <h3 className="text-lg font-semibold text-slate-900">Add New Client</h3>
@@ -412,7 +412,7 @@ function ClientAvatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' 
   };
   
   return (
-    <div className={`${sizeClasses[size]} rounded-full ${colors[colorIndex]} flex items-center justify-center font-semibold text-white`}>
+    <div className={`${sizeClasses[size]} rounded-full ${colors[colorIndex]} flex items-center justify-center font-semibold text-slate-900`}>
       {initials}
     </div>
   );
@@ -792,7 +792,7 @@ export default function ClientsPage() {
                   <MoreHorizontal className="w-5 h-5" />
                 </button>
                 {showPlusMenu && (
-                  <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden">
+                  <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1.5 overflow-hidden">
                     <button
                       onClick={() => { setQuickAddOpen(true); setShowPlusMenu(false); }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"

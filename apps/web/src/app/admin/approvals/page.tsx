@@ -72,12 +72,12 @@ interface Stats {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-500/20 text-yellow-400',
-  sos_verified: 'bg-blue-500/20 text-blue-400',
-  documents_submitted: 'bg-purple-500/20 text-purple-400',
-  approved: 'bg-green-500/20 text-green-400',
-  rejected: 'bg-red-500/20 text-red-400',
-  suspended: 'bg-orange-500/20 text-orange-400',
+  pending: 'bg-amber-50 text-amber-600',
+  sos_verified: 'bg-blue-50 text-blue-600',
+  documents_submitted: 'bg-purple-50 text-purple-600',
+  approved: 'bg-emerald-50 text-emerald-600',
+  rejected: 'bg-red-50 text-red-600',
+  suspended: 'bg-orange-50 text-orange-600',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -288,10 +288,10 @@ export default function AdminApprovalsPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Platform Admin Access</p>
+            <p className="text-blue-600 font-medium">Platform Admin Access</p>
             <p className="text-blue-300/70 text-sm mt-1">
               This dashboard shows business registration data only. Client/patient data is not accessible 
               from this view in compliance with HIPAA regulations. Each business manages their own client data.
@@ -309,7 +309,7 @@ export default function AdminApprovalsPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Business Approvals</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Business Approvals</h1>
               <p className="text-slate-500 mt-1">Review and approve business registrations</p>
             </div>
           </div>
@@ -326,23 +326,23 @@ export default function AdminApprovalsPage() {
           <div className="grid grid-cols-5 gap-4 mb-8">
             <div className="p-4 bg-white rounded-xl border border-slate-200">
               <p className="text-slate-500 text-sm">Total</p>
-              <p className="text-2xl font-bold text-white">{stats.total_businesses}</p>
+              <p className="text-2xl font-bold text-slate-900">{stats.total_businesses}</p>
             </div>
-            <div className="p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/30">
-              <p className="text-yellow-400 text-sm">Pending</p>
-              <p className="text-2xl font-bold text-yellow-400">{stats.pending_approval}</p>
+            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
+              <p className="text-amber-600 text-sm">Pending</p>
+              <p className="text-2xl font-bold text-amber-600">{stats.pending_approval}</p>
             </div>
-            <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/30">
-              <p className="text-green-400 text-sm">Approved</p>
-              <p className="text-2xl font-bold text-green-400">{stats.approved}</p>
+            <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+              <p className="text-emerald-600 text-sm">Approved</p>
+              <p className="text-2xl font-bold text-emerald-600">{stats.approved}</p>
             </div>
-            <div className="p-4 bg-red-500/10 rounded-xl border border-red-500/30">
-              <p className="text-red-400 text-sm">Rejected</p>
-              <p className="text-2xl font-bold text-red-400">{stats.rejected}</p>
+            <div className="p-4 bg-red-50 rounded-xl border border-red-200">
+              <p className="text-red-600 text-sm">Rejected</p>
+              <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
             </div>
-            <div className="p-4 bg-orange-500/10 rounded-xl border border-orange-500/30">
-              <p className="text-orange-400 text-sm">Suspended</p>
-              <p className="text-2xl font-bold text-orange-400">{stats.suspended}</p>
+            <div className="p-4 bg-orange-50 rounded-xl border border-orange-200">
+              <p className="text-orange-600 text-sm">Suspended</p>
+              <p className="text-2xl font-bold text-orange-600">{stats.suspended}</p>
             </div>
           </div>
         )}
@@ -355,7 +355,7 @@ export default function AdminApprovalsPage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-white'
+                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -480,16 +480,16 @@ export default function AdminApprovalsPage() {
                   {selectedBusiness.sos_verification_data && (
                     <div>
                       <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">SOS Verification</h3>
-                      <div className={`p-3 rounded-lg ${selectedBusiness.sos_verification_data.found ? 'bg-green-500/10' : 'bg-yellow-500/10'}`}>
+                      <div className={`p-3 rounded-lg ${selectedBusiness.sos_verification_data.found ? 'bg-emerald-50' : 'bg-amber-50'}`}>
                         {selectedBusiness.sos_verification_data.found ? (
                           <div className="text-sm">
-                            <p className="text-green-400 font-medium flex items-center gap-2">
+                            <p className="text-emerald-600 font-medium flex items-center gap-2">
                               <CheckCircle className="w-4 h-4" /> Verified
                             </p>
                             <p className="text-slate-600 mt-1">Status: {selectedBusiness.sos_verification_data.status}</p>
                           </div>
                         ) : (
-                          <p className="text-yellow-400 text-sm flex items-center gap-2">
+                          <p className="text-amber-600 text-sm flex items-center gap-2">
                             <AlertTriangle className="w-4 h-4" /> Not found in state records
                           </p>
                         )}
@@ -506,7 +506,7 @@ export default function AdminApprovalsPage() {
                           <div className="flex items-center gap-2">
                             <FileText className="w-4 h-4 text-slate-500" />
                             <div>
-                              <p className="text-sm text-white">{doc.document_type.replace(/_/g, ' ')}</p>
+                              <p className="text-sm text-slate-500">{doc.document_type.replace(/_/g, ' ')}</p>
                               <p className="text-xs text-slate-500">{doc.file_name}</p>
                             </div>
                           </div>
@@ -528,7 +528,7 @@ export default function AdminApprovalsPage() {
                       <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
                         <User className="w-8 h-8 text-slate-500 p-1.5 bg-slate-100 rounded-full" />
                         <div>
-                          <p className="text-sm text-white">{selectedBusiness.owner.full_name}</p>
+                          <p className="text-sm text-slate-500">{selectedBusiness.owner.full_name}</p>
                           <p className="text-xs text-slate-500">{selectedBusiness.owner.email}</p>
                         </div>
                       </div>
@@ -543,7 +543,7 @@ export default function AdminApprovalsPage() {
                     <button
                       onClick={() => setShowRejectModal(true)}
                       disabled={actionLoading}
-                      className="flex-1 px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition disabled:opacity-50"
+                      className="flex-1 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-500/30 transition disabled:opacity-50"
                     >
                       Reject
                     </button>
@@ -559,7 +559,7 @@ export default function AdminApprovalsPage() {
                 )}
               </div>
             ) : detailError ? (
-              <div className="flex flex-col items-center justify-center h-96 text-red-400 p-4">
+              <div className="flex flex-col items-center justify-center h-96 text-red-600 p-4">
                 <AlertTriangle className="w-12 h-12 mb-4 opacity-50" />
                 <p className="text-center">{detailError}</p>
                 <button 
@@ -583,7 +583,7 @@ export default function AdminApprovalsPage() {
       {showRejectModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl border border-slate-200 p-6 w-full max-w-md">
-            <h3 className="text-lg font-bold text-white mb-4">Reject Application</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Reject Application</h3>
             <p className="text-slate-500 mb-4">
               Please provide a reason for rejecting this business application.
             </p>

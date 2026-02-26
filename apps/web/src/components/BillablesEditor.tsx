@@ -27,99 +27,99 @@ const categoryConfig: Record<string, {
 }> = {
   ADL_HYGIENE: { 
     label: 'Bathing & Hygiene', 
-    color: 'text-blue-400', 
-    bgColor: 'bg-blue-500/20',
+    color: 'text-blue-600', 
+    bgColor: 'bg-blue-50',
     icon: Heart,
     serviceType: 'Personal Care'
   },
   ADL_DRESSING: { 
     label: 'Dressing Assistance', 
-    color: 'text-blue-400', 
-    bgColor: 'bg-blue-500/20',
+    color: 'text-blue-600', 
+    bgColor: 'bg-blue-50',
     icon: Heart,
     serviceType: 'Personal Care'
   },
   ADL_GROOMING: { 
     label: 'Grooming', 
-    color: 'text-blue-400', 
-    bgColor: 'bg-blue-500/20',
+    color: 'text-blue-600', 
+    bgColor: 'bg-blue-50',
     icon: Heart,
     serviceType: 'Personal Care'
   },
   MEAL_PREP: { 
     label: 'Meal Preparation', 
-    color: 'text-green-400', 
-    bgColor: 'bg-green-500/20',
+    color: 'text-emerald-600', 
+    bgColor: 'bg-emerald-50',
     icon: Utensils,
     serviceType: 'Nutrition'
   },
   MEAL_ASSIST: { 
     label: 'Feeding Assistance', 
-    color: 'text-green-400', 
-    bgColor: 'bg-green-500/20',
+    color: 'text-emerald-600', 
+    bgColor: 'bg-emerald-50',
     icon: Utensils,
     serviceType: 'Nutrition'
   },
   MED_REMINDER: { 
     label: 'Medication Management', 
-    color: 'text-orange-400', 
-    bgColor: 'bg-orange-500/20',
+    color: 'text-orange-600', 
+    bgColor: 'bg-orange-50',
     icon: Pill,
     serviceType: 'Medication'
   },
   VITALS: { 
     label: 'Vital Signs Monitoring', 
-    color: 'text-red-400', 
-    bgColor: 'bg-red-500/20',
+    color: 'text-red-600', 
+    bgColor: 'bg-red-50',
     icon: Activity,
     serviceType: 'Health Monitoring'
   },
   ADL_MOBILITY: { 
     label: 'Mobility Assistance', 
-    color: 'text-cyan-400', 
-    bgColor: 'bg-cyan-500/20',
+    color: 'text-cyan-600', 
+    bgColor: 'bg-cyan-50',
     icon: PersonStanding,
     serviceType: 'Mobility'
   },
   MOBILITY_ASSIST: { 
     label: 'Transfer Assistance', 
-    color: 'text-cyan-400', 
-    bgColor: 'bg-cyan-500/20',
+    color: 'text-cyan-600', 
+    bgColor: 'bg-cyan-50',
     icon: PersonStanding,
     serviceType: 'Mobility'
   },
   EXERCISE: { 
     label: 'Exercise & Therapy', 
-    color: 'text-cyan-400', 
-    bgColor: 'bg-cyan-500/20',
+    color: 'text-cyan-600', 
+    bgColor: 'bg-cyan-50',
     icon: PersonStanding,
     serviceType: 'Mobility'
   },
   HOUSEHOLD_LIGHT: { 
     label: 'Light Housekeeping', 
-    color: 'text-purple-400', 
-    bgColor: 'bg-purple-500/20',
+    color: 'text-purple-600', 
+    bgColor: 'bg-purple-50',
     icon: Home,
     serviceType: 'Homemaking'
   },
   HOUSEHOLD_LAUNDRY: { 
     label: 'Laundry Services', 
-    color: 'text-purple-400', 
-    bgColor: 'bg-purple-500/20',
+    color: 'text-purple-600', 
+    bgColor: 'bg-purple-50',
     icon: Home,
     serviceType: 'Homemaking'
   },
   COMPANIONSHIP: { 
     label: 'Companionship', 
-    color: 'text-pink-400', 
+    color: 'text-pink-600', 
     bgColor: 'bg-pink-500/20',
     icon: Users,
     serviceType: 'Companionship'
   },
   SUPERVISION: { 
     label: 'Safety Supervision', 
-    color: 'text-yellow-400', 
-    bgColor: 'bg-yellow-500/20',
+    color: 'text-amber-600', 
+    bgColor: 'bg-amber-50',
     icon: Shield,
     serviceType: 'Safety'
   },
@@ -173,7 +173,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
         <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <DollarSign className="w-8 h-8 text-slate-500" />
         </div>
-        <h3 className="text-lg font-semibold text-white mb-2">No Services Detected</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">No Services Detected</h3>
         <p className="text-slate-500 mb-2">Run the billing analysis to extract services from the transcript</p>
         <p className="text-sm text-slate-400">AI will identify care services mentioned in the conversation</p>
       </div>
@@ -185,11 +185,11 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-green-400" />
+          <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Identified Care Services</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Identified Care Services</h3>
             <p className="text-slate-500 text-sm">
               {items.length} service{items.length !== 1 ? 's' : ''} extracted from transcript
             </p>
@@ -197,11 +197,11 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
         </div>
         <div className="flex items-center gap-3">
           {flaggedCount > 0 && (
-            <span className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-lg text-sm">
+            <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-lg text-sm">
               {flaggedCount} to review
             </span>
           )}
-          <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-lg text-sm">
+          <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-sm">
             {approvedCount}/{items.length} approved
           </span>
           {approvedCount < items.length && (
@@ -226,7 +226,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
               {/* Service Type Header */}
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-1.5 h-1.5 bg-primary-400 rounded-full"></div>
-                <h4 className="text-sm font-semibold text-white uppercase tracking-wide">
+                <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">
                   {serviceType}
                 </h4>
                 <span className="text-slate-400 text-sm">
@@ -252,9 +252,9 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                       key={item.id}
                       className={`rounded-xl border transition-all ${
                         item.is_approved 
-                          ? 'bg-green-500/5 border-green-500/30' 
+                          ? 'bg-green-500/5 border-emerald-200' 
                           : item.is_flagged
-                          ? 'bg-orange-500/5 border-orange-500/30'
+                          ? 'bg-orange-500/5 border-orange-200'
                           : 'bg-slate-50/30 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
@@ -270,10 +270,10 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                           <div className="flex items-center gap-2 mb-0.5">
                             <span className="font-medium text-white">{config.label}</span>
                             {item.is_approved && (
-                              <Check className="w-4 h-4 text-green-400" />
+                              <Check className="w-4 h-4 text-emerald-600" />
                             )}
                             {item.is_flagged && !item.is_approved && (
-                              <AlertTriangle className="w-4 h-4 text-orange-400" />
+                              <AlertTriangle className="w-4 h-4 text-orange-600" />
                             )}
                           </div>
                           <p className="text-slate-500 text-sm truncate">{item.description}</p>
@@ -294,7 +294,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                           {!item.is_approved && (
                             <button
                               onClick={() => handleApprove(item.id)}
-                              className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm font-medium transition"
+                              className="px-3 py-1.5 bg-emerald-50 hover:bg-green-500/30 text-emerald-600 rounded-lg text-sm font-medium transition"
                             >
                               Approve
                             </button>
@@ -323,7 +323,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                                     </span>
                                   )}
                                   {ev.matched && (
-                                    <span className="px-2 py-0.5 bg-primary-500/20 text-primary-400 rounded font-medium">
+                                    <span className="px-2 py-0.5 bg-primary-50 text-primary-400 rounded font-medium">
                                       Keyword: "{ev.matched}"
                                     </span>
                                   )}
@@ -345,7 +345,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
 
       {/* Summary */}
       <div className="mt-6 p-4 bg-slate-100 border border-slate-200 rounded-xl">
-        <h4 className="text-white font-medium mb-3">Services Summary</h4>
+        <h4 className="text-slate-900 font-medium mb-3">Services Summary</h4>
         <div className="flex flex-wrap gap-2">
           {Object.entries(groupedItems).map(([type, typeItems]) => (
             <span 

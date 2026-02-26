@@ -69,10 +69,10 @@ function ContactForm() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="max-w-md text-center">
-          <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-green-400" />
+          <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-4">Thank You!</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mb-4">Thank You!</h1>
           <p className="text-slate-600 mb-8">
             We've received your inquiry and will get back to you within 1 business day.
           </p>
@@ -97,9 +97,9 @@ function ContactForm() {
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden">
               <Image src="/hand-icon-white.png" alt="PalmCare AI" width={28} height={28} className="object-contain" />
             </div>
-            <span className="text-xl font-bold text-white">PalmCare AI</span>
+            <span className="text-xl font-bold text-slate-900">PalmCare AI</span>
           </Link>
-          <Link href="/pricing" className="text-slate-600 hover:text-white transition">
+          <Link href="/pricing" className="text-slate-600 hover:text-slate-900 transition">
             View Pricing
           </Link>
         </div>
@@ -109,7 +109,7 @@ function ContactForm() {
         <div className="grid md:grid-cols-2 gap-16">
           {/* Left - Info */}
           <div>
-            <h1 className="text-4xl font-bold text-white mb-6">
+            <h1 className="text-4xl font-bold text-slate-900 mb-6">
               {inquiry === 'enterprise' ? 'Enterprise Solutions' : 'Contact Us'}
             </h1>
             <p className="text-xl text-slate-600 mb-8">
@@ -122,7 +122,7 @@ function ContactForm() {
             {inquiry === 'enterprise' && (
               <div className="space-y-6 mb-8">
                 <div className="p-5 bg-white rounded-xl border border-slate-200">
-                  <h3 className="text-white font-semibold mb-2">What's included in Enterprise?</h3>
+                  <h3 className="text-slate-900 font-semibold mb-2">What's included in Enterprise?</h3>
                   <ul className="space-y-2 text-slate-600 text-sm">
                     <li>• Everything in Pro plan</li>
                     <li>• Custom integrations with your EHR/EMR</li>
@@ -138,7 +138,7 @@ function ContactForm() {
 
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
                   <Mail className="w-5 h-5 text-primary-400" />
                 </div>
                 <div>
@@ -149,7 +149,7 @@ function ContactForm() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
                   <Phone className="w-5 h-5 text-primary-400" />
                 </div>
                 <div>
@@ -164,12 +164,12 @@ function ContactForm() {
 
           {/* Right - Form */}
           <div className="bg-white rounded-2xl border border-slate-200 p-8">
-            <h2 className="text-xl font-bold text-white mb-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-6">
               {inquiry === 'enterprise' ? 'Request Enterprise Quote' : 'Send us a message'}
             </h2>
 
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm mb-6">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-6">
                 {error}
               </div>
             )}

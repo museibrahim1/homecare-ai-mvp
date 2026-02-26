@@ -15,9 +15,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_
 
 const RISK_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ComponentType<{ className?: string }> }> = {
   low: { label: 'Low Risk', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
-  medium: { label: 'Medium', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', icon: Clock },
-  high: { label: 'High Risk', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20', icon: AlertTriangle },
-  critical: { label: 'Critical', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', icon: XCircle },
+  medium: { label: 'Medium', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-500/20', icon: Clock },
+  high: { label: 'High Risk', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-500/20', icon: AlertTriangle },
+  critical: { label: 'Critical', color: 'text-red-600', bg: 'bg-red-50 border-red-500/20', icon: XCircle },
 };
 
 export default function AnalyticsPage() {
@@ -149,7 +149,7 @@ export default function AnalyticsPage() {
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
@@ -162,7 +162,7 @@ export default function AnalyticsPage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-indigo-400" />
+              <BarChart3 className="w-6 h-6 text-indigo-600" />
               Analytics & Churn Tracking
             </h1>
             <p className="text-sm text-slate-500 mt-1">
@@ -173,7 +173,7 @@ export default function AnalyticsPage() {
             <button
               onClick={refreshScores}
               disabled={refreshing}
-              className="px-4 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-white flex items-center gap-2 text-sm disabled:opacity-50"
+              className="px-4 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-slate-900 flex items-center gap-2 text-sm disabled:opacity-50"
             >
               {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               Refresh Scores
@@ -193,8 +193,8 @@ export default function AnalyticsPage() {
               onClick={() => setActiveView(id)}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-all ${
                 activeView === id
-                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-indigo-50 text-indigo-600 border border-indigo-500/30'
+                  : 'text-gray-400 hover:text-slate-900 hover:bg-white/5'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -205,7 +205,7 @@ export default function AnalyticsPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
           </div>
         ) : (
           <>
@@ -216,34 +216,34 @@ export default function AnalyticsPage() {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                     <div className="flex items-center justify-between mb-3">
-                      <Users className="w-5 h-5 text-indigo-400" />
+                      <Users className="w-5 h-5 text-indigo-600" />
                       <span className="text-xs text-gray-500">Total</span>
                     </div>
-                    <p className="text-3xl font-bold text-white">{churnOverview.total_users}</p>
+                    <p className="text-3xl font-bold text-slate-900">{churnOverview.total_users}</p>
                     <p className="text-xs text-gray-500 mt-1">Registered users</p>
                   </div>
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                     <div className="flex items-center justify-between mb-3">
                       <Activity className="w-5 h-5 text-emerald-400" />
-                      <span className={`text-xs ${churnOverview.retention_rate_30d >= 70 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      <span className={`text-xs ${churnOverview.retention_rate_30d >= 70 ? 'text-emerald-400' : 'text-amber-600'}`}>
                         {churnOverview.retention_rate_30d}%
                       </span>
                     </div>
-                    <p className="text-3xl font-bold text-white">{churnOverview.active_users_30d}</p>
+                    <p className="text-3xl font-bold text-slate-900">{churnOverview.active_users_30d}</p>
                     <p className="text-xs text-gray-500 mt-1">Active last 30 days</p>
                   </div>
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                     <div className="flex items-center justify-between mb-3">
-                      <Zap className="w-5 h-5 text-cyan-400" />
+                      <Zap className="w-5 h-5 text-cyan-600" />
                     </div>
-                    <p className="text-3xl font-bold text-white">{churnOverview.active_users_7d}</p>
+                    <p className="text-3xl font-bold text-slate-900">{churnOverview.active_users_7d}</p>
                     <p className="text-xs text-gray-500 mt-1">Active last 7 days</p>
                   </div>
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                     <div className="flex items-center justify-between mb-3">
-                      <AlertTriangle className="w-5 h-5 text-red-400" />
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
                     </div>
-                    <p className="text-3xl font-bold text-red-400">${churnOverview.at_risk_mrr?.toFixed(0) || 0}</p>
+                    <p className="text-3xl font-bold text-red-600">${churnOverview.at_risk_mrr?.toFixed(0) || 0}</p>
                     <p className="text-xs text-gray-500 mt-1">At-risk MRR</p>
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export default function AnalyticsPage() {
                   <div className="px-5 py-3 border-b border-gray-700/50 flex items-center justify-between">
                     <h3 className="text-sm font-medium text-gray-400">
                       Provider Engagement
-                      {riskFilter && <span className="ml-2 text-indigo-400">({RISK_CONFIG[riskFilter]?.label})</span>}
+                      {riskFilter && <span className="ml-2 text-indigo-600">({RISK_CONFIG[riskFilter]?.label})</span>}
                     </h3>
                     <span className="text-xs text-gray-600">{filteredProviders.length} providers</span>
                   </div>
@@ -312,10 +312,10 @@ export default function AnalyticsPage() {
                                 <td className="px-4 py-3">
                                   <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 bg-indigo-500/10 rounded-lg flex items-center justify-center">
-                                      <Building2 className="w-4 h-4 text-indigo-400" />
+                                      <Building2 className="w-4 h-4 text-indigo-600" />
                                     </div>
                                     <div>
-                                      <p className="text-sm text-white font-medium">{p.business_name}</p>
+                                      <p className="text-sm text-slate-900 font-medium">{p.business_name}</p>
                                       {p.last_login_at && (
                                         <p className="text-[10px] text-gray-600">
                                           Last login: {new Date(p.last_login_at).toLocaleDateString()}
@@ -345,14 +345,14 @@ export default function AnalyticsPage() {
                                   </span>
                                 </td>
                                 <td className="px-4 py-3 text-right">
-                                  <span className={`text-sm ${p.days_since_last_activity > 14 ? 'text-red-400' : p.days_since_last_activity > 7 ? 'text-amber-400' : 'text-gray-300'}`}>
+                                  <span className={`text-sm ${p.days_since_last_activity > 14 ? 'text-red-600' : p.days_since_last_activity > 7 ? 'text-amber-600' : 'text-gray-300'}`}>
                                     {p.days_since_last_activity > 900 ? 'Never' : `${p.days_since_last_activity}d`}
                                   </span>
                                 </td>
                                 <td className="px-4 py-3 text-right text-sm text-gray-300">{p.logins_last_30d}</td>
-                                <td className="px-4 py-3 text-right text-sm text-indigo-400">{p.assessments_created}</td>
-                                <td className="px-4 py-3 text-right text-sm text-purple-400">{p.clients_added}</td>
-                                <td className="px-4 py-3 text-right text-sm text-cyan-400">{p.contracts_generated}</td>
+                                <td className="px-4 py-3 text-right text-sm text-indigo-600">{p.assessments_created}</td>
+                                <td className="px-4 py-3 text-right text-sm text-purple-600">{p.clients_added}</td>
+                                <td className="px-4 py-3 text-right text-sm text-cyan-600">{p.contracts_generated}</td>
                                 <td className="px-4 py-3 text-right text-xs text-gray-500">{p.plan_tier || '—'}</td>
                               </tr>
                             );
@@ -371,17 +371,17 @@ export default function AnalyticsPage() {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5 text-center">
                     <p className="text-xs text-gray-500">Total Leads</p>
-                    <p className="text-3xl font-bold text-white mt-1">{funnel.total_leads}</p>
+                    <p className="text-3xl font-bold text-slate-900 mt-1">{funnel.total_leads}</p>
                   </div>
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5 text-center">
                     <p className="text-xs text-gray-500">Conversion Rate</p>
-                    <p className={`text-3xl font-bold mt-1 ${funnel.conversion_rate >= 5 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    <p className={`text-3xl font-bold mt-1 ${funnel.conversion_rate >= 5 ? 'text-emerald-400' : 'text-amber-600'}`}>
                       {funnel.conversion_rate}%
                     </p>
                   </div>
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5 text-center">
                     <p className="text-xs text-gray-500">Lost / Not Interested</p>
-                    <p className="text-3xl font-bold text-red-400 mt-1">{funnel.lost}</p>
+                    <p className="text-3xl font-bold text-red-600 mt-1">{funnel.lost}</p>
                     <p className="text-xs text-gray-600 mt-0.5">{funnel.lost_percentage}%</p>
                   </div>
                 </div>
@@ -406,7 +406,7 @@ export default function AnalyticsPage() {
                               style={{ width: `${Math.max((stage.count / maxCount) * 100, 3)}%` }}
                             >
                               {stage.count > 0 && (
-                                <span className="text-[10px] text-white font-bold">{stage.count}</span>
+                                <span className="text-[10px] text-slate-900 font-bold">{stage.count}</span>
                               )}
                             </div>
                           </div>
@@ -423,11 +423,11 @@ export default function AnalyticsPage() {
             {activeView === 'activity' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-white">Platform Activity</h2>
+                  <h2 className="text-lg font-semibold text-slate-900">Platform Activity</h2>
                   <select
                     value={activityDays}
                     onChange={(e) => setActivityDays(Number(e.target.value))}
-                    className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white text-sm"
+                    className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-slate-900 text-sm"
                   >
                     <option value={7}>Last 7 days</option>
                     <option value={30}>Last 30 days</option>
@@ -500,7 +500,7 @@ export default function AnalyticsPage() {
                 ) : (
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
                     <Activity className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No activity data</h3>
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No activity data</h3>
                     <p className="text-sm text-gray-500">
                       Activity tracking will populate as users interact with the platform.
                     </p>

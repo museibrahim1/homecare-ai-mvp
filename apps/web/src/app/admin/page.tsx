@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
           <Icon className={`w-6 h-6 ${color}`} />
         </div>
       </div>
-      <div className="mt-4 flex items-center text-slate-500 text-sm group-hover:text-white transition">
+      <div className="mt-4 flex items-center text-slate-500 text-sm group-hover:text-slate-900 transition">
         <span>View details</span>
         <ChevronRight className="w-4 h-4 ml-1" />
       </div>
@@ -175,7 +175,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="flex items-center justify-between py-2">
         <span className="text-slate-600">{label}</span>
-        <span className={`flex items-center gap-2 text-sm ${isHealthy ? 'text-green-400' : 'text-red-400'}`}>
+        <span className={`flex items-center gap-2 text-sm ${isHealthy ? 'text-emerald-600' : 'text-red-600'}`}>
           {isHealthy ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
           {isHealthy ? 'Healthy' : 'Issue'}
         </span>
@@ -189,10 +189,10 @@ export default function AdminDashboardPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Platform Admin Dashboard</p>
+            <p className="text-blue-600 font-medium">Platform Admin Dashboard</p>
             <p className="text-blue-300/70 text-sm mt-1">
               This dashboard shows platform-level metrics only. Individual client/patient data is not 
               accessible in compliance with HIPAA regulations.
@@ -216,10 +216,10 @@ export default function AdminDashboardPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -235,21 +235,21 @@ export default function AdminDashboardPage() {
                 label="Active Businesses"
                 value={stats?.active_businesses || 0}
                 icon={Building2}
-                color="text-green-400"
+                color="text-emerald-600"
                 href="/admin/businesses"
               />
               <StatCard
                 label="Pending Approvals"
                 value={stats?.pending_approvals || 0}
                 icon={Clock}
-                color="text-yellow-400"
+                color="text-amber-600"
                 href="/admin/approvals"
               />
               <StatCard
                 label="Total Users"
                 value={stats?.total_users || 0}
                 icon={Users}
-                color="text-blue-400"
+                color="text-blue-600"
                 href="/admin/users"
               />
               <StatCard
@@ -265,19 +265,19 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-4 gap-6 mb-8">
               <div className="p-5 bg-white rounded-xl border border-slate-200">
                 <p className="text-slate-500 text-sm">Visits This Month</p>
-                <p className="text-2xl font-bold text-white mt-1">{stats?.visits_this_month || 0}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{stats?.visits_this_month || 0}</p>
               </div>
               <div className="p-5 bg-white rounded-xl border border-slate-200">
                 <p className="text-slate-500 text-sm">Contracts Generated</p>
-                <p className="text-2xl font-bold text-white mt-1">{stats?.contracts_this_month || 0}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{stats?.contracts_this_month || 0}</p>
               </div>
               <div className="p-5 bg-white rounded-xl border border-slate-200">
                 <p className="text-slate-500 text-sm">Active Subscriptions</p>
-                <p className="text-2xl font-bold text-white mt-1">{stats?.active_subscriptions || 0}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{stats?.active_subscriptions || 0}</p>
               </div>
               <div className="p-5 bg-white rounded-xl border border-slate-200">
                 <p className="text-slate-500 text-sm">Total Businesses</p>
-                <p className="text-2xl font-bold text-white mt-1">{stats?.total_businesses || 0}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{stats?.total_businesses || 0}</p>
               </div>
             </div>
 
@@ -286,7 +286,7 @@ export default function AdminDashboardPage() {
               <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                   <h2 className="font-medium text-white flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                    <AlertTriangle className="w-5 h-5 text-amber-600" />
                     Compliance Alerts
                   </h2>
                   <Link href="/admin/compliance" className="text-primary-400 text-sm hover:underline">
@@ -301,12 +301,12 @@ export default function AdminDashboardPage() {
                       <div
                         key={alert.id}
                         className={`p-3 rounded-lg ${
-                          alert.severity === 'critical' ? 'bg-red-500/10 border border-red-500/30' :
-                          alert.severity === 'high' ? 'bg-orange-500/10 border border-orange-500/30' :
-                          'bg-yellow-500/10 border border-yellow-500/30'
+                          alert.severity === 'critical' ? 'bg-red-50 border border-red-200' :
+                          alert.severity === 'high' ? 'bg-orange-50 border border-orange-200' :
+                          'bg-amber-50 border border-amber-200'
                         }`}
                       >
-                        <p className="text-white text-sm font-medium">{alert.business_name}</p>
+                        <p className="text-slate-900 text-sm font-medium">{alert.business_name}</p>
                         <p className="text-slate-500 text-xs mt-1">
                           {alert.document_type.replace(/_/g, ' ')} expires in {alert.days_until_expiry} days
                         </p>
@@ -320,7 +320,7 @@ export default function AdminDashboardPage() {
               <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                   <h2 className="font-medium text-white flex items-center gap-2">
-                    <Ticket className="w-5 h-5 text-purple-400" />
+                    <Ticket className="w-5 h-5 text-purple-600" />
                     Support Tickets
                   </h2>
                   <Link href="/admin/support" className="text-primary-400 text-sm hover:underline">
@@ -330,20 +330,20 @@ export default function AdminDashboardPage() {
                 <div className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600">Open</span>
-                    <span className="text-yellow-400 font-medium">{supportStats?.open || 0}</span>
+                    <span className="text-amber-600 font-medium">{supportStats?.open || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600">In Progress</span>
-                    <span className="text-blue-400 font-medium">{supportStats?.in_progress || 0}</span>
+                    <span className="text-blue-600 font-medium">{supportStats?.in_progress || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600">Resolved</span>
-                    <span className="text-green-400 font-medium">{supportStats?.resolved || 0}</span>
+                    <span className="text-emerald-600 font-medium">{supportStats?.resolved || 0}</span>
                   </div>
                   <div className="pt-3 border-t border-slate-200">
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500 text-sm">Total</span>
-                      <span className="text-white font-bold">{supportStats?.total_tickets || 0}</span>
+                      <span className="text-slate-900 font-bold">{supportStats?.total_tickets || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -353,7 +353,7 @@ export default function AdminDashboardPage() {
               <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                   <h2 className="font-medium text-white flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-green-400" />
+                    <Activity className="w-5 h-5 text-emerald-600" />
                     System Health
                   </h2>
                   <Link href="/admin/system" className="text-primary-400 text-sm hover:underline">
@@ -404,7 +404,7 @@ export default function AdminDashboardPage() {
                 href="/admin/incidents"
                 className="p-4 bg-white rounded-xl border border-slate-200 hover:border-orange-500 transition flex items-center gap-3"
               >
-                <AlertTriangle className="w-5 h-5 text-orange-400" />
+                <AlertTriangle className="w-5 h-5 text-orange-600" />
                 <span className="text-white">Status & Incidents</span>
               </Link>
             </div>

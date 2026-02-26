@@ -133,7 +133,7 @@ export default function IntegrationsPage() {
       <main className="flex-1 p-8 overflow-y-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white">Integrations</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Integrations</h1>
           <p className="text-slate-500 mt-1">Import clients from external systems or connect via webhooks</p>
         </div>
 
@@ -151,8 +151,8 @@ export default function IntegrationsPage() {
                 }}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all ${
                   activeTab === tab.id
-                    ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                    : 'text-slate-500 hover:text-white hover:bg-white'
+                    ? 'bg-primary-50 text-primary-400 border border-primary-200'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-white'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -164,11 +164,11 @@ export default function IntegrationsPage() {
 
         {/* Results Banner */}
         {importResult && (
-          <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
             <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-400" />
+              <Check className="w-5 h-5 text-emerald-600" />
               <div>
-                <p className="text-green-400 font-medium">Import Complete</p>
+                <p className="text-emerald-600 font-medium">Import Complete</p>
                 <p className="text-slate-600 text-sm">
                   {importResult.imported} imported, {importResult.skipped} skipped
                   {importResult.errors?.length > 0 && `, ${importResult.errors.length} errors`}
@@ -176,7 +176,7 @@ export default function IntegrationsPage() {
               </div>
               <button
                 onClick={() => router.push('/clients')}
-                className="ml-auto flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition"
+                className="ml-auto flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-green-500/30 transition"
               >
                 <Users className="w-4 h-4" />
                 View Clients
@@ -188,10 +188,10 @@ export default function IntegrationsPage() {
 
         {/* Error Banner */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400" />
-              <p className="text-red-400">{error}</p>
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <p className="text-red-600">{error}</p>
             </div>
           </div>
         )}
@@ -200,7 +200,7 @@ export default function IntegrationsPage() {
         {activeTab === 'import' && (
           <div className="space-y-6">
             <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Import from CSV</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Import from CSV</h2>
               <p className="text-slate-500 text-sm mb-6">
                 Upload a CSV file with client information. The file should have columns for name, phone, email, address, etc.
               </p>
@@ -215,14 +215,14 @@ export default function IntegrationsPage() {
                 />
                 {csvFile ? (
                   <div className="text-center">
-                    <FileSpreadsheet className="w-10 h-10 text-green-400 mx-auto mb-2" />
-                    <p className="text-white font-medium">{csvFile.name}</p>
+                    <FileSpreadsheet className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
+                    <p className="text-slate-900 font-medium">{csvFile.name}</p>
                     <p className="text-slate-500 text-sm">{(csvFile.size / 1024).toFixed(1)} KB</p>
                   </div>
                 ) : (
                   <>
                     <Upload className="w-10 h-10 text-slate-500 mb-2" />
-                    <p className="text-white font-medium">Drop CSV file here or click to browse</p>
+                    <p className="text-slate-900 font-medium">Drop CSV file here or click to browse</p>
                     <p className="text-slate-500 text-sm mt-1">Supports .csv files</p>
                   </>
                 )}
@@ -250,11 +250,11 @@ export default function IntegrationsPage() {
             </div>
 
             {/* CSV Format Help */}
-            <div className="bg-primary-500/10 border border-primary-500/20 rounded-xl p-6">
+            <div className="bg-primary-50 border border-primary-500/20 rounded-xl p-6">
               <h3 className="text-primary-400 font-semibold mb-3">CSV Format</h3>
               <p className="text-slate-600 text-sm mb-4">Your CSV should include these columns (column names are flexible):</p>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="text-slate-500">• name / full_name <span className="text-red-400">*required</span></div>
+                <div className="text-slate-500">• name / full_name <span className="text-red-600">*required</span></div>
                 <div className="text-slate-500">• phone / phone_number</div>
                 <div className="text-slate-500">• email / email_address</div>
                 <div className="text-slate-500">• address / street_address</div>
@@ -271,7 +271,7 @@ export default function IntegrationsPage() {
         {activeTab === 'monday' && (
           <div className="space-y-6">
             <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Connect to Monday.com</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Connect to Monday.com</h2>
               <p className="text-slate-500 text-sm mb-6">
                 Import clients directly from your Monday.com boards. Enter your API key and board ID below.
               </p>
@@ -327,7 +327,7 @@ export default function IntegrationsPage() {
 
             {/* Webhook Setup */}
             <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h3 className="text-white font-semibold mb-4">Auto-Sync with Webhooks</h3>
+              <h3 className="text-slate-900 font-semibold mb-4">Auto-Sync with Webhooks</h3>
               <p className="text-slate-500 text-sm mb-4">
                 Set up a webhook in Monday.com to automatically sync new clients when they're added to your board.
               </p>
@@ -349,7 +349,7 @@ export default function IntegrationsPage() {
         {activeTab === 'webhook' && (
           <div className="space-y-6">
             <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Generic Webhook</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Generic Webhook</h2>
               <p className="text-slate-500 text-sm mb-6">
                 Use this webhook URL to receive client data from any external system. Send a POST request with JSON data.
               </p>
@@ -372,7 +372,7 @@ export default function IntegrationsPage() {
             </div>
 
             {/* JSON Format */}
-            <div className="bg-primary-500/10 border border-primary-500/20 rounded-xl p-6">
+            <div className="bg-primary-50 border border-primary-500/20 rounded-xl p-6">
               <h3 className="text-primary-400 font-semibold mb-3">Expected JSON Format</h3>
               <pre className="bg-slate-50 p-4 rounded-lg text-sm text-slate-700 overflow-x-auto">
 {`{
@@ -394,12 +394,12 @@ export default function IntegrationsPage() {
 
             {/* API Import */}
             <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h3 className="text-white font-semibold mb-4">Bulk API Import</h3>
+              <h3 className="text-slate-900 font-semibold mb-4">Bulk API Import</h3>
               <p className="text-slate-500 text-sm mb-4">
                 For authenticated bulk imports, use this endpoint:
               </p>
               <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg mb-4">
-                <span className="text-green-400 text-sm font-mono">POST</span>
+                <span className="text-emerald-600 text-sm font-mono">POST</span>
                 <code className="text-primary-400 text-sm flex-1 truncate">{API_BASE}/integrations/import/bulk</code>
                 <button
                   onClick={() => copyToClipboard(`${API_BASE}/integrations/import/bulk`)}

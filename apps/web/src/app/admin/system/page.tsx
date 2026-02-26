@@ -97,17 +97,17 @@ export default function SystemHealthPage() {
   };
 
   const StatusIcon = ({ status }: { status: string }) => {
-    if (status === 'healthy') return <CheckCircle className="w-6 h-6 text-green-400" />;
-    if (status.startsWith('unhealthy')) return <XCircle className="w-6 h-6 text-red-400" />;
-    return <AlertTriangle className="w-6 h-6 text-yellow-400" />;
+    if (status === 'healthy') return <CheckCircle className="w-6 h-6 text-emerald-600" />;
+    if (status.startsWith('unhealthy')) return <XCircle className="w-6 h-6 text-red-600" />;
+    return <AlertTriangle className="w-6 h-6 text-amber-600" />;
   };
 
   const StatusBadge = ({ status }: { status: string }) => {
     const color = status === 'healthy' 
-      ? 'bg-green-500/20 text-green-400' 
+      ? 'bg-emerald-50 text-emerald-600' 
       : status.startsWith('unhealthy') 
-        ? 'bg-red-500/20 text-red-400' 
-        : 'bg-yellow-500/20 text-yellow-400';
+        ? 'bg-red-50 text-red-600' 
+        : 'bg-amber-50 text-amber-600';
     
     return (
       <span className={`px-3 py-1 rounded-lg text-sm font-medium ${color}`}>
@@ -139,10 +139,10 @@ export default function SystemHealthPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-5xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">System Health Monitor</p>
+            <p className="text-blue-600 font-medium">System Health Monitor</p>
             <p className="text-blue-300/70 text-sm mt-1">
               Monitor the health and performance of platform infrastructure.
             </p>
@@ -159,7 +159,7 @@ export default function SystemHealthPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">System Health</h1>
+              <h1 className="text-2xl font-bold text-slate-900">System Health</h1>
               <p className="text-slate-500 mt-1">Infrastructure monitoring</p>
             </div>
           </div>
@@ -184,28 +184,28 @@ export default function SystemHealthPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
         {/* Overall Status */}
         <div className={`p-6 rounded-xl border mb-8 ${
           allHealthy 
-            ? 'bg-green-500/10 border-green-500/30' 
-            : 'bg-red-500/10 border-red-500/30'
+            ? 'bg-emerald-50 border-emerald-200' 
+            : 'bg-red-50 border-red-200'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {allHealthy ? (
-                <CheckCircle className="w-10 h-10 text-green-400" />
+                <CheckCircle className="w-10 h-10 text-emerald-600" />
               ) : (
-                <AlertTriangle className="w-10 h-10 text-red-400" />
+                <AlertTriangle className="w-10 h-10 text-red-600" />
               )}
               <div>
-                <p className={`text-xl font-bold ${allHealthy ? 'text-green-400' : 'text-red-400'}`}>
+                <p className={`text-xl font-bold ${allHealthy ? 'text-emerald-600' : 'text-red-600'}`}>
                   {allHealthy ? 'All Systems Operational' : 'System Issues Detected'}
                 </p>
                 <p className="text-slate-500 text-sm mt-1">
@@ -228,7 +228,7 @@ export default function SystemHealthPage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Server className="w-6 h-6 text-primary-400" />
-                <h3 className="text-white font-medium">API Server</h3>
+                <h3 className="text-slate-900 font-medium">API Server</h3>
               </div>
               <StatusIcon status={health?.api_status || 'unknown'} />
             </div>
@@ -238,42 +238,42 @@ export default function SystemHealthPage() {
           <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Database className="w-6 h-6 text-blue-400" />
-                <h3 className="text-white font-medium">Database</h3>
+                <Database className="w-6 h-6 text-blue-600" />
+                <h3 className="text-slate-900 font-medium">Database</h3>
               </div>
               <StatusIcon status={health?.database_status || 'unknown'} />
             </div>
             <StatusBadge status={health?.database_status || 'unknown'} />
             {health?.database_status?.startsWith('unhealthy') && (
-              <p className="text-red-400 text-xs mt-2">{health.database_status}</p>
+              <p className="text-red-600 text-xs mt-2">{health.database_status}</p>
             )}
           </div>
 
           <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Activity className="w-6 h-6 text-purple-400" />
-                <h3 className="text-white font-medium">Redis (Queue)</h3>
+                <Activity className="w-6 h-6 text-purple-600" />
+                <h3 className="text-slate-900 font-medium">Redis (Queue)</h3>
               </div>
               <StatusIcon status={health?.redis_status || 'unknown'} />
             </div>
             <StatusBadge status={health?.redis_status || 'unknown'} />
             {health?.redis_status?.startsWith('unhealthy') && (
-              <p className="text-red-400 text-xs mt-2">{health.redis_status}</p>
+              <p className="text-red-600 text-xs mt-2">{health.redis_status}</p>
             )}
           </div>
 
           <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <HardDrive className="w-6 h-6 text-yellow-400" />
-                <h3 className="text-white font-medium">Storage (S3)</h3>
+                <HardDrive className="w-6 h-6 text-amber-600" />
+                <h3 className="text-slate-900 font-medium">Storage (S3)</h3>
               </div>
               <StatusIcon status={health?.storage_status || 'unknown'} />
             </div>
             <StatusBadge status={health?.storage_status || 'unknown'} />
             {health?.storage_status?.startsWith('unhealthy') && (
-              <p className="text-red-400 text-xs mt-2">{health.storage_status}</p>
+              <p className="text-red-600 text-xs mt-2">{health.storage_status}</p>
             )}
           </div>
 
@@ -281,7 +281,7 @@ export default function SystemHealthPage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Cpu className="w-6 h-6 text-emerald-400" />
-                <h3 className="text-white font-medium">Background Workers</h3>
+                <h3 className="text-slate-900 font-medium">Background Workers</h3>
               </div>
               <StatusIcon status={health?.worker_status || 'unknown'} />
             </div>
@@ -290,11 +290,11 @@ export default function SystemHealthPage() {
               {metrics && (
                 <>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-white">{metrics.worker_tasks_pending}</p>
+                    <p className="text-2xl font-bold text-slate-900">{metrics.worker_tasks_pending}</p>
                     <p className="text-slate-500 text-xs">Pending</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-white">{metrics.worker_tasks_completed_today}</p>
+                    <p className="text-2xl font-bold text-slate-900">{metrics.worker_tasks_completed_today}</p>
                     <p className="text-slate-500 text-xs">Completed Today</p>
                   </div>
                 </>
@@ -306,22 +306,22 @@ export default function SystemHealthPage() {
         {/* Metrics */}
         {metrics && (
           <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-white font-medium mb-4">System Metrics</h3>
+            <h3 className="text-slate-900 font-medium mb-4">System Metrics</h3>
             <div className="grid grid-cols-4 gap-6">
               <div className="text-center">
-                <p className="text-3xl font-bold text-white">{metrics.total_api_requests_today}</p>
+                <p className="text-3xl font-bold text-slate-900">{metrics.total_api_requests_today}</p>
                 <p className="text-slate-500 text-sm">API Requests Today</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-white">{metrics.database_connections}</p>
+                <p className="text-3xl font-bold text-slate-900">{metrics.database_connections}</p>
                 <p className="text-slate-500 text-sm">DB Connections</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-white">{metrics.storage_used_gb} GB</p>
+                <p className="text-3xl font-bold text-slate-900">{metrics.storage_used_gb} GB</p>
                 <p className="text-slate-500 text-sm">Storage Used</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-white">
+                <p className="text-3xl font-bold text-slate-900">
                   {Math.floor(metrics.uptime_seconds / 3600)}h
                 </p>
                 <p className="text-slate-500 text-sm">Uptime</p>

@@ -40,18 +40,18 @@ interface Subscription {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  active: 'bg-green-500/20 text-green-400',
-  trial: 'bg-blue-500/20 text-blue-400',
-  past_due: 'bg-red-500/20 text-red-400',
+  active: 'bg-emerald-50 text-emerald-600',
+  trial: 'bg-blue-50 text-blue-600',
+  past_due: 'bg-red-50 text-red-600',
   cancelled: 'bg-slate-200/20 text-slate-500',
-  suspended: 'bg-orange-500/20 text-orange-400',
+  suspended: 'bg-orange-50 text-orange-600',
 };
 
 const TIER_COLORS: Record<string, string> = {
   free: 'text-slate-500',
-  starter: 'text-blue-400',
-  professional: 'text-purple-400',
-  enterprise: 'text-yellow-400',
+  starter: 'text-blue-600',
+  professional: 'text-purple-600',
+  enterprise: 'text-amber-600',
 };
 
 export default function SubscriptionsPage() {
@@ -164,10 +164,10 @@ export default function SubscriptionsPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Subscription Management</p>
+            <p className="text-blue-600 font-medium">Subscription Management</p>
             <p className="text-blue-300/70 text-sm mt-1">
               Manage business subscriptions and billing. No client data is accessible from this view.
             </p>
@@ -184,7 +184,7 @@ export default function SubscriptionsPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Subscriptions</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Subscriptions</h1>
               <p className="text-slate-500 mt-1">Manage business plans and billing</p>
             </div>
           </div>
@@ -198,10 +198,10 @@ export default function SubscriptionsPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -209,7 +209,7 @@ export default function SubscriptionsPage() {
         <div className="grid grid-cols-3 gap-6 mb-8">
           {plans.map(plan => (
             <div key={plan.id} className={`p-6 rounded-xl border ${
-              plan.name === 'Pro' ? 'bg-primary-500/10 border-primary-500/30' : 'bg-white border-slate-200'
+              plan.name === 'Pro' ? 'bg-primary-50 border-primary-200' : 'bg-white border-slate-200'
             }`}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className={`font-bold text-lg ${TIER_COLORS[plan.tier]}`}>{plan.name}</h3>
@@ -218,10 +218,10 @@ export default function SubscriptionsPage() {
                 )}
               </div>
               {plan.is_contact_sales ? (
-                <p className="text-2xl font-bold text-white mb-2">Contact Sales</p>
+                <p className="text-2xl font-bold text-slate-900 mb-2">Contact Sales</p>
               ) : (
                 <>
-                  <p className="text-3xl font-bold text-white mb-1">
+                  <p className="text-3xl font-bold text-slate-900 mb-1">
                     ${plan.monthly_price.toLocaleString()}<span className="text-sm text-slate-500 font-normal">/mo</span>
                   </p>
                   <p className="text-slate-400 text-sm mb-3">
@@ -245,7 +245,7 @@ export default function SubscriptionsPage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-white'
+                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 {f === 'past_due' ? 'Past Due' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -294,7 +294,7 @@ export default function SubscriptionsPage() {
                 paginatedSubscriptions.map(sub => (
                     <tr key={sub.id} className="border-b border-slate-200 hover:bg-slate-50/30">
                       <td className="p-4">
-                        <p className="text-white font-medium">{sub.business_name}</p>
+                        <p className="text-slate-900 font-medium">{sub.business_name}</p>
                         <p className="text-slate-500 text-xs">{new Date(sub.created_at).toLocaleDateString()}</p>
                       </td>
                       <td className="p-4">
@@ -308,7 +308,7 @@ export default function SubscriptionsPage() {
                         </span>
                       </td>
                       <td className="p-4">
-                        <p className="text-white text-sm capitalize">{sub.billing_cycle}</p>
+                        <p className="text-slate-900 text-sm capitalize">{sub.billing_cycle}</p>
                         {sub.current_period_end && (
                           <p className="text-slate-500 text-xs">
                             Renews {new Date(sub.current_period_end).toLocaleDateString()}
@@ -316,14 +316,14 @@ export default function SubscriptionsPage() {
                         )}
                       </td>
                       <td className="p-4">
-                        <p className="text-white text-sm">{sub.visits_this_month} visits</p>
+                        <p className="text-slate-900 text-sm">{sub.visits_this_month} visits</p>
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           {sub.status === 'active' && (
                             <button
                               onClick={() => updateSubscriptionStatus(sub.id, 'suspended')}
-                              className="p-1.5 hover:bg-slate-100 rounded text-orange-400"
+                              className="p-1.5 hover:bg-slate-100 rounded text-orange-600"
                               title="Suspend"
                             >
                               <AlertCircle className="w-4 h-4" />
@@ -332,7 +332,7 @@ export default function SubscriptionsPage() {
                           {sub.status === 'suspended' && (
                             <button
                               onClick={() => updateSubscriptionStatus(sub.id, 'active')}
-                              className="p-1.5 hover:bg-slate-100 rounded text-green-400"
+                              className="p-1.5 hover:bg-slate-100 rounded text-emerald-600"
                               title="Reactivate"
                             >
                               <Check className="w-4 h-4" />
@@ -341,7 +341,7 @@ export default function SubscriptionsPage() {
                           {sub.status !== 'cancelled' && (
                             <button
                               onClick={() => updateSubscriptionStatus(sub.id, 'cancelled')}
-                              className="p-1.5 hover:bg-slate-100 rounded text-red-400"
+                              className="p-1.5 hover:bg-slate-100 rounded text-red-600"
                               title="Cancel"
                             >
                               <X className="w-4 h-4" />

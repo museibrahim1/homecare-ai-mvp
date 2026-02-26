@@ -46,18 +46,18 @@ export default function ForgotPasswordPage() {
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
             <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
+          <h1 className="text-2xl font-bold text-slate-900">PalmCare AI</h1>
         </div>
 
         {sent ? (
           /* Success State */
           <div className="card p-8 text-center">
-            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-green-400" />
+            <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Check Your Email</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Check Your Email</h2>
             <p className="text-slate-600 mb-6">
-              If an account exists for <span className="text-white font-medium">{email}</span>, 
+              If an account exists for <span className="text-slate-900 font-medium">{email}</span>, 
               we&apos;ve sent a password reset link. It will expire in 1 hour.
             </p>
             <p className="text-slate-500 text-sm mb-6">
@@ -82,10 +82,10 @@ export default function ForgotPasswordPage() {
           /* Form State */
           <div className="card p-8">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-8 h-8 text-primary-400" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Forgot Password?</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Forgot Password?</h2>
               <p className="text-slate-600 text-sm">
                 Enter the email address associated with your account and we&apos;ll send you a link to reset your password.
               </p>
@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm">
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
                   {error}
                 </div>
               )}

@@ -11,13 +11,13 @@ interface TranscriptTimelineProps {
 }
 
 const speakerConfig: Record<string, { gradient: string; bg: string; text: string }> = {
-  'SPEAKER_00': { gradient: 'from-primary-500 to-accent-cyan', bg: 'bg-primary-500/10', text: 'text-primary-400' },
+  'SPEAKER_00': { gradient: 'from-primary-500 to-accent-cyan', bg: 'bg-primary-50', text: 'text-primary-400' },
   'SPEAKER_01': { gradient: 'from-accent-green to-accent-cyan', bg: 'bg-accent-green/10', text: 'text-accent-green' },
   'SPEAKER_02': { gradient: 'from-accent-purple to-accent-pink', bg: 'bg-accent-purple/10', text: 'text-accent-purple' },
   'SPEAKER_03': { gradient: 'from-accent-orange to-accent-pink', bg: 'bg-accent-orange/10', text: 'text-accent-orange' },
-  'Speaker A': { gradient: 'from-primary-500 to-accent-cyan', bg: 'bg-primary-500/10', text: 'text-primary-400' },
+  'Speaker A': { gradient: 'from-primary-500 to-accent-cyan', bg: 'bg-primary-50', text: 'text-primary-400' },
   'Speaker B': { gradient: 'from-accent-green to-accent-cyan', bg: 'bg-accent-green/10', text: 'text-accent-green' },
-  'Caregiver': { gradient: 'from-primary-500 to-accent-cyan', bg: 'bg-primary-500/10', text: 'text-primary-400' },
+  'Caregiver': { gradient: 'from-primary-500 to-accent-cyan', bg: 'bg-primary-50', text: 'text-primary-400' },
   'Client': { gradient: 'from-accent-green to-accent-cyan', bg: 'bg-accent-green/10', text: 'text-accent-green' },
 };
 
@@ -48,7 +48,7 @@ export default function TranscriptTimeline({
         <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <MessageSquare className="w-8 h-8 text-slate-500" />
         </div>
-        <h3 className="text-lg font-semibold text-white mb-2">No transcript available</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">No transcript available</h3>
         <p className="text-slate-500">Run the transcription pipeline to generate a transcript</p>
       </div>
     );
@@ -71,7 +71,7 @@ export default function TranscriptTimeline({
               onClick={() => onSegmentClick?.(segment)}
               className={`group p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
                 isActive 
-                  ? 'bg-primary-500/10 border-primary-500/50 shadow-glow' 
+                  ? 'bg-primary-50 border-primary-500/50 shadow-glow' 
                   : 'bg-slate-50/30 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
               }`}
             >
@@ -123,7 +123,7 @@ export default function TranscriptTimeline({
           <div className="text-center pt-4">
             <button
               onClick={() => setVisibleCount(prev => Math.min(prev + 50, segments.length))}
-              className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-white rounded-lg text-sm transition"
+              className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-lg text-sm transition"
             >
               Show more ({segments.length - visibleCount} remaining)
             </button>

@@ -77,16 +77,16 @@ export default function ResetPasswordPage() {
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
             <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-white">PalmCare AI</h1>
+          <h1 className="text-2xl font-bold text-slate-900">PalmCare AI</h1>
         </div>
 
         {success ? (
           /* Success State */
           <div className="card p-8 text-center">
-            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-green-400" />
+            <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Password Reset!</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Password Reset!</h2>
             <p className="text-slate-600 mb-6">
               Your password has been updated successfully. 
               You&apos;ll be redirected to sign in momentarily.
@@ -102,10 +102,10 @@ export default function ResetPasswordPage() {
           /* Form State */
           <div className="card p-8">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-8 h-8 text-primary-400" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Set New Password</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Set New Password</h2>
               <p className="text-slate-600 text-sm">
                 Enter your new password below. Make sure it&apos;s at least 6 characters.
               </p>
@@ -113,7 +113,7 @@ export default function ResetPasswordPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -145,7 +145,7 @@ export default function ResetPasswordPage() {
                   </button>
                 </div>
                 {password.length > 0 && password.length < 6 && (
-                  <p className="text-amber-400 text-xs mt-1">Password must be at least 6 characters</p>
+                  <p className="text-amber-600 text-xs mt-1">Password must be at least 6 characters</p>
                 )}
               </div>
 
@@ -165,7 +165,7 @@ export default function ResetPasswordPage() {
                   disabled={!resetToken}
                 />
                 {confirmPassword.length > 0 && password !== confirmPassword && (
-                  <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+                  <p className="text-red-600 text-xs mt-1">Passwords do not match</p>
                 )}
               </div>
 

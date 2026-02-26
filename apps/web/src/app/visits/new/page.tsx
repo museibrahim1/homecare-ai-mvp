@@ -162,12 +162,12 @@ export default function NewVisitPage() {
           <div className="mb-8">
             <button
               onClick={() => router.push('/visits')}
-              className="flex items-center gap-2 text-slate-500 hover:text-white transition mb-4"
+              className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Visits
             </button>
-            <h1 className="text-3xl font-bold text-white mb-2">New Visit</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">New Visit</h1>
             <p className="text-slate-600">Create an assessment and add an intake call or transcript</p>
           </div>
 
@@ -191,7 +191,7 @@ export default function NewVisitPage() {
                     ${isCompleted 
                       ? 'bg-accent-green/20' 
                       : isActive 
-                      ? 'bg-primary-500/20' 
+                      ? 'bg-primary-50' 
                       : 'bg-slate-50'
                     }
                   `}>
@@ -215,7 +215,7 @@ export default function NewVisitPage() {
           {/* Step Content */}
           {step === 'details' && (
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-white mb-6">Assessment Details</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-6">Assessment Details</h2>
               
               <div className="space-y-5">
                 {/* Client Selection */}
@@ -292,7 +292,7 @@ export default function NewVisitPage() {
                 </div>
 
                 {error && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                     {error}
                   </div>
                 )}
@@ -320,7 +320,7 @@ export default function NewVisitPage() {
 
           {step === 'source' && createdVisit && (
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-white mb-2">Add Intake Data</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">Add Intake Data</h2>
               <p className="text-slate-500 text-sm mb-6">
                 Choose how to add data for this assessment
               </p>
@@ -331,10 +331,10 @@ export default function NewVisitPage() {
                   className="p-5 bg-slate-100 hover:bg-slate-50 border border-slate-200 hover:border-primary-500 rounded-xl transition-all group text-left"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center group-hover:bg-primary-500/30 transition">
+                    <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center group-hover:bg-primary-500/30 transition">
                       <Mic className="w-5 h-5 text-primary-400" />
                     </div>
-                    <h3 className="text-white font-medium">Audio</h3>
+                    <h3 className="text-slate-900 font-medium">Audio</h3>
                   </div>
                   <p className="text-slate-500 text-sm">
                     Record or upload audio
@@ -346,10 +346,10 @@ export default function NewVisitPage() {
                   className="p-5 bg-slate-100 hover:bg-slate-50 border border-slate-200 hover:border-purple-500 rounded-xl transition-all group text-left"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center group-hover:bg-purple-500/30 transition">
-                      <FileText className="w-5 h-5 text-purple-400" />
+                    <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-500/30 transition">
+                      <FileText className="w-5 h-5 text-purple-600" />
                     </div>
-                    <h3 className="text-white font-medium">Transcript</h3>
+                    <h3 className="text-slate-900 font-medium">Transcript</h3>
                   </div>
                   <p className="text-slate-500 text-sm">
                     Import text or SRT file
@@ -359,7 +359,7 @@ export default function NewVisitPage() {
               
               <button
                 onClick={handleSkipSource}
-                className="w-full text-center text-slate-500 hover:text-white py-2 transition text-sm"
+                className="w-full text-center text-slate-500 hover:text-slate-900 py-2 transition text-sm"
               >
                 Skip for now
               </button>
@@ -377,14 +377,14 @@ export default function NewVisitPage() {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => setStep('source')}
-                  className="text-slate-500 hover:text-white py-2 transition text-sm"
+                  className="text-slate-500 hover:text-slate-900 py-2 transition text-sm"
                 >
                   ← Back
                 </button>
                 <span className="text-slate-300">|</span>
                 <button
                   onClick={handleSkipSource}
-                  className="text-slate-500 hover:text-white py-2 transition text-sm"
+                  className="text-slate-500 hover:text-slate-900 py-2 transition text-sm"
                 >
                   Skip for now
                 </button>
@@ -403,14 +403,14 @@ export default function NewVisitPage() {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => setStep('source')}
-                  className="text-slate-500 hover:text-white py-2 transition text-sm"
+                  className="text-slate-500 hover:text-slate-900 py-2 transition text-sm"
                 >
                   ← Back
                 </button>
                 <span className="text-slate-300">|</span>
                 <button
                   onClick={handleSkipSource}
-                  className="text-slate-500 hover:text-white py-2 transition text-sm"
+                  className="text-slate-500 hover:text-slate-900 py-2 transition text-sm"
                 >
                   Skip for now
                 </button>
@@ -423,7 +423,7 @@ export default function NewVisitPage() {
               <div className="w-20 h-20 bg-accent-green/20 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-pulse-glow">
                 <Check className="w-10 h-10 text-accent-green" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Visit Created!</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Visit Created!</h2>
               <p className="text-slate-500 mb-6">
                 Your {sourceType === 'audio' ? 'audio is uploaded' : 'transcript is imported'} and ready for processing. Redirecting to visit...
               </p>

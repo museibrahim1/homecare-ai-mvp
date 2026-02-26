@@ -34,16 +34,16 @@ interface CareItem {
 
 /* ─── Config ─── */
 const STAGE_CONFIG: Record<CareStage, { label: string; color: string; bg: string; border: string; dot: string; headerBg: string }> = {
-  follow_up:   { label: 'Follow-up Needed',      color: 'text-amber-400',  bg: 'bg-amber-500/15',  border: 'border-amber-500',  dot: 'bg-amber-400',  headerBg: 'bg-amber-500' },
-  plan_review: { label: 'Care Plan Under Review', color: 'text-teal-400',   bg: 'bg-teal-500/15',   border: 'border-teal-500',   dot: 'bg-teal-400',   headerBg: 'bg-teal-500' },
-  ongoing:     { label: 'Ongoing Care',           color: 'text-purple-400', bg: 'bg-purple-500/15', border: 'border-purple-500', dot: 'bg-purple-400', headerBg: 'bg-purple-500' },
+  follow_up:   { label: 'Follow-up Needed',      color: 'text-amber-600',  bg: 'bg-amber-50',  border: 'border-amber-500',  dot: 'bg-amber-400',  headerBg: 'bg-amber-500' },
+  plan_review: { label: 'Care Plan Under Review', color: 'text-teal-600',   bg: 'bg-teal-50',   border: 'border-teal-500',   dot: 'bg-teal-400',   headerBg: 'bg-teal-500' },
+  ongoing:     { label: 'Ongoing Care',           color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-500', dot: 'bg-purple-400', headerBg: 'bg-purple-500' },
 };
 
 const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; bg: string; bar: string }> = {
-  critical: { label: 'Critical', color: 'text-red-400',    bg: 'bg-red-500/15',    bar: 'bg-red-500' },
-  high:     { label: 'High',     color: 'text-orange-400', bg: 'bg-orange-500/15', bar: 'bg-orange-500' },
-  moderate: { label: 'Moderate', color: 'text-yellow-400', bg: 'bg-yellow-500/15', bar: 'bg-yellow-500' },
-  routine:  { label: 'Routine',  color: 'text-green-400',  bg: 'bg-green-500/15',  bar: 'bg-green-400' },
+  critical: { label: 'Critical', color: 'text-red-600',    bg: 'bg-red-50',    bar: 'bg-red-500' },
+  high:     { label: 'High',     color: 'text-orange-600', bg: 'bg-orange-50', bar: 'bg-orange-500' },
+  moderate: { label: 'Moderate', color: 'text-amber-600', bg: 'bg-amber-50', bar: 'bg-yellow-500' },
+  routine:  { label: 'Routine',  color: 'text-emerald-600',  bg: 'bg-emerald-50',  bar: 'bg-green-400' },
 };
 
 const STORAGE_KEY = 'palmcare-care-tracker';
@@ -78,7 +78,7 @@ function Avatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'md' }) {
   const colors = ['from-blue-500 to-cyan-500', 'from-purple-500 to-pink-500', 'from-green-500 to-emerald-500', 'from-orange-500 to-red-500', 'from-indigo-500 to-purple-500'];
   const idx = name.charCodeAt(0) % colors.length;
   const s = size === 'sm' ? 'w-7 h-7 text-[10px]' : 'w-9 h-9 text-xs';
-  return <div className={`${s} rounded-full bg-gradient-to-br ${colors[idx]} flex items-center justify-center font-semibold text-white shrink-0`}>{initials}</div>;
+  return <div className={`${s} rounded-full bg-gradient-to-br ${colors[idx]} flex items-center justify-center font-semibold text-slate-900 shrink-0`}>{initials}</div>;
 }
 
 /* ─── Timeline Bar ─── */
@@ -104,7 +104,7 @@ function TimelineBar({ item, totalDays }: { item: CareItem; totalDays: number })
       )}
       {!overdue && daysUntil(item.targetDate) <= 7 && (
         <div className="absolute right-1 top-1/2 -translate-y-1/2">
-          <span className="text-[9px] text-amber-300 font-medium bg-amber-500/20 px-1 py-0.5 rounded">
+          <span className="text-[9px] text-amber-300 font-medium bg-amber-50 px-1 py-0.5 rounded">
             {daysUntil(item.targetDate)}d left
           </span>
         </div>
@@ -129,15 +129,15 @@ function CareItemForm({
   submitLabel: string;
   clients: { id: string; full_name: string; phone?: string; primary_diagnosis?: string }[];
 }) {
-  const INPUT = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
+  const INPUT = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div className="relative bg-white border border-slate-200 rounded-2xl shadow-lg w-full max-w-lg overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-          <h2 className="text-base font-semibold text-white">Care Tracking Entry</h2>
-          <button onClick={onCancel} className="p-1.5 text-slate-500 hover:text-white hover:bg-slate-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
+          <h2 className="text-base font-semibold text-slate-900">Care Tracking Entry</h2>
+          <button onClick={onCancel} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
         </div>
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Client selector */}
@@ -217,7 +217,7 @@ function CareItemForm({
           </div>
         </div>
         <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-200">
-          <button onClick={onCancel} className="flex-1 px-4 py-2 text-sm text-slate-600 hover:text-white bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+          <button onClick={onCancel} className="flex-1 px-4 py-2 text-sm text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
           <button onClick={onSubmit} disabled={!data.clientName.trim()} className="flex-1 px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 disabled:bg-slate-100 disabled:text-slate-500 text-white rounded-lg transition-colors">
             {submitLabel}
           </button>
@@ -327,12 +327,12 @@ export default function CareTrackerPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1">Post-Visit Care Tracker</h1>
+                <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-1">Post-Visit Care Tracker</h1>
                 <p className="text-slate-500 text-sm">Track follow-ups, care plan reviews, and ongoing client coordination</p>
               </div>
               <button
                 onClick={() => { setFormData(emptyForm()); setShowAdd(true); }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors shrink-0"
+                className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-slate-900 text-sm font-medium rounded-lg transition-colors shrink-0"
               >
                 <Plus className="w-4 h-4" />
                 Add Care Entry
@@ -342,11 +342,11 @@ export default function CareTrackerPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
               {[
-                { label: 'Total Tracking', value: items.length, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/15' },
-                { label: 'Overdue', value: overdueCount, icon: AlertCircle, color: overdueCount > 0 ? 'text-red-400' : 'text-slate-500', bg: overdueCount > 0 ? 'bg-red-500/15' : 'bg-slate-100' },
-                { label: 'Follow-Up Due', value: overdueFollowUpCount, icon: Clock, color: overdueFollowUpCount > 0 ? 'text-purple-400' : 'text-slate-500', bg: overdueFollowUpCount > 0 ? 'bg-purple-500/15' : 'bg-slate-100' },
-                { label: 'High Priority', value: criticalCount, icon: Heart, color: criticalCount > 0 ? 'text-orange-400' : 'text-slate-500', bg: criticalCount > 0 ? 'bg-orange-500/15' : 'bg-slate-100' },
-                { label: 'No Contact 7d+', value: noContactCount, icon: Phone, color: noContactCount > 0 ? 'text-amber-400' : 'text-slate-500', bg: noContactCount > 0 ? 'bg-amber-500/15' : 'bg-slate-100' },
+                { label: 'Total Tracking', value: items.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+                { label: 'Overdue', value: overdueCount, icon: AlertCircle, color: overdueCount > 0 ? 'text-red-600' : 'text-slate-500', bg: overdueCount > 0 ? 'bg-red-50' : 'bg-slate-100' },
+                { label: 'Follow-Up Due', value: overdueFollowUpCount, icon: Clock, color: overdueFollowUpCount > 0 ? 'text-purple-600' : 'text-slate-500', bg: overdueFollowUpCount > 0 ? 'bg-purple-50' : 'bg-slate-100' },
+                { label: 'High Priority', value: criticalCount, icon: Heart, color: criticalCount > 0 ? 'text-orange-600' : 'text-slate-500', bg: criticalCount > 0 ? 'bg-orange-50' : 'bg-slate-100' },
+                { label: 'No Contact 7d+', value: noContactCount, icon: Phone, color: noContactCount > 0 ? 'text-amber-600' : 'text-slate-500', bg: noContactCount > 0 ? 'bg-amber-50' : 'bg-slate-100' },
               ].map((s, i) => (
                 <div key={i} className="card p-3 lg:p-4 flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.bg}`}><s.icon className={`w-4 h-4 ${s.color}`} /></div>
@@ -362,7 +362,7 @@ export default function CareTrackerPage() {
                   { key: 'timeline' as const, label: 'Timeline', icon: Activity },
                   { key: 'board' as const, label: 'Board', icon: CalendarDays },
                 ].map(v => (
-                  <button key={v.key} onClick={() => setView(v.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === v.key ? 'bg-slate-50 text-white' : 'text-slate-500 hover:text-white'}`}>
+                  <button key={v.key} onClick={() => setView(v.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === v.key ? 'bg-slate-50 text-white' : 'text-slate-500 hover:text-slate-900'}`}>
                     <v.icon className="w-3.5 h-3.5" />{v.label}
                   </button>
                 ))}
@@ -371,9 +371,9 @@ export default function CareTrackerPage() {
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                  <input type="text" placeholder="Search clients..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-48 pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-white text-xs placeholder-slate-400 focus:outline-none focus:border-primary-500" />
+                  <input type="text" placeholder="Search clients..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-48 pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:border-primary-500" />
                 </div>
-                <select value={stageFilter} onChange={e => setStageFilter(e.target.value as any)} className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-white text-xs focus:outline-none focus:border-primary-500">
+                <select value={stageFilter} onChange={e => setStageFilter(e.target.value as any)} className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-900 text-xs focus:outline-none focus:border-primary-500">
                   <option value="all">All Stages</option>
                   {Object.entries(STAGE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                 </select>
@@ -413,7 +413,7 @@ export default function CareTrackerPage() {
                                 <div className="w-44 lg:w-56 shrink-0 flex items-center gap-2.5">
                                   <Avatar name={item.clientName} />
                                   <div className="min-w-0">
-                                    <p className="text-xs font-medium text-white truncate">{item.clientName}</p>
+                                    <p className="text-xs font-medium text-slate-900 truncate">{item.clientName}</p>
                                     <p className="text-[10px] text-slate-400 truncate">{item.assignedTo || 'Unassigned'}</p>
                                   </div>
                                 </div>
@@ -425,23 +425,23 @@ export default function CareTrackerPage() {
                                 <div className="flex items-center gap-2 shrink-0">
                                   {/* Priority */}
                                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${pCfg.bg} ${pCfg.color}`}>{pCfg.label}</span>
-                                  {overdue && <span title="Overdue"><AlertCircle className="w-3.5 h-3.5 text-red-400" /></span>}
+                                  {overdue && <span title="Overdue"><AlertCircle className="w-3.5 h-3.5 text-red-600" /></span>}
                                   {followUpOverdue && (
-                                    <span title={`Follow-up overdue (${item.nextFollowUp})`} className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-purple-500/15 text-purple-400">
+                                    <span title={`Follow-up overdue (${item.nextFollowUp})`} className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-purple-50 text-purple-600">
                                       F/U overdue
                                     </span>
                                   )}
                                   {followUpSoon && !followUpOverdue && (
-                                    <span title={`Follow-up on ${item.nextFollowUp}`} className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-purple-500/10 text-purple-300">
+                                    <span title={`Follow-up on ${item.nextFollowUp}`} className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-purple-50 text-purple-300">
                                       F/U {daysUntil(item.nextFollowUp)}d
                                     </span>
                                   )}
-                                  {noContact && <span title="No contact 7d+"><Phone className="w-3.5 h-3.5 text-amber-400" /></span>}
+                                  {noContact && <span title="No contact 7d+"><Phone className="w-3.5 h-3.5 text-amber-600" /></span>}
 
                                   {/* Actions */}
                                   <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => setEditItem({ ...item })} className="p-1 text-slate-400 hover:text-white hover:bg-slate-50 rounded transition-colors"><Pencil className="w-3 h-3" /></button>
-                                    <button onClick={() => handleDelete(item.id)} className="p-1 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"><Trash2 className="w-3 h-3" /></button>
+                                    <button onClick={() => setEditItem({ ...item })} className="p-1 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded transition-colors"><Pencil className="w-3 h-3" /></button>
+                                    <button onClick={() => handleDelete(item.id)} className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"><Trash2 className="w-3 h-3" /></button>
                                   </div>
                                 </div>
                               </div>
@@ -479,7 +479,7 @@ export default function CareTrackerPage() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-                            <h3 className="font-semibold text-sm text-white">{cfg.label}</h3>
+                            <h3 className="font-semibold text-sm text-slate-500">{cfg.label}</h3>
                           </div>
                           <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${cfg.color} bg-slate-100`}>{stageItems.length}</span>
                         </div>
@@ -504,13 +504,13 @@ export default function CareTrackerPage() {
                               } border border-slate-200 cursor-grab active:cursor-grabbing hover:border-slate-300 transition-all group ${isDragging ? 'opacity-40 scale-95' : ''}`}
                             >
                               <div className="flex items-center justify-between mb-1.5">
-                                <p className="text-xs font-medium text-white truncate">{item.clientName}</p>
+                                <p className="text-xs font-medium text-slate-900 truncate">{item.clientName}</p>
                                 <div className="flex items-center gap-1">
-                                  {overdue && <AlertCircle className="w-3 h-3 text-red-400" />}
+                                  {overdue && <AlertCircle className="w-3 h-3 text-red-600" />}
                                   {item.nextFollowUp && daysUntil(item.nextFollowUp) < 0 && (
-                                    <span title="Follow-up overdue" className="text-[8px] px-1 py-0.5 rounded bg-purple-500/15 text-purple-400 font-medium">F/U</span>
+                                    <span title="Follow-up overdue" className="text-[8px] px-1 py-0.5 rounded bg-purple-50 text-purple-600 font-medium">F/U</span>
                                   )}
-                                  <button onClick={() => setEditItem({ ...item })} className="p-0.5 text-slate-300 hover:text-white opacity-0 group-hover:opacity-100 transition-all"><Pencil className="w-3 h-3" /></button>
+                                  <button onClick={() => setEditItem({ ...item })} className="p-0.5 text-slate-300 hover:text-slate-900 opacity-0 group-hover:opacity-100 transition-all"><Pencil className="w-3 h-3" /></button>
                                 </div>
                               </div>
 
@@ -551,9 +551,9 @@ export default function CareTrackerPage() {
                 <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <UserCheck className="w-7 h-7 text-slate-500" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">No care tracking entries yet</h3>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">No care tracking entries yet</h3>
                 <p className="text-slate-500 text-sm mb-4">Start tracking post-visit follow-ups, care plan reviews, and ongoing client coordination</p>
-                <button onClick={() => { setFormData(emptyForm()); setShowAdd(true); }} className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors">
+                <button onClick={() => { setFormData(emptyForm()); setShowAdd(true); }} className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-slate-900 text-sm font-medium rounded-lg transition-colors">
                   <Plus className="w-4 h-4 inline mr-1" />Add First Entry
                 </button>
               </div>

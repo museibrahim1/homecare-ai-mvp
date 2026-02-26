@@ -434,7 +434,7 @@ export default function TeamChatPage() {
         {/* Channels & Team */}
         <div className="w-64 border-r border-slate-200 flex flex-col">
           <div className="p-4 border-b border-slate-200">
-            <h1 className="text-xl font-bold text-white">Communication</h1>
+            <h1 className="text-xl font-bold text-slate-900">Communication</h1>
           </div>
 
           {/* Tabs */}
@@ -444,7 +444,7 @@ export default function TeamChatPage() {
               className={`flex-1 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'chat'
                   ? 'text-primary-400 border-b-2 border-primary-400'
-                  : 'text-slate-500 hover:text-white'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <MessagesSquare className="w-4 h-4 inline mr-1.5" />
@@ -455,7 +455,7 @@ export default function TeamChatPage() {
               className={`flex-1 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'email'
                   ? 'text-primary-400 border-b-2 border-primary-400'
-                  : 'text-slate-500 hover:text-white'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <Mail className="w-4 h-4 inline mr-1.5" />
@@ -494,14 +494,14 @@ export default function TeamChatPage() {
                       onClick={() => setSelectedChannel(channel)}
                       className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
                         selectedChannel?.id === channel.id
-                          ? 'bg-primary-500/20 text-white'
-                          : 'text-slate-500 hover:bg-white hover:text-white'
+                          ? 'bg-primary-50 text-white'
+                          : 'text-slate-500 hover:bg-white hover:text-slate-900'
                       }`}
                     >
                       <Hash className="w-4 h-4" />
                       <span className="flex-1 text-left text-sm">{channel.name}</span>
                       {channel.unread > 0 && (
-                        <span className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center text-xs text-white">
+                        <span className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center text-xs text-slate-500">
                           {channel.unread}
                         </span>
                       )}
@@ -527,7 +527,7 @@ export default function TeamChatPage() {
                       <div key={member.id} className="flex items-center gap-2 px-2 py-1.5">
                         <div className="relative">
                           <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
-                            <span className="text-xs text-white">{member.name.split(' ').map(n => n[0]).join('')}</span>
+                            <span className="text-xs text-slate-500">{member.name.split(' ').map(n => n[0]).join('')}</span>
                           </div>
                           <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-dark-900 ${
                             member.status === 'online' ? 'bg-green-500' :
@@ -549,9 +549,9 @@ export default function TeamChatPage() {
               {/* Gmail Connection */}
               <div className="p-4">
                 {gmailConnected ? (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg mb-4">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-green-400">Gmail Connected</span>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-green-500/20 rounded-lg mb-4">
+                    <Check className="w-4 h-4 text-emerald-600" />
+                    <span className="text-sm text-emerald-600">Gmail Connected</span>
                   </div>
                 ) : (
                   <button
@@ -579,7 +579,7 @@ export default function TeamChatPage() {
                   <button 
                     onClick={() => setEmailFolder('INBOX')}
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                      emailFolder === 'INBOX' ? 'bg-primary-500/20 text-white' : 'text-slate-500 hover:bg-white hover:text-white'
+                      emailFolder === 'INBOX' ? 'bg-primary-50 text-white' : 'text-slate-500 hover:bg-white hover:text-slate-900'
                     }`}
                   >
                     <Inbox className="w-4 h-4" />
@@ -593,7 +593,7 @@ export default function TeamChatPage() {
                   <button 
                     onClick={() => setEmailFolder('STARRED')}
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                      emailFolder === 'STARRED' ? 'bg-primary-500/20 text-white' : 'text-slate-500 hover:bg-white hover:text-white'
+                      emailFolder === 'STARRED' ? 'bg-primary-50 text-white' : 'text-slate-500 hover:bg-white hover:text-slate-900'
                     }`}
                   >
                     <Star className="w-4 h-4" />
@@ -602,7 +602,7 @@ export default function TeamChatPage() {
                   <button 
                     onClick={() => setEmailFolder('SENT')}
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                      emailFolder === 'SENT' ? 'bg-primary-500/20 text-white' : 'text-slate-500 hover:bg-white hover:text-white'
+                      emailFolder === 'SENT' ? 'bg-primary-50 text-white' : 'text-slate-500 hover:bg-white hover:text-slate-900'
                     }`}
                   >
                     <Send className="w-4 h-4" />
@@ -615,7 +615,7 @@ export default function TeamChatPage() {
                 <div className="p-4 border-t border-slate-200">
                   <button
                     onClick={handleDisconnectGmail}
-                    className="w-full text-xs text-slate-400 hover:text-red-400 transition-colors"
+                    className="w-full text-xs text-slate-400 hover:text-red-600 transition-colors"
                   >
                     Disconnect Gmail
                   </button>
@@ -647,7 +647,7 @@ export default function TeamChatPage() {
                   ) : (
                     getChannelMessages().map(msg => (
                       <div key={msg.id} className="flex gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
                           <span className="text-primary-400 text-sm font-medium">{msg.avatar}</span>
                         </div>
                         <div>
@@ -742,8 +742,8 @@ export default function TeamChatPage() {
                               onClick={() => handleQuickEmail(contact)}
                               className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors text-left"
                             >
-                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                <span className="text-blue-400 text-xs font-medium">
+                              <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                                <span className="text-blue-600 text-xs font-medium">
                                   {contact.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                                 </span>
                               </div>
@@ -763,8 +763,8 @@ export default function TeamChatPage() {
                             onClick={() => handleQuickEmail(contact)}
                             className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors text-left"
                           >
-                            <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                              <span className="text-green-400 text-xs font-medium">
+                            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
+                              <span className="text-emerald-600 text-xs font-medium">
                                 {contact.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                               </span>
                             </div>
@@ -799,8 +799,8 @@ export default function TeamChatPage() {
                 )}
                 
                 {gmailError && gmailConnected && (
-                  <div className="p-4 bg-red-500/10 border-b border-red-500/20">
-                    <p className="text-sm text-red-400">{gmailError}</p>
+                  <div className="p-4 bg-red-50 border-b border-red-500/20">
+                    <p className="text-sm text-red-600">{gmailError}</p>
                     <button 
                       onClick={() => fetchEmails()}
                       className="mt-2 text-xs text-red-300 underline hover:text-red-200"
@@ -828,9 +828,9 @@ export default function TeamChatPage() {
                         className="flex-shrink-0 pt-1 hover:scale-110 transition-transform"
                       >
                         {email.starred ? (
-                          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                          <Star className="w-4 h-4 text-amber-600 fill-yellow-400" />
                         ) : (
-                          <Star className="w-4 h-4 text-slate-300 hover:text-yellow-400" />
+                          <Star className="w-4 h-4 text-slate-300 hover:text-amber-600" />
                         )}
                       </button>
                       <button 
@@ -844,7 +844,7 @@ export default function TeamChatPage() {
                           {email.hasAttachment && <Paperclip className="w-3 h-3 text-slate-400" />}
                           <span className="text-xs text-slate-400 ml-auto">{email.date}</span>
                         </div>
-                        <p className={`text-sm mb-1 ${email.unread ? 'text-white font-medium' : 'text-slate-500'}`}>
+                        <p className={`text-sm mb-1 ${email.unread ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>
                           {email.subject}
                         </p>
                         <p className="text-sm text-slate-400 truncate">{email.snippet}</p>
@@ -865,7 +865,7 @@ export default function TeamChatPage() {
                 <div className="flex items-center gap-2">
                   {composeMode === 'reply' && <Reply className="w-5 h-5 text-primary-400" />}
                   {composeMode === 'forward' && <Forward className="w-5 h-5 text-primary-400" />}
-                  <h2 className="font-bold text-white">
+                  <h2 className="font-bold text-slate-900">
                     {composeMode === 'reply' ? 'Reply' : composeMode === 'forward' ? 'Forward' : 'New Message'}
                   </h2>
                 </div>
@@ -932,14 +932,14 @@ export default function TeamChatPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
               <div className="flex items-center justify-between p-4 border-b border-slate-200">
-                <h2 className="font-bold text-white truncate flex-1">{selectedEmail.subject}</h2>
+                <h2 className="font-bold text-slate-900 truncate flex-1">{selectedEmail.subject}</h2>
                 <button onClick={() => setShowEmailModal(false)} className="p-2 hover:bg-slate-50 rounded-lg ml-2">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               <div className="p-4 border-b border-slate-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                     <span className="text-primary-400 text-sm font-medium">
                       {(selectedEmail.from || 'U').split(' ').map(n => n?.[0] || '').join('').slice(0, 2) || 'U'}
                     </span>
@@ -974,10 +974,10 @@ export default function TeamChatPage() {
                   onClick={() => handleToggleStar(selectedEmail.id, selectedEmail.starred)}
                   className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
                 >
-                  <Star className={`w-5 h-5 ${selectedEmail.starred ? 'text-yellow-400 fill-yellow-400' : 'text-slate-500 hover:text-yellow-400'}`} />
+                  <Star className={`w-5 h-5 ${selectedEmail.starred ? 'text-amber-600 fill-yellow-400' : 'text-slate-500 hover:text-amber-600'}`} />
                 </button>
                 <button className="p-2 hover:bg-slate-50 rounded-lg transition-colors">
-                  <Trash2 className="w-5 h-5 text-slate-500 hover:text-red-400" />
+                  <Trash2 className="w-5 h-5 text-slate-500 hover:text-red-600" />
                 </button>
               </div>
             </div>
@@ -989,7 +989,7 @@ export default function TeamChatPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Create Channel</h2>
+                <h2 className="text-xl font-bold text-slate-900">Create Channel</h2>
                 <button onClick={() => setShowAddChannelModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>

@@ -50,22 +50,22 @@ function formatElapsed(ms: number): string {
 function StepIcon({ status, index }: { status: StepStatus; index: number }) {
   if (status === 'completed') {
     return (
-      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center animate-check-bounce">
+      <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-500/30 flex items-center justify-center animate-check-bounce">
         <CheckCircle className="w-5 h-5 text-emerald-400" />
       </div>
     );
   }
   if (status === 'running') {
     return (
-      <div className="w-10 h-10 rounded-xl bg-primary-500/20 border border-primary-500/40 flex items-center justify-center animate-step-glow">
+      <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-500/40 flex items-center justify-center animate-step-glow">
         <Loader2 className="w-5 h-5 text-primary-400 animate-spin" />
       </div>
     );
   }
   if (status === 'failed') {
     return (
-      <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-        <AlertCircle className="w-5 h-5 text-red-400" />
+      <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center">
+        <AlertCircle className="w-5 h-5 text-red-600" />
       </div>
     );
   }
@@ -442,11 +442,11 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center">
             <Mic className="w-5 h-5 text-primary-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Add Audio</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Add Audio</h3>
             <p className="text-slate-500 text-sm">Record or upload & auto-process with AI</p>
           </div>
         </div>
@@ -465,7 +465,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             className={`flex-1 py-3 px-4 font-medium transition-all flex items-center justify-center gap-2 border-b-2 ${
               inputMode === 'record'
                 ? 'text-primary-400 border-primary-400'
-                : 'text-slate-500 border-transparent hover:text-white'
+                : 'text-slate-500 border-transparent hover:text-slate-900'
             }`}
           >
             <Mic className="w-4 h-4" />
@@ -476,7 +476,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             className={`flex-1 py-3 px-4 font-medium transition-all flex items-center justify-center gap-2 border-b-2 ${
               inputMode === 'upload'
                 ? 'text-primary-400 border-primary-400'
-                : 'text-slate-500 border-transparent hover:text-white'
+                : 'text-slate-500 border-transparent hover:text-slate-900'
             }`}
           >
             <Upload className="w-4 h-4" />
@@ -493,14 +493,14 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-11 h-11 rounded-xl bg-primary-500/20 flex items-center justify-center">
+                  <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center">
                     <Sparkles className="w-5 h-5 text-primary-400" />
                   </div>
                   <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary-400 rounded-full animate-ping opacity-75" />
                   <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary-400 rounded-full" />
                 </div>
                 <div>
-                  <p className="text-white font-semibold">AI Processing</p>
+                  <p className="text-slate-900 font-semibold">AI Processing</p>
                   <p className="text-slate-500 text-xs flex items-center gap-1.5">
                     Step {Math.min(completedCount + 1, totalSteps)} of {totalSteps}
                     {estimatedTimeRemaining > 0 && (
@@ -557,9 +557,9 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                       isCompleted
                         ? 'bg-emerald-500/5 border-emerald-500/20'
                         : isRunning
-                        ? 'bg-primary-500/[0.07] border-primary-500/30 shadow-lg shadow-primary-500/5'
+                        ? 'bg-primary-500/[0.07] border-primary-200 shadow-lg shadow-primary-500/5'
                         : isFailed
-                        ? 'bg-red-500/10 border-red-500/30'
+                        ? 'bg-red-50 border-red-200'
                         : 'bg-white/40 border-slate-200/40'
                     }`}
                     style={{ animationDelay: `${index * 60}ms` }}
@@ -574,19 +574,19 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className={`font-medium text-sm transition-colors duration-300 ${
-                            isCompleted ? 'text-emerald-400' : isRunning ? 'text-white' : isFailed ? 'text-red-400' : 'text-slate-400'
+                            isCompleted ? 'text-emerald-400' : isRunning ? 'text-white' : isFailed ? 'text-red-600' : 'text-slate-400'
                           }`}>
                             {step.label}
                           </span>
                           {isRunning && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-500/20 text-primary-300 text-[10px] font-medium uppercase tracking-wider">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-50 text-primary-300 text-[10px] font-medium uppercase tracking-wider">
                               <Zap className="w-2.5 h-2.5" />
                               {stepPercent}%
                             </span>
                           )}
                         </div>
                         <p className={`text-xs mt-0.5 transition-colors duration-300 ${
-                          isCompleted ? 'text-emerald-400/60' : isRunning ? 'text-slate-600' : isFailed ? 'text-red-400/70' : 'text-slate-300'
+                          isCompleted ? 'text-emerald-400/60' : isRunning ? 'text-slate-600' : isFailed ? 'text-red-600/70' : 'text-slate-300'
                         }`}>
                           {isFailed ? (ss.error || 'Step failed') : step.description}
                         </p>
@@ -621,7 +621,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                         {isFailed && (
                           <button
                             onClick={handleRetry}
-                            className="flex items-center gap-1 px-2.5 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-400 text-xs font-medium transition-colors"
+                            className="flex items-center gap-1 px-2.5 py-1 bg-red-50 hover:bg-red-500/30 border border-red-200 rounded-lg text-red-600 text-xs font-medium transition-colors"
                           >
                             <RotateCcw className="w-3 h-3" />
                             Retry
@@ -666,12 +666,12 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
           {!audioBlob ? (
             <div className="space-y-6">
               <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center transition-all ${
-                isRecording ? 'bg-red-500/20 animate-pulse' : 'bg-primary-500/20 hover:bg-primary-500/30'
+                isRecording ? 'bg-red-50 animate-pulse' : 'bg-primary-50 hover:bg-primary-500/30'
               }`}>
                 {isRecording ? (
                   <div className="relative">
                     <div className="absolute inset-0 animate-ping bg-red-500/30 rounded-full" />
-                    <Mic className="w-12 h-12 text-red-400 relative z-10" />
+                    <Mic className="w-12 h-12 text-red-600 relative z-10" />
                   </div>
                 ) : (
                   <Mic className="w-12 h-12 text-primary-400" />
@@ -680,7 +680,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
               {isRecording && (
                 <div className="space-y-2">
                   <div className="text-3xl font-mono text-white">{formatTime(recordingTime)}</div>
-                  <p className="text-red-400 text-sm animate-pulse">● Recording...</p>
+                  <p className="text-red-600 text-sm animate-pulse">● Recording...</p>
                 </div>
               )}
               <div className="flex justify-center gap-4">
@@ -704,7 +704,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                 <FileAudio className="w-8 h-8 text-accent-green" />
               </div>
               <div>
-                <p className="text-white font-medium">Recording Complete</p>
+                <p className="text-slate-900 font-medium">Recording Complete</p>
                 <p className="text-slate-500 text-sm">Duration: {formatTime(recordingTime)}</p>
               </div>
               <div className="flex items-center justify-center gap-3">
@@ -734,7 +734,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             selectedFile || state === 'uploading' ? 'cursor-default' : 'cursor-pointer'
           } ${
             state === 'dragging'
-              ? 'border-primary-400 bg-primary-500/10 scale-[1.02] shadow-xl shadow-primary-500/10 ring-2 ring-primary-400/20'
+              ? 'border-primary-400 bg-primary-50 scale-[1.02] shadow-xl shadow-primary-500/10 ring-2 ring-primary-400/20'
               : state === 'error'
               ? 'border-red-400/50 bg-red-500/5'
               : selectedFile
@@ -755,7 +755,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             <div className="p-8 space-y-5 animate-fade-in">
               <div className="flex items-center justify-center gap-3">
                 <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-primary-500/20 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center">
                     <Upload className="w-7 h-7 text-primary-400" />
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center border-2 border-slate-200">
@@ -764,7 +764,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-white font-medium mb-1">Uploading audio...</p>
+                <p className="text-slate-900 font-medium mb-1">Uploading audio...</p>
                 <p className="text-slate-500 text-xs truncate max-w-[280px] mx-auto">{selectedFile?.name}</p>
               </div>
               <div className="relative">
@@ -793,7 +793,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                   <FileAudio className="w-7 h-7 text-emerald-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium truncate">{selectedFile.name}</p>
+                  <p className="text-slate-900 font-medium truncate">{selectedFile.name}</p>
                   <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                     <span className="text-slate-500 text-xs flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-md">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -829,13 +829,13 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             /* Empty state - drag drop zone */
             <div className="p-10">
               <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-all duration-300 ${
-                state === 'dragging' ? 'bg-primary-500/30 scale-110 shadow-lg shadow-primary-500/20' : 'bg-slate-100 group-hover:bg-primary-500/20'
+                state === 'dragging' ? 'bg-primary-500/30 scale-110 shadow-lg shadow-primary-500/20' : 'bg-slate-100 group-hover:bg-primary-50'
               }`}>
                 <Upload className={`w-8 h-8 transition-all duration-300 ${
                   state === 'dragging' ? 'text-primary-400 -translate-y-1' : 'text-slate-500 group-hover:text-primary-400'
                 }`} />
               </div>
-              <p className="text-white font-medium mb-1 text-center">
+              <p className="text-slate-900 font-medium mb-1 text-center">
                 {state === 'dragging' ? 'Drop your audio file here' : 'Drag and drop audio file'}
               </p>
               <p className="text-slate-500 text-sm mb-5 text-center">or click to browse files</p>
@@ -854,12 +854,12 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       {state === 'success' && (
         <div className="text-center py-8 animate-fade-in">
           <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 bg-emerald-500/20 rounded-2xl animate-ping opacity-30" />
-            <div className="relative w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center">
+            <div className="absolute inset-0 bg-emerald-50 rounded-2xl animate-ping opacity-30" />
+            <div className="relative w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center">
               <CheckCircle className="w-8 h-8 text-emerald-400 animate-check-bounce" />
             </div>
           </div>
-          <p className="text-white font-medium text-lg">Processing Complete!</p>
+          <p className="text-slate-900 font-medium text-lg">Processing Complete!</p>
           <p className="text-slate-500 text-sm mt-2 mb-6">Transcript, notes, and contract are ready</p>
           <div className="flex items-center justify-center gap-3">
             <button onClick={() => { reset(); onClose?.(); }} className="btn-secondary px-4 py-2">Upload Another</button>
@@ -872,18 +872,18 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
 
       {/* ==================== ERROR DISPLAY ==================== */}
       {error && (
-        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3 animate-fade-in">
-          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-fade-in">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-red-400 text-sm">{error}</p>
+            <p className="text-red-600 text-sm">{error}</p>
           </div>
-          <button onClick={reset} className="text-red-400 text-sm underline hover:text-red-300 flex-shrink-0">Try again</button>
+          <button onClick={reset} className="text-red-600 text-sm underline hover:text-red-300 flex-shrink-0">Try again</button>
         </div>
       )}
 
       {/* ==================== AI INFO BANNER ==================== */}
       {state === 'idle' && !selectedFile && !audioBlob && (
-        <div className="mt-6 p-3 bg-primary-500/10 border border-primary-500/20 rounded-xl flex items-center gap-3">
+        <div className="mt-6 p-3 bg-primary-50 border border-primary-500/20 rounded-xl flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-primary-400 flex-shrink-0" />
           <p className="text-slate-600 text-sm">
             AI will transcribe, identify speakers, and generate notes & contract

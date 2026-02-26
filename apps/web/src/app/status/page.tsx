@@ -41,35 +41,35 @@ interface StatusOverview {
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any; banner: string }> = {
   operational: {
     label: 'All Systems Operational',
-    color: 'text-green-400',
+    color: 'text-emerald-600',
     bg: 'bg-green-500',
     icon: CheckCircle,
     banner: 'bg-gradient-to-r from-green-600 to-emerald-600',
   },
   maintenance: {
     label: 'Scheduled Maintenance',
-    color: 'text-blue-400',
+    color: 'text-blue-600',
     bg: 'bg-blue-500',
     icon: Wrench,
     banner: 'bg-gradient-to-r from-blue-600 to-indigo-600',
   },
   minor: {
     label: 'Minor Service Disruption',
-    color: 'text-yellow-400',
+    color: 'text-amber-600',
     bg: 'bg-yellow-500',
     icon: AlertTriangle,
     banner: 'bg-gradient-to-r from-yellow-600 to-orange-600',
   },
   major: {
     label: 'Partial System Outage',
-    color: 'text-orange-400',
+    color: 'text-orange-600',
     bg: 'bg-orange-500',
     icon: AlertTriangle,
     banner: 'bg-gradient-to-r from-orange-600 to-red-600',
   },
   critical: {
     label: 'Major System Outage',
-    color: 'text-red-400',
+    color: 'text-red-600',
     bg: 'bg-red-500',
     icon: XCircle,
     banner: 'bg-gradient-to-r from-red-600 to-red-800',
@@ -77,18 +77,18 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 };
 
 const INCIDENT_STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  investigating: { label: 'Investigating', color: 'text-red-400' },
-  identified: { label: 'Identified', color: 'text-orange-400' },
-  monitoring: { label: 'Monitoring', color: 'text-blue-400' },
-  resolved: { label: 'Resolved', color: 'text-green-400' },
+  investigating: { label: 'Investigating', color: 'text-red-600' },
+  identified: { label: 'Identified', color: 'text-orange-600' },
+  monitoring: { label: 'Monitoring', color: 'text-blue-600' },
+  resolved: { label: 'Resolved', color: 'text-emerald-600' },
 };
 
 const SERVICE_STATUS_ICON: Record<string, { color: string; bg: string }> = {
-  operational: { color: 'text-green-400', bg: 'bg-green-500' },
-  maintenance: { color: 'text-blue-400', bg: 'bg-blue-500' },
-  minor: { color: 'text-yellow-400', bg: 'bg-yellow-500' },
-  major: { color: 'text-orange-400', bg: 'bg-orange-500' },
-  critical: { color: 'text-red-400', bg: 'bg-red-500' },
+  operational: { color: 'text-emerald-600', bg: 'bg-green-500' },
+  maintenance: { color: 'text-blue-600', bg: 'bg-blue-500' },
+  minor: { color: 'text-amber-600', bg: 'bg-yellow-500' },
+  major: { color: 'text-orange-600', bg: 'bg-orange-500' },
+  critical: { color: 'text-red-600', bg: 'bg-red-500' },
 };
 
 function formatDate(dateStr: string) {
@@ -191,7 +191,7 @@ export default function StatusPage() {
               <Image src="/hand-icon-white.png" alt="PalmCare AI" width={28} height={28} className="object-contain" />
             </div>
             <div>
-              <span className="text-xl font-bold text-white">PalmCare AI</span>
+              <span className="text-xl font-bold text-slate-900">PalmCare AI</span>
               <span className="text-slate-500 text-sm ml-2">Status</span>
             </div>
           </Link>
@@ -203,7 +203,7 @@ export default function StatusPage() {
             )}
             <button
               onClick={fetchStatus}
-              className="p-2 rounded-lg hover:bg-slate-50 transition text-slate-500 hover:text-white"
+              className="p-2 rounded-lg hover:bg-slate-50 transition text-slate-500 hover:text-slate-900"
               aria-label="Refresh status"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -215,9 +215,9 @@ export default function StatusPage() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Overall Status Banner */}
         {error ? (
-          <div className="rounded-2xl bg-white border border-red-500/30 p-8 text-center mb-10">
-            <XCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-white mb-2">Unable to load status</h2>
+          <div className="rounded-2xl bg-white border border-red-200 p-8 text-center mb-10">
+            <XCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Unable to load status</h2>
             <p className="text-slate-500 mb-4">{error}</p>
             <button
               onClick={fetchStatus}
@@ -238,7 +238,7 @@ export default function StatusPage() {
               <div className="flex items-center gap-4">
                 <StatusIcon className="w-10 h-10 text-white/90" />
                 <div>
-                  <h1 className="text-2xl font-bold text-white">{config.label}</h1>
+                  <h1 className="text-2xl font-bold text-slate-900">{config.label}</h1>
                   <p className="text-white/70 text-sm mt-1">
                     {data.active_incidents.length === 0
                       ? 'All services are running normally.'
@@ -250,14 +250,14 @@ export default function StatusPage() {
 
             {/* Service Components */}
             <div className="mb-10">
-              <h2 className="text-lg font-semibold text-white mb-4">Service Components</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Service Components</h2>
               <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-200">
                 {data.services.map(svc => {
                   const svcConf = SERVICE_STATUS_ICON[svc.status] || SERVICE_STATUS_ICON.operational;
                   const isOk = svc.status === 'operational';
                   return (
                     <div key={svc.name} className="flex items-center justify-between px-5 py-4">
-                      <span className="text-white font-medium">{svc.name}</span>
+                      <span className="text-slate-900 font-medium">{svc.name}</span>
                       <div className="flex items-center gap-2">
                         <span className={`text-sm capitalize ${svcConf.color}`}>
                           {svc.status === 'operational' ? 'Operational' : svc.status.replace('_', ' ')}
@@ -273,8 +273,8 @@ export default function StatusPage() {
             {/* Active Incidents */}
             {data.active_incidents.length > 0 && (
               <div className="mb-10">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-orange-400" />
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-orange-600" />
                   Active Incidents
                 </h2>
                 <div className="space-y-4">
@@ -293,7 +293,7 @@ export default function StatusPage() {
 
             {/* Past Incidents Timeline */}
             <div>
-              <h2 className="text-lg font-semibold text-white mb-6">Past Incidents</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-6">Past Incidents</h2>
               <div className="space-y-1">
                 {days.map(day => {
                   const dayIncidents = grouped[day] || [];
@@ -353,10 +353,10 @@ function IncidentCard({
 }) {
   const statusConf = INCIDENT_STATUS_LABELS[incident.status] || INCIDENT_STATUS_LABELS.investigating;
   const impactColors: Record<string, string> = {
-    minor: 'border-yellow-500/30 bg-yellow-500/5',
-    major: 'border-orange-500/30 bg-orange-500/5',
-    critical: 'border-red-500/30 bg-red-500/5',
-    maintenance: 'border-blue-500/30 bg-blue-500/5',
+    minor: 'border-amber-200 bg-yellow-500/5',
+    major: 'border-orange-200 bg-orange-500/5',
+    critical: 'border-red-200 bg-red-500/5',
+    maintenance: 'border-blue-200 bg-blue-500/5',
     none: 'border-slate-200 bg-white',
   };
   const borderColor = active
@@ -375,7 +375,7 @@ function IncidentCard({
               {statusConf.label}
             </span>
             <span className="text-slate-300">—</span>
-            <span className="text-white font-medium">{incident.title}</span>
+            <span className="text-slate-900 font-medium">{incident.title}</span>
           </div>
           {incident.updates.length > 0 && (
             <p className="text-slate-500 text-sm mt-1.5 line-clamp-2">

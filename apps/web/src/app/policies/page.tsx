@@ -17,9 +17,9 @@ type Policy = {
 };
 
 const statusConfig: Record<string, { color: string; icon: any; label: string }> = {
-  active: { color: 'bg-green-500/20 text-green-400', icon: CheckCircle, label: 'Active' },
-  expiring: { color: 'bg-yellow-500/20 text-yellow-400', icon: AlertCircle, label: 'Expiring Soon' },
-  expired: { color: 'bg-red-500/20 text-red-400', icon: Clock, label: 'Expired' },
+  active: { color: 'bg-emerald-50 text-emerald-600', icon: CheckCircle, label: 'Active' },
+  expiring: { color: 'bg-amber-50 text-amber-600', icon: AlertCircle, label: 'Expiring Soon' },
+  expired: { color: 'bg-red-50 text-red-600', icon: Clock, label: 'Expired' },
 };
 
 const policyTypes = ['Care Agreement', 'Service Contract', 'Family Agreement', 'Respite Care'];
@@ -166,7 +166,7 @@ export default function PoliciesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Policies & Renewals</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Policies & Renewals</h1>
             <p className="text-slate-500">Manage care agreements and contract renewals</p>
           </div>
           <button 
@@ -182,24 +182,24 @@ export default function PoliciesPage() {
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-white border border-slate-200 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-2">
-              <CheckCircle className="w-5 h-5 text-green-400" />
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
               <span className="text-slate-500">Active Policies</span>
             </div>
-            <p className="text-3xl font-bold text-white">{activeCount}</p>
+            <p className="text-3xl font-bold text-slate-900">{activeCount}</p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-2">
-              <AlertCircle className="w-5 h-5 text-yellow-400" />
+              <AlertCircle className="w-5 h-5 text-amber-600" />
               <span className="text-slate-500">Expiring Soon</span>
             </div>
-            <p className="text-3xl font-bold text-white">{expiringCount}</p>
+            <p className="text-3xl font-bold text-slate-900">{expiringCount}</p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-2">
-              <Clock className="w-5 h-5 text-red-400" />
+              <Clock className="w-5 h-5 text-red-600" />
               <span className="text-slate-500">Expired</span>
             </div>
-            <p className="text-3xl font-bold text-white">{expiredCount}</p>
+            <p className="text-3xl font-bold text-slate-900">{expiredCount}</p>
           </div>
         </div>
 
@@ -215,7 +215,7 @@ export default function PoliciesPage() {
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-white transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
             <Filter className="w-5 h-5" />
             Filter
           </button>
@@ -225,7 +225,7 @@ export default function PoliciesPage() {
         {policies.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
             <ShieldCheck className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Policies Yet</h3>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">No Policies Yet</h3>
             <p className="text-slate-500 mb-6">Create and manage care agreements and service contracts</p>
             <button 
               onClick={() => setShowAddModal(true)}
@@ -258,7 +258,7 @@ export default function PoliciesPage() {
                     <tr key={policy.id} className="border-b border-slate-200/30 hover:bg-slate-50/20 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                             <span className="text-primary-400 font-medium">{policy.client.charAt(0)}</span>
                           </div>
                           <span className="font-medium text-white">{policy.client}</span>
@@ -274,23 +274,23 @@ export default function PoliciesPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-green-400 font-medium">${policy.monthlyValue.toLocaleString()}</span>
+                        <span className="text-emerald-600 font-medium">${policy.monthlyValue.toLocaleString()}</span>
                         <span className="text-slate-400 text-sm ml-1">/mo</span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={() => { setSelectedPolicy(policy); setShowRenewModal(true); }}
-                            className="px-3 py-1.5 bg-primary-500/20 text-primary-400 rounded-lg text-sm font-medium hover:bg-primary-500/30 transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 bg-primary-50 text-primary-400 rounded-lg text-sm font-medium hover:bg-primary-500/30 transition-colors flex items-center gap-1"
                           >
                             <RefreshCw className="w-4 h-4" />
                             Renew
                           </button>
                           <button 
                             onClick={() => handleDeletePolicy(policy.id)}
-                            className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors"
+                            className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
                           >
-                            <Trash2 className="w-4 h-4 text-slate-500 hover:text-red-400" />
+                            <Trash2 className="w-4 h-4 text-slate-500 hover:text-red-600" />
                           </button>
                         </div>
                       </td>
@@ -307,7 +307,7 @@ export default function PoliciesPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">New Policy</h2>
+                <h2 className="text-xl font-bold text-slate-900">New Policy</h2>
                 <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
@@ -405,13 +405,13 @@ export default function PoliciesPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Renew Policy</h2>
+                <h2 className="text-xl font-bold text-slate-900">Renew Policy</h2>
                 <button onClick={() => setShowRenewModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               <div className="bg-slate-50 rounded-lg p-4 mb-6">
-                <h3 className="font-medium text-white mb-2">{selectedPolicy.client}</h3>
+                <h3 className="font-medium text-slate-900 mb-2">{selectedPolicy.client}</h3>
                 <p className="text-slate-500 text-sm">{selectedPolicy.type}</p>
                 <div className="mt-3 pt-3 border-t border-slate-200">
                   <div className="flex justify-between text-sm mb-1">
@@ -420,7 +420,7 @@ export default function PoliciesPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">New End Date</span>
-                    <span className="text-green-400">
+                    <span className="text-emerald-600">
                       {new Date(new Date(selectedPolicy.endDate).setFullYear(new Date(selectedPolicy.endDate).getFullYear() + 1)).toISOString().split('T')[0]}
                     </span>
                   </div>

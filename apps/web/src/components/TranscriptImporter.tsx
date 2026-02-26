@@ -140,16 +140,16 @@ export default function TranscriptImporter({
     <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-            <FileText className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+            <FileText className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Import Transcript</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Import Transcript</h3>
             <p className="text-sm text-slate-400">Paste or upload - we'll detect the format automatically</p>
           </div>
         </div>
         {onClose && (
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-900">
             <X className="w-5 h-5" />
           </button>
         )}
@@ -169,7 +169,7 @@ export default function TranscriptImporter({
             {/* Action buttons */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <Wand2 className="w-4 h-4 text-purple-400" />
+                <Wand2 className="w-4 h-4 text-purple-600" />
                 <span>Auto-detects: SRT, VTT, JSON, or plain text</span>
               </div>
               <div className="flex gap-2">
@@ -214,8 +214,8 @@ Examples of supported formats:
             />
             
             {dragActive && (
-              <div className="absolute inset-0 bg-purple-500/10 border-2 border-dashed border-purple-500 rounded-lg flex items-center justify-center">
-                <div className="text-purple-400 font-medium">Drop file here</div>
+              <div className="absolute inset-0 bg-purple-50 border-2 border-dashed border-purple-500 rounded-lg flex items-center justify-center">
+                <div className="text-purple-600 font-medium">Drop file here</div>
               </div>
             )}
             
@@ -225,7 +225,7 @@ Examples of supported formats:
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
@@ -245,7 +245,7 @@ Examples of supported formats:
 
       {state === 'importing' && (
         <div className="py-8 text-center">
-          <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
           <p className="text-slate-300">Analyzing and importing transcript...</p>
           <p className="text-sm text-slate-500 mt-1">Auto-detecting format</p>
         </div>
@@ -253,14 +253,14 @@ Examples of supported formats:
 
       {state === 'success' && (
         <div className="py-6 text-center">
-          <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-          <h4 className="text-xl font-semibold text-white mb-2">Import Successful!</h4>
+          <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
+          <h4 className="text-xl font-semibold text-slate-900 mb-2">Import Successful!</h4>
           <p className="text-slate-400 mb-1">
             Imported {result?.segments} segments ({result?.words} words)
           </p>
           {result?.format && (
             <p className="text-sm text-slate-500 mb-6">
-              Detected format: <span className="text-purple-400">{result.format}</span>
+              Detected format: <span className="text-purple-600">{result.format}</span>
             </p>
           )}
           
@@ -280,7 +280,7 @@ Examples of supported formats:
             
             <button
               onClick={() => onImportComplete?.()}
-              className="w-full py-2 text-slate-400 hover:text-white text-sm"
+              className="w-full py-2 text-slate-400 hover:text-slate-900 text-sm"
             >
               Skip for now
             </button>
@@ -290,9 +290,9 @@ Examples of supported formats:
 
       {state === 'error' && (
         <div className="py-8 text-center">
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h4 className="text-xl font-semibold text-white mb-2">Import Failed</h4>
-          <p className="text-red-400 mb-6">{error}</p>
+          <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h4 className="text-xl font-semibold text-slate-900 mb-2">Import Failed</h4>
+          <p className="text-red-600 mb-6">{error}</p>
           <button
             onClick={() => { setState('idle'); setError(null); }}
             className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"

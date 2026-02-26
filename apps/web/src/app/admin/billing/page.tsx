@@ -175,10 +175,10 @@ export default function BillingConfigPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-6xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Stripe Billing Configuration</p>
+            <p className="text-blue-600 font-medium">Stripe Billing Configuration</p>
             <p className="text-blue-300/70 text-sm mt-1">
               Configure Stripe Price IDs for subscription billing. Create products and prices in your 
               <a href="https://dashboard.stripe.com/products" target="_blank" rel="noopener" className="underline ml-1">
@@ -198,7 +198,7 @@ export default function BillingConfigPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Billing Configuration</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Billing Configuration</h1>
               <p className="text-slate-500 mt-1">Connect plans to Stripe for payment processing</p>
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function BillingConfigPage() {
             href="https://dashboard.stripe.com/products"
             target="_blank"
             rel="noopener"
-            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg hover:bg-slate-50 transition text-slate-500 hover:text-white"
+            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg hover:bg-slate-50 transition text-slate-500 hover:text-slate-900"
           >
             <ExternalLink className="w-4 h-4" />
             Stripe Dashboard
@@ -214,10 +214,10 @@ export default function BillingConfigPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -243,7 +243,7 @@ export default function BillingConfigPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-white font-medium">{plan.name}</p>
+                        <p className="text-slate-900 font-medium">{plan.name}</p>
                         <p className="text-slate-500 text-sm">
                           {plan.is_contact_sales ? 'Contact Sales' : `$${plan.monthly_price}/mo`}
                         </p>
@@ -269,8 +269,8 @@ export default function BillingConfigPage() {
                   </div>
                   <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
                     isConfigured(selectedPlan)
-                      ? 'bg-green-500/20 text-green-400'
-                      : 'bg-yellow-500/20 text-yellow-400'
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : 'bg-amber-50 text-amber-600'
                   }`}>
                     {isConfigured(selectedPlan) ? (
                       <>
@@ -377,7 +377,7 @@ export default function BillingConfigPage() {
 
                 {/* Instructions */}
                 <div className="p-6 border-t border-slate-200 bg-slate-50/30">
-                  <h3 className="text-white font-medium mb-3">Setup Instructions</h3>
+                  <h3 className="text-slate-900 font-medium mb-3">Setup Instructions</h3>
                   <ol className="space-y-2 text-slate-500 text-sm">
                     <li>1. Go to <a href="https://dashboard.stripe.com/products/create" target="_blank" className="text-primary-400 hover:underline">Stripe Products</a> and create a product for "{selectedPlan.plan_name}"</li>
                     <li>2. Add a <strong>recurring monthly price</strong> of ${selectedPlan.monthly_price}</li>
@@ -400,7 +400,7 @@ export default function BillingConfigPage() {
 
         {/* Webhook Configuration */}
         <div className="mt-8 p-6 bg-white rounded-xl border border-slate-200">
-          <h3 className="text-white font-medium mb-4">Webhook Configuration</h3>
+          <h3 className="text-slate-900 font-medium mb-4">Webhook Configuration</h3>
           <p className="text-slate-500 text-sm mb-4">
             Set up a webhook in Stripe to receive subscription events:
           </p>
@@ -413,7 +413,7 @@ export default function BillingConfigPage() {
               className="p-2 hover:bg-slate-100 rounded transition"
             >
               {copied === 'webhook' ? (
-                <Check className="w-4 h-4 text-green-400" />
+                <Check className="w-4 h-4 text-emerald-600" />
               ) : (
                 <Copy className="w-4 h-4 text-slate-500" />
               )}

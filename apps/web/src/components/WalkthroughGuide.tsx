@@ -39,8 +39,8 @@ const STEPS: SpotlightStep[] = [
     description: 'Your main navigation. Jump between Clients, Assessments, Schedule, Pipeline, Team Chat, Reports, and more — organized into clear sections.',
     tip: 'On mobile, tap the menu icon to open the sidebar.',
     icon: Home,
-    iconBg: 'bg-blue-500/15',
-    iconColor: 'text-blue-400',
+    iconBg: 'bg-blue-50',
+    iconColor: 'text-blue-600',
     preferredSide: 'right',
   },
   {
@@ -49,8 +49,8 @@ const STEPS: SpotlightStep[] = [
     title: 'Key Metrics',
     description: 'Your at-a-glance numbers — total assessments, pending proposals, client count, and weekly activity. These update in real-time as you work.',
     icon: BarChart3,
-    iconBg: 'bg-purple-500/15',
-    iconColor: 'text-purple-400',
+    iconBg: 'bg-purple-50',
+    iconColor: 'text-purple-600',
     preferredSide: 'bottom',
   },
   {
@@ -59,8 +59,8 @@ const STEPS: SpotlightStep[] = [
     title: 'Charts & Pipeline',
     description: 'Track assessment trends over the last 6 months and see your client pipeline breakdown — from intake through active care.',
     icon: Activity,
-    iconBg: 'bg-green-500/15',
-    iconColor: 'text-green-400',
+    iconBg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
     preferredSide: 'bottom',
   },
   {
@@ -69,8 +69,8 @@ const STEPS: SpotlightStep[] = [
     title: 'Activity & Quick Actions',
     description: 'Recent assessments alongside quick-launch buttons — start a new assessment, add a client, or export proposals in one click.',
     icon: CalendarDays,
-    iconBg: 'bg-amber-500/15',
-    iconColor: 'text-amber-400',
+    iconBg: 'bg-amber-50',
+    iconColor: 'text-amber-600',
     preferredSide: 'top',
   },
   {
@@ -81,7 +81,7 @@ const STEPS: SpotlightStep[] = [
     tip: 'Tasks persist locally so you won\'t lose them between sessions.',
     icon: Target,
     iconBg: 'bg-pink-500/15',
-    iconColor: 'text-pink-400',
+    iconColor: 'text-pink-600',
     preferredSide: 'top',
   },
   {
@@ -91,8 +91,8 @@ const STEPS: SpotlightStep[] = [
     description: 'This bell aggregates alerts from your schedule, tasks, messages, emails, and follow-ups — sorted by priority so you never miss what matters.',
     tip: 'Click any notification to jump directly to the relevant page.',
     icon: Bell,
-    iconBg: 'bg-red-500/15',
-    iconColor: 'text-red-400',
+    iconBg: 'bg-red-50',
+    iconColor: 'text-red-600',
     preferredSide: 'bottom',
   },
   {
@@ -324,7 +324,7 @@ export default function WalkthroughGuide() {
         }}
       >
         <div
-          className="bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden"
+          className="bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Progress bar */}
@@ -338,7 +338,7 @@ export default function WalkthroughGuide() {
               <BookOpen className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">{step + 1} / {STEPS.length}</span>
             </div>
-            <button onClick={close} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-50 rounded-lg transition-colors">
+            <button onClick={close} className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -349,11 +349,11 @@ export default function WalkthroughGuide() {
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cur.iconBg}`}>
                 <Icon className={`w-5 h-5 ${cur.iconColor}`} />
               </div>
-              <h2 className={`text-base font-bold ${isLast ? 'text-green-400' : 'text-white'}`}>{cur.title}</h2>
+              <h2 className={`text-base font-bold ${isLast ? 'text-emerald-600' : 'text-white'}`}>{cur.title}</h2>
             </div>
 
             <p className="text-slate-600 text-sm leading-relaxed mb-2.5">
-              {cur.description.split('**').map((p, i) => i % 2 === 1 ? <strong key={i} className="text-white font-semibold">{p}</strong> : p)}
+              {cur.description.split('**').map((p, i) => i % 2 === 1 ? <strong key={i} className="text-slate-900 font-semibold">{p}</strong> : p)}
             </p>
 
             {cur.tip && (
@@ -370,7 +370,7 @@ export default function WalkthroughGuide() {
               {isFirst ? (
                 <button onClick={close} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">Skip tour</button>
               ) : (
-                <button onClick={() => go(-1)} className="flex items-center gap-1 text-xs text-slate-500 hover:text-white transition-colors">
+                <button onClick={() => go(-1)} className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 transition-colors">
                   <ChevronLeft className="w-3.5 h-3.5" /> Back
                 </button>
               )}

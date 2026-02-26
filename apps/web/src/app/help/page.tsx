@@ -148,12 +148,12 @@ export default function HelpPage() {
         <div className="max-w-4xl mx-auto p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-white">Help & Support</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Help & Support</h1>
             <p className="text-slate-500 mt-1">Find answers or get in touch with our team</p>
           </div>
 
           {/* Guided Tour Banner */}
-          <div className="mb-8 relative overflow-hidden rounded-2xl border border-primary-500/30 bg-gradient-to-r from-primary-500/10 via-purple-500/10 to-accent-cyan/10">
+          <div className="mb-8 relative overflow-hidden rounded-2xl border border-primary-200 bg-gradient-to-r from-primary-500/10 via-purple-500/10 to-accent-cyan/10">
             <div className="absolute inset-0 opacity-5">
               <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500 rounded-full blur-[80px]" />
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-cyan rounded-full blur-[80px]" />
@@ -163,14 +163,14 @@ export default function HelpPage() {
                 <BookOpen className="w-7 h-7 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-white mb-1">Interactive App Tour</h2>
+                <h2 className="text-lg font-bold text-slate-900 mb-1">Interactive App Tour</h2>
                 <p className="text-slate-600 text-sm leading-relaxed">
                   New to PalmCare AI? Take a guided walkthrough of all the key features — from client management and voice assessments to scheduling and care tracking. Takes about 2 minutes.
                 </p>
               </div>
               <button
                 onClick={openTour}
-                className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-all shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30"
+                className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-slate-900 font-medium rounded-xl transition-all shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30"
               >
                 <Play className="w-4 h-4" />
                 Start Tour
@@ -184,11 +184,11 @@ export default function HelpPage() {
               href="mailto:support@palmtai.com"
               className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500/50 transition"
             >
-              <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
                 <Mail className="w-6 h-6 text-primary-400" />
               </div>
               <div>
-                <p className="text-white font-medium">Email Support</p>
+                <p className="text-slate-900 font-medium">Email Support</p>
                 <p className="text-slate-500 text-sm">support@palmtai.com</p>
               </div>
             </a>
@@ -196,11 +196,11 @@ export default function HelpPage() {
               href="tel:+18005551234"
               className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500/50 transition"
             >
-              <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
-                <Phone className="w-6 h-6 text-green-400" />
+              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <Phone className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-white font-medium">Phone Support</p>
+                <p className="text-slate-900 font-medium">Phone Support</p>
                 <p className="text-slate-500 text-sm">(800) 555-1234</p>
               </div>
             </a>
@@ -213,7 +213,7 @@ export default function HelpPage() {
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 activeTab === 'faq'
                   ? 'bg-primary-500 text-white'
-                  : 'bg-white text-slate-600 hover:text-white'
+                  : 'bg-white text-slate-600 hover:text-slate-900'
               }`}
             >
               <Book className="w-4 h-4 inline mr-2" />
@@ -224,7 +224,7 @@ export default function HelpPage() {
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 activeTab === 'ticket'
                   ? 'bg-primary-500 text-white'
-                  : 'bg-white text-slate-600 hover:text-white'
+                  : 'bg-white text-slate-600 hover:text-slate-900'
               }`}
             >
               <MessageSquare className="w-4 h-4 inline mr-2" />
@@ -244,7 +244,7 @@ export default function HelpPage() {
                     onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
                     className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-100 transition"
                   >
-                    <span className="text-white font-medium">{item.question}</span>
+                    <span className="text-slate-900 font-medium">{item.question}</span>
                     <span className={`text-primary-400 transition-transform ${expandedFaq === index ? 'rotate-180' : ''}`}>
                       ▼
                     </span>
@@ -274,10 +274,10 @@ export default function HelpPage() {
             <div className="bg-white rounded-xl border border-slate-200 p-6">
               {submitted ? (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="w-8 h-8 text-green-400" />
+                  <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-emerald-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Ticket Submitted!</h3>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Ticket Submitted!</h3>
                   <p className="text-slate-500 mb-6">
                     We've received your support request and will respond within 1 business day.
                   </p>
@@ -301,14 +301,14 @@ export default function HelpPage() {
                           onClick={() => setFormData({ ...formData, category: cat.id })}
                           className={`p-4 rounded-xl border text-left transition ${
                             formData.category === cat.id
-                              ? 'bg-primary-500/10 border-primary-500/50'
+                              ? 'bg-primary-50 border-primary-500/50'
                               : 'bg-slate-100 border-slate-200 hover:border-slate-300'
                           }`}
                         >
                           <cat.icon className={`w-5 h-5 mb-2 ${
                             formData.category === cat.id ? 'text-primary-400' : 'text-slate-500'
                           }`} />
-                          <p className="text-white font-medium text-sm">{cat.label}</p>
+                          <p className="text-slate-900 font-medium text-sm">{cat.label}</p>
                           <p className="text-slate-400 text-xs mt-0.5">{cat.description}</p>
                         </button>
                       ))}
@@ -357,9 +357,9 @@ export default function HelpPage() {
                   </div>
 
                   {error && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-                      <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                      <p className="text-red-400 text-sm">{error}</p>
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <p className="text-red-600 text-sm">{error}</p>
                     </div>
                   )}
 

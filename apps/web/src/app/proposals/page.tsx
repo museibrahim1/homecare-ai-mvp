@@ -39,11 +39,11 @@ type ProposalWithClient = Contract & {
 };
 
 const statusColors: Record<string, string> = {
-  draft: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  pending: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  active: 'bg-green-500/20 text-green-400 border-green-500/30',
+  draft: 'bg-amber-50 text-amber-600 border-amber-200',
+  pending: 'bg-blue-50 text-blue-600 border-blue-200',
+  active: 'bg-emerald-50 text-emerald-600 border-emerald-200',
   completed: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  cancelled: 'bg-red-500/20 text-red-400 border-red-500/30',
+  cancelled: 'bg-red-50 text-red-600 border-red-200',
 };
 
 export default function ProposalsPage() {
@@ -263,12 +263,12 @@ export default function ProposalsPage() {
 
         {/* Error Banner */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between">
+          <div className="mb-6 p-4 bg-red-50 border border-red-500/20 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400" />
-              <span className="text-red-400">{error}</span>
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <span className="text-red-600">{error}</span>
             </div>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -278,23 +278,23 @@ export default function ProposalsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <p className="text-slate-500 text-sm mb-1">Total Proposals</p>
-            <p className="text-2xl font-bold text-white">{proposals.length}</p>
+            <p className="text-2xl font-bold text-slate-900">{proposals.length}</p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <p className="text-slate-500 text-sm mb-1">Active</p>
-            <p className="text-2xl font-bold text-green-400">
+            <p className="text-2xl font-bold text-emerald-600">
               {proposals.filter(p => p.status === 'active').length}
             </p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <p className="text-slate-500 text-sm mb-1">Pending</p>
-            <p className="text-2xl font-bold text-blue-400">
+            <p className="text-2xl font-bold text-blue-600">
               {proposals.filter(p => p.status === 'pending').length}
             </p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <p className="text-slate-500 text-sm mb-1">Draft</p>
-            <p className="text-2xl font-bold text-yellow-400">
+            <p className="text-2xl font-bold text-amber-600">
               {proposals.filter(p => p.status === 'draft').length}
             </p>
           </div>
@@ -308,7 +308,7 @@ export default function ProposalsPage() {
         ) : sortedProposals.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
             <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Proposals Found</h3>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">No Proposals Found</h3>
             <p className="text-slate-500 mb-6">
               {searchQuery || statusFilter !== 'all' 
                 ? 'Try adjusting your search or filters'
@@ -342,13 +342,13 @@ export default function ProposalsPage() {
                 <div className="p-5 border-b border-slate-200">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-primary-500/20 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center">
                         <span className="text-primary-400 font-semibold">
                           {proposal.client?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'NA'}
                         </span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white">
+                        <h3 className="font-semibold text-slate-900">
                           {proposal.client?.full_name || 'Unknown Client'}
                         </h3>
                         <p className="text-sm text-slate-500">
@@ -366,21 +366,21 @@ export default function ProposalsPage() {
                 {/* Card Body */}
                 <div className="p-5 space-y-3">
                   <div className="flex items-center gap-3 text-sm">
-                    <DollarSign className="w-4 h-4 text-green-400" />
+                    <DollarSign className="w-4 h-4 text-emerald-600" />
                     <span className="text-slate-500">Rate:</span>
-                    <span className="text-white font-medium">
+                    <span className="text-slate-900 font-medium">
                       {formatCurrency(proposal.hourly_rate)}/hr
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <Clock className="w-4 h-4 text-blue-400" />
+                    <Clock className="w-4 h-4 text-blue-600" />
                     <span className="text-slate-500">Hours:</span>
-                    <span className="text-white font-medium">
+                    <span className="text-slate-900 font-medium">
                       {proposal.weekly_hours || 0} hrs/week
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <Calendar className="w-4 h-4 text-purple-400" />
+                    <Calendar className="w-4 h-4 text-purple-600" />
                     <span className="text-slate-500">Updated:</span>
                     <span className="text-white">
                       {formatDate(proposal.updated_at)}
@@ -388,7 +388,7 @@ export default function ProposalsPage() {
                   </div>
                   {proposal.services && proposal.services.length > 0 && (
                     <div className="flex items-start gap-3 text-sm">
-                      <FileText className="w-4 h-4 text-orange-400 mt-0.5" />
+                      <FileText className="w-4 h-4 text-orange-600 mt-0.5" />
                       <span className="text-slate-500">Services:</span>
                       <span className="text-white flex-1 line-clamp-2">
                         {proposal.services.map(s => s.name || s).join(', ')}

@@ -264,31 +264,31 @@ export default function PipelinePage() {
         <div className="grid grid-cols-4 gap-4 mb-8">
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
-              <Target className="w-5 h-5 text-blue-400" />
+              <Target className="w-5 h-5 text-blue-600" />
               <span className="text-slate-500 text-sm">Total Pipeline</span>
             </div>
-            <p className="text-2xl font-bold text-white">${deals.reduce((s, d) => s + d.value, 0).toLocaleString()}</p>
+            <p className="text-2xl font-bold text-slate-900">${deals.reduce((s, d) => s + d.value, 0).toLocaleString()}</p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
-              <Clock className="w-5 h-5 text-yellow-400" />
+              <Clock className="w-5 h-5 text-amber-600" />
               <span className="text-slate-500 text-sm">In Progress</span>
             </div>
-            <p className="text-2xl font-bold text-white">{deals.filter(d => d.stage !== 'active').length}</p>
+            <p className="text-2xl font-bold text-slate-900">{deals.filter(d => d.stage !== 'active').length}</p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
-              <CheckCircle className="w-5 h-5 text-green-400" />
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
               <span className="text-slate-500 text-sm">Active Clients</span>
             </div>
-            <p className="text-2xl font-bold text-white">{deals.filter(d => d.stage === 'active').length}</p>
+            <p className="text-2xl font-bold text-slate-900">{deals.filter(d => d.stage === 'active').length}</p>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
-              <DollarSign className="w-5 h-5 text-green-400" />
+              <DollarSign className="w-5 h-5 text-emerald-600" />
               <span className="text-slate-500 text-sm">Avg Deal Value</span>
             </div>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-2xl font-bold text-slate-900">
               ${deals.length > 0 ? Math.round(deals.reduce((s, d) => s + d.value, 0) / deals.length).toLocaleString() : 0}
             </p>
           </div>
@@ -302,7 +302,7 @@ export default function PipelinePage() {
           <div className="flex items-center gap-2 flex-wrap">
             {stages.map((stage, idx) => (
               <div key={stage.id} className="flex items-center gap-2">
-                <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${stage.color}`}>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium text-slate-900 ${stage.color}`}>
                   {stage.name}
                 </div>
                 {idx < stages.length - 1 && (
@@ -320,7 +320,7 @@ export default function PipelinePage() {
               <div 
                 className={`bg-white rounded-xl p-4 border-2 transition-all min-h-[400px] ${
                   dragOverStage === stage.id 
-                    ? 'border-primary-500 bg-primary-500/10' 
+                    ? 'border-primary-500 bg-primary-50' 
                     : 'border-slate-200'
                 }`}
                 onDragOver={(e) => handleDragOver(e, stage.id)}
@@ -352,7 +352,7 @@ export default function PipelinePage() {
                       draggable
                       onDragStart={(e) => handleDragStart(e, deal)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-white border border-slate-200 rounded-lg p-4 hover:border-primary-500/30 transition-all cursor-grab active:cursor-grabbing group ${
+                      className={`bg-white border border-slate-200 rounded-lg p-4 hover:border-primary-200 transition-all cursor-grab active:cursor-grabbing group ${
                         draggedDeal?.id === deal.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
@@ -362,10 +362,10 @@ export default function PipelinePage() {
                       >
                         <div className="flex items-start gap-2">
                           <GripVertical className="w-4 h-4 text-slate-400 group-hover:text-slate-600 flex-shrink-0 mt-0.5" />
-                          <h3 className="font-medium text-white mb-2 flex-1">{deal.name}</h3>
+                          <h3 className="font-medium text-slate-900 mb-2 flex-1">{deal.name}</h3>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-green-400 font-medium">${deal.value.toLocaleString()}/mo</span>
+                          <span className="text-emerald-600 font-medium">${deal.value.toLocaleString()}/mo</span>
                           <span className="text-xs text-slate-400">{deal.daysInStage}d</span>
                         </div>
                         {deal.hasContract && (
@@ -392,8 +392,8 @@ export default function PipelinePage() {
                             onClick={(e) => { e.stopPropagation(); handleUpdateStage(deal, nextStage.id); }}
                             className={`flex-1 px-2 py-1.5 text-xs rounded transition-colors ${
                               nextStage.id === 'active' 
-                                ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400' 
-                                : 'bg-primary-500/20 hover:bg-primary-500/30 text-primary-400'
+                                ? 'bg-emerald-50 hover:bg-green-500/30 text-emerald-600' 
+                                : 'bg-primary-50 hover:bg-primary-500/30 text-primary-400'
                             }`}
                             title={`Move to ${nextStage.name}`}
                           >
@@ -419,7 +419,7 @@ export default function PipelinePage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Add New Client</h2>
+                <h2 className="text-xl font-bold text-slate-900">Add New Client</h2>
                 <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
@@ -510,7 +510,7 @@ export default function PipelinePage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">{selectedDeal.name}</h2>
+                <h2 className="text-xl font-bold text-slate-900">{selectedDeal.name}</h2>
                 <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
@@ -539,7 +539,7 @@ export default function PipelinePage() {
               {selectedDeal.visitId && (
                 <button
                   onClick={() => handleViewAssessment(selectedDeal)}
-                  className="w-full mb-4 px-4 py-2.5 bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full mb-4 px-4 py-2.5 bg-primary-50 hover:bg-primary-500/30 text-primary-400 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <FileText className="w-5 h-5" />
                   View Assessment

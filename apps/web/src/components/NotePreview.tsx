@@ -84,19 +84,19 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-white">Visit Note</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Visit Note</h3>
           <p className="text-sm text-slate-500">Version {note.version}</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={downloadNote}
-            className="flex items-center gap-2 px-3 py-2 bg-primary-500/20 text-primary-400 rounded-lg hover:bg-primary-500/30 transition text-sm"
+            className="flex items-center gap-2 px-3 py-2 bg-primary-50 text-primary-400 rounded-lg hover:bg-primary-500/30 transition text-sm"
           >
             <Download className="w-4 h-4" />
             PDF
           </button>
           {note.is_approved ? (
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-sm">
               <Check className="w-4 h-4" />
               Approved
             </span>
@@ -138,7 +138,7 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
           <ul className="space-y-2">
             {tasks.map((task: any, index: number) => (
               <li key={index} className="flex items-center justify-between p-2 bg-slate-100 rounded">
-                <span className="text-sm text-white">{task.description}</span>
+                <span className="text-sm text-slate-500">{task.description}</span>
                 <span className="text-xs text-slate-500">{task.duration_minutes}m</span>
               </li>
             ))}

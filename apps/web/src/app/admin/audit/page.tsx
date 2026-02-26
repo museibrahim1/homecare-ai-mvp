@@ -24,14 +24,14 @@ interface AuditLog {
 }
 
 const ACTION_COLORS: Record<string, string> = {
-  user_login: 'bg-green-500/20 text-green-400',
+  user_login: 'bg-emerald-50 text-emerald-600',
   user_logout: 'bg-slate-200/20 text-slate-500',
-  visit_created: 'bg-blue-500/20 text-blue-400',
-  audio_uploaded: 'bg-purple-500/20 text-purple-400',
-  contract_generated: 'bg-yellow-500/20 text-yellow-400',
-  client_created: 'bg-emerald-500/20 text-emerald-400',
-  business_approved: 'bg-green-500/20 text-green-400',
-  business_rejected: 'bg-red-500/20 text-red-400',
+  visit_created: 'bg-blue-50 text-blue-600',
+  audio_uploaded: 'bg-purple-50 text-purple-600',
+  contract_generated: 'bg-amber-50 text-amber-600',
+  client_created: 'bg-emerald-50 text-emerald-400',
+  business_approved: 'bg-emerald-50 text-emerald-600',
+  business_rejected: 'bg-red-50 text-red-600',
 };
 
 export default function AuditLogsPage() {
@@ -153,10 +153,10 @@ export default function AuditLogsPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Audit Log</p>
+            <p className="text-blue-600 font-medium">Audit Log</p>
             <p className="text-blue-300/70 text-sm mt-1">
               Track all system activities for security and compliance purposes.
             </p>
@@ -173,7 +173,7 @@ export default function AuditLogsPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Audit Logs</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Audit Logs</h1>
               <p className="text-slate-500 mt-1">System activity tracking</p>
             </div>
           </div>
@@ -196,10 +196,10 @@ export default function AuditLogsPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -258,7 +258,7 @@ export default function AuditLogsPage() {
                 logs.map(log => (
                   <tr key={log.id} className="border-b border-slate-200 hover:bg-slate-50/30">
                     <td className="p-4">
-                      <p className="text-white text-sm">
+                      <p className="text-slate-900 text-sm">
                         {new Date(log.created_at).toLocaleDateString()}
                       </p>
                       <p className="text-slate-500 text-xs">
@@ -266,7 +266,7 @@ export default function AuditLogsPage() {
                       </p>
                     </td>
                     <td className="p-4">
-                      <p className="text-white text-sm">{log.user_email || 'System'}</p>
+                      <p className="text-slate-900 text-sm">{log.user_email || 'System'}</p>
                     </td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${ACTION_COLORS[log.action] || 'bg-slate-100 text-slate-600'}`}>

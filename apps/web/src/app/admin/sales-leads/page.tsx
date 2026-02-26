@@ -127,21 +127,21 @@ const TEMPLATE_COLORS: Record<string, string> = {
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   new: { label: 'New', color: 'bg-slate-500/20 text-slate-300', icon: Circle },
-  contacted: { label: 'Contacted', color: 'bg-blue-500/20 text-blue-400', icon: Phone },
-  email_sent: { label: 'Email Sent', color: 'bg-indigo-500/20 text-indigo-400', icon: Mail },
-  email_opened: { label: 'Opened', color: 'bg-purple-500/20 text-purple-400', icon: MailOpen },
-  responded: { label: 'Responded', color: 'bg-emerald-500/20 text-emerald-400', icon: MessageSquare },
-  meeting_scheduled: { label: 'Meeting', color: 'bg-cyan-500/20 text-cyan-400', icon: Calendar },
-  demo_given: { label: 'Demo Given', color: 'bg-amber-500/20 text-amber-400', icon: Eye },
-  negotiating: { label: 'Negotiating', color: 'bg-orange-500/20 text-orange-400', icon: TrendingUp },
-  converted: { label: 'Converted', color: 'bg-green-500/20 text-green-400', icon: CheckCircle2 },
-  not_interested: { label: 'Not Interested', color: 'bg-red-500/20 text-red-400', icon: X },
+  contacted: { label: 'Contacted', color: 'bg-blue-50 text-blue-600', icon: Phone },
+  email_sent: { label: 'Email Sent', color: 'bg-indigo-50 text-indigo-600', icon: Mail },
+  email_opened: { label: 'Opened', color: 'bg-purple-50 text-purple-600', icon: MailOpen },
+  responded: { label: 'Responded', color: 'bg-emerald-50 text-emerald-400', icon: MessageSquare },
+  meeting_scheduled: { label: 'Meeting', color: 'bg-cyan-50 text-cyan-600', icon: Calendar },
+  demo_given: { label: 'Demo Given', color: 'bg-amber-50 text-amber-600', icon: Eye },
+  negotiating: { label: 'Negotiating', color: 'bg-orange-50 text-orange-600', icon: TrendingUp },
+  converted: { label: 'Converted', color: 'bg-emerald-50 text-emerald-600', icon: CheckCircle2 },
+  not_interested: { label: 'Not Interested', color: 'bg-red-50 text-red-600', icon: X },
   no_response: { label: 'No Response', color: 'bg-gray-500/20 text-gray-400', icon: Clock },
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  high: 'text-red-400 bg-red-500/10 border-red-500/30',
-  medium: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30',
+  high: 'text-red-600 bg-red-50 border-red-200',
+  medium: 'text-amber-600 bg-amber-50 border-amber-200',
   low: 'text-slate-400 bg-slate-500/10 border-slate-500/30',
 };
 
@@ -551,7 +551,7 @@ export default function SalesLeadsPage() {
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
@@ -564,7 +564,7 @@ export default function SalesLeadsPage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <Target className="w-6 h-6 text-indigo-400" />
+              <Target className="w-6 h-6 text-indigo-600" />
               Sales Leads CRM
             </h1>
             <p className="text-sm text-slate-500 mt-1">
@@ -574,7 +574,7 @@ export default function SalesLeadsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => { if (activeTab === 'leads') loadData(); else if (activeTab === 'analytics') loadAnalytics(); else loadSequenceStatus(); }}
-              className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-white flex items-center gap-2 text-sm"
+              className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-slate-900 flex items-center gap-2 text-sm"
             >
               <RefreshCw className="w-4 h-4" />
               Refresh
@@ -608,8 +608,8 @@ export default function SalesLeadsPage() {
               onClick={() => setActiveTab(id)}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-all ${
                 activeTab === id
-                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-indigo-50 text-indigo-600 border border-indigo-500/30'
+                  : 'text-gray-400 hover:text-slate-900 hover:bg-white/5'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -626,11 +626,11 @@ export default function SalesLeadsPage() {
             {[
               { label: 'Total', value: stats.total, color: 'text-white' },
               { label: 'Has Email', value: stats.has_email, color: 'text-emerald-400' },
-              { label: 'Email Sent', value: stats.email_sent, color: 'text-indigo-400' },
-              { label: 'Opened', value: stats.email_opened, color: 'text-purple-400' },
+              { label: 'Email Sent', value: stats.email_sent, color: 'text-indigo-600' },
+              { label: 'Opened', value: stats.email_opened, color: 'text-purple-600' },
               { label: 'Responded', value: stats.responded, color: 'text-emerald-400' },
-              { label: 'Converted', value: stats.converted, color: 'text-green-400' },
-              { label: '<5 Yrs', value: stats.last_5_years, color: 'text-red-400' },
+              { label: 'Converted', value: stats.converted, color: 'text-emerald-600' },
+              { label: '<5 Yrs', value: stats.last_5_years, color: 'text-red-600' },
             ].map(({ label, value, color }) => (
               <div key={label} className="bg-[#1a1a2e] border border-gray-700/50 rounded-lg p-3">
                 <p className="text-xs text-gray-400">{label}</p>
@@ -650,13 +650,13 @@ export default function SalesLeadsPage() {
                 placeholder="Search agencies..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <select
               value={filters.state}
               onChange={(e) => setFilters({ ...filters, state: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">All States</option>
               <option value="NE">Nebraska</option>
@@ -665,7 +665,7 @@ export default function SalesLeadsPage() {
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">All Status</option>
               {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -675,7 +675,7 @@ export default function SalesLeadsPage() {
             <select
               value={filters.priority}
               onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">All Priority</option>
               <option value="high">High (0-5 yrs)</option>
@@ -685,7 +685,7 @@ export default function SalesLeadsPage() {
             <select
               value={filters.max_years}
               onChange={(e) => setFilters({ ...filters, max_years: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">Any Age</option>
               <option value="5">Last 5 years</option>
@@ -695,7 +695,7 @@ export default function SalesLeadsPage() {
             <select
               value={filters.has_email}
               onChange={(e) => setFilters({ ...filters, has_email: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">All Contacts</option>
               <option value="true">Has Email</option>
@@ -703,7 +703,7 @@ export default function SalesLeadsPage() {
             </select>
             <button
               onClick={() => setFilters({ state: '', status: '', priority: '', ownership: '', search: '', max_years: '', contacted: '', has_email: '' })}
-              className="px-3 py-2 text-gray-400 hover:text-white text-sm"
+              className="px-3 py-2 text-gray-400 hover:text-slate-900 text-sm"
             >
               Clear
             </button>
@@ -711,7 +711,7 @@ export default function SalesLeadsPage() {
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 flex items-center gap-2 text-red-400 text-sm">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center gap-2 text-red-600 text-sm">
             <AlertCircle className="w-4 h-4" />
             {error}
           </div>
@@ -721,7 +721,7 @@ export default function SalesLeadsPage() {
         <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-lg overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
             </div>
           ) : (
             <>
@@ -744,7 +744,7 @@ export default function SalesLeadsPage() {
                             if (sortBy === key) setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
                             else { setSortBy(key); setSortOrder('asc'); }
                           })()}
-                          className={`px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider ${key ? 'cursor-pointer hover:text-white' : ''}`}
+                          className={`px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider ${key ? 'cursor-pointer hover:text-slate-900' : ''}`}
                         >
                           <div className="flex items-center gap-1">
                             {label}
@@ -769,7 +769,7 @@ export default function SalesLeadsPage() {
                           <td className="px-4 py-3">
                             <div>
                               <div className="flex items-center gap-2">
-                                <p className="text-sm font-medium text-white">{lead.provider_name}</p>
+                                <p className="text-sm font-medium text-slate-900">{lead.provider_name}</p>
                                 {lead.contact_email ? (
                                   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                                     <Mail className="w-2.5 h-2.5" /> email
@@ -801,8 +801,8 @@ export default function SalesLeadsPage() {
                           <td className="px-4 py-3">
                             {lead.star_rating && lead.star_rating !== '-' ? (
                               <div className="flex items-center gap-1 text-sm">
-                                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                                <span className="text-yellow-400">{lead.star_rating}</span>
+                                <Star className="w-3 h-3 text-amber-600 fill-yellow-400" />
+                                <span className="text-amber-600">{lead.star_rating}</span>
                               </div>
                             ) : <span className="text-gray-600 text-sm">—</span>}
                           </td>
@@ -815,12 +815,12 @@ export default function SalesLeadsPage() {
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2 text-xs">
                               {lead.email_send_count > 0 && (
-                                <span className="flex items-center gap-1 text-indigo-400">
+                                <span className="flex items-center gap-1 text-indigo-600">
                                   <Send className="w-3 h-3" /> {lead.email_send_count}
                                 </span>
                               )}
                               {lead.email_open_count > 0 && (
-                                <span className="flex items-center gap-1 text-purple-400">
+                                <span className="flex items-center gap-1 text-purple-600">
                                   <MailOpen className="w-3 h-3" /> {lead.email_open_count}
                                 </span>
                               )}
@@ -830,7 +830,7 @@ export default function SalesLeadsPage() {
                           <td className="px-4 py-3">
                             <button
                               onClick={(e) => { e.stopPropagation(); openLeadDetail(lead.id); }}
-                              className="text-indigo-400 hover:text-indigo-300 text-xs"
+                              className="text-indigo-600 hover:text-indigo-300 text-xs"
                             >
                               View
                             </button>
@@ -875,8 +875,8 @@ export default function SalesLeadsPage() {
             <div className="absolute inset-0 bg-black/60" onClick={() => setShowDetail(false)} />
             <div className="relative w-full max-w-xl bg-[#12122a] border-l border-gray-700 overflow-y-auto">
               <div className="sticky top-0 bg-[#12122a] border-b border-gray-700 px-6 py-4 flex items-center justify-between z-10">
-                <h2 className="text-lg font-semibold text-white truncate">{selectedLead.provider_name}</h2>
-                <button onClick={() => setShowDetail(false)} className="text-gray-400 hover:text-white">
+                <h2 className="text-lg font-semibold text-slate-900 truncate">{selectedLead.provider_name}</h2>
+                <button onClick={() => setShowDetail(false)} className="text-gray-400 hover:text-slate-900">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -887,7 +887,7 @@ export default function SalesLeadsPage() {
                   <select
                     value={selectedLead.status}
                     onChange={(e) => updateLead(selectedLead.id, { status: e.target.value })}
-                    className="px-3 py-1.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm"
+                    className="px-3 py-1.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm"
                   >
                     {Object.entries(STATUS_CONFIG).map(([k, v]) => (
                       <option key={k} value={k}>{v.label}</option>
@@ -896,7 +896,7 @@ export default function SalesLeadsPage() {
                   <select
                     value={selectedLead.priority}
                     onChange={(e) => updateLead(selectedLead.id, { priority: e.target.value })}
-                    className="px-3 py-1.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm"
+                    className="px-3 py-1.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm"
                   >
                     <option value="high">High Priority</option>
                     <option value="medium">Medium Priority</option>
@@ -937,7 +937,7 @@ export default function SalesLeadsPage() {
                       <span className="text-gray-500">Star Rating</span>
                       <p className="text-white flex items-center gap-1">
                         {selectedLead.star_rating && selectedLead.star_rating !== '-' ? (
-                          <><Star className="w-3 h-3 text-yellow-400 fill-yellow-400" /> {selectedLead.star_rating}</>
+                          <><Star className="w-3 h-3 text-amber-600 fill-yellow-400" /> {selectedLead.star_rating}</>
                         ) : '—'}
                       </p>
                     </div>
@@ -945,12 +945,12 @@ export default function SalesLeadsPage() {
                   <div className="pt-2">
                     <span className="text-gray-500 text-sm">Services</span>
                     <div className="flex flex-wrap gap-1.5 mt-1">
-                      {selectedLead.offers_nursing && <span className="text-xs px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded">Nursing</span>}
-                      {selectedLead.offers_pt && <span className="text-xs px-2 py-0.5 bg-green-500/10 text-green-400 rounded">PT</span>}
-                      {selectedLead.offers_ot && <span className="text-xs px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded">OT</span>}
-                      {selectedLead.offers_speech && <span className="text-xs px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded">Speech</span>}
-                      {selectedLead.offers_social && <span className="text-xs px-2 py-0.5 bg-orange-500/10 text-orange-400 rounded">Social</span>}
-                      {selectedLead.offers_aide && <span className="text-xs px-2 py-0.5 bg-pink-500/10 text-pink-400 rounded">Aide</span>}
+                      {selectedLead.offers_nursing && <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded">Nursing</span>}
+                      {selectedLead.offers_pt && <span className="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded">PT</span>}
+                      {selectedLead.offers_ot && <span className="text-xs px-2 py-0.5 bg-purple-50 text-purple-600 rounded">OT</span>}
+                      {selectedLead.offers_speech && <span className="text-xs px-2 py-0.5 bg-cyan-500/10 text-cyan-600 rounded">Speech</span>}
+                      {selectedLead.offers_social && <span className="text-xs px-2 py-0.5 bg-orange-50 text-orange-600 rounded">Social</span>}
+                      {selectedLead.offers_aide && <span className="text-xs px-2 py-0.5 bg-pink-500/10 text-pink-600 rounded">Aide</span>}
                     </div>
                   </div>
                 </div>
@@ -974,16 +974,16 @@ export default function SalesLeadsPage() {
                               }
                               if (e.key === 'Escape') setEditingField(null);
                             }}
-                            className="px-2 py-1 bg-[#1a1a2e] border border-indigo-500 rounded text-white text-sm w-48"
+                            className="px-2 py-1 bg-[#1a1a2e] border border-indigo-500 rounded text-slate-900 text-sm w-48"
                           />
                           <button onClick={() => { updateLead(selectedLead.id, { [field]: editValue }); setEditingField(null); }}>
-                            <Check className="w-4 h-4 text-green-400" />
+                            <Check className="w-4 h-4 text-emerald-600" />
                           </button>
                         </div>
                       ) : (
                         <span
                           onClick={() => { setEditingField(field); setEditValue(selectedLead[field as keyof LeadDetail] as string || ''); }}
-                          className="text-white text-sm cursor-pointer hover:text-indigo-400"
+                          className="text-slate-900 text-sm cursor-pointer hover:text-indigo-600"
                         >
                           {(selectedLead[field as keyof LeadDetail] as string) || <span className="text-gray-600 italic">Click to add</span>}
                         </span>
@@ -997,11 +997,11 @@ export default function SalesLeadsPage() {
                   <h3 className="text-sm font-medium text-gray-400">Email Campaign</h3>
                   <div className="grid grid-cols-3 gap-2 text-center text-sm">
                     <div className="bg-[#1a1a2e] rounded p-2">
-                      <p className="text-indigo-400 font-bold">{selectedLead.email_send_count}</p>
+                      <p className="text-indigo-600 font-bold">{selectedLead.email_send_count}</p>
                       <p className="text-gray-500 text-xs">Sent</p>
                     </div>
                     <div className="bg-[#1a1a2e] rounded p-2">
-                      <p className="text-purple-400 font-bold">{selectedLead.email_open_count}</p>
+                      <p className="text-purple-600 font-bold">{selectedLead.email_open_count}</p>
                       <p className="text-gray-500 text-xs">Opened</p>
                     </div>
                     <div className="bg-[#1a1a2e] rounded p-2">
@@ -1018,7 +1018,7 @@ export default function SalesLeadsPage() {
                     </button>
                     <button
                       onClick={() => logAction('log-open')}
-                      className="px-3 py-2 bg-purple-600/20 text-purple-400 border border-purple-500/30 rounded-lg text-sm hover:bg-purple-600/30"
+                      className="px-3 py-2 bg-purple-600/20 text-purple-600 border border-purple-200 rounded-lg text-sm hover:bg-purple-600/30"
                     >
                       <MailOpen className="w-4 h-4" />
                     </button>
@@ -1036,20 +1036,20 @@ export default function SalesLeadsPage() {
                         placeholder="To (leave empty to use contact email)"
                         value={emailForm.to}
                         onChange={(e) => setEmailForm({ ...emailForm, to: e.target.value })}
-                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-white text-sm placeholder-gray-500"
+                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-slate-900 text-sm placeholder-gray-500"
                       />
                       <input
                         placeholder="Subject"
                         value={emailForm.subject}
                         onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
-                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-white text-sm placeholder-gray-500"
+                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-slate-900 text-sm placeholder-gray-500"
                       />
                       <textarea
                         placeholder="Email body (HTML)"
                         value={emailForm.body}
                         onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })}
                         rows={5}
-                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-white text-sm placeholder-gray-500 resize-none"
+                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-slate-900 text-sm placeholder-gray-500 resize-none"
                       />
                       <button
                         onClick={sendEmail}
@@ -1072,7 +1072,7 @@ export default function SalesLeadsPage() {
                     onBlur={() => updateLead(selectedLead.id, { notes: selectedLead.notes })}
                     placeholder="Add notes..."
                     rows={3}
-                    className="w-full px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded text-white text-sm placeholder-gray-500 resize-none"
+                    className="w-full px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded text-slate-900 text-sm placeholder-gray-500 resize-none"
                   />
                 </div>
 
@@ -1110,11 +1110,11 @@ export default function SalesLeadsPage() {
           <div className="space-y-6">
             {/* Period selector */}
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">Campaign Performance</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Campaign Performance</h2>
               <select
                 value={analyticsDays}
                 onChange={(e) => setAnalyticsDays(Number(e.target.value))}
-                className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-white text-sm"
+                className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-slate-900 text-sm"
               >
                 <option value={7}>Last 7 days</option>
                 <option value={30}>Last 30 days</option>
@@ -1125,19 +1125,19 @@ export default function SalesLeadsPage() {
 
             {analyticsLoading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
               </div>
             ) : analyticsData ? (
               <>
                 {/* Overall stats */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                   {[
-                    { label: 'Sent', value: analyticsData.totals?.total_sent || 0, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-                    { label: 'Delivered', value: analyticsData.totals?.total_delivered || 0, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-                    { label: 'Opened', value: analyticsData.totals?.total_opened || 0, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-                    { label: 'Clicked', value: analyticsData.totals?.total_clicked || 0, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+                    { label: 'Sent', value: analyticsData.totals?.total_sent || 0, color: 'text-indigo-600', bg: 'bg-indigo-500/10' },
+                    { label: 'Delivered', value: analyticsData.totals?.total_delivered || 0, color: 'text-blue-600', bg: 'bg-blue-50' },
+                    { label: 'Opened', value: analyticsData.totals?.total_opened || 0, color: 'text-purple-600', bg: 'bg-purple-50' },
+                    { label: 'Clicked', value: analyticsData.totals?.total_clicked || 0, color: 'text-cyan-600', bg: 'bg-cyan-500/10' },
                     { label: 'Replied', value: analyticsData.totals?.total_replied || 0, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-                    { label: 'Bounced', value: analyticsData.totals?.total_bounced || 0, color: 'text-red-400', bg: 'bg-red-500/10' },
+                    { label: 'Bounced', value: analyticsData.totals?.total_bounced || 0, color: 'text-red-600', bg: 'bg-red-50' },
                   ].map(({ label, value, color, bg }) => (
                     <div key={label} className={`${bg} border border-gray-700/30 rounded-xl p-4`}>
                       <p className="text-xs text-gray-400">{label}</p>
@@ -1149,9 +1149,9 @@ export default function SalesLeadsPage() {
                 {/* Key rates */}
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    { label: 'Open Rate', value: `${analyticsData.totals?.overall_open_rate || 0}%`, target: '40%+', color: (analyticsData.totals?.overall_open_rate || 0) >= 40 ? 'text-emerald-400' : 'text-amber-400' },
-                    { label: 'Click Rate', value: `${analyticsData.totals?.overall_click_rate || 0}%`, target: '3%+', color: (analyticsData.totals?.overall_click_rate || 0) >= 3 ? 'text-emerald-400' : 'text-amber-400' },
-                    { label: 'Reply Rate', value: `${analyticsData.totals?.overall_reply_rate || 0}%`, target: '5%+', color: (analyticsData.totals?.overall_reply_rate || 0) >= 5 ? 'text-emerald-400' : 'text-amber-400' },
+                    { label: 'Open Rate', value: `${analyticsData.totals?.overall_open_rate || 0}%`, target: '40%+', color: (analyticsData.totals?.overall_open_rate || 0) >= 40 ? 'text-emerald-400' : 'text-amber-600' },
+                    { label: 'Click Rate', value: `${analyticsData.totals?.overall_click_rate || 0}%`, target: '3%+', color: (analyticsData.totals?.overall_click_rate || 0) >= 3 ? 'text-emerald-400' : 'text-amber-600' },
+                    { label: 'Reply Rate', value: `${analyticsData.totals?.overall_reply_rate || 0}%`, target: '5%+', color: (analyticsData.totals?.overall_reply_rate || 0) >= 5 ? 'text-emerald-400' : 'text-amber-600' },
                   ].map(({ label, value, target, color }) => (
                     <div key={label} className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5 text-center">
                       <p className="text-xs text-gray-500 mb-2">{label}</p>
@@ -1221,25 +1221,25 @@ export default function SalesLeadsPage() {
                                   <div className={`w-7 h-7 bg-gradient-to-br ${gradient} rounded-md flex items-center justify-center`}>
                                     <Icon className="w-3.5 h-3.5 text-white" />
                                   </div>
-                                  <span className="text-sm text-white font-medium">{t.name}</span>
+                                  <span className="text-sm text-slate-900 font-medium">{t.name}</span>
                                 </div>
                               </td>
                               <td className="px-3 py-3 text-right text-xs text-gray-500 font-mono">Day {t.sequence_day}</td>
-                              <td className="px-3 py-3 text-right text-sm text-indigo-400 font-medium">{t.sent}</td>
-                              <td className="px-3 py-3 text-right text-sm text-purple-400">{t.opened}</td>
+                              <td className="px-3 py-3 text-right text-sm text-indigo-600 font-medium">{t.sent}</td>
+                              <td className="px-3 py-3 text-right text-sm text-purple-600">{t.opened}</td>
                               <td className="px-3 py-3 text-right text-sm">
-                                <span className={t.open_rate >= 40 ? 'text-emerald-400' : t.open_rate >= 20 ? 'text-amber-400' : 'text-gray-500'}>
+                                <span className={t.open_rate >= 40 ? 'text-emerald-400' : t.open_rate >= 20 ? 'text-amber-600' : 'text-gray-500'}>
                                   {t.open_rate}%
                                 </span>
                               </td>
-                              <td className="px-3 py-3 text-right text-sm text-cyan-400">{t.clicked}</td>
+                              <td className="px-3 py-3 text-right text-sm text-cyan-600">{t.clicked}</td>
                               <td className="px-3 py-3 text-right text-sm text-emerald-400">{t.replied}</td>
                               <td className="px-3 py-3 text-right text-sm">
-                                <span className={t.reply_rate >= 5 ? 'text-emerald-400' : t.reply_rate >= 2 ? 'text-amber-400' : 'text-gray-500'}>
+                                <span className={t.reply_rate >= 5 ? 'text-emerald-400' : t.reply_rate >= 2 ? 'text-amber-600' : 'text-gray-500'}>
                                   {t.reply_rate}%
                                 </span>
                               </td>
-                              <td className="px-3 py-3 text-right text-sm text-red-400">{t.bounced}</td>
+                              <td className="px-3 py-3 text-right text-sm text-red-600">{t.bounced}</td>
                             </tr>
                           );
                         })}
@@ -1252,7 +1252,7 @@ export default function SalesLeadsPage() {
                 {analyticsData.totals?.total_sent === 0 && (
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
                     <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No campaign data yet</h3>
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No campaign data yet</h3>
                     <p className="text-sm text-gray-500 max-w-md mx-auto">
                       Launch your first email sequence or send a campaign to start tracking performance.
                       Analytics will show open rates, click rates, and reply rates for each template.
@@ -1263,7 +1263,7 @@ export default function SalesLeadsPage() {
             ) : (
               <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
                 <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">Loading analytics...</h3>
+                <h3 className="text-lg font-medium text-slate-900 mb-2">Loading analytics...</h3>
               </div>
             )}
           </div>
@@ -1273,7 +1273,7 @@ export default function SalesLeadsPage() {
         {activeTab === 'sequences' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">Email Sequence Status</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Email Sequence Status</h2>
               <button
                 onClick={processScheduledEmails}
                 disabled={sequenceProcessing}
@@ -1286,7 +1286,7 @@ export default function SalesLeadsPage() {
 
             {sequenceLoading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
               </div>
             ) : sequenceStatus ? (
               <>
@@ -1294,7 +1294,7 @@ export default function SalesLeadsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                     <p className="text-xs text-gray-500">In Sequence</p>
-                    <p className="text-3xl font-bold text-white mt-1">{sequenceStatus.total_in_sequence}</p>
+                    <p className="text-3xl font-bold text-slate-900 mt-1">{sequenceStatus.total_in_sequence}</p>
                   </div>
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                     <p className="text-xs text-gray-500">Completed</p>
@@ -1302,9 +1302,9 @@ export default function SalesLeadsPage() {
                   </div>
                   <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
                     <p className="text-xs text-gray-500">Ready to Send</p>
-                    <p className="text-3xl font-bold text-amber-400 mt-1">{sequenceStatus.pending_send_now}</p>
+                    <p className="text-3xl font-bold text-amber-600 mt-1">{sequenceStatus.pending_send_now}</p>
                     {sequenceStatus.pending_send_now > 0 && (
-                      <p className="text-xs text-amber-400/70 mt-1">Click "Process Due Emails" to send</p>
+                      <p className="text-xs text-amber-600/70 mt-1">Click "Process Due Emails" to send</p>
                     )}
                   </div>
                   <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-xl p-5">
@@ -1333,7 +1333,7 @@ export default function SalesLeadsPage() {
                           <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center mx-auto mb-2`}>
                             <Icon className="w-5 h-5 text-white" />
                           </div>
-                          <p className="text-xl font-bold text-white">{count}</p>
+                          <p className="text-xl font-bold text-slate-900">{count}</p>
                           <p className="text-xs text-gray-500 mt-0.5">{label}</p>
                           <p className="text-[10px] text-gray-600 font-mono">Day {day}</p>
                           {i < 4 && (
@@ -1351,8 +1351,8 @@ export default function SalesLeadsPage() {
                   <div className={`border rounded-xl p-4 ${sequenceResult.error ? 'bg-red-500/5 border-red-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
                     {sequenceResult.error ? (
                       <div className="flex items-center gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-400" />
-                        <p className="text-sm text-red-400">{sequenceResult.error}</p>
+                        <AlertCircle className="w-5 h-5 text-red-600" />
+                        <p className="text-sm text-red-600">{sequenceResult.error}</p>
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
@@ -1376,7 +1376,7 @@ export default function SalesLeadsPage() {
             ) : (
               <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
                 <Activity className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">No active sequences</h3>
+                <h3 className="text-lg font-medium text-slate-900 mb-2">No active sequences</h3>
                 <p className="text-sm text-gray-500 mb-4">Launch a 5-email sequence to start automating your outreach.</p>
                 <button
                   onClick={() => { setShowSequenceLauncher(true); setSequenceResult(null); }}
@@ -1394,18 +1394,18 @@ export default function SalesLeadsPage() {
         {showSequenceLauncher && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowSequenceLauncher(false)} />
-            <div className="relative w-full max-w-lg bg-[#0d0d1f] border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+            <div className="relative w-full max-w-lg bg-[#0d0d1f] border border-gray-700/50 rounded-2xl overflow-hidden shadow-lg shadow-black/50">
               <div className="border-b border-gray-800 px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
                     <Rocket className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Launch Full Sequence</h2>
+                    <h2 className="text-lg font-semibold text-slate-900">Launch Full Sequence</h2>
                     <p className="text-xs text-gray-500">5 emails over 28 days, fully automated</p>
                   </div>
                 </div>
-                <button onClick={() => setShowSequenceLauncher(false)} className="text-gray-500 hover:text-white">
+                <button onClick={() => setShowSequenceLauncher(false)} className="text-gray-500 hover:text-slate-900">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -1423,8 +1423,8 @@ export default function SalesLeadsPage() {
                       { day: 28, name: 'The Graceful Exit', desc: 'Respectful close' },
                     ].map(({ day, name, desc }) => (
                       <div key={day} className="flex items-center gap-3">
-                        <span className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 rounded px-2 py-0.5 w-14 text-center">Day {day}</span>
-                        <span className="text-sm text-white font-medium">{name}</span>
+                        <span className="text-[10px] font-mono text-indigo-600 bg-indigo-500/10 rounded px-2 py-0.5 w-14 text-center">Day {day}</span>
+                        <span className="text-sm text-slate-900 font-medium">{name}</span>
                         <span className="text-xs text-gray-600 ml-auto">{desc}</span>
                       </div>
                     ))}
@@ -1436,7 +1436,7 @@ export default function SalesLeadsPage() {
                   <input
                     value={sequenceFilters.campaign_name}
                     onChange={(e) => setSequenceFilters({ ...sequenceFilters, campaign_name: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
 
@@ -1446,7 +1446,7 @@ export default function SalesLeadsPage() {
                     <select
                       value={sequenceFilters.state}
                       onChange={(e) => setSequenceFilters({ ...sequenceFilters, state: e.target.value })}
-                      className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm"
+                      className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm"
                     >
                       <option value="">All States</option>
                       <option value="NE">Nebraska</option>
@@ -1458,7 +1458,7 @@ export default function SalesLeadsPage() {
                     <select
                       value={sequenceFilters.priority}
                       onChange={(e) => setSequenceFilters({ ...sequenceFilters, priority: e.target.value })}
-                      className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm"
+                      className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm"
                     >
                       <option value="">All</option>
                       <option value="high">High</option>
@@ -1479,7 +1479,7 @@ export default function SalesLeadsPage() {
                 </label>
 
                 {sequenceResult && (
-                  <div className={`rounded-lg p-3 ${sequenceResult.error ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'} text-sm`}>
+                  <div className={`rounded-lg p-3 ${sequenceResult.error ? 'bg-red-50 border border-red-500/20 text-red-600' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'} text-sm`}>
                     {sequenceResult.error || `${sequenceResult.message} (${sequenceResult.sent} emails sent)`}
                   </div>
                 )}
@@ -1488,7 +1488,7 @@ export default function SalesLeadsPage() {
               <div className="border-t border-gray-800 px-6 py-4 flex justify-between">
                 <button
                   onClick={() => setShowSequenceLauncher(false)}
-                  className="px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-white text-sm"
+                  className="px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-slate-900 text-sm"
                 >
                   Cancel
                 </button>
@@ -1509,7 +1509,7 @@ export default function SalesLeadsPage() {
         {showCampaign && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCampaign(false)} />
-            <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#0d0d1f] border border-gray-700/50 rounded-2xl overflow-hidden flex flex-col shadow-2xl shadow-black/50">
+            <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#0d0d1f] border border-gray-700/50 rounded-2xl overflow-hidden flex flex-col shadow-lg shadow-black/50">
               {/* Modal Header with Palm branding */}
               <div className="border-b border-gray-800 px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -1517,15 +1517,15 @@ export default function SalesLeadsPage() {
                     <Rocket className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white tracking-tight">Email Campaign</h2>
+                    <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Email Campaign</h2>
                     <p className="text-xs text-gray-500">
                       {['Choose Email', 'Configure', 'Preview & Send', 'Results'][campaignStep]}
                       <span className="text-gray-700 mx-1.5">/</span>
-                      <span className="text-indigo-400">PalmCare AI</span>
+                      <span className="text-indigo-600">PalmCare AI</span>
                     </p>
                   </div>
                 </div>
-                <button onClick={() => setShowCampaign(false)} className="text-gray-500 hover:text-white transition-colors">
+                <button onClick={() => setShowCampaign(false)} className="text-gray-500 hover:text-slate-900 transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -1582,8 +1582,8 @@ export default function SalesLeadsPage() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="text-white font-medium text-sm">{tmpl.name}</h3>
-                                  {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-400" />}
+                                  <h3 className="text-slate-900 font-medium text-sm">{tmpl.name}</h3>
+                                  {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600" />}
                                 </div>
                                 <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{tmpl.description}</p>
                                 <div className="flex items-center gap-2 mt-2">
@@ -1609,7 +1609,7 @@ export default function SalesLeadsPage() {
                         value={campaignName}
                         onChange={(e) => setCampaignName(e.target.value)}
                         placeholder="e.g., feb-2026-ai-advantage"
-                        className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                        className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -1618,7 +1618,7 @@ export default function SalesLeadsPage() {
                         <select
                           value={campaignFilters.state}
                           onChange={(e) => setCampaignFilters({ ...campaignFilters, state: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                         >
                           <option value="">All States</option>
                           <option value="NE">Nebraska</option>
@@ -1630,7 +1630,7 @@ export default function SalesLeadsPage() {
                         <select
                           value={campaignFilters.priority}
                           onChange={(e) => setCampaignFilters({ ...campaignFilters, priority: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                         >
                           <option value="">All Priorities</option>
                           <option value="high">High (newer agencies)</option>
@@ -1643,7 +1643,7 @@ export default function SalesLeadsPage() {
                         <select
                           value={campaignFilters.max_years}
                           onChange={(e) => setCampaignFilters({ ...campaignFilters, max_years: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-white text-sm focus:border-indigo-500 focus:outline-none"
+                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                         >
                           <option value="">Any</option>
                           <option value="5">Under 5 years</option>
@@ -1674,10 +1674,10 @@ export default function SalesLeadsPage() {
                       <div className="bg-[#0a0a18] border border-gray-800 rounded-xl p-4">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center">
-                            <Users className="w-5 h-5 text-indigo-400" />
+                            <Users className="w-5 h-5 text-indigo-600" />
                           </div>
                           <div>
-                            <p className="text-2xl font-bold text-white tracking-tight">{campaignPreview.total_recipients}</p>
+                            <p className="text-2xl font-bold text-slate-900 tracking-tight">{campaignPreview.total_recipients}</p>
                             <p className="text-xs text-gray-500">agencies will receive this email</p>
                           </div>
                         </div>
@@ -1734,27 +1734,27 @@ export default function SalesLeadsPage() {
                   <div className="space-y-5">
                     {campaignResult.error ? (
                       <div className="bg-[#0a0a18] border border-red-500/20 rounded-xl p-8 text-center">
-                        <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-                          <AlertCircle className="w-7 h-7 text-red-400" />
+                        <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                          <AlertCircle className="w-7 h-7 text-red-600" />
                         </div>
-                        <h3 className="text-lg font-semibold text-white mb-1">Campaign Failed</h3>
+                        <h3 className="text-lg font-semibold text-slate-900 mb-1">Campaign Failed</h3>
                         <p className="text-sm text-gray-500">{campaignResult.error}</p>
                       </div>
                     ) : (
                       <div className="bg-[#0a0a18] border border-gray-800 rounded-xl p-8 text-center">
                         <div className="w-14 h-14 rounded-full bg-indigo-500/10 flex items-center justify-center mx-auto mb-4">
-                          <Check className="w-7 h-7 text-indigo-400" />
+                          <Check className="w-7 h-7 text-indigo-600" />
                         </div>
-                        <h3 className="text-lg font-semibold text-white mb-1">Campaign Sent</h3>
+                        <h3 className="text-lg font-semibold text-slate-900 mb-1">Campaign Sent</h3>
                         <p className="text-sm text-gray-500 mb-6">{campaignResult.message}</p>
                         <div className="flex justify-center gap-10">
                           <div>
-                            <p className="text-4xl font-bold text-white tracking-tight">{campaignResult.sent}</p>
+                            <p className="text-4xl font-bold text-slate-900 tracking-tight">{campaignResult.sent}</p>
                             <p className="text-xs text-gray-600 mt-1 uppercase tracking-wider">Delivered</p>
                           </div>
                           {(campaignResult.failed ?? 0) > 0 && (
                             <div>
-                              <p className="text-4xl font-bold text-red-400 tracking-tight">{campaignResult.failed}</p>
+                              <p className="text-4xl font-bold text-red-600 tracking-tight">{campaignResult.failed}</p>
                               <p className="text-xs text-gray-600 mt-1 uppercase tracking-wider">Failed</p>
                             </div>
                           )}
@@ -1763,7 +1763,7 @@ export default function SalesLeadsPage() {
                           <div className="mt-6 text-left bg-[#060612] rounded-lg p-4 border border-gray-800">
                             <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Errors</p>
                             {campaignResult.errors!.map((err, i) => (
-                              <p key={i} className="text-xs text-red-400/80 py-0.5">{err.lead}: {err.error}</p>
+                              <p key={i} className="text-xs text-red-600/80 py-0.5">{err.lead}: {err.error}</p>
                             ))}
                           </div>
                         )}
@@ -1780,7 +1780,7 @@ export default function SalesLeadsPage() {
                     if (campaignStep === 0) setShowCampaign(false);
                     else setCampaignStep(campaignStep - 1);
                   }}
-                  className="px-4 py-2.5 bg-transparent border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-600 text-sm transition-colors"
+                  className="px-4 py-2.5 bg-transparent border border-gray-700 rounded-lg text-gray-400 hover:text-slate-900 hover:border-gray-600 text-sm transition-colors"
                 >
                   {campaignStep === 0 ? 'Cancel' : 'Back'}
                 </button>

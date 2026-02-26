@@ -45,12 +45,12 @@ interface Stats {
 }
 
 const STATUS_CONFIG: Record<string, { color: string; bgColor: string; icon: any; label: string }> = {
-  pending: { color: 'text-yellow-400', bgColor: 'bg-yellow-500/10', icon: Clock, label: 'Pending' },
-  sos_verified: { color: 'text-blue-400', bgColor: 'bg-blue-500/10', icon: CheckCircle2, label: 'SOS Verified' },
-  documents_submitted: { color: 'text-purple-400', bgColor: 'bg-purple-500/10', icon: FileCheck, label: 'Under Review' },
-  approved: { color: 'text-green-400', bgColor: 'bg-green-500/10', icon: CheckCircle2, label: 'Approved' },
-  rejected: { color: 'text-red-400', bgColor: 'bg-red-500/10', icon: XCircle, label: 'Rejected' },
-  suspended: { color: 'text-orange-400', bgColor: 'bg-orange-500/10', icon: AlertCircle, label: 'Suspended' },
+  pending: { color: 'text-amber-600', bgColor: 'bg-amber-50', icon: Clock, label: 'Pending' },
+  sos_verified: { color: 'text-blue-600', bgColor: 'bg-blue-50', icon: CheckCircle2, label: 'SOS Verified' },
+  documents_submitted: { color: 'text-purple-600', bgColor: 'bg-purple-50', icon: FileCheck, label: 'Under Review' },
+  approved: { color: 'text-emerald-600', bgColor: 'bg-emerald-50', icon: CheckCircle2, label: 'Approved' },
+  rejected: { color: 'text-red-600', bgColor: 'bg-red-50', icon: XCircle, label: 'Rejected' },
+  suspended: { color: 'text-orange-600', bgColor: 'bg-orange-50', icon: AlertCircle, label: 'Suspended' },
 };
 
 export default function AdminBusinessesPage() {
@@ -136,7 +136,7 @@ export default function AdminBusinessesPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">All Businesses</h1>
+              <h1 className="text-2xl font-bold text-slate-900">All Businesses</h1>
               <p className="text-slate-500">View and manage all registered businesses</p>
             </div>
           </div>
@@ -151,10 +151,10 @@ export default function AdminBusinessesPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -167,55 +167,55 @@ export default function AdminBusinessesPage() {
                   <Building2 className="w-5 h-5 text-slate-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{stats.total_businesses}</p>
+                  <p className="text-2xl font-bold text-slate-900">{stats.total_businesses}</p>
                   <p className="text-sm text-slate-500">Total</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white border border-yellow-500/30 rounded-xl p-4">
+            <div className="bg-white border border-amber-200 rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-yellow-400" />
+                <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-yellow-400">{stats.pending_approval}</p>
+                  <p className="text-2xl font-bold text-amber-600">{stats.pending_approval}</p>
                   <p className="text-sm text-slate-500">Pending</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white border border-green-500/30 rounded-xl p-4">
+            <div className="bg-white border border-emerald-200 rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-green-400">{stats.approved}</p>
+                  <p className="text-2xl font-bold text-emerald-600">{stats.approved}</p>
                   <p className="text-sm text-slate-500">Approved</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white border border-red-500/30 rounded-xl p-4">
+            <div className="bg-white border border-red-200 rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
-                  <XCircle className="w-5 h-5 text-red-400" />
+                <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+                  <XCircle className="w-5 h-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-red-400">{stats.rejected}</p>
+                  <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
                   <p className="text-sm text-slate-500">Rejected</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white border border-orange-500/30 rounded-xl p-4">
+            <div className="bg-white border border-orange-200 rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-5 h-5 text-orange-400" />
+                <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                  <AlertCircle className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-orange-400">{stats.suspended}</p>
+                  <p className="text-2xl font-bold text-orange-600">{stats.suspended}</p>
                   <p className="text-sm text-slate-500">Suspended</p>
                 </div>
               </div>
@@ -265,7 +265,7 @@ export default function AdminBusinessesPage() {
           ) : businesses.length === 0 ? (
             <div className="p-12 text-center">
               <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">No businesses found</h3>
+              <h3 className="text-lg font-medium text-slate-900 mb-2">No businesses found</h3>
               <p className="text-slate-500">
                 {statusFilter || search ? 'Try adjusting your filters' : 'No businesses have registered yet'}
               </p>
@@ -313,7 +313,7 @@ export default function AdminBusinessesPage() {
                       <td className="px-6 py-4 text-right">
                         <Link
                           href={`/admin/businesses/${business.id}`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-white text-sm rounded-lg transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-900 text-sm rounded-lg transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                           Review

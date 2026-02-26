@@ -33,10 +33,10 @@ interface ComplianceSummary {
 }
 
 const SEVERITY_STYLES: Record<string, { bg: string; border: string; text: string }> = {
-  critical: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400' },
-  high: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400' },
-  medium: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400' },
-  low: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
+  critical: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-600' },
+  high: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-600' },
+  medium: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600' },
+  low: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600' },
 };
 
 export default function CompliancePage() {
@@ -116,10 +116,10 @@ export default function CompliancePage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Compliance Monitoring</p>
+            <p className="text-blue-600 font-medium">Compliance Monitoring</p>
             <p className="text-blue-300/70 text-sm mt-1">
               Track document expirations and compliance status across all businesses.
             </p>
@@ -136,7 +136,7 @@ export default function CompliancePage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Compliance Alerts</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Compliance Alerts</h1>
               <p className="text-slate-500 mt-1">Monitor expiring documents and licenses</p>
             </div>
           </div>
@@ -154,23 +154,23 @@ export default function CompliancePage() {
           <div className="grid grid-cols-5 gap-4 mb-8">
             <div className="p-5 bg-white rounded-xl border border-slate-200">
               <p className="text-slate-500 text-sm">Total Documents</p>
-              <p className="text-2xl font-bold text-white mt-1">{summary.total_documents}</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1">{summary.total_documents}</p>
             </div>
             <div className="p-5 bg-white rounded-xl border border-slate-200">
               <p className="text-slate-500 text-sm">Verified</p>
-              <p className="text-2xl font-bold text-green-400 mt-1">{summary.verified_documents}</p>
+              <p className="text-2xl font-bold text-emerald-600 mt-1">{summary.verified_documents}</p>
             </div>
-            <div className="p-5 bg-red-500/10 rounded-xl border border-red-500/30">
-              <p className="text-red-400 text-sm">Expired</p>
-              <p className="text-2xl font-bold text-red-400 mt-1">{summary.expired_documents}</p>
+            <div className="p-5 bg-red-50 rounded-xl border border-red-200">
+              <p className="text-red-600 text-sm">Expired</p>
+              <p className="text-2xl font-bold text-red-600 mt-1">{summary.expired_documents}</p>
             </div>
-            <div className="p-5 bg-yellow-500/10 rounded-xl border border-yellow-500/30">
-              <p className="text-yellow-400 text-sm">Expiring Soon</p>
-              <p className="text-2xl font-bold text-yellow-400 mt-1">{summary.expiring_in_30_days}</p>
+            <div className="p-5 bg-amber-50 rounded-xl border border-amber-200">
+              <p className="text-amber-600 text-sm">Expiring Soon</p>
+              <p className="text-2xl font-bold text-amber-600 mt-1">{summary.expiring_in_30_days}</p>
             </div>
             <div className="p-5 bg-white rounded-xl border border-slate-200">
               <p className="text-slate-500 text-sm">Compliance Rate</p>
-              <p className={`text-2xl font-bold mt-1 ${summary.compliance_rate >= 80 ? 'text-green-400' : summary.compliance_rate >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+              <p className={`text-2xl font-bold mt-1 ${summary.compliance_rate >= 80 ? 'text-emerald-600' : summary.compliance_rate >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
                 {summary.compliance_rate}%
               </p>
             </div>
@@ -185,7 +185,7 @@ export default function CompliancePage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-white'
+                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -205,8 +205,8 @@ export default function CompliancePage() {
             </div>
           ) : filteredAlerts.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-xl border border-slate-200">
-              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <p className="text-white font-medium">No compliance alerts</p>
+              <CheckCircle className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+              <p className="text-slate-900 font-medium">No compliance alerts</p>
               <p className="text-slate-500 text-sm mt-1">All documents are up to date</p>
             </div>
           ) : (
@@ -227,7 +227,7 @@ export default function CompliancePage() {
                         )}
                       </div>
                       <div>
-                        <p className="text-white font-medium">{alert.business_name}</p>
+                        <p className="text-slate-900 font-medium">{alert.business_name}</p>
                         <p className="text-slate-500 text-sm mt-1">
                           {alert.document_type.replace(/_/g, ' ')}
                         </p>

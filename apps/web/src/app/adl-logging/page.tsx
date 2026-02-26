@@ -36,21 +36,21 @@ interface VisitLog {
 }
 
 const ADL_CATEGORIES: Record<ADLCategory, { label: string; icon: typeof HeartPulse; color: string; bg: string; items: string[] }> = {
-  bathing:    { label: 'Bathing & Hygiene', icon: Droplets,          color: 'text-blue-400',   bg: 'bg-blue-500/15',   items: ['Shower assist', 'Sponge bath', 'Hair washing', 'Oral care', 'Skin care'] },
-  dressing:   { label: 'Dressing',          icon: Shirt,             color: 'text-purple-400', bg: 'bg-purple-500/15', items: ['Upper body', 'Lower body', 'Footwear', 'Outerwear'] },
-  medication: { label: 'Medication',        icon: Pill,              color: 'text-red-400',    bg: 'bg-red-500/15',    items: ['Morning meds', 'Afternoon meds', 'Evening meds', 'PRN medication', 'Refill check'] },
-  meals:      { label: 'Meals & Nutrition', icon: UtensilsCrossed,   color: 'text-amber-400',  bg: 'bg-amber-500/15',  items: ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Fluid intake', 'Meal prep'] },
-  mobility:   { label: 'Mobility',          icon: Footprints,        color: 'text-green-400',  bg: 'bg-green-500/15',  items: ['Transfer assist', 'Walking assist', 'Wheelchair', 'Range of motion', 'Fall prevention'] },
-  toileting:  { label: 'Toileting',         icon: BedDouble,         color: 'text-teal-400',   bg: 'bg-teal-500/15',   items: ['Toilet assist', 'Incontinence care', 'Catheter care', 'Bowel program'] },
-  cognition:  { label: 'Cognitive Support', icon: Brain,             color: 'text-indigo-400', bg: 'bg-indigo-500/15', items: ['Orientation', 'Memory exercises', 'Engagement', 'Supervision', 'Redirection'] },
-  vitals:     { label: 'Vitals & Monitoring', icon: Stethoscope,     color: 'text-pink-400',   bg: 'bg-pink-500/15',   items: ['Blood pressure', 'Temperature', 'Pulse', 'Blood sugar', 'Weight', 'O2 saturation'] },
+  bathing:    { label: 'Bathing & Hygiene', icon: Droplets,          color: 'text-blue-600',   bg: 'bg-blue-50',   items: ['Shower assist', 'Sponge bath', 'Hair washing', 'Oral care', 'Skin care'] },
+  dressing:   { label: 'Dressing',          icon: Shirt,             color: 'text-purple-600', bg: 'bg-purple-50', items: ['Upper body', 'Lower body', 'Footwear', 'Outerwear'] },
+  medication: { label: 'Medication',        icon: Pill,              color: 'text-red-600',    bg: 'bg-red-50',    items: ['Morning meds', 'Afternoon meds', 'Evening meds', 'PRN medication', 'Refill check'] },
+  meals:      { label: 'Meals & Nutrition', icon: UtensilsCrossed,   color: 'text-amber-600',  bg: 'bg-amber-50',  items: ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Fluid intake', 'Meal prep'] },
+  mobility:   { label: 'Mobility',          icon: Footprints,        color: 'text-emerald-600',  bg: 'bg-emerald-50',  items: ['Transfer assist', 'Walking assist', 'Wheelchair', 'Range of motion', 'Fall prevention'] },
+  toileting:  { label: 'Toileting',         icon: BedDouble,         color: 'text-teal-600',   bg: 'bg-teal-50',   items: ['Toilet assist', 'Incontinence care', 'Catheter care', 'Bowel program'] },
+  cognition:  { label: 'Cognitive Support', icon: Brain,             color: 'text-indigo-600', bg: 'bg-indigo-500/15', items: ['Orientation', 'Memory exercises', 'Engagement', 'Supervision', 'Redirection'] },
+  vitals:     { label: 'Vitals & Monitoring', icon: Stethoscope,     color: 'text-pink-600',   bg: 'bg-pink-500/15',   items: ['Blood pressure', 'Temperature', 'Pulse', 'Blood sugar', 'Weight', 'O2 saturation'] },
 };
 
 const STATUS_CONFIG: Record<LogStatus, { label: string; color: string; bg: string; icon: typeof Check }> = {
-  completed:      { label: 'Completed',      color: 'text-green-400',  bg: 'bg-green-500/15',  icon: CheckCircle2 },
-  assisted:       { label: 'Assisted',        color: 'text-blue-400',   bg: 'bg-blue-500/15',   icon: Users },
-  independent:    { label: 'Independent',     color: 'text-teal-400',   bg: 'bg-teal-500/15',   icon: Check },
-  refused:        { label: 'Refused',         color: 'text-red-400',    bg: 'bg-red-500/15',    icon: X },
+  completed:      { label: 'Completed',      color: 'text-emerald-600',  bg: 'bg-emerald-50',  icon: CheckCircle2 },
+  assisted:       { label: 'Assisted',        color: 'text-blue-600',   bg: 'bg-blue-50',   icon: Users },
+  independent:    { label: 'Independent',     color: 'text-teal-600',   bg: 'bg-teal-50',   icon: Check },
+  refused:        { label: 'Refused',         color: 'text-red-600',    bg: 'bg-red-50',    icon: X },
   not_applicable: { label: 'N/A',             color: 'text-gray-400',   bg: 'bg-gray-500/15',   icon: MoreHorizontal },
 };
 
@@ -185,7 +185,7 @@ export default function ADLLoggingPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
                 <HeartPulse className="w-7 h-7 text-primary-400" />
                 ADL & Care Logging
               </h1>
@@ -196,10 +196,10 @@ export default function ADLLoggingPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Visits Today', value: totalStats.totalVisits, icon: CalendarDays, color: 'text-blue-400', bg: 'bg-blue-500/15' },
-              { label: 'ADL Entries', value: totalStats.totalEntries, icon: HeartPulse, color: 'text-green-400', bg: 'bg-green-500/15' },
-              { label: 'Completion Rate', value: `${totalStats.completedRate}%`, icon: CheckCircle2, color: 'text-teal-400', bg: 'bg-teal-500/15' },
-              { label: 'Refusals', value: totalStats.refusedCount, icon: AlertCircle, color: totalStats.refusedCount > 0 ? 'text-red-400' : 'text-gray-400', bg: totalStats.refusedCount > 0 ? 'bg-red-500/15' : 'bg-gray-500/15' },
+              { label: 'Visits Today', value: totalStats.totalVisits, icon: CalendarDays, color: 'text-blue-600', bg: 'bg-blue-50' },
+              { label: 'ADL Entries', value: totalStats.totalEntries, icon: HeartPulse, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+              { label: 'Completion Rate', value: `${totalStats.completedRate}%`, icon: CheckCircle2, color: 'text-teal-600', bg: 'bg-teal-50' },
+              { label: 'Refusals', value: totalStats.refusedCount, icon: AlertCircle, color: totalStats.refusedCount > 0 ? 'text-red-600' : 'text-gray-400', bg: totalStats.refusedCount > 0 ? 'bg-red-50' : 'bg-gray-500/15' },
             ].map((stat, i) => (
               <div key={i} className="card p-4">
                 <div className="flex items-center gap-3 mb-2">
@@ -208,7 +208,7 @@ export default function ADLLoggingPage() {
                   </div>
                   <span className="text-slate-500 text-sm">{stat.label}</span>
                 </div>
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
+                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
               </div>
             ))}
           </div>
@@ -222,14 +222,14 @@ export default function ADLLoggingPage() {
                 placeholder="Search clients..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white text-sm placeholder:text-slate-400 focus:outline-none focus:border-primary-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-primary-500"
               />
             </div>
             <input
               type="date"
               value={filterDate}
               onChange={e => setFilterDate(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
+              className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:border-primary-500"
             />
           </div>
 
@@ -249,7 +249,7 @@ export default function ADLLoggingPage() {
                   className={`w-full text-left card p-4 transition hover:border-primary-500/50 ${selectedVisit?.id === visit.id ? 'border-primary-500 bg-primary-500/5' : ''}`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium">{visit.clientName}</span>
+                    <span className="text-slate-900 font-medium">{visit.clientName}</span>
                     <span className="text-xs text-slate-500">{visit.entries.length} ADLs</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
@@ -279,7 +279,7 @@ export default function ADLLoggingPage() {
               {!selectedVisit ? (
                 <div className="card p-12 text-center">
                   <HeartPulse className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">Select a Visit</h3>
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Select a Visit</h3>
                   <p className="text-slate-500">Click on a visit log to view and manage ADL entries</p>
                 </div>
               ) : (
@@ -288,7 +288,7 @@ export default function ADLLoggingPage() {
                   <div className="card p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <h2 className="text-lg font-bold text-white">{selectedVisit.clientName}</h2>
+                        <h2 className="text-lg font-bold text-slate-900">{selectedVisit.clientName}</h2>
                         <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
                           <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {selectedVisit.caregiverName}</span>
                           <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {selectedVisit.clockIn} — {selectedVisit.clockOut || 'Active'}</span>
@@ -327,7 +327,7 @@ export default function ADLLoggingPage() {
                   {/* New Entry Form */}
                   {showNewEntry && (
                     <div className="card p-4 border-primary-500/50">
-                      <h3 className="text-sm font-semibold text-white mb-3">New ADL Entry</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 mb-3">New ADL Entry</h3>
                       <div className="grid grid-cols-2 gap-3 mb-3">
                         <div>
                           <label className="text-xs text-slate-500 mb-1 block">Category</label>
@@ -394,7 +394,7 @@ export default function ADLLoggingPage() {
                           onChange={e => setNewNotes(e.target.value)}
                           placeholder="Add details..."
                           rows={2}
-                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white text-sm placeholder:text-slate-400 focus:outline-none focus:border-primary-500 resize-none"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-primary-500 resize-none"
                         />
                       </div>
                       <div className="flex gap-2">
@@ -421,7 +421,7 @@ export default function ADLLoggingPage() {
                                 <Icon className={`w-5 h-5 ${cfg.color}`} />
                               </div>
                               <div className="text-left">
-                                <span className="text-white font-medium">{cfg.label}</span>
+                                <span className="text-slate-900 font-medium">{cfg.label}</span>
                                 <span className="text-slate-500 text-xs ml-2">{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span>
                               </div>
                             </div>

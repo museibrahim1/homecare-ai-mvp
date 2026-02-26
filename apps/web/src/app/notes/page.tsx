@@ -53,10 +53,10 @@ interface ReminderItem {
 
 /* ─── Config ─── */
 const PRIORITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  urgent: { label: 'Urgent', color: 'text-red-400', bg: 'bg-red-500/15' },
-  high:   { label: 'High',   color: 'text-orange-400', bg: 'bg-orange-500/15' },
-  medium: { label: 'Medium', color: 'text-yellow-400', bg: 'bg-yellow-500/15' },
-  low:    { label: 'Low',    color: 'text-green-400', bg: 'bg-green-500/15' },
+  urgent: { label: 'Urgent', color: 'text-red-600', bg: 'bg-red-50' },
+  high:   { label: 'High',   color: 'text-orange-600', bg: 'bg-orange-50' },
+  medium: { label: 'Medium', color: 'text-amber-600', bg: 'bg-amber-50' },
+  low:    { label: 'Low',    color: 'text-emerald-600', bg: 'bg-emerald-50' },
 };
 
 const TAG_OPTIONS = ['meeting', 'call', 'idea', 'follow-up', 'important', 'personal'];
@@ -123,7 +123,7 @@ export default function NotesPage() {
   const [newReminderAt, setNewReminderAt] = useState('');
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const INPUT = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
+  const INPUT = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
 
   // ─── Data Loading ───
 
@@ -323,7 +323,7 @@ export default function NotesPage() {
             {/* List header */}
             <div className="p-4 border-b border-slate-200 space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-primary-400" />
                   Notes & Tasks
                 </h2>
@@ -344,7 +344,7 @@ export default function NotesPage() {
                   placeholder="Search notes..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
                 />
               </div>
 
@@ -356,8 +356,8 @@ export default function NotesPage() {
                     onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
                     className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
                       tagFilter === tag
-                        ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                        : 'bg-slate-100 text-slate-500 border border-slate-200 hover:text-white'
+                        ? 'bg-primary-50 text-primary-400 border border-primary-200'
+                        : 'bg-slate-100 text-slate-500 border border-slate-200 hover:text-slate-900'
                     }`}
                   >
                     {tag}
@@ -398,8 +398,8 @@ export default function NotesPage() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            {note.is_pinned && <Pin className="w-3 h-3 text-amber-400 shrink-0" />}
-                            <p className="text-sm font-medium text-white truncate">{note.title}</p>
+                            {note.is_pinned && <Pin className="w-3 h-3 text-amber-600 shrink-0" />}
+                            <p className="text-sm font-medium text-slate-900 truncate">{note.title}</p>
                           </div>
                           {note.ai_summary && (
                             <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{note.ai_summary}</p>
@@ -459,17 +459,17 @@ export default function NotesPage() {
                     <button
                       onClick={handleExtractTasks}
                       disabled={extracting}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/15 hover:bg-purple-500/25 text-purple-400 text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-500/25 text-purple-600 text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
                       title="AI Extract Tasks"
                     >
                       {extracting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                       AI Extract
                     </button>
-                    <button onClick={handleTogglePin} className="p-1.5 text-slate-500 hover:text-amber-400 transition-colors rounded-lg hover:bg-slate-100" title={selectedNote.is_pinned ? 'Unpin' : 'Pin'}>
+                    <button onClick={handleTogglePin} className="p-1.5 text-slate-500 hover:text-amber-600 transition-colors rounded-lg hover:bg-slate-100" title={selectedNote.is_pinned ? 'Unpin' : 'Pin'}>
                       {selectedNote.is_pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
                     </button>
                     <div className="relative">
-                      <button onClick={() => setShowTagPicker(!showTagPicker)} className="p-1.5 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-100" title="Tags">
+                      <button onClick={() => setShowTagPicker(!showTagPicker)} className="p-1.5 text-slate-500 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-100" title="Tags">
                         <Tag className="w-4 h-4" />
                       </button>
                       {showTagPicker && (
@@ -479,7 +479,7 @@ export default function NotesPage() {
                               key={tag}
                               onClick={() => handleToggleTag(tag)}
                               className={`w-full text-left px-2 py-1.5 text-xs rounded transition-colors flex items-center gap-2 ${
-                                editTags.includes(tag) ? 'text-primary-400 bg-primary-500/10' : 'text-slate-600 hover:bg-slate-50'
+                                editTags.includes(tag) ? 'text-primary-400 bg-primary-50' : 'text-slate-600 hover:bg-slate-50'
                               }`}
                             >
                               {editTags.includes(tag) && <Check className="w-3 h-3" />}
@@ -489,7 +489,7 @@ export default function NotesPage() {
                         </div>
                       )}
                     </div>
-                    <button onClick={handleDeleteNote} className="p-1.5 text-slate-500 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10" title="Delete note">
+                    <button onClick={handleDeleteNote} className="p-1.5 text-slate-500 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50" title="Delete note">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -503,14 +503,14 @@ export default function NotesPage() {
                       type="text"
                       value={editTitle}
                       onChange={e => handleTitleChange(e.target.value)}
-                      className="w-full text-2xl font-bold text-white bg-transparent border-none outline-none placeholder-dark-500"
+                      className="w-full text-2xl font-bold text-slate-900 bg-transparent border-none outline-none placeholder-dark-500"
                       placeholder="Note title..."
                     />
 
                     {/* AI Summary */}
                     {selectedNote.ai_summary && (
-                      <div className="flex items-start gap-2 px-3 py-2.5 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                        <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                      <div className="flex items-start gap-2 px-3 py-2.5 bg-purple-50 border border-purple-500/20 rounded-lg">
+                        <Sparkles className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
                         <p className="text-xs text-purple-300">{selectedNote.ai_summary}</p>
                       </div>
                     )}
@@ -519,7 +519,7 @@ export default function NotesPage() {
                     {editTags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {editTags.map(tag => (
-                          <span key={tag} className="text-[10px] px-2 py-0.5 bg-primary-500/15 text-primary-400 border border-primary-500/20 rounded-full">
+                          <span key={tag} className="text-[10px] px-2 py-0.5 bg-primary-50 text-primary-400 border border-primary-500/20 rounded-full">
                             {tag}
                           </span>
                         ))}
@@ -537,8 +537,8 @@ export default function NotesPage() {
                     {/* ─── Tasks Section ─── */}
                     <div className="border-t border-slate-200 pt-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                          <ListTodo className="w-4 h-4 text-blue-400" />
+                        <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                          <ListTodo className="w-4 h-4 text-blue-600" />
                           Tasks
                           {tasks.length > 0 && (
                             <span className="text-[10px] px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded-full">
@@ -566,15 +566,15 @@ export default function NotesPage() {
                             onKeyDown={e => e.key === 'Enter' && handleAddTask()}
                           />
                           <div className="flex items-center gap-2">
-                            <select value={newTaskPriority} onChange={e => setNewTaskPriority(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-white">
+                            <select value={newTaskPriority} onChange={e => setNewTaskPriority(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-500">
                               <option value="low">Low</option>
                               <option value="medium">Medium</option>
                               <option value="high">High</option>
                               <option value="urgent">Urgent</option>
                             </select>
-                            <input type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-white" />
+                            <input type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-500" />
                             <div className="flex-1" />
-                            <button onClick={() => setShowAddTask(false)} className="px-2 py-1 text-xs text-slate-500 hover:text-white">Cancel</button>
+                            <button onClick={() => setShowAddTask(false)} className="px-2 py-1 text-xs text-slate-500 hover:text-slate-900">Cancel</button>
                             <button onClick={handleAddTask} disabled={!newTaskTitle.trim()} className="px-3 py-1 text-xs bg-primary-500 hover:bg-primary-600 text-white rounded disabled:opacity-50">Add</button>
                           </div>
                         </div>
@@ -591,7 +591,7 @@ export default function NotesPage() {
                             <div key={task.id} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-50/20 transition-colors group ${isDone ? 'opacity-50' : ''}`}>
                               <button onClick={() => !isDone && handleCompleteTask(task.id)} className="shrink-0">
                                 {isDone ? (
-                                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                                 ) : (
                                   <Circle className="w-4 h-4 text-slate-400 hover:text-primary-400 transition-colors" />
                                 )}
@@ -602,8 +602,8 @@ export default function NotesPage() {
                                   <span className={`text-[9px] px-1 py-0.5 rounded ${pCfg.bg} ${pCfg.color}`}>{pCfg.label}</span>
                                   {task.due_date && (
                                     <span className={`text-[9px] flex items-center gap-0.5 ${
-                                      dueStatus === 'overdue' ? 'text-red-400' :
-                                      dueStatus === 'today' ? 'text-amber-400' : 'text-slate-400'
+                                      dueStatus === 'overdue' ? 'text-red-600' :
+                                      dueStatus === 'today' ? 'text-amber-600' : 'text-slate-400'
                                     }`}>
                                       <Calendar className="w-2.5 h-2.5" />
                                       {task.due_date}
@@ -611,7 +611,7 @@ export default function NotesPage() {
                                   )}
                                 </div>
                               </div>
-                              <button onClick={() => handleDeleteTask(task.id)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-400 transition-all">
+                              <button onClick={() => handleDeleteTask(task.id)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 transition-all">
                                 <Trash2 className="w-3 h-3" />
                               </button>
                             </div>
@@ -626,8 +626,8 @@ export default function NotesPage() {
                     {/* ─── Reminders Section ─── */}
                     <div className="border-t border-slate-200 pt-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                          <Bell className="w-4 h-4 text-amber-400" />
+                        <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                          <Bell className="w-4 h-4 text-amber-600" />
                           Reminders
                         </h3>
                         <button
@@ -650,7 +650,7 @@ export default function NotesPage() {
                           />
                           <div className="flex items-center gap-2">
                             <input type="datetime-local" value={newReminderAt} onChange={e => setNewReminderAt(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-white flex-1" />
-                            <button onClick={() => setShowAddReminder(false)} className="px-2 py-1 text-xs text-slate-500 hover:text-white">Cancel</button>
+                            <button onClick={() => setShowAddReminder(false)} className="px-2 py-1 text-xs text-slate-500 hover:text-slate-900">Cancel</button>
                             <button onClick={handleAddReminder} disabled={!newReminderTitle.trim() || !newReminderAt} className="px-3 py-1 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded disabled:opacity-50">Set</button>
                           </div>
                         </div>
@@ -662,15 +662,15 @@ export default function NotesPage() {
                           const isPast = new Date(rem.remind_at) <= new Date();
                           return (
                             <div key={rem.id} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-50/20 transition-colors group ${rem.is_dismissed ? 'opacity-40' : ''}`}>
-                              <Bell className={`w-4 h-4 shrink-0 ${isPast && !rem.is_dismissed ? 'text-amber-400' : 'text-slate-400'}`} />
+                              <Bell className={`w-4 h-4 shrink-0 ${isPast && !rem.is_dismissed ? 'text-amber-600' : 'text-slate-400'}`} />
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs text-white">{rem.title}</p>
-                                <p className={`text-[10px] ${isPast && !rem.is_dismissed ? 'text-amber-400' : 'text-slate-400'}`}>
+                                <p className="text-xs text-slate-500">{rem.title}</p>
+                                <p className={`text-[10px] ${isPast && !rem.is_dismissed ? 'text-amber-600' : 'text-slate-400'}`}>
                                   {new Date(rem.remind_at).toLocaleString()}
                                 </p>
                               </div>
                               {!rem.is_dismissed && (
-                                <button onClick={() => handleDismissReminder(rem.id)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-amber-400 transition-all" title="Dismiss">
+                                <button onClick={() => handleDismissReminder(rem.id)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-amber-600 transition-all" title="Dismiss">
                                   <BellOff className="w-3 h-3" />
                                 </button>
                               )}
@@ -694,10 +694,10 @@ export default function NotesPage() {
       {showNewNote && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowNewNote(false)} />
-          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-lg w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-white">New Note</h2>
-              <button onClick={() => setShowNewNote(false)} className="p-1.5 text-slate-500 hover:text-white hover:bg-slate-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
+              <h2 className="text-base font-semibold text-slate-900">New Note</h2>
+              <button onClick={() => setShowNewNote(false)} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5">
               <input
@@ -711,7 +711,7 @@ export default function NotesPage() {
               />
             </div>
             <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-200">
-              <button onClick={() => setShowNewNote(false)} className="flex-1 px-4 py-2 text-sm text-slate-600 hover:text-white bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+              <button onClick={() => setShowNewNote(false)} className="flex-1 px-4 py-2 text-sm text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
               <button onClick={handleCreateNote} disabled={!newTitle.trim()} className="flex-1 px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 disabled:bg-slate-100 disabled:text-slate-500 text-white rounded-lg transition-colors">
                 Create
               </button>

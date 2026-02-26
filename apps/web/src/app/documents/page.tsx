@@ -40,16 +40,16 @@ type DriveFile = {
 };
 
 const typeColors: Record<string, string> = {
-  PDF: 'bg-red-500/20 text-red-400',
-  DOCX: 'bg-blue-500/20 text-blue-400',
-  XLSX: 'bg-green-500/20 text-green-400',
-  MP3: 'bg-purple-500/20 text-purple-400',
-  WAV: 'bg-purple-500/20 text-purple-400',
-  M4A: 'bg-purple-500/20 text-purple-400',
-  AUDIO: 'bg-purple-500/20 text-purple-400',
-  GDOC: 'bg-blue-500/20 text-blue-400',
-  GSHEET: 'bg-green-500/20 text-green-400',
-  GSLIDE: 'bg-yellow-500/20 text-yellow-400',
+  PDF: 'bg-red-50 text-red-600',
+  DOCX: 'bg-blue-50 text-blue-600',
+  XLSX: 'bg-emerald-50 text-emerald-600',
+  MP3: 'bg-purple-50 text-purple-600',
+  WAV: 'bg-purple-50 text-purple-600',
+  M4A: 'bg-purple-50 text-purple-600',
+  AUDIO: 'bg-purple-50 text-purple-600',
+  GDOC: 'bg-blue-50 text-blue-600',
+  GSHEET: 'bg-emerald-50 text-emerald-600',
+  GSLIDE: 'bg-amber-50 text-amber-600',
 };
 
 const typeIcons: Record<string, any> = {
@@ -394,7 +394,7 @@ export default function DocumentsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Documents</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Documents</h1>
             <p className="text-slate-500">Contracts, assessments, and recordings from your clients</p>
           </div>
           <div className="flex gap-3">
@@ -410,8 +410,8 @@ export default function DocumentsPage() {
               disabled={checkingDrive}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
                 driveConnected 
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                  : 'bg-white border border-slate-200 text-slate-600 hover:text-white'
+                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
+                  : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
             >
               {checkingDrive ? (
@@ -426,7 +426,7 @@ export default function DocumentsPage() {
             <button 
               onClick={fetchDocuments}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 hover:text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition-colors"
             >
               <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
               Refresh
@@ -436,12 +436,12 @@ export default function DocumentsPage() {
 
         {/* Error Banner */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between">
+          <div className="mb-6 p-4 bg-red-50 border border-red-500/20 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400" />
-              <span className="text-red-400">{error}</span>
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <span className="text-red-600">{error}</span>
             </div>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -449,20 +449,20 @@ export default function DocumentsPage() {
 
         {/* Google Drive Status Banner */}
         {driveConnected && (
-          <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
+          <div className="mb-6 p-4 bg-emerald-50 border border-green-500/20 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                <Cloud className="w-5 h-5 text-green-400" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <Cloud className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <p className="text-white font-medium">Google Drive Connected</p>
+                <p className="text-slate-900 font-medium">Google Drive Connected</p>
                 <p className="text-sm text-slate-500">Your files are synced from Google Drive</p>
               </div>
             </div>
             <button 
               onClick={handleSyncDrive}
               disabled={driveLoading}
-              className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {driveLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               {driveLoading ? 'Syncing...' : 'Sync Now'}
@@ -500,18 +500,18 @@ export default function DocumentsPage() {
 
         {/* Folders - Single click to filter */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-white mb-4">Folders</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Folders</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {folders.map(folder => (
               <button
                 key={folder.id}
                 onClick={() => handleFolderClick(folder.name)}
-                className={`bg-white border rounded-xl p-4 hover:border-primary-500/30 transition-colors text-left ${
+                className={`bg-white border rounded-xl p-4 hover:border-primary-200 transition-colors text-left ${
                   selectedFolder === folder.name ? 'border-primary-500/50 bg-primary-500/5' : 'border-slate-200'
                 }`}
               >
                 <div className="text-3xl mb-3">{folder.icon}</div>
-                <h3 className="font-medium text-white mb-1">{folder.name}</h3>
+                <h3 className="font-medium text-slate-900 mb-1">{folder.name}</h3>
                 <p className="text-sm text-slate-500">{folder.count} files</p>
               </button>
             ))}
@@ -521,7 +521,7 @@ export default function DocumentsPage() {
         {/* Files */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-slate-900">
               {selectedFolder ? `${selectedFolder}` : 'All Documents'}
             </h2>
             {selectedFolder && (
@@ -543,7 +543,7 @@ export default function DocumentsPage() {
               <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <FolderOpen className="w-8 h-8 text-slate-500" />
               </div>
-              <h3 className="text-lg font-medium text-white mb-2">No documents yet</h3>
+              <h3 className="text-lg font-medium text-slate-900 mb-2">No documents yet</h3>
               <p className="text-slate-500 mb-4">Documents from your assessments will appear here automatically</p>
               <a 
                 href="/visits/new" 
@@ -574,15 +574,15 @@ export default function DocumentsPage() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              file.type === 'contract' ? 'bg-purple-500/20' :
-                              file.type === 'note' ? 'bg-blue-500/20' :
-                              file.type === 'audio' ? 'bg-green-500/20' :
+                              file.type === 'contract' ? 'bg-purple-50' :
+                              file.type === 'note' ? 'bg-blue-50' :
+                              file.type === 'audio' ? 'bg-emerald-50' :
                               'bg-slate-50'
                             }`}>
                               <FileIcon className={`w-4 h-4 ${
-                                file.type === 'contract' ? 'text-purple-400' :
-                                file.type === 'note' ? 'text-blue-400' :
-                                file.type === 'audio' ? 'text-green-400' :
+                                file.type === 'contract' ? 'text-purple-600' :
+                                file.type === 'note' ? 'text-blue-600' :
+                                file.type === 'audio' ? 'text-emerald-600' :
                                 'text-slate-500'
                               }`} />
                             </div>
@@ -645,10 +645,10 @@ export default function DocumentsPage() {
                             )}
                             <button 
                               onClick={() => handleDeleteFile(file.id)}
-                              className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                              className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                               title="Delete"
                             >
-                              <Trash2 className="w-4 h-4 text-slate-500 hover:text-red-400" />
+                              <Trash2 className="w-4 h-4 text-slate-500 hover:text-red-600" />
                             </button>
                           </div>
                         </td>
@@ -666,22 +666,22 @@ export default function DocumentsPage() {
                 return (
                   <div
                     key={file.id}
-                    className="bg-white border border-slate-200 rounded-xl p-4 hover:border-primary-500/30 transition-colors group"
+                    className="bg-white border border-slate-200 rounded-xl p-4 hover:border-primary-200 transition-colors group"
                   >
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
-                      file.type === 'contract' ? 'bg-purple-500/20' :
-                      file.type === 'note' ? 'bg-blue-500/20' :
-                      file.type === 'audio' ? 'bg-green-500/20' :
+                      file.type === 'contract' ? 'bg-purple-50' :
+                      file.type === 'note' ? 'bg-blue-50' :
+                      file.type === 'audio' ? 'bg-emerald-50' :
                       'bg-slate-50'
                     }`}>
                       <FileIcon className={`w-6 h-6 ${
-                        file.type === 'contract' ? 'text-purple-400' :
-                        file.type === 'note' ? 'text-blue-400' :
-                        file.type === 'audio' ? 'text-green-400' :
+                        file.type === 'contract' ? 'text-purple-600' :
+                        file.type === 'note' ? 'text-blue-600' :
+                        file.type === 'audio' ? 'text-emerald-600' :
                         'text-slate-500'
                       }`} />
                     </div>
-                    <h3 className="font-medium text-white text-sm truncate mb-1" title={file.name}>
+                    <h3 className="font-medium text-slate-900 text-sm truncate mb-1" title={file.name}>
                       {file.name}
                     </h3>
                     {file.client_name && (
@@ -715,7 +715,7 @@ export default function DocumentsPage() {
                         className="flex-1 p-2 bg-slate-50 hover:bg-red-500/30 rounded-lg transition-colors"
                         title="Delete"
                       >
-                        <Trash2 className="w-4 h-4 text-slate-600 hover:text-red-400 mx-auto" />
+                        <Trash2 className="w-4 h-4 text-slate-600 hover:text-red-600 mx-auto" />
                       </button>
                     </div>
                   </div>
@@ -730,30 +730,30 @@ export default function DocumentsPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-lg">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Document Details</h2>
+                <h2 className="text-xl font-bold text-slate-900">Document Details</h2>
                 <button onClick={() => setShowPreviewModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               <div className="flex items-center gap-4 mb-6 p-4 bg-slate-50 rounded-lg">
                 <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${
-                  selectedFile.type === 'contract' ? 'bg-purple-500/20' :
-                  selectedFile.type === 'note' ? 'bg-blue-500/20' :
-                  selectedFile.type === 'audio' ? 'bg-green-500/20' :
+                  selectedFile.type === 'contract' ? 'bg-purple-50' :
+                  selectedFile.type === 'note' ? 'bg-blue-50' :
+                  selectedFile.type === 'audio' ? 'bg-emerald-50' :
                   'bg-slate-50'
                 }`}>
                   {(() => {
                     const Icon = getFileIcon(selectedFile);
                     return <Icon className={`w-8 h-8 ${
-                      selectedFile.type === 'contract' ? 'text-purple-400' :
-                      selectedFile.type === 'note' ? 'text-blue-400' :
-                      selectedFile.type === 'audio' ? 'text-green-400' :
+                      selectedFile.type === 'contract' ? 'text-purple-600' :
+                      selectedFile.type === 'note' ? 'text-blue-600' :
+                      selectedFile.type === 'audio' ? 'text-emerald-600' :
                       'text-slate-500'
                     }`} />;
                   })()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-white mb-1 truncate">{selectedFile.name}</h3>
+                  <h3 className="font-medium text-slate-900 mb-1 truncate">{selectedFile.name}</h3>
                   <p className="text-sm text-slate-500">{selectedFile.size} • {selectedFile.format}</p>
                 </div>
               </div>
@@ -805,7 +805,7 @@ export default function DocumentsPage() {
                 )}
                 <button 
                   onClick={() => handleDeleteFile(selectedFile.id)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-500/30 text-red-600 border border-red-200 rounded-lg transition-colors"
                 >
                   <Trash2 className="w-5 h-5" />
                   Delete
@@ -820,7 +820,7 @@ export default function DocumentsPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Google Drive</h2>
+                <h2 className="text-xl font-bold text-slate-900">Google Drive</h2>
                 <button onClick={() => setShowDriveModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
@@ -828,22 +828,22 @@ export default function DocumentsPage() {
               
               {driveConnected ? (
                 <div>
-                  <div className="flex items-center gap-3 mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <Check className="w-6 h-6 text-green-400" />
+                  <div className="flex items-center gap-3 mb-6 p-4 bg-emerald-50 border border-green-500/20 rounded-lg">
+                    <Check className="w-6 h-6 text-emerald-600" />
                     <div>
-                      <p className="text-white font-medium">Connected</p>
+                      <p className="text-slate-900 font-medium">Connected</p>
                       <p className="text-sm text-slate-500">Your Drive is synced</p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                       <span className="text-slate-600">Files synced</span>
-                      <span className="text-green-400 text-sm">{files.filter(f => f.driveId).length} files</span>
+                      <span className="text-emerald-600 text-sm">{files.filter(f => f.driveId).length} files</span>
                     </div>
                   </div>
                   <button
                     onClick={handleDisconnectDrive}
-                    className="w-full mt-6 px-4 py-2.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-colors"
+                    className="w-full mt-6 px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-500/30 transition-colors"
                   >
                     Disconnect Google Drive
                   </button>
@@ -889,7 +889,7 @@ export default function DocumentsPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-lg">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Upload Document</h2>
+                <h2 className="text-xl font-bold text-slate-900">Upload Document</h2>
                 <button onClick={() => setShowUploadModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
@@ -899,7 +899,7 @@ export default function DocumentsPage() {
               <div 
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                   dragActive 
-                    ? 'border-primary-500 bg-primary-500/10' 
+                    ? 'border-primary-500 bg-primary-50' 
                     : 'border-slate-200 hover:border-slate-300'
                 }`}
                 onDragEnter={handleDrag}
@@ -910,7 +910,7 @@ export default function DocumentsPage() {
                 <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Upload className="w-8 h-8 text-primary-400" />
                 </div>
-                <p className="text-white font-medium mb-2">
+                <p className="text-slate-900 font-medium mb-2">
                   {dragActive ? 'Drop files here' : 'Drag and drop files here'}
                 </p>
                 <p className="text-slate-500 text-sm mb-4">

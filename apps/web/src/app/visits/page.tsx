@@ -341,7 +341,7 @@ export default function VisitsPage() {
         };
       case 'in_progress':
         return { 
-          bg: 'bg-primary-500/20', 
+          bg: 'bg-primary-50', 
           text: 'text-primary-400', 
           icon: Mic,
           label: 'In Progress' 
@@ -413,7 +413,7 @@ export default function VisitsPage() {
               {!isAdmin && visits.length > 0 && (
                 <button 
                   onClick={handleClearAll}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-red-500/20 text-slate-600 hover:text-red-400 rounded-xl font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-xl font-medium transition-colors"
                 >
                   <Trash2 className="w-5 h-5" />
                   Clear All
@@ -463,10 +463,10 @@ export default function VisitsPage() {
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-              <p className="text-red-400 flex-1">{error}</p>
-              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <p className="text-red-600 flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -476,15 +476,15 @@ export default function VisitsPage() {
           {usage && !usage.has_paid_plan && (
             <div className={`mb-6 p-4 rounded-xl border flex items-center justify-between ${
               usage.upgrade_required 
-                ? 'bg-amber-500/10 border-amber-500/30' 
+                ? 'bg-amber-50 border-amber-200' 
                 : 'bg-slate-50 border-slate-200'
             }`}>
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${usage.upgrade_required ? 'bg-amber-500/20' : 'bg-primary-500/20'}`}>
-                  <Sparkles className={`w-5 h-5 ${usage.upgrade_required ? 'text-amber-400' : 'text-primary-400'}`} />
+                <div className={`p-2 rounded-lg ${usage.upgrade_required ? 'bg-amber-50' : 'bg-primary-50'}`}>
+                  <Sparkles className={`w-5 h-5 ${usage.upgrade_required ? 'text-amber-600' : 'text-primary-400'}`} />
                 </div>
                 <div>
-                  <p className={`font-medium ${usage.upgrade_required ? 'text-amber-400' : 'text-white'}`}>
+                  <p className={`font-medium ${usage.upgrade_required ? 'text-amber-600' : 'text-white'}`}>
                     {usage.upgrade_required 
                       ? 'Free Plan Limit Reached' 
                       : `Free Plan — ${usage.total_assessments}/${usage.max_allowed} assessments used`
@@ -576,13 +576,13 @@ export default function VisitsPage() {
           ) : filteredVisits.length === 0 ? (
             <div className="space-y-6">
               {/* Demo CTA Card */}
-              <div className="card p-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
+              <div className="card p-8 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-200">
                 <div className="flex items-center gap-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shrink-0">
                     <Sparkles className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white mb-2">Try a Sample Assessment</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Try a Sample Assessment</h3>
                     <p className="text-slate-600 mb-4">
                       See how PalmCare AI transforms a care assessment conversation into a proposal-ready contract in seconds.
                     </p>
@@ -612,7 +612,7 @@ export default function VisitsPage() {
                 <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Users className="w-8 h-8 text-slate-500" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">No assessments yet</h3>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">No assessments yet</h3>
                 <p className="text-slate-500 mb-4">Create a new assessment or try the demo above</p>
                 <button 
                   onClick={() => router.push('/visits/new')}
@@ -644,7 +644,7 @@ export default function VisitsPage() {
                       {/* Visit info */}
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1">
-                          <h3 className="font-semibold text-white">
+                          <h3 className="font-semibold text-slate-900">
                             {visit.client?.full_name || 'Unknown Client'}
                           </h3>
                           <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${statusConfig.bg} ${statusConfig.text}`}>
@@ -678,13 +678,13 @@ export default function VisitsPage() {
                       <button
                         onClick={(e) => handleDeleteVisit(e, visit.id)}
                         disabled={deletingId === visit.id}
-                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-2 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                         title="Delete assessment"
                       >
                         {deletingId === visit.id ? (
-                          <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
+                          <Loader2 className="w-5 h-5 text-red-600 animate-spin" />
                         ) : (
-                          <Trash2 className="w-5 h-5 text-slate-500 hover:text-red-400" />
+                          <Trash2 className="w-5 h-5 text-slate-500 hover:text-red-600" />
                         )}
                       </button>
                       

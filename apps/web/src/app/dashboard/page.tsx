@@ -19,11 +19,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_
 
 /* ─── Pipeline stage config ─── */
 const PIPELINE_STAGES = [
-  { key: 'intake', label: 'Intake', color: 'bg-blue-500', text: 'text-blue-400', bg: 'bg-blue-500/20', statuses: ['intake', 'pending'] },
-  { key: 'assessment', label: 'Assessment', color: 'bg-purple-500', text: 'text-purple-400', bg: 'bg-purple-500/20', statuses: ['assessment'] },
-  { key: 'proposal', label: 'Proposal', color: 'bg-orange-500', text: 'text-orange-400', bg: 'bg-orange-500/20', statuses: ['proposal', 'pending_review'] },
-  { key: 'active', label: 'Active', color: 'bg-green-500', text: 'text-green-400', bg: 'bg-green-500/20', statuses: ['active', 'assigned'] },
-  { key: 'follow_up', label: 'Follow-up', color: 'bg-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500/20', statuses: ['follow_up', 'review', 'discharged', 'inactive'] },
+  { key: 'intake', label: 'Intake', color: 'bg-blue-500', text: 'text-blue-600', bg: 'bg-blue-50', statuses: ['intake', 'pending'] },
+  { key: 'assessment', label: 'Assessment', color: 'bg-purple-500', text: 'text-purple-600', bg: 'bg-purple-50', statuses: ['assessment'] },
+  { key: 'proposal', label: 'Proposal', color: 'bg-orange-500', text: 'text-orange-600', bg: 'bg-orange-50', statuses: ['proposal', 'pending_review'] },
+  { key: 'active', label: 'Active', color: 'bg-green-500', text: 'text-emerald-600', bg: 'bg-emerald-50', statuses: ['active', 'assigned'] },
+  { key: 'follow_up', label: 'Follow-up', color: 'bg-yellow-500', text: 'text-amber-600', bg: 'bg-amber-50', statuses: ['follow_up', 'review', 'discharged', 'inactive'] },
 ];
 
 /* ─── Simple bar chart component (pure CSS, no library) ─── */
@@ -180,7 +180,7 @@ function TasksWidget() {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-400 hover:bg-primary-500/10 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-400 hover:bg-primary-50 rounded-lg transition-colors"
         >
           {showAddForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showAddForm ? 'Cancel' : 'Add Task'}
@@ -276,7 +276,7 @@ function TasksWidget() {
                   title={`Status: ${task.status.replace('_', ' ')}`}
                 >
                   {task.status === 'completed' ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                   ) : task.status === 'in_progress' ? (
                     <div className="w-5 h-5 rounded-full border-2 border-yellow-400 flex items-center justify-center">
                       <div className="w-2 h-2 bg-yellow-400 rounded-full" />
@@ -296,7 +296,7 @@ function TasksWidget() {
                       {catCfg.label}
                     </span>
                     {task.dueDate && (
-                      <span className={`text-[10px] ${isOverdue ? 'text-red-400 font-medium' : 'text-slate-500'}`}>
+                      <span className={`text-[10px] ${isOverdue ? 'text-red-600 font-medium' : 'text-slate-500'}`}>
                         {isOverdue ? 'Overdue: ' : 'Due: '}{format(new Date(task.dueDate), 'MMM d')}
                       </span>
                     )}
@@ -306,7 +306,7 @@ function TasksWidget() {
                 {/* Delete */}
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="p-1 text-slate-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                  className="p-1 text-slate-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all shrink-0"
                   title="Delete task"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -784,10 +784,10 @@ export default function DashboardPage() {
           )}
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-              <p className="text-red-400 text-sm flex-1">{error}</p>
-              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+              <p className="text-red-600 text-sm flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
             </div>
           )}
 
@@ -817,7 +817,7 @@ export default function DashboardPage() {
                               <stat.icon className={`w-4 h-4 lg:w-5 lg:h-5 ${stat.textClass}`} />
                             </div>
                             {'trend' in stat && stat.trend !== undefined && stat.trend !== 0 && (
-                              <div className={`flex items-center gap-0.5 text-xs font-medium ${stat.trend > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              <div className={`flex items-center gap-0.5 text-xs font-medium ${stat.trend > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                                 {stat.trend > 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                                 {Math.abs(stat.trend)}%
                               </div>
@@ -856,7 +856,7 @@ export default function DashboardPage() {
                       <div className="card p-4 lg:p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
-                            <Activity className="w-5 h-5 text-green-400" />
+                            <Activity className="w-5 h-5 text-emerald-600" />
                             <h2 className="text-sm lg:text-base font-semibold text-slate-800">Client Pipeline</h2>
                           </div>
                           <button
@@ -933,7 +933,7 @@ export default function DashboardPage() {
                               <button
                                 onClick={() => handleClientAction(client.id, 'active')}
                                 disabled={updatingClientId === client.id}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-green-400 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 rounded-lg transition-colors disabled:opacity-50"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 border border-green-500/20 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50"
                               >
                                 {updatingClientId === client.id ? (
                                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -945,7 +945,7 @@ export default function DashboardPage() {
                               <button
                                 onClick={() => handleClientAction(client.id, 'follow_up')}
                                 disabled={updatingClientId === client.id}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:text-red-400 bg-slate-100 border border-slate-200 hover:border-red-500/20 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:text-red-600 bg-slate-100 border border-slate-200 hover:border-red-500/20 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                               >
                                 <X className="w-3.5 h-3.5" />
                                 Decline

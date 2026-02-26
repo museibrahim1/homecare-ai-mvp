@@ -131,7 +131,7 @@ const STATUS_MAP: Record<string, string> = {
 };
 
 /* ─── Shared style constants ─── */
-const INPUT_CLS = 'w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent';
+const INPUT_CLS = 'w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent';
 const TEXTAREA_CLS = `${INPUT_CLS} resize-none`;
 const SELECT_CLS = INPUT_CLS;
 
@@ -275,7 +275,7 @@ function EditableSelect({
           {displayValue || value || 'Not set'}
         </span>
       ) : (
-        <p className="text-sm text-white">{displayValue || value?.replace(/_/g, ' ') || 'Not set'}</p>
+        <p className="text-sm text-slate-500">{displayValue || value?.replace(/_/g, ' ') || 'Not set'}</p>
       )}
     </div>
   );
@@ -300,7 +300,7 @@ function ClientAvatar({ name, size = 'lg' }: { name: string; size?: 'sm' | 'md' 
     xl: 'w-20 h-20 text-2xl',
   };
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${colors[colorIndex]} flex items-center justify-center font-bold text-white shadow-lg`}>
+    <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${colors[colorIndex]} flex items-center justify-center font-bold text-slate-900 shadow-lg`}>
       {initials}
     </div>
   );
@@ -309,13 +309,13 @@ function ClientAvatar({ name, size = 'lg' }: { name: string; size?: 'sm' | 'md' 
 function InsuranceBadges({ client }: { client: Client }) {
   const badges = [];
   if (client.medicaid_id) {
-    badges.push(<span key="medicaid" className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">Medicaid</span>);
+    badges.push(<span key="medicaid" className="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200">Medicaid</span>);
   }
   if (client.medicare_id) {
-    badges.push(<span key="medicare" className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">Medicare</span>);
+    badges.push(<span key="medicare" className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">Medicare</span>);
   }
   if (client.insurance_provider && !client.medicaid_id && !client.medicare_id) {
-    badges.push(<span key="private" className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">Private</span>);
+    badges.push(<span key="private" className="px-3 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-600 border border-purple-200">Private</span>);
   }
   if (badges.length === 0) {
     return <span className="px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500 border border-slate-300">No Insurance</span>;
@@ -506,8 +506,8 @@ export default function ClientDetailPage() {
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-white mb-2">Client Not Found</h2>
+            <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Client Not Found</h2>
             <p className="text-slate-500 mb-6">{error}</p>
             <button onClick={() => router.push('/clients')} className="btn-primary">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -541,7 +541,7 @@ export default function ClientDetailPage() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => { if (isEditing) { cancelEditing(); } router.push('/clients'); }}
-                  className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-500 hover:text-white"
+                  className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-500 hover:text-slate-900"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -553,10 +553,10 @@ export default function ClientDetailPage() {
                         type="text"
                         value={editData?.full_name || ''}
                         onChange={(e) => handleFieldChange('full_name', e.target.value)}
-                        className="text-xl font-bold text-white bg-transparent border-b-2 border-primary-500 focus:outline-none pb-0.5"
+                        className="text-xl font-bold text-slate-900 bg-transparent border-b-2 border-primary-500 focus:outline-none pb-0.5"
                       />
                     ) : (
-                      <h1 className="text-xl font-bold text-white">{client.full_name}</h1>
+                      <h1 className="text-xl font-bold text-slate-900">{client.full_name}</h1>
                     )}
                     <div className="flex items-center gap-2 mt-0.5">
                       <InsuranceBadges client={client} />
@@ -568,7 +568,7 @@ export default function ClientDetailPage() {
               <div className="flex items-center gap-2">
                 {/* Save Success Toast */}
                 {saveSuccess && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium animate-fade-in">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-sm font-medium animate-fade-in">
                     <Check className="w-4 h-4" />
                     Saved
                   </div>
@@ -619,7 +619,7 @@ export default function ClientDetailPage() {
                     </button>
                     <button
                       onClick={() => setShowDeleteConfirm(true)}
-                      className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete client"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -634,10 +634,10 @@ export default function ClientDetailPage() {
         {/* Error banner */}
         {error && client && (
           <div className="max-w-7xl mx-auto px-8 pt-4">
-            <div className="flex items-center gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+            <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
               <AlertCircle className="w-4 h-4 shrink-0" />
               {error}
-              <button onClick={() => setError('')} className="ml-auto hover:text-white"><X className="w-4 h-4" /></button>
+              <button onClick={() => setError('')} className="ml-auto hover:text-slate-900"><X className="w-4 h-4" /></button>
             </div>
           </div>
         )}
@@ -660,7 +660,7 @@ export default function ClientDetailPage() {
                   const isActive = index <= currentStageIndex;
                   const isCurrent = index === currentStageIndex;
                   const colorMap: Record<string, string> = { blue: 'bg-blue-500 shadow-blue-500/50', purple: 'bg-purple-500 shadow-purple-500/50', orange: 'bg-orange-500 shadow-orange-500/50', green: 'bg-green-500 shadow-green-500/50', yellow: 'bg-yellow-500 shadow-yellow-500/50', red: 'bg-red-500 shadow-red-500/50' };
-                  const textColorMap: Record<string, string> = { blue: 'text-blue-400', purple: 'text-purple-400', orange: 'text-orange-400', green: 'text-green-400', yellow: 'text-yellow-400', red: 'text-red-400' };
+                  const textColorMap: Record<string, string> = { blue: 'text-blue-600', purple: 'text-purple-600', orange: 'text-orange-600', green: 'text-emerald-600', yellow: 'text-amber-600', red: 'text-red-600' };
                   return (
                     <button key={stage.key} onClick={() => handleStatusChange(stage.key)} disabled={updatingStatus} className="flex flex-col items-center gap-2 group">
                       <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${isCurrent ? `${colorMap[stage.color]} shadow-lg scale-110 ring-4 ring-dark-800` : isActive ? `${colorMap[stage.color]} opacity-80` : 'bg-slate-100 group-hover:bg-slate-200'}`}>
@@ -686,7 +686,7 @@ export default function ClientDetailPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 -mb-px border-b-2 transition-colors text-sm font-medium ${activeTab === tab.id ? 'border-primary-500 text-primary-400' : 'border-transparent text-slate-500 hover:text-white'}`}
+                className={`flex items-center gap-2 px-4 py-3 -mb-px border-b-2 transition-colors text-sm font-medium ${activeTab === tab.id ? 'border-primary-500 text-primary-400' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -708,7 +708,7 @@ export default function ClientDetailPage() {
               <div className="lg:col-span-1 space-y-6">
                 {/* Contact Info */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5">
-                  <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Contact Information</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Contact Information</h3>
                   <div className="space-y-1 divide-y divide-slate-200/50">
                     <EditableField icon={Phone} label="Primary Phone" value={data.phone} field="phone" isEditing={isEditing} onChange={handleFieldChange} type="tel" placeholder="(555) 123-4567" href={!isEditing && data.phone ? `tel:${data.phone}` : undefined} />
                     <EditableField icon={Phone} label="Secondary Phone" value={data.phone_secondary} field="phone_secondary" isEditing={isEditing} onChange={handleFieldChange} type="tel" placeholder="(555) 987-6543" href={!isEditing && data.phone_secondary ? `tel:${data.phone_secondary}` : undefined} />
@@ -741,7 +741,7 @@ export default function ClientDetailPage() {
 
                 {/* Personal Details */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5">
-                  <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Personal Details</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Personal Details</h3>
                   <div className="space-y-1 divide-y divide-slate-200/50">
                     <EditableField icon={!isEditing ? User : undefined} label="Preferred Name" value={data.preferred_name} field="preferred_name" isEditing={isEditing} onChange={handleFieldChange} placeholder="Johnny" />
                     <EditableField icon={!isEditing ? Calendar : undefined} label="Date of Birth" value={data.date_of_birth} field="date_of_birth" isEditing={isEditing} onChange={handleFieldChange} type="date" />
@@ -769,7 +769,7 @@ export default function ClientDetailPage() {
 
                 {/* Insurance */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5">
-                  <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Insurance</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Insurance</h3>
                   <div className="space-y-1 divide-y divide-slate-200/50">
                     <EditableField icon={!isEditing ? Shield : undefined} label="Provider" value={data.insurance_provider} field="insurance_provider" isEditing={isEditing} onChange={handleFieldChange} placeholder="Blue Cross Blue Shield" />
                     <EditableField icon={!isEditing ? CreditCard : undefined} label="Insurance ID" value={data.insurance_id} field="insurance_id" isEditing={isEditing} onChange={handleFieldChange} placeholder="XYZ123456789" />
@@ -783,8 +783,8 @@ export default function ClientDetailPage() {
               <div className="lg:col-span-2 space-y-6">
                 {/* Emergency Contacts */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5">
-                  <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-red-400" />
+                  <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-600" />
                     Emergency Contacts
                   </h3>
                   {isEditing ? (
@@ -831,7 +831,7 @@ export default function ClientDetailPage() {
                 {/* Recent Visits (read-only) */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                       <Activity className="w-4 h-4 text-primary-400" />
                       Recent Assessments
                     </h3>
@@ -852,12 +852,12 @@ export default function ClientDetailPage() {
                           <div className="flex items-center gap-3">
                             <div className={`w-2 h-2 rounded-full ${visit.status === 'completed' ? 'bg-green-400' : visit.status === 'processing' ? 'bg-yellow-400 animate-pulse' : visit.status === 'failed' ? 'bg-red-400' : 'bg-dark-400'}`} />
                             <div>
-                              <p className="text-sm font-medium text-white">{visit.caregiver_name || 'Assessment'}</p>
+                              <p className="text-sm font-medium text-slate-900">{visit.caregiver_name || 'Assessment'}</p>
                               <p className="text-xs text-slate-500">{new Date(visit.scheduled_date || visit.created_at).toLocaleDateString()}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${visit.status === 'completed' ? 'bg-green-500/20 text-green-400' : visit.status === 'processing' ? 'bg-yellow-500/20 text-yellow-400' : visit.status === 'failed' ? 'bg-red-500/20 text-red-400' : 'bg-slate-100 text-slate-600'}`}>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${visit.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : visit.status === 'processing' ? 'bg-amber-50 text-amber-600' : visit.status === 'failed' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
                               {(visit.status || 'pending').replace(/_/g, ' ')}
                             </span>
                             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary-400 transition-colors" />
@@ -870,7 +870,7 @@ export default function ClientDetailPage() {
 
                 {/* Notes (editable) */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5">
-                  <h3 className="text-sm font-semibold text-white mb-3 uppercase tracking-wider">Notes</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">Notes</h3>
                   <EditableTextArea label="" value={data.notes} field="notes" isEditing={isEditing} onChange={handleFieldChange} placeholder="General notes about this client..." rows={4} />
                 </div>
               </div>
@@ -881,7 +881,7 @@ export default function ClientDetailPage() {
           {activeTab === 'visits' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-white">All Assessments</h2>
+                <h2 className="text-lg font-semibold text-slate-900">All Assessments</h2>
                 <button onClick={() => router.push(`/visits?client=${client.id}`)} className="btn-primary flex items-center gap-2 text-sm">
                   <Plus className="w-4 h-4" />
                   New Assessment
@@ -890,7 +890,7 @@ export default function ClientDetailPage() {
               {visits.length === 0 ? (
                 <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
                   <Activity className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2">No assessments</h3>
+                  <h3 className="text-slate-900 font-semibold mb-2">No assessments</h3>
                   <p className="text-slate-500 text-sm">Start the first assessment for {client.full_name}</p>
                 </div>
               ) : (
@@ -900,10 +900,10 @@ export default function ClientDetailPage() {
                   </div>
                   {visits.map((visit) => (
                     <div key={visit.id} onClick={() => router.push(`/visits/${visit.id}`)} className="grid grid-cols-5 gap-4 px-4 py-3 hover:bg-slate-100 cursor-pointer transition-colors border-b border-slate-200 last:border-0">
-                      <div className="text-sm text-white">{new Date(visit.scheduled_date || visit.created_at).toLocaleDateString()}</div>
+                      <div className="text-sm text-slate-500">{new Date(visit.scheduled_date || visit.created_at).toLocaleDateString()}</div>
                       <div className="text-sm text-slate-600">{visit.caregiver_name || '-'}</div>
                       <div>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${visit.status === 'completed' ? 'bg-green-500/20 text-green-400' : visit.status === 'processing' ? 'bg-yellow-500/20 text-yellow-400' : visit.status === 'failed' ? 'bg-red-500/20 text-red-400' : 'bg-slate-100 text-slate-600'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${visit.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : visit.status === 'processing' ? 'bg-amber-50 text-amber-600' : visit.status === 'failed' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
                           {(visit.status || 'pending').replace(/_/g, ' ')}
                         </span>
                       </div>
@@ -923,13 +923,13 @@ export default function ClientDetailPage() {
           {activeTab === 'contracts' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-white">Service Contracts</h2>
+                <h2 className="text-lg font-semibold text-slate-900">Service Contracts</h2>
                 <span className="text-sm text-slate-500">{contracts.length} contract{contracts.length !== 1 ? 's' : ''}</span>
               </div>
               {contracts.length === 0 ? (
                 <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
                   <FileSignature className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-white font-semibold mb-2">No contracts</h3>
+                  <h3 className="text-slate-900 font-semibold mb-2">No contracts</h3>
                   <p className="text-slate-500 text-sm">Contracts are generated from completed assessments</p>
                 </div>
               ) : (
@@ -938,23 +938,23 @@ export default function ClientDetailPage() {
                     <div key={contract.id} className="bg-white rounded-xl border border-slate-200 p-5 hover:border-primary-500/50 transition-colors">
                       <div className="flex items-start justify-between mb-4">
                         <div>
-                          <h4 className="font-semibold text-white">{contract.title || `Contract #${contract.contract_number || contract.id.slice(0, 8)}`}</h4>
+                          <h4 className="font-semibold text-slate-900">{contract.title || `Contract #${contract.contract_number || contract.id.slice(0, 8)}`}</h4>
                           <p className="text-xs text-slate-500 mt-1">Created {new Date(contract.created_at).toLocaleDateString()}</p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${contract.status === 'active' ? 'bg-green-500/20 text-green-400' : contract.status === 'draft' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-slate-100 text-slate-600'}`}>{contract.status}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${contract.status === 'active' ? 'bg-emerald-50 text-emerald-600' : contract.status === 'draft' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'}`}>{contract.status}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Hourly Rate</p><p className="text-lg font-bold text-green-400">${Number(contract.hourly_rate || 0).toFixed(2)}</p></div>
-                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Weekly Hours</p><p className="text-lg font-bold text-white">{Number(contract.weekly_hours || 0)} hrs</p></div>
-                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Weekly Cost</p><p className="text-base font-semibold text-white">${(Number(contract.hourly_rate || 0) * Number(contract.weekly_hours || 0)).toFixed(2)}</p></div>
-                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Monthly Est.</p><p className="text-base font-semibold text-white">${(Number(contract.hourly_rate || 0) * Number(contract.weekly_hours || 0) * 4.33).toFixed(2)}</p></div>
+                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Hourly Rate</p><p className="text-lg font-bold text-emerald-600">${Number(contract.hourly_rate || 0).toFixed(2)}</p></div>
+                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Weekly Hours</p><p className="text-lg font-bold text-slate-900">{Number(contract.weekly_hours || 0)} hrs</p></div>
+                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Weekly Cost</p><p className="text-base font-semibold text-slate-900">${(Number(contract.hourly_rate || 0) * Number(contract.weekly_hours || 0)).toFixed(2)}</p></div>
+                        <div className="bg-slate-100 rounded-lg p-3"><p className="text-xs text-slate-500">Monthly Est.</p><p className="text-base font-semibold text-slate-900">${(Number(contract.hourly_rate || 0) * Number(contract.weekly_hours || 0) * 4.33).toFixed(2)}</p></div>
                       </div>
                       {contract.services && contract.services.length > 0 && (
                         <div className="mb-3">
                           <p className="text-xs text-slate-500 mb-2">Services</p>
                           <div className="flex flex-wrap gap-1">
                             {contract.services.map((s: any, i: number) => (
-                              <span key={i} className="px-2 py-0.5 bg-primary-500/10 text-primary-400 rounded text-xs">{typeof s === 'string' ? s : s.name}</span>
+                              <span key={i} className="px-2 py-0.5 bg-primary-50 text-primary-400 rounded text-xs">{typeof s === 'string' ? s : s.name}</span>
                             ))}
                           </div>
                         </div>
@@ -971,8 +971,8 @@ export default function ClientDetailPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Care Requirements */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <Stethoscope className="w-4 h-4 text-purple-400" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                  <Stethoscope className="w-4 h-4 text-purple-600" />
                   Care Requirements
                 </h3>
                 <div className="space-y-4">
@@ -989,21 +989,21 @@ export default function ClientDetailPage() {
                     ]}
                     displayValue={data.care_level || 'Not set'}
                     badgeClass={
-                      data.care_level === 'HIGH' ? 'bg-red-500/20 text-red-400' :
-                      data.care_level === 'MODERATE' ? 'bg-yellow-500/20 text-yellow-400' :
-                      data.care_level === 'LOW' ? 'bg-green-500/20 text-green-400' :
+                      data.care_level === 'HIGH' ? 'bg-red-50 text-red-600' :
+                      data.care_level === 'MODERATE' ? 'bg-amber-50 text-amber-600' :
+                      data.care_level === 'LOW' ? 'bg-emerald-50 text-emerald-600' :
                       'bg-slate-100 text-slate-600'
                     }
                   />
                   {isEditing ? (
                     <EditableField label="Primary Diagnosis" value={data.primary_diagnosis} field="primary_diagnosis" isEditing onChange={handleFieldChange} placeholder="Type 2 Diabetes" />
                   ) : (
-                    <div><p className="text-xs text-slate-500 mb-1">Primary Diagnosis</p><p className="text-sm text-white">{data.primary_diagnosis || 'Not specified'}</p></div>
+                    <div><p className="text-xs text-slate-500 mb-1">Primary Diagnosis</p><p className="text-sm text-slate-500">{data.primary_diagnosis || 'Not specified'}</p></div>
                   )}
                   {isEditing ? (
                     <EditableField label="Secondary Diagnoses" value={data.secondary_diagnoses} field="secondary_diagnoses" isEditing onChange={handleFieldChange} placeholder="Hypertension, Arthritis" />
                   ) : data.secondary_diagnoses ? (
-                    <div><p className="text-xs text-slate-500 mb-1">Secondary Diagnoses</p><p className="text-sm text-white">{data.secondary_diagnoses}</p></div>
+                    <div><p className="text-xs text-slate-500 mb-1">Secondary Diagnoses</p><p className="text-sm text-slate-500">{data.secondary_diagnoses}</p></div>
                   ) : null}
                   <EditableSelect
                     label="Mobility Status"
@@ -1039,8 +1039,8 @@ export default function ClientDetailPage() {
 
               {/* Care Plan */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-blue-400" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-600" />
                   Care Plan
                 </h3>
                 <EditableTextArea label="Care Plan Details" value={data.care_plan} field="care_plan" isEditing={isEditing} onChange={handleFieldChange} placeholder="Describe the care plan, daily routines, goals..." rows={6} />
@@ -1051,8 +1051,8 @@ export default function ClientDetailPage() {
 
               {/* Scheduling Preferences */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-green-400" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-emerald-600" />
                   Scheduling Preferences
                 </h3>
                 <div className="space-y-3">
@@ -1063,8 +1063,8 @@ export default function ClientDetailPage() {
                     </>
                   ) : (
                     <>
-                      <div><p className="text-xs text-slate-500 mb-1">Preferred Days</p><p className="text-sm text-white">{data.preferred_days || 'Not specified'}</p></div>
-                      <div><p className="text-xs text-slate-500 mb-1">Preferred Times</p><p className="text-sm text-white">{data.preferred_times || 'Not specified'}</p></div>
+                      <div><p className="text-xs text-slate-500 mb-1">Preferred Days</p><p className="text-sm text-slate-500">{data.preferred_days || 'Not specified'}</p></div>
+                      <div><p className="text-xs text-slate-500 mb-1">Preferred Times</p><p className="text-sm text-slate-500">{data.preferred_times || 'Not specified'}</p></div>
                     </>
                   )}
                 </div>
@@ -1072,8 +1072,8 @@ export default function ClientDetailPage() {
 
               {/* Physician */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-teal-400" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-teal-600" />
                   Physician
                 </h3>
                 <div className="space-y-3">
@@ -1084,7 +1084,7 @@ export default function ClientDetailPage() {
                     </>
                   ) : (
                     <>
-                      <div><p className="text-xs text-slate-500 mb-1">Physician Name</p><p className="text-sm text-white">{data.physician_name || 'Not specified'}</p></div>
+                      <div><p className="text-xs text-slate-500 mb-1">Physician Name</p><p className="text-sm text-slate-500">{data.physician_name || 'Not specified'}</p></div>
                       {data.physician_phone && (
                         <div><p className="text-xs text-slate-500 mb-1">Physician Phone</p><a href={`tel:${data.physician_phone}`} className="text-sm text-primary-400 hover:underline">{data.physician_phone}</a></div>
                       )}
@@ -1100,8 +1100,8 @@ export default function ClientDetailPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Diagnoses */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-red-400" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-red-600" />
                   Diagnoses
                 </h3>
                 <div className="space-y-3">
@@ -1112,8 +1112,8 @@ export default function ClientDetailPage() {
                     </>
                   ) : (
                     <>
-                      <div><p className="text-xs text-slate-500 mb-1">Primary Diagnosis</p><p className="text-sm text-white">{data.primary_diagnosis || 'None recorded'}</p></div>
-                      {data.secondary_diagnoses && <div><p className="text-xs text-slate-500 mb-1">Secondary Diagnoses</p><p className="text-sm text-white">{data.secondary_diagnoses}</p></div>}
+                      <div><p className="text-xs text-slate-500 mb-1">Primary Diagnosis</p><p className="text-sm text-slate-500">{data.primary_diagnosis || 'None recorded'}</p></div>
+                      {data.secondary_diagnoses && <div><p className="text-xs text-slate-500 mb-1">Secondary Diagnoses</p><p className="text-sm text-slate-500">{data.secondary_diagnoses}</p></div>}
                     </>
                   )}
                 </div>
@@ -1121,8 +1121,8 @@ export default function ClientDetailPage() {
 
               {/* Allergies */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-orange-400" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-orange-600" />
                   Allergies
                 </h3>
                 {isEditing ? (
@@ -1130,7 +1130,7 @@ export default function ClientDetailPage() {
                 ) : data.allergies ? (
                   <div className="flex flex-wrap gap-2">
                     {data.allergies.split(',').map((allergy, i) => (
-                      <span key={i} className="px-3 py-1 bg-red-500/10 text-red-400 rounded-full text-sm border border-red-500/20">{allergy.trim()}</span>
+                      <span key={i} className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-sm border border-red-500/20">{allergy.trim()}</span>
                     ))}
                   </div>
                 ) : (
@@ -1140,8 +1140,8 @@ export default function ClientDetailPage() {
 
               {/* Medications */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <Pill className="w-4 h-4 text-blue-400" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                  <Pill className="w-4 h-4 text-blue-600" />
                   Current Medications
                 </h3>
                 <EditableTextArea label="" value={data.medications} field="medications" isEditing={isEditing} onChange={handleFieldChange} placeholder="Metformin 500mg, Lisinopril 10mg..." rows={4} />
@@ -1149,8 +1149,8 @@ export default function ClientDetailPage() {
 
               {/* Medical Notes */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-purple-400" />
+                <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-purple-600" />
                   Medical Notes
                 </h3>
                 <EditableTextArea label="" value={data.medical_notes} field="medical_notes" isEditing={isEditing} onChange={handleFieldChange} placeholder="Additional medical history, precautions..." rows={6} />
@@ -1168,7 +1168,7 @@ export default function ClientDetailPage() {
                 You are editing this client&apos;s information
               </p>
               <div className="flex items-center gap-3">
-                <button onClick={cancelEditing} className="px-4 py-2 text-slate-500 hover:text-white transition-colors text-sm">
+                <button onClick={cancelEditing} className="px-4 py-2 text-slate-500 hover:text-slate-900 transition-colors text-sm">
                   Cancel
                 </button>
                 <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2 text-sm">
@@ -1187,8 +1187,8 @@ export default function ClientDetailPage() {
           <div className="absolute inset-0 bg-black/70" onClick={() => setShowDeleteConfirm(false)} />
           <div className="relative bg-white rounded-2xl w-full max-w-md p-6 border border-slate-200">
             <div className="text-center">
-              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 className="w-6 h-6 text-red-400" /></div>
-              <h3 className="text-lg font-semibold text-white mb-2">Delete Client</h3>
+              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 className="w-6 h-6 text-red-600" /></div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Client</h3>
               <p className="text-slate-500 mb-6">Are you sure you want to delete <strong className="text-white">{client.full_name}</strong>? This action cannot be undone.</p>
               <div className="flex items-center gap-3">
                 <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors">Cancel</button>

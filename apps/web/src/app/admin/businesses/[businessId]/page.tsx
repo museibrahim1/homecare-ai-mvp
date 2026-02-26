@@ -74,12 +74,12 @@ interface Owner {
 }
 
 const STATUS_CONFIG: Record<string, { color: string; bgColor: string; icon: any; label: string }> = {
-  pending: { color: 'text-yellow-400', bgColor: 'bg-yellow-500/10', icon: Clock, label: 'Pending' },
-  sos_verified: { color: 'text-blue-400', bgColor: 'bg-blue-500/10', icon: CheckCircle2, label: 'SOS Verified' },
-  documents_submitted: { color: 'text-purple-400', bgColor: 'bg-purple-500/10', icon: FileText, label: 'Under Review' },
-  approved: { color: 'text-green-400', bgColor: 'bg-green-500/10', icon: CheckCircle2, label: 'Approved' },
-  rejected: { color: 'text-red-400', bgColor: 'bg-red-500/10', icon: XCircle, label: 'Rejected' },
-  suspended: { color: 'text-orange-400', bgColor: 'bg-orange-500/10', icon: AlertCircle, label: 'Suspended' },
+  pending: { color: 'text-amber-600', bgColor: 'bg-amber-50', icon: Clock, label: 'Pending' },
+  sos_verified: { color: 'text-blue-600', bgColor: 'bg-blue-50', icon: CheckCircle2, label: 'SOS Verified' },
+  documents_submitted: { color: 'text-purple-600', bgColor: 'bg-purple-50', icon: FileText, label: 'Under Review' },
+  approved: { color: 'text-emerald-600', bgColor: 'bg-emerald-50', icon: CheckCircle2, label: 'Approved' },
+  rejected: { color: 'text-red-600', bgColor: 'bg-red-50', icon: XCircle, label: 'Rejected' },
+  suspended: { color: 'text-orange-600', bgColor: 'bg-orange-50', icon: AlertCircle, label: 'Suspended' },
 };
 
 const DOCUMENT_LABELS: Record<string, string> = {
@@ -226,8 +226,8 @@ export default function BusinessDetailPage() {
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">Business Not Found</h2>
+            <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">Business Not Found</h2>
             <Link href="/admin/businesses" className="text-primary-400 hover:underline">
               Back to list
             </Link>
@@ -256,7 +256,7 @@ export default function BusinessDetailPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">{business.name}</h1>
+              <h1 className="text-2xl font-bold text-slate-900">{business.name}</h1>
               {business.dba_name && (
                 <p className="text-slate-500">DBA: {business.dba_name}</p>
               )}
@@ -274,7 +274,7 @@ export default function BusinessDetailPage() {
           <div className="col-span-2 space-y-6">
             {/* Business Details */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-primary-400" />
                 Business Information
               </h2>
@@ -301,7 +301,7 @@ export default function BusinessDetailPage() {
 
             {/* Contact Info */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-primary-400" />
                 Contact Information
               </h2>
@@ -352,7 +352,7 @@ export default function BusinessDetailPage() {
 
             {/* Documents */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-primary-400" />
                 Uploaded Documents ({business.documents.length})
               </h2>
@@ -368,9 +368,9 @@ export default function BusinessDetailPage() {
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          doc.is_verified ? 'bg-green-500/20' : 'bg-slate-100'
+                          doc.is_verified ? 'bg-emerald-50' : 'bg-slate-100'
                         }`}>
-                          <FileText className={`w-5 h-5 ${doc.is_verified ? 'text-green-400' : 'text-slate-500'}`} />
+                          <FileText className={`w-5 h-5 ${doc.is_verified ? 'text-emerald-600' : 'text-slate-500'}`} />
                         </div>
                         <div>
                           <p className="font-medium text-white">
@@ -385,7 +385,7 @@ export default function BusinessDetailPage() {
                       
                       <div className="flex items-center gap-2">
                         {doc.is_verified && (
-                          <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                          <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded">
                             Verified
                           </span>
                         )}
@@ -406,7 +406,7 @@ export default function BusinessDetailPage() {
             {/* SOS Verification Data */}
             {business.sos_verification_data && (
               <div className="bg-white border border-slate-200 rounded-xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-primary-400" />
                   SOS Verification Data
                 </h2>
@@ -429,7 +429,7 @@ export default function BusinessDetailPage() {
             {/* Owner Info */}
             {business.owner && (
               <div className="bg-white border border-slate-200 rounded-xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <User className="w-5 h-5 text-primary-400" />
                   Business Owner
                 </h2>
@@ -443,7 +443,7 @@ export default function BusinessDetailPage() {
                     <p className="text-sm text-slate-500">Email</p>
                     <p className="text-white">{business.owner.email}</p>
                     {business.owner.email_verified && (
-                      <span className="text-xs text-green-400">Verified</span>
+                      <span className="text-xs text-emerald-600">Verified</span>
                     )}
                   </div>
                   {business.owner.phone && (
@@ -465,7 +465,7 @@ export default function BusinessDetailPage() {
             {/* Actions */}
             {canApprove && (
               <div className="bg-white border border-slate-200 rounded-xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Actions</h2>
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">Actions</h2>
                 
                 <div className="space-y-3">
                   <button
@@ -486,7 +486,7 @@ export default function BusinessDetailPage() {
                   <button
                     onClick={() => setShowRejectModal(true)}
                     disabled={actionLoading}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg font-medium transition-colors disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 hover:bg-red-50 text-red-600 border border-red-200 rounded-lg font-medium transition-colors disabled:opacity-50"
                   >
                     <XCircle className="w-5 h-5" />
                     Reject Application
@@ -501,7 +501,7 @@ export default function BusinessDetailPage() {
 
             {/* Timeline */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-primary-400" />
                 Timeline
               </h2>
@@ -510,7 +510,7 @@ export default function BusinessDetailPage() {
                 <div className="flex gap-3">
                   <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
                   <div>
-                    <p className="text-sm text-white">Registered</p>
+                    <p className="text-sm text-slate-500">Registered</p>
                     <p className="text-xs text-slate-500">{formatDate(business.created_at)}</p>
                   </div>
                 </div>
@@ -519,7 +519,7 @@ export default function BusinessDetailPage() {
                   <div className="flex gap-3">
                     <div className="w-2 h-2 mt-2 rounded-full bg-blue-500" />
                     <div>
-                      <p className="text-sm text-white">SOS Verified</p>
+                      <p className="text-sm text-slate-500">SOS Verified</p>
                       <p className="text-xs text-slate-500">{formatDate(business.sos_verified_at)}</p>
                     </div>
                   </div>
@@ -529,7 +529,7 @@ export default function BusinessDetailPage() {
                   <div className="flex gap-3">
                     <div className="w-2 h-2 mt-2 rounded-full bg-purple-500" />
                     <div>
-                      <p className="text-sm text-white">Documents Uploaded</p>
+                      <p className="text-sm text-slate-500">Documents Uploaded</p>
                       <p className="text-xs text-slate-500">{business.documents.length} documents</p>
                     </div>
                   </div>
@@ -544,7 +544,7 @@ export default function BusinessDetailPage() {
       {showRejectModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold text-white mb-4">Reject Application</h2>
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">Reject Application</h2>
             
             <p className="text-slate-500 mb-4">
               Please provide a reason for rejection. This will be shared with the business owner.

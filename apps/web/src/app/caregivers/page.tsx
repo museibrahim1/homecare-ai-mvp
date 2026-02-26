@@ -211,37 +211,37 @@ export default function CaregiversPage() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-              <p className="text-red-400 text-sm flex-1">{error}</p>
-              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+              <p className="text-red-600 text-sm flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
             </div>
           )}
 
           {/* Certification Compliance Alert */}
           {expiringCerts.length > 0 && (
-            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-                <h3 className="text-sm font-semibold text-amber-400">Certification Compliance Alert</h3>
-                <span className="text-xs text-amber-400/70 ml-auto">{expiringCerts.length} cert{expiringCerts.length > 1 ? 's' : ''} need attention</span>
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                <h3 className="text-sm font-semibold text-amber-600">Certification Compliance Alert</h3>
+                <span className="text-xs text-amber-600/70 ml-auto">{expiringCerts.length} cert{expiringCerts.length > 1 ? 's' : ''} need attention</span>
               </div>
               <div className="space-y-1.5">
                 {expiringCerts.slice(0, 5).map((cert, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <span className={`px-1.5 py-0.5 rounded font-medium ${
-                      cert.badge === 'expired' ? 'bg-red-500/20 text-red-400' :
-                      cert.badge === 'expiring_soon' ? 'bg-amber-500/20 text-amber-400' :
-                      'bg-yellow-500/15 text-yellow-400'
+                      cert.badge === 'expired' ? 'bg-red-50 text-red-600' :
+                      cert.badge === 'expiring_soon' ? 'bg-amber-50 text-amber-600' :
+                      'bg-amber-50 text-amber-600'
                     }`}>
                       {cert.badge === 'expired' ? 'EXPIRED' : cert.days_until_expiry <= 30 ? 'EXPIRING SOON' : `${cert.days_until_expiry}d left`}
                     </span>
-                    <span className="text-white font-medium">{cert.caregiver_name}</span>
+                    <span className="text-slate-900 font-medium">{cert.caregiver_name}</span>
                     <span className="text-slate-500">— {cert.certification} (expires {cert.expiry_date})</span>
                   </div>
                 ))}
                 {expiringCerts.length > 5 && (
-                  <p className="text-xs text-amber-400/60">+{expiringCerts.length - 5} more</p>
+                  <p className="text-xs text-amber-600/60">+{expiringCerts.length - 5} more</p>
                 )}
               </div>
             </div>
@@ -251,7 +251,7 @@ export default function CaregiversPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
               <p className="text-slate-500 text-sm mb-1">Total Caregivers</p>
-              <p className="text-3xl font-bold text-white">{caregivers.length}</p>
+              <p className="text-3xl font-bold text-slate-900">{caregivers.length}</p>
             </div>
             <div className="card p-5">
               <p className="text-slate-500 text-sm mb-1">Active</p>
@@ -295,7 +295,7 @@ export default function CaregiversPage() {
               <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-slate-500" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
                 {searchQuery ? 'No caregivers found' : 'No caregivers yet'}
               </h3>
               <p className="text-slate-500 mb-4">Add caregivers to assign them to clients</p>
@@ -313,7 +313,7 @@ export default function CaregiversPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      caregiver.can_handle_high_care ? 'bg-primary-500/20' : 'bg-slate-50'
+                      caregiver.can_handle_high_care ? 'bg-primary-50' : 'bg-slate-50'
                     }`}>
                       <span className={`font-bold text-lg ${
                         caregiver.can_handle_high_care ? 'text-primary-400' : 'text-slate-600'
@@ -321,20 +321,20 @@ export default function CaregiversPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-semibold text-white">{caregiver.full_name}</h3>
+                        <h3 className="font-semibold text-slate-900">{caregiver.full_name}</h3>
                         {caregiver.certification_level && (
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-primary-500/20 text-primary-400">
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-primary-50 text-primary-400">
                             {caregiver.certification_level}
                           </span>
                         )}
                         {caregiver.can_handle_high_care && (
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-500/20 text-red-400">
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600">
                             High Care
                           </span>
                         )}
                         <span className={`px-2 py-0.5 rounded text-xs ${
-                          caregiver.status === 'active' ? 'bg-green-500/20 text-green-400' :
-                          caregiver.status === 'on_leave' ? 'bg-yellow-500/20 text-yellow-400' :
+                          caregiver.status === 'active' ? 'bg-emerald-50 text-emerald-600' :
+                          caregiver.status === 'on_leave' ? 'bg-amber-50 text-amber-600' :
                           'bg-slate-100 text-slate-500'
                         }`}>
                           {caregiver.status || 'active'}
@@ -344,7 +344,7 @@ export default function CaregiversPage() {
                           if (!badge) return null;
                           return (
                             <span title={label || ''} className={`px-2 py-0.5 rounded text-xs font-medium ${
-                              badge === 'expired' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                              badge === 'expired' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
                             }`}>
                               {badge === 'expired' ? 'Cert Expired' : 'Cert Expiring'}
                             </span>
@@ -369,7 +369,7 @@ export default function CaregiversPage() {
                         )}
                         {caregiver.rating !== undefined && (
                           <div className="flex items-center gap-1.5">
-                            <Star className="w-4 h-4 text-yellow-400" />{Number(caregiver.rating).toFixed(1)}
+                            <Star className="w-4 h-4 text-amber-600" />{Number(caregiver.rating).toFixed(1)}
                           </div>
                         )}
                       </div>
@@ -388,7 +388,7 @@ export default function CaregiversPage() {
                     </div>
                     <div className="text-right mr-4">
                       <p className="text-sm text-slate-500">Clients</p>
-                      <p className="text-lg font-semibold text-white">
+                      <p className="text-lg font-semibold text-slate-900">
                         {caregiver.current_client_count || 0}/{caregiver.max_clients || 5}
                       </p>
                     </div>

@@ -20,9 +20,9 @@ export default function PrivacyPolicyPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden">
               <Image src="/hand-icon-white.png" alt="PalmCare AI" width={28} height={28} className="object-contain" />
             </div>
-            <span className="text-xl font-bold text-white">{COMPANY}</span>
+            <span className="text-xl font-bold text-slate-900">{COMPANY}</span>
           </Link>
-          <Link href="/" className="text-slate-600 hover:text-white transition flex items-center gap-2">
+          <Link href="/" className="text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
@@ -33,11 +33,11 @@ export default function PrivacyPolicyPage() {
         {/* Title */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
               <Shield className="w-6 h-6 text-primary-400" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Privacy Policy</h1>
+              <h1 className="text-3xl font-bold text-slate-900">Privacy Policy</h1>
               <p className="text-slate-500 text-sm">Last updated: {LAST_UPDATED}</p>
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function PrivacyPolicyPage() {
           <Section title="14. Contact Us">
             <p className="text-slate-600 mb-4">If you have questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
             <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-2">
-              <p className="text-white font-medium">{COMPANY}</p>
+              <p className="text-slate-900 font-medium">{COMPANY}</p>
               <p className="text-slate-600">Email: <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a></p>
               <p className="text-slate-600">Website: <a href={`https://${WEBSITE}`} className="text-primary-400 hover:text-primary-300">{WEBSITE}</a></p>
             </div>
@@ -241,7 +241,7 @@ export default function PrivacyPolicyPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-xl font-bold text-white mb-4">{title}</h2>
+      <h2 className="text-xl font-bold text-slate-900 mb-4">{title}</h2>
       {children}
     </section>
   );

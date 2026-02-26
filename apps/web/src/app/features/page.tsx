@@ -176,12 +176,12 @@ export default function FeaturesPage() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden"><Image src="/hand-icon-white.png" alt="PalmCare AI" width={30} height={30} className="object-contain" /></div>
-            <span className="text-xl font-bold text-white">PalmCare AI</span>
+            <span className="text-xl font-bold text-slate-900">PalmCare AI</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/#pricing" className="text-slate-600 hover:text-white transition">Pricing</Link>
-            <Link href="/#book-demo" className="text-slate-600 hover:text-white transition">Book Demo</Link>
-            <Link href="/login" className="text-slate-600 hover:text-white transition">Sign In</Link>
+            <Link href="/#pricing" className="text-slate-600 hover:text-slate-900 transition">Pricing</Link>
+            <Link href="/#book-demo" className="text-slate-600 hover:text-slate-900 transition">Book Demo</Link>
+            <Link href="/login" className="text-slate-600 hover:text-slate-900 transition">Sign In</Link>
             <Link href="/#book-demo" className="btn-primary py-2 px-5 text-sm">Schedule Demo</Link>
           </div>
         </div>
@@ -191,7 +191,7 @@ export default function FeaturesPage() {
         {/* Hero */}
         <section className="px-6 pb-16">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl font-bold text-white mb-6">
+            <h1 className="text-5xl font-bold text-slate-900 mb-6">
               Where Innovation Meets
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> Functionality</span>
             </h1>
@@ -205,7 +205,7 @@ export default function FeaturesPage() {
         <section className="px-6 pb-12 sticky top-[73px] z-30 bg-slate-50/80 backdrop-blur-sm py-3">
           <div className="max-w-5xl mx-auto flex flex-wrap justify-center gap-2">
             {FEATURE_SECTIONS.map(s => (
-              <a key={s.id} href={`#${s.id}`} className="px-4 py-2 bg-white text-slate-600 hover:text-white hover:bg-slate-50 rounded-lg text-sm font-medium transition border border-slate-200">
+              <a key={s.id} href={`#${s.id}`} className="px-4 py-2 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg text-sm font-medium transition border border-slate-200">
                 {s.title}
               </a>
             ))}
@@ -218,7 +218,7 @@ export default function FeaturesPage() {
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-16">
                 <p className="text-primary-400 font-medium mb-2">{section.subtitle}</p>
-                <h2 className="text-4xl font-bold text-white mb-4">{section.title}</h2>
+                <h2 className="text-4xl font-bold text-slate-900 mb-4">{section.title}</h2>
                 <p className="text-slate-500 max-w-2xl mx-auto">{section.description}</p>
               </div>
               <div className="space-y-12">
@@ -226,16 +226,16 @@ export default function FeaturesPage() {
                   <div key={fIdx} className={`grid md:grid-cols-2 gap-8 items-center ${fIdx % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
                     <div className={fIdx % 2 === 1 ? 'md:order-2' : ''}>
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
+                        <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
                           <feature.icon className="w-6 h-6 text-primary-400" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white">{feature.title}</h3>
+                        <h3 className="text-2xl font-bold text-slate-900">{feature.title}</h3>
                       </div>
                       <p className="text-slate-600 leading-relaxed mb-6">{feature.description}</p>
                       <div className="flex flex-wrap gap-2">
                         {feature.highlights.map((h, i) => (
                           <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs text-slate-600">
-                            <CheckCircle className="w-3 h-3 text-green-400" />{h}
+                            <CheckCircle className="w-3 h-3 text-emerald-600" />{h}
                           </span>
                         ))}
                       </div>
@@ -261,8 +261,8 @@ export default function FeaturesPage() {
         {/* CTA */}
         <section className="px-6 py-20">
           <div className="max-w-4xl mx-auto">
-            <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-500/30">
-              <h2 className="text-3xl font-bold text-white mb-4">Ready to See These Features in Action?</h2>
+            <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-200">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready to See These Features in Action?</h2>
               <p className="text-xl text-slate-600 mb-8">Book a free 30-minute demo and we&apos;ll show you exactly how PalmCare AI can streamline your agency.</p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></Link>
@@ -276,8 +276,8 @@ export default function FeaturesPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 text-sm">&copy; 2026 PalmCare AI. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2"><Shield className="w-5 h-5 text-green-400" /><span className="text-slate-500 text-sm">HIPAA Compliant</span></div>
-            <div className="flex items-center gap-2"><Lock className="w-5 h-5 text-blue-400" /><span className="text-slate-500 text-sm">256-bit Encrypted</span></div>
+            <div className="flex items-center gap-2"><Shield className="w-5 h-5 text-emerald-600" /><span className="text-slate-500 text-sm">HIPAA Compliant</span></div>
+            <div className="flex items-center gap-2"><Lock className="w-5 h-5 text-blue-600" /><span className="text-slate-500 text-sm">256-bit Encrypted</span></div>
           </div>
         </div>
       </footer>

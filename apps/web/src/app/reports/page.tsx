@@ -183,14 +183,14 @@ export default function ReportsPage() {
 
   const getServiceColor = (type: string) => {
     const colors: Record<string, string> = {
-      'Personal Care': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      'Medication': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-      'Health Monitoring': 'bg-red-500/20 text-red-400 border-red-500/30',
-      'Nutrition': 'bg-green-500/20 text-green-400 border-green-500/30',
-      'Mobility': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-      'Homemaking': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      'Companionship': 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-      'Safety': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      'Personal Care': 'bg-blue-50 text-blue-600 border-blue-200',
+      'Medication': 'bg-orange-50 text-orange-600 border-orange-200',
+      'Health Monitoring': 'bg-red-50 text-red-600 border-red-200',
+      'Nutrition': 'bg-emerald-50 text-emerald-600 border-emerald-200',
+      'Mobility': 'bg-cyan-50 text-cyan-600 border-cyan-500/30',
+      'Homemaking': 'bg-purple-50 text-purple-600 border-purple-200',
+      'Companionship': 'bg-pink-500/20 text-pink-600 border-pink-500/30',
+      'Safety': 'bg-amber-50 text-amber-600 border-amber-200',
     };
     return colors[type] || 'bg-slate-100 text-slate-600 border-slate-300';
   };
@@ -222,7 +222,7 @@ export default function ReportsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-slate-100 rounded-xl p-4 text-center">
                 <p className="text-slate-500 text-xs mb-1">Period</p>
-                <p className="text-white font-medium text-sm">
+                <p className="text-slate-900 font-medium text-sm">
                   {new Date(reportData.period_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(reportData.period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
@@ -242,7 +242,7 @@ export default function ReportsPage() {
 
             {/* Services by Category */}
             <div>
-              <h4 className="text-white font-medium mb-3">Services Breakdown</h4>
+              <h4 className="text-slate-900 font-medium mb-3">Services Breakdown</h4>
               <div className="grid grid-cols-2 gap-3">
                 {reportData.services_by_category?.map((service: any, i: number) => (
                   <div key={i} className={`rounded-xl p-4 border ${getServiceColor(service.description)}`}>
@@ -264,7 +264,7 @@ export default function ReportsPage() {
             {/* Assessments List */}
             {reportData.assessments?.length > 0 && (
               <div>
-                <h4 className="text-white font-medium mb-3">Recent Assessments</h4>
+                <h4 className="text-slate-900 font-medium mb-3">Recent Assessments</h4>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {reportData.assessments.map((a: any, i: number) => (
                     <div 
@@ -273,7 +273,7 @@ export default function ReportsPage() {
                       className="flex items-center justify-between p-3 bg-slate-50/30 rounded-lg cursor-pointer hover:bg-slate-100 transition"
                     >
                       <div>
-                        <p className="text-white text-sm font-medium">{a.client_name}</p>
+                        <p className="text-slate-900 text-sm font-medium">{a.client_name}</p>
                         <p className="text-slate-500 text-xs">{a.date} • {a.services_count} services</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -290,7 +290,7 @@ export default function ReportsPage() {
           <div className="p-6 space-y-6">
             {/* Month Header */}
             <div className="bg-gradient-to-r from-accent-green/10 to-primary-500/10 rounded-xl p-4 border border-accent-green/20">
-              <h4 className="text-white font-bold text-lg">{reportData.month} {reportData.year}</h4>
+              <h4 className="text-slate-900 font-bold text-lg">{reportData.month} {reportData.year}</h4>
               <p className="text-slate-600 text-sm mt-1">{reportData.summary}</p>
             </div>
 
@@ -298,7 +298,7 @@ export default function ReportsPage() {
             <div className="grid grid-cols-4 gap-3">
               <div className="bg-slate-100 rounded-xl p-4 text-center">
                 <p className="text-slate-500 text-xs mb-1">Assessments</p>
-                <p className="text-xl font-bold text-white">{reportData.total_assessments}</p>
+                <p className="text-xl font-bold text-slate-900">{reportData.total_assessments}</p>
                 <p className="text-xs text-accent-green">{reportData.completed_assessments} done</p>
               </div>
               <div className="bg-slate-100 rounded-xl p-4 text-center">
@@ -312,14 +312,14 @@ export default function ReportsPage() {
               </div>
               <div className="bg-slate-100 rounded-xl p-4 text-center">
                 <p className="text-slate-500 text-xs mb-1">Pending</p>
-                <p className="text-xl font-bold text-yellow-400">{reportData.pending_assessments}</p>
+                <p className="text-xl font-bold text-amber-600">{reportData.pending_assessments}</p>
               </div>
             </div>
 
             {/* Services Breakdown */}
             {reportData.services_breakdown?.length > 0 && (
               <div>
-                <h4 className="text-white font-medium mb-3">Services by Type</h4>
+                <h4 className="text-slate-900 font-medium mb-3">Services by Type</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {reportData.services_breakdown.map((svc: any, i: number) => (
                     <div key={i} className={`rounded-xl p-4 border ${getServiceColor(svc.type)}`}>
@@ -341,12 +341,12 @@ export default function ReportsPage() {
             {/* Weekly Trend */}
             {reportData.weekly_trend?.length > 0 && (
               <div>
-                <h4 className="text-white font-medium mb-3">Weekly Trend</h4>
+                <h4 className="text-slate-900 font-medium mb-3">Weekly Trend</h4>
                 <div className="grid grid-cols-4 gap-3">
                   {reportData.weekly_trend.map((week: any, i: number) => (
                     <div key={i} className="bg-slate-100 rounded-xl p-3 text-center">
                       <p className="text-slate-500 text-xs">{week.week}</p>
-                      <p className="text-xl font-bold text-white">{week.assessments}</p>
+                      <p className="text-xl font-bold text-slate-900">{week.assessments}</p>
                       <p className="text-slate-400 text-xs">{week.start_date}</p>
                     </div>
                   ))}
@@ -361,7 +361,7 @@ export default function ReportsPage() {
           <div className="p-6 space-y-6">
             {/* Summary */}
             <div className="bg-gradient-to-r from-accent-orange/10 to-yellow-500/10 rounded-xl p-4 border border-accent-orange/20">
-              <h4 className="text-white font-bold">{reportData.period}</h4>
+              <h4 className="text-slate-900 font-bold">{reportData.period}</h4>
               <p className="text-slate-600 text-sm mt-1">{reportData.summary}</p>
             </div>
 
@@ -384,7 +384,7 @@ export default function ReportsPage() {
             {/* Services by Type */}
             {reportData.services_by_type?.length > 0 && (
               <div>
-                <h4 className="text-white font-medium mb-3">Services by Type</h4>
+                <h4 className="text-slate-900 font-medium mb-3">Services by Type</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {reportData.services_by_type.map((svc: any, i: number) => (
                     <div key={i} className={`rounded-xl p-4 border ${getServiceColor(svc.type)}`}>
@@ -409,24 +409,24 @@ export default function ReportsPage() {
             {/* Client Billing */}
             {reportData.client_billing?.length > 0 && (
               <div>
-                <h4 className="text-white font-medium mb-3">Client Billing</h4>
+                <h4 className="text-slate-900 font-medium mb-3">Client Billing</h4>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {reportData.client_billing.map((client: any, i: number) => (
                     <div key={i} className="flex items-center justify-between p-3 bg-slate-50/30 rounded-lg">
                       <div>
-                        <p className="text-white text-sm font-medium">{client.client_name}</p>
+                        <p className="text-slate-900 text-sm font-medium">{client.client_name}</p>
                         <p className="text-slate-500 text-xs">{client.assessment_date} • {client.total_services} services</p>
                       </div>
                       <div className="text-right">
                         <span className={`px-2 py-1 rounded text-xs ${
                           client.contract_status === 'Generated' 
                             ? 'bg-accent-green/20 text-accent-green' 
-                            : 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-amber-50 text-amber-600'
                         }`}>
                           {client.contract_status}
                         </span>
                         {client.estimated_weekly && (
-                          <p className="text-white text-sm font-medium mt-1">${client.estimated_weekly.toFixed(0)}/wk</p>
+                          <p className="text-slate-900 text-sm font-medium mt-1">${client.estimated_weekly.toFixed(0)}/wk</p>
                         )}
                       </div>
                     </div>
@@ -442,7 +442,7 @@ export default function ReportsPage() {
           <div className="p-6 space-y-6">
             {/* Summary */}
             <div className="bg-gradient-to-r from-accent-cyan/10 to-primary-500/10 rounded-xl p-4 border border-accent-cyan/20">
-              <h4 className="text-white font-bold">Client Overview</h4>
+              <h4 className="text-slate-900 font-bold">Client Overview</h4>
               <p className="text-slate-600 text-sm mt-1">{reportData.summary}</p>
             </div>
 
@@ -450,7 +450,7 @@ export default function ReportsPage() {
             <div className="grid grid-cols-4 gap-3">
               <div className="bg-slate-100 rounded-xl p-4 text-center">
                 <p className="text-slate-500 text-xs mb-1">Total</p>
-                <p className="text-xl font-bold text-white">{reportData.total_clients}</p>
+                <p className="text-xl font-bold text-slate-900">{reportData.total_clients}</p>
               </div>
               <div className="bg-slate-100 rounded-xl p-4 text-center">
                 <p className="text-slate-500 text-xs mb-1">Active</p>
@@ -462,14 +462,14 @@ export default function ReportsPage() {
               </div>
               <div className="bg-slate-100 rounded-xl p-4 text-center">
                 <p className="text-slate-500 text-xs mb-1">Pending</p>
-                <p className="text-xl font-bold text-yellow-400">{reportData.clients_pending}</p>
+                <p className="text-xl font-bold text-amber-600">{reportData.clients_pending}</p>
               </div>
             </div>
 
             {/* Client List */}
             {reportData.clients?.length > 0 && (
               <div>
-                <h4 className="text-white font-medium mb-3">All Clients</h4>
+                <h4 className="text-slate-900 font-medium mb-3">All Clients</h4>
                 <div className="space-y-2 max-h-80 overflow-y-auto">
                   {reportData.clients.map((client: any, i: number) => (
                     <div 
@@ -479,11 +479,11 @@ export default function ReportsPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                          <div className="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
                             <span className="text-primary-400 font-bold text-sm">{client.client_name.charAt(0)}</span>
                           </div>
                           <div>
-                            <p className="text-white text-sm font-medium">{client.client_name}</p>
+                            <p className="text-slate-900 text-sm font-medium">{client.client_name}</p>
                             <p className="text-slate-500 text-xs">
                               {client.total_assessments} assessments
                               {client.last_assessment_date && ` • Last: ${client.last_assessment_date}`}
@@ -493,9 +493,9 @@ export default function ReportsPage() {
                         <div className="flex items-center gap-2">
                           {client.care_level && (
                             <span className={`px-2 py-0.5 rounded text-xs ${
-                              client.care_level === 'HIGH' ? 'bg-red-500/20 text-red-400' :
-                              client.care_level === 'MODERATE' ? 'bg-yellow-500/20 text-yellow-400' :
-                              'bg-green-500/20 text-green-400'
+                              client.care_level === 'HIGH' ? 'bg-red-50 text-red-600' :
+                              client.care_level === 'MODERATE' ? 'bg-amber-50 text-amber-600' :
+                              'bg-emerald-50 text-emerald-600'
                             }`}>
                               {client.care_level}
                             </span>
@@ -547,12 +547,12 @@ export default function ReportsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-primary-400" />
                 </div>
                 <span className="text-slate-500 text-sm">This Week</span>
               </div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-slate-900">
                 {overviewStats?.assessments_this_week ?? '--'}
               </p>
               <p className="text-sm text-slate-500">assessments</p>
@@ -564,7 +564,7 @@ export default function ReportsPage() {
                 </div>
                 <span className="text-slate-500 text-sm">Services</span>
               </div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-slate-900">
                 {overviewStats?.services_identified ?? '--'}
               </p>
               <p className="text-sm text-slate-500">identified</p>
@@ -576,7 +576,7 @@ export default function ReportsPage() {
                 </div>
                 <span className="text-slate-500 text-sm">Contracts</span>
               </div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-slate-900">
                 {overviewStats?.contracts_generated ?? '--'}
               </p>
               <p className="text-sm text-slate-500">generated</p>
@@ -588,7 +588,7 @@ export default function ReportsPage() {
                 </div>
                 <span className="text-slate-500 text-sm">Clients</span>
               </div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-slate-900">
                 {overviewStats?.active_clients ?? '--'}
               </p>
               <p className="text-sm text-slate-500">active</p>
@@ -596,7 +596,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Report Types - Clickable Cards */}
-          <h2 className="text-xl font-semibold text-white mb-4">Generate Reports</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">Generate Reports</h2>
           <div className="grid grid-cols-2 gap-4 mb-8">
             {reportTypes.map((report) => {
               const isExpanded = expandedReport === report.id;
@@ -617,7 +617,7 @@ export default function ReportsPage() {
                         <report.icon className={`w-6 h-6 ${report.textClass}`} />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-white mb-1">{report.title}</h3>
+                        <h3 className="font-semibold text-slate-900 mb-1">{report.title}</h3>
                         <p className="text-slate-500 text-sm">{report.description}</p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -634,11 +634,11 @@ export default function ReportsPage() {
                             CSV
                           </button>
                         )}
-                        <div className={`p-2 rounded-lg transition ${isExpanded ? 'bg-primary-500/20' : 'group-hover:bg-slate-50'}`}>
+                        <div className={`p-2 rounded-lg transition ${isExpanded ? 'bg-primary-50' : 'group-hover:bg-slate-50'}`}>
                           {isExpanded ? (
                             <ChevronDown className="w-5 h-5 text-primary-400" />
                           ) : (
-                            <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white" />
+                            <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-slate-900" />
                           )}
                         </div>
                       </div>
@@ -659,7 +659,7 @@ export default function ReportsPage() {
           {/* Weekly Activity Chart */}
           <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Weekly Activity</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Weekly Activity</h3>
             </div>
             {(overviewStats?.assessments_this_week || 0) > 0 ? (
               <>
@@ -698,7 +698,7 @@ export default function ReportsPage() {
 
           {/* Recent Activity Feed */}
           <div className="card p-6 mt-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h3>
             {(overviewStats?.assessments_this_week || 0) === 0 ? (
               <div className="text-center py-8">
                 <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />

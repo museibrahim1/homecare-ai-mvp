@@ -240,10 +240,10 @@ export default function NewContractPage() {
         <Sidebar />
         <main className="flex-1 flex items-center justify-center p-8">
           <div className="text-center">
-            <div className="w-20 h-20 bg-green-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <Check className="w-10 h-10 text-green-400" />
+            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <Check className="w-10 h-10 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Contract Created!</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Contract Created!</h2>
             <p className="text-slate-500 mb-4">
               Your contract has been saved as a draft. Redirecting to proposals...
             </p>
@@ -264,17 +264,17 @@ export default function NewContractPage() {
           <div className="mb-8">
             <button
               onClick={() => router.push('/proposals')}
-              className="flex items-center gap-2 text-slate-500 hover:text-white transition mb-4"
+              className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Proposals
             </button>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center">
                 <FileText className="w-5 h-5 text-primary-400" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Create Contract</h1>
+                <h1 className="text-2xl font-bold text-slate-900">Create Contract</h1>
                 <p className="text-slate-500 text-sm">
                   Build a service agreement manually — no pipeline needed
                 </p>
@@ -284,9 +284,9 @@ export default function NewContractPage() {
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-              <span className="text-red-400">{error}</span>
+            <div className="mb-6 p-4 bg-red-50 border border-red-500/20 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+              <span className="text-red-600">{error}</span>
             </div>
           )}
 
@@ -294,7 +294,7 @@ export default function NewContractPage() {
           <div className="space-y-6">
             {/* Section 1: Client & Title */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-primary-400" />
                 Client & Title
               </h2>
@@ -356,7 +356,7 @@ export default function NewContractPage() {
                     {selectedClient && (
                       <button
                         onClick={autoGenerateTitle}
-                        className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 hover:text-white hover:border-slate-300 transition text-sm whitespace-nowrap"
+                        className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-900 hover:border-slate-300 transition text-sm whitespace-nowrap"
                         title="Auto-generate title from services and client"
                       >
                         Auto
@@ -370,8 +370,8 @@ export default function NewContractPage() {
             {/* Section: Template Selection */}
             {templates.length > 0 && (
               <div className="bg-white border border-slate-200 rounded-xl p-6">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-cyan-600" />
                   OCR Template
                 </h2>
                 <p className="text-slate-500 text-sm mb-3">
@@ -391,7 +391,7 @@ export default function NewContractPage() {
                   ))}
                 </select>
                 {selectedTemplate && (
-                  <div className="mt-2 flex items-center gap-2 text-xs text-cyan-400">
+                  <div className="mt-2 flex items-center gap-2 text-xs text-cyan-600">
                     <Scan className="w-3.5 h-3.5" />
                     Contract will use this template&apos;s field mapping when generating
                   </div>
@@ -401,8 +401,8 @@ export default function NewContractPage() {
 
             {/* Section 2: Services */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-400" />
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
                 Services
               </h2>
 
@@ -418,7 +418,7 @@ export default function NewContractPage() {
                       <button
                         key={svc}
                         onClick={() => addCommonService(svc)}
-                        className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-full text-xs text-slate-600 hover:text-white hover:border-primary-500/50 transition"
+                        className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-full text-xs text-slate-600 hover:text-slate-900 hover:border-primary-500/50 transition"
                       >
                         + {svc}
                       </button>
@@ -455,7 +455,7 @@ export default function NewContractPage() {
                     <select
                       value={service.unit}
                       onChange={(e) => updateServiceLine(index, 'unit', e.target.value)}
-                      className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white text-sm focus:border-primary-500 focus:outline-none"
+                      className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
                     >
                       <option value="hour">/hr</option>
                       <option value="visit">/visit</option>
@@ -466,7 +466,7 @@ export default function NewContractPage() {
                     {services.length > 1 && (
                       <button
                         onClick={() => removeServiceLine(index)}
-                        className="p-2 text-slate-400 hover:text-red-400 transition"
+                        className="p-2 text-slate-400 hover:text-red-600 transition"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -486,8 +486,8 @@ export default function NewContractPage() {
 
             {/* Section 3: Schedule */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-purple-400" />
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-purple-600" />
                 Schedule
               </h2>
 
@@ -505,7 +505,7 @@ export default function NewContractPage() {
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                           scheduleDays.includes(day.id)
                             ? 'bg-primary-500 text-white'
-                            : 'bg-slate-50 text-slate-500 hover:text-white border border-slate-200'
+                            : 'bg-slate-50 text-slate-500 hover:text-slate-900 border border-slate-200'
                         }`}
                       >
                         {day.label}
@@ -543,8 +543,8 @@ export default function NewContractPage() {
 
             {/* Section 4: Rates & Dates */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-green-400" />
+              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-emerald-600" />
                 Rates & Duration
               </h2>
 
@@ -600,10 +600,10 @@ export default function NewContractPage() {
 
               {/* Weekly summary */}
               {hourlyRate > 0 && weeklyHours > 0 && (
-                <div className="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                <div className="mt-4 p-4 bg-emerald-50 border border-green-500/20 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600">Estimated Weekly Total</span>
-                    <span className="text-xl font-bold text-green-400">
+                    <span className="text-xl font-bold text-emerald-600">
                       ${calculateWeeklyTotal().toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -620,8 +620,8 @@ export default function NewContractPage() {
                 onClick={() => setShowTerms(!showTerms)}
                 className="w-full p-6 flex items-center justify-between text-left"
               >
-                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-orange-400" />
+                <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-orange-600" />
                   Terms & Policies
                 </h2>
                 {showTerms ? (
@@ -663,7 +663,7 @@ export default function NewContractPage() {
             <div className="flex items-center justify-between pt-2 pb-8">
               <button
                 onClick={() => router.push('/proposals')}
-                className="px-6 py-3 text-slate-500 hover:text-white transition"
+                className="px-6 py-3 text-slate-500 hover:text-slate-900 transition"
               >
                 Cancel
               </button>

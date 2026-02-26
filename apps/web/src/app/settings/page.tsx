@@ -531,7 +531,7 @@ export default function SettingsPage() {
             <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
               extractionMessage.includes('✓') 
                 ? 'bg-accent-green/10 border border-accent-green/30' 
-                : 'bg-primary-500/10 border border-primary-500/30'
+                : 'bg-primary-50 border border-primary-200'
             }`}>
               {extracting ? (
                 <Loader2 className="w-5 h-5 text-primary-400 animate-spin" />
@@ -546,10 +546,10 @@ export default function SettingsPage() {
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-              <p className="text-red-400 flex-1">{error}</p>
-              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <p className="text-red-600 flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -565,8 +565,8 @@ export default function SettingsPage() {
                   onClick={() => setActiveTab(tab.id as typeof activeTab)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'bg-primary-500/20 text-primary-400'
-                      : 'text-slate-500 hover:text-white hover:bg-slate-100'
+                      ? 'bg-primary-50 text-primary-400'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
                   <TabIcon className="w-4 h-4" />
@@ -580,13 +580,13 @@ export default function SettingsPage() {
           {activeTab === 'agency' && (
             <div className="space-y-6">
               {/* Quick Upload for Auto-Fill */}
-              <div className="card p-6 bg-gradient-to-r from-primary-500/10 to-purple-500/10 border-primary-500/30">
+              <div className="card p-6 bg-gradient-to-r from-primary-500/10 to-purple-500/10 border-primary-200">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Sparkles className="w-6 h-6 text-primary-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-white font-semibold mb-1">Auto-Fill Company Info</h3>
+                    <h3 className="text-slate-900 font-semibold mb-1">Auto-Fill Company Info</h3>
                     <p className="text-slate-600 text-sm mb-3">
                       Upload any document with your company letterhead, and AI will extract your business information automatically.
                     </p>
@@ -612,7 +612,7 @@ export default function SettingsPage() {
 
               {/* Logo Upload */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Image className="w-5 h-5 text-primary-400" />
                   Company Logo
                 </h2>
@@ -662,7 +662,7 @@ export default function SettingsPage() {
 
               {/* Company Information */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-primary-400" />
                   Company Information
                 </h2>
@@ -754,7 +754,7 @@ export default function SettingsPage() {
 
               {/* Business Identifiers */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Business Identifiers</h2>
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">Business Identifiers</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-600 text-sm mb-1">License Number</label>
@@ -781,7 +781,7 @@ export default function SettingsPage() {
 
               {/* Contact Person */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Primary Contact</h2>
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">Primary Contact</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-600 text-sm mb-1">Contact Name</label>
@@ -808,7 +808,7 @@ export default function SettingsPage() {
 
               {/* Brand Colors */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Brand Colors</h2>
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">Brand Colors</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-600 text-sm mb-2">Primary Color</label>
@@ -854,7 +854,7 @@ export default function SettingsPage() {
             <div className="space-y-6">
               {/* Upload New Document */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Upload className="w-5 h-5 text-primary-400" />
                   Upload Documents
                 </h2>
@@ -875,7 +875,7 @@ export default function SettingsPage() {
                           onClick={() => setSelectedCategory(cat.id)}
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
                             selectedCategory === cat.id
-                              ? 'bg-primary-500/20 text-primary-400 border border-primary-500/50'
+                              ? 'bg-primary-50 text-primary-400 border border-primary-500/50'
                               : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
                           }`}
                         >
@@ -904,7 +904,7 @@ export default function SettingsPage() {
                   ) : (
                     <>
                       <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-                      <p className="text-white font-medium mb-1">Click to upload document</p>
+                      <p className="text-slate-900 font-medium mb-1">Click to upload document</p>
                       <p className="text-slate-500 text-sm">PDF, DOCX, DOC, PNG, JPG • Max 25MB</p>
                     </>
                   )}
@@ -920,7 +920,7 @@ export default function SettingsPage() {
 
               {/* Uploaded Documents List */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Uploaded Documents</h2>
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">Uploaded Documents</h2>
                 
                 {agency.documents.length === 0 ? (
                   <div className="text-center py-8">
@@ -940,19 +940,19 @@ export default function SettingsPage() {
                           className="flex items-center justify-between p-4 bg-slate-100 rounded-xl border border-slate-200"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
                               <CatIcon className="w-5 h-5 text-primary-400" />
                             </div>
                             <div>
-                              <p className="text-white font-medium">{doc.name}</p>
+                              <p className="text-slate-900 font-medium">{doc.name}</p>
                               <p className="text-slate-500 text-sm">{category?.label} • Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}</p>
                             </div>
                           </div>
                           <button
                             onClick={() => removeDocument(doc.id)}
-                            className="p-2 hover:bg-red-500/20 rounded-lg transition"
+                            className="p-2 hover:bg-red-50 rounded-lg transition"
                           >
-                            <Trash2 className="w-4 h-4 text-red-400" />
+                            <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
                         </div>
                       );
@@ -963,7 +963,7 @@ export default function SettingsPage() {
 
               {/* Default Policies */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-4">Default Policies</h2>
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">Default Policies</h2>
                 <p className="text-slate-500 text-sm mb-4">
                   These will be used as defaults when generating contracts. You can also upload policy documents above for more detailed extraction.
                 </p>
@@ -994,7 +994,7 @@ export default function SettingsPage() {
           {/* Profile Tab */}
           {activeTab === 'profile' && (
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
                 <User className="w-5 h-5 text-primary-400" />
                 Profile Settings
               </h2>
@@ -1041,17 +1041,17 @@ export default function SettingsPage() {
                 <div className={`p-4 rounded-xl border ${
                   teamLimits.can_invite 
                     ? 'bg-white border-slate-200'
-                    : 'bg-yellow-500/10 border-yellow-500/30'
+                    : 'bg-amber-50 border-amber-200'
                 }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        teamLimits.can_invite ? 'bg-primary-500/20' : 'bg-yellow-500/20'
+                        teamLimits.can_invite ? 'bg-primary-50' : 'bg-amber-50'
                       }`}>
-                        <Users className={`w-5 h-5 ${teamLimits.can_invite ? 'text-primary-400' : 'text-yellow-400'}`} />
+                        <Users className={`w-5 h-5 ${teamLimits.can_invite ? 'text-primary-400' : 'text-amber-600'}`} />
                       </div>
                       <div>
-                        <p className="text-white font-medium">
+                        <p className="text-slate-900 font-medium">
                           {teamLimits.current_users} / {teamLimits.max_users} Team Members
                         </p>
                         <p className="text-slate-500 text-sm">
@@ -1088,7 +1088,7 @@ export default function SettingsPage() {
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <Users className="w-5 h-5 text-primary-400" />
                       Team Members
                     </h2>
@@ -1130,13 +1130,13 @@ export default function SettingsPage() {
                     {teamMembers.map((member) => (
                       <div key={member.id} className="py-4 flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-primary-500/20 rounded-full flex items-center justify-center">
+                          <div className="w-10 h-10 bg-primary-50 rounded-full flex items-center justify-center">
                             <span className="text-primary-400 font-medium">
                               {member.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                             </span>
                           </div>
                           <div>
-                            <p className="text-white font-medium">{member.full_name}</p>
+                            <p className="text-slate-900 font-medium">{member.full_name}</p>
                             <p className="text-slate-500 text-sm">{member.email}</p>
                           </div>
                         </div>
@@ -1144,7 +1144,7 @@ export default function SettingsPage() {
                           <select
                             value={member.role}
                             onChange={(e) => handleUpdateMember(member.id, { role: e.target.value })}
-                            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-white"
+                            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-500"
                           >
                             <option value="owner">Owner</option>
                             <option value="admin">Admin</option>
@@ -1154,8 +1154,8 @@ export default function SettingsPage() {
                             onClick={() => handleUpdateMember(member.id, { is_active: !member.is_active })}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
                               member.is_active 
-                                ? 'bg-green-500/20 text-green-400' 
-                                : 'bg-red-500/20 text-red-400'
+                                ? 'bg-emerald-50 text-emerald-600' 
+                                : 'bg-red-50 text-red-600'
                             }`}
                           >
                             {member.is_active ? 'Active' : 'Inactive'}
@@ -1172,7 +1172,7 @@ export default function SettingsPage() {
                 <div className="flex gap-4">
                   <Volume2 className="w-6 h-6 text-primary-400 flex-shrink-0" />
                   <div>
-                    <h3 className="text-white font-medium mb-1">Voice ID for Team Members</h3>
+                    <h3 className="text-slate-900 font-medium mb-1">Voice ID for Team Members</h3>
                     <p className="text-slate-500 text-sm">
                       Each team member can set up their Voice ID in Settings &gt; Voice ID. This allows the system 
                       to automatically identify who is speaking during assessments.
@@ -1188,7 +1188,7 @@ export default function SettingsPage() {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-2xl p-6 w-full max-w-md border border-slate-200">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                     <UserPlus className="w-5 h-5 text-primary-400" />
                     Invite Team Member
                   </h3>
@@ -1198,8 +1198,8 @@ export default function SettingsPage() {
                 </div>
                 
                 {inviteSuccess ? (
-                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4">
-                    <p className="text-green-400 text-sm">{inviteSuccess}</p>
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
+                    <p className="text-emerald-600 text-sm">{inviteSuccess}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1236,8 +1236,8 @@ export default function SettingsPage() {
                     </div>
                     
                     {inviteError && (
-                      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-                        <p className="text-red-400 text-sm">{inviteError}</p>
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                        <p className="text-red-600 text-sm">{inviteError}</p>
                       </div>
                     )}
                     
@@ -1272,7 +1272,7 @@ export default function SettingsPage() {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-2xl p-6 w-full max-w-lg border border-slate-200">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary-400" />
                     Upgrade Your Plan
                   </h3>
@@ -1282,7 +1282,7 @@ export default function SettingsPage() {
                 </div>
                 
                 <p className="text-slate-500 text-sm mb-6">
-                  Your current <span className="text-white font-medium">{teamLimits.plan_name}</span> plan 
+                  Your current <span className="text-slate-900 font-medium">{teamLimits.plan_name}</span> plan 
                   allows {teamLimits.max_users} team member{teamLimits.max_users !== 1 ? 's' : ''}. 
                   Upgrade to add more users and unlock additional features.
                 </p>
@@ -1293,7 +1293,7 @@ export default function SettingsPage() {
                       key={plan.name}
                       className={`p-4 rounded-xl border transition-all cursor-pointer ${
                         index === 0 
-                          ? 'bg-primary-500/10 border-primary-500/30 hover:border-primary-500/50' 
+                          ? 'bg-primary-50 border-primary-200 hover:border-primary-500/50' 
                           : 'bg-slate-100 border-slate-200 hover:border-slate-300'
                       }`}
                     >
@@ -1303,18 +1303,18 @@ export default function SettingsPage() {
                             {plan.name}
                           </h4>
                           {index === 0 && (
-                            <span className="px-2 py-0.5 bg-primary-500/20 text-primary-400 text-xs rounded-full">
+                            <span className="px-2 py-0.5 bg-primary-50 text-primary-400 text-xs rounded-full">
                               Recommended
                             </span>
                           )}
                         </div>
-                        <p className="text-white font-bold">
+                        <p className="text-slate-900 font-bold">
                           ${plan.monthly_price}<span className="text-slate-500 font-normal text-sm">/mo</span>
                         </p>
                       </div>
                       <p className="text-slate-500 text-sm">
                         Up to {plan.max_users} team members 
-                        <span className="text-green-400 ml-1">
+                        <span className="text-emerald-600 ml-1">
                           (+{plan.additional_users} more than current)
                         </span>
                       </p>
@@ -1341,7 +1341,7 @@ export default function SettingsPage() {
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
                 <Bell className="w-5 h-5 text-primary-400" />
                 Notification Preferences
               </h2>
@@ -1373,7 +1373,7 @@ export default function SettingsPage() {
           {activeTab === 'security' && (
             <div className="space-y-6">
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-primary-400" />
                   Security Settings
                 </h2>
@@ -1397,7 +1397,7 @@ export default function SettingsPage() {
 
               {/* Active Sessions / Log Out All Devices */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
                   <Laptop className="w-5 h-5 text-primary-400" />
                   Active Sessions
                 </h2>
@@ -1407,11 +1407,11 @@ export default function SettingsPage() {
                 </p>
                 <div className="flex items-center justify-between p-4 bg-slate-50/30 rounded-xl border border-slate-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                      <LogOut className="w-5 h-5 text-orange-400" />
+                    <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                      <LogOut className="w-5 h-5 text-orange-600" />
                     </div>
                     <div>
-                      <p className="text-white font-medium">Log out of all devices</p>
+                      <p className="text-slate-900 font-medium">Log out of all devices</p>
                       <p className="text-slate-500 text-sm">Invalidates all active sessions including this one</p>
                     </div>
                   </div>
@@ -1430,9 +1430,9 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="card p-6 border-red-500/30">
-                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Database className="w-5 h-5 text-red-400" />
+              <div className="card p-6 border-red-200">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                  <Database className="w-5 h-5 text-red-600" />
                   Danger Zone
                 </h2>
                 <div className="flex items-center justify-between">
@@ -1446,7 +1446,7 @@ export default function SettingsPage() {
                         setError('Account deletion requires contacting support. Please email support for assistance.');
                       }
                     }}
-                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition"
+                    className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-500/30 transition"
                   >
                     Delete Account
                   </button>

@@ -25,7 +25,7 @@ const PLANS = [
     ],
     popular: false,
     color: 'from-blue-500 to-cyan-500',
-    borderColor: 'border-blue-500/30',
+    borderColor: 'border-blue-200',
   },
   {
     name: 'Growth',
@@ -57,7 +57,7 @@ const PLANS = [
     ],
     popular: false,
     color: 'from-amber-500 to-orange-500',
-    borderColor: 'border-amber-500/30',
+    borderColor: 'border-amber-200',
   },
 ];
 
@@ -81,27 +81,27 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl border border-slate-200 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="relative bg-white rounded-2xl border border-slate-200 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-lg">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-slate-50 rounded-lg text-slate-500 hover:text-white transition z-10"
+          className="absolute top-4 right-4 p-2 hover:bg-slate-50 rounded-lg text-slate-500 hover:text-slate-900 transition z-10"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="p-8 pb-4 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full text-amber-600 text-sm font-medium mb-4">
             <Zap className="w-4 h-4" />
             Free Plan Limit Reached
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
             Upgrade to Continue
           </h2>
           <p className="text-slate-500 max-w-lg mx-auto">
-            You&apos;ve completed <span className="text-white font-semibold">{usedCount}</span> of{' '}
-            <span className="text-white font-semibold">{maxCount}</span> free assessments.
+            You&apos;ve completed <span className="text-slate-900 font-semibold">{usedCount}</span> of{' '}
+            <span className="text-slate-900 font-semibold">{maxCount}</span> free assessments.
             Upgrade your plan to unlock unlimited assessments and more features.
           </p>
 
@@ -109,7 +109,7 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
           <div className="mt-4 max-w-xs mx-auto">
             <div className="flex justify-between text-sm text-slate-500 mb-1">
               <span>Assessments used</span>
-              <span className="text-amber-400 font-medium">{usedCount}/{maxCount}</span>
+              <span className="text-amber-600 font-medium">{usedCount}/{maxCount}</span>
             </div>
             <div className="h-2 bg-slate-50 rounded-full overflow-hidden">
               <div
@@ -133,24 +133,24 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
                 } p-6 flex flex-col`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-primary-500 to-purple-500 rounded-full text-white text-xs font-bold flex items-center gap-1">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-primary-500 to-purple-500 rounded-full text-slate-900 text-xs font-bold flex items-center gap-1">
                     <Crown className="w-3 h-3" />
                     Most Popular
                   </div>
                 )}
 
-                <h3 className="text-lg font-bold text-white mt-1">{plan.name}</h3>
+                <h3 className="text-lg font-bold text-slate-900 mt-1">{plan.name}</h3>
                 <p className="text-slate-500 text-sm mt-1">{plan.description}</p>
 
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-white">${plan.price}</span>
+                  <span className="text-3xl font-bold text-slate-900">${plan.price}</span>
                   <span className="text-slate-500 text-sm">{plan.period}</span>
                 </div>
 
                 <ul className="mt-4 space-y-2 flex-1">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                       <span className="text-slate-600">{feature}</span>
                     </li>
                   ))}

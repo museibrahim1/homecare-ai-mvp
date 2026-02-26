@@ -141,11 +141,11 @@ export default function QuickSetupPage() {
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Quick Setup</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Quick Setup</h1>
               <p className="text-sm text-gray-400">Onboard a new agency in seconds</p>
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function QuickSetupPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400">Company</span>
-                  <span className="text-white font-medium">{companyName}</span>
+                  <span className="text-slate-900 font-medium">{companyName}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400">Business ID</span>
@@ -186,7 +186,7 @@ export default function QuickSetupPage() {
               <div className="flex gap-3">
                 <button
                   onClick={copyCredentials}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-medium transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-900 text-sm font-medium transition-colors"
                 >
                   {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                   {copied ? 'Copied!' : 'Copy Credentials'}
@@ -195,7 +195,7 @@ export default function QuickSetupPage() {
                   href={result.login_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-500/20 hover:bg-primary-500/30 text-primary-300 text-sm font-medium transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-50 hover:bg-primary-500/30 text-primary-300 text-sm font-medium transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open Login Page
@@ -204,7 +204,7 @@ export default function QuickSetupPage() {
 
               <button
                 onClick={resetForm}
-                className="w-full mt-4 px-4 py-2.5 rounded-xl border border-white/10 hover:border-white/20 text-gray-400 hover:text-white text-sm font-medium transition-colors"
+                className="w-full mt-4 px-4 py-2.5 rounded-xl border border-white/10 hover:border-white/20 text-gray-400 hover:text-slate-900 text-sm font-medium transition-colors"
               >
                 Set Up Another Agency
               </button>
@@ -213,8 +213,8 @@ export default function QuickSetupPage() {
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 mb-6">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+            <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-6">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
               <p className="text-red-300 text-sm">{error}</p>
             </div>
           )}
@@ -223,7 +223,7 @@ export default function QuickSetupPage() {
           {!result && (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="bg-[#111128] border border-white/[0.06] rounded-2xl p-6 space-y-5">
-                <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-1">Agency Details</h3>
+                <h3 className="text-slate-900 font-semibold text-sm uppercase tracking-wider mb-1">Agency Details</h3>
 
                 {/* Company Name */}
                 <div>
@@ -296,7 +296,7 @@ export default function QuickSetupPage() {
               </div>
 
               <div className="bg-[#111128] border border-white/[0.06] rounded-2xl p-6 space-y-5">
-                <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-1">Service Profile</h3>
+                <h3 className="text-slate-900 font-semibold text-sm uppercase tracking-wider mb-1">Service Profile</h3>
 
                 {/* Services */}
                 <div>
@@ -309,7 +309,7 @@ export default function QuickSetupPage() {
                         onClick={() => toggleService(svc)}
                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left ${
                           services.includes(svc)
-                            ? 'bg-primary-500/20 text-primary-300 border border-primary-500/40'
+                            ? 'bg-primary-50 text-primary-300 border border-primary-500/40'
                             : 'bg-white/5 text-gray-400 border border-white/10 hover:border-white/20 hover:text-gray-300'
                         }`}
                       >
@@ -341,7 +341,7 @@ export default function QuickSetupPage() {
               <button
                 type="submit"
                 disabled={loading || !companyName || !ownerName || !ownerEmail || !state}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-primary-500/20"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-slate-900 font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-primary-500/20"
               >
                 {loading ? (
                   <>

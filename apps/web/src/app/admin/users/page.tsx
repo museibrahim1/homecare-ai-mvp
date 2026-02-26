@@ -164,10 +164,10 @@ export default function PlatformUsersPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-5xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Platform User Management</p>
+            <p className="text-blue-600 font-medium">Platform User Management</p>
             <p className="text-blue-300/70 text-sm mt-1">
               Manage platform administrator accounts. Only @palmtai.com emails can be platform admins.
             </p>
@@ -184,7 +184,7 @@ export default function PlatformUsersPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Platform Users</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Platform Users</h1>
               <p className="text-slate-500 mt-1">Manage platform administrator accounts</p>
             </div>
           </div>
@@ -207,10 +207,10 @@ export default function PlatformUsersPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -232,17 +232,17 @@ export default function PlatformUsersPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">
+                        <span className="text-slate-900 font-bold text-lg">
                           {user.full_name.charAt(0)}
                         </span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-white font-medium">{user.full_name}</p>
+                          <p className="text-slate-900 font-medium">{user.full_name}</p>
                           {user.is_active ? (
-                            <CheckCircle className="w-4 h-4 text-green-400" />
+                            <CheckCircle className="w-4 h-4 text-emerald-600" />
                           ) : (
-                            <XCircle className="w-4 h-4 text-red-400" />
+                            <XCircle className="w-4 h-4 text-red-600" />
                           )}
                         </div>
                         <p className="text-slate-500 text-sm">{user.email}</p>
@@ -251,7 +251,7 @@ export default function PlatformUsersPage() {
                     <div className="flex items-center gap-6">
                       <div className="text-right">
                         <p className="text-slate-500 text-xs">Last Login</p>
-                        <p className="text-white text-sm">
+                        <p className="text-slate-900 text-sm">
                           {user.last_login 
                             ? new Date(user.last_login).toLocaleDateString() 
                             : 'Never'
@@ -264,7 +264,7 @@ export default function PlatformUsersPage() {
                       </div>
                       <button
                         onClick={() => deleteUser(user.id, user.email)}
-                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-red-400 transition"
+                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-red-600 transition"
                         title="Delete user"
                       >
                         <XCircle className="w-5 h-5" />
@@ -306,13 +306,13 @@ export default function PlatformUsersPage() {
       {showInviteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl border border-slate-200 p-6 w-full max-w-md">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-primary-400" />
               Invite Platform Admin
             </h3>
             
             {inviteError && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm mb-4">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm mb-4">
                 {inviteError}
               </div>
             )}

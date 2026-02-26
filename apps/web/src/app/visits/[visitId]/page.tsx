@@ -439,7 +439,7 @@ export default function VisitDetailPage() {
               <ArrowLeft className="w-5 h-5 text-slate-600" />
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold text-white truncate">
+              <h1 className="text-lg sm:text-2xl font-bold text-slate-900 truncate">
                 {visit.client?.full_name || 'Unknown Client'}
               </h1>
               <p className="text-slate-500 text-sm sm:text-base truncate">
@@ -485,7 +485,7 @@ export default function VisitDetailPage() {
               {(transcript.length > 0 || billables.length > 0 || contract || note) && (
                 <button 
                   onClick={() => setShowRestartModal(true)}
-                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors text-sm"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-red-600 hover:text-red-300 hover:bg-red-50 rounded-lg transition-colors text-sm"
                   title="Restart Assessment"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -512,11 +512,11 @@ export default function VisitDetailPage() {
                       disabled={!contract}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                      <div className="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
                         <FileCheck className="w-4 h-4 text-primary-400" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">Contract (Your Template)</p>
+                        <p className="text-sm font-medium text-slate-900">Contract (Your Template)</p>
                         <p className="text-xs text-slate-500">Uses your uploaded template</p>
                       </div>
                     </button>
@@ -526,11 +526,11 @@ export default function VisitDetailPage() {
                       disabled={!contract}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                        <File className="w-4 h-4 text-blue-400" />
+                      <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <File className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">Contract DOCX</p>
+                        <p className="text-sm font-medium text-slate-900">Contract DOCX</p>
                         <p className="text-xs text-slate-500">Editable Word document</p>
                       </div>
                     </button>
@@ -540,11 +540,11 @@ export default function VisitDetailPage() {
                       disabled={!contract}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                        <File className="w-4 h-4 text-purple-400" />
+                      <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+                        <File className="w-4 h-4 text-purple-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">Contract PDF</p>
+                        <p className="text-sm font-medium text-slate-900">Contract PDF</p>
                         <p className="text-xs text-slate-500">Default format</p>
                       </div>
                     </button>
@@ -554,11 +554,11 @@ export default function VisitDetailPage() {
                       disabled={billables.length === 0}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                        <FileSpreadsheet className="w-4 h-4 text-green-400" />
+                      <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                        <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">Timesheet CSV</p>
+                        <p className="text-sm font-medium text-slate-900">Timesheet CSV</p>
                         <p className="text-xs text-slate-500">Billable hours</p>
                       </div>
                     </button>
@@ -568,11 +568,11 @@ export default function VisitDetailPage() {
                       disabled={!visit?.pipeline_state?.note?.status}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                        <FileText className="w-4 h-4 text-blue-400" />
+                      <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <FileText className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">Visit Note PDF</p>
+                        <p className="text-sm font-medium text-slate-900">Visit Note PDF</p>
                         <p className="text-xs text-slate-500">Care documentation</p>
                       </div>
                     </button>
@@ -585,10 +585,10 @@ export default function VisitDetailPage() {
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-              <p className="text-red-400 flex-1">{error}</p>
-              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <p className="text-red-600 flex-1">{error}</p>
+              <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -611,9 +611,9 @@ export default function VisitDetailPage() {
                       status === 'completed'
                         ? 'bg-accent-green/10 border-accent-green/30 hover:bg-accent-green/20'
                         : status === 'processing'
-                        ? 'bg-primary-500/10 border-primary-500/30'
+                        ? 'bg-primary-50 border-primary-200'
                         : status === 'failed'
-                        ? 'bg-red-500/10 border-red-500/30 hover:bg-red-500/20'
+                        ? 'bg-red-50 border-red-200 hover:bg-red-50'
                         : 'bg-slate-100 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
                     }`}
                   >
@@ -623,14 +623,14 @@ export default function VisitDetailPage() {
                       ) : status === 'completed' ? (
                         <CheckCircle className="w-5 h-5 text-accent-green" />
                       ) : status === 'failed' ? (
-                        <AlertCircle className="w-5 h-5 text-red-400" />
+                        <AlertCircle className="w-5 h-5 text-red-600" />
                       ) : (
                         <StepIcon className="w-5 h-5 text-slate-500" />
                       )}
                       <span className={`text-xs font-medium ${
                         status === 'completed' ? 'text-accent-green' :
                         status === 'processing' ? 'text-primary-400' :
-                        status === 'failed' ? 'text-red-400' :
+                        status === 'failed' ? 'text-red-600' :
                         'text-slate-600'
                       }`}>
                         {step.label}
@@ -652,7 +652,7 @@ export default function VisitDetailPage() {
                     onClick={() => setUploadMode('audio')}
                     className={`flex-1 p-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
                       uploadMode === 'audio' 
-                        ? 'bg-primary-500/20 border-primary-500/50 text-primary-400' 
+                        ? 'bg-primary-50 border-primary-500/50 text-primary-400' 
                         : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
@@ -663,7 +663,7 @@ export default function VisitDetailPage() {
                     onClick={() => setUploadMode('transcript')}
                     className={`flex-1 p-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
                       uploadMode === 'transcript' 
-                        ? 'bg-purple-500/20 border-purple-500/50 text-purple-400' 
+                        ? 'bg-purple-50 border-purple-500/50 text-purple-600' 
                         : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
@@ -689,7 +689,7 @@ export default function VisitDetailPage() {
                 
                 <button
                   onClick={() => setShowUploader(false)}
-                  className="w-full text-center text-slate-500 hover:text-white py-2 transition text-sm"
+                  className="w-full text-center text-slate-500 hover:text-slate-900 py-2 transition text-sm"
                 >
                   Cancel
                 </button>
@@ -701,11 +701,11 @@ export default function VisitDetailPage() {
                     {hasAudio && <AudioPlayer visitId={visitId} />}
                     {!hasAudio && transcript.length > 0 && (
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-purple-400" />
+                        <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-purple-600" />
                         </div>
                         <div>
-                          <p className="text-white font-medium">Transcript Imported</p>
+                          <p className="text-slate-900 font-medium">Transcript Imported</p>
                           <p className="text-slate-500 text-sm">{transcript.length} segments</p>
                         </div>
                       </div>
@@ -716,14 +716,14 @@ export default function VisitDetailPage() {
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => { setUploadMode('audio'); setShowUploader(true); }}
-                      className="flex items-center gap-2 px-4 py-2 bg-primary-500/20 hover:bg-primary-500/30 border border-primary-500/30 hover:border-primary-500/50 rounded-lg transition-all text-primary-400 text-sm font-medium"
+                      className="flex items-center gap-2 px-4 py-2 bg-primary-50 hover:bg-primary-500/30 border border-primary-200 hover:border-primary-500/50 rounded-lg transition-all text-primary-400 text-sm font-medium"
                     >
                       <Mic className="w-4 h-4" />
                       Upload Audio
                     </button>
                     <button
                       onClick={() => { setUploadMode('transcript'); setShowUploader(true); }}
-                      className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 hover:border-purple-500/50 rounded-lg transition-all text-purple-400 text-sm font-medium"
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-50 hover:bg-purple-500/30 border border-purple-200 hover:border-purple-500/50 rounded-lg transition-all text-purple-600 text-sm font-medium"
                     >
                       <FileText className="w-4 h-4" />
                       Import Transcript
@@ -734,7 +734,7 @@ export default function VisitDetailPage() {
             ) : (
               <div className="card p-6">
                 <div className="text-center mb-6">
-                  <h3 className="text-lg font-medium text-white mb-2">Add Recording or Transcript</h3>
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Add Recording or Transcript</h3>
                   <p className="text-slate-500 text-sm">Upload audio or import a transcript to get started</p>
                 </div>
                 
@@ -743,10 +743,10 @@ export default function VisitDetailPage() {
                     onClick={() => { setUploadMode('audio'); setShowUploader(true); }}
                     className="p-5 bg-slate-100 hover:bg-slate-50 border border-slate-200 hover:border-primary-500 rounded-xl transition-all group"
                   >
-                    <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:bg-primary-500/30 transition">
+                    <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:bg-primary-500/30 transition">
                       <Mic className="w-6 h-6 text-primary-400" />
                     </div>
-                    <h4 className="text-white font-medium text-sm mb-1">Upload Audio</h4>
+                    <h4 className="text-slate-900 font-medium text-sm mb-1">Upload Audio</h4>
                     <p className="text-slate-500 text-xs">MP3, WAV, M4A</p>
                   </button>
                   
@@ -754,10 +754,10 @@ export default function VisitDetailPage() {
                     onClick={() => { setUploadMode('transcript'); setShowUploader(true); }}
                     className="p-5 bg-slate-100 hover:bg-slate-50 border border-slate-200 hover:border-purple-500 rounded-xl transition-all group"
                   >
-                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:bg-purple-500/30 transition">
-                      <FileText className="w-6 h-6 text-purple-400" />
+                    <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:bg-purple-500/30 transition">
+                      <FileText className="w-6 h-6 text-purple-600" />
                     </div>
-                    <h4 className="text-white font-medium text-sm mb-1">Import Transcript</h4>
+                    <h4 className="text-slate-900 font-medium text-sm mb-1">Import Transcript</h4>
                     <p className="text-slate-500 text-xs">SRT, VTT, TXT</p>
                   </button>
                 </div>
@@ -769,14 +769,14 @@ export default function VisitDetailPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {panelTabs.map((tab) => {
               const TabIcon = tab.icon;
-              const bgColor = tab.color === 'blue' ? 'bg-blue-500/20' :
-                tab.color === 'green' ? 'bg-green-500/20' :
-                tab.color === 'amber' ? 'bg-amber-500/20' :
-                'bg-purple-500/20';
-              const textColor = tab.color === 'blue' ? 'text-blue-400' :
-                tab.color === 'green' ? 'text-green-400' :
-                tab.color === 'amber' ? 'text-amber-400' :
-                'text-purple-400';
+              const bgColor = tab.color === 'blue' ? 'bg-blue-50' :
+                tab.color === 'green' ? 'bg-emerald-50' :
+                tab.color === 'amber' ? 'bg-amber-50' :
+                'bg-purple-50';
+              const textColor = tab.color === 'blue' ? 'text-blue-600' :
+                tab.color === 'green' ? 'text-emerald-600' :
+                tab.color === 'amber' ? 'text-amber-600' :
+                'text-purple-600';
               return (
                 <button
                   key={tab.id}
@@ -790,7 +790,7 @@ export default function VisitDetailPage() {
                       <TabIcon className={`w-4 h-4 ${textColor}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-white">{tab.label}</h3>
+                      <h3 className="text-sm font-medium text-slate-900">{tab.label}</h3>
                       <p className="text-xs text-slate-500">
                         {tab.id === 'contract' 
                           ? (contract ? 'Generated' : 'Pending')
@@ -824,7 +824,7 @@ export default function VisitDetailPage() {
         />
         <div
           ref={panelRef}
-          className={`fixed top-0 right-0 h-full bg-dark-850 border-l border-slate-200 shadow-2xl z-40 flex flex-col ${
+          className={`fixed top-0 right-0 h-full bg-dark-850 border-l border-slate-200 shadow-lg z-40 flex flex-col ${
             !panelWidth ? 'w-[92vw] sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] max-w-[calc(100vw-4rem)]' : ''
           }`}
           style={panelWidth ? { width: `${panelWidth}px`, maxWidth: 'calc(100vw - 4rem)' } : undefined}
@@ -839,11 +839,11 @@ export default function VisitDetailPage() {
         {/* Panel Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
               <FileText className="w-4 h-4 text-primary-400" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-white">Document Preview</h3>
+              <h3 className="text-base font-semibold text-slate-900">Document Preview</h3>
               <p className="text-xs text-slate-500">Review generated content</p>
             </div>
           </div>
@@ -853,13 +853,13 @@ export default function VisitDetailPage() {
               className="p-2 hover:bg-slate-50 rounded-lg transition-colors group"
               title="Open in full view"
             >
-              <Maximize2 className="w-4 h-4 text-slate-500 group-hover:text-white" />
+              <Maximize2 className="w-4 h-4 text-slate-500 group-hover:text-slate-900" />
             </button>
             <button
               onClick={() => setSidebarOpen(false)}
               className="p-2 hover:bg-slate-50 rounded-lg transition-colors group"
             >
-              <X className="w-5 h-5 text-slate-500 group-hover:text-white" />
+              <X className="w-5 h-5 text-slate-500 group-hover:text-slate-900" />
             </button>
           </div>
         </div>
@@ -880,8 +880,8 @@ export default function VisitDetailPage() {
                 }}
                 className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg cursor-pointer select-none whitespace-nowrap flex-shrink-0 ${
                   isActive
-                    ? 'bg-primary-500/20 text-white border border-primary-500/30'
-                    : 'text-slate-500 hover:text-white hover:bg-slate-100 border border-transparent'
+                    ? 'bg-primary-50 text-white border border-primary-200'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-transparent'
                 }`}
               >
                 <TabIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${isActive ? 'text-primary-400' : ''}`} />
@@ -922,32 +922,32 @@ export default function VisitDetailPage() {
                 <div className="space-y-6">
                   {/* SOAP Notes */}
                   <div className="bg-white rounded-xl p-4 border border-slate-200">
-                    <h3 className="text-lg font-semibold text-white mb-4">Visit Notes (SOAP)</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-4">Visit Notes (SOAP)</h3>
                     
                     {note.structured_data && note.structured_data.subjective && (
                       <div className="mb-4">
-                        <h4 className="text-sm font-medium text-amber-400 mb-1">Subjective</h4>
+                        <h4 className="text-sm font-medium text-amber-600 mb-1">Subjective</h4>
                         <p className="text-slate-700 text-sm">{note.structured_data.subjective}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.objective && (
                       <div className="mb-4">
-                        <h4 className="text-sm font-medium text-blue-400 mb-1">Objective</h4>
+                        <h4 className="text-sm font-medium text-blue-600 mb-1">Objective</h4>
                         <p className="text-slate-700 text-sm">{note.structured_data.objective}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.assessment && (
                       <div className="mb-4">
-                        <h4 className="text-sm font-medium text-green-400 mb-1">Assessment</h4>
+                        <h4 className="text-sm font-medium text-emerald-600 mb-1">Assessment</h4>
                         <p className="text-slate-700 text-sm">{note.structured_data.assessment}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.plan && (
                       <div className="mb-4">
-                        <h4 className="text-sm font-medium text-purple-400 mb-1">Plan</h4>
+                        <h4 className="text-sm font-medium text-purple-600 mb-1">Plan</h4>
                         <p className="text-slate-700 text-sm">{note.structured_data.plan}</p>
                       </div>
                     )}
@@ -960,7 +960,7 @@ export default function VisitDetailPage() {
                   {/* Narrative */}
                   {note.narrative && (
                     <div className="bg-white rounded-xl p-4 border border-slate-200">
-                      <h3 className="text-lg font-semibold text-white mb-2">Narrative Summary</h3>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">Narrative Summary</h3>
                       <p className="text-slate-700 text-sm whitespace-pre-wrap">{note.narrative}</p>
                     </div>
                   )}
@@ -968,7 +968,7 @@ export default function VisitDetailPage() {
                   {/* Tasks Performed */}
                   {note.structured_data && Array.isArray(note.structured_data.tasks_performed) && note.structured_data.tasks_performed.length > 0 && (
                     <div className="bg-white rounded-xl p-4 border border-slate-200">
-                      <h3 className="text-lg font-semibold text-white mb-2">Tasks Performed</h3>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">Tasks Performed</h3>
                       <ul className="space-y-3">
                         {note.structured_data.tasks_performed.map((task, i) => (
                           <li key={i} className="bg-slate-100 rounded-lg p-3">
@@ -979,7 +979,7 @@ export default function VisitDetailPage() {
                                 <div className="flex items-center justify-between mb-1">
                                   <span className="font-medium text-white">{task.task || 'Task'}</span>
                                   {task.duration_minutes && (
-                                    <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">
+                                    <span className="text-xs text-amber-600 bg-amber-400/10 px-2 py-0.5 rounded">
                                       {task.duration_minutes} min
                                     </span>
                                   )}
@@ -1025,7 +1025,7 @@ export default function VisitDetailPage() {
       {/* Pop-out Full View Modal - z-[70] to render above sidebar nav (z-[60]) */}
       {popoutPanel && (
         <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4">
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-lg">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white flex-shrink-0">
               <div className="flex items-center gap-3">
@@ -1033,21 +1033,21 @@ export default function VisitDetailPage() {
                   const tab = panelTabs.find(t => t.id === popoutPanel);
                   if (!tab) return null;
                   const TabIcon = tab.icon;
-                  const bgColor = tab.color === 'blue' ? 'bg-blue-500/20' :
-                    tab.color === 'green' ? 'bg-green-500/20' :
-                    tab.color === 'amber' ? 'bg-amber-500/20' :
-                    'bg-purple-500/20';
-                  const txtColor = tab.color === 'blue' ? 'text-blue-400' :
-                    tab.color === 'green' ? 'text-green-400' :
-                    tab.color === 'amber' ? 'text-amber-400' :
-                    'text-purple-400';
+                  const bgColor = tab.color === 'blue' ? 'bg-blue-50' :
+                    tab.color === 'green' ? 'bg-emerald-50' :
+                    tab.color === 'amber' ? 'bg-amber-50' :
+                    'bg-purple-50';
+                  const txtColor = tab.color === 'blue' ? 'text-blue-600' :
+                    tab.color === 'green' ? 'text-emerald-600' :
+                    tab.color === 'amber' ? 'text-amber-600' :
+                    'text-purple-600';
                   return (
                     <>
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bgColor}`}>
                         <TabIcon className={`w-5 h-5 ${txtColor}`} />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-white">{tab.label}</h3>
+                        <h3 className="text-lg font-semibold text-slate-900">{tab.label}</h3>
                         <p className="text-xs text-slate-500">
                           {tab.id === 'contract' 
                             ? (contract ? 'Generated - Click Edit to modify' : 'Pending')
@@ -1070,8 +1070,8 @@ export default function VisitDetailPage() {
                       onClick={() => setPopoutPanel(tab.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
                         isActive
-                          ? 'bg-primary-500/20 text-white border border-primary-500/30'
-                          : 'text-slate-500 hover:text-white hover:bg-slate-50 border border-transparent'
+                          ? 'bg-primary-50 text-white border border-primary-200'
+                          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
                       }`}
                     >
                       <TabIcon className={`w-4 h-4 ${isActive ? 'text-primary-400' : ''}`} />
@@ -1084,7 +1084,7 @@ export default function VisitDetailPage() {
                   onClick={() => setPopoutPanel(null)}
                   className="p-2 hover:bg-slate-50 rounded-lg transition-colors group"
                 >
-                  <X className="w-5 h-5 text-slate-500 group-hover:text-white" />
+                  <X className="w-5 h-5 text-slate-500 group-hover:text-slate-900" />
                 </button>
               </div>
             </div>
@@ -1108,28 +1108,28 @@ export default function VisitDetailPage() {
                   {note && note.id ? (
                     <div className="space-y-6 max-w-4xl mx-auto">
                       <div className="bg-white rounded-xl p-6 border border-slate-200">
-                        <h3 className="text-xl font-semibold text-white mb-6">Visit Notes (SOAP)</h3>
+                        <h3 className="text-xl font-semibold text-slate-900 mb-6">Visit Notes (SOAP)</h3>
                         {note.structured_data && note.structured_data.subjective && (
                           <div className="mb-4">
-                            <h4 className="text-sm font-medium text-amber-400 mb-1">Subjective</h4>
+                            <h4 className="text-sm font-medium text-amber-600 mb-1">Subjective</h4>
                             <p className="text-slate-700 text-sm">{note.structured_data.subjective}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.objective && (
                           <div className="mb-4">
-                            <h4 className="text-sm font-medium text-blue-400 mb-1">Objective</h4>
+                            <h4 className="text-sm font-medium text-blue-600 mb-1">Objective</h4>
                             <p className="text-slate-700 text-sm">{note.structured_data.objective}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.assessment && (
                           <div className="mb-4">
-                            <h4 className="text-sm font-medium text-green-400 mb-1">Assessment</h4>
+                            <h4 className="text-sm font-medium text-emerald-600 mb-1">Assessment</h4>
                             <p className="text-slate-700 text-sm">{note.structured_data.assessment}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.plan && (
                           <div className="mb-4">
-                            <h4 className="text-sm font-medium text-purple-400 mb-1">Plan</h4>
+                            <h4 className="text-sm font-medium text-purple-600 mb-1">Plan</h4>
                             <p className="text-slate-700 text-sm">{note.structured_data.plan}</p>
                           </div>
                         )}
@@ -1139,13 +1139,13 @@ export default function VisitDetailPage() {
                       </div>
                       {note.narrative && (
                         <div className="bg-white rounded-xl p-6 border border-slate-200">
-                          <h3 className="text-xl font-semibold text-white mb-2">Narrative Summary</h3>
+                          <h3 className="text-xl font-semibold text-slate-900 mb-2">Narrative Summary</h3>
                           <p className="text-slate-700 text-sm whitespace-pre-wrap">{note.narrative}</p>
                         </div>
                       )}
                       {note.structured_data && Array.isArray(note.structured_data.tasks_performed) && note.structured_data.tasks_performed.length > 0 && (
                         <div className="bg-white rounded-xl p-6 border border-slate-200">
-                          <h3 className="text-xl font-semibold text-white mb-2">Tasks Performed</h3>
+                          <h3 className="text-xl font-semibold text-slate-900 mb-2">Tasks Performed</h3>
                           <ul className="space-y-3">
                             {note.structured_data.tasks_performed.map((task, i) => (
                               <li key={i} className="bg-slate-100 rounded-lg p-3">
@@ -1156,7 +1156,7 @@ export default function VisitDetailPage() {
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="font-medium text-white">{task.task || 'Task'}</span>
                                       {task.duration_minutes && (
-                                        <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">
+                                        <span className="text-xs text-amber-600 bg-amber-400/10 px-2 py-0.5 rounded">
                                           {task.duration_minutes} min
                                         </span>
                                       )}
@@ -1197,20 +1197,20 @@ export default function VisitDetailPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
-                <RotateCcw className="w-6 h-6 text-red-400" />
+              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+                <RotateCcw className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Restart Assessment</h2>
+                <h2 className="text-xl font-bold text-slate-900">Restart Assessment</h2>
                 <p className="text-slate-500 text-sm">This action cannot be undone</p>
               </div>
             </div>
             
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
+            <div className="bg-red-50 border border-red-500/20 rounded-lg p-4 mb-6">
               <p className="text-red-300 text-sm">
                 This will permanently delete:
               </p>
-              <ul className="mt-2 space-y-1 text-red-400 text-sm">
+              <ul className="mt-2 space-y-1 text-red-600 text-sm">
                 {hasAudio && <li>• Uploaded audio files</li>}
                 {transcript.length > 0 && <li>• {transcript.length} transcript segments</li>}
                 {billables.length > 0 && <li>• {billables.length} billable items</li>}

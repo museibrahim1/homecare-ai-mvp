@@ -31,10 +31,10 @@ type Appointment = {
 
 /* ─── Config ─── */
 const TYPE_CONFIG: Record<AppointmentType, { color: string; bg: string; border: string; label: string; icon: typeof Calendar }> = {
-  assessment: { color: 'text-blue-400', bg: 'bg-blue-500/15', border: 'border-l-blue-500', label: 'Assessment', icon: FileText },
-  review:     { color: 'text-green-400', bg: 'bg-green-500/15', border: 'border-l-green-500', label: 'Care Review', icon: Users },
-  meeting:    { color: 'text-purple-400', bg: 'bg-purple-500/15', border: 'border-l-purple-500', label: 'Meeting', icon: Video },
-  visit:      { color: 'text-orange-400', bg: 'bg-orange-500/15', border: 'border-l-orange-500', label: 'Home Visit', icon: MapPin },
+  assessment: { color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-l-blue-500', label: 'Assessment', icon: FileText },
+  review:     { color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-l-green-500', label: 'Care Review', icon: Users },
+  meeting:    { color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-l-purple-500', label: 'Meeting', icon: Video },
+  visit:      { color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-l-orange-500', label: 'Home Visit', icon: MapPin },
 };
 
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7am - 8pm
@@ -111,9 +111,9 @@ function OAuthHandler({ token, onConnected, onError }: { token: string | null; o
   }, [searchParams, token, onConnected, processing, onError]);
 
   if (processing) return (
-    <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-3">
-      <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
-      <span className="text-blue-400 text-sm">Connecting to Google Calendar...</span>
+    <div className="mb-4 p-3 bg-blue-50 border border-blue-500/20 rounded-xl flex items-center gap-3">
+      <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+      <span className="text-blue-600 text-sm">Connecting to Google Calendar...</span>
     </div>
   );
   return null;
@@ -139,14 +139,14 @@ function AppointmentForm({
   googleConnected: boolean;
   isEdit: boolean;
 }) {
-  const INPUT = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
+  const INPUT = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div className="relative bg-white border border-slate-200 rounded-2xl shadow-lg w-full max-w-lg overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-          <h2 className="text-base font-semibold text-white">{isEdit ? 'Edit Appointment' : 'New Appointment'}</h2>
-          <button onClick={onCancel} className="p-1.5 text-slate-500 hover:text-white hover:bg-slate-50 rounded-lg transition-colors">
+          <h2 className="text-base font-semibold text-slate-900">{isEdit ? 'Edit Appointment' : 'New Appointment'}</h2>
+          <button onClick={onCancel} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -190,14 +190,14 @@ function AppointmentForm({
             </div>
           </div>
           {googleConnected && (
-            <div className="flex items-center gap-2 text-xs text-green-400 bg-green-500/10 px-3 py-2 rounded-lg">
+            <div className="flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg">
               <Check className="w-3.5 h-3.5" />
               {isEdit ? 'Changes will sync to Google Calendar' : 'Will sync to Google Calendar'}
             </div>
           )}
         </div>
         <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-200">
-          <button onClick={onCancel} className="flex-1 px-4 py-2 text-sm text-slate-600 hover:text-white bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+          <button onClick={onCancel} className="flex-1 px-4 py-2 text-sm text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
           <button onClick={onSubmit} disabled={loading || !data.title.trim() || !data.client.trim()} className="flex-1 px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 disabled:bg-slate-100 disabled:text-slate-500 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? 'Saving...' : submitLabel}
@@ -277,12 +277,12 @@ function DayTimeline({
                     >
                       <div className="flex items-start justify-between gap-1">
                         <div className="min-w-0">
-                          <p className="text-xs font-medium text-white truncate leading-tight">{apt.title}</p>
+                          <p className="text-xs font-medium text-slate-900 truncate leading-tight">{apt.title}</p>
                           <p className="text-[10px] text-slate-500 truncate">{apt.client} &middot; {formatTime12(apt.time)}</p>
                         </div>
                         <button
                           onClick={(e) => { e.stopPropagation(); onDelete(apt); }}
-                          className="p-0.5 text-slate-300 hover:text-red-400 opacity-0 group-hover/apt:opacity-100 transition-all shrink-0"
+                          className="p-0.5 text-slate-300 hover:text-red-600 opacity-0 group-hover/apt:opacity-100 transition-all shrink-0"
                         >
                           {deleting === apt.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                         </button>
@@ -601,19 +601,19 @@ function ScheduleContent() {
 
       {/* Error */}
       {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2"><AlertCircle className="w-4 h-4 text-red-400" /><span className="text-red-400 text-sm">{error}</span></div>
-          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
+        <div className="mb-4 p-3 bg-red-50 border border-red-500/20 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-2"><AlertCircle className="w-4 h-4 text-red-600" /><span className="text-red-600 text-sm">{error}</span></div>
+          <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300"><X className="w-4 h-4" /></button>
         </div>
       )}
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Today', value: todayTotal, icon: Sun, color: 'text-amber-400', bg: 'bg-amber-500/15' },
-          { label: 'This Week', value: weekTotal, icon: Calendar, color: 'text-blue-400', bg: 'bg-blue-500/15' },
-          { label: 'Upcoming', value: upcomingCount, icon: Clock, color: 'text-green-400', bg: 'bg-green-500/15' },
-          { label: 'Google Sync', value: googleConnected ? 'On' : 'Off', icon: Link2, color: googleConnected ? 'text-green-400' : 'text-slate-500', bg: googleConnected ? 'bg-green-500/15' : 'bg-slate-100' },
+          { label: 'Today', value: todayTotal, icon: Sun, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'This Week', value: weekTotal, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Upcoming', value: upcomingCount, icon: Clock, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Google Sync', value: googleConnected ? 'On' : 'Off', icon: Link2, color: googleConnected ? 'text-emerald-600' : 'text-slate-500', bg: googleConnected ? 'bg-emerald-50' : 'bg-slate-100' },
         ].map((s, i) => (
           <div key={i} className="card p-3 lg:p-4 flex items-center gap-3" onClick={i === 3 ? () => setShowConnectModal(true) : undefined} role={i === 3 ? 'button' : undefined}>
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.bg}`}>
@@ -630,18 +630,18 @@ function ScheduleContent() {
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <button onClick={goToday} className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-white bg-slate-100 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors">
+          <button onClick={goToday} className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors">
             Today
           </button>
           <div className="flex items-center">
-            <button onClick={goPrev} className="p-1.5 text-slate-500 hover:text-white hover:bg-slate-50 rounded-l-lg transition-colors border border-slate-200">
+            <button onClick={goPrev} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-l-lg transition-colors border border-slate-200">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button onClick={goNext} className="p-1.5 text-slate-500 hover:text-white hover:bg-slate-50 rounded-r-lg transition-colors border border-slate-200 border-l-0">
+            <button onClick={goNext} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-r-lg transition-colors border border-slate-200 border-l-0">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-          <h2 className="text-sm lg:text-base font-semibold text-white ml-1">{dateLabel}</h2>
+          <h2 className="text-sm lg:text-base font-semibold text-slate-900 ml-1">{dateLabel}</h2>
         </div>
 
         <div className="flex items-center gap-2">
@@ -656,7 +656,7 @@ function ScheduleContent() {
                 key={v.key}
                 onClick={() => setView(v.key)}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                  view === v.key ? 'bg-slate-50 text-white' : 'text-slate-500 hover:text-white'
+                  view === v.key ? 'bg-slate-50 text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <v.icon className="w-3.5 h-3.5" />
@@ -667,7 +667,7 @@ function ScheduleContent() {
 
           {/* Sync button */}
           {googleConnected && (
-            <button onClick={handleSyncNow} disabled={syncing} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-400 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 rounded-lg transition-colors disabled:opacity-50">
+            <button onClick={handleSyncNow} disabled={syncing} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 border border-green-500/20 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50">
               {syncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
               Sync
             </button>
@@ -701,7 +701,7 @@ function ScheduleContent() {
 
           {/* Sidebar: upcoming */}
           <div className="card p-4 lg:p-5">
-            <h3 className="text-sm font-semibold text-white mb-3">Upcoming</h3>
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Upcoming</h3>
             <div className="space-y-2 max-h-[calc(100vh-380px)] overflow-y-auto">
               {appointments
                 .filter(a => a.date >= formatLocalDate(new Date()))
@@ -718,7 +718,7 @@ function ScheduleContent() {
                       className={`p-2.5 rounded-lg border-l-2 ${cfg.border} bg-slate-50/30 hover:bg-slate-100 cursor-pointer transition-colors`}
                     >
                       <div className="flex items-center justify-between mb-0.5">
-                        <p className="text-xs font-medium text-white truncate">{apt.title}</p>
+                        <p className="text-xs font-medium text-slate-900 truncate">{apt.title}</p>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.color}`}>{cfg.label}</span>
                       </div>
                       <p className="text-[10px] text-slate-500">
@@ -761,7 +761,7 @@ function ScheduleContent() {
                   onClick={() => day && (() => { setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day)); setView('day'); })()}
                   className={`min-h-[80px] p-1.5 text-left transition-colors rounded-lg ${
                     !day ? '' :
-                    isSelected ? 'bg-primary-500/10 ring-1 ring-primary-500/30' :
+                    isSelected ? 'bg-primary-50 ring-1 ring-primary-500/30' :
                     today ? 'bg-primary-500/5' :
                     'hover:bg-slate-50/30'
                   }`}
@@ -816,19 +816,19 @@ function ScheduleContent() {
       {showConnectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowConnectModal(false)} />
-          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-lg w-full max-w-sm overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-white">Google Calendar</h2>
-              <button onClick={() => setShowConnectModal(false)} className="p-1.5 text-slate-500 hover:text-white hover:bg-slate-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
+              <h2 className="text-base font-semibold text-slate-900">Google Calendar</h2>
+              <button onClick={() => setShowConnectModal(false)} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5">
               {googleConnected ? (
                 <>
-                  <div className="flex items-center gap-3 mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
-                    <Check className="w-5 h-5 text-green-400" />
-                    <div><p className="text-white text-sm font-medium">Connected</p><p className="text-[11px] text-slate-500">Events sync automatically</p></div>
+                  <div className="flex items-center gap-3 mb-4 p-3 bg-emerald-50 border border-green-500/20 rounded-xl">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                    <div><p className="text-slate-900 text-sm font-medium">Connected</p><p className="text-[11px] text-slate-500">Events sync automatically</p></div>
                   </div>
-                  <button onClick={handleDisconnectGoogle} className="w-full px-4 py-2 text-sm bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors">Disconnect</button>
+                  <button onClick={handleDisconnectGoogle} className="w-full px-4 py-2 text-sm bg-red-50 text-red-600 border border-red-500/20 rounded-lg hover:bg-red-50 transition-colors">Disconnect</button>
                 </>
               ) : (
                 <>

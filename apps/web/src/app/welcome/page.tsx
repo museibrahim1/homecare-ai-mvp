@@ -150,7 +150,7 @@ export default function WelcomePage() {
                 <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-2xl font-bold text-slate-900">
                   Welcome to PalmCare AI
                 </h1>
                 <p className="text-slate-500">
@@ -160,7 +160,7 @@ export default function WelcomePage() {
             </div>
             <Link
               href="/visits"
-              className="text-slate-500 hover:text-white transition flex items-center gap-2"
+              className="text-slate-500 hover:text-slate-900 transition flex items-center gap-2"
             >
               Skip to Dashboard
               <ArrowRight className="w-4 h-4" />
@@ -171,17 +171,17 @@ export default function WelcomePage() {
 
       <main className="max-w-6xl mx-auto px-6 py-12">
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
         {/* Progress */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-white">Getting Started</h2>
+            <h2 className="text-lg font-semibold text-slate-900">Getting Started</h2>
             <span className="text-slate-500 text-sm">{completedCount} of {steps.length} completed</span>
           </div>
           <div className="h-2 bg-slate-50 rounded-full overflow-hidden">
@@ -204,9 +204,9 @@ export default function WelcomePage() {
                 key={step.id}
                 className={`relative p-6 rounded-2xl border transition-all ${
                   isCompleted
-                    ? 'bg-green-500/10 border-green-500/30'
+                    ? 'bg-emerald-50 border-emerald-200'
                     : isNext
-                    ? 'bg-primary-500/10 border-primary-500/50 ring-2 ring-primary-500/30'
+                    ? 'bg-primary-50 border-primary-500/50 ring-2 ring-primary-500/30'
                     : 'bg-white border-slate-200'
                 }`}
               >
@@ -224,14 +224,14 @@ export default function WelcomePage() {
                 <div className="flex items-start gap-4">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     isCompleted
-                      ? 'bg-green-500/20'
+                      ? 'bg-emerald-50'
                       : isNext
-                      ? 'bg-primary-500/20'
+                      ? 'bg-primary-50'
                       : 'bg-slate-50'
                   }`}>
                     <StepIcon className={`w-6 h-6 ${
                       isCompleted
-                        ? 'text-green-400'
+                        ? 'text-emerald-600'
                         : isNext
                         ? 'text-primary-400'
                         : 'text-slate-500'
@@ -239,7 +239,7 @@ export default function WelcomePage() {
                   </div>
                   <div className="flex-1">
                     <h3 className={`font-semibold mb-1 ${
-                      isCompleted ? 'text-green-400' : 'text-white'
+                      isCompleted ? 'text-emerald-600' : 'text-white'
                     }`}>
                       {step.title}
                       {isCompleted && <span className="ml-2 text-xs">Completed</span>}
@@ -249,10 +249,10 @@ export default function WelcomePage() {
                       href={step.href}
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
                         isCompleted
-                          ? 'bg-slate-50 text-slate-600 hover:text-white'
+                          ? 'bg-slate-50 text-slate-600 hover:text-slate-900'
                           : isNext
                           ? 'bg-primary-500 text-white hover:bg-primary-600'
-                          : 'bg-slate-50 text-slate-500 hover:text-white'
+                          : 'bg-slate-50 text-slate-500 hover:text-slate-900'
                       }`}
                     >
                       {isCompleted ? 'Review' : step.action}
@@ -266,10 +266,10 @@ export default function WelcomePage() {
         </div>
 
         {/* Quick Start Video/Demo Section */}
-        <div className="bg-gradient-to-r from-primary-500/10 to-purple-500/10 rounded-2xl border border-primary-500/30 p-8 mb-12">
+        <div className="bg-gradient-to-r from-primary-500/10 to-purple-500/10 rounded-2xl border border-primary-200 p-8 mb-12">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-white mb-3">
+              <h2 className="text-2xl font-bold text-slate-900 mb-3">
                 See It In Action
               </h2>
               <p className="text-slate-600 mb-6">
@@ -293,7 +293,7 @@ export default function WelcomePage() {
             </div>
             <div className="w-full md:w-80 aspect-video bg-white rounded-xl flex items-center justify-center border border-slate-200">
               <div className="text-center">
-                <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Sparkles className="w-8 h-8 text-primary-400" />
                 </div>
                 <p className="text-slate-500 text-sm">AI-Powered Assessment</p>
@@ -304,7 +304,7 @@ export default function WelcomePage() {
 
         {/* Feature Highlights */}
         <div className="mb-12">
-          <h2 className="text-xl font-bold text-white mb-6">What You Can Do</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-6">What You Can Do</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
@@ -341,10 +341,10 @@ export default function WelcomePage() {
               const FeatureIcon = feature.icon;
               return (
                 <div key={feature.title} className="bg-white rounded-xl p-5 border border-slate-200">
-                  <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center mb-3">
+                  <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center mb-3">
                     <FeatureIcon className="w-5 h-5 text-primary-400" />
                   </div>
-                  <h3 className="text-white font-medium mb-1">{feature.title}</h3>
+                  <h3 className="text-slate-900 font-medium mb-1">{feature.title}</h3>
                   <p className="text-slate-500 text-sm">{feature.description}</p>
                 </div>
               );
@@ -354,7 +354,7 @@ export default function WelcomePage() {
 
         {/* Help Section */}
         <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
-          <h2 className="text-xl font-bold text-white mb-2">Need Help?</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Need Help?</h2>
           <p className="text-slate-500 mb-6">
             Our team is here to help you get started. Reach out anytime.
           </p>

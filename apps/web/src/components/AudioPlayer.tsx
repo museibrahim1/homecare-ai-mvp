@@ -179,7 +179,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
       <div className="flex items-center justify-center gap-4">
         <button
           onClick={() => skip(-10)}
-          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-white"
+          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-slate-900"
           title="Back 10 seconds"
         >
           <SkipBack className="w-5 h-5" />
@@ -198,7 +198,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
 
         <button
           onClick={() => skip(10)}
-          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-white"
+          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-slate-900"
           title="Forward 10 seconds"
         >
           <SkipForward className="w-5 h-5" />
@@ -208,7 +208,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
 
         <button 
           onClick={toggleMute}
-          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-white"
+          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-slate-900"
         >
           {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
         </button>

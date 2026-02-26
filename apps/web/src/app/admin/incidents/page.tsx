@@ -41,17 +41,17 @@ const SERVICES = [
 ];
 
 const STATUSES = [
-  { value: 'investigating', label: 'Investigating', color: 'text-red-400 bg-red-500/10' },
-  { value: 'identified', label: 'Identified', color: 'text-orange-400 bg-orange-500/10' },
-  { value: 'monitoring', label: 'Monitoring', color: 'text-blue-400 bg-blue-500/10' },
-  { value: 'resolved', label: 'Resolved', color: 'text-green-400 bg-green-500/10' },
+  { value: 'investigating', label: 'Investigating', color: 'text-red-600 bg-red-50' },
+  { value: 'identified', label: 'Identified', color: 'text-orange-600 bg-orange-50' },
+  { value: 'monitoring', label: 'Monitoring', color: 'text-blue-600 bg-blue-50' },
+  { value: 'resolved', label: 'Resolved', color: 'text-emerald-600 bg-emerald-50' },
 ];
 
 const IMPACTS = [
-  { value: 'minor', label: 'Minor', color: 'text-yellow-400' },
-  { value: 'major', label: 'Major', color: 'text-orange-400' },
-  { value: 'critical', label: 'Critical', color: 'text-red-400' },
-  { value: 'maintenance', label: 'Maintenance', color: 'text-blue-400' },
+  { value: 'minor', label: 'Minor', color: 'text-amber-600' },
+  { value: 'major', label: 'Major', color: 'text-orange-600' },
+  { value: 'critical', label: 'Critical', color: 'text-red-600' },
+  { value: 'maintenance', label: 'Maintenance', color: 'text-blue-600' },
 ];
 
 function formatDate(dateStr: string) {
@@ -217,10 +217,10 @@ export default function AdminIncidentsPage() {
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-5xl mx-auto">
         {/* HIPAA Notice */}
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3">
-          <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-blue-400 font-medium">Incident Management</p>
+            <p className="text-blue-600 font-medium">Incident Management</p>
             <p className="text-blue-300/70 text-sm mt-1">
               Create and manage incidents that appear on the public status page at{' '}
               <Link href="/status" className="underline hover:text-blue-200" target="_blank">/status</Link>.
@@ -235,7 +235,7 @@ export default function AdminIncidentsPage() {
               <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">Status & Incidents</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Status & Incidents</h1>
               <p className="text-slate-500 mt-1">Manage the public status page</p>
             </div>
           </div>
@@ -262,7 +262,7 @@ export default function AdminIncidentsPage() {
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-xl border border-slate-200 p-4">
             <p className="text-slate-500 text-sm">Active Incidents</p>
-            <p className={`text-2xl font-bold mt-1 ${activeCount > 0 ? 'text-orange-400' : 'text-green-400'}`}>
+            <p className={`text-2xl font-bold mt-1 ${activeCount > 0 ? 'text-orange-600' : 'text-emerald-600'}`}>
               {activeCount}
             </p>
           </div>
@@ -277,18 +277,18 @@ export default function AdminIncidentsPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3">
-            <XCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-400 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 text-sm underline">Dismiss</button>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+            <XCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <p className="text-red-600 text-sm flex-1">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
           </div>
         )}
 
         {/* Create Incident Form */}
         {showCreate && (
-          <div className="mb-8 bg-white rounded-xl border border-orange-500/30 p-6">
-            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-orange-400" />
+          <div className="mb-8 bg-white rounded-xl border border-orange-200 p-6">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-orange-600" />
               Report New Incident
             </h2>
             <div className="space-y-4">
@@ -372,8 +372,8 @@ export default function AdminIncidentsPage() {
             </div>
           ) : incidents.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
-              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-white mb-2">No Incidents</h3>
+              <CheckCircle className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-slate-900 mb-2">No Incidents</h3>
               <p className="text-slate-500">All systems are operational. No incidents in the last 90 days.</p>
             </div>
           ) : (
@@ -386,7 +386,7 @@ export default function AdminIncidentsPage() {
               return (
                 <div
                   key={inc.id}
-                  className={`bg-white rounded-xl border ${isActive ? 'border-orange-500/30' : 'border-slate-200'} overflow-hidden`}
+                  className={`bg-white rounded-xl border ${isActive ? 'border-orange-200' : 'border-slate-200'} overflow-hidden`}
                 >
                   {/* Header row */}
                   <div
@@ -399,7 +399,7 @@ export default function AdminIncidentsPage() {
                       }`} />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-white font-medium truncate">{inc.title}</span>
+                          <span className="text-slate-900 font-medium truncate">{inc.title}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusConf.color}`}>
                             {statusConf.label}
                           </span>
@@ -415,7 +415,7 @@ export default function AdminIncidentsPage() {
                     <div className="flex items-center gap-2 ml-3 flex-shrink-0">
                       <button
                         onClick={e => { e.stopPropagation(); handleDelete(inc.id); }}
-                        className="p-1.5 hover:bg-red-500/20 rounded-lg transition text-slate-400 hover:text-red-400"
+                        className="p-1.5 hover:bg-red-50 rounded-lg transition text-slate-400 hover:text-red-600"
                         aria-label="Delete incident"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -461,7 +461,7 @@ export default function AdminIncidentsPage() {
                       {/* Add update form */}
                       {inc.status !== 'resolved' && (
                         <div className="bg-slate-100 rounded-lg p-4">
-                          <h4 className="text-sm font-medium text-white mb-3">Post Update</h4>
+                          <h4 className="text-sm font-medium text-slate-900 mb-3">Post Update</h4>
                           <div className="flex gap-3 mb-3">
                             <select
                               value={updateForm[inc.id]?.status || 'monitoring'}
@@ -469,7 +469,7 @@ export default function AdminIncidentsPage() {
                                 ...prev,
                                 [inc.id]: { ...prev[inc.id], status: e.target.value, message: prev[inc.id]?.message || '' },
                               }))}
-                              className="px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
+                              className="px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:border-primary-500"
                             >
                               {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                             </select>

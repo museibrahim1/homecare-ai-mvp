@@ -51,12 +51,12 @@ const DOCUMENT_TYPES = [
 ];
 
 const STATUS_CONFIG: Record<string, { color: string; icon: any; label: string }> = {
-  pending: { color: 'text-yellow-400', icon: Clock, label: 'Pending' },
-  sos_verified: { color: 'text-blue-400', icon: CheckCircle2, label: 'SOS Verified' },
-  documents_submitted: { color: 'text-purple-400', icon: FileCheck, label: 'Documents Submitted' },
-  approved: { color: 'text-green-400', icon: CheckCircle2, label: 'Approved' },
-  rejected: { color: 'text-red-400', icon: XCircle, label: 'Rejected' },
-  suspended: { color: 'text-orange-400', icon: AlertCircle, label: 'Suspended' },
+  pending: { color: 'text-amber-600', icon: Clock, label: 'Pending' },
+  sos_verified: { color: 'text-blue-600', icon: CheckCircle2, label: 'SOS Verified' },
+  documents_submitted: { color: 'text-purple-600', icon: FileCheck, label: 'Documents Submitted' },
+  approved: { color: 'text-emerald-600', icon: CheckCircle2, label: 'Approved' },
+  rejected: { color: 'text-red-600', icon: XCircle, label: 'Rejected' },
+  suspended: { color: 'text-orange-600', icon: AlertCircle, label: 'Suspended' },
 };
 
 export default function VerificationStatusPage() {
@@ -160,8 +160,8 @@ export default function VerificationStatusPage() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Business Not Found</h2>
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">Business Not Found</h2>
           <p className="text-slate-500 mb-4">The business ID is invalid or has been removed.</p>
           <Link href="/#book-demo" className="text-primary-400 hover:underline">
             Schedule a demo
@@ -183,11 +183,11 @@ export default function VerificationStatusPage() {
             <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-semibold text-white">PalmCare AI</span>
+            <span className="text-lg font-semibold text-slate-900">PalmCare AI</span>
           </Link>
           <button
             onClick={() => { loadStatus(); loadDocuments(); }}
-            className="flex items-center gap-2 text-slate-600 hover:text-white text-sm"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 text-sm"
           >
             <RefreshCw className="w-4 h-4" />
             Refresh Status
@@ -197,9 +197,9 @@ export default function VerificationStatusPage() {
 
       <main className="max-w-4xl mx-auto px-6 py-10">
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-            <span className="text-red-400">{error}</span>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+            <span className="text-red-600">{error}</span>
           </div>
         )}
 
@@ -207,7 +207,7 @@ export default function VerificationStatusPage() {
         <div className="bg-white border border-slate-200 rounded-xl p-6 mb-8">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white mb-1">{status.business_name}</h1>
+              <h1 className="text-2xl font-bold text-slate-900 mb-1">{status.business_name}</h1>
               <p className="text-slate-500">Business ID: {status.business_id}</p>
             </div>
             <div className={`flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 ${statusConfig.color}`}>
@@ -249,7 +249,7 @@ export default function VerificationStatusPage() {
             ].map((step, idx) => (
               <div key={step.key} className="text-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 ${
-                  step.complete ? 'bg-green-500/20 text-green-400' : 'bg-slate-50 text-slate-400'
+                  step.complete ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'
                 }`}>
                   {step.complete ? (
                     <CheckCircle2 className="w-5 h-5" />
@@ -257,7 +257,7 @@ export default function VerificationStatusPage() {
                     <span className="text-sm font-medium">{idx + 1}</span>
                   )}
                 </div>
-                <span className={`text-xs ${step.complete ? 'text-green-400' : 'text-slate-400'}`}>
+                <span className={`text-xs ${step.complete ? 'text-emerald-600' : 'text-slate-400'}`}>
                   {step.label}
                 </span>
               </div>
@@ -266,8 +266,8 @@ export default function VerificationStatusPage() {
 
           {/* Rejection Reason */}
           {status.verification_status === 'rejected' && status.rejection_reason && (
-            <div className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <h3 className="font-semibold text-red-400 mb-2">Rejection Reason:</h3>
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <h3 className="font-semibold text-red-600 mb-2">Rejection Reason:</h3>
               <p className="text-slate-600">{status.rejection_reason}</p>
             </div>
           )}
@@ -286,7 +286,7 @@ export default function VerificationStatusPage() {
         {/* Documents Section */}
         {status.verification_status !== 'approved' && (
           <div className="bg-white border border-slate-200 rounded-xl p-6">
-            <h2 className="text-xl font-bold text-white mb-2">Required Documents</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Required Documents</h2>
             <p className="text-slate-500 mb-6">
               Upload the following documents to complete your verification.
             </p>
@@ -303,30 +303,30 @@ export default function VerificationStatusPage() {
                     key={docType.value}
                     className={`p-4 rounded-lg border ${
                       uploadedDoc 
-                        ? 'bg-green-500/10 border-green-500/30' 
+                        ? 'bg-emerald-50 border-emerald-200' 
                         : isMissing 
-                          ? 'bg-slate-50 border-yellow-500/30' 
+                          ? 'bg-slate-50 border-amber-200' 
                           : 'bg-slate-50 border-slate-200'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          uploadedDoc ? 'bg-green-500/20' : 'bg-slate-100'
+                          uploadedDoc ? 'bg-emerald-50' : 'bg-slate-100'
                         }`}>
-                          <DocIcon className={`w-5 h-5 ${uploadedDoc ? 'text-green-400' : 'text-slate-500'}`} />
+                          <DocIcon className={`w-5 h-5 ${uploadedDoc ? 'text-emerald-600' : 'text-slate-500'}`} />
                         </div>
                         <div>
                           <p className="font-medium text-white flex items-center gap-2">
                             {docType.label}
                             {isRequired && !uploadedDoc && (
-                              <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded">
+                              <span className="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">
                                 Required
                               </span>
                             )}
                           </p>
                           {uploadedDoc ? (
-                            <p className="text-sm text-green-400">
+                            <p className="text-sm text-emerald-600">
                               {uploadedDoc.file_name}
                               {uploadedDoc.is_verified && ' • Verified'}
                             </p>
@@ -382,9 +382,9 @@ export default function VerificationStatusPage() {
 
         {/* Approved Message */}
         {status.verification_status === 'approved' && (
-          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-8 text-center">
-            <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">Your Business is Approved!</h2>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-8 text-center">
+            <CheckCircle2 className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Your Business is Approved!</h2>
             <p className="text-slate-600 mb-6">
               You can now access all features of PalmCare AI.
             </p>

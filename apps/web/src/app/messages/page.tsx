@@ -155,7 +155,7 @@ export default function MessagesPage() {
         <div className="w-80 border-r border-slate-200 flex flex-col">
           <div className="p-4 border-b border-slate-200">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-bold text-white">Messages</h1>
+              <h1 className="text-xl font-bold text-slate-900">Messages</h1>
               <button 
                 onClick={() => setShowNewConvoModal(true)}
                 className="p-2 hover:bg-white rounded-lg transition-colors"
@@ -193,7 +193,7 @@ export default function MessagesPage() {
                     selectedConversation?.id === conv.id ? 'bg-white' : ''
                   }`}
                 >
-                  <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
                     <span className="text-primary-400 font-medium">{conv.avatar}</span>
                   </div>
                   <div className="flex-1 min-w-0 text-left">
@@ -205,7 +205,7 @@ export default function MessagesPage() {
                   </div>
                   {conv.unread > 0 && (
                     <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
-                      <span className="text-xs text-white font-medium">{conv.unread}</span>
+                      <span className="text-xs text-slate-900 font-medium">{conv.unread}</span>
                     </div>
                   )}
                 </button>
@@ -221,12 +221,12 @@ export default function MessagesPage() {
               {/* Chat Header */}
               <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                     <span className="text-primary-400 font-medium">{selectedConversation.avatar}</span>
                   </div>
                   <div>
                     <h2 className="font-medium text-white">{selectedConversation.name}</h2>
-                    <span className="text-xs text-green-400">Online</span>
+                    <span className="text-xs text-emerald-600">Online</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -312,7 +312,7 @@ export default function MessagesPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md max-h-[70vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">New Conversation</h2>
+                <h2 className="text-xl font-bold text-slate-900">New Conversation</h2>
                 <button onClick={() => setShowNewConvoModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
@@ -333,7 +333,7 @@ export default function MessagesPage() {
                       onClick={() => handleStartConversation(client)}
                       className="w-full flex items-center gap-3 p-3 bg-slate-100 hover:bg-slate-50 rounded-lg transition-colors"
                     >
-                      <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                         <span className="text-primary-400 font-medium">
                           {client.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || '?'}
                         </span>

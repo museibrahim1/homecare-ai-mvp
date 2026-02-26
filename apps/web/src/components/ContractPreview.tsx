@@ -770,15 +770,15 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4 border-b border-slate-200 bg-white print:hidden flex-shrink-0">
         <div className="flex items-center gap-3">
           {agency.contract_template_name && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-lg">
-              <FileText className="w-4 h-4 text-green-400" />
-              <span className="text-green-400 text-xs">{agency.contract_template_name}</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <FileText className="w-4 h-4 text-emerald-600" />
+              <span className="text-emerald-600 text-xs">{agency.contract_template_name}</span>
             </div>
           )}
           {savedMessage && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/20 rounded-lg animate-pulse">
-              <Check className="w-4 h-4 text-green-400" />
-              <span className="text-green-400 text-sm">Saved!</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-lg animate-pulse">
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span className="text-emerald-600 text-sm">Saved!</span>
             </div>
           )}
         </div>
@@ -852,8 +852,8 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             onClick={() => setDocumentType('template')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               documentType === 'template'
-                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                : 'text-slate-500 hover:text-white hover:bg-slate-50 border border-transparent'
+                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
             }`}
           >
             {templatePreview.template_name || 'My Template'}
@@ -863,8 +863,8 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           onClick={() => setDocumentType('proposal')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             documentType === 'proposal'
-              ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-              : 'text-slate-500 hover:text-white hover:bg-slate-50 border border-transparent'
+              ? 'bg-primary-50 text-primary-400 border border-primary-200'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
           }`}
         >
           Proposal
@@ -873,8 +873,8 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           onClick={() => setDocumentType('agreement')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             documentType === 'agreement'
-              ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-              : 'text-slate-500 hover:text-white hover:bg-slate-50 border border-transparent'
+              ? 'bg-primary-50 text-primary-400 border border-primary-200'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
           }`}
         >
           Service Agreement
@@ -885,7 +885,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       </div>
 
       {error && (
-        <div className="mx-4 mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
+        <div className="mx-4 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600 text-sm">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
@@ -974,16 +974,16 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                                   ) : field.is_mapped ? (
                                     <span className="text-amber-500 italic">No data in database</span>
                                   ) : (
-                                    <span className="text-red-400 italic">Unmapped field</span>
+                                    <span className="text-red-600 italic">Unmapped field</span>
                                   )}
                                 </td>
                                 <td className="py-2 px-1 w-6">
                                   {field.value ? (
                                     <span className="text-green-500 text-xs" title="Populated">&#10003;</span>
                                   ) : field.is_mapped ? (
-                                    <span className="text-amber-400 text-xs" title="Mapped but empty">&#9888;</span>
+                                    <span className="text-amber-600 text-xs" title="Mapped but empty">&#9888;</span>
                                   ) : (
-                                    <span className="text-red-400 text-xs" title="Not mapped">&#10007;</span>
+                                    <span className="text-red-600 text-xs" title="Not mapped">&#10007;</span>
                                   )}
                                 </td>
                               </tr>
@@ -1487,7 +1487,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                             const newServices = editData.services.filter((_: any, i: number) => i !== idx);
                             setEditData({ ...editData, services: newServices });
                           }}
-                          className="text-red-400 hover:text-red-600 text-sm mt-1"
+                          className="text-red-600 hover:text-red-600 text-sm mt-1"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -1687,11 +1687,11 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-green-400" />
+                <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Email Contract</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">Email Contract</h3>
                   <p className="text-xs text-slate-500">Send the contract PDF as an attachment</p>
                 </div>
               </div>
@@ -1707,10 +1707,10 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             <div className="p-4 space-y-4">
               {emailSent ? (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Check className="w-8 h-8 text-green-400" />
+                  <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Check className="w-8 h-8 text-emerald-600" />
                   </div>
-                  <h4 className="text-lg font-semibold text-white mb-2">Email Sent!</h4>
+                  <h4 className="text-lg font-semibold text-slate-900 mb-2">Email Sent!</h4>
                   <p className="text-slate-500">The contract has been sent successfully.</p>
                 </div>
               ) : (
@@ -1771,13 +1771,13 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   </div>
 
                   <div className="flex items-center gap-2 p-3 bg-slate-100 rounded-lg">
-                    <FileText className="w-5 h-5 text-purple-400" />
+                    <FileText className="w-5 h-5 text-purple-600" />
                     <span className="text-slate-600 text-sm">Service_Agreement_{(client?.full_name || 'Client').replace(/ /g, '_')}.pdf</span>
                     <span className="text-slate-400 text-xs ml-auto">Attached</span>
                   </div>
 
                   {error && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600 text-sm">
                       <AlertCircle className="w-4 h-4 flex-shrink-0" />
                       {error}
                     </div>
