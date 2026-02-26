@@ -2,6 +2,9 @@
 SmartNotes Router
 
 CRUD for notes, tasks, and reminders with AI task extraction.
+
+IMPORTANT: /tasks/* and /reminders/* routes MUST be declared before
+/{note_id} to prevent FastAPI from matching "tasks"/"reminders" as a UUID.
 """
 
 import logging
@@ -88,7 +91,7 @@ Note content:
     return {"summary": None, "tasks": [], "reminders": []}
 
 
-# ─── Notes CRUD ───
+# ─── Notes: collection endpoints (no path params) ───
 
 @router.post("", response_model=SmartNoteResponse, status_code=status.HTTP_201_CREATED)
 async def create_note(
@@ -182,6 +185,226 @@ async def list_notes(
 
     return query.order_by(SmartNote.is_pinned.desc(), SmartNote.updated_at.desc()).all()
 
+
+# ─── Tasks CRUD (must be before /{note_id}) ───
+
+@router.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED, tags=["Tasks"])
+async def create_task(
+    task_in: TaskCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = Task(
+        user_id=current_user.id,
+        smart_note_id=task_in.smart_note_id,
+        title=task_in.title,
+        description=task_in.description,
+        status=task_in.status or "todo",
+        priority=task_in.priority or "medium",
+        due_date=task_in.due_date,
+        related_client_id=task_in.related_client_id,
+        assigned_to_id=task_in.assigned_to_id,
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    return task
+
+
+@router.get("/tasks", response_model=List[TaskResponse], tags=["Tasks"])
+async def list_tasks(
+    task_status: Optional[str] = Query(None, alias="status"),
+    priority: Optional[str] = None,
+    due_before: Optional[str] = None,
+    note_id: Optional[UUID] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(Task).filter(Task.user_id == current_user.id)
+    if task_status:
+        query = query.filter(Task.status == task_status)
+    if priority:
+        query = query.filter(Task.priority == priority)
+    if due_before:
+        try:
+            cutoff = datetime.strptime(due_before, "%Y-%m-%d").date()
+            query = query.filter(Task.due_date <= cutoff)
+        except ValueError:
+            pass
+    if note_id:
+        query = query.filter(Task.smart_note_id == note_id)
+
+    return query.order_by(Task.due_date.asc().nullslast(), Task.created_at.desc()).all()
+
+
+@router.put("/tasks/{task_id}", response_model=TaskResponse, tags=["Tasks"])
+async def update_task(
+    task_id: UUID,
+    task_in: TaskUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    update_data = task_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(task, field, value)
+
+    db.commit()
+    db.refresh(task)
+    return task
+
+
+@router.put("/tasks/{task_id}/complete", response_model=TaskResponse, tags=["Tasks"])
+async def complete_task(
+    task_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    task.status = "done"
+    task.completed_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(task)
+    return task
+
+
+@router.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Tasks"])
+async def delete_task(
+    task_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    db.delete(task)
+    db.commit()
+
+
+# ─── Reminders CRUD (must be before /{note_id}) ───
+
+@router.post("/reminders", response_model=ReminderResponse, status_code=status.HTTP_201_CREATED, tags=["Reminders"])
+async def create_reminder(
+    rem_in: ReminderCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    reminder = Reminder(
+        user_id=current_user.id,
+        task_id=rem_in.task_id,
+        smart_note_id=rem_in.smart_note_id,
+        title=rem_in.title,
+        description=rem_in.description,
+        remind_at=rem_in.remind_at,
+        reminder_type=rem_in.reminder_type or "one_time",
+    )
+    db.add(reminder)
+    db.commit()
+    db.refresh(reminder)
+    return reminder
+
+
+@router.get("/reminders", response_model=List[ReminderResponse], tags=["Reminders"])
+async def list_reminders(
+    upcoming: Optional[bool] = None,
+    dismissed: Optional[bool] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(Reminder).filter(Reminder.user_id == current_user.id)
+
+    if upcoming:
+        query = query.filter(
+            Reminder.is_dismissed == False,
+            Reminder.remind_at <= datetime.now(timezone.utc) + timedelta(hours=1),
+        )
+    if dismissed is not None:
+        query = query.filter(Reminder.is_dismissed == dismissed)
+
+    return query.order_by(Reminder.remind_at.asc()).all()
+
+
+@router.put("/reminders/{reminder_id}/dismiss", response_model=ReminderResponse, tags=["Reminders"])
+async def dismiss_reminder(
+    reminder_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    reminder = db.query(Reminder).filter(
+        Reminder.id == reminder_id,
+        Reminder.user_id == current_user.id,
+    ).first()
+    if not reminder:
+        raise HTTPException(status_code=404, detail="Reminder not found")
+
+    reminder.is_dismissed = True
+    db.commit()
+    db.refresh(reminder)
+    return reminder
+
+
+@router.delete("/reminders/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Reminders"])
+async def delete_reminder(
+    reminder_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    reminder = db.query(Reminder).filter(
+        Reminder.id == reminder_id,
+        Reminder.user_id == current_user.id,
+    ).first()
+    if not reminder:
+        raise HTTPException(status_code=404, detail="Reminder not found")
+    db.delete(reminder)
+    db.commit()
+
+
+@router.post("/reminders/send-due-notifications", tags=["Reminders"])
+async def send_due_reminder_notifications(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Send email notifications for reminders due within the next hour. Idempotent."""
+    now = datetime.now(timezone.utc)
+    due_reminders = db.query(Reminder).filter(
+        Reminder.user_id == current_user.id,
+        Reminder.is_dismissed == False,
+        Reminder.notification_sent == False,
+        Reminder.remind_at <= now + timedelta(hours=1),
+    ).all()
+
+    sent_count = 0
+    try:
+        from app.services.email import get_email_service
+        email_svc = get_email_service()
+    except Exception:
+        email_svc = None
+
+    for rem in due_reminders:
+        rem.notification_sent = True
+        if email_svc and current_user.email:
+            try:
+                email_svc.send_follow_up_reminder(
+                    user_email=current_user.email,
+                    client_name=rem.title,
+                    client_id="",
+                    days_since_last_visit=0,
+                )
+                sent_count += 1
+            except Exception as e:
+                logger.error(f"Failed to send reminder email: {e}")
+
+    db.commit()
+    return {"due_count": len(due_reminders), "emails_sent": sent_count}
+
+
+# ─── Notes: single-item routes (/{note_id} MUST be last) ───
 
 @router.get("/{note_id}", response_model=SmartNoteDetail)
 async def get_note(
@@ -304,229 +527,10 @@ async def extract_tasks_from_note(
             reminders_created += 1
 
     db.commit()
+    db.refresh(note)
 
     return {
-        "summary": result.get("summary"),
+        "summary": note.ai_summary,
         "tasks_created": tasks_created,
         "reminders_created": reminders_created,
     }
-
-
-# ─── Tasks CRUD ───
-
-@router.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED, tags=["Tasks"])
-async def create_task(
-    task_in: TaskCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    task = Task(
-        user_id=current_user.id,
-        smart_note_id=task_in.smart_note_id,
-        title=task_in.title,
-        description=task_in.description,
-        status=task_in.status or "todo",
-        priority=task_in.priority or "medium",
-        due_date=task_in.due_date,
-        related_client_id=task_in.related_client_id,
-        assigned_to_id=task_in.assigned_to_id,
-    )
-    db.add(task)
-    db.commit()
-    db.refresh(task)
-    return task
-
-
-@router.get("/tasks", response_model=List[TaskResponse], tags=["Tasks"])
-async def list_tasks(
-    task_status: Optional[str] = Query(None, alias="status"),
-    priority: Optional[str] = None,
-    due_before: Optional[str] = None,
-    note_id: Optional[UUID] = None,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    query = db.query(Task).filter(Task.user_id == current_user.id)
-    if task_status:
-        query = query.filter(Task.status == task_status)
-    if priority:
-        query = query.filter(Task.priority == priority)
-    if due_before:
-        try:
-            cutoff = datetime.strptime(due_before, "%Y-%m-%d").date()
-            query = query.filter(Task.due_date <= cutoff)
-        except ValueError:
-            pass
-    if note_id:
-        query = query.filter(Task.smart_note_id == note_id)
-
-    return query.order_by(Task.due_date.asc().nullslast(), Task.created_at.desc()).all()
-
-
-@router.put("/tasks/{task_id}", response_model=TaskResponse, tags=["Tasks"])
-async def update_task(
-    task_id: UUID,
-    task_in: TaskUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    update_data = task_in.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(task, field, value)
-
-    db.commit()
-    db.refresh(task)
-    return task
-
-
-@router.put("/tasks/{task_id}/complete", response_model=TaskResponse, tags=["Tasks"])
-async def complete_task(
-    task_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    task.status = "done"
-    task.completed_at = datetime.now(timezone.utc)
-    db.commit()
-    db.refresh(task)
-    return task
-
-
-@router.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Tasks"])
-async def delete_task(
-    task_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    db.delete(task)
-    db.commit()
-
-
-# ─── Reminders CRUD ───
-
-@router.post("/reminders", response_model=ReminderResponse, status_code=status.HTTP_201_CREATED, tags=["Reminders"])
-async def create_reminder(
-    rem_in: ReminderCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    reminder = Reminder(
-        user_id=current_user.id,
-        task_id=rem_in.task_id,
-        smart_note_id=rem_in.smart_note_id,
-        title=rem_in.title,
-        description=rem_in.description,
-        remind_at=rem_in.remind_at,
-        reminder_type=rem_in.reminder_type or "one_time",
-    )
-    db.add(reminder)
-    db.commit()
-    db.refresh(reminder)
-    return reminder
-
-
-@router.get("/reminders", response_model=List[ReminderResponse], tags=["Reminders"])
-async def list_reminders(
-    upcoming: Optional[bool] = None,
-    dismissed: Optional[bool] = None,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    query = db.query(Reminder).filter(Reminder.user_id == current_user.id)
-
-    if upcoming:
-        query = query.filter(
-            Reminder.is_dismissed == False,
-            Reminder.remind_at <= datetime.now(timezone.utc) + timedelta(hours=1),
-        )
-    if dismissed is not None:
-        query = query.filter(Reminder.is_dismissed == dismissed)
-
-    return query.order_by(Reminder.remind_at.asc()).all()
-
-
-@router.put("/reminders/{reminder_id}/dismiss", response_model=ReminderResponse, tags=["Reminders"])
-async def dismiss_reminder(
-    reminder_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    reminder = db.query(Reminder).filter(
-        Reminder.id == reminder_id,
-        Reminder.user_id == current_user.id,
-    ).first()
-    if not reminder:
-        raise HTTPException(status_code=404, detail="Reminder not found")
-
-    reminder.is_dismissed = True
-    db.commit()
-    db.refresh(reminder)
-    return reminder
-
-
-@router.delete("/reminders/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Reminders"])
-async def delete_reminder(
-    reminder_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    reminder = db.query(Reminder).filter(
-        Reminder.id == reminder_id,
-        Reminder.user_id == current_user.id,
-    ).first()
-    if not reminder:
-        raise HTTPException(status_code=404, detail="Reminder not found")
-    db.delete(reminder)
-    db.commit()
-
-
-# ─── Reminder Notification (email) ───
-
-@router.post("/reminders/send-due-notifications", tags=["Reminders"])
-async def send_due_reminder_notifications(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Send email notifications for reminders due within the next hour. Idempotent."""
-    now = datetime.now(timezone.utc)
-    due_reminders = db.query(Reminder).filter(
-        Reminder.user_id == current_user.id,
-        Reminder.is_dismissed == False,
-        Reminder.notification_sent == False,
-        Reminder.remind_at <= now + timedelta(hours=1),
-    ).all()
-
-    sent_count = 0
-    try:
-        from app.services.email import get_email_service
-        email_svc = get_email_service()
-    except Exception:
-        email_svc = None
-
-    for rem in due_reminders:
-        rem.notification_sent = True
-        if email_svc and current_user.email:
-            try:
-                email_svc.send_follow_up_reminder(
-                    user_email=current_user.email,
-                    client_name=rem.title,
-                    client_id="",
-                    days_since_last_visit=0,
-                )
-                sent_count += 1
-            except Exception as e:
-                logger.error(f"Failed to send reminder email: {e}")
-
-    db.commit()
-    return {"due_count": len(due_reminders), "emails_sent": sent_count}
