@@ -1,10 +1,88 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '@/lib/api';
 import type { Contract } from '@/lib/types';
 import LoadingScreen from '@/components/LoadingScreen';
+
+function FormattedContractText({ text }: { text: string }) {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let key = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (/^={4,}$/.test(trimmed)) continue;
+    if (/^-{4,}$/.test(trimmed)) continue;
+    if (trimmed === '') {
+      elements.push(<View key={key++} className="h-2" />);
+      continue;
+    }
+
+    if (/^\d+\.\s+[A-Z][A-Z\s&]+$/.test(trimmed)) {
+      elements.push(
+        <Text key={key++} className="text-palm-400 font-bold text-sm mt-3 mb-1.5">
+          {trimmed}
+        </Text>,
+      );
+      continue;
+    }
+
+    if (/^[A-Z][A-Z\s]+:?$/.test(trimmed) && trimmed.length < 50) {
+      elements.push(
+        <Text key={key++} className="text-white font-semibold text-sm mt-2 mb-1">
+          {trimmed}
+        </Text>,
+      );
+      continue;
+    }
+
+    if (trimmed.startsWith('•') || trimmed.startsWith('- ')) {
+      const bullet = trimmed.replace(/^[•\-]\s*/, '');
+      elements.push(
+        <View key={key++} className="flex-row ml-1 mt-1">
+          <Text className="text-palm-400 text-sm mr-2">{'•'}</Text>
+          <Text className="text-white text-sm flex-1">{bullet}</Text>
+        </View>,
+      );
+      continue;
+    }
+
+    if (/^\s+(Description|Frequency|Evidence):/.test(line)) {
+      const match = line.match(/^\s+(Description|Frequency|Evidence):\s*(.*)/);
+      if (match) {
+        elements.push(
+          <Text key={key++} className="text-dark-400 text-xs ml-5 mt-0.5">
+            {match[1]}: {match[2]}
+          </Text>,
+        );
+        continue;
+      }
+    }
+
+    const kvMatch = trimmed.match(/^([A-Za-z][A-Za-z\s/()]+):\s+(.+)$/);
+    if (kvMatch && kvMatch[1].length < 30) {
+      elements.push(
+        <View key={key++} className="flex-row justify-between py-0.5">
+          <Text className="text-dark-400 text-sm">{kvMatch[1]}</Text>
+          <Text className="text-white text-sm font-medium text-right flex-1 ml-4">{kvMatch[2]}</Text>
+        </View>,
+      );
+      continue;
+    }
+
+    elements.push(
+      <Text key={key++} className="text-dark-300 text-sm leading-5">
+        {trimmed}
+      </Text>,
+    );
+  }
+
+  return <View>{elements}</View>;
+}
 
 const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {
   draft: { bg: '#1e3f7640', text: '#829bcd', label: 'Draft' },
@@ -166,14 +244,14 @@ export default function ContractDetailScreen() {
         {contract.terms_and_conditions && (
           <View className="bg-dark-800 rounded-xl p-4 mb-3">
             <Text className="text-white font-semibold text-sm mb-2">Terms & Conditions</Text>
-            <Text className="text-dark-300 text-sm leading-5">{contract.terms_and_conditions}</Text>
+            <FormattedContractText text={contract.terms_and_conditions} />
           </View>
         )}
 
         {contract.cancellation_policy && (
           <View className="bg-dark-800 rounded-xl p-4 mb-3">
             <Text className="text-white font-semibold text-sm mb-2">Cancellation Policy</Text>
-            <Text className="text-dark-300 text-sm leading-5">{contract.cancellation_policy}</Text>
+            <FormattedContractText text={contract.cancellation_policy} />
           </View>
         )}
       </ScrollView>
