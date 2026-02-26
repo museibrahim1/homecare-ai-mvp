@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
-import { getToken, getCachedUser } from '@/lib/auth';
+import { getToken, getCachedUser, removeToken } from '@/lib/auth';
 import { useStore } from '@/lib/store';
 import { registerForPushNotifications } from '@/lib/notifications';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -32,13 +32,17 @@ export default function RootLayout() {
         try {
           await fetchUser();
         } catch {
+          // Token is expired or invalid -- clear it so the user sees login
+          await removeToken().catch(() => {});
           const cached = await getCachedUser();
           if (cached) {
             try {
               setUser(JSON.parse(cached));
             } catch {
-              // corrupt cache
+              setUser(null);
             }
+          } else {
+            setUser(null);
           }
         }
       }

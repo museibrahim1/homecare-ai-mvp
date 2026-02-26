@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { api } from '@/lib/api';
 
 let useAudioRecorder: (() => unknown) | null = null;
 let AudioModule: { requestRecordingPermissionsAsync?: () => Promise<{ granted: boolean }> } | null = null;
@@ -17,10 +18,19 @@ try {
 
 interface Props {
   onRecordingComplete: (uri: string) => void;
+  onTranscriptUpdate?: (text: string) => void;
+  onRecordingStart?: () => void;
+  onRecordingStop?: () => void;
   disabled?: boolean;
 }
 
-export default function AudioRecorder({ onRecordingComplete, disabled }: Props) {
+export default function AudioRecorder({
+  onRecordingComplete,
+  onTranscriptUpdate,
+  onRecordingStart,
+  onRecordingStop,
+  disabled,
+}: Props) {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [unavailable, setUnavailable] = useState(!useAudioRecorder);
@@ -62,6 +72,7 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
       recorder.record();
       setIsRecording(true);
       setDuration(0);
+      onRecordingStart?.();
 
       intervalRef.current = setInterval(() => {
         setDuration((d: number) => d + 1);
@@ -84,6 +95,7 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
     }
 
     setIsRecording(false);
+    onRecordingStop?.();
 
     try {
       await recorder.stop();
@@ -91,12 +103,37 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
       setDuration(0);
 
       if (uri) {
+        // Send final audio for live transcription preview
+        transcribeChunk(uri);
         onRecordingComplete(uri);
       }
     } catch {
       Alert.alert('Error', 'Failed to stop recording.');
     }
   };
+
+  const transcribeChunk = useCallback(async (uri: string) => {
+    if (!onTranscriptUpdate) return;
+    try {
+      const formData = new FormData();
+      formData.append('file', {
+        uri,
+        name: 'chunk.m4a',
+        type: 'audio/m4a',
+      } as unknown as Blob);
+
+      const result = await api.upload<{ transcript: string; provider: string }>(
+        '/live/transcribe',
+        formData,
+      );
+
+      if (result.transcript) {
+        onTranscriptUpdate(result.transcript);
+      }
+    } catch {
+      // Live transcription is best-effort; don't interrupt recording
+    }
+  }, [onTranscriptUpdate]);
 
   if (unavailable) {
     return (

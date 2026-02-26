@@ -87,6 +87,7 @@ from app.routers import (
     smart_notes,
     analytics,
     landing_chat,
+    live_transcribe,
 )
 
 @asynccontextmanager
@@ -163,6 +164,7 @@ app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(clients.router, prefix="/clients", tags=["Clients"])
 app.include_router(visits.router, prefix="/visits", tags=["Visits"])
 app.include_router(uploads.router, prefix="/uploads", tags=["Uploads"])
+app.include_router(live_transcribe.router, prefix="/live", tags=["Live Transcription"])
 app.include_router(pipeline.router, prefix="/pipeline", tags=["Pipeline"])
 app.include_router(transcript.router, prefix="/visits", tags=["Transcripts"])
 app.include_router(diarization.router, prefix="/visits", tags=["Diarization"])

@@ -84,6 +84,8 @@ export const useStore = create<AppState>((set, get) => ({
       const data = await api.get<Client[] | { items?: Client[]; clients?: Client[] }>('/clients');
       const list = Array.isArray(data) ? data : (data.items || data.clients || []);
       set({ clients: list });
+    } catch {
+      // Silently fail (401 handled by api client)
     } finally {
       set({ isLoading: false });
     }
@@ -96,9 +98,13 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   fetchVisits: async () => {
-    const data = await api.get<Visit[] | { items?: Visit[]; visits?: Visit[] }>('/visits');
-    const list = Array.isArray(data) ? data : (data.items || data.visits || []);
-    set({ visits: list });
+    try {
+      const data = await api.get<Visit[] | { items?: Visit[]; visits?: Visit[] }>('/visits');
+      const list = Array.isArray(data) ? data : (data.items || data.visits || []);
+      set({ visits: list });
+    } catch {
+      // Silently fail (401 handled by api client)
+    }
   },
 
   fetchContracts: async () => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, Pressable, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,10 +15,30 @@ export default function RecordScreen() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const transcriptRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     if (clients.length === 0) fetchClients();
   }, [clients.length, fetchClients]);
+
+  const onTranscriptUpdate = useCallback((text: string) => {
+    setLiveTranscript((prev) => {
+      const updated = prev ? `${prev} ${text}` : text;
+      return updated;
+    });
+    setTimeout(() => transcriptRef.current?.scrollToEnd({ animated: true }), 100);
+  }, []);
+
+  const onRecordingStart = useCallback(() => {
+    setIsRecording(true);
+    setLiveTranscript('');
+  }, []);
+
+  const onRecordingStop = useCallback(() => {
+    setIsRecording(false);
+  }, []);
 
   const handleRecordingComplete = async (uri: string) => {
     if (!selectedClient) {
@@ -44,7 +64,7 @@ export default function RecordScreen() {
 
       await api.upload('/uploads/audio', formData);
 
-      Alert.alert('Uploaded', 'Assessment uploaded successfully.', [
+      Alert.alert('Uploaded', 'Assessment uploaded & pipeline started.', [
         { text: 'View Pipeline', onPress: () => router.push(`/pipeline/${visit.id}`) },
       ]);
     } catch (err: unknown) {
@@ -61,7 +81,8 @@ export default function RecordScreen() {
       </View>
 
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32 }}>
-        <View className="px-5 mb-8">
+        {/* Client picker */}
+        <View className="px-5 mb-6">
           <Pressable
             onPress={() => setShowPicker(!showPicker)}
             className="bg-dark-800 rounded-2xl px-4 py-3.5 flex-row items-center justify-between active:opacity-80"
@@ -104,16 +125,54 @@ export default function RecordScreen() {
           )}
         </View>
 
+        {/* Recorder */}
         <View className="items-center px-5">
           {uploading ? (
             <View className="items-center py-8">
               <ActivityIndicator size="large" color="#0d9488" />
-              <Text className="text-dark-400 mt-4 text-sm">Uploading...</Text>
+              <Text className="text-dark-400 mt-4 text-sm">Uploading & starting pipeline...</Text>
             </View>
           ) : (
-            <AudioRecorder onRecordingComplete={handleRecordingComplete} disabled={!selectedClient} />
+            <AudioRecorder
+              onRecordingComplete={handleRecordingComplete}
+              onTranscriptUpdate={onTranscriptUpdate}
+              onRecordingStart={onRecordingStart}
+              onRecordingStop={onRecordingStop}
+              disabled={!selectedClient}
+            />
           )}
         </View>
+
+        {/* Live transcript preview */}
+        {(isRecording || liveTranscript) && (
+          <View className="px-5 mt-6">
+            <View className="flex-row items-center mb-2">
+              <Ionicons name="text" size={14} color="#0d9488" />
+              <Text className="text-palm-400 text-xs font-semibold ml-1.5 uppercase tracking-wider">
+                Live Transcript
+              </Text>
+              {isRecording && (
+                <View className="ml-2 flex-row items-center">
+                  <View className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1" />
+                  <Text className="text-red-400 text-xs">listening</Text>
+                </View>
+              )}
+            </View>
+            <ScrollView
+              ref={transcriptRef}
+              className="bg-dark-800 rounded-2xl p-4 max-h-48"
+              showsVerticalScrollIndicator={false}
+            >
+              {liveTranscript ? (
+                <Text className="text-dark-200 text-sm leading-5">{liveTranscript}</Text>
+              ) : (
+                <Text className="text-dark-500 text-sm italic">
+                  Transcript will appear here as you speak...
+                </Text>
+              )}
+            </ScrollView>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

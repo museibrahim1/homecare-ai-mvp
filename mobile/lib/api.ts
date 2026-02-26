@@ -43,8 +43,8 @@ class ApiClient {
     });
 
     if (response.status === 401) {
-      await removeToken();
-      throw new ApiError(401, 'Session expired. Please log in again.');
+      await removeToken().catch(() => {});
+      throw new ApiError(401, 'Session expired');
     }
 
     if (!response.ok) {

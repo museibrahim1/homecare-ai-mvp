@@ -169,6 +169,36 @@ Authorization: Bearer $WAVESPEED_API_KEY
 
 ---
 
+## Transcription (Deepgram Nova-3)
+
+### When to Use
+When processing audio recordings for transcription, either batch (pipeline) or live (real-time preview).
+
+### API Configuration
+```
+Provider: Deepgram
+Model: Nova-3
+API Key: Set DEEPGRAM_API_KEY in .env
+Endpoint: https://api.deepgram.com/v1/listen
+```
+
+### Features
+- Smart formatting (currency, phone numbers, medical terms)
+- Built-in speaker diarization (no separate pyannote step)
+- Sub-300ms latency for live transcription
+- 36+ languages
+
+### Backend Integration
+- **Batch (pipeline):** `apps/worker/libs/deepgram_asr.py` - auto-selected when DEEPGRAM_API_KEY is set
+- **Live (real-time):** `POST /live/transcribe` - sends audio chunk, returns instant transcript
+- **Fallback:** OpenAI Whisper when Deepgram key not configured
+
+### Pricing
+- Pay-as-you-go: ~$0.0077/minute
+- Cheaper than Whisper ($0.006/min) for batch, slightly more for streaming
+
+---
+
 ## Quick Reference
 
 | Task | Tool/API | Model |
@@ -177,6 +207,9 @@ Authorization: Bearer $WAVESPEED_API_KEY
 | Generate voiceover | WaveSpeed | ElevenLabs v3 |
 | Generate image | WaveSpeed | Nano Banana Pro |
 | Quick TTS (dev) | OpenAI | tts-1-hd |
+| Transcription (primary) | Deepgram | Nova-3 |
+| Transcription (fallback) | OpenAI | Whisper-1 |
+| AI Analysis | Anthropic | Claude Sonnet 4 |
 
 ---
 

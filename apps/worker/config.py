@@ -23,9 +23,14 @@ class Settings(BaseSettings):
     asr_model_size: str = "small"  # Good balance of speed/accuracy
     use_gpu: bool = False
     
-    # Cloud ASR (OpenAI Whisper API) - Much faster! ~$0.006/minute
+    # Cloud ASR (OpenAI Whisper API) - ~$0.006/minute
     # Set to True to use OpenAI API instead of local model
-    use_openai_whisper: bool = True  # Enable cloud transcription by default
+    use_openai_whisper: bool = True
+    
+    # Deepgram Nova-3 - Better quality + built-in diarization (~$0.0077/min)
+    # Set DEEPGRAM_API_KEY to enable; takes priority over Whisper when set
+    deepgram_api_key: str = ""
+    use_deepgram: bool = True  # Use Deepgram when API key is available
     
     # Diarization
     hf_token: str = ""  # Hugging Face token for pyannote models

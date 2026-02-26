@@ -15,6 +15,7 @@ from db import get_db
 from storage import download_file_to_path
 from config import settings
 from libs.whisper_asr import transcribe_audio
+from libs.deepgram_asr import transcribe_with_deepgram
 
 logger = logging.getLogger(__name__)
 
@@ -66,14 +67,28 @@ def transcribe_visit(self, visit_id: str):
         try:
             download_file_to_path(audio_asset.s3_key, tmp_path)
             
-            # Transcribe (uses OpenAI API if configured, otherwise local)
-            segments = transcribe_audio(
-                tmp_path,
-                model_size=settings.asr_model_size,
-                use_gpu=settings.use_gpu,
-                use_openai_api=settings.use_openai_whisper,
-                openai_api_key=settings.openai_api_key,
+            # Transcribe: prefer Deepgram Nova-3 > OpenAI Whisper > local
+            use_deepgram = (
+                settings.use_deepgram
+                and settings.deepgram_api_key
             )
+            
+            if use_deepgram:
+                logger.info("Using Deepgram Nova-3 for transcription")
+                segments = transcribe_with_deepgram(
+                    tmp_path,
+                    api_key=settings.deepgram_api_key,
+                    diarize=not settings.skip_diarization,
+                )
+            else:
+                logger.info("Using OpenAI Whisper for transcription")
+                segments = transcribe_audio(
+                    tmp_path,
+                    model_size=settings.asr_model_size,
+                    use_gpu=settings.use_gpu,
+                    use_openai_api=settings.use_openai_whisper,
+                    openai_api_key=settings.openai_api_key,
+                )
             
             # Sort segments by start time to ensure correct order
             segments.sort(key=lambda s: s["start_ms"])
@@ -108,6 +123,7 @@ def transcribe_visit(self, visit_id: str):
                     end_ms=seg["end_ms"],
                     text=seg["text"],
                     confidence=seg.get("confidence"),
+                    speaker_label=seg.get("speaker"),
                 )
                 db.add(transcript_segment)
             
