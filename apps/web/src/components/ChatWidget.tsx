@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Bot, User, Loader2, Hand } from 'lucide-react';
+import { MessageCircle, X, Send, User, Loader2, Hand } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -18,7 +18,7 @@ const QUICK_PROMPTS = [
 ];
 
 export default function ChatWidget() {
-  const API = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+  const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: GREETING },
@@ -136,10 +136,10 @@ export default function ChatWidget() {
             {messages.map((msg, i) => (
               <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: 'rgba(13, 148, 136, 0.15)' }}
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold"
+                    style={{ background: 'linear-gradient(135deg, #0d9488, #06b6d4)', color: '#ffffff' }}
                   >
-                    <Bot className="w-4 h-4" style={{ color: '#0d9488' }} />
+                    P
                   </div>
                 )}
                 <div
@@ -168,10 +168,10 @@ export default function ChatWidget() {
 
             {loading && (
               <div className="flex gap-2.5">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(13, 148, 136, 0.15)' }}
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
+                  style={{ background: 'linear-gradient(135deg, #0d9488, #06b6d4)', color: '#ffffff' }}
                 >
-                  <Bot className="w-4 h-4" style={{ color: '#0d9488' }} />
+                  P
                 </div>
                 <div className="rounded-2xl px-4 py-3"
                   style={{ background: 'rgba(30, 63, 118, 0.4)', borderBottomLeftRadius: '6px' }}
