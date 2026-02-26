@@ -79,17 +79,19 @@ export default function ContractDetailScreen() {
               <Text className="text-palm-400 font-bold text-lg">${contract.hourly_rate}</Text>
             </View>
           )}
-          {contract.weekly_hours != null && (
+          {(contract.weekly_hours ?? contract.schedule?.total_hours_per_week) != null && (
             <View className="flex-row items-center justify-between py-2 border-b border-dark-700/50">
               <Text className="text-dark-400 text-sm">Hours/Week</Text>
-              <Text className="text-white font-medium text-sm">{contract.weekly_hours}</Text>
+              <Text className="text-white font-medium text-sm">
+                {contract.weekly_hours ?? contract.schedule?.total_hours_per_week}
+              </Text>
             </View>
           )}
-          {contract.hourly_rate != null && contract.weekly_hours != null && (
+          {contract.hourly_rate != null && (contract.weekly_hours ?? contract.schedule?.total_hours_per_week) != null && (
             <View className="flex-row items-center justify-between py-2 border-b border-dark-700/50">
               <Text className="text-dark-400 text-sm">Monthly Est.</Text>
               <Text className="text-white font-bold text-base">
-                ${(contract.hourly_rate * contract.weekly_hours * 4.33).toFixed(0)}
+                ${(contract.hourly_rate * (contract.weekly_hours ?? contract.schedule?.total_hours_per_week ?? 0) * 4.33).toFixed(0)}
               </Text>
             </View>
           )}
@@ -112,11 +114,16 @@ export default function ContractDetailScreen() {
           <View className="bg-dark-800 rounded-xl p-4 mb-3">
             <Text className="text-white font-semibold text-sm mb-3">Services</Text>
             {contract.services.map((svc, i) => (
-              <View key={i} className="flex-row items-center py-2.5 border-b border-dark-700/50">
-                <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
-                <Text className="text-white text-sm ml-2 flex-1">{svc.name}</Text>
-                {svc.rate != null && (
-                  <Text className="text-dark-400 text-sm">${svc.rate}/{svc.unit || 'hr'}</Text>
+              <View key={i} className="py-2.5 border-b border-dark-700/50">
+                <View className="flex-row items-center">
+                  <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                  <Text className="text-white text-sm ml-2 flex-1">{svc.name}</Text>
+                  {svc.priority && (
+                    <Text className="text-dark-400 text-xs capitalize">{svc.priority}</Text>
+                  )}
+                </View>
+                {svc.description && (
+                  <Text className="text-dark-400 text-xs mt-1 ml-6" numberOfLines={2}>{svc.description}</Text>
                 )}
               </View>
             ))}
@@ -124,29 +131,36 @@ export default function ContractDetailScreen() {
         )}
 
         {/* Schedule */}
-        {contract.schedule?.days && contract.schedule.days.length > 0 && (
-          <View className="bg-dark-800 rounded-xl p-4 mb-3">
-            <Text className="text-white font-semibold text-sm mb-3">Weekly Schedule</Text>
-            <View className="flex-row flex-wrap">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => {
-                const isActive = contract.schedule?.days?.some(
-                  (d) => d.toLowerCase().startsWith(day.toLowerCase()),
-                );
-                return (
-                  <View
-                    key={day}
-                    className="w-10 h-10 rounded-full items-center justify-center mr-2 mb-2"
-                    style={{ backgroundColor: isActive ? '#0d948830' : '#1e3f7630' }}
-                  >
-                    <Text className="text-xs font-medium" style={{ color: isActive ? '#0d9488' : '#4b5563' }}>
-                      {day}
-                    </Text>
-                  </View>
-                );
-              })}
+        {(() => {
+          const scheduleDays = contract.schedule?.preferred_days || contract.schedule?.days;
+          if (!scheduleDays || scheduleDays.length === 0) return null;
+          return (
+            <View className="bg-dark-800 rounded-xl p-4 mb-3">
+              <Text className="text-white font-semibold text-sm mb-3">Weekly Schedule</Text>
+              {contract.schedule?.frequency && (
+                <Text className="text-dark-300 text-sm mb-3">{contract.schedule.frequency}</Text>
+              )}
+              <View className="flex-row flex-wrap">
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => {
+                  const isActive = scheduleDays.some(
+                    (d) => d.toLowerCase().startsWith(day.toLowerCase()),
+                  );
+                  return (
+                    <View
+                      key={day}
+                      className="w-10 h-10 rounded-full items-center justify-center mr-2 mb-2"
+                      style={{ backgroundColor: isActive ? '#0d948830' : '#1e3f7630' }}
+                    >
+                      <Text className="text-xs font-medium" style={{ color: isActive ? '#0d9488' : '#4b5563' }}>
+                        {day}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
             </View>
-          </View>
-        )}
+          );
+        })()}
 
         {/* Terms */}
         {contract.terms_and_conditions && (

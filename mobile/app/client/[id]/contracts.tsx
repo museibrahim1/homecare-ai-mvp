@@ -15,10 +15,10 @@ export default function ClientContractsScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await api.get<{ items?: Contract[]; contracts?: Contract[] }>(
+        const data = await api.get<Contract[] | { items?: Contract[] }>(
           `/visits/clients/${id}/contracts`,
         );
-        setContracts(data.items || data.contracts || []);
+        setContracts(Array.isArray(data) ? data : (data.items || []));
       } catch {
         // handle error
       } finally {

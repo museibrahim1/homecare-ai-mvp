@@ -17,10 +17,13 @@ export default function CarePlanScreen() {
       try {
         const [c, cData] = await Promise.all([
           api.get<Client>(`/clients/${id}`),
-          api.get<{ items?: Contract[]; contracts?: Contract[] }>(`/visits/clients/${id}/contracts`).catch(() => null),
+          api.get<Contract[] | { items?: Contract[] }>(`/visits/clients/${id}/contracts`).catch(() => null),
         ]);
         setClient(c);
-        if (cData) setContracts(cData.items || cData.contracts || []);
+        if (cData) {
+          const list = Array.isArray(cData) ? cData : (cData.items || []);
+          setContracts(list);
+        }
       } catch {
         // handle error
       } finally {
@@ -86,18 +89,29 @@ export default function CarePlanScreen() {
         {activeContract && (
           <View className="bg-dark-800 rounded-xl p-4 mb-3">
             <Text className="text-white font-semibold text-sm mb-3">Schedule</Text>
-            {activeContract.schedule?.days && (
+            {(activeContract.schedule?.preferred_days || activeContract.schedule?.days) && (
               <View className="flex-row items-center py-2 border-b border-dark-700/50">
                 <Ionicons name="calendar" size={16} color="#829bcd" />
                 <Text className="text-dark-400 text-sm ml-2 flex-1">Days</Text>
-                <Text className="text-white text-sm">{activeContract.schedule.days.join(', ')}</Text>
+                <Text className="text-white text-sm">
+                  {(activeContract.schedule.preferred_days || activeContract.schedule.days)?.join(', ')}
+                </Text>
               </View>
             )}
-            {activeContract.weekly_hours != null && (
+            {activeContract.schedule?.frequency && (
+              <View className="flex-row items-center py-2 border-b border-dark-700/50">
+                <Ionicons name="repeat" size={16} color="#829bcd" />
+                <Text className="text-dark-400 text-sm ml-2 flex-1">Frequency</Text>
+                <Text className="text-white text-sm">{activeContract.schedule.frequency}</Text>
+              </View>
+            )}
+            {(activeContract.weekly_hours ?? activeContract.schedule?.total_hours_per_week) != null && (
               <View className="flex-row items-center py-2 border-b border-dark-700/50">
                 <Ionicons name="time" size={16} color="#829bcd" />
                 <Text className="text-dark-400 text-sm ml-2 flex-1">Hours/Week</Text>
-                <Text className="text-white text-sm">{activeContract.weekly_hours}</Text>
+                <Text className="text-white text-sm">
+                  {activeContract.weekly_hours ?? activeContract.schedule?.total_hours_per_week}
+                </Text>
               </View>
             )}
             {activeContract.hourly_rate != null && (
@@ -115,11 +129,16 @@ export default function CarePlanScreen() {
           <View className="bg-dark-800 rounded-xl p-4 mb-3">
             <Text className="text-white font-semibold text-sm mb-3">Services</Text>
             {activeContract.services.map((svc, i) => (
-              <View key={i} className="flex-row items-center py-2 border-b border-dark-700/50 last:border-b-0">
-                <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
-                <Text className="text-white text-sm ml-2 flex-1">{svc.name}</Text>
-                {svc.rate != null && (
-                  <Text className="text-dark-400 text-sm">${svc.rate}/{svc.unit || 'hr'}</Text>
+              <View key={i} className="py-2 border-b border-dark-700/50">
+                <View className="flex-row items-center">
+                  <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                  <Text className="text-white text-sm ml-2 flex-1">{svc.name}</Text>
+                  {svc.frequency && (
+                    <Text className="text-dark-400 text-xs">{svc.frequency}</Text>
+                  )}
+                </View>
+                {svc.description && (
+                  <Text className="text-dark-400 text-xs mt-1 ml-6" numberOfLines={2}>{svc.description}</Text>
                 )}
               </View>
             ))}

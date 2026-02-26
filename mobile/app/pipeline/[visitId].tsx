@@ -26,8 +26,10 @@ export default function PipelineScreen() {
 
   const loadStatus = useCallback(async () => {
     try {
-      const data = await api.get<PipelineState>(`/pipeline/visits/${visitId}/status`);
-      setState(data);
+      const data = await api.get<{ pipeline_state?: PipelineState } & PipelineState>(
+        `/pipeline/visits/${visitId}/status`,
+      );
+      setState(data.pipeline_state || data);
     } catch {
       // handle error
     } finally {

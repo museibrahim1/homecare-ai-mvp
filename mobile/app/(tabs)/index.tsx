@@ -30,10 +30,13 @@ export default function HomeScreen() {
     try {
       const [usageData, visitsData] = await Promise.all([
         api.get<UsageStats>('/visits/usage').catch(() => null),
-        api.get<{ items?: Visit[]; visits?: Visit[] }>('/visits?limit=5').catch(() => null),
+        api.get<Visit[] | { items?: Visit[]; visits?: Visit[] }>('/visits?limit=5').catch(() => null),
       ]);
       if (usageData) setUsage(usageData);
-      if (visitsData) setRecentVisits(visitsData.items || visitsData.visits || []);
+      if (visitsData) {
+        const list = Array.isArray(visitsData) ? visitsData : (visitsData.items || visitsData.visits || []);
+        setRecentVisits(list);
+      }
       await fetchClients();
     } catch {
       // silent
@@ -64,8 +67,8 @@ export default function HomeScreen() {
 
         <View className="flex-row px-5 mb-6">
           <StatCard label="Clients" value={clients.length.toString()} icon="people" color="#0d9488" />
-          <StatCard label="This Month" value={usage?.visits_this_month?.toString() || '0'} icon="mic" color="#8b5cf6" />
-          <StatCard label="Total" value={usage?.total_visits?.toString() || '0'} icon="bar-chart" color="#f59e0b" />
+          <StatCard label="Completed" value={usage?.completed_assessments?.toString() || '0'} icon="mic" color="#8b5cf6" />
+          <StatCard label="Total" value={usage?.total_assessments?.toString() || '0'} icon="bar-chart" color="#f59e0b" />
         </View>
 
         <View className="px-5 mb-6">

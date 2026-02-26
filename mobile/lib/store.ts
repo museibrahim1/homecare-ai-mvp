@@ -81,8 +81,9 @@ export const useStore = create<AppState>((set, get) => ({
   fetchClients: async () => {
     set({ isLoading: true });
     try {
-      const data = await api.get<{ items?: Client[]; clients?: Client[] }>('/clients');
-      set({ clients: data.items || data.clients || [] });
+      const data = await api.get<Client[] | { items?: Client[]; clients?: Client[] }>('/clients');
+      const list = Array.isArray(data) ? data : (data.items || data.clients || []);
+      set({ clients: list });
     } finally {
       set({ isLoading: false });
     }
@@ -95,12 +96,25 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   fetchVisits: async () => {
-    const data = await api.get<{ items?: Visit[]; visits?: Visit[] }>('/visits');
-    set({ visits: data.items || data.visits || [] });
+    const data = await api.get<Visit[] | { items?: Visit[]; visits?: Visit[] }>('/visits');
+    const list = Array.isArray(data) ? data : (data.items || data.visits || []);
+    set({ visits: list });
   },
 
   fetchContracts: async () => {
-    const data = await api.get<{ items?: Contract[]; contracts?: Contract[] }>('/visits/contracts');
-    set({ contracts: data.items || data.contracts || [] });
+    // No global contracts endpoint; contracts are per-client
+    // Aggregate from all loaded clients
+    const { clients } = get();
+    const allContracts: Contract[] = [];
+    for (const client of clients.slice(0, 10)) {
+      try {
+        const data = await api.get<Contract[] | { items?: Contract[] }>(`/visits/clients/${client.id}/contracts`);
+        const list = Array.isArray(data) ? data : (data.items || []);
+        allContracts.push(...list);
+      } catch {
+        // skip
+      }
+    }
+    set({ contracts: allContracts });
   },
 }));

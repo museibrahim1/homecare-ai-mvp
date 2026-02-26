@@ -76,12 +76,28 @@ export interface Contract {
 
 export interface ServiceItem {
   name: string;
+  description?: string;
+  frequency?: string;
+  priority?: string;
+  evidence?: string;
   rate?: number;
   unit?: string;
-  description?: string;
 }
 
 export interface ScheduleInfo {
+  frequency?: string;
+  preferred_days?: string[];
+  preferred_times?: string;
+  visit_duration?: string;
+  total_hours_per_week?: number;
+  care_need_level?: string;
+  service_hours?: Array<{
+    service: string;
+    hours_per_week: number;
+    need_level?: string;
+    rationale?: string;
+  }>;
+  // Legacy shape support
   days?: string[];
   hours_per_week?: number;
   start_time?: string;
@@ -127,10 +143,14 @@ export interface CalendarEvent {
 }
 
 export interface UsageStats {
-  total_visits: number;
-  visits_this_month: number;
-  plan_limit?: number;
+  completed_assessments: number;
+  total_assessments: number;
+  max_allowed?: number;
+  can_create?: boolean;
   plan_name?: string;
+  plan_tier?: string;
+  has_paid_plan?: boolean;
+  upgrade_required?: boolean;
 }
 
 export interface ChatMessage {
