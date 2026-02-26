@@ -5,6 +5,7 @@ import { Check, Edit2, X, Download } from 'lucide-react';
 import { Note } from '@/lib/types';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { stripSeparators } from '@/lib/formatText';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -151,13 +152,13 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
       {/* Observations */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-slate-600 mb-2">Observations</h4>
-        <p className="text-sm text-slate-700 bg-slate-100 p-3 rounded">{observations}</p>
+        <p className="text-sm text-slate-700 bg-slate-100 p-3 rounded whitespace-pre-wrap">{stripSeparators(observations)}</p>
       </div>
 
       {/* Concerns */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-slate-600 mb-2">Risks/Concerns</h4>
-        <p className="text-sm text-slate-700 bg-slate-100 p-3 rounded">{concerns}</p>
+        <p className="text-sm text-slate-700 bg-slate-100 p-3 rounded whitespace-pre-wrap">{stripSeparators(concerns)}</p>
       </div>
 
       {/* Narrative */}
@@ -204,7 +205,7 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
         ) : (
           <div className="bg-slate-100 p-4 rounded-lg">
             <p className="text-sm text-slate-700 whitespace-pre-wrap">
-              {note.narrative || 'No narrative note available.'}
+              {note.narrative ? stripSeparators(note.narrative) : 'No narrative note available.'}
             </p>
           </div>
         )}

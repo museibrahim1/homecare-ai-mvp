@@ -32,6 +32,7 @@ import {
   Check,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
+import { stripSeparators } from '@/lib/formatText';
 import Sidebar from '@/components/Sidebar';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -221,7 +222,7 @@ function EditableTextArea({
   return value ? (
     <div>
       <p className="text-xs text-slate-500 mb-1">{label}</p>
-      <p className="text-sm text-slate-600 whitespace-pre-wrap">{value}</p>
+      <p className="text-sm text-slate-600 whitespace-pre-wrap">{stripSeparators(value)}</p>
     </div>
   ) : (
     <div>

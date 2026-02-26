@@ -36,6 +36,7 @@ import TranscriptTimeline from '@/components/TranscriptTimeline';
 import BillablesEditor from '@/components/BillablesEditor';
 import ContractPreview from '@/components/ContractPreview';
 import TranscriptImporter from '@/components/TranscriptImporter';
+import { stripSeparators } from '@/lib/formatText';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -927,28 +928,28 @@ export default function VisitDetailPage() {
                     {note.structured_data && note.structured_data.subjective && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-amber-600 mb-1">Subjective</h4>
-                        <p className="text-slate-700 text-sm">{note.structured_data.subjective}</p>
+                        <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.structured_data.subjective)}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.objective && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-blue-600 mb-1">Objective</h4>
-                        <p className="text-slate-700 text-sm">{note.structured_data.objective}</p>
+                        <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.structured_data.objective)}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.assessment && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-emerald-600 mb-1">Assessment</h4>
-                        <p className="text-slate-700 text-sm">{note.structured_data.assessment}</p>
+                        <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.structured_data.assessment)}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.plan && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-purple-600 mb-1">Plan</h4>
-                        <p className="text-slate-700 text-sm">{note.structured_data.plan}</p>
+                        <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.structured_data.plan)}</p>
                       </div>
                     )}
                     
@@ -961,7 +962,7 @@ export default function VisitDetailPage() {
                   {note.narrative && (
                     <div className="bg-white rounded-xl p-4 border border-slate-200">
                       <h3 className="text-lg font-semibold text-slate-900 mb-2">Narrative Summary</h3>
-                      <p className="text-slate-700 text-sm whitespace-pre-wrap">{note.narrative}</p>
+                      <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.narrative)}</p>
                     </div>
                   )}
                   
@@ -1112,25 +1113,25 @@ export default function VisitDetailPage() {
                         {note.structured_data && note.structured_data.subjective && (
                           <div className="mb-4">
                             <h4 className="text-sm font-medium text-amber-600 mb-1">Subjective</h4>
-                            <p className="text-slate-700 text-sm">{note.structured_data.subjective}</p>
+                            <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.structured_data.subjective)}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.objective && (
                           <div className="mb-4">
                             <h4 className="text-sm font-medium text-blue-600 mb-1">Objective</h4>
-                            <p className="text-slate-700 text-sm">{note.structured_data.objective}</p>
+                            <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.structured_data.objective)}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.assessment && (
                           <div className="mb-4">
                             <h4 className="text-sm font-medium text-emerald-600 mb-1">Assessment</h4>
-                            <p className="text-slate-700 text-sm">{note.structured_data.assessment}</p>
+                            <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.structured_data.assessment)}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.plan && (
                           <div className="mb-4">
                             <h4 className="text-sm font-medium text-purple-600 mb-1">Plan</h4>
-                            <p className="text-slate-700 text-sm">{note.structured_data.plan}</p>
+                            <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.structured_data.plan)}</p>
                           </div>
                         )}
                         {(!note.structured_data || (!note.structured_data.subjective && !note.structured_data.objective && !note.structured_data.assessment && !note.structured_data.plan)) && (
@@ -1140,7 +1141,7 @@ export default function VisitDetailPage() {
                       {note.narrative && (
                         <div className="bg-white rounded-xl p-6 border border-slate-200">
                           <h3 className="text-xl font-semibold text-slate-900 mb-2">Narrative Summary</h3>
-                          <p className="text-slate-700 text-sm whitespace-pre-wrap">{note.narrative}</p>
+                          <p className="text-slate-700 text-sm whitespace-pre-wrap">{stripSeparators(note.narrative)}</p>
                         </div>
                       )}
                       {note.structured_data && Array.isArray(note.structured_data.tasks_performed) && note.structured_data.tasks_performed.length > 0 && (

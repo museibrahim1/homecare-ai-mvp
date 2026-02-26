@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { api } from '@/lib/api';
 import type { Client, Contract } from '@/lib/types';
 import LoadingScreen from '@/components/LoadingScreen';
+import { stripSeparators } from '@/lib/formatText';
 
 export default function CarePlanScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -73,7 +74,7 @@ export default function CarePlanScreen() {
         {client.care_plan && (
           <View className="bg-dark-800 rounded-xl p-4 mb-3">
             <Text className="text-white font-semibold text-sm mb-2">Care Plan Details</Text>
-            <Text className="text-dark-300 text-sm leading-5">{client.care_plan}</Text>
+            <Text className="text-dark-300 text-sm leading-5">{stripSeparators(client.care_plan)}</Text>
           </View>
         )}
 
@@ -81,7 +82,7 @@ export default function CarePlanScreen() {
         {client.special_requirements && (
           <View className="bg-dark-800 rounded-xl p-4 mb-3">
             <Text className="text-white font-semibold text-sm mb-2">Special Requirements</Text>
-            <Text className="text-dark-300 text-sm leading-5">{client.special_requirements}</Text>
+            <Text className="text-dark-300 text-sm leading-5">{stripSeparators(client.special_requirements)}</Text>
           </View>
         )}
 

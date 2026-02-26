@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { api } from '@/lib/api';
 import type { Client } from '@/lib/types';
 import LoadingScreen from '@/components/LoadingScreen';
+import { stripSeparators } from '@/lib/formatText';
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -118,7 +119,7 @@ export default function ClientProfileScreen() {
             <InfoRow label="Medications" value={client.medications} />
             <InfoRow label="Physician" value={client.physician_name} />
             <InfoRow label="Physician Phone" value={client.physician_phone} />
-            {client.medical_notes && <Text className="text-dark-300 text-sm mt-2 leading-5">{client.medical_notes}</Text>}
+            {client.medical_notes && <Text className="text-dark-300 text-sm mt-2 leading-5">{stripSeparators(client.medical_notes)}</Text>}
           </Section>
 
           <Section title="Care" icon="heart-outline">
@@ -128,7 +129,7 @@ export default function ClientProfileScreen() {
             <InfoRow label="Living Situation" value={client.living_situation} />
             <InfoRow label="Preferred Days" value={client.preferred_days} />
             <InfoRow label="Preferred Times" value={client.preferred_times} />
-            {client.special_requirements && <Text className="text-dark-300 text-sm mt-2 leading-5">{client.special_requirements}</Text>}
+            {client.special_requirements && <Text className="text-dark-300 text-sm mt-2 leading-5">{stripSeparators(client.special_requirements)}</Text>}
           </Section>
 
           <Section title="Emergency Contacts" icon="alert-circle-outline">
