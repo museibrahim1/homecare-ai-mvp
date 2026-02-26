@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "PalmCare AI",
+    "slug": "palmcare-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "palmcare",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a1628"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.palmtechnologies.palmcare",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "PalmCare AI needs microphone access to record care assessments."
+      }
+    },
+    "android": {
+      "package": "com.palmtechnologies.palmcare",
+      "adaptiveIcon": {
+        "backgroundColor": "#0a1628",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["RECORD_AUDIO"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "PalmCare AI needs microphone access to record care assessments."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#0d9488"
+        }
+      ],
+      "expo-splash-screen"
+    ]
+  }
+}
