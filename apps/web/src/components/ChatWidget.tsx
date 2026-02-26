@@ -1,20 +1,20 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Loader2, Hand } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
-const GREETING = "Hi! I'm PalmCare AI's assistant. I can answer questions about our platform, features, pricing, or help you get started. What would you like to know?";
+const GREETING = "Hey! I'm Palm. Ask me anything about PalmCare AI, or let's get you set up with a free demo. What can I help with?";
 
 const QUICK_PROMPTS = [
   'What does PalmCare AI do?',
   'How does voice assessment work?',
   'Is it HIPAA compliant?',
-  'How do I get started?',
+  'I want to schedule a demo',
 ];
 
 export default function ChatWidget() {
@@ -76,7 +76,7 @@ export default function ChatWidget() {
     } catch (e) {
       setMessages(prev => [
         ...prev,
-        { role: 'assistant', content: "Sorry, I'm having trouble connecting right now. Please try again in a moment, or schedule a demo and our team will answer all your questions!" },
+        { role: 'assistant', content: "Hmm, I'm having a connection issue. Try again in a sec! Or better yet — scroll down and schedule a free demo. Our team will answer everything live." },
       ]);
     } finally {
       setLoading(false);
@@ -109,13 +109,13 @@ export default function ChatWidget() {
               <div className="w-9 h-9 rounded-xl flex items-center justify-center"
                 style={{ background: 'linear-gradient(135deg, #0d9488, #06b6d4)' }}
               >
-                <Sparkles className="w-5 h-5 text-white" />
+                <Hand className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold" style={{ color: '#ffffff' }}>PalmCare Assistant</p>
+                <p className="text-sm font-semibold" style={{ color: '#ffffff' }}>Palm</p>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-xs" style={{ color: 'rgb(130 155 205)' }}>Online</span>
+                  <span className="text-xs" style={{ color: 'rgb(130 155 205)' }}>Palm it.</span>
                 </div>
               </div>
             </div>
@@ -229,7 +229,7 @@ export default function ChatWidget() {
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder="Ask anything about PalmCare AI..."
+                placeholder="Ask Palm anything..."
                 disabled={loading}
                 className="flex-1 bg-transparent outline-none text-sm placeholder-slate-500"
                 style={{ color: '#e2e8f0' }}
@@ -249,7 +249,7 @@ export default function ChatWidget() {
               </button>
             </div>
             <p className="text-center mt-2 text-xs" style={{ color: 'rgb(61 105 178)' }}>
-              Powered by PalmCare AI
+              Palm it.
             </p>
           </form>
         </div>
