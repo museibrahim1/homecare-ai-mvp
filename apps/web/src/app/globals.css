@@ -674,4 +674,89 @@ html {
     @apply absolute inset-0 bg-green-500 rounded-full;
     animation: notification-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
+
+  /* ── Enterprise Data Table ── */
+  .table-enterprise {
+    @apply w-full text-sm;
+  }
+  .table-enterprise thead {
+    @apply bg-slate-50 border-b border-slate-200;
+  }
+  .table-enterprise thead th {
+    @apply px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider;
+  }
+  .table-enterprise tbody tr {
+    @apply border-b border-slate-100 hover:bg-slate-50 transition-colors;
+  }
+  .table-enterprise tbody tr:last-child {
+    @apply border-b-0;
+  }
+  .table-enterprise tbody td {
+    @apply px-4 py-3 text-slate-700;
+  }
+  .table-enterprise tbody tr.row-alt {
+    @apply bg-slate-50/50;
+  }
+
+  /* ── Enterprise Page Header ── */
+  .page-header {
+    @apply flex items-start justify-between mb-6;
+  }
+  .page-header-title {
+    @apply text-xl lg:text-2xl font-bold text-slate-900;
+  }
+  .page-header-subtitle {
+    @apply text-sm text-slate-500 mt-0.5;
+  }
+
+  /* ── Period Selector (Day/Week/Month/Quarter tabs) ── */
+  .period-selector {
+    @apply inline-flex items-center bg-slate-100 rounded-lg p-0.5 gap-0.5;
+  }
+  .period-selector button {
+    @apply px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-slate-500;
+  }
+  .period-selector button:hover {
+    @apply text-slate-700;
+  }
+  .period-selector button.active {
+    @apply bg-white text-slate-800 shadow-sm;
+  }
+
+  /* ── Filter Bar ── */
+  .filter-bar {
+    @apply flex items-center gap-3 mb-4 flex-wrap;
+  }
+  .filter-pill {
+    @apply px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer;
+  }
+  .filter-pill-inactive {
+    @apply filter-pill border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 bg-white;
+  }
+  .filter-pill-active {
+    @apply filter-pill border-primary-200 text-primary-700 bg-primary-50;
+  }
+
+  /* ── Stat Card (compact enterprise variant) ── */
+  .stat-card {
+    @apply bg-white rounded-lg border border-slate-200 p-4 shadow-sm;
+  }
+  .stat-card-label {
+    @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+  }
+  .stat-card-value {
+    @apply text-2xl font-bold text-slate-900 mt-1;
+  }
+  .stat-card-trend {
+    @apply text-xs font-medium mt-1;
+  }
+
+  /* ── Status Badge ── */
+  .status-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium;
+  }
+  .status-active { @apply status-badge bg-emerald-50 text-emerald-700; }
+  .status-pending { @apply status-badge bg-amber-50 text-amber-700; }
+  .status-inactive { @apply status-badge bg-slate-100 text-slate-600; }
+  .status-error { @apply status-badge bg-red-50 text-red-700; }
 }

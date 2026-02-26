@@ -5,124 +5,88 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
-  Home, 
-  Calendar, 
-  Users, 
-  UserCheck,
-  BarChart3, 
-  Settings, 
-  LogOut,
-  Mic,
-  Link2,
-  FileText,
-  ChevronRight,
-  Shield,
-  Building2,
-  CreditCard,
-  AlertTriangle,
-  Ticket,
-  Activity,
-  DollarSign,
-  Target,
-  CalendarDays,
-  MessageSquare,
-  MessagesSquare,
-  FolderOpen,
-  UserCog,
-  Eye,
-  RefreshCw,
-  HelpCircle,
-  HeartPulse,
-  FilePlus,
-  Layers,
-  Menu,
-  X,
-  Sun,
-  Moon,
-  Zap,
-  LucideIcon
+  Home, Calendar, Users, UserCheck, BarChart3, Settings, LogOut,
+  Mic, Link2, FileText, ChevronRight, Shield, Building2, CreditCard,
+  AlertTriangle, Ticket, Activity, DollarSign, Target, CalendarDays,
+  MessageSquare, MessagesSquare, FolderOpen, UserCog, Eye, RefreshCw,
+  HelpCircle, HeartPulse, FilePlus, Layers, Menu, X, Sun, Moon, Zap,
+  ChevronDown, LucideIcon
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 
-// Nav item type
 interface NavItemData {
   href: string;
   label: string;
   icon: LucideIcon;
-  description: string;
+  badge?: number | string;
 }
 
-// Sales & Pipeline
+interface NavSectionData {
+  title: string;
+  items: NavItemData[];
+  defaultOpen?: boolean;
+}
+
 const salesNavItems: NavItemData[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: Home, description: 'Overview & stats' },
-  { href: '/pipeline', label: 'Deals Pipeline', icon: Target, description: 'Track opportunities' },
-  { href: '/leads', label: 'Leads', icon: Users, description: 'Potential clients' },
-  { href: '/schedule', label: 'My Schedule', icon: CalendarDays, description: 'Appointments' },
+  { href: '/dashboard', label: 'Dashboard', icon: Home },
+  { href: '/pipeline', label: 'Deals Pipeline', icon: Target },
+  { href: '/leads', label: 'Leads', icon: Users },
+  { href: '/schedule', label: 'My Schedule', icon: CalendarDays },
 ];
 
-// Clients section
 const clientsNavItems: NavItemData[] = [
-  { href: '/clients', label: 'All Clients', icon: Users, description: 'Client records' },
-  { href: '/visits', label: 'Assessments', icon: Calendar, description: 'Intakes & visits' },
-  { href: '/care-tracker', label: 'Care Tracker', icon: Activity, description: 'Post-visit follow-ups' },
-  { href: '/adl-logging', label: 'ADL Logging', icon: HeartPulse, description: 'Activities of daily living' },
-  { href: '/policies', label: 'Policies & Renewals', icon: RefreshCw, description: 'Care agreements' },
+  { href: '/clients', label: 'All Clients', icon: Users },
+  { href: '/visits', label: 'Assessments', icon: Calendar },
+  { href: '/care-tracker', label: 'Care Tracker', icon: Activity },
+  { href: '/adl-logging', label: 'ADL Logging', icon: HeartPulse },
+  { href: '/policies', label: 'Policies & Renewals', icon: RefreshCw },
 ];
 
-// Communication
 const communicationNavItems: NavItemData[] = [
-  { href: '/team-chat', label: 'Team Chat', icon: MessagesSquare, description: 'Internal chat' },
-  { href: '/notes', label: 'Notes & Tasks', icon: FileText, description: 'AI-powered notes' },
+  { href: '/team-chat', label: 'Team Chat', icon: MessagesSquare },
+  { href: '/notes', label: 'Notes & Tasks', icon: FileText },
 ];
 
-// Resources
 const resourcesNavItems: NavItemData[] = [
-  { href: '/proposals', label: 'Proposals', icon: FileText, description: 'Contract proposals' },
-  { href: '/contracts/new', label: 'Create Contract', icon: FilePlus, description: 'Manual contract' },
-  { href: '/templates', label: 'OCR Templates', icon: Layers, description: 'Upload & scan templates' },
-  { href: '/documents', label: 'Documents', icon: FolderOpen, description: 'Files & contracts' },
-  { href: '/reports', label: 'Reports', icon: BarChart3, description: 'Analytics' },
-  { href: '/help', label: 'Help & Support', icon: HelpCircle, description: 'Get help' },
+  { href: '/proposals', label: 'Proposals', icon: FileText },
+  { href: '/contracts/new', label: 'Create Contract', icon: FilePlus },
+  { href: '/templates', label: 'OCR Templates', icon: Layers },
+  { href: '/documents', label: 'Documents', icon: FolderOpen },
+  { href: '/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/help', label: 'Help & Support', icon: HelpCircle },
 ];
 
-// Agency Admin
 const agencyAdminNavItems: NavItemData[] = [
-  { href: '/caregivers', label: 'Team Members', icon: UserCheck, description: 'Staff management' },
-  { href: '/billing', label: 'Billing', icon: CreditCard, description: 'Plans & payments' },
-  { href: '/activity', label: 'Activity Monitor', icon: Eye, description: 'Track actions' },
-  { href: '/integrations', label: 'Integrations', icon: Link2, description: 'Connect apps' },
-  { href: '/settings', label: 'Settings', icon: Settings, description: 'Agency settings' },
+  { href: '/caregivers', label: 'Team Members', icon: UserCheck },
+  { href: '/billing', label: 'Billing', icon: CreditCard },
+  { href: '/activity', label: 'Activity Monitor', icon: Eye },
+  { href: '/integrations', label: 'Integrations', icon: Link2 },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 const adminNavItems: NavItemData[] = [
-  { href: '/admin', label: 'Dashboard', icon: BarChart3, description: 'Platform overview' },
-  { href: '/admin/quick-setup', label: 'Quick Setup', icon: Zap, description: 'Onboard new agency' },
-  { href: '/admin/approvals', label: 'Approvals', icon: Building2, description: 'Review applications' },
-  { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard, description: 'Active subs' },
-  { href: '/admin/billing', label: 'Stripe Config', icon: DollarSign, description: 'Price IDs' },
-  { href: '/admin/compliance', label: 'Compliance', icon: AlertTriangle, description: 'License tracking' },
-  { href: '/admin/support', label: 'Support', icon: Ticket, description: 'Help tickets' },
-  { href: '/admin/audit', label: 'Audit Logs', icon: FileText, description: 'Activity tracking' },
-  { href: '/admin/users', label: 'Platform Users', icon: UserCheck, description: 'Admin accounts' },
-  { href: '/admin/system', label: 'System Health', icon: Activity, description: 'Infrastructure' },
-  { href: '/admin/incidents', label: 'Status Page', icon: AlertTriangle, description: 'Incident management' },
-  { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target, description: 'Outbound CRM' },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, description: 'Churn & engagement' },
+  { href: '/admin', label: 'Dashboard', icon: BarChart3 },
+  { href: '/admin/quick-setup', label: 'Quick Setup', icon: Zap },
+  { href: '/admin/approvals', label: 'Approvals', icon: Building2 },
+  { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard },
+  { href: '/admin/billing', label: 'Stripe Config', icon: DollarSign },
+  { href: '/admin/compliance', label: 'Compliance', icon: AlertTriangle },
+  { href: '/admin/support', label: 'Support', icon: Ticket },
+  { href: '/admin/audit', label: 'Audit Logs', icon: FileText },
+  { href: '/admin/users', label: 'Platform Users', icon: UserCheck },
+  { href: '/admin/system', label: 'System Health', icon: Activity },
+  { href: '/admin/incidents', label: 'Status Page', icon: AlertTriangle },
+  { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 
-// NavItem defined OUTSIDE the Sidebar to prevent re-creation on every render
 const NavItem = memo(function NavItem({ 
-  item, 
-  isActive, 
-  onNavigate 
+  item, isActive, onNavigate 
 }: { 
-  item: NavItemData; 
-  isActive: boolean; 
-  onNavigate: (href: string) => void;
+  item: NavItemData; isActive: boolean; onNavigate: (href: string) => void;
 }) {
   const ItemIcon = item.icon;
-  
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -135,60 +99,67 @@ const NavItem = memo(function NavItem({
       scroll={false}
       prefetch={true}
       onClick={handleClick}
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group cursor-pointer select-none ${
+      className={`flex items-center gap-2.5 px-3 py-[7px] rounded-md transition-all group cursor-pointer select-none text-[13px] ${
         isActive 
-          ? 'bg-primary-50 text-primary-700 border-l-[3px] border-l-primary-500 -ml-px' 
-          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+          ? 'bg-primary-50 text-primary-700 font-semibold' 
+          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800 font-medium'
       }`}
     >
-      <ItemIcon className={`w-[18px] h-[18px] flex-shrink-0 ${
-        isActive ? 'text-primary-500' : 'text-slate-400 group-hover:text-slate-600'
+      <ItemIcon className={`w-4 h-4 flex-shrink-0 ${
+        isActive ? 'text-primary-500' : 'text-slate-400 group-hover:text-slate-500'
       }`} />
-      <span className={`text-[13px] truncate ${isActive ? 'font-semibold' : 'font-medium'}`}>
-        {item.label}
-      </span>
+      <span className="truncate flex-1">{item.label}</span>
+      {item.badge !== undefined && (
+        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+          isActive ? 'bg-primary-100 text-primary-600' : 'bg-slate-100 text-slate-500'
+        }`}>
+          {item.badge}
+        </span>
+      )}
     </Link>
   );
 });
 
-// NavSection to reduce boilerplate
-const NavSection = memo(function NavSection({ 
-  title, 
-  items, 
-  pathname, 
-  onNavigate 
+const CollapsibleSection = memo(function CollapsibleSection({ 
+  title, items, pathname, onNavigate, defaultOpen = true 
 }: { 
-  title: string; 
-  items: NavItemData[]; 
-  pathname: string; 
-  onNavigate: (href: string) => void;
+  title: string; items: NavItemData[]; pathname: string; onNavigate: (href: string) => void; defaultOpen?: boolean;
 }) {
+  const hasActiveItem = items.some(item => 
+    pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+  );
+  const [open, setOpen] = useState(defaultOpen || hasActiveItem);
+
+  useEffect(() => {
+    if (hasActiveItem && !open) setOpen(true);
+  }, [hasActiveItem, open]);
+
   return (
-    <div className="mb-4">
-      <div className="px-3 py-1.5 mb-1">
-        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+    <div className="mb-1">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center justify-between w-full px-3 py-2 group"
+      >
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest group-hover:text-slate-500 transition-colors">
           {title}
         </span>
-      </div>
-      <div className="space-y-0.5">
-        {items.map((item) => {
-          const isActive = pathname === item.href || 
-            (item.href !== '/dashboard' && pathname.startsWith(item.href));
-          return (
-            <NavItem 
-              key={item.href} 
-              item={item} 
-              isActive={isActive} 
-              onNavigate={onNavigate} 
-            />
-          );
-        })}
-      </div>
+        <ChevronDown className={`w-3 h-3 text-slate-300 group-hover:text-slate-400 transition-transform ${open ? '' : '-rotate-90'}`} />
+      </button>
+      {open && (
+        <div className="space-y-px pb-2">
+          {items.map((item) => {
+            const isActive = pathname === item.href || 
+              (item.href !== '/dashboard' && pathname.startsWith(item.href));
+            return (
+              <NavItem key={item.href} item={item} isActive={isActive} onNavigate={onNavigate} />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 });
 
-// Module-level: survives component remounts across page navigations
 let _sidebarScrollTop = 0;
 
 export default function Sidebar() {
@@ -201,51 +172,30 @@ export default function Sidebar() {
 
   const isAdmin = user?.role === 'admin';
 
-  // Stable navigate callback that won't change on re-renders
   const handleNavigate = useCallback((href: string) => {
-    // Save scroll before navigating
-    if (navRef.current) {
-      _sidebarScrollTop = navRef.current.scrollTop;
-    }
+    if (navRef.current) _sidebarScrollTop = navRef.current.scrollTop;
     setMobileOpen(false);
     router.push(href, { scroll: false });
   }, [router]);
 
-  // Restore sidebar scroll position after mount / navigation
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
-
-    // Restore saved position
-    if (_sidebarScrollTop > 0) {
-      nav.scrollTop = _sidebarScrollTop;
-    }
-
-    // Track scroll changes
-    const handleScroll = () => {
-      _sidebarScrollTop = nav.scrollTop;
-    };
+    if (_sidebarScrollTop > 0) nav.scrollTop = _sidebarScrollTop;
+    const handleScroll = () => { _sidebarScrollTop = nav.scrollTop; };
     nav.addEventListener('scroll', handleScroll, { passive: true });
-
     return () => nav.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile sidebar on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  // Close mobile sidebar on escape key
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMobileOpen(false);
-    };
+    const handleEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
   const handleLogout = useCallback(async () => {
-    // Call backend to clear Google tokens so user must reconnect next login
     try {
       const authData = localStorage.getItem('palmcare-auth');
       if (authData) {
@@ -253,15 +203,10 @@ export default function Sidebar() {
         const token = parsed?.state?.token;
         if (token) {
           const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-          await fetch(`${API_BASE}/auth/logout`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          await fetch(`${API_BASE}/auth/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
         }
       }
-    } catch {
-      // Best-effort — proceed with frontend logout regardless
-    }
+    } catch { /* Best-effort */ }
     logout();
     router.push('/login', { scroll: false });
   }, [logout, router]);
@@ -271,7 +216,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
         aria-label="Open menu"
       >
         <Menu className="w-5 h-5" />
@@ -279,20 +224,17 @@ export default function Sidebar() {
 
       {/* Mobile Overlay */}
       {mobileOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black/30 z-[55]"
-          onClick={() => setMobileOpen(false)}
-        />
+        <div className="lg:hidden fixed inset-0 bg-black/20 z-[55]" onClick={() => setMobileOpen(false)} />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        w-64 bg-white border-r border-slate-200 flex flex-col h-screen flex-shrink-0
+        w-60 bg-white border-r border-slate-200 flex flex-col h-screen flex-shrink-0
         fixed lg:sticky top-0 left-0 z-[60] pointer-events-auto
-        transition-transform duration-300 ease-in-out
+        transition-transform duration-200 ease-out
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        {/* Mobile Close Button */}
+        {/* Mobile Close */}
         <button
           onClick={() => setMobileOpen(false)}
           className="lg:hidden absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
@@ -302,89 +244,82 @@ export default function Sidebar() {
         </button>
 
         {/* Logo */}
-        <div className="px-5 py-5 flex-shrink-0 border-b border-slate-100">
-          <Link href="/dashboard" className="flex items-center gap-3" onClick={(e) => { e.preventDefault(); handleNavigate('/dashboard'); }}>
-            <div className="w-9 h-9 flex-shrink-0 bg-primary-500 rounded-lg flex items-center justify-center overflow-hidden">
-              <Image src="/hand-icon-white.png" alt="Palm Technologies" width={26} height={26} className="object-contain" />
+        <div className="px-4 py-4 flex-shrink-0 border-b border-slate-100">
+          <Link href="/dashboard" className="flex items-center gap-2.5" onClick={(e) => { e.preventDefault(); handleNavigate('/dashboard'); }}>
+            <div className="w-8 h-8 flex-shrink-0 bg-primary-500 rounded-lg flex items-center justify-center overflow-hidden">
+              <Image src="/hand-icon-white.png" alt="Palm Technologies" width={22} height={22} className="object-contain" />
             </div>
             <div className="min-w-0">
-              <span className="text-base font-bold text-slate-900 block leading-tight">PalmCare AI</span>
-              <span className="text-[11px] text-slate-400 leading-tight">Home Care Platform</span>
+              <span className="text-sm font-bold text-slate-900 block leading-tight">PalmCare AI</span>
+              <span className="text-[10px] text-slate-400 leading-tight">Home Care Platform</span>
             </div>
           </Link>
         </div>
 
-        {/* Main Navigation */}
-        <nav ref={navRef} data-tour="sidebar-nav" className="flex-1 px-3 py-3 overflow-y-auto overflow-x-hidden min-h-0">
-          <NavSection title="Sales" items={salesNavItems} pathname={pathname} onNavigate={handleNavigate} />
-          <NavSection title="Clients" items={clientsNavItems} pathname={pathname} onNavigate={handleNavigate} />
-          <NavSection title="Communication" items={communicationNavItems} pathname={pathname} onNavigate={handleNavigate} />
-          <NavSection title="Resources" items={resourcesNavItems} pathname={pathname} onNavigate={handleNavigate} />
-          <NavSection title="Admin" items={agencyAdminNavItems} pathname={pathname} onNavigate={handleNavigate} />
+        {/* Navigation */}
+        <nav ref={navRef} data-tour="sidebar-nav" className="flex-1 px-2 py-2 overflow-y-auto overflow-x-hidden min-h-0">
+          <CollapsibleSection title="Overview" items={salesNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={true} />
+          <CollapsibleSection title="Clients" items={clientsNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={true} />
+          <CollapsibleSection title="Communication" items={communicationNavItems} pathname={pathname} onNavigate={handleNavigate} />
+          <CollapsibleSection title="Resources" items={resourcesNavItems} pathname={pathname} onNavigate={handleNavigate} />
+          <CollapsibleSection title="Administration" items={agencyAdminNavItems} pathname={pathname} onNavigate={handleNavigate} />
 
-          {/* Platform Admin Section */}
           {isAdmin && (
-            <div className="mb-4">
-              <div className="px-3 py-2 mb-1">
+            <div className="mb-1">
+              <button
+                onClick={() => {}}
+                className="flex items-center justify-between w-full px-3 py-2"
+              >
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <Shield className="w-3 h-3" />
                   Platform Admin
                 </span>
-              </div>
-              <div className="space-y-0.5">
+              </button>
+              <div className="space-y-px pb-2">
                 {adminNavItems.map((item) => {
                   const isActive = pathname === item.href || 
                     (item.href !== '/dashboard' && pathname.startsWith(item.href));
-                  return (
-                    <NavItem key={item.href} item={item} isActive={isActive} onNavigate={handleNavigate} />
-                  );
+                  return <NavItem key={item.href} item={item} isActive={isActive} onNavigate={handleNavigate} />;
                 })}
               </div>
             </div>
           )}
         </nav>
 
-        {/* Theme Toggle */}
-        <div className="px-3 pb-2 flex-shrink-0">
+        {/* Footer */}
+        <div className="border-t border-slate-100 flex-shrink-0">
+          {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors text-[13px] font-medium"
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="flex items-center gap-2 w-full px-4 py-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors text-[12px] font-medium"
           >
-            {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-amber-500" />
-            ) : (
-              <Moon className="w-4 h-4 text-slate-400" />
-            )}
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-slate-400" />}
             {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
           </button>
-        </div>
 
-        {/* User Section */}
-        <div className="px-3 pb-3 pt-2 border-t border-slate-100 flex-shrink-0">
-          <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-lg bg-slate-50">
-            <div className="w-9 h-9 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-semibold text-sm" style={{ color: '#fff' }}>
+          {/* User */}
+          <div className="flex items-center gap-2.5 px-4 py-3">
+            <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="font-semibold text-[11px]" style={{ color: '#fff' }}>
                 {user?.full_name?.charAt(0) || 'A'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-slate-900 font-medium truncate text-[13px]">
+              <p className="text-slate-800 font-medium truncate text-[12px] leading-tight">
                 {user?.full_name || 'Admin User'}
               </p>
-              <p className="text-slate-400 text-[11px] truncate">
+              <p className="text-slate-400 text-[10px] truncate leading-tight">
                 {user?.email || 'admin@palmtai.com'}
               </p>
             </div>
+            <button
+              onClick={handleLogout}
+              className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+              title="Sign out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
-          
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 px-3 py-2 w-full rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors text-[13px] font-medium"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </button>
         </div>
       </aside>
     </>

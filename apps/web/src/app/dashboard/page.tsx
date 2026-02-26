@@ -600,6 +600,7 @@ export default function DashboardPage() {
   /* ─── Widget preferences ─── */
   const [widgetPrefs, setWidgetPrefs] = useState<WidgetPrefs>({ order: DEFAULT_ORDER, hidden: [] });
   const [showCustomize, setShowCustomize] = useState(false);
+  const [period, setPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
 
   useEffect(() => {
     setWidgetPrefs(loadWidgetPrefs());
@@ -746,18 +747,32 @@ export default function DashboardPage() {
         <div className="flex-1 p-4 lg:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex items-start justify-between mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-1">Dashboard</h1>
-              <p className="text-slate-500 text-sm lg:text-base">Care assessments in, proposal-ready contracts out.</p>
+              <h1 className="text-xl lg:text-2xl font-bold text-slate-900">Dashboard</h1>
+              <p className="text-slate-500 text-sm mt-0.5">Care assessments in, proposal-ready contracts out.</p>
             </div>
-            <button
-              onClick={() => setShowCustomize(true)}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500 hover:text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors shrink-0 shadow-sm"
-            >
-              <Settings2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Customize</span>
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Period Selector */}
+              <div className="period-selector">
+                {(['week', 'month', 'quarter', 'year'] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPeriod(p)}
+                    className={period === p ? 'active' : ''}
+                  >
+                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowCustomize(true)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors"
+                title="Customize dashboard"
+              >
+                <Settings2 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {showCustomize && (

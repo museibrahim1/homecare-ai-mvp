@@ -82,15 +82,15 @@ type InsuranceFilter = 'all' | 'medicaid' | 'medicare' | 'private';
 
 // Status configuration with colors
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
-  intake: { label: 'Intake', color: 'text-blue-400', bgColor: 'bg-blue-500/20', borderColor: 'border-l-blue-500' },
-  assessment: { label: 'Assessment', color: 'text-purple-400', bgColor: 'bg-purple-500/20', borderColor: 'border-l-purple-500' },
-  pending: { label: 'Pending', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20', borderColor: 'border-l-yellow-500' },
-  proposal: { label: 'Proposal Sent', color: 'text-orange-400', bgColor: 'bg-orange-500/20', borderColor: 'border-l-orange-500' },
-  active: { label: 'Active', color: 'text-green-400', bgColor: 'bg-green-500/20', borderColor: 'border-l-green-500' },
-  assigned: { label: 'Assigned', color: 'text-teal-400', bgColor: 'bg-teal-500/20', borderColor: 'border-l-teal-500' },
-  follow_up: { label: 'Follow-up', color: 'text-purple-400', bgColor: 'bg-purple-500/20', borderColor: 'border-l-purple-500' },
-  inactive: { label: 'Inactive', color: 'text-slate-400', bgColor: 'bg-slate-500/20', borderColor: 'border-l-slate-500' },
-  discharged: { label: 'Discharged', color: 'text-red-400', bgColor: 'bg-red-500/20', borderColor: 'border-l-red-500' },
+  intake: { label: 'Intake', color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: 'border-l-blue-500' },
+  assessment: { label: 'Assessment', color: 'text-purple-700', bgColor: 'bg-purple-50', borderColor: 'border-l-purple-500' },
+  pending: { label: 'Pending', color: 'text-yellow-700', bgColor: 'bg-yellow-50', borderColor: 'border-l-yellow-500' },
+  proposal: { label: 'Proposal Sent', color: 'text-orange-700', bgColor: 'bg-orange-50', borderColor: 'border-l-orange-500' },
+  active: { label: 'Active', color: 'text-emerald-700', bgColor: 'bg-emerald-50', borderColor: 'border-l-emerald-500' },
+  assigned: { label: 'Assigned', color: 'text-teal-700', bgColor: 'bg-teal-50', borderColor: 'border-l-teal-500' },
+  follow_up: { label: 'Follow-up', color: 'text-purple-700', bgColor: 'bg-purple-50', borderColor: 'border-l-purple-500' },
+  inactive: { label: 'Inactive', color: 'text-slate-600', bgColor: 'bg-slate-100', borderColor: 'border-l-slate-400' },
+  discharged: { label: 'Discharged', color: 'text-red-700', bgColor: 'bg-red-50', borderColor: 'border-l-red-500' },
 };
 
 const CARE_SPECIALTY_OPTIONS = [
@@ -106,10 +106,10 @@ const CARE_SPECIALTY_OPTIONS = [
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: 'low', label: 'Low', color: 'text-green-400' },
-  { value: 'medium', label: 'Medium', color: 'text-yellow-400' },
-  { value: 'high', label: 'High', color: 'text-orange-400' },
-  { value: 'urgent', label: 'Urgent', color: 'text-red-400' },
+  { value: 'low', label: 'Low', color: 'text-green-600' },
+  { value: 'medium', label: 'Medium', color: 'text-yellow-600' },
+  { value: 'high', label: 'High', color: 'text-orange-600' },
+  { value: 'urgent', label: 'Urgent', color: 'text-red-600' },
 ];
 
 // Quick Add Modal Component
@@ -185,11 +185,11 @@ function QuickAddModal({
     <div className="fixed inset-0 z-50 flex items-start justify-end p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
-      <div className="relative bg-dark-800 rounded-2xl w-full max-w-md shadow-2xl border border-dark-600 mt-20 mr-4 max-h-[85vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 mt-20 mr-4 max-h-[85vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-dark-600 sticky top-0 bg-dark-800 z-10">
-          <h3 className="text-lg font-semibold text-white">Add New Client</h3>
-          <button onClick={onClose} className="text-dark-400 hover:text-white">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 sticky top-0 bg-white z-10">
+          <h3 className="text-lg font-semibold text-slate-900">Add New Client</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -197,7 +197,7 @@ function QuickAddModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Name *</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Name *</label>
             <input
               type="text"
               value={formData.full_name}
@@ -208,7 +208,7 @@ function QuickAddModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Email</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Email</label>
             <input
               type="email"
               value={formData.email}
@@ -219,7 +219,7 @@ function QuickAddModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Phone</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Phone</label>
             <input
               type="tel"
               value={formData.phone}
@@ -230,7 +230,7 @@ function QuickAddModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Address</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Address</label>
             <input
               type="text"
               value={formData.address}
@@ -242,7 +242,7 @@ function QuickAddModal({
 
           {/* Priority / Care Level */}
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Priority</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Priority</label>
             <div className="grid grid-cols-4 gap-2">
               {PRIORITY_OPTIONS.map(opt => (
                 <button
@@ -251,8 +251,8 @@ function QuickAddModal({
                   onClick={() => setFormData(prev => ({ ...prev, care_level: opt.value.toUpperCase() }))}
                   className={`px-2 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${
                     formData.care_level === opt.value.toUpperCase()
-                      ? `${opt.color} bg-dark-700 border border-current`
-                      : 'text-dark-400 bg-dark-700/50 border border-dark-600 hover:border-dark-500'
+                      ? `${opt.color} bg-slate-50 border border-current`
+                      : 'text-slate-500 bg-white border border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className={`w-1 h-3 rounded-full ${
@@ -266,15 +266,15 @@ function QuickAddModal({
 
           {/* Insurance Type Selection */}
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Insurance Type</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Insurance Type</label>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, insurance_type: 'medicaid' }))}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   formData.insurance_type === 'medicaid'
-                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
-                    : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-dark-500'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                 }`}
               >
                 Medicaid
@@ -284,8 +284,8 @@ function QuickAddModal({
                 onClick={() => setFormData(prev => ({ ...prev, insurance_type: 'medicare' }))}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   formData.insurance_type === 'medicare'
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/50'
-                    : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-dark-500'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                 }`}
               >
                 Medicare
@@ -295,8 +295,8 @@ function QuickAddModal({
                 onClick={() => setFormData(prev => ({ ...prev, insurance_type: 'private' }))}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   formData.insurance_type === 'private'
-                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50'
-                    : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-dark-500'
+                    ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                 }`}
               >
                 Private
@@ -307,7 +307,7 @@ function QuickAddModal({
           {/* Insurance ID field based on type */}
           {formData.insurance_type === 'medicaid' && (
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">Medicaid ID</label>
+              <label className="block text-sm font-medium text-slate-600 mb-2">Medicaid ID</label>
               <input
                 type="text"
                 value={formData.medicaid_id}
@@ -319,7 +319,7 @@ function QuickAddModal({
           )}
           {formData.insurance_type === 'medicare' && (
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">Medicare ID</label>
+              <label className="block text-sm font-medium text-slate-600 mb-2">Medicare ID</label>
               <input
                 type="text"
                 value={formData.medicare_id}
@@ -331,7 +331,7 @@ function QuickAddModal({
           )}
           {formData.insurance_type === 'private' && (
             <div>
-              <label className="block text-sm font-medium text-dark-300 mb-2">Insurance Provider</label>
+              <label className="block text-sm font-medium text-slate-600 mb-2">Insurance Provider</label>
               <input
                 type="text"
                 value={formData.insurance_provider}
@@ -343,7 +343,7 @@ function QuickAddModal({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Care Specialty</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Care Specialty</label>
             <select
               value={formData.primary_diagnosis}
               onChange={(e) => setFormData(prev => ({ ...prev, primary_diagnosis: e.target.value }))}
@@ -357,7 +357,7 @@ function QuickAddModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-dark-300 mb-2">Referral Notes</label>
+            <label className="block text-sm font-medium text-slate-600 mb-2">Referral Notes</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
@@ -396,12 +396,12 @@ function QuickAddModal({
 function ClientAvatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   const colors = [
-    'from-blue-500 to-cyan-500',
-    'from-purple-500 to-pink-500',
-    'from-green-500 to-emerald-500',
-    'from-orange-500 to-red-500',
-    'from-indigo-500 to-purple-500',
-    'from-teal-500 to-green-500',
+    'bg-blue-500',
+    'bg-purple-500',
+    'bg-emerald-500',
+    'bg-orange-500',
+    'bg-indigo-500',
+    'bg-teal-500',
   ];
   const colorIndex = name.charCodeAt(0) % colors.length;
   
@@ -412,7 +412,7 @@ function ClientAvatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' 
   };
   
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${colors[colorIndex]} flex items-center justify-center font-semibold text-white`}>
+    <div className={`${sizeClasses[size]} rounded-full ${colors[colorIndex]} flex items-center justify-center font-semibold text-white`}>
       {initials}
     </div>
   );
@@ -434,21 +434,21 @@ function InsuranceBadge({ client }: { client: Client }) {
   
   if (client.medicaid_id) {
     badges.push(
-      <span key="medicaid" className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+      <span key="medicaid" className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700">
         Medicaid
       </span>
     );
   }
   if (client.medicare_id) {
     badges.push(
-      <span key="medicare" className="px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+      <span key="medicare" className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700">
         Medicare
       </span>
     );
   }
   if (client.insurance_provider && !client.medicaid_id && !client.medicare_id) {
     badges.push(
-      <span key="private" className="px-2 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+      <span key="private" className="px-2 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700">
         Private
       </span>
     );
@@ -456,7 +456,7 @@ function InsuranceBadge({ client }: { client: Client }) {
   
   if (badges.length === 0) {
     return (
-      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-dark-600 text-dark-400 border border-dark-500">
+      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500">
         No Insurance
       </span>
     );
@@ -483,45 +483,45 @@ function ClientRow({
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-4 px-4 py-3 bg-dark-800/50 hover:bg-dark-700/80 cursor-pointer transition-all border-l-4 ${config.borderColor} group ${isConfirmingDelete ? 'bg-red-500/5' : ''}`}
+      className={`flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 cursor-pointer transition-all border-l-4 ${config.borderColor} group ${isConfirmingDelete ? 'bg-red-50' : ''}`}
     >
       <ClientAvatar name={client.full_name} />
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="font-medium text-white truncate">{client.full_name}</p>
+          <p className="font-medium text-slate-900 truncate">{client.full_name}</p>
           <InsuranceBadge client={client} />
         </div>
       </div>
       
       <StatusBadge status={status} />
       
-      <div className="w-32 text-sm text-dark-300">
+      <div className="w-32 text-sm text-slate-500">
         {client.phone || '-'}
       </div>
       
-      <div className="w-36 text-sm text-dark-300 truncate">
+      <div className="w-36 text-sm text-slate-500 truncate">
         {client.primary_diagnosis || 'General Care'}
       </div>
       
       {isConfirmingDelete ? (
         <button
           onClick={onDelete}
-          className="px-2 py-1 text-xs font-medium text-red-400 bg-red-500/20 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-all animate-pulse"
+          className="px-2 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-all animate-pulse"
         >
           Confirm?
         </button>
       ) : (
         <button
           onClick={onDelete}
-          className="p-1.5 text-dark-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
           title="Delete client"
         >
           <Trash2 className="w-4 h-4" />
         </button>
       )}
       
-      <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
     </div>
   );
 }
@@ -787,31 +787,31 @@ export default function ClientsPage() {
               <div className="relative" ref={plusMenuRef}>
                 <button 
                   onClick={() => setShowPlusMenu(!showPlusMenu)}
-                  className="p-2 text-dark-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
                 >
                   <MoreHorizontal className="w-5 h-5" />
                 </button>
                 {showPlusMenu && (
-                  <div className="absolute top-full right-0 mt-2 w-52 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden">
+                  <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden">
                     <button
                       onClick={() => { setQuickAddOpen(true); setShowPlusMenu(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                     >
-                      <UserPlus className="w-4 h-4 text-primary-400" />
+                      <UserPlus className="w-4 h-4 text-primary-500" />
                       Add New Client
                     </button>
                     <button
                       onClick={() => { setShowPlusMenu(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                     >
-                      <FileSpreadsheet className="w-4 h-4 text-green-400" />
+                      <FileSpreadsheet className="w-4 h-4 text-green-500" />
                       Import from CSV
                     </button>
                     <button
                       onClick={() => { setShowPlusMenu(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-dark-200 hover:bg-dark-700 hover:text-white transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                     >
-                      <FolderUp className="w-4 h-4 text-orange-400" />
+                      <FolderUp className="w-4 h-4 text-orange-500" />
                       Bulk Import
                     </button>
                   </div>
@@ -821,66 +821,66 @@ export default function ClientsPage() {
           </div>
 
           {/* Insurance Type Filter Tabs */}
-          <div className="flex items-center gap-2 mb-4 border-b border-dark-700 pb-4">
+          <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-4">
             <button
               onClick={() => setInsuranceFilter('all')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 insuranceFilter === 'all' 
-                  ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' 
-                  : 'text-dark-400 hover:text-white hover:bg-dark-700'
+                  ? 'bg-primary-50 text-primary-700 border border-primary-200' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
               }`}
             >
               <Users className="w-4 h-4" />
               All Clients
-              <span className="text-xs bg-dark-600 px-2 py-0.5 rounded-full">{clients.length}</span>
+              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">{clients.length}</span>
             </button>
             <button
               onClick={() => setInsuranceFilter('medicaid')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 insuranceFilter === 'medicaid' 
-                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
-                  : 'text-dark-400 hover:text-white hover:bg-dark-700'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
               }`}
             >
               <Building2 className="w-4 h-4" />
               Medicaid
-              <span className="text-xs bg-dark-600 px-2 py-0.5 rounded-full">{medicaidCount}</span>
+              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">{medicaidCount}</span>
             </button>
             <button
               onClick={() => setInsuranceFilter('medicare')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 insuranceFilter === 'medicare' 
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                  : 'text-dark-400 hover:text-white hover:bg-dark-700'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
               }`}
             >
               <Shield className="w-4 h-4" />
               Medicare
-              <span className="text-xs bg-dark-600 px-2 py-0.5 rounded-full">{medicareCount}</span>
+              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">{medicareCount}</span>
             </button>
             <button
               onClick={() => setInsuranceFilter('private')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 insuranceFilter === 'private' 
-                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
-                  : 'text-dark-400 hover:text-white hover:bg-dark-700'
+                  ? 'bg-purple-50 text-purple-700 border border-purple-200' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
               }`}
             >
               <Heart className="w-4 h-4" />
               Private Insurance
-              <span className="text-xs bg-dark-600 px-2 py-0.5 rounded-full">{privateCount}</span>
+              <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">{privateCount}</span>
             </button>
           </div>
 
           {/* View Tabs & Search */}
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-1 bg-dark-800/50 rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('table')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   viewMode === 'table' 
-                    ? 'bg-dark-700 text-white' 
-                    : 'text-dark-400 hover:text-white'
+                    ? 'bg-white text-slate-800 shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -890,8 +890,8 @@ export default function ClientsPage() {
                 onClick={() => setViewMode('pipeline')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   viewMode === 'pipeline' 
-                    ? 'bg-dark-700 text-white' 
-                    : 'text-dark-400 hover:text-white'
+                    ? 'bg-white text-slate-800 shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -901,8 +901,8 @@ export default function ClientsPage() {
                 onClick={() => setViewMode('forecast')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   viewMode === 'forecast' 
-                    ? 'bg-dark-700 text-white' 
-                    : 'text-dark-400 hover:text-white'
+                    ? 'bg-white text-slate-800 shadow-sm' 
+                    : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />
@@ -910,7 +910,7 @@ export default function ClientsPage() {
               </button>
               <button
                 onClick={() => setQuickAddOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-dark-400 hover:text-white hover:bg-dark-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors"
                 title="Add new client"
               >
                 <Plus className="w-4 h-4" />
@@ -919,16 +919,16 @@ export default function ClientsPage() {
 
             <div className="flex items-center gap-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Search clients..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64 pl-10 pr-4 py-2 bg-dark-800 border border-dark-600 rounded-xl text-white text-sm placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                  className="w-64 pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
                 />
               </div>
-              <button className="p-2 bg-dark-800 border border-dark-600 rounded-xl text-dark-400 hover:text-white">
+              <button className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600">
                 <Filter className="w-4 h-4" />
               </button>
               <button 
@@ -945,7 +945,7 @@ export default function ClientsPage() {
           {loading ? (
             <div className="card p-12 text-center">
               <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-dark-400">Loading clients...</p>
+              <p className="text-slate-500">Loading clients...</p>
             </div>
           ) : viewMode === 'table' ? (
             /* Table View - Grouped by Status */
@@ -954,12 +954,12 @@ export default function ClientsPage() {
               {intakeClients.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-teal-400">Intake queue</h2>
-                    <span className="text-sm text-dark-400">({intakeClients.length})</span>
+                    <h2 className="text-lg font-semibold text-teal-700">Intake queue</h2>
+                    <span className="text-sm text-slate-500">({intakeClients.length})</span>
                   </div>
                   
                   {/* Table Header */}
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
                     <div className="w-10" />
                     <div className="flex-1">Client</div>
                     <div className="w-28">Visit status</div>
@@ -969,7 +969,7 @@ export default function ClientsPage() {
                     <div className="w-4" />
                   </div>
 
-                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
                     {intakeClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -987,11 +987,11 @@ export default function ClientsPage() {
               {assessmentClients.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-purple-400">In Assessment</h2>
-                    <span className="text-sm text-dark-400">({assessmentClients.length})</span>
+                    <h2 className="text-lg font-semibold text-purple-700">In Assessment</h2>
+                    <span className="text-sm text-slate-500">({assessmentClients.length})</span>
                   </div>
                   
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
                     <div className="w-10" />
                     <div className="flex-1">Client</div>
                     <div className="w-28">Visit status</div>
@@ -1001,7 +1001,7 @@ export default function ClientsPage() {
                     <div className="w-4" />
                   </div>
 
-                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
                     {assessmentClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -1019,12 +1019,12 @@ export default function ClientsPage() {
               {proposalClients.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-orange-400">Awaiting signature</h2>
-                    <span className="text-sm text-dark-400">({proposalClients.length})</span>
+                    <h2 className="text-lg font-semibold text-orange-700">Awaiting signature</h2>
+                    <span className="text-sm text-slate-500">({proposalClients.length})</span>
                   </div>
                   
                   {/* Table Header */}
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
                     <div className="w-10" />
                     <div className="flex-1">Client</div>
                     <div className="w-28">Visit status</div>
@@ -1034,7 +1034,7 @@ export default function ClientsPage() {
                     <div className="w-4" />
                   </div>
 
-                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
                     {proposalClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -1052,12 +1052,12 @@ export default function ClientsPage() {
               {assignedClients.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-green-400">Active clients</h2>
-                    <span className="text-sm text-dark-400">({assignedClients.length})</span>
+                    <h2 className="text-lg font-semibold text-emerald-700">Active clients</h2>
+                    <span className="text-sm text-slate-500">({assignedClients.length})</span>
                   </div>
                   
                   {/* Table Header */}
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
                     <div className="w-10" />
                     <div className="flex-1">Client</div>
                     <div className="w-28">Visit status</div>
@@ -1067,7 +1067,7 @@ export default function ClientsPage() {
                     <div className="w-4" />
                   </div>
 
-                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
                     {assignedClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -1085,11 +1085,11 @@ export default function ClientsPage() {
               {followUpClients.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-purple-400">Follow-up required</h2>
-                    <span className="text-sm text-dark-400">({followUpClients.length})</span>
+                    <h2 className="text-lg font-semibold text-purple-700">Follow-up required</h2>
+                    <span className="text-sm text-slate-500">({followUpClients.length})</span>
                   </div>
                   
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
                     <div className="w-10" />
                     <div className="flex-1">Client</div>
                     <div className="w-28">Visit status</div>
@@ -1099,7 +1099,7 @@ export default function ClientsPage() {
                     <div className="w-4" />
                   </div>
 
-                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
                     {followUpClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -1117,11 +1117,11 @@ export default function ClientsPage() {
               {ungroupedClients.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <h2 className="text-lg font-semibold text-dark-300">Other Clients</h2>
-                    <span className="text-sm text-dark-400">({ungroupedClients.length})</span>
+                    <h2 className="text-lg font-semibold text-slate-600">Other Clients</h2>
+                    <span className="text-sm text-slate-500">({ungroupedClients.length})</span>
                   </div>
                   
-                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-dark-400 uppercase tracking-wider border-b border-dark-700">
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-200">
                     <div className="w-10" />
                     <div className="flex-1">Client</div>
                     <div className="w-28">Visit status</div>
@@ -1131,7 +1131,7 @@ export default function ClientsPage() {
                     <div className="w-4" />
                   </div>
 
-                  <div className="bg-dark-800/30 rounded-xl overflow-hidden border border-dark-700/50">
+                  <div className="bg-white rounded-lg overflow-hidden border border-slate-200">
                     {ungroupedClients.map((client) => (
                       <ClientRow 
                         key={client.id} 
@@ -1148,13 +1148,13 @@ export default function ClientsPage() {
               {/* Empty State */}
               {filteredClients.length === 0 && (
                 <div className="card p-12 text-center">
-                  <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-dark-400" />
+                  <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-slate-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
                     {searchQuery ? 'No clients found' : 'No clients yet'}
                   </h3>
-                  <p className="text-dark-400 mb-4">
+                  <p className="text-slate-400 mb-4">
                     {searchQuery ? 'Try a different search term' : 'Add your first client to get started'}
                   </p>
                   {!searchQuery && (
@@ -1172,11 +1172,11 @@ export default function ClientsPage() {
               {pipelineColumns.map((col) => {
                 const columnClients = getPipelineClients(col.statuses);
                 const colorMap: Record<string, { header: string; headerBorder: string; text: string; dot: string }> = {
-                  blue:   { header: 'bg-blue-500',   headerBorder: 'border-blue-500',   text: 'text-blue-400',   dot: 'bg-blue-400' },
-                  purple: { header: 'bg-purple-500', headerBorder: 'border-purple-500', text: 'text-purple-400', dot: 'bg-purple-400' },
-                  orange: { header: 'bg-orange-500', headerBorder: 'border-orange-500', text: 'text-orange-400', dot: 'bg-orange-400' },
-                  green:  { header: 'bg-green-500',  headerBorder: 'border-green-500',  text: 'text-green-400',  dot: 'bg-green-400' },
-                  yellow: { header: 'bg-yellow-500', headerBorder: 'border-yellow-500', text: 'text-yellow-400', dot: 'bg-yellow-400' },
+                  blue:   { header: 'bg-blue-500',   headerBorder: 'border-blue-500',   text: 'text-blue-700',   dot: 'bg-blue-500' },
+                  purple: { header: 'bg-purple-500', headerBorder: 'border-purple-500', text: 'text-purple-700', dot: 'bg-purple-500' },
+                  orange: { header: 'bg-orange-500', headerBorder: 'border-orange-500', text: 'text-orange-700', dot: 'bg-orange-500' },
+                  green:  { header: 'bg-green-500',  headerBorder: 'border-green-500',  text: 'text-green-700',  dot: 'bg-green-500' },
+                  yellow: { header: 'bg-yellow-500', headerBorder: 'border-yellow-500', text: 'text-yellow-700', dot: 'bg-yellow-500' },
                 };
                 const colors = colorMap[col.color] || colorMap.blue;
                 const isOver = dragOverColumn === col.key;
@@ -1196,19 +1196,19 @@ export default function ClientsPage() {
                     }}
                     className={`rounded-xl border overflow-hidden transition-all ${
                       isOver
-                        ? `border-2 ${colors.headerBorder} bg-dark-700/20 scale-[1.01]`
-                        : 'border-dark-700/50 bg-dark-800/30'
+                        ? `border-2 ${colors.headerBorder} bg-slate-50 scale-[1.01]`
+                        : 'border-slate-200 bg-white'
                     }`}
                   >
                     {/* Column header with colored top bar */}
                     <div className={`h-1 ${colors.header}`} />
-                    <div className="px-3 py-2.5 border-b border-dark-700/50">
+                    <div className="px-3 py-2.5 border-b border-slate-200">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${colors.dot}`} />
-                          <h3 className="font-semibold text-sm text-white">{col.label}</h3>
+                          <h3 className="font-semibold text-sm text-slate-800">{col.label}</h3>
                         </div>
-                        <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${colors.text} bg-dark-700/50`}>
+                        <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${colors.text} bg-slate-100`}>
                           {columnClients.length}
                         </span>
                       </div>
@@ -1223,8 +1223,8 @@ export default function ClientsPage() {
                           careLevel === 'moderate' ? 'border-l-orange-400' : 'border-l-transparent';
                         const priorityLabel = careLevel === 'high' ? 'High' :
                           careLevel === 'moderate' ? 'Moderate' : careLevel === 'low' ? 'Routine' : null;
-                        const priorityColor = careLevel === 'high' ? 'text-red-400' :
-                          careLevel === 'moderate' ? 'text-orange-400' : 'text-green-400';
+                        const priorityColor = careLevel === 'high' ? 'text-red-600' :
+                          careLevel === 'moderate' ? 'text-orange-600' : 'text-green-600';
 
                         return (
                           <div
@@ -1233,13 +1233,13 @@ export default function ClientsPage() {
                             onDragStart={() => setDraggedClientId(client.id)}
                             onDragEnd={() => { setDraggedClientId(null); setDragOverColumn(null); }}
                             onClick={() => router.push(`/clients/${client.id}`)}
-                            className={`p-3 bg-dark-800 rounded-lg border-l-[3px] ${priorityBorder} border border-dark-600 cursor-grab active:cursor-grabbing hover:border-dark-500 hover:shadow-lg hover:shadow-black/20 transition-all group ${
+                            className={`p-3 bg-white rounded-lg border-l-[3px] ${priorityBorder} border border-slate-200 cursor-grab active:cursor-grabbing hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 transition-all group ${
                               isDragging ? 'opacity-40 scale-95' : ''
                             }`}
                           >
                             {/* Client name row */}
                             <div className="flex items-center gap-2 mb-1.5">
-                              <p className="font-medium text-white text-xs truncate flex-1">{client.full_name}</p>
+                              <p className="font-medium text-slate-800 text-xs truncate flex-1">{client.full_name}</p>
                             </div>
 
                             {/* Priority badge */}
@@ -1255,9 +1255,9 @@ export default function ClientsPage() {
                             {/* Meta row: avatar, specialty */}
                             <div className="flex items-center justify-between mt-2">
                               <ClientAvatar name={client.full_name} size="sm" />
-                              <div className="flex items-center gap-2 text-dark-500">
+                              <div className="flex items-center gap-2 text-slate-500">
                                 {client.primary_diagnosis && (
-                                  <span className="text-[9px] px-1.5 py-0.5 bg-dark-700/60 rounded text-dark-400 truncate max-w-[80px]">
+                                  <span className="text-[9px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 truncate max-w-[80px]">
                                     {client.primary_diagnosis}
                                   </span>
                                 )}
@@ -1267,8 +1267,8 @@ export default function ClientsPage() {
                         );
                       })}
                       {columnClients.length === 0 && (
-                        <div className={`text-center py-8 text-dark-500 text-xs rounded-lg border border-dashed transition-colors ${
-                          isOver ? `${colors.headerBorder} border-opacity-50` : 'border-dark-700/30'
+                        <div className={`text-center py-8 text-slate-400 text-xs rounded-lg border border-dashed transition-colors ${
+                          isOver ? `${colors.headerBorder} border-opacity-50` : 'border-slate-200'
                         }`}>
                           {isOver ? 'Drop here' : 'No clients'}
                         </div>
@@ -1284,48 +1284,48 @@ export default function ClientsPage() {
               <div className="grid grid-cols-4 gap-4">
                 <div className="card p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                      <Users className="w-5 h-5 text-blue-400" />
+                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                      <Users className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-dark-400">Total Clients</p>
-                      <p className="text-2xl font-bold text-white">{clients.length}</p>
+                      <p className="text-sm text-slate-500">Total Clients</p>
+                      <p className="text-2xl font-bold text-slate-900">{clients.length}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="card p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-green-400" />
+                    <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-dark-400">Active</p>
-                      <p className="text-2xl font-bold text-green-400">{activeCount}</p>
+                      <p className="text-sm text-slate-500">Active</p>
+                      <p className="text-2xl font-bold text-emerald-600">{activeCount}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="card p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                      <AlertCircle className="w-5 h-5 text-orange-400" />
+                    <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                      <AlertCircle className="w-5 h-5 text-orange-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-dark-400">In Intake</p>
-                      <p className="text-2xl font-bold text-orange-400">{intakeCount}</p>
+                      <p className="text-sm text-slate-500">In Intake</p>
+                      <p className="text-2xl font-bold text-orange-600">{intakeCount}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="card p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
-                      <Heart className="w-5 h-5 text-red-400" />
+                    <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-red-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-dark-400">High Care</p>
-                      <p className="text-2xl font-bold text-red-400">{highCareCount}</p>
+                      <p className="text-sm text-slate-500">High Care</p>
+                      <p className="text-2xl font-bold text-red-600">{highCareCount}</p>
                     </div>
                   </div>
                 </div>
@@ -1333,7 +1333,7 @@ export default function ClientsPage() {
 
               {/* Simple Chart Placeholder */}
               <div className="card p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Client Pipeline Forecast</h3>
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Client Pipeline Forecast</h3>
                 <div className="h-64 flex items-end justify-around gap-4">
                   {['Intake', 'Assessment', 'Active', 'Follow-up'].map((stage, i) => {
                     const heights = [intakeCount, 
@@ -1351,8 +1351,8 @@ export default function ClientsPage() {
                           className={`w-full max-w-[80px] ${colors[i]} rounded-t-lg transition-all duration-500`}
                           style={{ height: `${Math.max(height, 10)}%` }}
                         />
-                        <span className="text-sm text-dark-400">{stage}</span>
-                        <span className="text-lg font-bold text-white">{heights[i]}</span>
+                        <span className="text-sm text-slate-500">{stage}</span>
+                        <span className="text-lg font-bold text-slate-900">{heights[i]}</span>
                       </div>
                     );
                   })}
@@ -1382,17 +1382,17 @@ export default function ClientsPage() {
       {/* Automations Modal */}
       {showAutomationsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-dark-800 border border-dark-700 rounded-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-dark-700">
+            <div className="bg-white border border-slate-200 rounded-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-slate-200">
               <div>
-                <h2 className="text-xl font-bold text-white">Client Automations</h2>
-                <p className="text-dark-400 text-sm mt-1">Manage workflow automations for client management</p>
+                <h2 className="text-xl font-bold text-slate-900">Client Automations</h2>
+                <p className="text-slate-500 text-sm mt-1">Manage workflow automations for client management</p>
               </div>
               <button 
                 onClick={() => setShowAutomationsModal(false)} 
-                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5 text-dark-400" />
+                <X className="w-5 h-5 text-slate-400" />
               </button>
             </div>
             
@@ -1402,23 +1402,23 @@ export default function ClientsPage() {
                   key={automation.id}
                   className={`p-4 rounded-xl border transition-colors ${
                     automation.enabled 
-                      ? 'bg-primary-500/10 border-primary-500/30' 
-                      : 'bg-dark-700/50 border-dark-600'
+                      ? 'bg-primary-50 border-primary-200' 
+                      : 'bg-slate-50 border-slate-200'
                   }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <Zap className={`w-4 h-4 ${automation.enabled ? 'text-primary-400' : 'text-dark-400'}`} />
-                        <h3 className="font-medium text-white">{automation.name}</h3>
+                        <Zap className={`w-4 h-4 ${automation.enabled ? 'text-primary-500' : 'text-slate-400'}`} />
+                        <h3 className="font-medium text-slate-900">{automation.name}</h3>
                       </div>
-                      <p className="text-dark-400 text-sm mt-1">{automation.description}</p>
-                      <p className="text-dark-500 text-xs mt-2">Trigger: {automation.trigger}</p>
+                      <p className="text-slate-500 text-sm mt-1">{automation.description}</p>
+                      <p className="text-slate-400 text-xs mt-2">Trigger: {automation.trigger}</p>
                     </div>
                     <button
                       onClick={() => toggleAutomation(automation.id)}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        automation.enabled ? 'bg-primary-500' : 'bg-dark-600'
+                        automation.enabled ? 'bg-primary-500' : 'bg-slate-300'
                       }`}
                     >
                       <span
@@ -1432,9 +1432,9 @@ export default function ClientsPage() {
               ))}
             </div>
             
-            <div className="p-6 border-t border-dark-700 bg-dark-800/50">
+            <div className="p-6 border-t border-slate-200 bg-slate-50">
               <div className="flex items-center justify-between">
-                <p className="text-dark-400 text-sm">
+                <p className="text-slate-500 text-sm">
                   {automations.filter(a => a.enabled).length} of {automations.length} automations active
                 </p>
                 <button
