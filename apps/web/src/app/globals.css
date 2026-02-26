@@ -61,47 +61,8 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* ============================================================
-   LIGHT/DARK MODE: text-white handling
-   In light mode (default), text-white becomes dark for readability.
-   Restore white on colored/dark backgrounds.
-   ============================================================ */
-
-.text-white {
-  color: rgb(15 23 42) !important;
-}
-
-/* Restore white on any solid colored or dark background */
-[class*="bg-primary-5"] .text-white, [class*="bg-primary-5"].text-white,
-[class*="bg-primary-6"] .text-white, [class*="bg-primary-6"].text-white,
-[class*="bg-primary-7"] .text-white, [class*="bg-primary-7"].text-white,
-[class*="bg-green-5"] .text-white, [class*="bg-green-5"].text-white,
-[class*="bg-green-6"] .text-white, [class*="bg-green-6"].text-white,
-[class*="bg-emerald-5"] .text-white, [class*="bg-emerald-5"].text-white,
-[class*="bg-emerald-6"] .text-white, [class*="bg-emerald-6"].text-white,
-[class*="bg-red-5"] .text-white, [class*="bg-red-5"].text-white,
-[class*="bg-red-6"] .text-white, [class*="bg-red-6"].text-white,
-[class*="bg-blue-5"] .text-white, [class*="bg-blue-5"].text-white,
-[class*="bg-blue-6"] .text-white, [class*="bg-blue-6"].text-white,
-[class*="bg-purple-5"] .text-white, [class*="bg-purple-5"].text-white,
-[class*="bg-purple-6"] .text-white, [class*="bg-purple-6"].text-white,
-[class*="bg-orange-5"] .text-white, [class*="bg-orange-5"].text-white,
-[class*="bg-amber-5"] .text-white, [class*="bg-amber-5"].text-white,
-[class*="bg-teal-5"] .text-white, [class*="bg-teal-5"].text-white,
-[class*="bg-teal-6"] .text-white, [class*="bg-teal-6"].text-white,
-[class*="bg-teal-7"] .text-white, [class*="bg-teal-7"].text-white,
-[class*="bg-indigo-5"] .text-white, [class*="bg-indigo-5"].text-white,
-[class*="bg-cyan-5"] .text-white, [class*="bg-cyan-5"].text-white,
-[class*="bg-yellow-5"] .text-white, [class*="bg-yellow-5"].text-white,
-[class*="bg-slate-7"] .text-white, [class*="bg-slate-7"].text-white,
-[class*="bg-slate-8"] .text-white, [class*="bg-slate-8"].text-white,
-[class*="bg-slate-9"] .text-white, [class*="bg-slate-9"].text-white,
-[class*="bg-gray-7"] .text-white, [class*="bg-gray-7"].text-white,
-[class*="bg-gray-8"] .text-white, [class*="bg-gray-8"].text-white,
-[class*="bg-gray-9"] .text-white, [class*="bg-gray-9"].text-white,
-[class*="bg-black"] .text-white, [class*="bg-black"].text-white {
-  color: #ffffff !important;
-}
+/* Keep Tailwind `text-white` semantics globally.
+   Avoid global color overrides that require fragile class-based exceptions. */
 
 /* Gradient backgrounds keep white */
 [class*="from-"][class*="to-"].text-white,
@@ -151,11 +112,6 @@ button[class*="bg-gradient-to-br"][class*="from-"] {
 a[class*="bg-gradient-to-r"][class*="from-"] *,
 button[class*="bg-gradient-to-r"][class*="from-"] * {
   color: inherit !important;
-}
-
-/* Dark mode: restore text-white naturally */
-[data-theme="dark"] .text-white {
-  color: #ffffff !important;
 }
 
 /* ============================================================
@@ -244,7 +200,8 @@ thead[class*="bg-dark-700"] {
 }
 
 /* Modal/dialog overlays */
-[class*="bg-black"] {
+.modal-backdrop,
+[class*="fixed"][class*="inset-0"][class*="bg-black"] {
   background-color: rgba(0, 0, 0, 0.3) !important;
 }
 

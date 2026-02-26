@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, Pressable, Alert } from 'react-native';
-import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
+
+let Audio: typeof import('expo-av').Audio | null = null;
+try {
+  Audio = require('expo-av').Audio;
+} catch {
+  // expo-av not available (Expo Go without native module)
+}
 
 interface Props {
   onRecordingComplete: (uri: string) => void;
@@ -9,9 +15,10 @@ interface Props {
 }
 
 export default function AudioRecorder({ onRecordingComplete, disabled }: Props) {
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [recording, setRecording] = useState<InstanceType<NonNullable<typeof Audio>['Recording']> | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
+  const [unavailable, setUnavailable] = useState(!Audio);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -29,6 +36,15 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
   };
 
   const startRecording = async () => {
+    if (!Audio) {
+      setUnavailable(true);
+      Alert.alert(
+        'Development Build Required',
+        'Audio recording requires a development build. Run `npx expo run:ios` to create one.',
+      );
+      return;
+    }
+
     try {
       const permission = await Audio.requestPermissionsAsync();
       if (!permission.granted) {
@@ -52,8 +68,12 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
       intervalRef.current = setInterval(() => {
         setDuration((d) => d + 1);
       }, 1000);
-    } catch (err) {
-      Alert.alert('Error', 'Failed to start recording. Please try again.');
+    } catch {
+      setUnavailable(true);
+      Alert.alert(
+        'Recording Unavailable',
+        'Audio recording is not available in Expo Go. Use a development build instead.',
+      );
     }
   };
 
@@ -76,17 +96,36 @@ export default function AudioRecorder({ onRecordingComplete, disabled }: Props) 
       if (uri) {
         onRecordingComplete(uri);
       }
-    } catch (err) {
+    } catch {
       Alert.alert('Error', 'Failed to stop recording.');
     }
   };
+
+  if (unavailable) {
+    return (
+      <View className="items-center">
+        <View
+          className="w-20 h-20 rounded-full items-center justify-center mb-4"
+          style={{ backgroundColor: '#1e3f76' }}
+        >
+          <Ionicons name="mic-off" size={32} color="#829bcd" />
+        </View>
+        <Text className="text-dark-300 text-sm text-center px-4">
+          Audio recording requires a development build.
+        </Text>
+        <Text className="text-dark-500 text-xs text-center mt-1">
+          Run: npx expo run:ios
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="items-center">
       {isRecording && (
         <View className="items-center mb-6">
           <View className="flex-row items-center mb-2">
-            <View className="w-3 h-3 rounded-full bg-red-500 mr-2 animate-pulse" />
+            <View className="w-3 h-3 rounded-full bg-red-500 mr-2" />
             <Text className="text-red-400 font-medium text-sm">Recording</Text>
           </View>
           <Text className="text-white text-4xl font-light tracking-wider">

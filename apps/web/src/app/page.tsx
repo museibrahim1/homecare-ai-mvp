@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ChatWidget from '@/components/ChatWidget';
@@ -388,7 +388,11 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                 <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mb-6 animate-pulse shadow-lg shadow-red-500/30"><Mic className="w-12 h-12 text-white" /></div>
                 <div className="flex items-center gap-1 h-16 mb-4">
                   {Array.from({ length: 40 }).map((_, i) => (
-                    <div key={i} className="w-1.5 bg-red-500 rounded-full animate-waveform" style={{ height: `${20 + Math.random() * 80}%`, animationDelay: `${i * 30}ms` }} />
+                    <div
+                      key={i}
+                      className="w-1.5 bg-red-500 rounded-full animate-waveform"
+                      style={{ height: `${28 + ((i * 11) % 58)}%`, animationDelay: `${i * 30}ms` }}
+                    />
                   ))}
                 </div>
                 <div className="bg-dark-800 rounded-xl p-4 max-w-md">
@@ -409,14 +413,14 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                 </div>
                 <div className="space-y-3">
                   {[
-                    { initial: 'C', color: 'purple', speaker: 'Caregiver (00:00)', text: 'Good morning Mrs. Johnson, I\'m here to do your care assessment today.' },
-                    { initial: 'M', color: 'green', speaker: 'Mrs. Johnson (00:05)', text: 'Hello dear, thank you for coming. I\'ve been having trouble with my daily activities.' },
-                    { initial: 'C', color: 'purple', speaker: 'Caregiver (00:12)', text: 'I understand. Let\'s go through what kind of help you need...' },
+                    { initial: 'C', avatarClass: 'bg-purple-500', speakerClass: 'text-purple-400', speaker: 'Caregiver (00:00)', text: 'Good morning Mrs. Johnson, I\'m here to do your care assessment today.' },
+                    { initial: 'M', avatarClass: 'bg-green-500', speakerClass: 'text-green-400', speaker: 'Mrs. Johnson (00:05)', text: 'Hello dear, thank you for coming. I\'ve been having trouble with my daily activities.' },
+                    { initial: 'C', avatarClass: 'bg-purple-500', speakerClass: 'text-purple-400', speaker: 'Caregiver (00:12)', text: 'I understand. Let\'s go through what kind of help you need...' },
                   ].map((msg, i) => (
                     <div key={i} className="flex gap-3 animate-slideIn" style={{ animationDelay: `${i * 200}ms` }}>
-                      <div className={`w-8 h-8 bg-${msg.color}-500 rounded-full flex items-center justify-center text-white text-sm font-bold`}>{msg.initial}</div>
+                      <div className={`w-8 h-8 ${msg.avatarClass} rounded-full flex items-center justify-center text-white text-sm font-bold`}>{msg.initial}</div>
                       <div className="flex-1 bg-dark-800 rounded-xl p-3">
-                        <p className={`text-xs text-${msg.color}-400 mb-1`}>{msg.speaker}</p>
+                        <p className={`text-xs ${msg.speakerClass} mb-1`}>{msg.speaker}</p>
                         <p className="text-dark-200 text-sm">{msg.text}</p>
                       </div>
                     </div>
@@ -744,13 +748,19 @@ function BookDemoSection() {
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
+  const faqId = `faq-${q.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
   return (
     <div className="border border-dark-600 rounded-xl overflow-hidden transition-all">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between p-5 text-left hover:bg-dark-800/50 transition">
+      <button
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-controls={faqId}
+        className="w-full flex items-center justify-between p-5 text-left hover:bg-dark-800/50 transition"
+      >
         <span className="text-white font-medium pr-4">{q}</span>
         {open ? <Minus className="w-5 h-5 text-primary-400 shrink-0" /> : <Plus className="w-5 h-5 text-dark-400 shrink-0" />}
       </button>
-      {open && <div className="px-5 pb-5 text-dark-300 leading-relaxed">{a}</div>}
+      {open && <div id={faqId} className="px-5 pb-5 text-dark-300 leading-relaxed">{a}</div>}
     </div>
   );
 }
@@ -762,6 +772,27 @@ export default function LandingPage() {
   const [demoOpen, setDemoOpen] = useState(false);
   const [activeFeatureTab, setActiveFeatureTab] = useState('ai');
   const [navDropdown, setNavDropdown] = useState<string | null>(null);
+  const isDropdownOpen = (id: string) => navDropdown === id;
+  const openDropdown = (id: string) => setNavDropdown(id);
+  const closeDropdown = () => setNavDropdown(null);
+  const toggleDropdown = (id: string) => setNavDropdown(prev => (prev === id ? null : id));
+  const handleDropdownKeyDown = (e: React.KeyboardEvent, id: string) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      openDropdown(id);
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeDropdown();
+    }
+  };
+  const handleDropdownBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    const next = e.relatedTarget as Node | null;
+    if (!e.currentTarget.contains(next)) {
+      closeDropdown();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-dark-900 landing-dark">
@@ -774,14 +805,27 @@ export default function LandingPage() {
               <span className="text-xl font-bold text-white">PalmCare AI</span>
             </Link>
 
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1" onKeyDown={(e) => e.key === 'Escape' && closeDropdown()}>
               {/* Features dropdown */}
-              <div className="relative" onMouseEnter={() => setNavDropdown('features')} onMouseLeave={() => setNavDropdown(null)}>
-                <button className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg">
+              <div
+                className="relative"
+                onMouseEnter={() => openDropdown('features')}
+                onMouseLeave={closeDropdown}
+                onFocusCapture={() => openDropdown('features')}
+                onBlurCapture={handleDropdownBlur}
+              >
+                <button
+                  aria-haspopup="menu"
+                  aria-expanded={isDropdownOpen('features')}
+                  aria-controls="features-menu"
+                  onClick={() => toggleDropdown('features')}
+                  onKeyDown={(e) => handleDropdownKeyDown(e, 'features')}
+                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg"
+                >
                   Features <ChevronDown className="w-4 h-4" />
                 </button>
-                {navDropdown === 'features' && (
-                  <div className="absolute top-full left-0 mt-1 w-[520px] bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-4 grid grid-cols-2 gap-3">
+                {isDropdownOpen('features') && (
+                  <div id="features-menu" role="menu" className="absolute top-full left-0 mt-1 w-[520px] bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-4 grid grid-cols-2 gap-3">
                     {[
                       { href: '/features#ai', icon: Brain, label: 'AI Intelligence', desc: 'Voice assessments & smart contracts' },
                       { href: '/features#ops', icon: ClipboardList, label: 'Agency Operations', desc: 'CRM, scheduling & visit management' },
@@ -805,12 +849,25 @@ export default function LandingPage() {
               </div>
 
               {/* Solutions dropdown */}
-              <div className="relative" onMouseEnter={() => setNavDropdown('solutions')} onMouseLeave={() => setNavDropdown(null)}>
-                <button className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg">
+              <div
+                className="relative"
+                onMouseEnter={() => openDropdown('solutions')}
+                onMouseLeave={closeDropdown}
+                onFocusCapture={() => openDropdown('solutions')}
+                onBlurCapture={handleDropdownBlur}
+              >
+                <button
+                  aria-haspopup="menu"
+                  aria-expanded={isDropdownOpen('solutions')}
+                  aria-controls="solutions-menu"
+                  onClick={() => toggleDropdown('solutions')}
+                  onKeyDown={(e) => handleDropdownKeyDown(e, 'solutions')}
+                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg"
+                >
                   Solutions <ChevronDown className="w-4 h-4" />
                 </button>
-                {navDropdown === 'solutions' && (
-                  <div className="absolute top-full left-0 mt-1 w-72 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
+                {isDropdownOpen('solutions') && (
+                  <div id="solutions-menu" role="menu" className="absolute top-full left-0 mt-1 w-72 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
                     {[
                       { label: 'Small Agencies', desc: 'Up to 30 clients', href: '#solutions' },
                       { label: 'Medium Agencies', desc: '30–200 clients', href: '#solutions' },
@@ -826,12 +883,25 @@ export default function LandingPage() {
               </div>
 
               {/* Resources dropdown */}
-              <div className="relative" onMouseEnter={() => setNavDropdown('resources')} onMouseLeave={() => setNavDropdown(null)}>
-                <button className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg">
+              <div
+                className="relative"
+                onMouseEnter={() => openDropdown('resources')}
+                onMouseLeave={closeDropdown}
+                onFocusCapture={() => openDropdown('resources')}
+                onBlurCapture={handleDropdownBlur}
+              >
+                <button
+                  aria-haspopup="menu"
+                  aria-expanded={isDropdownOpen('resources')}
+                  aria-controls="resources-menu"
+                  onClick={() => toggleDropdown('resources')}
+                  onKeyDown={(e) => handleDropdownKeyDown(e, 'resources')}
+                  className="flex items-center gap-1 px-3 py-2 text-dark-300 hover:text-white transition rounded-lg"
+                >
                   Resources <ChevronDown className="w-4 h-4" />
                 </button>
-                {navDropdown === 'resources' && (
-                  <div className="absolute top-full left-0 mt-1 w-64 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
+                {isDropdownOpen('resources') && (
+                  <div id="resources-menu" role="menu" className="absolute top-full left-0 mt-1 w-64 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
                     {[
                       { label: 'Help Center', href: '/help' },
                       { label: 'System Status', href: '/status' },
@@ -852,7 +922,7 @@ export default function LandingPage() {
               <a href="#book-demo" className="btn-primary py-2 px-5 text-sm">Schedule Demo</a>
             </div>
 
-            <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-dark-300 hover:text-white">
+            <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="block lg:hidden p-2 text-dark-300 hover:text-white">
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -923,7 +993,13 @@ export default function LandingPage() {
                       <div><p className="text-white font-medium">Recording Assessment...</p><p className="text-sm text-dark-400">Client: Margaret Johnson</p></div>
                     </div>
                     <div className="flex items-center gap-1 h-8">
-                      {Array.from({ length: 30 }).map((_, i) => <div key={i} className="w-1 bg-primary-500 rounded-full animate-pulse" style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 50}ms` }} />)}
+                      {Array.from({ length: 30 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-1 bg-primary-500 rounded-full animate-pulse"
+                          style={{ height: `${24 + ((i * 9) % 62)}%`, animationDelay: `${i * 50}ms` }}
+                        />
+                      ))}
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
