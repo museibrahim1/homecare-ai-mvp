@@ -35,14 +35,15 @@ export default function ClientProfileScreen() {
   const router = useRouter();
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const data = await api.get<Client>(`/clients/${id}`);
         setClient(data);
-      } catch {
-        // handle error
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load client');
       } finally {
         setLoading(false);
       }
@@ -50,11 +51,18 @@ export default function ClientProfileScreen() {
   }, [id]);
 
   if (loading) return <LoadingScreen />;
-  if (!client) {
+  if (error || !client) {
     return (
-      <View className="flex-1 bg-dark-900 items-center justify-center">
-        <Text className="text-white">Client not found</Text>
-      </View>
+      <>
+        <Stack.Screen options={{ title: 'Client' }} />
+        <View className="flex-1 bg-dark-900 items-center justify-center px-8">
+          <Ionicons name="alert-circle-outline" size={40} color="#ef4444" />
+          <Text className="text-white font-semibold text-base mt-3">{error || 'Client not found'}</Text>
+          <Pressable onPress={() => router.back()} className="bg-dark-800 rounded-xl px-6 py-2.5 mt-4 active:opacity-80">
+            <Text className="text-palm-400 text-sm font-medium">Go Back</Text>
+          </Pressable>
+        </View>
+      </>
     );
   }
 

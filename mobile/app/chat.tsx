@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View, Text, TextInput, Pressable, FlatList,
-  KeyboardAvoidingView, Platform, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ActivityIndicator, AppState,
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -35,10 +35,24 @@ export default function TeamChatScreen() {
 
   useEffect(() => {
     loadMessages();
-    if (!unavailable) {
-      const interval = setInterval(loadMessages, 5000);
-      return () => clearInterval(interval);
-    }
+    if (unavailable) return;
+
+    let interval: ReturnType<typeof setInterval> | null = setInterval(loadMessages, 5000);
+
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active' && !interval) {
+        loadMessages();
+        interval = setInterval(loadMessages, 5000);
+      } else if (nextState !== 'active' && interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    });
+
+    return () => {
+      if (interval) clearInterval(interval);
+      sub.remove();
+    };
   }, [loadMessages, unavailable]);
 
   const sendMessage = async () => {

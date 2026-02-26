@@ -33,11 +33,15 @@ export default function CalendarScreen() {
 
   const onRefresh = async () => { setRefreshing(true); await loadEvents(); setRefreshing(false); };
 
+  const getStartTime = (e: CalendarEvent) => e.start.dateTime || e.start.date || '';
+  const getEndTime = (e: CalendarEvent) => e.end.dateTime || e.end.date || '';
+  const isAllDay = (e: CalendarEvent) => !e.start.dateTime && !!e.start.date;
+
   const formatTime = (d: string) => new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const formatDate = (d: string) => new Date(d).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
 
   const grouped = events.reduce<Record<string, CalendarEvent[]>>((acc, e) => {
-    const key = new Date(e.start.dateTime).toDateString();
+    const key = new Date(getStartTime(e)).toDateString();
     if (!acc[key]) acc[key] = [];
     acc[key].push(e);
     return acc;
@@ -73,14 +77,16 @@ export default function CalendarScreen() {
         {Object.entries(grouped).map(([dateKey, dayEvents]) => (
           <View key={dateKey} className="mb-5">
             <Text className="text-dark-400 text-xs font-medium uppercase tracking-wider mb-2">
-              {formatDate(dayEvents[0].start.dateTime)}
+              {formatDate(getStartTime(dayEvents[0]))}
             </Text>
             {dayEvents.map((evt) => (
               <View key={evt.id} className="bg-dark-800 rounded-2xl px-4 py-3 mb-2 flex-row items-start">
                 <View className="w-1 rounded-full bg-palm-500 self-stretch mr-3" />
                 <View className="flex-1">
                   <Text className="text-white text-sm font-medium">{evt.summary}</Text>
-                  <Text className="text-dark-400 text-xs mt-1">{formatTime(evt.start.dateTime)} — {formatTime(evt.end.dateTime)}</Text>
+                  <Text className="text-dark-400 text-xs mt-1">
+                    {isAllDay(evt) ? 'All day' : `${formatTime(getStartTime(evt))} — ${formatTime(getEndTime(evt))}`}
+                  </Text>
                 </View>
               </View>
             ))}

@@ -112,7 +112,7 @@ export default function HomeScreen() {
                     {new Date(visit.created_at).toLocaleDateString()}
                   </Text>
                 </View>
-                <Text className="text-dark-400 text-xs capitalize">{visit.status.replace('_', ' ')}</Text>
+                <Text className="text-dark-400 text-xs capitalize">{visit.status.replace(/_/g, ' ')}</Text>
               </Pressable>
             ))
           )}

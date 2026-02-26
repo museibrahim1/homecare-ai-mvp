@@ -53,8 +53,12 @@ export default function PipelineScreen() {
       try {
         await api.post(`/pipeline/visits/${visitId}/${step.endpoint}`);
         await loadStatus();
-      } catch {
+      } catch (err) {
         await loadStatus();
+        Alert.alert(
+          `${step.name} Failed`,
+          err instanceof Error ? err.message : 'An error occurred. You can retry later.',
+        );
         break;
       }
     }
@@ -63,9 +67,17 @@ export default function PipelineScreen() {
 
   if (loading) return <LoadingScreen />;
 
-  const allComplete =
-    state?.transcription?.status === 'completed' &&
-    state?.contract?.status === 'completed';
+  const stages = [
+    state?.transcription,
+    state?.diarization,
+    state?.alignment,
+    state?.billing,
+    state?.note,
+    state?.contract,
+  ];
+  const completedCount = stages.filter((s) => s?.status === 'completed').length;
+  const failedStage = stages.find((s) => s?.status === 'failed');
+  const allComplete = completedCount === stages.length;
 
   return (
     <>
@@ -76,6 +88,21 @@ export default function PipelineScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0d9488" />}
       >
         <PipelineTracker state={state || undefined} />
+
+        {failedStage && (
+          <View className="bg-red-900/30 border border-red-500/30 rounded-xl px-4 py-3 mt-3">
+            <Text className="text-red-400 text-sm font-medium">
+              A step failed: {failedStage.error || 'Unknown error'}
+            </Text>
+            <Text className="text-red-400/70 text-xs mt-1">Tap "Run Full Pipeline" to retry.</Text>
+          </View>
+        )}
+
+        {!allComplete && !failedStage && completedCount > 0 && (
+          <View className="bg-palm-500/10 border border-palm-500/20 rounded-xl px-4 py-3 mt-3">
+            <Text className="text-palm-400 text-sm">{completedCount} of {stages.length} steps completed</Text>
+          </View>
+        )}
 
         <View className="mt-4">
           {!allComplete && (

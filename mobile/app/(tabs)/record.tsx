@@ -19,6 +19,12 @@ export default function RecordScreen() {
   const [liveTranscript, setLiveTranscript] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const transcriptRef = useRef<ScrollView>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   useEffect(() => {
     if (clients.length === 0) fetchClients();
@@ -43,6 +49,7 @@ export default function RecordScreen() {
     setLiveTranscript('');
 
     const onTranscript = (ev: { transcript: string }) => {
+      if (!mountedRef.current) return;
       setLiveTranscript((prev) => (prev ? `${prev} ${ev.transcript}` : ev.transcript));
       setTimeout(() => transcriptRef.current?.scrollToEnd({ animated: true }), 100);
     };
@@ -66,13 +73,15 @@ export default function RecordScreen() {
 
       await api.upload('/uploads/audio', formData);
 
+      if (!mountedRef.current) return;
       Alert.alert('Uploaded', 'Assessment uploaded & pipeline started.', [
         { text: 'View Pipeline', onPress: () => router.push(`/pipeline/${visit.id}`) },
       ]);
     } catch (err: unknown) {
+      if (!mountedRef.current) return;
       Alert.alert('Upload Failed', err instanceof Error ? err.message : 'Please try again.');
     } finally {
-      setUploading(false);
+      if (mountedRef.current) setUploading(false);
     }
   };
 
