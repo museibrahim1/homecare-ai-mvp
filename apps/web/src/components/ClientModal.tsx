@@ -192,7 +192,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
     required?: boolean;
   }) => (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1">
+      <label className="block text-sm font-medium text-slate-600 mb-1">
         {label} {required && <span className="text-red-600">*</span>}
       </label>
       <input
@@ -200,7 +200,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
         value={(formData[field] as string) || ''}
         onChange={(e) => handleChange(field, e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300"
       />
     </div>
   );
@@ -212,13 +212,13 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
     rows?: number;
   }) => (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>
       <textarea
         value={(formData[field] as string) || ''}
         onChange={(e) => handleChange(field, e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300 resize-none"
       />
     </div>
   );
@@ -229,11 +229,11 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
     options: { value: string; label: string }[];
   }) => (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>
       <select
         value={(formData[field] as string) || ''}
         onChange={(e) => handleChange(field, e.target.value)}
-        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300"
       >
         <option value="">Select...</option>
         {options.map(opt => (
@@ -246,34 +246,34 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       
       {/* Modal */}
-      <div className="relative bg-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-xl border border-slate-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700">
-          <h2 className="text-xl font-bold text-slate-900">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <h2 className="text-lg font-bold text-slate-900">
             {client?.id ? 'Edit Client' : 'Add New Client'}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-900">
-            <X className="w-6 h-6" />
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-700 px-4 overflow-x-auto">
+        <div className="flex border-b border-slate-200 px-4 overflow-x-auto bg-slate-50">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3 py-3 border-b-2 transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3 py-3 border-b-2 transition-colors whitespace-nowrap text-sm ${
                 activeTab === tab.id
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-slate-400 hover:text-slate-900'
+                  ? 'border-primary-500 text-primary-700 font-medium'
+                  : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
             >
               {tab.icon}
-              <span className="text-sm">{tab.label}</span>
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
@@ -309,7 +309,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
           {activeTab === 'contact' && (
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-4">
-                <Phone className="w-5 h-5 text-purple-600" />
+                <Phone className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Phone Numbers</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -318,13 +318,13 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
               </div>
 
               <div className="flex items-center gap-2 mb-4 mt-8">
-                <Mail className="w-5 h-5 text-purple-600" />
+                <Mail className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Email</h3>
               </div>
               <InputField label="Email Address" field="email" type="email" placeholder="john@example.com" />
 
               <div className="flex items-center gap-2 mb-4 mt-8">
-                <Home className="w-5 h-5 text-purple-600" />
+                <Home className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Address</h3>
               </div>
               <div className="space-y-4">
@@ -364,7 +364,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-700/50 rounded-lg">
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <p className="text-sm text-slate-400">
                   <strong className="text-white">Note:</strong> Emergency contacts will be notified in case of medical emergencies or if the client cannot be reached for scheduled visits.
                 </p>
@@ -391,7 +391,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                     onChange={(e) => handleChange('allergies', e.target.value)}
                     placeholder="Penicillin, Shellfish, Latex..."
                     rows={2}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300 resize-none"
                   />
                 </div>
                 <div>
@@ -401,13 +401,13 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                     onChange={(e) => handleChange('medications', e.target.value)}
                     placeholder="Metformin 500mg, Lisinopril 10mg..."
                     rows={2}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300 resize-none"
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-2 mt-6 mb-2">
-                <Building className="w-5 h-5 text-purple-600" />
+                <Building className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Primary Care Physician</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -416,7 +416,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
               </div>
 
               <div className="flex items-center gap-2 mt-6 mb-2">
-                <History className="w-5 h-5 text-purple-600" />
+                <History className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Physical & Cognitive Status</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -442,7 +442,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
           {activeTab === 'care' && (
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
-                <FileText className="w-5 h-5 text-purple-600" />
+                <FileText className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Care Requirements</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -469,7 +469,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
           {activeTab === 'insurance' && (
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
-                <Shield className="w-5 h-5 text-purple-600" />
+                <Shield className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Primary Insurance</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -487,7 +487,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
               </div>
 
               <div className="flex items-center gap-2 mt-6 mb-2">
-                <MapPin className="w-5 h-5 text-purple-600" />
+                <MapPin className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Billing Address</h3>
               </div>
               <TextArea label="Billing Address (if different from home address)" field="billing_address" placeholder="123 Billing Street, City, State ZIP" rows={2} />
@@ -497,7 +497,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
           {activeTab === 'scheduling' && (
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-5 h-5 text-purple-600" />
+                <Calendar className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Scheduling Preferences</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -508,7 +508,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                     value={formData.preferred_days || ''}
                     onChange={(e) => handleChange('preferred_days', e.target.value)}
                     placeholder="Monday, Wednesday, Friday"
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300"
                   />
                   <p className="text-xs text-slate-500 mt-1">Days when care visits are preferred</p>
                 </div>
@@ -519,14 +519,14 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                     value={formData.preferred_times || ''}
                     onChange={(e) => handleChange('preferred_times', e.target.value)}
                     placeholder="9:00 AM - 1:00 PM"
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300"
                   />
                   <p className="text-xs text-slate-500 mt-1">Time slots when care visits are preferred</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 mt-6 mb-2">
-                <Clock className="w-5 h-5 text-purple-600" />
+                <Clock className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Important Dates</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -535,7 +535,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
               </div>
 
               <div className="flex items-center gap-2 mt-6 mb-2">
-                <Building className="w-5 h-5 text-purple-600" />
+                <Building className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">External System Integration</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -555,7 +555,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <FileSignature className="w-5 h-5 text-purple-600" />
+                  <FileSignature className="w-5 h-5 text-primary-600" />
                   <h3 className="text-lg font-semibold text-slate-900">Service Contracts</h3>
                 </div>
                 <span className="text-sm text-slate-400">
@@ -570,7 +570,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 </div>
               ) : loadingContracts ? (
                 <div className="text-center py-12">
-                  <Loader2 className="w-8 h-8 mx-auto mb-4 text-purple-600 animate-spin" />
+                  <Loader2 className="w-8 h-8 mx-auto mb-4 text-primary-600 animate-spin" />
                   <p className="text-slate-400">Loading contracts...</p>
                 </div>
               ) : contracts.length === 0 ? (
@@ -584,13 +584,13 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <div className="space-y-4">
                   <button
                     onClick={() => setSelectedContract(null)}
-                    className="flex items-center gap-2 text-purple-600 hover:text-purple-300 text-sm"
+                    className="flex items-center gap-2 text-primary-600 hover:text-primary-400 text-sm"
                   >
                     <ChevronRight className="w-4 h-4 rotate-180" />
                     Back to list
                   </button>
                   
-                  <div className="bg-slate-700/50 rounded-xl p-6 space-y-4">
+                  <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <h4 className="text-lg font-semibold text-slate-900">
@@ -642,7 +642,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                         <div className="space-y-2">
                           {selectedContract.services.map((service: any, idx: number) => (
                             <div key={idx} className="flex items-center gap-2 text-white">
-                              <span className="w-6 h-6 bg-purple-50 rounded-full flex items-center justify-center text-xs text-purple-600">
+                              <span className="w-6 h-6 bg-primary-50 rounded-full flex items-center justify-center text-xs text-primary-600">
                                 {idx + 1}
                               </span>
                               {typeof service === 'string' ? service : service.name}
@@ -681,7 +681,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                     <div className="pt-4 border-t border-slate-600 flex gap-2">
                       <a
                         href={`/visits?client=${client.id}`}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors text-sm"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm"
                       >
                         <Eye className="w-4 h-4" />
                         View in Assessments
@@ -696,7 +696,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                     <div
                       key={contract.id}
                       onClick={() => setSelectedContract(contract)}
-                      className="bg-slate-700/50 hover:bg-slate-700 rounded-xl p-4 cursor-pointer transition-colors group"
+                      className="bg-white hover:bg-slate-50 rounded-lg border border-slate-200 p-4 cursor-pointer transition-colors group"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
@@ -718,7 +718,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                             <span>{new Date(contract.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+                        <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
                   ))}
@@ -729,13 +729,13 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-slate-700 bg-slate-800/50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
           <div>
             {client?.id && onDelete && (
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-300 hover:bg-red-50 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"
               >
                 {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 Delete Client
@@ -745,14 +745,15 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-slate-400 hover:text-slate-900 transition-colors"
+              className="px-4 py-2 text-slate-500 hover:text-slate-700 transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-600 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-5 py-2 bg-primary-500 hover:bg-primary-600 disabled:bg-slate-300 text-white rounded-lg transition-colors text-sm font-medium"
+              style={{ color: '#fff' }}
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {saving ? 'Saving...' : 'Save Client'}
