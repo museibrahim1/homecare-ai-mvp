@@ -172,11 +172,11 @@ export default function ADLLoggingPage() {
     refusedCount: filteredVisits.reduce((s, v) => s + v.entries.filter(e => e.status === 'refused').length, 0),
   };
 
-  if (authLoading) return <div className="flex items-center justify-center h-screen bg-dark-900"><div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>;
+  if (authLoading) return <div className="flex items-center justify-center h-screen bg-slate-50"><div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-dark-900 overflow-hidden">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar />

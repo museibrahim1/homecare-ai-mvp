@@ -55,7 +55,6 @@ export default function OnboardingChecklist() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if dismissed
     const wasDismissed = localStorage.getItem('onboarding-dismissed');
     if (wasDismissed === 'true') {
       setDismissed(true);
@@ -73,7 +72,6 @@ export default function OnboardingChecklist() {
       const completed: string[] = [];
 
       try {
-        // Check agency settings
         const agencyRes = await fetch(`${API_BASE}/agency`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -84,7 +82,6 @@ export default function OnboardingChecklist() {
           }
         }
 
-        // Check for clients
         const clientsRes = await fetch(`${API_BASE}/clients`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -95,7 +92,6 @@ export default function OnboardingChecklist() {
           }
         }
 
-        // Check for visits
         const visitsRes = await fetch(`${API_BASE}/visits`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -111,7 +107,6 @@ export default function OnboardingChecklist() {
 
         setCompletedSteps(completed);
 
-        // Auto-dismiss if all completed
         if (completed.length === CHECKLIST_ITEMS.length) {
           setTimeout(() => {
             setDismissed(true);
@@ -140,27 +135,27 @@ export default function OnboardingChecklist() {
   const allComplete = completedCount === CHECKLIST_ITEMS.length;
 
   return (
-    <div className={`rounded-2xl border p-6 mb-6 ${
+    <div className={`rounded-xl border p-5 mb-6 ${
       allComplete 
-        ? 'bg-green-500/10 border-green-500/30' 
-        : 'bg-gradient-to-r from-primary-500/10 to-purple-500/10 border-primary-500/30'
+        ? 'bg-emerald-50 border-emerald-200' 
+        : 'bg-primary-50 border-primary-200'
     }`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-            allComplete ? 'bg-green-500/20' : 'bg-primary-500/20'
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+            allComplete ? 'bg-emerald-100' : 'bg-primary-100'
           }`}>
             {allComplete ? (
-              <CheckCircle className="w-5 h-5 text-green-400" />
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
             ) : (
-              <Sparkles className="w-5 h-5 text-primary-400" />
+              <Sparkles className="w-5 h-5 text-primary-600" />
             )}
           </div>
           <div>
-            <h3 className={`font-semibold ${allComplete ? 'text-green-400' : 'text-white'}`}>
+            <h3 className={`font-semibold ${allComplete ? 'text-emerald-700' : 'text-slate-800'}`}>
               {allComplete ? 'Setup Complete!' : 'Getting Started'}
             </h3>
-            <p className="text-dark-400 text-sm">
+            <p className="text-slate-500 text-sm">
               {allComplete 
                 ? 'You\'re all set to use PalmCare AI' 
                 : `${completedCount} of ${CHECKLIST_ITEMS.length} tasks completed`
@@ -170,25 +165,25 @@ export default function OnboardingChecklist() {
         </div>
         <button
           onClick={handleDismiss}
-          className="p-1.5 hover:bg-dark-700 rounded-lg transition"
+          className="p-1.5 hover:bg-slate-100 rounded-lg transition"
           title="Dismiss"
         >
-          <X className="w-4 h-4 text-dark-400" />
+          <X className="w-4 h-4 text-slate-400" />
         </button>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 bg-dark-700 rounded-full overflow-hidden mb-4">
+      <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden mb-4">
         <div 
           className={`h-full transition-all duration-500 ${
-            allComplete ? 'bg-green-500' : 'bg-primary-500'
+            allComplete ? 'bg-emerald-500' : 'bg-primary-500'
           }`}
           style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Checklist items */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {CHECKLIST_ITEMS.map((item) => {
           const isCompleted = completedSteps.includes(item.id);
           const ItemIcon = item.icon;
@@ -197,44 +192,43 @@ export default function OnboardingChecklist() {
             <Link
               key={item.id}
               href={item.href}
-              className={`flex items-center gap-3 p-3 rounded-xl transition ${
+              className={`flex items-center gap-3 p-3 rounded-lg transition ${
                 isCompleted 
-                  ? 'bg-dark-800/50' 
-                  : 'bg-dark-800 hover:bg-dark-700'
+                  ? 'bg-white/60' 
+                  : 'bg-white hover:bg-slate-50 border border-slate-100'
               }`}
             >
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                isCompleted ? 'bg-green-500/20' : 'bg-dark-700'
+                isCompleted ? 'bg-emerald-50' : 'bg-slate-50'
               }`}>
                 {isCompleted ? (
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <CheckCircle className="w-4 h-4 text-emerald-500" />
                 ) : (
-                  <ItemIcon className="w-4 h-4 text-dark-400" />
+                  <ItemIcon className="w-4 h-4 text-slate-400" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium ${
-                  isCompleted ? 'text-dark-400 line-through' : 'text-white'
+                  isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'
                 }`}>
                   {item.title}
                 </p>
                 {!isCompleted && (
-                  <p className="text-xs text-dark-500">{item.description}</p>
+                  <p className="text-xs text-slate-400">{item.description}</p>
                 )}
               </div>
               {!isCompleted && (
-                <ChevronRight className="w-4 h-4 text-dark-500" />
+                <ChevronRight className="w-4 h-4 text-slate-300" />
               )}
             </Link>
           );
         })}
       </div>
 
-      {/* View full guide link */}
       {!allComplete && (
         <Link
           href="/welcome"
-          className="flex items-center justify-center gap-2 mt-4 text-primary-400 text-sm hover:text-primary-300 transition"
+          className="flex items-center justify-center gap-2 mt-4 text-primary-600 text-sm hover:text-primary-700 transition font-medium"
         >
           View full setup guide
           <ArrowRight className="w-4 h-4" />
