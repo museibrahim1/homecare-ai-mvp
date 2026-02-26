@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import ChatWidget from '@/components/ChatWidget';
 import { 
   Mic, 
   FileText, 
@@ -1208,6 +1209,7 @@ export default function LandingPage() {
       </div>
 
       <DemoModal isOpen={demoOpen} onClose={() => setDemoOpen(false)} />
+      <ChatWidget />
     </div>
   );
 }
