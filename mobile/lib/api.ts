@@ -1,6 +1,6 @@
 import { getToken, removeToken } from './auth';
 
-const API_BASE = 'https://api-production-a0a2.up.railway.app';
+export const API_BASE = 'https://api-production-a0a2.up.railway.app';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 

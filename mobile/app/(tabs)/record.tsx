@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useStore } from '@/lib/store';
 import { api } from '@/lib/api';
+import { streamTranscribe } from '@/lib/streamTranscribe';
 import AudioRecorder from '@/components/AudioRecorder';
 import type { Client, Visit } from '@/lib/types';
 
@@ -23,14 +24,6 @@ export default function RecordScreen() {
     if (clients.length === 0) fetchClients();
   }, [clients.length, fetchClients]);
 
-  const onTranscriptUpdate = useCallback((text: string) => {
-    setLiveTranscript((prev) => {
-      const updated = prev ? `${prev} ${text}` : text;
-      return updated;
-    });
-    setTimeout(() => transcriptRef.current?.scrollToEnd({ animated: true }), 100);
-  }, []);
-
   const onRecordingStart = useCallback(() => {
     setIsRecording(true);
     setLiveTranscript('');
@@ -47,11 +40,20 @@ export default function RecordScreen() {
     }
 
     setUploading(true);
+    setLiveTranscript('');
+
+    const onTranscript = (ev: { transcript: string }) => {
+      setLiveTranscript((prev) => (prev ? `${prev} ${ev.transcript}` : ev.transcript));
+      setTimeout(() => transcriptRef.current?.scrollToEnd({ animated: true }), 100);
+    };
+
     try {
       const visit = await api.post<Visit>('/visits', {
         client_id: selectedClient.id,
         status: 'in_progress',
       });
+
+      streamTranscribe(uri, onTranscript).catch(() => {});
 
       const formData = new FormData();
       formData.append('file', {
@@ -135,7 +137,6 @@ export default function RecordScreen() {
           ) : (
             <AudioRecorder
               onRecordingComplete={handleRecordingComplete}
-              onTranscriptUpdate={onTranscriptUpdate}
               onRecordingStart={onRecordingStart}
               onRecordingStop={onRecordingStop}
               disabled={!selectedClient}
@@ -144,7 +145,7 @@ export default function RecordScreen() {
         </View>
 
         {/* Live transcript preview */}
-        {(isRecording || liveTranscript) && (
+        {(isRecording || uploading || liveTranscript) && (
           <View className="px-5 mt-6">
             <View className="flex-row items-center mb-2">
               <Ionicons name="text" size={14} color="#0d9488" />
@@ -155,6 +156,11 @@ export default function RecordScreen() {
                 <View className="ml-2 flex-row items-center">
                   <View className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1" />
                   <Text className="text-red-400 text-xs">listening</Text>
+                </View>
+              )}
+              {uploading && !isRecording && (
+                <View className="ml-2 flex-row items-center">
+                  <Text className="text-palm-400 text-xs">transcribing...</Text>
                 </View>
               )}
             </View>

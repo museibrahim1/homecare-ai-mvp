@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { View, Text, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { api } from '@/lib/api';
 
 let useAudioRecorder: (() => unknown) | null = null;
 let AudioModule: { requestRecordingPermissionsAsync?: () => Promise<{ granted: boolean }> } | null = null;
@@ -18,7 +17,6 @@ try {
 
 interface Props {
   onRecordingComplete: (uri: string) => void;
-  onTranscriptUpdate?: (text: string) => void;
   onRecordingStart?: () => void;
   onRecordingStop?: () => void;
   disabled?: boolean;
@@ -26,7 +24,6 @@ interface Props {
 
 export default function AudioRecorder({
   onRecordingComplete,
-  onTranscriptUpdate,
   onRecordingStart,
   onRecordingStop,
   disabled,
@@ -103,37 +100,12 @@ export default function AudioRecorder({
       setDuration(0);
 
       if (uri) {
-        // Send final audio for live transcription preview
-        transcribeChunk(uri);
         onRecordingComplete(uri);
       }
     } catch {
       Alert.alert('Error', 'Failed to stop recording.');
     }
   };
-
-  const transcribeChunk = useCallback(async (uri: string) => {
-    if (!onTranscriptUpdate) return;
-    try {
-      const formData = new FormData();
-      formData.append('file', {
-        uri,
-        name: 'chunk.m4a',
-        type: 'audio/m4a',
-      } as unknown as Blob);
-
-      const result = await api.upload<{ transcript: string; provider: string }>(
-        '/live/transcribe',
-        formData,
-      );
-
-      if (result.transcript) {
-        onTranscriptUpdate(result.transcript);
-      }
-    } catch {
-      // Live transcription is best-effort; don't interrupt recording
-    }
-  }, [onTranscriptUpdate]);
 
   if (unavailable) {
     return (
