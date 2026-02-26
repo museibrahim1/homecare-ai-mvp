@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   Bell, Settings, ChevronDown, LogOut, User, X,
   CalendarDays, CheckSquare, MessageSquare, Mail, AlertTriangle,
   Clock, ChevronRight, BellOff, Check, BookOpen, Search,
-  Home
+  Home, Users, FileText, BarChart3, Zap, CreditCard,
+  Shield, Headphones, Layout, PlusCircle
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useNotifications, type AppNotification, type NotificationCategory } from '@/lib/notifications';
@@ -239,6 +240,39 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
+interface SearchableItem {
+  label: string;
+  href: string;
+  keywords: string[];
+  category: 'page' | 'action';
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const SEARCHABLE_ITEMS: SearchableItem[] = [
+  { label: 'Dashboard',        href: '/dashboard',        keywords: ['home', 'overview', 'summary'],                    category: 'page', icon: Layout },
+  { label: 'Clients',          href: '/clients',          keywords: ['patients', 'contacts', 'people', 'customer'],     category: 'page', icon: Users },
+  { label: 'Deals Pipeline',   href: '/pipeline',         keywords: ['deals', 'sales', 'funnel', 'opportunities'],      category: 'page', icon: BarChart3 },
+  { label: 'Leads',            href: '/leads',            keywords: ['prospects', 'inquiries'],                          category: 'page', icon: Users },
+  { label: 'Assessments',      href: '/visits',           keywords: ['visits', 'evaluations', 'intake'],                category: 'page', icon: Zap },
+  { label: 'New Assessment',   href: '/visits/new',       keywords: ['create assessment', 'new visit', 'start'],        category: 'action', icon: PlusCircle },
+  { label: 'Schedule',         href: '/schedule',         keywords: ['calendar', 'appointments', 'events'],             category: 'page', icon: CalendarDays },
+  { label: 'Care Tracker',     href: '/care-tracker',     keywords: ['tracking', 'care plans', 'monitoring'],           category: 'page', icon: CheckSquare },
+  { label: 'ADL Logging',      href: '/adl-logging',      keywords: ['activities daily living', 'adl'],                 category: 'page', icon: FileText },
+  { label: 'Notes & Tasks',    href: '/notes',            keywords: ['notes', 'tasks', 'reminders', 'todo'],            category: 'page', icon: FileText },
+  { label: 'Proposals',        href: '/proposals',        keywords: ['quotes', 'bids'],                                 category: 'page', icon: FileText },
+  { label: 'Contracts',        href: '/contracts/new',    keywords: ['agreements', 'create contract'],                   category: 'action', icon: PlusCircle },
+  { label: 'Documents',        href: '/documents',        keywords: ['files', 'uploads', 'records'],                    category: 'page', icon: FileText },
+  { label: 'Templates',        href: '/templates',        keywords: ['ocr', 'forms', 'document templates'],             category: 'page', icon: FileText },
+  { label: 'Team Chat',        href: '/team-chat',        keywords: ['messages', 'chat', 'communication'],              category: 'page', icon: MessageSquare },
+  { label: 'Messages',         href: '/messages',         keywords: ['inbox', 'email', 'sms'],                          category: 'page', icon: Mail },
+  { label: 'Team Members',     href: '/caregivers',       keywords: ['staff', 'caregivers', 'employees'],               category: 'page', icon: Users },
+  { label: 'Reports',          href: '/reports',          keywords: ['analytics', 'metrics', 'data'],                   category: 'page', icon: BarChart3 },
+  { label: 'Billing & Plans',  href: '/billing',          keywords: ['subscription', 'payment', 'invoice', 'stripe'],   category: 'page', icon: CreditCard },
+  { label: 'Integrations',     href: '/integrations',     keywords: ['connect', 'api', 'google', 'calendar'],           category: 'page', icon: Shield },
+  { label: 'Settings',         href: '/settings',         keywords: ['preferences', 'account', 'profile', 'config'],    category: 'page', icon: Settings },
+  { label: 'Help & Support',   href: '/help',             keywords: ['faq', 'documentation', 'contact'],                category: 'page', icon: Headphones },
+];
+
 export default function TopBar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -249,17 +283,78 @@ export default function TopBar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowUserMenu(false);
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotifications(false);
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setSearchFocused(false);
+      }
     };
-    if (showUserMenu || showNotifications) document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showUserMenu, showNotifications]);
+
+  // ⌘K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (e.key === 'Escape' && searchFocused) {
+        setSearchFocused(false);
+        setSearchQuery('');
+        searchRef.current?.blur();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [searchFocused]);
+
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return SEARCHABLE_ITEMS.filter(item => {
+      if (item.label.toLowerCase().includes(q)) return true;
+      return item.keywords.some(kw => kw.includes(q));
+    }).slice(0, 8);
+  }, [searchQuery]);
+
+  const showSearchDropdown = searchFocused && searchQuery.trim().length > 0;
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [searchQuery]);
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSearchDropdown) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex(prev => Math.min(prev + 1, searchResults.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex(prev => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter' && searchResults[selectedIndex]) {
+      e.preventDefault();
+      router.push(searchResults[selectedIndex].href, { scroll: false });
+      setSearchQuery('');
+      setSearchFocused(false);
+      searchRef.current?.blur();
+    }
+  };
+
+  const handleSearchSelect = (href: string) => {
+    router.push(href, { scroll: false });
+    setSearchQuery('');
+    setSearchFocused(false);
+  };
 
   const handleLogout = async () => {
     setShowUserMenu(false);
@@ -307,24 +402,83 @@ export default function TopBar() {
         </nav>
 
         {/* Center: Search */}
-        <div className="hidden md:flex items-center flex-1 max-w-md mx-8">
+        <div className="hidden md:flex items-center flex-1 max-w-md mx-8 relative" ref={searchContainerRef}>
           <div className={`flex items-center w-full px-3 py-1.5 rounded-lg border transition-colors ${
             searchFocused ? 'border-primary-300 bg-white ring-2 ring-primary-50' : 'border-slate-200 bg-slate-50'
           }`}>
             <Search className="w-4 h-4 text-slate-400 shrink-0" />
             <input
+              ref={searchRef}
               type="text"
-              placeholder="Search clients, visits, contracts..."
+              placeholder="Search pages, clients, actions..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
+              onKeyDown={handleSearchKeyDown}
               className="w-full ml-2 text-sm bg-transparent outline-none text-slate-700 placeholder-slate-400"
             />
-            <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium text-slate-400 bg-slate-100 rounded border border-slate-200">
-              ⌘K
-            </kbd>
+            {searchQuery ? (
+              <button
+                onClick={() => { setSearchQuery(''); searchRef.current?.focus(); }}
+                className="p-0.5 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium text-slate-400 bg-slate-100 rounded border border-slate-200">
+                ⌘K
+              </kbd>
+            )}
           </div>
+
+          {/* Search Results Dropdown */}
+          {showSearchDropdown && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden">
+              {searchResults.length > 0 ? (
+                <div className="py-1">
+                  {searchResults.map((item, i) => {
+                    const IconComp = item.icon;
+                    return (
+                      <button
+                        key={item.href}
+                        onClick={() => handleSearchSelect(item.href)}
+                        onMouseEnter={() => setSelectedIndex(i)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
+                          i === selectedIndex ? 'bg-primary-50' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className={`w-7 h-7 rounded flex items-center justify-center shrink-0 ${
+                          i === selectedIndex ? 'bg-primary-100' : 'bg-slate-100'
+                        }`}>
+                          <IconComp className={`w-3.5 h-3.5 ${i === selectedIndex ? 'text-primary-600' : 'text-slate-500'}`} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className={`text-sm font-medium truncate ${i === selectedIndex ? 'text-primary-700' : 'text-slate-800'}`}>
+                            {item.label}
+                          </p>
+                          <p className="text-[10px] text-slate-400 capitalize">{item.category}</p>
+                        </div>
+                        {i === selectedIndex && (
+                          <span className="text-[10px] text-slate-400">↵</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="px-4 py-6 text-center">
+                  <Search className="w-5 h-5 text-slate-300 mx-auto mb-1.5" />
+                  <p className="text-sm text-slate-500">No results for &ldquo;{searchQuery}&rdquo;</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Try searching for pages or features</p>
+                </div>
+              )}
+              <div className="px-3 py-2 border-t border-slate-100 flex items-center gap-3 text-[10px] text-slate-400">
+                <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 bg-slate-100 rounded text-[9px] border border-slate-200">↑↓</kbd> navigate</span>
+                <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 bg-slate-100 rounded text-[9px] border border-slate-200">↵</kbd> select</span>
+                <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 bg-slate-100 rounded text-[9px] border border-slate-200">esc</kbd> close</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Actions */}
