@@ -25,8 +25,14 @@ railway up
 - `REDIS_URL` (Railway provides Redis)
 - `ANTHROPIC_API_KEY`
 - `OPENAI_API_KEY`
+- `DEEPGRAM_API_KEY` (for live streaming transcription via WebSocket; get from [Deepgram Console](https://console.deepgram.com/))
 - `HF_TOKEN`
 - `JWT_SECRET` (generate with `openssl rand -hex 32`)
+
+**Via CLI** (from project root):
+```bash
+cd apps/api && railway service api && railway variables set DEEPGRAM_API_KEY=your_key
+```
 
 **Estimated cost**: $5-20/month
 
@@ -165,6 +171,7 @@ REDIS_URL=redis://...
 JWT_SECRET=your-secure-random-string
 ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-proj-...
+DEEPGRAM_API_KEY=...   # API service: WebSocket streaming transcription
 HF_TOKEN=hf_...
 S3_ENDPOINT_URL=https://your-s3-endpoint
 S3_ACCESS_KEY=...
