@@ -40,16 +40,21 @@ class DemoBookingRequest(BaseModel):
     email: EmailStr
     company_name: str
     phone: Optional[str] = None
-    date: str  # YYYY-MM-DD
-    time_slot: str  # HH:MM (24h)
+    date: Optional[str] = None  # YYYY-MM-DD (optional for request-only flow)
+    time_slot: Optional[str] = None  # HH:MM 24h (optional)
     message: Optional[str] = None
+    state: Optional[str] = None
+    role: Optional[str] = None
+    services: Optional[list[str]] = None
+    estimated_clients: Optional[str] = None
+    current_software: Optional[str] = None
 
 
 class DemoBookingResponse(BaseModel):
     success: bool
     meeting_link: Optional[str] = None
-    date: str
-    time: str
+    date: Optional[str] = None
+    time: Optional[str] = None
     message: str
 
 
@@ -163,132 +168,117 @@ async def book_demo(
     booking: DemoBookingRequest,
     db: Session = Depends(get_db),
 ):
-    """Book a product demo with a Google Meet link."""
+    """Book a product demo — supports both calendar-pick and request-only flows."""
 
-    if booking.time_slot not in DEMO_SLOTS:
-        raise HTTPException(status_code=400, detail="Invalid time slot")
-
-    try:
-        selected_date = datetime.strptime(booking.date, "%Y-%m-%d").date()
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format (use YYYY-MM-DD)")
-
-    if selected_date <= datetime.now(timezone.utc).date():
-        raise HTTPException(status_code=400, detail="Date must be in the future")
-    if selected_date.weekday() >= 5:
-        raise HTTPException(status_code=400, detail="Demos are only available on weekdays")
-
-    hour, minute = map(int, booking.time_slot.split(":"))
-    start_dt = datetime(selected_date.year, selected_date.month, selected_date.day, hour, minute)
-    end_dt = start_dt + timedelta(minutes=DEMO_DURATION_MINUTES)
-
-    start_iso = start_dt.isoformat()
-    end_iso = end_dt.isoformat()
-
-    formatted_date = selected_date.strftime("%B %d, %Y")
-    formatted_time = start_dt.strftime("%I:%M %p")
-
+    has_schedule = booking.date and booking.time_slot
     meeting_link = None
     calendar_created = False
+    formatted_date = None
+    formatted_time = None
 
-    # Try to create a Google Calendar event with Meet
-    admin_user = _find_calendar_admin(db)
-    if admin_user:
+    if has_schedule:
+        if booking.time_slot not in DEMO_SLOTS:
+            raise HTTPException(status_code=400, detail="Invalid time slot")
         try:
-            token = await _refresh_token_if_needed(admin_user, db)
+            selected_date = datetime.strptime(booking.date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format (use YYYY-MM-DD)")
+        if selected_date <= datetime.now(timezone.utc).date():
+            raise HTTPException(status_code=400, detail="Date must be in the future")
+        if selected_date.weekday() >= 5:
+            raise HTTPException(status_code=400, detail="Demos are only available on weekdays")
 
-            summary = f"PalmCare AI Demo — {booking.company_name}"
-            description = (
-                f"Product demo for {booking.name} from {booking.company_name}\n"
-                f"Email: {booking.email}\n"
-                f"Phone: {booking.phone or 'N/A'}\n"
-                f"\n{booking.message or ''}"
-            )
+        hour, minute = map(int, booking.time_slot.split(":"))
+        start_dt = datetime(selected_date.year, selected_date.month, selected_date.day, hour, minute)
+        end_dt = start_dt + timedelta(minutes=DEMO_DURATION_MINUTES)
+        formatted_date = selected_date.strftime("%B %d, %Y")
+        formatted_time = start_dt.strftime("%I:%M %p")
 
-            event = await _create_calendar_event(
-                access_token=token,
-                summary=summary,
-                description=description,
-                start_iso=start_iso,
-                end_iso=end_iso,
-                attendee_email=booking.email,
-            )
+        admin_user = _find_calendar_admin(db)
+        if admin_user:
+            try:
+                token = await _refresh_token_if_needed(admin_user, db)
+                summary = f"PalmCare AI Demo — {booking.company_name}"
+                description = (
+                    f"Product demo for {booking.name} from {booking.company_name}\n"
+                    f"Email: {booking.email}\n"
+                    f"Phone: {booking.phone or 'N/A'}\n"
+                    f"State: {booking.state or 'N/A'}\n"
+                    f"Services: {', '.join(booking.services or []) or 'N/A'}\n"
+                )
+                event = await _create_calendar_event(
+                    access_token=token, summary=summary, description=description,
+                    start_iso=start_dt.isoformat(), end_iso=end_dt.isoformat(),
+                    attendee_email=booking.email,
+                )
+                conf = event.get("conferenceData", {})
+                for ep in conf.get("entryPoints", []):
+                    if ep.get("entryPointType") == "video":
+                        meeting_link = ep.get("uri")
+                        break
+                calendar_created = True
+                logger.info(f"Demo booked on {formatted_date} at {formatted_time}")
+            except Exception as e:
+                logger.error(f"Failed to create calendar event: {e}")
 
-            # Extract Meet link
-            conf = event.get("conferenceData", {})
-            entry_points = conf.get("entryPoints", [])
-            for ep in entry_points:
-                if ep.get("entryPointType") == "video":
-                    meeting_link = ep.get("uri")
-                    break
+    # Also store as a sales lead for CRM tracking
+    try:
+        from app.models.sales_lead import SalesLead
+        lead = SalesLead(
+            provider_name=booking.company_name,
+            contact_name=booking.name,
+            contact_email=booking.email,
+            phone=booking.phone,
+            state=booking.state or "NA",
+            source="demo_request",
+            status="new",
+            notes=f"Role: {booking.role or 'N/A'}\nServices: {', '.join(booking.services or [])}\nClients: {booking.estimated_clients or 'N/A'}\nCurrent Software: {booking.current_software or 'N/A'}",
+        )
+        db.add(lead)
+        db.commit()
+    except Exception as e:
+        logger.warning(f"Could not save demo request as lead: {e}")
+        db.rollback()
 
-            calendar_created = True
-            logger.info(f"Demo booked on {formatted_date} at {formatted_time} — Meet link created")
-
-        except Exception as e:
-            logger.error(f"Failed to create calendar event for demo: {e}")
-
-    # Send confirmation emails
     email_svc = get_email_service()
-    app_url = os.getenv("APP_URL", "https://palmcareai.com")
 
-    meet_section = ""
-    if meeting_link:
-        meet_section = f"""
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
-                <p style="margin: 0 0 12px 0; font-size: 14px; color: #166534; font-weight: 600;">Your Google Meet Link</p>
-                <a href="{meeting_link}"
-                   style="background: #22c55e; color: white; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">
-                    Join Meeting
-                </a>
-                <p style="margin: 12px 0 0 0; font-size: 13px; color: #6b7280; word-break: break-all;">{meeting_link}</p>
-            </div>
-        """
+    services_list = ', '.join(booking.services or []) or 'Not specified'
+
+    # Confirmation email to prospect
+    if has_schedule and formatted_date:
+        meet_section = ""
+        if meeting_link:
+            meet_section = f"""
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #166534; font-weight: 600;">Your Google Meet Link</p>
+                    <a href="{meeting_link}" style="background: #22c55e; color: white; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">Join Meeting</a>
+                </div>
+            """
+        subject = f"Your PalmCare AI Demo — {formatted_date} at {formatted_time}"
     else:
-        meet_section = """
-            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px; margin: 20px 0;">
-                <p style="margin: 0; color: #1e40af; font-size: 14px;">
-                    We'll send you a Google Meet link before the meeting.
-                </p>
-            </div>
-        """
+        meet_section = ""
+        subject = f"We Received Your Demo Request — {booking.company_name}"
 
-    # Email to prospect — from sales@
     email_svc.send_email(
         to=booking.email,
-        subject=f"Your PalmCare AI Demo — {formatted_date} at {formatted_time}",
+        subject=subject,
         sender=email_svc.from_sales,
         html=f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
                 <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">PalmCare AI</h1>
-                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">Your Demo is Confirmed</p>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">{'Your Demo is Confirmed' if has_schedule else 'Demo Request Received'}</p>
             </div>
             <div style="padding: 40px 30px;">
-                <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 22px; text-align: center;">See you soon, {booking.name}!</h2>
-                <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date</td>
-                            <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">{formatted_date}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time</td>
-                            <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">{formatted_time} ET</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Duration</td>
-                            <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">{DEMO_DURATION_MINUTES} minutes</td>
-                        </tr>
-                    </table>
-                </div>
+                <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 22px; text-align: center;">{'See you soon' if has_schedule else 'Thanks for your interest'}, {booking.name}!</h2>
+                {'<div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 20px;"><table style="width: 100%; border-collapse: collapse;"><tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date</td><td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">' + (formatted_date or '') + '</td></tr><tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time</td><td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">' + (formatted_time or '') + ' ET</td></tr></table></div>' if has_schedule else '<div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin-bottom: 20px;"><p style="margin: 0; color: #1e40af; font-size: 14px;">Our team will reach out within 1 business day to schedule your personalized demo.</p></div>'}
                 {meet_section}
                 <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
-                    During the demo we'll show you how PalmCare AI can help {booking.company_name}
-                    turn care assessments into contracts in minutes, manage clients, and grow revenue.
+                    We&rsquo;ll show you how PalmCare AI can help {booking.company_name}
+                    turn care assessments into contracts in minutes, manage clients, and streamline your operations.
                 </p>
                 <p style="color: #9ca3af; font-size: 13px; margin-top: 24px;">
-                    Need to reschedule? Just reply to this email.
+                    Questions? Just reply to this email.
                 </p>
             </div>
             <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
@@ -299,33 +289,41 @@ async def book_demo(
         """,
     )
 
-    # Notify admin — from sales@
+    # Admin notification
     admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "admin@palmtai.com")
     email_svc.send_email(
         to=admin_email,
-        subject=f"New Demo Booked: {booking.company_name} — {formatted_date}",
+        subject=f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name}",
         sender=email_svc.from_sales,
         html=f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #6366f1;">New Demo Booking</h2>
+            <h2 style="color: #6366f1;">{'Demo Booked' if has_schedule else 'New Demo Request'}</h2>
             <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
                 <p><strong>Name:</strong> {booking.name}</p>
                 <p><strong>Email:</strong> {booking.email}</p>
                 <p><strong>Company:</strong> {booking.company_name}</p>
                 <p><strong>Phone:</strong> {booking.phone or 'N/A'}</p>
-                <p><strong>Date:</strong> {formatted_date} at {formatted_time} ET</p>
-                <p><strong>Message:</strong> {booking.message or 'None'}</p>
-                <p><strong>Calendar Event:</strong> {'Created with Meet link' if calendar_created else 'Not created (no admin calendar connected)'}</p>
+                <p><strong>State:</strong> {booking.state or 'N/A'}</p>
+                <p><strong>Role:</strong> {booking.role or 'N/A'}</p>
+                <p><strong>Services:</strong> {services_list}</p>
+                <p><strong>Estimated Clients:</strong> {booking.estimated_clients or 'N/A'}</p>
+                <p><strong>Current Software:</strong> {booking.current_software or 'N/A'}</p>
+                {'<p><strong>Date:</strong> ' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' ET</p>' if has_schedule else '<p><strong>Status:</strong> Needs scheduling — reach out to prospect</p>'}
+                <p><strong>Calendar Event:</strong> {'Created with Meet link' if calendar_created else 'Not created'}</p>
                 {f'<p><strong>Meet Link:</strong> <a href="{meeting_link}">{meeting_link}</a></p>' if meeting_link else ''}
             </div>
         </div>
         """,
     )
 
-    return DemoBookingResponse(
-        success=True,
-        meeting_link=meeting_link,
-        date=formatted_date,
-        time=formatted_time,
-        message="Demo booked! Check your email for confirmation and meeting details.",
-    )
+    if has_schedule:
+        return DemoBookingResponse(
+            success=True, meeting_link=meeting_link,
+            date=formatted_date, time=formatted_time,
+            message="Demo booked! Check your email for confirmation.",
+        )
+    else:
+        return DemoBookingResponse(
+            success=True,
+            message="Demo request received! Our team will reach out within 1 business day to schedule your demo.",
+        )

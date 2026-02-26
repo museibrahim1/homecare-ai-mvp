@@ -14,8 +14,6 @@ function getSiteUrl(): string {
 
 const PAGES: { path: string; changeFrequency: 'weekly' | 'monthly'; priority: number }[] = [
   { path: '', changeFrequency: 'weekly', priority: 1.0 },
-  { path: '/pricing', changeFrequency: 'weekly', priority: 0.9 },
-  { path: '/register', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/contact', changeFrequency: 'monthly', priority: 0.7 },
   { path: '/help', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/login', changeFrequency: 'monthly', priority: 0.5 },

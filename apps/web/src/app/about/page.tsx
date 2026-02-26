@@ -19,7 +19,7 @@ export default function AboutPage() {
             <Link href="/#pricing" className="text-dark-300 hover:text-white transition">Pricing</Link>
             <Link href="/contact" className="text-dark-300 hover:text-white transition">Contact</Link>
             <Link href="/login" className="text-dark-300 hover:text-white transition">Sign In</Link>
-            <Link href="/register" className="btn-primary py-2 px-5 text-sm">Get Started</Link>
+            <Link href="/#book-demo" className="btn-primary py-2 px-5 text-sm">Schedule Demo</Link>
           </div>
         </div>
       </nav>
@@ -128,8 +128,7 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold text-white mb-4">Ready to See the Difference?</h2>
               <p className="text-xl text-dark-300 mb-8">Book a free demo and see why 500+ agencies trust PalmCare AI.</p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Free Trial<ArrowRight className="w-5 h-5" /></Link>
-                <Link href="/#book-demo" className="btn-secondary py-4 px-8 text-lg">Book a Demo</Link>
+                <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></Link>
               </div>
             </div>
           </div>

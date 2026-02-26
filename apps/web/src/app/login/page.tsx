@@ -216,8 +216,8 @@ export default function LoginPage() {
           <div className="mt-8 text-center">
             <p className="text-dark-400 text-sm">
               New to PalmCare AI?{' '}
-              <Link href="/register" className="text-primary-400 hover:underline font-medium">
-                Register your agency
+              <Link href="/#book-demo" className="text-primary-400 hover:underline font-medium">
+                Schedule a demo
               </Link>
             </p>
           </div>

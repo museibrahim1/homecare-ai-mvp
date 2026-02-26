@@ -163,8 +163,8 @@ export default function VerificationStatusPage() {
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-white mb-2">Business Not Found</h2>
           <p className="text-dark-400 mb-4">The business ID is invalid or has been removed.</p>
-          <Link href="/register" className="text-primary-400 hover:underline">
-            Register a new business
+          <Link href="/#book-demo" className="text-primary-400 hover:underline">
+            Schedule a demo
           </Link>
         </div>
       </div>

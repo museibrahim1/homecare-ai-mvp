@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -291,29 +291,33 @@ const FAQ_ITEMS = [
   },
 ];
 
-const PRICING = [
-  {
-    name: 'Starter',
-    price: 379.99,
-    description: 'For small agencies getting organized',
-    features: ['5 contracts/month', '20 clients in CRM', '10 caregivers', '29 seats included', 'Email support', 'Caregiver mobile app'],
-    popular: false,
-  },
-  {
-    name: 'Growth',
-    price: 639.99,
-    description: 'For growing teams scaling up',
-    features: ['15 contracts/month', '75 clients in CRM', '40 caregivers', '49 seats included', 'Priority support', 'Custom templates', 'Advanced analytics'],
-    popular: true,
-  },
-  {
-    name: 'Pro',
-    price: 1299,
-    description: 'For high-volume agencies',
-    features: ['Unlimited contracts', '500 clients in CRM', '200 caregivers', '99 seats included', 'Dedicated manager', 'Custom integrations', 'SLA guarantee'],
-    popular: false,
-  },
+const US_STATES = [
+  { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
+  { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
+  { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
+  { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
+  { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
+  { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
+  { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
+  { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
+  { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
+  { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
+  { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
+  { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
+  { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
+  { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
+  { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
+  { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
+  { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' },
 ];
+
+const SERVICES_OPTIONS = ['Hospice', 'Intellectual and Developmental Disabilities (IDD)', 'Non-Skilled Services', 'Skilled Nursing Services', 'Personal Care', 'Companion Care'];
+
+const ROLE_OPTIONS = ['Agency Owner', 'Administrator', 'Office Manager', 'Clinical Director', 'Billing Manager', 'Other'];
+
+const CLIENT_RANGES = ['1-10', '11-25', '26-50', '51-100', '101-250', '250+'];
+
+const SOFTWARE_OPTIONS = ['None / Pen & Paper', 'AxisCare', 'ClearCare / WellSky', 'Alora', 'HHAeXchange', 'Axxess', 'MatrixCare', 'KanTime', 'Sandata', 'Other'];
 
 const DEMO_STEPS = [
   { title: 'Step 1: Record Assessment', description: 'Caregiver records the client intake assessment using voice', duration: 5000 },
@@ -498,7 +502,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <button aria-label="Skip" onClick={() => { if (currentStep < DEMO_STEPS.length - 1) { setCurrentStep(s => s + 1); setProgress(0); } }} className="p-2 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition"><SkipForward className="w-5 h-5" /></button>
                 </>
               )}
-              <Link href="/register" className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition">Try It Free</Link>
+              <a href="#book-demo" onClick={onClose} className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition">Schedule a Demo</a>
             </div>
           </div>
         </div>
@@ -515,167 +519,222 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   );
 }
 
-/* ───────────────────── BOOK DEMO ───────────────────── */
+/* ───────────────────── SCHEDULE DEMO (Multi-Step) ───────────────────── */
 
 function BookDemoSection() {
   const API = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [step, setStep] = useState<'date' | 'form' | 'success'>('date');
+  const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
-  const [meetLink, setMeetLink] = useState<string | null>(null);
-  const [confirmDate, setConfirmDate] = useState('');
-  const [confirmTime, setConfirmTime] = useState('');
-  const [form, setForm] = useState({ name: '', email: '', company_name: '', phone: '' });
-  const [viewMonth, setViewMonth] = useState(() => { const now = new Date(); return { year: now.getFullYear(), month: now.getMonth() }; });
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({
+    email: '', first_name: '', last_name: '', phone: '',
+    company_name: '', state: '', role: '', services: [] as string[],
+    estimated_clients: '', current_software: '',
+  });
 
-  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
+  const toggleService = (svc: string) => {
+    setForm(prev => ({
+      ...prev,
+      services: prev.services.includes(svc) ? prev.services.filter(s => s !== svc) : [...prev.services, svc],
+    }));
+  };
 
-  const calendarDays = useMemo(() => {
-    const { year, month } = viewMonth;
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDow = firstDay.getDay();
-    const cells: (Date | null)[] = [];
-    for (let i = 0; i < startDow; i++) cells.push(null);
-    for (let d = 1; d <= lastDay.getDate(); d++) cells.push(new Date(year, month, d));
-    while (cells.length % 7 !== 0) cells.push(null);
-    return cells;
-  }, [viewMonth]);
-
-  const monthLabel = new Date(viewMonth.year, viewMonth.month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const isSelectable = (d: Date) => { const dow = d.getDay(); if (dow === 0 || dow === 6) return false; if (d <= today) return false; return (d.getTime() - today.getTime()) / 864e5 <= 30; };
-  const toIso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  const canGoPrev = viewMonth.month > today.getMonth() || viewMonth.year > today.getFullYear();
-  const maxMonth = new Date(today.getFullYear(), today.getMonth() + 1);
-  const canGoNext = viewMonth.year < maxMonth.getFullYear() || viewMonth.month < maxMonth.getMonth();
-  const prevMonth = () => setViewMonth(prev => { const d = new Date(prev.year, prev.month - 1); return { year: d.getFullYear(), month: d.getMonth() }; });
-  const nextMonth = () => setViewMonth(prev => { const d = new Date(prev.year, prev.month + 1); return { year: d.getFullYear(), month: d.getMonth() }; });
-  const timeSlots = ['09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'];
-  const formatSlot = (slot: string) => { const [h, m] = slot.split(':').map(Number); return `${h > 12 ? h - 12 : h === 0 ? 12 : h}:${m.toString().padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`; };
-  const selectedDateObj = selectedDate ? new Date(selectedDate + 'T12:00:00') : null;
+  const canProceed1 = form.email && form.first_name && form.last_name && form.phone;
+  const canProceed2 = form.company_name && form.state && form.role && form.services.length > 0;
+  const canSubmit = form.estimated_clients && form.current_software;
 
   const handleSubmit = async () => {
-    if (!selectedDate || !selectedTime) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`${API}/demos/book`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, date: selectedDate, time_slot: selectedTime }) });
-      const data = await res.json();
-      if (res.ok && data.success) { setMeetLink(data.meeting_link || null); setConfirmDate(data.date); setConfirmTime(data.time); setStep('success'); }
-      else alert(data.detail || 'Failed to book demo. Please try again.');
+      const res = await fetch(`${API}/demos/book`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${form.first_name} ${form.last_name}`,
+          email: form.email,
+          company_name: form.company_name,
+          phone: form.phone,
+          state: form.state,
+          role: form.role,
+          services: form.services,
+          estimated_clients: form.estimated_clients,
+          current_software: form.current_software,
+        }),
+      });
+      if (res.ok) { setSubmitted(true); }
+      else { const data = await res.json().catch(() => ({})); alert(data.detail || 'Something went wrong. Please try again.'); }
     } catch { alert('Network error. Please try again.'); }
     finally { setSubmitting(false); }
   };
 
-  const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const stepIndicator = (
+    <div className="flex items-center justify-center gap-2 mb-10">
+      {[1, 2, 3].map(s => (
+        <div key={s} className="flex items-center gap-2">
+          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${step >= s ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'bg-dark-700 text-dark-400 border border-dark-600'}`}>{s}</div>
+          {s < 3 && <div className={`w-12 h-0.5 rounded ${step > s ? 'bg-primary-500' : 'bg-dark-600'}`} />}
+        </div>
+      ))}
+    </div>
+  );
+
+  if (submitted) {
+    return (
+      <section id="book-demo" className="py-20 px-6 bg-dark-800/30">
+        <div className="max-w-xl mx-auto text-center animate-fadeIn">
+          <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle className="w-10 h-10 text-green-400" /></div>
+          <h2 className="text-3xl font-bold text-white mb-4">Thank You!</h2>
+          <p className="text-dark-300 text-lg mb-6">We&apos;ve received your demo request. Our team will reach out within 1 business day to schedule your personalized demo.</p>
+          <div className="card p-6 text-left space-y-3 border-primary-500/20">
+            <div className="flex justify-between"><span className="text-dark-400">Company</span><span className="text-white font-medium">{form.company_name}</span></div>
+            <div className="flex justify-between"><span className="text-dark-400">Contact</span><span className="text-white font-medium">{form.first_name} {form.last_name}</span></div>
+            <div className="flex justify-between"><span className="text-dark-400">Email</span><span className="text-white font-medium">{form.email}</span></div>
+          </div>
+          <button onClick={() => { setSubmitted(false); setStep(1); setForm({ email: '', first_name: '', last_name: '', phone: '', company_name: '', state: '', role: '', services: [], estimated_clients: '', current_software: '' }); }}
+            className="text-primary-400 hover:text-primary-300 text-sm font-medium transition mt-6 inline-block">Submit another request</button>
+        </div>
+        <style jsx>{`
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+          .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+        `}</style>
+      </section>
+    );
+  }
 
   return (
     <section id="book-demo" className="py-20 px-6 bg-dark-800/30">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full mb-6">
             <Video className="w-4 h-4 text-green-400" /><span className="text-sm text-green-400">Live Product Demo</span>
           </div>
-          <h2 className="text-4xl font-bold text-white mb-4">See PalmCare AI in Action</h2>
-          <p className="text-xl text-dark-400 max-w-2xl mx-auto">Book a free 30-minute demo with our team. We&apos;ll show you how to turn assessments into contracts in minutes.</p>
+          <h2 className="text-4xl font-bold text-white mb-4">Schedule a Live Demo</h2>
+          <p className="text-xl text-dark-400">See how PalmCare AI can transform your agency&apos;s workflow.</p>
         </div>
-        <div className="card p-6 md:p-8 border-primary-500/20">
-          {step === 'date' && (
-            <div className="grid md:grid-cols-[1fr_340px] gap-8">
+
+        <div className="card p-8 md:p-10 border-primary-500/20">
+          {stepIndicator}
+
+          {step === 1 && (
+            <div className="space-y-5 animate-fadeIn">
+              <h3 className="text-xl font-semibold text-white mb-2">Your Contact Information</h3>
               <div>
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2"><Calendar className="w-5 h-5 text-primary-400" />{monthLabel}</h3>
-                  <div className="flex items-center gap-1">
-                    <button aria-label="Previous month" onClick={prevMonth} disabled={!canGoPrev} className="p-2 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"><ChevronLeft className="w-4 h-4" /></button>
-                    <button aria-label="Next month" onClick={nextMonth} disabled={!canGoNext} className="p-2 rounded-lg bg-dark-700 text-dark-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"><ChevronRight className="w-4 h-4" /></button>
-                  </div>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">Work Email<span className="text-red-400">*</span></label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="you@company.com"
+                    className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition" />
                 </div>
-                <div className="grid grid-cols-7 mb-1">{DOW.map(d => (<div key={d} className="py-2 text-center text-xs font-semibold text-dark-400 uppercase tracking-wide">{d}</div>))}</div>
-                <div className="grid grid-cols-7">
-                  {calendarDays.map((day, i) => {
-                    if (!day) return <div key={`e-${i}`} className="aspect-square" />;
-                    const iso = toIso(day);
-                    const selectable = isSelectable(day);
-                    const isSelected = iso === selectedDate;
-                    const isToday = day.getTime() === today.getTime();
-                    return (
-                      <button key={iso} disabled={!selectable} onClick={() => { setSelectedDate(iso); setSelectedTime(null); }}
-                        className={`aspect-square flex items-center justify-center text-sm font-medium rounded-xl transition-all relative ${isSelected ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : selectable ? 'text-dark-200 hover:bg-dark-700 hover:text-white cursor-pointer' : 'text-dark-600 cursor-not-allowed'}`}>
-                        {day.getDate()}
-                        {isToday && !isSelected && <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-400" />}
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="text-xs text-dark-500 mt-3">Weekdays only, up to 30 days out</p>
               </div>
-              <div className="border-t md:border-t-0 md:border-l border-dark-600/50 pt-6 md:pt-0 md:pl-8">
-                {selectedDate && selectedDateObj ? (
-                  <div className="animate-fadeIn">
-                    <h3 className="text-lg font-semibold text-white mb-1">{selectedDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
-                    <p className="text-sm text-dark-400 mb-5 flex items-center gap-1.5"><Clock className="w-4 h-4" />30 min &bull; Eastern Time</p>
-                    <div className="grid grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1 scrollbar-hide">
-                      {timeSlots.map(slot => (
-                        <button key={slot} onClick={() => setSelectedTime(slot)}
-                          className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-all ${selectedTime === slot ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'bg-dark-700/50 text-dark-300 hover:bg-dark-700 hover:text-white border border-dark-600'}`}>
-                          {formatSlot(slot)}
-                        </button>
-                      ))}
-                    </div>
-                    {selectedTime && <button onClick={() => setStep('form')} className="w-full btn-primary flex items-center justify-center gap-2 py-3 mt-5">Continue<ArrowRight className="w-4 h-4" /></button>}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-center py-12 md:py-0">
-                    <Calendar className="w-10 h-10 text-dark-600 mb-3" />
-                    <p className="text-dark-400 text-sm">Select a date to see available times</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          {step === 'form' && (
-            <div className="max-w-lg mx-auto space-y-6 animate-fadeIn">
-              <button onClick={() => setStep('date')} className="text-sm text-dark-400 hover:text-white flex items-center gap-1 transition"><ChevronLeft className="w-4 h-4" /> Back to calendar</button>
-              <div className="bg-dark-700/50 border border-dark-600 rounded-xl p-4 flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center"><Calendar className="w-6 h-6 text-primary-400" /></div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-white font-semibold">{selectedDateObj?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
-                  <p className="text-dark-400 text-sm">{formatSlot(selectedTime!)} ET — 30 min demo via Google Meet</p>
+                  <label className="block text-sm font-medium text-dark-300 mb-1.5">First Name<span className="text-red-400">*</span></label>
+                  <input type="text" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} placeholder="First name"
+                    className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Last Name<span className="text-red-400">*</span></label>
+                  <input type="text" value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} placeholder="Last name"
+                    className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-white">Your Details</h3>
-              <div className="space-y-4">
-                {[
-                  { icon: User, placeholder: 'Full name *', key: 'name' as const, type: 'text' },
-                  { icon: Mail, placeholder: 'Work email *', key: 'email' as const, type: 'email' },
-                  { icon: Building2, placeholder: 'Company / Agency name *', key: 'company_name' as const, type: 'text' },
-                  { icon: Phone, placeholder: 'Phone number (optional)', key: 'phone' as const, type: 'tel' },
-                ].map(({ icon: Icon, placeholder, key, type }) => (
-                  <div key={key} className="relative">
-                    <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
-                    <input type={type} placeholder={placeholder} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition" />
-                  </div>
-                ))}
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">Phone Number<span className="text-red-400">*</span></label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+1 (555) 000-0000"
+                    className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition" />
+                </div>
               </div>
-              <button onClick={handleSubmit} disabled={submitting || !form.name || !form.email || !form.company_name}
-                className="w-full btn-primary py-4 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />Booking...</> : <><Video className="w-5 h-5" />Book My Demo</>}
+              <p className="text-xs text-red-400/80 italic">If you are a caregiver, please visit our <a href="/contact" className="underline hover:text-red-300">caregiver resources page</a> instead.</p>
+              <button disabled={!canProceed1} onClick={() => setStep(2)}
+                className="w-full btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed mt-2">
+                Next <ArrowRight className="w-5 h-5" />
               </button>
-              <p className="text-center text-dark-500 text-xs">By booking, you agree to receive a calendar invite and follow-up emails.</p>
             </div>
           )}
-          {step === 'success' && (
-            <div className="max-w-lg mx-auto text-center space-y-6 animate-fadeIn py-8">
-              <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto"><CheckCircle className="w-10 h-10 text-green-400" /></div>
-              <h3 className="text-2xl font-bold text-white">Demo Booked!</h3>
-              <p className="text-dark-300">Your demo is confirmed for <span className="text-white font-semibold">{confirmDate}</span> at <span className="text-white font-semibold">{confirmTime} ET</span>.</p>
-              {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition shadow-lg shadow-green-500/30"><Video className="w-5 h-5" />Join Google Meet</a>}
-              <div className="bg-dark-700/50 border border-dark-600 rounded-xl p-4"><p className="text-dark-400 text-sm">Check your email at <span className="text-white">{form.email}</span> for the calendar invite and meeting details.</p></div>
-              <button onClick={() => { setStep('date'); setSelectedDate(null); setSelectedTime(null); setForm({ name: '', email: '', company_name: '', phone: '' }); }} className="text-primary-400 hover:text-primary-300 text-sm font-medium transition">Book another demo</button>
+
+          {step === 2 && (
+            <div className="space-y-5 animate-fadeIn">
+              <h3 className="text-xl font-semibold text-white mb-2">About Your Agency</h3>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">Company Name<span className="text-red-400">*</span></label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input type="text" value={form.company_name} onChange={e => setForm({ ...form, company_name: e.target.value })} placeholder="Your agency name"
+                    className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">State<span className="text-red-400">*</span></label>
+                <select value={form.state} onChange={e => setForm({ ...form, state: e.target.value })}
+                  className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition appearance-none cursor-pointer">
+                  <option value="" className="bg-dark-800">Select state</option>
+                  {US_STATES.map(s => <option key={s.code} value={s.code} className="bg-dark-800">{s.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">Role<span className="text-red-400">*</span></label>
+                <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}
+                  className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition appearance-none cursor-pointer">
+                  <option value="" className="bg-dark-800">Select role</option>
+                  {ROLE_OPTIONS.map(r => <option key={r} value={r} className="bg-dark-800">{r}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-2">What services do you provide?<span className="text-red-400">*</span></label>
+                <div className="space-y-2">
+                  {SERVICES_OPTIONS.map(svc => (
+                    <label key={svc} className="flex items-center gap-3 p-3 rounded-xl bg-dark-700/50 border border-dark-600 hover:border-dark-500 transition cursor-pointer group">
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition ${form.services.includes(svc) ? 'bg-primary-500 border-primary-500' : 'border-dark-500 group-hover:border-dark-400'}`}>
+                        {form.services.includes(svc) && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                      <span className="text-white text-sm">{svc}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 mt-2">
+                <button onClick={() => setStep(1)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
+                <button disabled={!canProceed2} onClick={() => setStep(3)}
+                  className="flex-1 btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                  Next <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-5 animate-fadeIn">
+              <h3 className="text-xl font-semibold text-white mb-2">Let&apos;s Get You Scheduled</h3>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">Estimate Current Number of Clients<span className="text-red-400">*</span></label>
+                <p className="text-xs text-dark-500 mb-2">How many clients are you currently serving?</p>
+                <select value={form.estimated_clients} onChange={e => setForm({ ...form, estimated_clients: e.target.value })}
+                  className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition appearance-none cursor-pointer">
+                  <option value="" className="bg-dark-800">Select range</option>
+                  {CLIENT_RANGES.map(r => <option key={r} value={r} className="bg-dark-800">{r}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">What is your current software?<span className="text-red-400">*</span></label>
+                <select value={form.current_software} onChange={e => setForm({ ...form, current_software: e.target.value })}
+                  className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition appearance-none cursor-pointer">
+                  <option value="" className="bg-dark-800">Select software</option>
+                  {SOFTWARE_OPTIONS.map(s => <option key={s} value={s} className="bg-dark-800">{s}</option>)}
+                </select>
+              </div>
+              <div className="flex gap-3 mt-2">
+                <button onClick={() => setStep(2)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
+                <button disabled={!canSubmit || submitting} onClick={handleSubmit}
+                  className="flex-1 btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                  {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />Submitting...</> : <>Submit</>}
+                </button>
+              </div>
             </div>
           )}
         </div>
+        <p className="text-center text-dark-500 text-xs mt-4">By submitting, you agree to receive communications from PalmCare AI.</p>
       </div>
       <style jsx>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -789,13 +848,12 @@ export default function LandingPage() {
                 )}
               </div>
 
-              <a href="#pricing" className="px-3 py-2 text-dark-300 hover:text-white transition">Pricing</a>
-              <a href="#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Book Demo</a>
+              <a href="#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Schedule Demo</a>
             </div>
 
             <div className="hidden lg:flex items-center gap-3">
               <Link href="/login" className="text-dark-300 hover:text-white transition px-3 py-2">Sign In</Link>
-              <Link href="/register" className="btn-primary py-2 px-5 text-sm">Get Started Free</Link>
+              <a href="#book-demo" className="btn-primary py-2 px-5 text-sm">Schedule Demo</a>
             </div>
 
             <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-dark-300 hover:text-white">
@@ -807,11 +865,10 @@ export default function LandingPage() {
             <div className="lg:hidden pt-4 pb-2 space-y-3 border-t border-dark-700 mt-4">
               <Link href="/features" className="block py-2 text-dark-300 hover:text-white">Features</Link>
               <a href="#solutions" className="block py-2 text-dark-300 hover:text-white">Solutions</a>
-              <a href="#pricing" className="block py-2 text-dark-300 hover:text-white">Pricing</a>
-              <a href="#book-demo" className="block py-2 text-dark-300 hover:text-white">Book Demo</a>
+              <a href="#book-demo" className="block py-2 text-dark-300 hover:text-white">Schedule Demo</a>
               <Link href="/contact" className="block py-2 text-dark-300 hover:text-white">Contact</Link>
               <Link href="/login" className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
-              <Link href="/register" className="block btn-primary py-2 px-5 text-sm text-center mt-4">Get Started Free</Link>
+              <a href="#book-demo" className="block btn-primary py-2 px-5 text-sm text-center mt-4">Schedule Demo</a>
             </div>
           )}
         </div>
@@ -839,7 +896,7 @@ export default function LandingPage() {
               </p>
               
               <div className="flex flex-wrap gap-4">
-                <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Free Trial<ArrowRight className="w-5 h-5" /></Link>
+                <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></a>
                 <button onClick={() => setDemoOpen(true)} className="btn-secondary flex items-center gap-2 py-4 px-8 text-lg"><Play className="w-5 h-5" />Watch Demo</button>
               </div>
 
@@ -1037,34 +1094,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── PRICING ── */}
-      <section id="pricing" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-xl text-dark-400">Start free, upgrade as you grow. No hidden fees.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {PRICING.map((plan, i) => (
-              <div key={i} className={`card p-6 relative ${plan.popular ? 'border-primary-500 ring-2 ring-primary-500/20' : ''}`}>
-                {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary-500 rounded-full text-sm font-medium text-white">Most Popular</div>}
-                <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
-                <p className="text-dark-400 text-sm mb-6">{plan.description}</p>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-bold text-white">${plan.price}</span>
-                  <span className="text-dark-400">/mo</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((f, j) => <li key={j} className="flex items-center gap-3 text-dark-300 text-sm"><CheckCircle className="w-5 h-5 text-green-400 shrink-0" />{f}</li>)}
-                </ul>
-                <Link href={`/register?plan=${plan.name.toLowerCase()}`} className={`block text-center py-3 rounded-xl font-medium transition ${plan.popular ? 'btn-primary' : 'bg-primary-500 text-white hover:bg-primary-600'}`}>Get Started</Link>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-dark-500 text-sm mt-6">All plans include 14-day free trial. No credit card required.</p>
-        </div>
-      </section>
-
       {/* ── FAQ ── */}
       <section className="py-20 px-6 bg-dark-800/30">
         <div className="max-w-3xl mx-auto">
@@ -1122,10 +1151,9 @@ export default function LandingPage() {
             <h2 className="text-4xl font-bold text-white mb-4">Ready to Transform Your Agency?</h2>
             <p className="text-xl text-dark-300 mb-8">Join 500+ home care agencies using AI to streamline their operations.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Your Free Trial<ArrowRight className="w-5 h-5" /></Link>
-              <a href="#book-demo" className="btn-secondary py-4 px-8 text-lg">Book a Demo</a>
+              <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule Your Demo<ArrowRight className="w-5 h-5" /></a>
             </div>
-            <p className="text-dark-400 text-sm mt-6">No credit card required &bull; 14-day free trial &bull; Cancel anytime</p>
+            <p className="text-dark-400 text-sm mt-6">Free personalized demo &bull; No commitment required</p>
           </div>
         </div>
       </section>
@@ -1154,7 +1182,7 @@ export default function LandingPage() {
               <h3 className="font-semibold text-white mb-4 text-base">Product</h3>
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/features" className="hover:text-white transition">Features</Link></li>
-                <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
+                <li><a href="#book-demo" className="hover:text-white transition">Schedule Demo</a></li>
                 <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
                 <li><Link href="/status" className="hover:text-white transition">System Status</Link></li>
               </ul>
@@ -1195,10 +1223,9 @@ export default function LandingPage() {
       {/* ── STICKY CTA BAR ── */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 backdrop-blur-sm border-t border-dark-700 py-3 px-6 lg:hidden">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-white text-sm font-medium hidden sm:block">Start your free trial today</p>
+          <p className="text-white text-sm font-medium hidden sm:block">See PalmCare AI in action</p>
           <div className="flex items-center gap-2 flex-1 sm:flex-none">
-            <a href="#book-demo" className="flex-1 sm:flex-none text-center py-2.5 px-4 bg-dark-700 text-white rounded-lg text-sm font-medium">Book Demo</a>
-            <Link href="/register" className="flex-1 sm:flex-none text-center btn-primary py-2.5 px-4 text-sm">Get Started</Link>
+            <a href="#book-demo" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Schedule a Demo</a>
           </div>
         </div>
       </div>
