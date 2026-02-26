@@ -152,18 +152,18 @@ export default function AdminDashboardPage() {
   const StatCard = ({ label, value, icon: Icon, color, href }: any) => (
     <Link
       href={href || '#'}
-      className="p-6 bg-dark-800 rounded-xl border border-dark-700 hover:border-dark-600 transition group"
+      className="p-6 bg-white rounded-xl border border-slate-200 hover:border-slate-200 transition group"
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-dark-400 text-sm">{label}</p>
+          <p className="text-slate-500 text-sm">{label}</p>
           <p className={`text-3xl font-bold mt-1 ${color}`}>{value}</p>
         </div>
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color.replace('text-', 'bg-')}/10`}>
           <Icon className={`w-6 h-6 ${color}`} />
         </div>
       </div>
-      <div className="mt-4 flex items-center text-dark-400 text-sm group-hover:text-white transition">
+      <div className="mt-4 flex items-center text-slate-500 text-sm group-hover:text-white transition">
         <span>View details</span>
         <ChevronRight className="w-4 h-4 ml-1" />
       </div>
@@ -174,7 +174,7 @@ export default function AdminDashboardPage() {
     const isHealthy = status === 'healthy';
     return (
       <div className="flex items-center justify-between py-2">
-        <span className="text-dark-300">{label}</span>
+        <span className="text-slate-600">{label}</span>
         <span className={`flex items-center gap-2 text-sm ${isHealthy ? 'text-green-400' : 'text-red-400'}`}>
           {isHealthy ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
           {isHealthy ? 'Healthy' : 'Issue'}
@@ -209,9 +209,9 @@ export default function AdminDashboardPage() {
           <button
             onClick={fetchData}
             disabled={loading}
-            className="p-2 bg-dark-800 rounded-lg hover:bg-dark-700 transition disabled:opacity-50"
+            className="p-2 bg-white rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
           >
-            <RefreshCw className={`w-5 h-5 text-dark-400 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
 
@@ -263,28 +263,28 @@ export default function AdminDashboardPage() {
 
             {/* Secondary Stats */}
             <div className="grid grid-cols-4 gap-6 mb-8">
-              <div className="p-5 bg-dark-800 rounded-xl border border-dark-700">
-                <p className="text-dark-400 text-sm">Visits This Month</p>
+              <div className="p-5 bg-white rounded-xl border border-slate-200">
+                <p className="text-slate-500 text-sm">Visits This Month</p>
                 <p className="text-2xl font-bold text-white mt-1">{stats?.visits_this_month || 0}</p>
               </div>
-              <div className="p-5 bg-dark-800 rounded-xl border border-dark-700">
-                <p className="text-dark-400 text-sm">Contracts Generated</p>
+              <div className="p-5 bg-white rounded-xl border border-slate-200">
+                <p className="text-slate-500 text-sm">Contracts Generated</p>
                 <p className="text-2xl font-bold text-white mt-1">{stats?.contracts_this_month || 0}</p>
               </div>
-              <div className="p-5 bg-dark-800 rounded-xl border border-dark-700">
-                <p className="text-dark-400 text-sm">Active Subscriptions</p>
+              <div className="p-5 bg-white rounded-xl border border-slate-200">
+                <p className="text-slate-500 text-sm">Active Subscriptions</p>
                 <p className="text-2xl font-bold text-white mt-1">{stats?.active_subscriptions || 0}</p>
               </div>
-              <div className="p-5 bg-dark-800 rounded-xl border border-dark-700">
-                <p className="text-dark-400 text-sm">Total Businesses</p>
+              <div className="p-5 bg-white rounded-xl border border-slate-200">
+                <p className="text-slate-500 text-sm">Total Businesses</p>
                 <p className="text-2xl font-bold text-white mt-1">{stats?.total_businesses || 0}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
               {/* Compliance Alerts */}
-              <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
-                <div className="p-4 border-b border-dark-700 flex items-center justify-between">
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                   <h2 className="font-medium text-white flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5 text-yellow-400" />
                     Compliance Alerts
@@ -295,7 +295,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="p-4 space-y-3 max-h-64 overflow-y-auto">
                   {alerts.length === 0 ? (
-                    <p className="text-dark-400 text-center py-4">No active alerts</p>
+                    <p className="text-slate-500 text-center py-4">No active alerts</p>
                   ) : (
                     alerts.slice(0, 5).map(alert => (
                       <div
@@ -307,7 +307,7 @@ export default function AdminDashboardPage() {
                         }`}
                       >
                         <p className="text-white text-sm font-medium">{alert.business_name}</p>
-                        <p className="text-dark-400 text-xs mt-1">
+                        <p className="text-slate-500 text-xs mt-1">
                           {alert.document_type.replace(/_/g, ' ')} expires in {alert.days_until_expiry} days
                         </p>
                       </div>
@@ -317,8 +317,8 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Support Tickets */}
-              <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
-                <div className="p-4 border-b border-dark-700 flex items-center justify-between">
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                   <h2 className="font-medium text-white flex items-center gap-2">
                     <Ticket className="w-5 h-5 text-purple-400" />
                     Support Tickets
@@ -329,20 +329,20 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-dark-300">Open</span>
+                    <span className="text-slate-600">Open</span>
                     <span className="text-yellow-400 font-medium">{supportStats?.open || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-dark-300">In Progress</span>
+                    <span className="text-slate-600">In Progress</span>
                     <span className="text-blue-400 font-medium">{supportStats?.in_progress || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-dark-300">Resolved</span>
+                    <span className="text-slate-600">Resolved</span>
                     <span className="text-green-400 font-medium">{supportStats?.resolved || 0}</span>
                   </div>
-                  <div className="pt-3 border-t border-dark-700">
+                  <div className="pt-3 border-t border-slate-200">
                     <div className="flex items-center justify-between">
-                      <span className="text-dark-400 text-sm">Total</span>
+                      <span className="text-slate-500 text-sm">Total</span>
                       <span className="text-white font-bold">{supportStats?.total_tickets || 0}</span>
                     </div>
                   </div>
@@ -350,8 +350,8 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* System Health */}
-              <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
-                <div className="p-4 border-b border-dark-700 flex items-center justify-between">
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                   <h2 className="font-medium text-white flex items-center gap-2">
                     <Activity className="w-5 h-5 text-green-400" />
                     System Health
@@ -374,35 +374,35 @@ export default function AdminDashboardPage() {
             <div className="mt-8 grid grid-cols-4 gap-4">
               <Link
                 href="/admin/approvals"
-                className="p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-primary-500 transition flex items-center gap-3"
+                className="p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500 transition flex items-center gap-3"
               >
                 <Building2 className="w-5 h-5 text-primary-400" />
                 <span className="text-white">Review Approvals</span>
               </Link>
               <Link
                 href="/admin/subscriptions"
-                className="p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-primary-500 transition flex items-center gap-3"
+                className="p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500 transition flex items-center gap-3"
               >
                 <DollarSign className="w-5 h-5 text-primary-400" />
                 <span className="text-white">Manage Subscriptions</span>
               </Link>
               <Link
                 href="/admin/audit"
-                className="p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-primary-500 transition flex items-center gap-3"
+                className="p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500 transition flex items-center gap-3"
               >
                 <FileText className="w-5 h-5 text-primary-400" />
                 <span className="text-white">Audit Logs</span>
               </Link>
               <Link
                 href="/admin/users"
-                className="p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-primary-500 transition flex items-center gap-3"
+                className="p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500 transition flex items-center gap-3"
               >
                 <Users className="w-5 h-5 text-primary-400" />
                 <span className="text-white">Platform Users</span>
               </Link>
               <Link
                 href="/admin/incidents"
-                className="p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-orange-500 transition flex items-center gap-3"
+                className="p-4 bg-white rounded-xl border border-slate-200 hover:border-orange-500 transition flex items-center gap-3"
               >
                 <AlertTriangle className="w-5 h-5 text-orange-400" />
                 <span className="text-white">Status & Incidents</span>

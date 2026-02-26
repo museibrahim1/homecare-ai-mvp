@@ -21,7 +21,7 @@ const speakerConfig: Record<string, { gradient: string; bg: string; text: string
   'Client': { gradient: 'from-accent-green to-accent-cyan', bg: 'bg-accent-green/10', text: 'text-accent-green' },
 };
 
-const defaultConfig = { gradient: 'from-dark-500 to-dark-400', bg: 'bg-dark-700', text: 'text-dark-300' };
+const defaultConfig = { gradient: 'from-dark-500 to-dark-400', bg: 'bg-slate-50', text: 'text-slate-600' };
 
 function formatTimestamp(ms: number): string {
   const seconds = Math.floor(ms / 1000);
@@ -45,11 +45,11 @@ export default function TranscriptTimeline({
   if (segments.length === 0) {
     return (
       <div className="p-12 text-center">
-        <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <MessageSquare className="w-8 h-8 text-dark-400" />
+        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <MessageSquare className="w-8 h-8 text-slate-500" />
         </div>
         <h3 className="text-lg font-semibold text-white mb-2">No transcript available</h3>
-        <p className="text-dark-400">Run the transcription pipeline to generate a transcript</p>
+        <p className="text-slate-500">Run the transcription pipeline to generate a transcript</p>
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function TranscriptTimeline({
               className={`group p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
                 isActive 
                   ? 'bg-primary-500/10 border-primary-500/50 shadow-glow' 
-                  : 'bg-dark-700/30 border-dark-600/50 hover:bg-dark-700/50 hover:border-dark-500'
+                  : 'bg-slate-50/30 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
               }`}
             >
               <div className="flex items-start gap-3">
@@ -87,7 +87,7 @@ export default function TranscriptTimeline({
                     <span className={`text-sm font-semibold ${config.text}`}>
                       {speakerLabel}
                     </span>
-                    <div className="flex items-center gap-1.5 text-dark-400">
+                    <div className="flex items-center gap-1.5 text-slate-500">
                       <Clock className="w-3.5 h-3.5" />
                       <span className="text-xs font-mono">
                         {formatTimestamp(segment.start_ms)}
@@ -96,20 +96,20 @@ export default function TranscriptTimeline({
                   </div>
 
                   {/* Text */}
-                  <p className="text-dark-200 text-sm leading-relaxed">
+                  <p className="text-slate-700 text-sm leading-relaxed">
                     {segment.text}
                   </p>
 
                   {/* Confidence */}
                   {segment.confidence !== undefined && (
                     <div className="mt-3 flex items-center gap-3">
-                      <div className="flex-1 h-1.5 bg-dark-600 rounded-full overflow-hidden">
+                      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full bg-gradient-to-r ${config.gradient}`}
                           style={{ width: `${Math.max(0, segment.confidence * 100)}%` }}
                         />
                       </div>
-                      <span className="text-xs text-dark-500 font-mono">
+                      <span className="text-xs text-slate-400 font-mono">
                         {(segment.confidence * 100).toFixed(0)}%
                       </span>
                     </div>
@@ -123,7 +123,7 @@ export default function TranscriptTimeline({
           <div className="text-center pt-4">
             <button
               onClick={() => setVisibleCount(prev => Math.min(prev + 50, segments.length))}
-              className="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white rounded-lg text-sm transition"
+              className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-white rounded-lg text-sm transition"
             >
               Show more ({segments.length - visibleCount} remaining)
             </button>

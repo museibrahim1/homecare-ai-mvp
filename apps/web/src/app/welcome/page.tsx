@@ -133,7 +133,7 @@ export default function WelcomePage() {
 
   if (!isReady || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -142,7 +142,7 @@ export default function WelcomePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-dark-800 border-b border-dark-700">
+      <header className="bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -153,14 +153,14 @@ export default function WelcomePage() {
                 <h1 className="text-2xl font-bold text-white">
                   Welcome to PalmCare AI
                 </h1>
-                <p className="text-dark-400">
+                <p className="text-slate-500">
                   {agencyName || 'Let\'s get your agency set up'}
                 </p>
               </div>
             </div>
             <Link
               href="/visits"
-              className="text-dark-400 hover:text-white transition flex items-center gap-2"
+              className="text-slate-500 hover:text-white transition flex items-center gap-2"
             >
               Skip to Dashboard
               <ArrowRight className="w-4 h-4" />
@@ -182,9 +182,9 @@ export default function WelcomePage() {
         <div className="mb-12">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-white">Getting Started</h2>
-            <span className="text-dark-400 text-sm">{completedCount} of {steps.length} completed</span>
+            <span className="text-slate-500 text-sm">{completedCount} of {steps.length} completed</span>
           </div>
-          <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
+          <div className="h-2 bg-slate-50 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-primary-500 to-green-500 transition-all duration-500"
               style={{ width: `${progress}%` }}
@@ -207,7 +207,7 @@ export default function WelcomePage() {
                     ? 'bg-green-500/10 border-green-500/30'
                     : isNext
                     ? 'bg-primary-500/10 border-primary-500/50 ring-2 ring-primary-500/30'
-                    : 'bg-dark-800 border-dark-700'
+                    : 'bg-white border-slate-200'
                 }`}
               >
                 {/* Step number */}
@@ -216,7 +216,7 @@ export default function WelcomePage() {
                     ? 'bg-green-500 text-white'
                     : isNext
                     ? 'bg-primary-500 text-white'
-                    : 'bg-dark-600 text-dark-400'
+                    : 'bg-slate-100 text-slate-500'
                 }`}>
                   {isCompleted ? <CheckCircle className="w-5 h-5" /> : index + 1}
                 </div>
@@ -227,14 +227,14 @@ export default function WelcomePage() {
                       ? 'bg-green-500/20'
                       : isNext
                       ? 'bg-primary-500/20'
-                      : 'bg-dark-700'
+                      : 'bg-slate-50'
                   }`}>
                     <StepIcon className={`w-6 h-6 ${
                       isCompleted
                         ? 'text-green-400'
                         : isNext
                         ? 'text-primary-400'
-                        : 'text-dark-400'
+                        : 'text-slate-500'
                     }`} />
                   </div>
                   <div className="flex-1">
@@ -244,15 +244,15 @@ export default function WelcomePage() {
                       {step.title}
                       {isCompleted && <span className="ml-2 text-xs">Completed</span>}
                     </h3>
-                    <p className="text-dark-400 text-sm mb-4">{step.description}</p>
+                    <p className="text-slate-500 text-sm mb-4">{step.description}</p>
                     <Link
                       href={step.href}
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
                         isCompleted
-                          ? 'bg-dark-700 text-dark-300 hover:text-white'
+                          ? 'bg-slate-50 text-slate-600 hover:text-white'
                           : isNext
                           ? 'bg-primary-500 text-white hover:bg-primary-600'
-                          : 'bg-dark-700 text-dark-400 hover:text-white'
+                          : 'bg-slate-50 text-slate-500 hover:text-white'
                       }`}
                     >
                       {isCompleted ? 'Review' : step.action}
@@ -272,7 +272,7 @@ export default function WelcomePage() {
               <h2 className="text-2xl font-bold text-white mb-3">
                 See It In Action
               </h2>
-              <p className="text-dark-300 mb-6">
+              <p className="text-slate-600 mb-6">
                 Watch how easy it is to record an assessment and generate a contract in under 5 minutes.
               </p>
               <div className="flex flex-wrap gap-4">
@@ -285,18 +285,18 @@ export default function WelcomePage() {
                 </Link>
                 <Link
                   href="/visits"
-                  className="inline-flex items-center gap-2 bg-dark-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-dark-600 transition"
+                  className="inline-flex items-center gap-2 bg-slate-50 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
                 >
                   Go to Dashboard
                 </Link>
               </div>
             </div>
-            <div className="w-full md:w-80 aspect-video bg-dark-800 rounded-xl flex items-center justify-center border border-dark-600">
+            <div className="w-full md:w-80 aspect-video bg-white rounded-xl flex items-center justify-center border border-slate-200">
               <div className="text-center">
                 <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Sparkles className="w-8 h-8 text-primary-400" />
                 </div>
-                <p className="text-dark-400 text-sm">AI-Powered Assessment</p>
+                <p className="text-slate-500 text-sm">AI-Powered Assessment</p>
               </div>
             </div>
           </div>
@@ -340,12 +340,12 @@ export default function WelcomePage() {
             ].map((feature) => {
               const FeatureIcon = feature.icon;
               return (
-                <div key={feature.title} className="bg-dark-800 rounded-xl p-5 border border-dark-700">
+                <div key={feature.title} className="bg-white rounded-xl p-5 border border-slate-200">
                   <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center mb-3">
                     <FeatureIcon className="w-5 h-5 text-primary-400" />
                   </div>
                   <h3 className="text-white font-medium mb-1">{feature.title}</h3>
-                  <p className="text-dark-400 text-sm">{feature.description}</p>
+                  <p className="text-slate-500 text-sm">{feature.description}</p>
                 </div>
               );
             })}
@@ -353,22 +353,22 @@ export default function WelcomePage() {
         </div>
 
         {/* Help Section */}
-        <div className="bg-dark-800 rounded-2xl border border-dark-700 p-8 text-center">
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
           <h2 className="text-xl font-bold text-white mb-2">Need Help?</h2>
-          <p className="text-dark-400 mb-6">
+          <p className="text-slate-500 mb-6">
             Our team is here to help you get started. Reach out anytime.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
               href="mailto:support@palmtai.com"
-              className="inline-flex items-center gap-2 bg-dark-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-dark-600 transition"
+              className="inline-flex items-center gap-2 bg-slate-50 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
             >
               <Mail className="w-5 h-5" />
               Email Support
             </a>
             <Link
               href="/settings"
-              className="inline-flex items-center gap-2 bg-dark-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-dark-600 transition"
+              className="inline-flex items-center gap-2 bg-slate-50 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
             >
               <Settings className="w-5 h-5" />
               Account Settings

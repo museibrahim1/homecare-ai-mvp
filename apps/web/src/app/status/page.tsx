@@ -182,9 +182,9 @@ export default function StatusPage() {
   const days = getDaysInRange(14);
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="border-b border-dark-700/50 bg-dark-800/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden">
@@ -192,18 +192,18 @@ export default function StatusPage() {
             </div>
             <div>
               <span className="text-xl font-bold text-white">PalmCare AI</span>
-              <span className="text-dark-400 text-sm ml-2">Status</span>
+              <span className="text-slate-500 text-sm ml-2">Status</span>
             </div>
           </Link>
           <div className="flex items-center gap-3">
             {lastUpdated && (
-              <span className="text-dark-500 text-xs hidden sm:block">
+              <span className="text-slate-400 text-xs hidden sm:block">
                 Updated {formatTime(lastUpdated.toISOString())}
               </span>
             )}
             <button
               onClick={fetchStatus}
-              className="p-2 rounded-lg hover:bg-dark-700 transition text-dark-400 hover:text-white"
+              className="p-2 rounded-lg hover:bg-slate-50 transition text-slate-500 hover:text-white"
               aria-label="Refresh status"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -215,10 +215,10 @@ export default function StatusPage() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Overall Status Banner */}
         {error ? (
-          <div className="rounded-2xl bg-dark-800 border border-red-500/30 p-8 text-center mb-10">
+          <div className="rounded-2xl bg-white border border-red-500/30 p-8 text-center mb-10">
             <XCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-white mb-2">Unable to load status</h2>
-            <p className="text-dark-400 mb-4">{error}</p>
+            <p className="text-slate-500 mb-4">{error}</p>
             <button
               onClick={fetchStatus}
               className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
@@ -227,9 +227,9 @@ export default function StatusPage() {
             </button>
           </div>
         ) : loading && !data ? (
-          <div className="rounded-2xl bg-dark-800 border border-dark-700 p-12 text-center mb-10">
+          <div className="rounded-2xl bg-white border border-slate-200 p-12 text-center mb-10">
             <RefreshCw className="w-8 h-8 text-primary-400 animate-spin mx-auto mb-4" />
-            <p className="text-dark-400">Loading service status...</p>
+            <p className="text-slate-500">Loading service status...</p>
           </div>
         ) : data && (
           <>
@@ -251,7 +251,7 @@ export default function StatusPage() {
             {/* Service Components */}
             <div className="mb-10">
               <h2 className="text-lg font-semibold text-white mb-4">Service Components</h2>
-              <div className="bg-dark-800 rounded-xl border border-dark-700 divide-y divide-dark-700">
+              <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-200">
                 {data.services.map(svc => {
                   const svcConf = SERVICE_STATUS_ICON[svc.status] || SERVICE_STATUS_ICON.operational;
                   const isOk = svc.status === 'operational';
@@ -299,12 +299,12 @@ export default function StatusPage() {
                   const dayIncidents = grouped[day] || [];
                   const resolved = dayIncidents.filter(i => i.status === 'resolved');
                   return (
-                    <div key={day} className="border-b border-dark-700/50 pb-4 mb-4">
-                      <h3 className="text-sm font-semibold text-dark-300 mb-3">
+                    <div key={day} className="border-b border-slate-200 pb-4 mb-4">
+                      <h3 className="text-sm font-semibold text-slate-600 mb-3">
                         {formatDateGroup(day + 'T12:00:00Z')}
                       </h3>
                       {resolved.length === 0 ? (
-                        <p className="text-dark-500 text-sm pl-1">No incidents reported.</p>
+                        <p className="text-slate-400 text-sm pl-1">No incidents reported.</p>
                       ) : (
                         <div className="space-y-3">
                           {resolved.map(inc => (
@@ -326,8 +326,8 @@ export default function StatusPage() {
         )}
 
         {/* Footer */}
-        <footer className="mt-16 pt-8 border-t border-dark-700 text-center">
-          <p className="text-dark-500 text-sm">
+        <footer className="mt-16 pt-8 border-t border-slate-200 text-center">
+          <p className="text-slate-400 text-sm">
             Powered by{' '}
             <Link href="/" className="text-primary-400 hover:text-primary-300 transition">
               PalmCare AI
@@ -357,46 +357,46 @@ function IncidentCard({
     major: 'border-orange-500/30 bg-orange-500/5',
     critical: 'border-red-500/30 bg-red-500/5',
     maintenance: 'border-blue-500/30 bg-blue-500/5',
-    none: 'border-dark-700 bg-dark-800',
+    none: 'border-slate-200 bg-white',
   };
   const borderColor = active
     ? impactColors[incident.impact] || impactColors.none
-    : 'border-dark-700/50 bg-dark-800/50';
+    : 'border-slate-200 bg-white';
 
   return (
     <div className={`rounded-xl border ${borderColor} overflow-hidden transition-all`}>
       <button
         onClick={onToggle}
-        className="w-full px-5 py-4 flex items-start justify-between text-left hover:bg-dark-700/30 transition"
+        className="w-full px-5 py-4 flex items-start justify-between text-left hover:bg-slate-50/30 transition"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-xs font-bold uppercase tracking-wide ${statusConf.color}`}>
               {statusConf.label}
             </span>
-            <span className="text-dark-600">—</span>
+            <span className="text-slate-300">—</span>
             <span className="text-white font-medium">{incident.title}</span>
           </div>
           {incident.updates.length > 0 && (
-            <p className="text-dark-400 text-sm mt-1.5 line-clamp-2">
+            <p className="text-slate-500 text-sm mt-1.5 line-clamp-2">
               {incident.updates[0].message}
             </p>
           )}
-          <p className="text-dark-500 text-xs mt-2">
+          <p className="text-slate-400 text-xs mt-2">
             {formatDate(incident.created_at)} · {incident.service_name}
           </p>
         </div>
         <div className="ml-3 mt-1 flex-shrink-0">
           {expanded ? (
-            <ChevronUp className="w-4 h-4 text-dark-500" />
+            <ChevronUp className="w-4 h-4 text-slate-400" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-dark-500" />
+            <ChevronDown className="w-4 h-4 text-slate-400" />
           )}
         </div>
       </button>
 
       {expanded && incident.updates.length > 0 && (
-        <div className="px-5 pb-5 border-t border-dark-700/50">
+        <div className="px-5 pb-5 border-t border-slate-200">
           <div className="mt-4 space-y-4">
             {incident.updates.map((upd, idx) => {
               const updConf = INCIDENT_STATUS_LABELS[upd.status] || INCIDENT_STATUS_LABELS.investigating;
@@ -410,7 +410,7 @@ function IncidentCard({
                       'bg-red-500'
                     }`} />
                     {idx < incident.updates.length - 1 && (
-                      <div className="w-px flex-1 bg-dark-700 mt-1" />
+                      <div className="w-px flex-1 bg-slate-50 mt-1" />
                     )}
                   </div>
                   <div className="flex-1 pb-2">
@@ -418,11 +418,11 @@ function IncidentCard({
                       <span className={`text-xs font-bold uppercase ${updConf.color}`}>
                         {updConf.label}
                       </span>
-                      <span className="text-dark-500 text-xs">
+                      <span className="text-slate-400 text-xs">
                         {formatDate(upd.created_at)} {formatTime(upd.created_at)}
                       </span>
                     </div>
-                    <p className="text-dark-300 text-sm mt-1 leading-relaxed">
+                    <p className="text-slate-600 text-sm mt-1 leading-relaxed">
                       {upd.message}
                     </p>
                   </div>

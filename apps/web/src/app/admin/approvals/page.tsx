@@ -304,28 +304,28 @@ export default function AdminApprovalsPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">Business Approvals</h1>
-              <p className="text-dark-400 mt-1">Review and approve business registrations</p>
+              <p className="text-slate-500 mt-1">Review and approve business registrations</p>
             </div>
           </div>
           <button
             onClick={() => { fetchStats(); fetchBusinesses(); }}
-            className="p-2 bg-dark-800 rounded-lg hover:bg-dark-700 transition"
+            className="p-2 bg-white rounded-lg hover:bg-slate-50 transition"
           >
-            <RefreshCw className="w-5 h-5 text-dark-400" />
+            <RefreshCw className="w-5 h-5 text-slate-500" />
           </button>
         </div>
 
         {/* Stats */}
         {stats && (
           <div className="grid grid-cols-5 gap-4 mb-8">
-            <div className="p-4 bg-dark-800 rounded-xl border border-dark-700">
-              <p className="text-dark-400 text-sm">Total</p>
+            <div className="p-4 bg-white rounded-xl border border-slate-200">
+              <p className="text-slate-500 text-sm">Total</p>
               <p className="text-2xl font-bold text-white">{stats.total_businesses}</p>
             </div>
             <div className="p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/30">
@@ -349,13 +349,13 @@ export default function AdminApprovalsPage() {
 
         {/* Filters */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="flex bg-dark-800 rounded-lg p-1">
+          <div className="flex bg-white rounded-lg p-1">
             {['pending', 'approved', 'rejected', 'all'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  filter === f ? 'bg-primary-500 text-white' : 'text-dark-400 hover:text-white'
+                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-white'
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -363,22 +363,22 @@ export default function AdminApprovalsPage() {
             ))}
           </div>
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && fetchBusinesses()}
               placeholder="Search businesses..."
-              className="w-full pl-10 pr-4 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-6">
           {/* Business List */}
-          <div className="col-span-2 bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
-            <div className="p-4 border-b border-dark-700">
+          <div className="col-span-2 bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="p-4 border-b border-slate-200">
               <h2 className="font-medium text-white">Applications ({businesses.length})</h2>
             </div>
             
@@ -388,32 +388,32 @@ export default function AdminApprovalsPage() {
               </div>
             ) : businesses.length === 0 ? (
               <div className="text-center py-12">
-                <Building2 className="w-12 h-12 text-dark-600 mx-auto mb-4" />
-                <p className="text-dark-400">No businesses found</p>
+                <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-500">No businesses found</p>
               </div>
             ) : (
-              <div className="divide-y divide-dark-700">
+              <div className="divide-y divide-slate-200">
                 {businesses.map(business => (
                   <div
                     key={business.id}
                     onClick={() => fetchBusinessDetail(business.id)}
-                    className={`p-4 hover:bg-dark-700/50 cursor-pointer transition ${
-                      selectedBusiness?.id === business.id ? 'bg-dark-700/50' : ''
+                    className={`p-4 hover:bg-slate-100 cursor-pointer transition ${
+                      selectedBusiness?.id === business.id ? 'bg-slate-100' : ''
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-white">{business.name}</p>
-                        <p className="text-sm text-dark-400">{business.email}</p>
+                        <p className="text-sm text-slate-500">{business.email}</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className={`px-2 py-1 rounded-lg text-xs font-medium ${STATUS_COLORS[business.verification_status]}`}>
                           {STATUS_LABELS[business.verification_status]}
                         </span>
-                        <ChevronRight className="w-5 h-5 text-dark-400" />
+                        <ChevronRight className="w-5 h-5 text-slate-500" />
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-dark-500">
+                    <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
                       <span>{business.state_of_incorporation}</span>
                       <span>{business.documents_count} docs</span>
                       <span>{new Date(business.created_at).toLocaleDateString()}</span>
@@ -425,14 +425,14 @@ export default function AdminApprovalsPage() {
           </div>
 
           {/* Detail Panel */}
-          <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             {detailLoading ? (
               <div className="flex items-center justify-center h-96">
                 <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
               </div>
             ) : selectedBusiness ? (
               <div className="h-full flex flex-col">
-                <div className="p-4 border-b border-dark-700">
+                <div className="p-4 border-b border-slate-200">
                   <div className="flex items-center justify-between">
                     <h2 className="font-medium text-white">{selectedBusiness.name}</h2>
                     <span className={`px-2 py-1 rounded-lg text-xs font-medium ${STATUS_COLORS[selectedBusiness.verification_status]}`}>
@@ -440,36 +440,36 @@ export default function AdminApprovalsPage() {
                     </span>
                   </div>
                   {selectedBusiness.dba_name && (
-                    <p className="text-sm text-dark-400">DBA: {selectedBusiness.dba_name}</p>
+                    <p className="text-sm text-slate-500">DBA: {selectedBusiness.dba_name}</p>
                   )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {/* Business Info */}
                   <div>
-                    <h3 className="text-sm font-medium text-dark-400 uppercase tracking-wide mb-2">Business Info</h3>
+                    <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Business Info</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-dark-400">Type</span>
+                        <span className="text-slate-500">Type</span>
                         <span className="text-white">{selectedBusiness.entity_type}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-dark-400">State</span>
+                        <span className="text-slate-500">State</span>
                         <span className="text-white">{selectedBusiness.state_of_incorporation}</span>
                       </div>
                       {selectedBusiness.registration_number && (
                         <div className="flex justify-between">
-                          <span className="text-dark-400">Reg #</span>
+                          <span className="text-slate-500">Reg #</span>
                           <span className="text-white">{selectedBusiness.registration_number}</span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span className="text-dark-400">Email</span>
+                        <span className="text-slate-500">Email</span>
                         <span className="text-white">{selectedBusiness.email}</span>
                       </div>
                       {selectedBusiness.phone && (
                         <div className="flex justify-between">
-                          <span className="text-dark-400">Phone</span>
+                          <span className="text-slate-500">Phone</span>
                           <span className="text-white">{selectedBusiness.phone}</span>
                         </div>
                       )}
@@ -479,14 +479,14 @@ export default function AdminApprovalsPage() {
                   {/* SOS Verification */}
                   {selectedBusiness.sos_verification_data && (
                     <div>
-                      <h3 className="text-sm font-medium text-dark-400 uppercase tracking-wide mb-2">SOS Verification</h3>
+                      <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">SOS Verification</h3>
                       <div className={`p-3 rounded-lg ${selectedBusiness.sos_verification_data.found ? 'bg-green-500/10' : 'bg-yellow-500/10'}`}>
                         {selectedBusiness.sos_verification_data.found ? (
                           <div className="text-sm">
                             <p className="text-green-400 font-medium flex items-center gap-2">
                               <CheckCircle className="w-4 h-4" /> Verified
                             </p>
-                            <p className="text-dark-300 mt-1">Status: {selectedBusiness.sos_verification_data.status}</p>
+                            <p className="text-slate-600 mt-1">Status: {selectedBusiness.sos_verification_data.status}</p>
                           </div>
                         ) : (
                           <p className="text-yellow-400 text-sm flex items-center gap-2">
@@ -499,22 +499,22 @@ export default function AdminApprovalsPage() {
 
                   {/* Documents */}
                   <div>
-                    <h3 className="text-sm font-medium text-dark-400 uppercase tracking-wide mb-2">Documents ({selectedBusiness.documents.length})</h3>
+                    <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Documents ({selectedBusiness.documents.length})</h3>
                     <div className="space-y-2">
                       {selectedBusiness.documents.map(doc => (
-                        <div key={doc.id} className="flex items-center justify-between p-2 bg-dark-700 rounded-lg">
+                        <div key={doc.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
                           <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-dark-400" />
+                            <FileText className="w-4 h-4 text-slate-500" />
                             <div>
                               <p className="text-sm text-white">{doc.document_type.replace(/_/g, ' ')}</p>
-                              <p className="text-xs text-dark-400">{doc.file_name}</p>
+                              <p className="text-xs text-slate-500">{doc.file_name}</p>
                             </div>
                           </div>
                           <button
                             onClick={() => downloadDocument(doc.id)}
-                            className="p-1.5 hover:bg-dark-600 rounded transition"
+                            className="p-1.5 hover:bg-slate-100 rounded transition"
                           >
-                            <Download className="w-4 h-4 text-dark-400" />
+                            <Download className="w-4 h-4 text-slate-500" />
                           </button>
                         </div>
                       ))}
@@ -524,12 +524,12 @@ export default function AdminApprovalsPage() {
                   {/* Owner */}
                   {selectedBusiness.owner && (
                     <div>
-                      <h3 className="text-sm font-medium text-dark-400 uppercase tracking-wide mb-2">Owner</h3>
-                      <div className="flex items-center gap-3 p-2 bg-dark-700 rounded-lg">
-                        <User className="w-8 h-8 text-dark-400 p-1.5 bg-dark-600 rounded-full" />
+                      <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Owner</h3>
+                      <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
+                        <User className="w-8 h-8 text-slate-500 p-1.5 bg-slate-100 rounded-full" />
                         <div>
                           <p className="text-sm text-white">{selectedBusiness.owner.full_name}</p>
-                          <p className="text-xs text-dark-400">{selectedBusiness.owner.email}</p>
+                          <p className="text-xs text-slate-500">{selectedBusiness.owner.email}</p>
                         </div>
                       </div>
                     </div>
@@ -539,7 +539,7 @@ export default function AdminApprovalsPage() {
                 {/* Actions */}
                 {selectedBusiness.verification_status !== 'approved' && 
                  selectedBusiness.verification_status !== 'rejected' && (
-                  <div className="p-4 border-t border-dark-700 flex gap-3">
+                  <div className="p-4 border-t border-slate-200 flex gap-3">
                     <button
                       onClick={() => setShowRejectModal(true)}
                       disabled={actionLoading}
@@ -564,13 +564,13 @@ export default function AdminApprovalsPage() {
                 <p className="text-center">{detailError}</p>
                 <button 
                   onClick={() => setDetailError(null)}
-                  className="mt-4 px-4 py-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition text-sm"
+                  className="mt-4 px-4 py-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition text-sm"
                 >
                   Dismiss
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-96 text-dark-400">
+              <div className="flex flex-col items-center justify-center h-96 text-slate-500">
                 <Eye className="w-12 h-12 mb-4 opacity-50" />
                 <p>Select a business to view details</p>
               </div>
@@ -582,21 +582,21 @@ export default function AdminApprovalsPage() {
       {/* Reject Modal */}
       {showRejectModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 w-full max-w-md">
+          <div className="bg-white rounded-xl border border-slate-200 p-6 w-full max-w-md">
             <h3 className="text-lg font-bold text-white mb-4">Reject Application</h3>
-            <p className="text-dark-400 mb-4">
+            <p className="text-slate-500 mb-4">
               Please provide a reason for rejecting this business application.
             </p>
             <textarea
               value={rejectionReason}
               onChange={e => setRejectionReason(e.target.value)}
               placeholder="Enter rejection reason..."
-              className="w-full h-32 px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-red-500 resize-none"
+              className="w-full h-32 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-red-500 resize-none"
             />
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => { setShowRejectModal(false); setRejectionReason(''); }}
-                className="flex-1 px-4 py-2 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition"
+                className="flex-1 px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
               >
                 Cancel
               </button>

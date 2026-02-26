@@ -179,13 +179,13 @@ export default function PlatformUsersPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">Platform Users</h1>
-              <p className="text-dark-400 mt-1">Manage platform administrator accounts</p>
+              <p className="text-slate-500 mt-1">Manage platform administrator accounts</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -199,9 +199,9 @@ export default function PlatformUsersPage() {
             <button
               onClick={fetchUsers}
               disabled={loading}
-              className="p-2 bg-dark-800 rounded-lg hover:bg-dark-700 transition disabled:opacity-50"
+              className="p-2 bg-white rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
             >
-              <RefreshCw className={`w-5 h-5 text-dark-400 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -215,20 +215,20 @@ export default function PlatformUsersPage() {
         )}
 
         {/* Users List */}
-        <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-20">
-              <Users className="w-12 h-12 text-dark-600 mx-auto mb-4" />
-              <p className="text-dark-400">No platform users found</p>
+              <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500">No platform users found</p>
             </div>
           ) : (
-            <div className="divide-y divide-dark-700">
+            <div className="divide-y divide-slate-200">
               {paginatedUsers.map(user => (
-                <div key={user.id} className="p-5 hover:bg-dark-700/30 transition">
+                <div key={user.id} className="p-5 hover:bg-slate-50/30 transition">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
@@ -245,12 +245,12 @@ export default function PlatformUsersPage() {
                             <XCircle className="w-4 h-4 text-red-400" />
                           )}
                         </div>
-                        <p className="text-dark-400 text-sm">{user.email}</p>
+                        <p className="text-slate-500 text-sm">{user.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="text-dark-400 text-xs">Last Login</p>
+                        <p className="text-slate-500 text-xs">Last Login</p>
                         <p className="text-white text-sm">
                           {user.last_login 
                             ? new Date(user.last_login).toLocaleDateString() 
@@ -259,12 +259,12 @@ export default function PlatformUsersPage() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-dark-400 text-xs">Role</p>
+                        <p className="text-slate-500 text-xs">Role</p>
                         <p className="text-primary-400 text-sm capitalize">{user.role}</p>
                       </div>
                       <button
                         onClick={() => deleteUser(user.id, user.email)}
-                        className="p-2 hover:bg-dark-600 rounded-lg text-dark-400 hover:text-red-400 transition"
+                        className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-red-400 transition"
                         title="Delete user"
                       >
                         <XCircle className="w-5 h-5" />
@@ -276,25 +276,25 @@ export default function PlatformUsersPage() {
             </div>
           )}
           {users.length > pageSize && (
-            <div className="p-4 border-t border-dark-700 flex items-center justify-between">
-              <p className="text-dark-400 text-sm">
+            <div className="p-4 border-t border-slate-200 flex items-center justify-between">
+              <p className="text-slate-500 text-sm">
                 Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, users.length)} of {users.length}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage(Math.max(0, page - 1))}
                   disabled={page === 0}
-                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                  className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
                 >
-                  <ChevronLeft className="w-4 h-4 text-dark-400" />
+                  <ChevronLeft className="w-4 h-4 text-slate-500" />
                 </button>
-                <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
+                <span className="text-slate-500 px-3 text-sm">Page {page + 1}</span>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={(page + 1) * pageSize >= users.length}
-                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                  className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
                 >
-                  <ChevronRight className="w-4 h-4 text-dark-400" />
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
                 </button>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function PlatformUsersPage() {
       {/* Invite Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 w-full max-w-md">
+          <div className="bg-white rounded-xl border border-slate-200 p-6 w-full max-w-md">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-primary-400" />
               Invite Platform Admin
@@ -319,32 +319,32 @@ export default function PlatformUsersPage() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-dark-400 text-sm mb-2">Full Name</label>
+                <label className="block text-slate-500 text-sm mb-2">Full Name</label>
                 <input
                   type="text"
                   value={inviteForm.full_name}
                   onChange={e => setInviteForm({ ...inviteForm, full_name: e.target.value })}
                   placeholder="John Smith"
-                  className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-dark-400 text-sm mb-2">Email</label>
+                <label className="block text-slate-500 text-sm mb-2">Email</label>
                 <input
                   type="email"
                   value={inviteForm.email}
                   onChange={e => setInviteForm({ ...inviteForm, email: e.target.value })}
                   placeholder="john@palmtai.com"
-                  className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
                 />
-                <p className="text-dark-500 text-xs mt-1">Must be @palmtai.com email</p>
+                <p className="text-slate-400 text-xs mt-1">Must be @palmtai.com email</p>
               </div>
             </div>
             
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => { setShowInviteModal(false); setInviteError(''); }}
-                className="flex-1 px-4 py-2 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition"
+                className="flex-1 px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
               >
                 Cancel
               </button>

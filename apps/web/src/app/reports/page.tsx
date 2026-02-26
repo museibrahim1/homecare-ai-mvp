@@ -192,7 +192,7 @@ export default function ReportsPage() {
       'Companionship': 'bg-pink-500/20 text-pink-400 border-pink-500/30',
       'Safety': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
     };
-    return colors[type] || 'bg-dark-600 text-dark-300 border-dark-500';
+    return colors[type] || 'bg-slate-100 text-slate-600 border-slate-300';
   };
 
   // Render expanded content based on report type
@@ -201,7 +201,7 @@ export default function ReportsPage() {
       return (
         <div className="p-8 text-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin mx-auto mb-3" />
-          <p className="text-dark-400">Loading report data...</p>
+          <p className="text-slate-500">Loading report data...</p>
         </div>
       );
     }
@@ -209,7 +209,7 @@ export default function ReportsPage() {
     if (!reportData) {
       return (
         <div className="p-8 text-center">
-          <p className="text-dark-400">No data available</p>
+          <p className="text-slate-500">No data available</p>
         </div>
       );
     }
@@ -220,22 +220,22 @@ export default function ReportsPage() {
           <div className="p-6 space-y-6">
             {/* Summary Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Period</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Period</p>
                 <p className="text-white font-medium text-sm">
                   {new Date(reportData.period_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(reportData.period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Assessments</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Assessments</p>
                 <p className="text-2xl font-bold text-primary-400">{reportData.total_assessments}</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Clients</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Clients</p>
                 <p className="text-2xl font-bold text-accent-green">{reportData.total_clients}</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Services</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Services</p>
                 <p className="text-2xl font-bold text-accent-cyan">{reportData.total_services}</p>
               </div>
             </div>
@@ -270,13 +270,13 @@ export default function ReportsPage() {
                     <div 
                       key={i} 
                       onClick={() => router.push(`/visits/${a.id}`)}
-                      className="flex items-center justify-between p-3 bg-dark-700/30 rounded-lg cursor-pointer hover:bg-dark-700/50 transition"
+                      className="flex items-center justify-between p-3 bg-slate-50/30 rounded-lg cursor-pointer hover:bg-slate-100 transition"
                     >
                       <div>
                         <p className="text-white text-sm font-medium">{a.client_name}</p>
-                        <p className="text-dark-400 text-xs">{a.date} • {a.services_count} services</p>
+                        <p className="text-slate-500 text-xs">{a.date} • {a.services_count} services</p>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-dark-500" />
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
                     </div>
                   ))}
                 </div>
@@ -291,27 +291,27 @@ export default function ReportsPage() {
             {/* Month Header */}
             <div className="bg-gradient-to-r from-accent-green/10 to-primary-500/10 rounded-xl p-4 border border-accent-green/20">
               <h4 className="text-white font-bold text-lg">{reportData.month} {reportData.year}</h4>
-              <p className="text-dark-300 text-sm mt-1">{reportData.summary}</p>
+              <p className="text-slate-600 text-sm mt-1">{reportData.summary}</p>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-4 gap-3">
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Assessments</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Assessments</p>
                 <p className="text-xl font-bold text-white">{reportData.total_assessments}</p>
                 <p className="text-xs text-accent-green">{reportData.completed_assessments} done</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Clients</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Clients</p>
                 <p className="text-xl font-bold text-accent-cyan">{reportData.total_clients_served}</p>
                 <p className="text-xs text-accent-green">+{reportData.new_clients} new</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Contracts</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Contracts</p>
                 <p className="text-xl font-bold text-accent-purple">{reportData.total_contracts_generated}</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Pending</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Pending</p>
                 <p className="text-xl font-bold text-yellow-400">{reportData.pending_assessments}</p>
               </div>
             </div>
@@ -344,10 +344,10 @@ export default function ReportsPage() {
                 <h4 className="text-white font-medium mb-3">Weekly Trend</h4>
                 <div className="grid grid-cols-4 gap-3">
                   {reportData.weekly_trend.map((week: any, i: number) => (
-                    <div key={i} className="bg-dark-700/50 rounded-xl p-3 text-center">
-                      <p className="text-dark-400 text-xs">{week.week}</p>
+                    <div key={i} className="bg-slate-100 rounded-xl p-3 text-center">
+                      <p className="text-slate-500 text-xs">{week.week}</p>
                       <p className="text-xl font-bold text-white">{week.assessments}</p>
-                      <p className="text-dark-500 text-xs">{week.start_date}</p>
+                      <p className="text-slate-400 text-xs">{week.start_date}</p>
                     </div>
                   ))}
                 </div>
@@ -362,21 +362,21 @@ export default function ReportsPage() {
             {/* Summary */}
             <div className="bg-gradient-to-r from-accent-orange/10 to-yellow-500/10 rounded-xl p-4 border border-accent-orange/20">
               <h4 className="text-white font-bold">{reportData.period}</h4>
-              <p className="text-dark-300 text-sm mt-1">{reportData.summary}</p>
+              <p className="text-slate-600 text-sm mt-1">{reportData.summary}</p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Assessments</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Assessments</p>
                 <p className="text-2xl font-bold text-primary-400">{reportData.total_assessments}</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Services Found</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Services Found</p>
                 <p className="text-2xl font-bold text-accent-orange">{reportData.total_services_identified}</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Categories</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Categories</p>
                 <p className="text-2xl font-bold text-accent-cyan">{reportData.services_by_type?.length || 0}</p>
               </div>
             </div>
@@ -412,10 +412,10 @@ export default function ReportsPage() {
                 <h4 className="text-white font-medium mb-3">Client Billing</h4>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {reportData.client_billing.map((client: any, i: number) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-dark-700/30 rounded-lg">
+                    <div key={i} className="flex items-center justify-between p-3 bg-slate-50/30 rounded-lg">
                       <div>
                         <p className="text-white text-sm font-medium">{client.client_name}</p>
-                        <p className="text-dark-400 text-xs">{client.assessment_date} • {client.total_services} services</p>
+                        <p className="text-slate-500 text-xs">{client.assessment_date} • {client.total_services} services</p>
                       </div>
                       <div className="text-right">
                         <span className={`px-2 py-1 rounded text-xs ${
@@ -443,25 +443,25 @@ export default function ReportsPage() {
             {/* Summary */}
             <div className="bg-gradient-to-r from-accent-cyan/10 to-primary-500/10 rounded-xl p-4 border border-accent-cyan/20">
               <h4 className="text-white font-bold">Client Overview</h4>
-              <p className="text-dark-300 text-sm mt-1">{reportData.summary}</p>
+              <p className="text-slate-600 text-sm mt-1">{reportData.summary}</p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-4 gap-3">
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Total</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Total</p>
                 <p className="text-xl font-bold text-white">{reportData.total_clients}</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Active</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Active</p>
                 <p className="text-xl font-bold text-accent-green">{reportData.active_clients}</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">With Contracts</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">With Contracts</p>
                 <p className="text-xl font-bold text-accent-cyan">{reportData.clients_with_contracts}</p>
               </div>
-              <div className="bg-dark-700/50 rounded-xl p-4 text-center">
-                <p className="text-dark-400 text-xs mb-1">Pending</p>
+              <div className="bg-slate-100 rounded-xl p-4 text-center">
+                <p className="text-slate-500 text-xs mb-1">Pending</p>
                 <p className="text-xl font-bold text-yellow-400">{reportData.clients_pending}</p>
               </div>
             </div>
@@ -475,7 +475,7 @@ export default function ReportsPage() {
                     <div 
                       key={i} 
                       onClick={() => router.push('/clients')}
-                      className="p-3 bg-dark-700/30 rounded-lg cursor-pointer hover:bg-dark-700/50 transition"
+                      className="p-3 bg-slate-50/30 rounded-lg cursor-pointer hover:bg-slate-100 transition"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -484,7 +484,7 @@ export default function ReportsPage() {
                           </div>
                           <div>
                             <p className="text-white text-sm font-medium">{client.client_name}</p>
-                            <p className="text-dark-400 text-xs">
+                            <p className="text-slate-500 text-xs">
                               {client.total_assessments} assessments
                               {client.last_assessment_date && ` • Last: ${client.last_assessment_date}`}
                             </p>
@@ -503,7 +503,7 @@ export default function ReportsPage() {
                           <span className={`px-2 py-0.5 rounded text-xs ${
                             client.contract_status === 'Active' 
                               ? 'bg-accent-green/20 text-accent-green' 
-                              : 'bg-dark-600 text-dark-400'
+                              : 'bg-slate-100 text-slate-500'
                           }`}>
                             {client.contract_status}
                           </span>
@@ -512,7 +512,7 @@ export default function ReportsPage() {
                       {client.services_identified?.length > 0 && (
                         <div className="flex gap-1 flex-wrap mt-2 ml-11">
                           {client.services_identified.slice(0, 4).map((s: string, j: number) => (
-                            <span key={j} className="px-2 py-0.5 bg-dark-600 rounded text-xs text-dark-300">{s}</span>
+                            <span key={j} className="px-2 py-0.5 bg-slate-100 rounded text-xs text-slate-600">{s}</span>
                           ))}
                         </div>
                       )}
@@ -550,48 +550,48 @@ export default function ReportsPage() {
                 <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-primary-400" />
                 </div>
-                <span className="text-dark-400 text-sm">This Week</span>
+                <span className="text-slate-500 text-sm">This Week</span>
               </div>
               <p className="text-2xl font-bold text-white">
                 {overviewStats?.assessments_this_week ?? '--'}
               </p>
-              <p className="text-sm text-dark-400">assessments</p>
+              <p className="text-sm text-slate-500">assessments</p>
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-accent-green/20 rounded-xl flex items-center justify-center">
                   <DollarSign className="w-5 h-5 text-accent-green" />
                 </div>
-                <span className="text-dark-400 text-sm">Services</span>
+                <span className="text-slate-500 text-sm">Services</span>
               </div>
               <p className="text-2xl font-bold text-white">
                 {overviewStats?.services_identified ?? '--'}
               </p>
-              <p className="text-sm text-dark-400">identified</p>
+              <p className="text-sm text-slate-500">identified</p>
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-accent-cyan/20 rounded-xl flex items-center justify-center">
                   <Calendar className="w-5 h-5 text-accent-cyan" />
                 </div>
-                <span className="text-dark-400 text-sm">Contracts</span>
+                <span className="text-slate-500 text-sm">Contracts</span>
               </div>
               <p className="text-2xl font-bold text-white">
                 {overviewStats?.contracts_generated ?? '--'}
               </p>
-              <p className="text-sm text-dark-400">generated</p>
+              <p className="text-sm text-slate-500">generated</p>
             </div>
             <div className="card p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-accent-purple/20 rounded-xl flex items-center justify-center">
                   <BarChart3 className="w-5 h-5 text-accent-purple" />
                 </div>
-                <span className="text-dark-400 text-sm">Clients</span>
+                <span className="text-slate-500 text-sm">Clients</span>
               </div>
               <p className="text-2xl font-bold text-white">
                 {overviewStats?.active_clients ?? '--'}
               </p>
-              <p className="text-sm text-dark-400">active</p>
+              <p className="text-sm text-slate-500">active</p>
             </div>
           </div>
 
@@ -610,7 +610,7 @@ export default function ReportsPage() {
                   {/* Card Header - Always visible */}
                   <div 
                     onClick={() => handleCardClick(report.id)}
-                    className="p-6 cursor-pointer group hover:bg-dark-700/30 transition"
+                    className="p-6 cursor-pointer group hover:bg-slate-50/30 transition"
                   >
                     <div className="flex items-start gap-4">
                       <div className={`w-12 h-12 ${report.bgClass} rounded-xl flex items-center justify-center`}>
@@ -618,7 +618,7 @@ export default function ReportsPage() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-white mb-1">{report.title}</h3>
-                        <p className="text-dark-400 text-sm">{report.description}</p>
+                        <p className="text-slate-500 text-sm">{report.description}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         {isExpanded && (report.id === 'timesheet' || report.id === 'billing') && (
@@ -634,11 +634,11 @@ export default function ReportsPage() {
                             CSV
                           </button>
                         )}
-                        <div className={`p-2 rounded-lg transition ${isExpanded ? 'bg-primary-500/20' : 'group-hover:bg-dark-700'}`}>
+                        <div className={`p-2 rounded-lg transition ${isExpanded ? 'bg-primary-500/20' : 'group-hover:bg-slate-50'}`}>
                           {isExpanded ? (
                             <ChevronDown className="w-5 h-5 text-primary-400" />
                           ) : (
-                            <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-white" />
+                            <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white" />
                           )}
                         </div>
                       </div>
@@ -647,7 +647,7 @@ export default function ReportsPage() {
 
                   {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="border-t border-dark-700">
+                    <div className="border-t border-slate-200">
                       {renderReportContent()}
                     </div>
                   )}
@@ -675,23 +675,23 @@ export default function ReportsPage() {
                             style={{ height: `${barHeight}px` }}
                           />
                         </div>
-                        <span className="text-dark-400 text-xs">{day}</span>
+                        <span className="text-slate-500 text-xs">{day}</span>
                       </div>
                     );
                   })}
                 </div>
-                <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-dark-700">
+                <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-slate-200">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-primary-500 rounded" />
-                    <span className="text-dark-400 text-sm">Assessments Completed</span>
+                    <span className="text-slate-500 text-sm">Assessments Completed</span>
                   </div>
                 </div>
               </>
             ) : (
               <div className="h-64 flex flex-col items-center justify-center">
-                <BarChart3 className="w-12 h-12 text-dark-600 mb-3" />
-                <p className="text-dark-400">No activity data yet</p>
-                <p className="text-dark-500 text-sm mt-1">Complete assessments to see your weekly activity</p>
+                <BarChart3 className="w-12 h-12 text-slate-300 mb-3" />
+                <p className="text-slate-500">No activity data yet</p>
+                <p className="text-slate-400 text-sm mt-1">Complete assessments to see your weekly activity</p>
               </div>
             )}
           </div>
@@ -701,13 +701,13 @@ export default function ReportsPage() {
             <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
             {(overviewStats?.assessments_this_week || 0) === 0 ? (
               <div className="text-center py-8">
-                <FileText className="w-12 h-12 text-dark-600 mx-auto mb-3" />
-                <p className="text-dark-400">No recent activity</p>
-                <p className="text-dark-500 text-sm mt-1">Complete an assessment to see activity here</p>
+                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-500">No recent activity</p>
+                <p className="text-slate-400 text-sm mt-1">Complete an assessment to see activity here</p>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="text-center py-4 text-dark-400 text-sm">
+                <div className="text-center py-4 text-slate-500 text-sm">
                   Activity feed based on your assessments will appear here
                 </div>
               </div>

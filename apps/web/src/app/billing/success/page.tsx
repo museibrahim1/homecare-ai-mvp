@@ -9,7 +9,7 @@ import { useRequireAuth } from '@/lib/auth';
 export default function BillingSuccessPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
       </div>
     }>
@@ -41,14 +41,14 @@ function BillingSuccessContent() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-lg w-full text-center">
         {/* Success animation */}
         <div className="relative mb-8">
@@ -64,26 +64,26 @@ function BillingSuccessContent() {
         <h1 className="text-3xl font-bold text-white mb-3">
           Payment Successful!
         </h1>
-        <p className="text-dark-300 text-lg mb-8">
+        <p className="text-slate-600 text-lg mb-8">
           Your subscription is now active. Welcome to the next level of home healthcare management.
         </p>
 
         {/* What's unlocked */}
-        <div className="bg-dark-900/50 backdrop-blur border border-dark-800 rounded-2xl p-6 mb-8 text-left">
-          <h3 className="text-sm font-semibold text-dark-400 uppercase tracking-wider mb-4">What&apos;s Unlocked</h3>
+        <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl p-6 mb-8 text-left">
+          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">What&apos;s Unlocked</h3>
           <div className="space-y-3">
             {[
               { icon: Zap, label: 'AI-Powered Assessments', desc: 'Turn conversations into contracts' },
               { icon: FileText, label: 'Automated Proposals', desc: 'Send professional proposals instantly' },
               { icon: Users, label: 'Full Team Access', desc: 'Invite your team and assign roles' },
             ].map(({ icon: Icon, label, desc }) => (
-              <div key={label} className="flex items-center gap-3 p-3 bg-dark-800/50 rounded-xl">
+              <div key={label} className="flex items-center gap-3 p-3 bg-white rounded-xl">
                 <div className="w-10 h-10 rounded-xl bg-primary-500/10 flex items-center justify-center flex-shrink-0">
                   <Icon className="w-5 h-5 text-primary-400" />
                 </div>
                 <div>
                   <p className="text-white text-sm font-medium">{label}</p>
-                  <p className="text-dark-400 text-xs">{desc}</p>
+                  <p className="text-slate-500 text-xs">{desc}</p>
                 </div>
               </div>
             ))}
@@ -99,13 +99,13 @@ function BillingSuccessContent() {
           </Link>
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 px-6 py-3 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-white font-medium rounded-xl transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-white font-medium rounded-xl transition-all"
           >
             Back to Dashboard
           </Link>
         </div>
 
-        <p className="text-dark-500 text-xs mt-6">
+        <p className="text-slate-400 text-xs mt-6">
           Redirecting to billing in {countdown}s...
         </p>
       </div>

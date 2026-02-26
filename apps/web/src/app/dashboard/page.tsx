@@ -252,8 +252,8 @@ function TasksWidget() {
       {/* Task List */}
       {filtered.length === 0 ? (
         <div className="text-center py-6">
-          <CheckCircle2 className="w-8 h-8 text-dark-600 mx-auto mb-2" />
-          <p className="text-dark-400 text-sm">
+          <CheckCircle2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+          <p className="text-slate-500 text-sm">
             {filter === 'all' ? 'No tasks yet. Add one above!' : `No ${filter.replace('_', ' ')} tasks`}
           </p>
         </div>
@@ -282,7 +282,7 @@ function TasksWidget() {
                       <div className="w-2 h-2 bg-yellow-400 rounded-full" />
                     </div>
                   ) : (
-                    <Circle className="w-5 h-5 text-dark-500 hover:text-primary-400 transition-colors" />
+                    <Circle className="w-5 h-5 text-slate-400 hover:text-primary-400 transition-colors" />
                   )}
                 </button>
 
@@ -296,7 +296,7 @@ function TasksWidget() {
                       {catCfg.label}
                     </span>
                     {task.dueDate && (
-                      <span className={`text-[10px] ${isOverdue ? 'text-red-400 font-medium' : 'text-dark-400'}`}>
+                      <span className={`text-[10px] ${isOverdue ? 'text-red-400 font-medium' : 'text-slate-500'}`}>
                         {isOverdue ? 'Overdue: ' : 'Due: '}{format(new Date(task.dueDate), 'MMM d')}
                       </span>
                     )}
@@ -306,7 +306,7 @@ function TasksWidget() {
                 {/* Delete */}
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="p-1 text-dark-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                  className="p-1 text-slate-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all shrink-0"
                   title="Delete task"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -518,7 +518,7 @@ function CustomizePanel({
                 <button
                   onClick={() => toggleVisibility(widget.id)}
                   className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 shrink-0 ${
-                    isHidden ? 'bg-dark-600' : 'bg-primary-500'
+                    isHidden ? 'bg-slate-100' : 'bg-primary-500'
                   }`}
                   role="switch"
                   aria-checked={!isHidden}
@@ -872,8 +872,8 @@ export default function DashboardPage() {
                           </div>
                         ) : allClients.length === 0 ? (
                           <div className="text-center py-6">
-                            <Users className="w-8 h-8 text-dark-600 mx-auto mb-2" />
-                            <p className="text-dark-400 text-sm">No clients yet</p>
+                            <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                            <p className="text-slate-500 text-sm">No clients yet</p>
                           </div>
                         ) : (
                           <div>
@@ -945,7 +945,7 @@ export default function DashboardPage() {
                               <button
                                 onClick={() => handleClientAction(client.id, 'follow_up')}
                                 disabled={updatingClientId === client.id}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-dark-400 hover:text-red-400 bg-dark-700/50 border border-dark-600 hover:border-red-500/20 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:text-red-400 bg-slate-100 border border-slate-200 hover:border-red-500/20 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
                               >
                                 <X className="w-3.5 h-3.5" />
                                 Decline
@@ -978,8 +978,8 @@ export default function DashboardPage() {
                           </div>
                         ) : recentVisits.length === 0 ? (
                           <div className="text-center py-6 lg:py-8">
-                            <Calendar className="w-10 h-10 text-dark-600 mx-auto mb-3" />
-                            <p className="text-dark-400 text-sm">No assessments yet</p>
+                            <Calendar className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                            <p className="text-slate-500 text-sm">No assessments yet</p>
                             <button onClick={() => router.push('/visits/new')} className="text-sm text-primary-400 hover:text-primary-300 mt-2">
                               Start your first assessment
                             </button>
@@ -1045,7 +1045,7 @@ export default function DashboardPage() {
                                       </span>
                                     </div>
                                     <div className="sm:col-span-1 hidden sm:flex justify-end">
-                                      <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
+                                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary-400 transition-colors" />
                                     </div>
                                   </div>
                                 );
@@ -1163,15 +1163,15 @@ export default function DashboardPage() {
                             </div>
                           )}
                           {myUsage.total_events === 0 && (
-                            <p className="text-dark-500 text-sm text-center py-4">
+                            <p className="text-slate-400 text-sm text-center py-4">
                               Activity tracking has started. Check back tomorrow for your trends.
                             </p>
                           )}
                         </div>
                       ) : (
                         <div className="text-center py-6">
-                          <Activity className="w-8 h-8 text-dark-600 mx-auto mb-2" />
-                          <p className="text-dark-500 text-sm">Loading your activity data...</p>
+                          <Activity className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                          <p className="text-slate-400 text-sm">Loading your activity data...</p>
                         </div>
                       )}
                     </div>

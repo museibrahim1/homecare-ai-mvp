@@ -393,7 +393,7 @@ export default function VisitDetailPage() {
         <main className="flex-1 flex items-center justify-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-dark-300">Loading visit details...</span>
+            <span className="text-slate-600">Loading visit details...</span>
           </div>
         </main>
       </div>
@@ -404,10 +404,10 @@ export default function VisitDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-dark-400" />
+          <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-slate-500" />
           </div>
-          <p className="text-dark-300">Visit not found</p>
+          <p className="text-slate-600">Visit not found</p>
         </div>
       </div>
     );
@@ -434,15 +434,15 @@ export default function VisitDetailPage() {
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
             <button
               onClick={() => router.push('/visits')}
-              className="p-2 sm:p-2.5 hover:bg-dark-700 rounded-xl transition-colors"
+              className="p-2 sm:p-2.5 hover:bg-slate-50 rounded-xl transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-300" />
+              <ArrowLeft className="w-5 h-5 text-slate-600" />
             </button>
             <div className="flex-1 min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold text-white truncate">
                 {visit.client?.full_name || 'Unknown Client'}
               </h1>
-              <p className="text-dark-400 text-sm sm:text-base truncate">
+              <p className="text-slate-500 text-sm sm:text-base truncate">
                 {visit.scheduled_start 
                   ? format(new Date(visit.scheduled_start), 'EEEE, MMMM d, yyyy • h:mm a')
                   : 'Not scheduled'
@@ -475,7 +475,7 @@ export default function VisitDetailPage() {
               
               <button 
                 onClick={toggleSidebar}
-                className={`p-2 sm:p-2.5 rounded-xl transition-colors ${sidebarOpen ? 'bg-primary-500 text-white' : 'hover:bg-dark-700 text-dark-300'}`}
+                className={`p-2 sm:p-2.5 rounded-xl transition-colors ${sidebarOpen ? 'bg-primary-500 text-white' : 'hover:bg-slate-50 text-slate-600'}`}
                 title="Toggle Preview Panel"
               >
                 <PanelRightOpen className="w-5 h-5" />
@@ -505,75 +505,75 @@ export default function VisitDetailPage() {
                 </button>
               
               {showExportMenu && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-dark-800 border border-dark-600 rounded-xl shadow-xl z-50 overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden">
                   <div className="p-2">
                     <button
                       onClick={() => handleExport('contract-template')}
                       disabled={!contract}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
                         <FileCheck className="w-4 h-4 text-primary-400" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-white">Contract (Your Template)</p>
-                        <p className="text-xs text-dark-400">Uses your uploaded template</p>
+                        <p className="text-xs text-slate-500">Uses your uploaded template</p>
                       </div>
                     </button>
                     
                     <button
                       onClick={() => handleExport('contract-docx')}
                       disabled={!contract}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
                         <File className="w-4 h-4 text-blue-400" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-white">Contract DOCX</p>
-                        <p className="text-xs text-dark-400">Editable Word document</p>
+                        <p className="text-xs text-slate-500">Editable Word document</p>
                       </div>
                     </button>
                     
                     <button
                       onClick={() => handleExport('contract')}
                       disabled={!contract}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
                         <File className="w-4 h-4 text-purple-400" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-white">Contract PDF</p>
-                        <p className="text-xs text-dark-400">Default format</p>
+                        <p className="text-xs text-slate-500">Default format</p>
                       </div>
                     </button>
                     
                     <button
                       onClick={() => handleExport('timesheet')}
                       disabled={billables.length === 0}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
                         <FileSpreadsheet className="w-4 h-4 text-green-400" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-white">Timesheet CSV</p>
-                        <p className="text-xs text-dark-400">Billable hours</p>
+                        <p className="text-xs text-slate-500">Billable hours</p>
                       </div>
                     </button>
                     
                     <button
                       onClick={() => handleExport('note')}
                       disabled={!visit?.pipeline_state?.note?.status}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
                         <FileText className="w-4 h-4 text-blue-400" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-white">Visit Note PDF</p>
-                        <p className="text-xs text-dark-400">Care documentation</p>
+                        <p className="text-xs text-slate-500">Care documentation</p>
                       </div>
                     </button>
                   </div>
@@ -596,7 +596,7 @@ export default function VisitDetailPage() {
 
           {/* Pipeline Steps */}
           <div className="card p-3 sm:p-5 mb-6">
-            <h3 className="text-sm font-medium text-dark-300 mb-3">Processing Pipeline</h3>
+            <h3 className="text-sm font-medium text-slate-600 mb-3">Processing Pipeline</h3>
             <div className="grid grid-cols-2 sm:flex gap-2">
               {pipelineSteps.filter(s => s.enabled).map((step) => {
                 const status = getStepStatus(step);
@@ -614,7 +614,7 @@ export default function VisitDetailPage() {
                         ? 'bg-primary-500/10 border-primary-500/30'
                         : status === 'failed'
                         ? 'bg-red-500/10 border-red-500/30 hover:bg-red-500/20'
-                        : 'bg-dark-700/50 border-dark-600 hover:bg-dark-700 hover:border-dark-500'
+                        : 'bg-slate-100 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex flex-col items-center gap-1.5">
@@ -625,13 +625,13 @@ export default function VisitDetailPage() {
                       ) : status === 'failed' ? (
                         <AlertCircle className="w-5 h-5 text-red-400" />
                       ) : (
-                        <StepIcon className="w-5 h-5 text-dark-400" />
+                        <StepIcon className="w-5 h-5 text-slate-500" />
                       )}
                       <span className={`text-xs font-medium ${
                         status === 'completed' ? 'text-accent-green' :
                         status === 'processing' ? 'text-primary-400' :
                         status === 'failed' ? 'text-red-400' :
-                        'text-dark-300'
+                        'text-slate-600'
                       }`}>
                         {step.label}
                       </span>
@@ -653,7 +653,7 @@ export default function VisitDetailPage() {
                     className={`flex-1 p-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
                       uploadMode === 'audio' 
                         ? 'bg-primary-500/20 border-primary-500/50 text-primary-400' 
-                        : 'bg-dark-700/50 border-dark-600 text-dark-300 hover:bg-dark-700'
+                        : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
                     <Mic className="w-4 h-4" />
@@ -664,7 +664,7 @@ export default function VisitDetailPage() {
                     className={`flex-1 p-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
                       uploadMode === 'transcript' 
                         ? 'bg-purple-500/20 border-purple-500/50 text-purple-400' 
-                        : 'bg-dark-700/50 border-dark-600 text-dark-300 hover:bg-dark-700'
+                        : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
                     <FileText className="w-4 h-4" />
@@ -689,7 +689,7 @@ export default function VisitDetailPage() {
                 
                 <button
                   onClick={() => setShowUploader(false)}
-                  className="w-full text-center text-dark-400 hover:text-white py-2 transition text-sm"
+                  className="w-full text-center text-slate-500 hover:text-white py-2 transition text-sm"
                 >
                   Cancel
                 </button>
@@ -706,7 +706,7 @@ export default function VisitDetailPage() {
                         </div>
                         <div>
                           <p className="text-white font-medium">Transcript Imported</p>
-                          <p className="text-dark-400 text-sm">{transcript.length} segments</p>
+                          <p className="text-slate-500 text-sm">{transcript.length} segments</p>
                         </div>
                       </div>
                     )}
@@ -735,30 +735,30 @@ export default function VisitDetailPage() {
               <div className="card p-6">
                 <div className="text-center mb-6">
                   <h3 className="text-lg font-medium text-white mb-2">Add Recording or Transcript</h3>
-                  <p className="text-dark-400 text-sm">Upload audio or import a transcript to get started</p>
+                  <p className="text-slate-500 text-sm">Upload audio or import a transcript to get started</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => { setUploadMode('audio'); setShowUploader(true); }}
-                    className="p-5 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-primary-500 rounded-xl transition-all group"
+                    className="p-5 bg-slate-100 hover:bg-slate-50 border border-slate-200 hover:border-primary-500 rounded-xl transition-all group"
                   >
                     <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:bg-primary-500/30 transition">
                       <Mic className="w-6 h-6 text-primary-400" />
                     </div>
                     <h4 className="text-white font-medium text-sm mb-1">Upload Audio</h4>
-                    <p className="text-dark-400 text-xs">MP3, WAV, M4A</p>
+                    <p className="text-slate-500 text-xs">MP3, WAV, M4A</p>
                   </button>
                   
                   <button
                     onClick={() => { setUploadMode('transcript'); setShowUploader(true); }}
-                    className="p-5 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-purple-500 rounded-xl transition-all group"
+                    className="p-5 bg-slate-100 hover:bg-slate-50 border border-slate-200 hover:border-purple-500 rounded-xl transition-all group"
                   >
                     <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-3 mx-auto group-hover:bg-purple-500/30 transition">
                       <FileText className="w-6 h-6 text-purple-400" />
                     </div>
                     <h4 className="text-white font-medium text-sm mb-1">Import Transcript</h4>
-                    <p className="text-dark-400 text-xs">SRT, VTT, TXT</p>
+                    <p className="text-slate-500 text-xs">SRT, VTT, TXT</p>
                   </button>
                 </div>
               </div>
@@ -781,8 +781,8 @@ export default function VisitDetailPage() {
                 <button
                   key={tab.id}
                   onClick={() => setPopoutPanel(tab.id)}
-                  className={`card p-4 text-left hover:bg-dark-700/50 transition-all duration-200 group ${
-                    activePanel === tab.id && sidebarOpen ? 'ring-2 ring-primary-500/50 bg-dark-700/30' : ''
+                  className={`card p-4 text-left hover:bg-slate-100 transition-all duration-200 group ${
+                    activePanel === tab.id && sidebarOpen ? 'ring-2 ring-primary-500/50 bg-slate-50/30' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -791,7 +791,7 @@ export default function VisitDetailPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-medium text-white">{tab.label}</h3>
-                      <p className="text-xs text-dark-400">
+                      <p className="text-xs text-slate-500">
                         {tab.id === 'contract' 
                           ? (contract ? 'Generated' : 'Pending')
                           : `${tab.count} ${tab.id === 'transcript' ? 'segments' : 'items'}`
@@ -801,10 +801,10 @@ export default function VisitDetailPage() {
                     <span
                       role="button"
                       onClick={(e) => { e.stopPropagation(); setActivePanel(tab.id as any); setSidebarOpen(true); }}
-                      className="p-1.5 rounded-lg hover:bg-dark-600 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
                       title={`Open ${tab.label} in sidebar`}
                     >
-                      <ChevronRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary-400 transition-colors" />
                     </span>
                   </div>
                 </button>
@@ -824,7 +824,7 @@ export default function VisitDetailPage() {
         />
         <div
           ref={panelRef}
-          className={`fixed top-0 right-0 h-full bg-dark-850 border-l border-dark-700 shadow-2xl z-40 flex flex-col ${
+          className={`fixed top-0 right-0 h-full bg-dark-850 border-l border-slate-200 shadow-2xl z-40 flex flex-col ${
             !panelWidth ? 'w-[92vw] sm:w-[340px] md:w-[380px] lg:w-[420px] xl:w-[450px] 2xl:w-[500px] max-w-[calc(100vw-4rem)]' : ''
           }`}
           style={panelWidth ? { width: `${panelWidth}px`, maxWidth: 'calc(100vw - 4rem)' } : undefined}
@@ -834,38 +834,38 @@ export default function VisitDetailPage() {
             className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-primary-500/30 z-50 group hidden lg:flex items-center"
             onMouseDown={handleResizeStart}
           >
-            <div className="w-1 h-12 bg-dark-500 group-hover:bg-primary-400 rounded-full transition-colors mx-auto" />
+            <div className="w-1 h-12 bg-slate-200 group-hover:bg-primary-400 rounded-full transition-colors mx-auto" />
           </div>
         {/* Panel Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary-500/20 rounded-lg flex items-center justify-center">
               <FileText className="w-4 h-4 text-primary-400" />
             </div>
             <div>
               <h3 className="text-base font-semibold text-white">Document Preview</h3>
-              <p className="text-xs text-dark-400">Review generated content</p>
+              <p className="text-xs text-slate-500">Review generated content</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => { setPopoutPanel(activePanel); setSidebarOpen(false); }}
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors group"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors group"
               title="Open in full view"
             >
-              <Maximize2 className="w-4 h-4 text-dark-400 group-hover:text-white" />
+              <Maximize2 className="w-4 h-4 text-slate-500 group-hover:text-white" />
             </button>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors group"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors group"
             >
-              <X className="w-5 h-5 text-dark-400 group-hover:text-white" />
+              <X className="w-5 h-5 text-slate-500 group-hover:text-white" />
             </button>
           </div>
         </div>
 
         {/* Panel Tabs - Scrollable on smaller screens */}
-        <div className="flex border-b border-dark-700 px-2 sm:px-4 pt-2 sm:pt-3 gap-1 sm:gap-2 bg-dark-800 overflow-x-auto scrollbar-hide">
+        <div className="flex border-b border-slate-200 px-2 sm:px-4 pt-2 sm:pt-3 gap-1 sm:gap-2 bg-white overflow-x-auto scrollbar-hide">
           {panelTabs.map((tab) => {
             const TabIcon = tab.icon;
             const isActive = activePanel === tab.id;
@@ -881,7 +881,7 @@ export default function VisitDetailPage() {
                 className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg cursor-pointer select-none whitespace-nowrap flex-shrink-0 ${
                   isActive
                     ? 'bg-primary-500/20 text-white border border-primary-500/30'
-                    : 'text-dark-400 hover:text-white hover:bg-dark-700/50 border border-transparent'
+                    : 'text-slate-500 hover:text-white hover:bg-slate-100 border border-transparent'
                 }`}
               >
                 <TabIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${isActive ? 'text-primary-400' : ''}`} />
@@ -890,7 +890,7 @@ export default function VisitDetailPage() {
                   <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs ${
                     isActive 
                       ? 'bg-primary-500/30 text-primary-300' 
-                      : 'bg-dark-600 text-dark-400'
+                      : 'bg-slate-100 text-slate-500'
                   }`}>
                     {tab.count}
                   </span>
@@ -921,59 +921,59 @@ export default function VisitDetailPage() {
               {note && note.id ? (
                 <div className="space-y-6">
                   {/* SOAP Notes */}
-                  <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
+                  <div className="bg-white rounded-xl p-4 border border-slate-200">
                     <h3 className="text-lg font-semibold text-white mb-4">Visit Notes (SOAP)</h3>
                     
                     {note.structured_data && note.structured_data.subjective && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-amber-400 mb-1">Subjective</h4>
-                        <p className="text-dark-200 text-sm">{note.structured_data.subjective}</p>
+                        <p className="text-slate-700 text-sm">{note.structured_data.subjective}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.objective && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-blue-400 mb-1">Objective</h4>
-                        <p className="text-dark-200 text-sm">{note.structured_data.objective}</p>
+                        <p className="text-slate-700 text-sm">{note.structured_data.objective}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.assessment && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-green-400 mb-1">Assessment</h4>
-                        <p className="text-dark-200 text-sm">{note.structured_data.assessment}</p>
+                        <p className="text-slate-700 text-sm">{note.structured_data.assessment}</p>
                       </div>
                     )}
                     
                     {note.structured_data && note.structured_data.plan && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-purple-400 mb-1">Plan</h4>
-                        <p className="text-dark-200 text-sm">{note.structured_data.plan}</p>
+                        <p className="text-slate-700 text-sm">{note.structured_data.plan}</p>
                       </div>
                     )}
                     
                     {(!note.structured_data || (!note.structured_data.subjective && !note.structured_data.objective && !note.structured_data.assessment && !note.structured_data.plan)) && (
-                      <p className="text-dark-400 text-sm">No SOAP data available</p>
+                      <p className="text-slate-500 text-sm">No SOAP data available</p>
                     )}
                   </div>
                   
                   {/* Narrative */}
                   {note.narrative && (
-                    <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
+                    <div className="bg-white rounded-xl p-4 border border-slate-200">
                       <h3 className="text-lg font-semibold text-white mb-2">Narrative Summary</h3>
-                      <p className="text-dark-200 text-sm whitespace-pre-wrap">{note.narrative}</p>
+                      <p className="text-slate-700 text-sm whitespace-pre-wrap">{note.narrative}</p>
                     </div>
                   )}
                   
                   {/* Tasks Performed */}
                   {note.structured_data && Array.isArray(note.structured_data.tasks_performed) && note.structured_data.tasks_performed.length > 0 && (
-                    <div className="bg-dark-800 rounded-xl p-4 border border-dark-700">
+                    <div className="bg-white rounded-xl p-4 border border-slate-200">
                       <h3 className="text-lg font-semibold text-white mb-2">Tasks Performed</h3>
                       <ul className="space-y-3">
                         {note.structured_data.tasks_performed.map((task, i) => (
-                          <li key={i} className="bg-dark-700/50 rounded-lg p-3">
+                          <li key={i} className="bg-slate-100 rounded-lg p-3">
                             {typeof task === 'string' ? (
-                              <p className="text-dark-200 text-sm">{task}</p>
+                              <p className="text-slate-700 text-sm">{task}</p>
                             ) : (
                               <div>
                                 <div className="flex items-center justify-between mb-1">
@@ -985,10 +985,10 @@ export default function VisitDetailPage() {
                                   )}
                                 </div>
                                 {task.details && (
-                                  <p className="text-dark-300 text-sm mt-1">{task.details}</p>
+                                  <p className="text-slate-600 text-sm mt-1">{task.details}</p>
                                 )}
                                 {task.client_response && (
-                                  <p className="text-dark-400 text-xs mt-1 italic">Client: {task.client_response}</p>
+                                  <p className="text-slate-500 text-xs mt-1 italic">Client: {task.client_response}</p>
                                 )}
                               </div>
                             )}
@@ -999,7 +999,7 @@ export default function VisitDetailPage() {
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-dark-400">
+                <div className="flex flex-col items-center justify-center h-full text-slate-500">
                   <ClipboardList className="w-12 h-12 mb-4 opacity-50" />
                   <p>No notes generated yet</p>
                   <p className="text-sm">Click the "Notes" button in the pipeline to generate</p>
@@ -1025,9 +1025,9 @@ export default function VisitDetailPage() {
       {/* Pop-out Full View Modal - z-[70] to render above sidebar nav (z-[60]) */}
       {popoutPanel && (
         <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4">
-          <div className="bg-dark-900 border border-dark-700 rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden shadow-2xl">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800 flex-shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white flex-shrink-0">
               <div className="flex items-center gap-3">
                 {(() => {
                   const tab = panelTabs.find(t => t.id === popoutPanel);
@@ -1048,7 +1048,7 @@ export default function VisitDetailPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white">{tab.label}</h3>
-                        <p className="text-xs text-dark-400">
+                        <p className="text-xs text-slate-500">
                           {tab.id === 'contract' 
                             ? (contract ? 'Generated - Click Edit to modify' : 'Pending')
                             : `${tab.count} ${tab.id === 'transcript' ? 'segments' : 'items'}`
@@ -1071,7 +1071,7 @@ export default function VisitDetailPage() {
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
                         isActive
                           ? 'bg-primary-500/20 text-white border border-primary-500/30'
-                          : 'text-dark-400 hover:text-white hover:bg-dark-700 border border-transparent'
+                          : 'text-slate-500 hover:text-white hover:bg-slate-50 border border-transparent'
                       }`}
                     >
                       <TabIcon className={`w-4 h-4 ${isActive ? 'text-primary-400' : ''}`} />
@@ -1079,12 +1079,12 @@ export default function VisitDetailPage() {
                     </button>
                   );
                 })}
-                <div className="w-px h-6 bg-dark-600 mx-1" />
+                <div className="w-px h-6 bg-slate-100 mx-1" />
                 <button
                   onClick={() => setPopoutPanel(null)}
-                  className="p-2 hover:bg-dark-700 rounded-lg transition-colors group"
+                  className="p-2 hover:bg-slate-50 rounded-lg transition-colors group"
                 >
-                  <X className="w-5 h-5 text-dark-400 group-hover:text-white" />
+                  <X className="w-5 h-5 text-slate-500 group-hover:text-white" />
                 </button>
               </div>
             </div>
@@ -1107,50 +1107,50 @@ export default function VisitDetailPage() {
                 <div className="p-6">
                   {note && note.id ? (
                     <div className="space-y-6 max-w-4xl mx-auto">
-                      <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
+                      <div className="bg-white rounded-xl p-6 border border-slate-200">
                         <h3 className="text-xl font-semibold text-white mb-6">Visit Notes (SOAP)</h3>
                         {note.structured_data && note.structured_data.subjective && (
                           <div className="mb-4">
                             <h4 className="text-sm font-medium text-amber-400 mb-1">Subjective</h4>
-                            <p className="text-dark-200 text-sm">{note.structured_data.subjective}</p>
+                            <p className="text-slate-700 text-sm">{note.structured_data.subjective}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.objective && (
                           <div className="mb-4">
                             <h4 className="text-sm font-medium text-blue-400 mb-1">Objective</h4>
-                            <p className="text-dark-200 text-sm">{note.structured_data.objective}</p>
+                            <p className="text-slate-700 text-sm">{note.structured_data.objective}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.assessment && (
                           <div className="mb-4">
                             <h4 className="text-sm font-medium text-green-400 mb-1">Assessment</h4>
-                            <p className="text-dark-200 text-sm">{note.structured_data.assessment}</p>
+                            <p className="text-slate-700 text-sm">{note.structured_data.assessment}</p>
                           </div>
                         )}
                         {note.structured_data && note.structured_data.plan && (
                           <div className="mb-4">
                             <h4 className="text-sm font-medium text-purple-400 mb-1">Plan</h4>
-                            <p className="text-dark-200 text-sm">{note.structured_data.plan}</p>
+                            <p className="text-slate-700 text-sm">{note.structured_data.plan}</p>
                           </div>
                         )}
                         {(!note.structured_data || (!note.structured_data.subjective && !note.structured_data.objective && !note.structured_data.assessment && !note.structured_data.plan)) && (
-                          <p className="text-dark-400 text-sm">No SOAP data available</p>
+                          <p className="text-slate-500 text-sm">No SOAP data available</p>
                         )}
                       </div>
                       {note.narrative && (
-                        <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
+                        <div className="bg-white rounded-xl p-6 border border-slate-200">
                           <h3 className="text-xl font-semibold text-white mb-2">Narrative Summary</h3>
-                          <p className="text-dark-200 text-sm whitespace-pre-wrap">{note.narrative}</p>
+                          <p className="text-slate-700 text-sm whitespace-pre-wrap">{note.narrative}</p>
                         </div>
                       )}
                       {note.structured_data && Array.isArray(note.structured_data.tasks_performed) && note.structured_data.tasks_performed.length > 0 && (
-                        <div className="bg-dark-800 rounded-xl p-6 border border-dark-700">
+                        <div className="bg-white rounded-xl p-6 border border-slate-200">
                           <h3 className="text-xl font-semibold text-white mb-2">Tasks Performed</h3>
                           <ul className="space-y-3">
                             {note.structured_data.tasks_performed.map((task, i) => (
-                              <li key={i} className="bg-dark-700/50 rounded-lg p-3">
+                              <li key={i} className="bg-slate-100 rounded-lg p-3">
                                 {typeof task === 'string' ? (
-                                  <p className="text-dark-200 text-sm">{task}</p>
+                                  <p className="text-slate-700 text-sm">{task}</p>
                                 ) : (
                                   <div>
                                     <div className="flex items-center justify-between mb-1">
@@ -1161,8 +1161,8 @@ export default function VisitDetailPage() {
                                         </span>
                                       )}
                                     </div>
-                                    {task.details && <p className="text-dark-300 text-sm mt-1">{task.details}</p>}
-                                    {task.client_response && <p className="text-dark-400 text-xs mt-1 italic">Client: {task.client_response}</p>}
+                                    {task.details && <p className="text-slate-600 text-sm mt-1">{task.details}</p>}
+                                    {task.client_response && <p className="text-slate-500 text-xs mt-1 italic">Client: {task.client_response}</p>}
                                   </div>
                                 )}
                               </li>
@@ -1172,7 +1172,7 @@ export default function VisitDetailPage() {
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-64 text-dark-400">
+                    <div className="flex flex-col items-center justify-center h-64 text-slate-500">
                       <ClipboardList className="w-12 h-12 mb-4 opacity-50" />
                       <p>No notes generated yet</p>
                     </div>
@@ -1195,14 +1195,14 @@ export default function VisitDetailPage() {
       {/* Restart Assessment Confirmation Modal */}
       {showRestartModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
                 <RotateCcw className="w-6 h-6 text-red-400" />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">Restart Assessment</h2>
-                <p className="text-dark-400 text-sm">This action cannot be undone</p>
+                <p className="text-slate-500 text-sm">This action cannot be undone</p>
               </div>
             </div>
             
@@ -1223,7 +1223,7 @@ export default function VisitDetailPage() {
               <button
                 onClick={() => setShowRestartModal(false)}
                 disabled={restarting}
-                className="flex-1 px-4 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>

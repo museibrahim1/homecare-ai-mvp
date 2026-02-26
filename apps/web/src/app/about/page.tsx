@@ -6,19 +6,19 @@ import { Mic, ArrowRight, Shield, Heart, Zap, Globe, Users, Award, Lock } from '
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-slate-50">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-50/80 backdrop-blur-lg border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden"><Image src="/hand-icon-white.png" alt="PalmCare AI" width={30} height={30} className="object-contain" /></div>
             <span className="text-xl font-bold text-white">PalmCare AI</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/#features" className="text-dark-300 hover:text-white transition">Features</Link>
-            <Link href="/#pricing" className="text-dark-300 hover:text-white transition">Pricing</Link>
-            <Link href="/contact" className="text-dark-300 hover:text-white transition">Contact</Link>
-            <Link href="/login" className="text-dark-300 hover:text-white transition">Sign In</Link>
+            <Link href="/#features" className="text-slate-600 hover:text-white transition">Features</Link>
+            <Link href="/#pricing" className="text-slate-600 hover:text-white transition">Pricing</Link>
+            <Link href="/contact" className="text-slate-600 hover:text-white transition">Contact</Link>
+            <Link href="/login" className="text-slate-600 hover:text-white transition">Sign In</Link>
             <Link href="/#book-demo" className="btn-primary py-2 px-5 text-sm">Schedule Demo</Link>
           </div>
         </div>
@@ -36,7 +36,7 @@ export default function AboutPage() {
               A Story of Innovation and
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> Compassionate Care</span>
             </h1>
-            <p className="text-xl text-dark-300 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
               We built PalmCare AI because we saw caregivers drowning in paperwork instead of doing what they do best — caring for people. 
               Our platform puts AI to work on the administrative burden so agencies can focus on delivering exceptional care.
             </p>
@@ -44,20 +44,20 @@ export default function AboutPage() {
         </section>
 
         {/* Mission */}
-        <section className="px-6 py-16 bg-dark-800/30">
+        <section className="px-6 py-16 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="grid md:grid-cols-2 gap-16 items-center">
               <div>
                 <h2 className="text-3xl font-bold text-white mb-6">Our Mission: Empower Every Agency</h2>
-                <p className="text-dark-300 mb-4 leading-relaxed">
+                <p className="text-slate-600 mb-4 leading-relaxed">
                   In home care, technology should enhance the human experience — not replace it. We chose a different path from legacy software vendors: 
                   one that combines cutting-edge AI with deep understanding of how agencies actually operate.
                 </p>
-                <p className="text-dark-300 mb-4 leading-relaxed">
+                <p className="text-slate-600 mb-4 leading-relaxed">
                   Every feature in PalmCare AI was designed from the perspective of the people who use it — caregivers in the field, 
                   administrators managing schedules, and agency owners scaling their businesses.
                 </p>
-                <p className="text-dark-300 leading-relaxed">
+                <p className="text-slate-600 leading-relaxed">
                   The result is a platform that feels intuitive from day one, eliminates hours of manual paperwork, 
                   and gives agencies the data they need to make smart decisions and grow with confidence.
                 </p>
@@ -72,7 +72,7 @@ export default function AboutPage() {
                   <div key={i} className="card p-5">
                     <item.icon className="w-8 h-8 text-primary-400 mb-3" />
                     <h3 className="text-white font-semibold mb-1">{item.title}</h3>
-                    <p className="text-dark-400 text-sm">{item.desc}</p>
+                    <p className="text-slate-500 text-sm">{item.desc}</p>
                   </div>
                 ))}
               </div>
@@ -113,7 +113,7 @@ export default function AboutPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
-                    <p className="text-dark-300 leading-relaxed">{item.description}</p>
+                    <p className="text-slate-600 leading-relaxed">{item.description}</p>
                   </div>
                 </div>
               ))}
@@ -126,7 +126,7 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto">
             <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-500/30">
               <h2 className="text-3xl font-bold text-white mb-4">Ready to See the Difference?</h2>
-              <p className="text-xl text-dark-300 mb-8">Book a free demo and see why 500+ agencies trust PalmCare AI.</p>
+              <p className="text-xl text-slate-600 mb-8">Book a free demo and see why 500+ agencies trust PalmCare AI.</p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></Link>
               </div>
@@ -136,12 +136,12 @@ export default function AboutPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-dark-700">
+      <footer className="py-12 px-6 border-t border-slate-200">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-dark-400 text-sm">&copy; 2026 PalmCare AI. All rights reserved.</p>
+          <p className="text-slate-500 text-sm">&copy; 2026 PalmCare AI. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2"><Shield className="w-5 h-5 text-green-400" /><span className="text-dark-400 text-sm">HIPAA Compliant</span></div>
-            <div className="flex items-center gap-2"><Lock className="w-5 h-5 text-blue-400" /><span className="text-dark-400 text-sm">256-bit Encrypted</span></div>
+            <div className="flex items-center gap-2"><Shield className="w-5 h-5 text-green-400" /><span className="text-slate-500 text-sm">HIPAA Compliant</span></div>
+            <div className="flex items-center gap-2"><Lock className="w-5 h-5 text-blue-400" /><span className="text-slate-500 text-sm">256-bit Encrypted</span></div>
           </div>
         </div>
       </footer>

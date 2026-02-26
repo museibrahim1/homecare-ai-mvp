@@ -395,7 +395,7 @@ export default function DocumentsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Documents</h1>
-            <p className="text-dark-400">Contracts, assessments, and recordings from your clients</p>
+            <p className="text-slate-500">Contracts, assessments, and recordings from your clients</p>
           </div>
           <div className="flex gap-3">
             <button 
@@ -411,7 +411,7 @@ export default function DocumentsPage() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
                 driveConnected 
                   ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                  : 'bg-dark-800 border border-dark-700 text-dark-300 hover:text-white'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:text-white'
               }`}
             >
               {checkingDrive ? (
@@ -426,7 +426,7 @@ export default function DocumentsPage() {
             <button 
               onClick={fetchDocuments}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-dark-800 border border-dark-700 text-dark-300 hover:text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 hover:text-white rounded-lg transition-colors"
             >
               <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
               Refresh
@@ -456,7 +456,7 @@ export default function DocumentsPage() {
               </div>
               <div>
                 <p className="text-white font-medium">Google Drive Connected</p>
-                <p className="text-sm text-dark-400">Your files are synced from Google Drive</p>
+                <p className="text-sm text-slate-500">Your files are synced from Google Drive</p>
               </div>
             </div>
             <button 
@@ -473,25 +473,25 @@ export default function DocumentsPage() {
         {/* Search & View Toggle */}
         <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search documents or clients..."
-              className="w-full pl-10 pr-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
-          <div className="flex bg-dark-800 border border-dark-700 rounded-lg overflow-hidden">
+          <div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2.5 ${viewMode === 'grid' ? 'bg-dark-700 text-white' : 'text-dark-400'}`}
+              className={`p-2.5 ${viewMode === 'grid' ? 'bg-slate-50 text-white' : 'text-slate-500'}`}
             >
               <Grid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2.5 ${viewMode === 'list' ? 'bg-dark-700 text-white' : 'text-dark-400'}`}
+              className={`p-2.5 ${viewMode === 'list' ? 'bg-slate-50 text-white' : 'text-slate-500'}`}
             >
               <List className="w-5 h-5" />
             </button>
@@ -506,13 +506,13 @@ export default function DocumentsPage() {
               <button
                 key={folder.id}
                 onClick={() => handleFolderClick(folder.name)}
-                className={`bg-dark-800/50 border rounded-xl p-4 hover:border-primary-500/30 transition-colors text-left ${
-                  selectedFolder === folder.name ? 'border-primary-500/50 bg-primary-500/5' : 'border-dark-700/50'
+                className={`bg-white border rounded-xl p-4 hover:border-primary-500/30 transition-colors text-left ${
+                  selectedFolder === folder.name ? 'border-primary-500/50 bg-primary-500/5' : 'border-slate-200'
                 }`}
               >
                 <div className="text-3xl mb-3">{folder.icon}</div>
                 <h3 className="font-medium text-white mb-1">{folder.name}</h3>
-                <p className="text-sm text-dark-400">{folder.count} files</p>
+                <p className="text-sm text-slate-500">{folder.count} files</p>
               </button>
             ))}
           </div>
@@ -539,12 +539,12 @@ export default function DocumentsPage() {
               <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
             </div>
           ) : filteredFiles.length === 0 ? (
-            <div className="text-center py-20 bg-dark-800/50 border border-dark-700/50 rounded-xl">
-              <div className="w-16 h-16 bg-dark-700 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <FolderOpen className="w-8 h-8 text-dark-400" />
+            <div className="text-center py-20 bg-white border border-slate-200 rounded-xl">
+              <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <FolderOpen className="w-8 h-8 text-slate-500" />
               </div>
               <h3 className="text-lg font-medium text-white mb-2">No documents yet</h3>
-              <p className="text-dark-400 mb-4">Documents from your assessments will appear here automatically</p>
+              <p className="text-slate-500 mb-4">Documents from your assessments will appear here automatically</p>
               <a 
                 href="/visits/new" 
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
@@ -554,15 +554,15 @@ export default function DocumentsPage() {
               </a>
             </div>
           ) : viewMode === 'list' ? (
-            <div className="bg-dark-800/50 border border-dark-700/50 rounded-xl overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-dark-700/50">
-                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Name</th>
-                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Client</th>
-                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Type</th>
-                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Size</th>
-                    <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Modified</th>
+                  <tr className="border-b border-slate-200">
+                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Name</th>
+                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Client</th>
+                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Type</th>
+                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Size</th>
+                    <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Modified</th>
                     <th className="px-6 py-4"></th>
                   </tr>
                 </thead>
@@ -570,20 +570,20 @@ export default function DocumentsPage() {
                   {filteredFiles.map(file => {
                     const FileIcon = getFileIcon(file);
                     return (
-                      <tr key={file.id} className="border-b border-dark-700/30 hover:bg-dark-700/20 transition-colors">
+                      <tr key={file.id} className="border-b border-slate-200/30 hover:bg-slate-50/20 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                               file.type === 'contract' ? 'bg-purple-500/20' :
                               file.type === 'note' ? 'bg-blue-500/20' :
                               file.type === 'audio' ? 'bg-green-500/20' :
-                              'bg-dark-700'
+                              'bg-slate-50'
                             }`}>
                               <FileIcon className={`w-4 h-4 ${
                                 file.type === 'contract' ? 'text-purple-400' :
                                 file.type === 'note' ? 'text-blue-400' :
                                 file.type === 'audio' ? 'text-green-400' :
-                                'text-dark-400'
+                                'text-slate-500'
                               }`} />
                             </div>
                             <span className="font-medium text-white">{file.name}</span>
@@ -592,20 +592,20 @@ export default function DocumentsPage() {
                         <td className="px-6 py-4">
                           {file.client_name ? (
                             <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-dark-500" />
-                              <span className="text-dark-300">{file.client_name}</span>
+                              <User className="w-4 h-4 text-slate-400" />
+                              <span className="text-slate-600">{file.client_name}</span>
                             </div>
                           ) : (
-                            <span className="text-dark-500">-</span>
+                            <span className="text-slate-400">-</span>
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${typeColors[file.format] || 'bg-dark-700 text-dark-300'}`}>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${typeColors[file.format] || 'bg-slate-50 text-slate-600'}`}>
                             {file.format}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-dark-400">{file.size}</td>
-                        <td className="px-6 py-4 text-dark-400 text-sm">{formatDate(file.created_at)}</td>
+                        <td className="px-6 py-4 text-slate-500">{file.size}</td>
+                        <td className="px-6 py-4 text-slate-500 text-sm">{formatDate(file.created_at)}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1">
                             {file.webViewLink ? (
@@ -613,34 +613,34 @@ export default function DocumentsPage() {
                                 href={file.webViewLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
                               >
-                                <Link2 className="w-4 h-4 text-dark-400" />
+                                <Link2 className="w-4 h-4 text-slate-500" />
                               </a>
                             ) : file.type === 'audio' ? (
                               <button 
                                 onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
-                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
                                 title="Preview"
                               >
-                                <Play className="w-4 h-4 text-dark-400" />
+                                <Play className="w-4 h-4 text-slate-500" />
                               </button>
                             ) : (
                               <button 
                                 onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
-                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
                                 title="Preview"
                               >
-                                <Eye className="w-4 h-4 text-dark-400" />
+                                <Eye className="w-4 h-4 text-slate-500" />
                               </button>
                             )}
                             {file.download_url && (
                               <button 
                                 onClick={() => handleDownload(file)}
-                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
                                 title="Download"
                               >
-                                <Download className="w-4 h-4 text-dark-400" />
+                                <Download className="w-4 h-4 text-slate-500" />
                               </button>
                             )}
                             <button 
@@ -648,7 +648,7 @@ export default function DocumentsPage() {
                               className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
                               title="Delete"
                             >
-                              <Trash2 className="w-4 h-4 text-dark-400 hover:text-red-400" />
+                              <Trash2 className="w-4 h-4 text-slate-500 hover:text-red-400" />
                             </button>
                           </div>
                         </td>
@@ -666,56 +666,56 @@ export default function DocumentsPage() {
                 return (
                   <div
                     key={file.id}
-                    className="bg-dark-800/50 border border-dark-700/50 rounded-xl p-4 hover:border-primary-500/30 transition-colors group"
+                    className="bg-white border border-slate-200 rounded-xl p-4 hover:border-primary-500/30 transition-colors group"
                   >
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
                       file.type === 'contract' ? 'bg-purple-500/20' :
                       file.type === 'note' ? 'bg-blue-500/20' :
                       file.type === 'audio' ? 'bg-green-500/20' :
-                      'bg-dark-700'
+                      'bg-slate-50'
                     }`}>
                       <FileIcon className={`w-6 h-6 ${
                         file.type === 'contract' ? 'text-purple-400' :
                         file.type === 'note' ? 'text-blue-400' :
                         file.type === 'audio' ? 'text-green-400' :
-                        'text-dark-400'
+                        'text-slate-500'
                       }`} />
                     </div>
                     <h3 className="font-medium text-white text-sm truncate mb-1" title={file.name}>
                       {file.name}
                     </h3>
                     {file.client_name && (
-                      <p className="text-xs text-dark-400 truncate mb-2">{file.client_name}</p>
+                      <p className="text-xs text-slate-500 truncate mb-2">{file.client_name}</p>
                     )}
                     <div className="flex items-center justify-between">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[file.format] || 'bg-dark-700 text-dark-300'}`}>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors[file.format] || 'bg-slate-50 text-slate-600'}`}>
                         {file.format}
                       </span>
-                      <span className="text-xs text-dark-500">{file.size}</span>
+                      <span className="text-xs text-slate-400">{file.size}</span>
                     </div>
                     <div className="flex gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                       {file.download_url && (
                         <button 
                           onClick={() => handleDownload(file)}
-                          className="flex-1 p-2 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
+                          className="flex-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
                           title="Download"
                         >
-                          <Download className="w-4 h-4 text-dark-300 mx-auto" />
+                          <Download className="w-4 h-4 text-slate-600 mx-auto" />
                         </button>
                       )}
                       <button 
                         onClick={() => { setSelectedFile(file); setShowPreviewModal(true); }}
-                        className="flex-1 p-2 bg-dark-700 hover:bg-dark-600 rounded-lg transition-colors"
+                        className="flex-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
                         title="Preview"
                       >
-                        <Eye className="w-4 h-4 text-dark-300 mx-auto" />
+                        <Eye className="w-4 h-4 text-slate-600 mx-auto" />
                       </button>
                       <button 
                         onClick={() => handleDeleteFile(file.id)}
-                        className="flex-1 p-2 bg-dark-700 hover:bg-red-500/30 rounded-lg transition-colors"
+                        className="flex-1 p-2 bg-slate-50 hover:bg-red-500/30 rounded-lg transition-colors"
                         title="Delete"
                       >
-                        <Trash2 className="w-4 h-4 text-dark-300 hover:text-red-400 mx-auto" />
+                        <Trash2 className="w-4 h-4 text-slate-600 hover:text-red-400 mx-auto" />
                       </button>
                     </div>
                   </div>
@@ -728,19 +728,19 @@ export default function DocumentsPage() {
         {/* Preview Modal */}
         {showPreviewModal && selectedFile && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-lg">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-lg">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white">Document Details</h2>
-                <button onClick={() => setShowPreviewModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
-                  <X className="w-5 h-5 text-dark-400" />
+                <button onClick={() => setShowPreviewModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
-              <div className="flex items-center gap-4 mb-6 p-4 bg-dark-900 rounded-lg">
+              <div className="flex items-center gap-4 mb-6 p-4 bg-slate-50 rounded-lg">
                 <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${
                   selectedFile.type === 'contract' ? 'bg-purple-500/20' :
                   selectedFile.type === 'note' ? 'bg-blue-500/20' :
                   selectedFile.type === 'audio' ? 'bg-green-500/20' :
-                  'bg-dark-700'
+                  'bg-slate-50'
                 }`}>
                   {(() => {
                     const Icon = getFileIcon(selectedFile);
@@ -748,33 +748,33 @@ export default function DocumentsPage() {
                       selectedFile.type === 'contract' ? 'text-purple-400' :
                       selectedFile.type === 'note' ? 'text-blue-400' :
                       selectedFile.type === 'audio' ? 'text-green-400' :
-                      'text-dark-400'
+                      'text-slate-500'
                     }`} />;
                   })()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-white mb-1 truncate">{selectedFile.name}</h3>
-                  <p className="text-sm text-dark-400">{selectedFile.size} • {selectedFile.format}</p>
+                  <p className="text-sm text-slate-500">{selectedFile.size} • {selectedFile.format}</p>
                 </div>
               </div>
               <div className="space-y-3 mb-6">
                 {selectedFile.client_name && (
-                  <div className="flex justify-between py-2 border-b border-dark-700">
-                    <span className="text-dark-400">Client</span>
+                  <div className="flex justify-between py-2 border-b border-slate-200">
+                    <span className="text-slate-500">Client</span>
                     <span className="text-white">{selectedFile.client_name}</span>
                   </div>
                 )}
-                <div className="flex justify-between py-2 border-b border-dark-700">
-                  <span className="text-dark-400">Folder</span>
+                <div className="flex justify-between py-2 border-b border-slate-200">
+                  <span className="text-slate-500">Folder</span>
                   <span className="text-white">{selectedFile.folder}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-dark-700">
-                  <span className="text-dark-400">Created</span>
+                <div className="flex justify-between py-2 border-b border-slate-200">
+                  <span className="text-slate-500">Created</span>
                   <span className="text-white">{formatDate(selectedFile.created_at)}</span>
                 </div>
                 {selectedFile.visit_id && (
-                  <div className="flex justify-between py-2 border-b border-dark-700">
-                    <span className="text-dark-400">Visit</span>
+                  <div className="flex justify-between py-2 border-b border-slate-200">
+                    <span className="text-slate-500">Visit</span>
                     <a 
                       href={`/visits/${selectedFile.visit_id}`}
                       className="text-primary-400 hover:text-primary-300"
@@ -797,7 +797,7 @@ export default function DocumentsPage() {
                 {selectedFile.visit_id && (
                   <a 
                     href={`/visits/${selectedFile.visit_id}`}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
                   >
                     <Eye className="w-5 h-5" />
                     View Visit
@@ -818,11 +818,11 @@ export default function DocumentsPage() {
         {/* Google Drive Modal */}
         {showDriveModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white">Google Drive</h2>
-                <button onClick={() => setShowDriveModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
-                  <X className="w-5 h-5 text-dark-400" />
+                <button onClick={() => setShowDriveModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               
@@ -832,12 +832,12 @@ export default function DocumentsPage() {
                     <Check className="w-6 h-6 text-green-400" />
                     <div>
                       <p className="text-white font-medium">Connected</p>
-                      <p className="text-sm text-dark-400">Your Drive is synced</p>
+                      <p className="text-sm text-slate-500">Your Drive is synced</p>
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-dark-900 rounded-lg">
-                      <span className="text-dark-300">Files synced</span>
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <span className="text-slate-600">Files synced</span>
                       <span className="text-green-400 text-sm">{files.filter(f => f.driveId).length} files</span>
                     </div>
                   </div>
@@ -851,13 +851,13 @@ export default function DocumentsPage() {
               ) : (
                 <div>
                   <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-dark-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                       <Cloud className="w-8 h-8 text-primary-400" />
                     </div>
-                    <p className="text-dark-300 mb-2">
+                    <p className="text-slate-600 mb-2">
                       Connect Google Drive to access your files
                     </p>
-                    <ul className="text-sm text-dark-400 space-y-1">
+                    <ul className="text-sm text-slate-500 space-y-1">
                       <li>• Browse and search Drive files</li>
                       <li>• Open files directly in Google</li>
                       <li>• Sync files automatically</li>
@@ -875,7 +875,7 @@ export default function DocumentsPage() {
                     </svg>
                     Connect with Google
                   </button>
-                  <p className="text-xs text-dark-500 text-center mt-4">
+                  <p className="text-xs text-slate-400 text-center mt-4">
                     We only access your Drive files. Your data stays secure.
                   </p>
                 </div>
@@ -887,11 +887,11 @@ export default function DocumentsPage() {
         {/* Upload Modal */}
         {showUploadModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-lg">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-lg">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white">Upload Document</h2>
-                <button onClick={() => setShowUploadModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
-                  <X className="w-5 h-5 text-dark-400" />
+                <button onClick={() => setShowUploadModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               
@@ -900,20 +900,20 @@ export default function DocumentsPage() {
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
                   dragActive 
                     ? 'border-primary-500 bg-primary-500/10' 
-                    : 'border-dark-600 hover:border-dark-500'
+                    : 'border-slate-200 hover:border-slate-300'
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
               >
-                <div className="w-16 h-16 bg-dark-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Upload className="w-8 h-8 text-primary-400" />
                 </div>
                 <p className="text-white font-medium mb-2">
                   {dragActive ? 'Drop files here' : 'Drag and drop files here'}
                 </p>
-                <p className="text-dark-400 text-sm mb-4">
+                <p className="text-slate-500 text-sm mb-4">
                   or click to browse your computer
                 </p>
                 <input
@@ -936,7 +936,7 @@ export default function DocumentsPage() {
               </div>
 
               <div className="mt-6">
-                <p className="text-dark-400 text-sm">
+                <p className="text-slate-500 text-sm">
                   Supported formats: PDF, DOCX, XLSX, images, audio files, and more
                 </p>
               </div>

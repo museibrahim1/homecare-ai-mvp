@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8 justify-center">
@@ -56,17 +56,17 @@ export default function ForgotPasswordPage() {
               <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">Check Your Email</h2>
-            <p className="text-dark-300 mb-6">
+            <p className="text-slate-600 mb-6">
               If an account exists for <span className="text-white font-medium">{email}</span>, 
               we&apos;ve sent a password reset link. It will expire in 1 hour.
             </p>
-            <p className="text-dark-400 text-sm mb-6">
+            <p className="text-slate-500 text-sm mb-6">
               Don&apos;t see it? Check your spam folder or try again.
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => { setSent(false); setEmail(''); }}
-                className="w-full py-3 px-4 bg-dark-700 hover:bg-dark-600 text-white rounded-xl font-medium transition-colors border border-dark-600"
+                className="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 text-white rounded-xl font-medium transition-colors border border-slate-200"
               >
                 Try a different email
               </button>
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
                 <Mail className="w-8 h-8 text-primary-400" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Forgot Password?</h2>
-              <p className="text-dark-300 text-sm">
+              <p className="text-slate-600 text-sm">
                 Enter the email address associated with your account and we&apos;ll send you a link to reset your password.
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
               )}
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-dark-200 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                   Email address
                 </label>
                 <input

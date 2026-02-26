@@ -43,12 +43,12 @@ const STATUS_COLORS: Record<string, string> = {
   active: 'bg-green-500/20 text-green-400',
   trial: 'bg-blue-500/20 text-blue-400',
   past_due: 'bg-red-500/20 text-red-400',
-  cancelled: 'bg-dark-500/20 text-dark-400',
+  cancelled: 'bg-slate-200/20 text-slate-500',
   suspended: 'bg-orange-500/20 text-orange-400',
 };
 
 const TIER_COLORS: Record<string, string> = {
-  free: 'text-dark-400',
+  free: 'text-slate-500',
   starter: 'text-blue-400',
   professional: 'text-purple-400',
   enterprise: 'text-yellow-400',
@@ -179,21 +179,21 @@ export default function SubscriptionsPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">Subscriptions</h1>
-              <p className="text-dark-400 mt-1">Manage business plans and billing</p>
+              <p className="text-slate-500 mt-1">Manage business plans and billing</p>
             </div>
           </div>
           <button
             onClick={fetchData}
             disabled={loading}
-            className="p-2 bg-dark-800 rounded-lg hover:bg-dark-700 transition disabled:opacity-50"
+            className="p-2 bg-white rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
           >
-            <RefreshCw className={`w-5 h-5 text-dark-400 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
 
@@ -209,7 +209,7 @@ export default function SubscriptionsPage() {
         <div className="grid grid-cols-3 gap-6 mb-8">
           {plans.map(plan => (
             <div key={plan.id} className={`p-6 rounded-xl border ${
-              plan.name === 'Pro' ? 'bg-primary-500/10 border-primary-500/30' : 'bg-dark-800 border-dark-700'
+              plan.name === 'Pro' ? 'bg-primary-500/10 border-primary-500/30' : 'bg-white border-slate-200'
             }`}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className={`font-bold text-lg ${TIER_COLORS[plan.tier]}`}>{plan.name}</h3>
@@ -222,14 +222,14 @@ export default function SubscriptionsPage() {
               ) : (
                 <>
                   <p className="text-3xl font-bold text-white mb-1">
-                    ${plan.monthly_price.toLocaleString()}<span className="text-sm text-dark-400 font-normal">/mo</span>
+                    ${plan.monthly_price.toLocaleString()}<span className="text-sm text-slate-500 font-normal">/mo</span>
                   </p>
-                  <p className="text-dark-500 text-sm mb-3">
+                  <p className="text-slate-400 text-sm mb-3">
                     ${plan.setup_fee.toLocaleString()} setup fee
                   </p>
                 </>
               )}
-              <div className="pt-3 border-t border-dark-700 space-y-1 text-sm text-dark-400">
+              <div className="pt-3 border-t border-slate-200 space-y-1 text-sm text-slate-500">
                 <p>{plan.max_users >= 9999 ? 'Unlimited' : plan.max_users} users</p>
                 <p>Annual: ${Math.round(plan.annual_price / 12).toLocaleString()}/mo (save 10%)</p>
               </div>
@@ -239,13 +239,13 @@ export default function SubscriptionsPage() {
 
         {/* Filters */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="flex bg-dark-800 rounded-lg p-1">
+          <div className="flex bg-white rounded-lg p-1">
             {['all', 'active', 'trial', 'past_due', 'cancelled'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  filter === f ? 'bg-primary-500 text-white' : 'text-dark-400 hover:text-white'
+                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-white'
                 }`}
               >
                 {f === 'past_due' ? 'Past Due' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -253,28 +253,28 @@ export default function SubscriptionsPage() {
             ))}
           </div>
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search businesses..."
-              className="w-full pl-10 pr-4 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
             />
           </div>
         </div>
 
         {/* Subscriptions Table */}
-        <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-dark-700">
-                <th className="text-left p-4 text-dark-400 font-medium">Business</th>
-                <th className="text-left p-4 text-dark-400 font-medium">Plan</th>
-                <th className="text-left p-4 text-dark-400 font-medium">Status</th>
-                <th className="text-left p-4 text-dark-400 font-medium">Billing</th>
-                <th className="text-left p-4 text-dark-400 font-medium">Usage</th>
-                <th className="text-left p-4 text-dark-400 font-medium">Actions</th>
+              <tr className="border-b border-slate-200">
+                <th className="text-left p-4 text-slate-500 font-medium">Business</th>
+                <th className="text-left p-4 text-slate-500 font-medium">Plan</th>
+                <th className="text-left p-4 text-slate-500 font-medium">Status</th>
+                <th className="text-left p-4 text-slate-500 font-medium">Billing</th>
+                <th className="text-left p-4 text-slate-500 font-medium">Usage</th>
+                <th className="text-left p-4 text-slate-500 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -286,16 +286,16 @@ export default function SubscriptionsPage() {
                 </tr>
               ) : filteredSubscriptions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-dark-400">
+                  <td colSpan={6} className="p-8 text-center text-slate-500">
                     No subscriptions found
                   </td>
                 </tr>
               ) : (
                 paginatedSubscriptions.map(sub => (
-                    <tr key={sub.id} className="border-b border-dark-700 hover:bg-dark-700/30">
+                    <tr key={sub.id} className="border-b border-slate-200 hover:bg-slate-50/30">
                       <td className="p-4">
                         <p className="text-white font-medium">{sub.business_name}</p>
-                        <p className="text-dark-400 text-xs">{new Date(sub.created_at).toLocaleDateString()}</p>
+                        <p className="text-slate-500 text-xs">{new Date(sub.created_at).toLocaleDateString()}</p>
                       </td>
                       <td className="p-4">
                         <span className={`font-medium ${TIER_COLORS[sub.plan_tier] || 'text-white'}`}>
@@ -310,7 +310,7 @@ export default function SubscriptionsPage() {
                       <td className="p-4">
                         <p className="text-white text-sm capitalize">{sub.billing_cycle}</p>
                         {sub.current_period_end && (
-                          <p className="text-dark-400 text-xs">
+                          <p className="text-slate-500 text-xs">
                             Renews {new Date(sub.current_period_end).toLocaleDateString()}
                           </p>
                         )}
@@ -323,7 +323,7 @@ export default function SubscriptionsPage() {
                           {sub.status === 'active' && (
                             <button
                               onClick={() => updateSubscriptionStatus(sub.id, 'suspended')}
-                              className="p-1.5 hover:bg-dark-600 rounded text-orange-400"
+                              className="p-1.5 hover:bg-slate-100 rounded text-orange-400"
                               title="Suspend"
                             >
                               <AlertCircle className="w-4 h-4" />
@@ -332,7 +332,7 @@ export default function SubscriptionsPage() {
                           {sub.status === 'suspended' && (
                             <button
                               onClick={() => updateSubscriptionStatus(sub.id, 'active')}
-                              className="p-1.5 hover:bg-dark-600 rounded text-green-400"
+                              className="p-1.5 hover:bg-slate-100 rounded text-green-400"
                               title="Reactivate"
                             >
                               <Check className="w-4 h-4" />
@@ -341,7 +341,7 @@ export default function SubscriptionsPage() {
                           {sub.status !== 'cancelled' && (
                             <button
                               onClick={() => updateSubscriptionStatus(sub.id, 'cancelled')}
-                              className="p-1.5 hover:bg-dark-600 rounded text-red-400"
+                              className="p-1.5 hover:bg-slate-100 rounded text-red-400"
                               title="Cancel"
                             >
                               <X className="w-4 h-4" />
@@ -355,25 +355,25 @@ export default function SubscriptionsPage() {
             </tbody>
           </table>
           {filteredSubscriptions.length > pageSize && (
-            <div className="p-4 border-t border-dark-700 flex items-center justify-between">
-              <p className="text-dark-400 text-sm">
+            <div className="p-4 border-t border-slate-200 flex items-center justify-between">
+              <p className="text-slate-500 text-sm">
                 Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, filteredSubscriptions.length)} of {filteredSubscriptions.length}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage(Math.max(0, page - 1))}
                   disabled={page === 0}
-                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                  className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
                 >
-                  <ChevronLeft className="w-4 h-4 text-dark-400" />
+                  <ChevronLeft className="w-4 h-4 text-slate-500" />
                 </button>
-                <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
+                <span className="text-slate-500 px-3 text-sm">Page {page + 1}</span>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={(page + 1) * pageSize >= filteredSubscriptions.length}
-                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                  className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
                 >
-                  <ChevronRight className="w-4 h-4 text-dark-400" />
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
                 </button>
               </div>
             </div>

@@ -156,7 +156,7 @@ export default function RootLayout({
         />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className={`${inter.className} bg-dark-900 text-dark-100 min-h-screen`}>
+      <body className={`${inter.className} bg-slate-50 text-slate-800 min-h-screen`}>
         <ThemeProvider>
           <NotificationProvider>
             <WalkthroughProvider>

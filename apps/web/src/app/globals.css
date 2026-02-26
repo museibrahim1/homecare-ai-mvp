@@ -62,33 +62,50 @@ body {
 }
 
 /* ============================================================
-   DARK MODE: text-white overrides
-   In dark mode, text-white works naturally.
+   LIGHT/DARK MODE: text-white handling
    In light mode (default), text-white becomes dark for readability.
+   Restore white on colored/dark backgrounds.
    ============================================================ */
 
-/* Light mode (default): make text-white readable on light surfaces */
 .text-white {
   color: rgb(15 23 42) !important;
 }
 
-/* Restore white text on solid colored backgrounds */
-.bg-primary-500 .text-white, .bg-primary-600 .text-white,
-.bg-primary-500.text-white, .bg-primary-600.text-white,
-.bg-green-500 .text-white, .bg-green-600 .text-white,
-.bg-green-500.text-white, .bg-green-600.text-white,
-.bg-red-500 .text-white, .bg-red-500.text-white,
-.bg-red-600 .text-white, .bg-red-600.text-white,
-.bg-blue-500.text-white, .bg-blue-600.text-white,
-.bg-purple-500.text-white, .bg-purple-600.text-white {
+/* Restore white on any solid colored or dark background */
+[class*="bg-primary-5"] .text-white, [class*="bg-primary-5"].text-white,
+[class*="bg-primary-6"] .text-white, [class*="bg-primary-6"].text-white,
+[class*="bg-primary-7"] .text-white, [class*="bg-primary-7"].text-white,
+[class*="bg-green-5"] .text-white, [class*="bg-green-5"].text-white,
+[class*="bg-green-6"] .text-white, [class*="bg-green-6"].text-white,
+[class*="bg-emerald-5"] .text-white, [class*="bg-emerald-5"].text-white,
+[class*="bg-emerald-6"] .text-white, [class*="bg-emerald-6"].text-white,
+[class*="bg-red-5"] .text-white, [class*="bg-red-5"].text-white,
+[class*="bg-red-6"] .text-white, [class*="bg-red-6"].text-white,
+[class*="bg-blue-5"] .text-white, [class*="bg-blue-5"].text-white,
+[class*="bg-blue-6"] .text-white, [class*="bg-blue-6"].text-white,
+[class*="bg-purple-5"] .text-white, [class*="bg-purple-5"].text-white,
+[class*="bg-purple-6"] .text-white, [class*="bg-purple-6"].text-white,
+[class*="bg-orange-5"] .text-white, [class*="bg-orange-5"].text-white,
+[class*="bg-amber-5"] .text-white, [class*="bg-amber-5"].text-white,
+[class*="bg-teal-5"] .text-white, [class*="bg-teal-5"].text-white,
+[class*="bg-teal-6"] .text-white, [class*="bg-teal-6"].text-white,
+[class*="bg-teal-7"] .text-white, [class*="bg-teal-7"].text-white,
+[class*="bg-indigo-5"] .text-white, [class*="bg-indigo-5"].text-white,
+[class*="bg-cyan-5"] .text-white, [class*="bg-cyan-5"].text-white,
+[class*="bg-yellow-5"] .text-white, [class*="bg-yellow-5"].text-white,
+[class*="bg-slate-7"] .text-white, [class*="bg-slate-7"].text-white,
+[class*="bg-slate-8"] .text-white, [class*="bg-slate-8"].text-white,
+[class*="bg-slate-9"] .text-white, [class*="bg-slate-9"].text-white,
+[class*="bg-gray-7"] .text-white, [class*="bg-gray-7"].text-white,
+[class*="bg-gray-8"] .text-white, [class*="bg-gray-8"].text-white,
+[class*="bg-gray-9"] .text-white, [class*="bg-gray-9"].text-white,
+[class*="bg-black"] .text-white, [class*="bg-black"].text-white {
   color: #ffffff !important;
 }
 
-/* Gradient buttons keep white text */
-[class*="from-primary-5"][class*="to-"].text-white,
-[class*="from-green-5"][class*="to-"].text-white,
-[class*="from-blue-5"][class*="to-"].text-white,
-[class*="from-purple-5"][class*="to-"].text-white,
+/* Gradient backgrounds keep white */
+[class*="from-"][class*="to-"].text-white,
+[class*="from-"][class*="to-"] .text-white,
 .bg-gradient-button.text-white,
 .bg-gradient-button .text-white {
   color: #ffffff !important;

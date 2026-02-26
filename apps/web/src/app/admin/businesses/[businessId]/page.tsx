@@ -211,7 +211,7 @@ export default function BusinessDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex">
+      <div className="min-h-screen bg-slate-50 flex">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -222,7 +222,7 @@ export default function BusinessDetailPage() {
 
   if (!business) {
     return (
-      <div className="min-h-screen bg-dark-900 flex">
+      <div className="min-h-screen bg-slate-50 flex">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -242,7 +242,7 @@ export default function BusinessDetailPage() {
   const canApprove = ['pending', 'sos_verified', 'documents_submitted'].includes(business.verification_status);
 
   return (
-    <div className="min-h-screen bg-dark-900 flex">
+    <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       
       <main className="flex-1 p-8">
@@ -251,14 +251,14 @@ export default function BusinessDetailPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin/businesses"
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">{business.name}</h1>
               {business.dba_name && (
-                <p className="text-dark-400">DBA: {business.dba_name}</p>
+                <p className="text-slate-500">DBA: {business.dba_name}</p>
               )}
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function BusinessDetailPage() {
           {/* Main Info */}
           <div className="col-span-2 space-y-6">
             {/* Business Details */}
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+            <div className="bg-white border border-slate-200 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-primary-400" />
                 Business Information
@@ -281,26 +281,26 @@ export default function BusinessDetailPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-dark-400">Entity Type</p>
+                  <p className="text-sm text-slate-500">Entity Type</p>
                   <p className="text-white capitalize">{business.entity_type.replace('_', ' ')}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-dark-400">State of Incorporation</p>
+                  <p className="text-sm text-slate-500">State of Incorporation</p>
                   <p className="text-white">{business.state_of_incorporation}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-dark-400">Registration Number</p>
+                  <p className="text-sm text-slate-500">Registration Number</p>
                   <p className="text-white font-mono">{business.registration_number || 'Not provided'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-dark-400">Registered</p>
+                  <p className="text-sm text-slate-500">Registered</p>
                   <p className="text-white">{formatDate(business.created_at)}</p>
                 </div>
               </div>
             </div>
 
             {/* Contact Info */}
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+            <div className="bg-white border border-slate-200 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-primary-400" />
                 Contact Information
@@ -309,10 +309,10 @@ export default function BusinessDetailPage() {
               <div className="space-y-3">
                 {business.address && (
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-dark-400 mt-0.5" />
+                    <MapPin className="w-5 h-5 text-slate-500 mt-0.5" />
                     <div>
                       <p className="text-white">{business.address}</p>
-                      <p className="text-dark-400">
+                      <p className="text-slate-500">
                         {business.city}, {business.state} {business.zip_code}
                       </p>
                     </div>
@@ -321,13 +321,13 @@ export default function BusinessDetailPage() {
                 
                 {business.phone && (
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-dark-400" />
+                    <Phone className="w-5 h-5 text-slate-500" />
                     <p className="text-white">{business.phone}</p>
                   </div>
                 )}
                 
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-dark-400" />
+                  <Mail className="w-5 h-5 text-slate-500" />
                   <a href={`mailto:${business.email}`} className="text-primary-400 hover:underline">
                     {business.email}
                   </a>
@@ -335,7 +335,7 @@ export default function BusinessDetailPage() {
                 
                 {business.website && (
                   <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-dark-400" />
+                    <Globe className="w-5 h-5 text-slate-500" />
                     <a 
                       href={business.website} 
                       target="_blank" 
@@ -351,32 +351,32 @@ export default function BusinessDetailPage() {
             </div>
 
             {/* Documents */}
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+            <div className="bg-white border border-slate-200 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-primary-400" />
                 Uploaded Documents ({business.documents.length})
               </h2>
               
               {business.documents.length === 0 ? (
-                <p className="text-dark-400 text-center py-6">No documents uploaded yet</p>
+                <p className="text-slate-500 text-center py-6">No documents uploaded yet</p>
               ) : (
                 <div className="space-y-3">
                   {business.documents.map((doc) => (
                     <div 
                       key={doc.id}
-                      className="flex items-center justify-between p-4 bg-dark-700 rounded-lg"
+                      className="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          doc.is_verified ? 'bg-green-500/20' : 'bg-dark-600'
+                          doc.is_verified ? 'bg-green-500/20' : 'bg-slate-100'
                         }`}>
-                          <FileText className={`w-5 h-5 ${doc.is_verified ? 'text-green-400' : 'text-dark-400'}`} />
+                          <FileText className={`w-5 h-5 ${doc.is_verified ? 'text-green-400' : 'text-slate-500'}`} />
                         </div>
                         <div>
                           <p className="font-medium text-white">
                             {DOCUMENT_LABELS[doc.document_type] || doc.document_type}
                           </p>
-                          <p className="text-sm text-dark-400">
+                          <p className="text-sm text-slate-500">
                             {doc.file_name} • {doc.file_size}
                             {doc.expiration_date && ` • Expires: ${formatDate(doc.expiration_date)}`}
                           </p>
@@ -391,10 +391,10 @@ export default function BusinessDetailPage() {
                         )}
                         <button
                           onClick={() => handleDownloadDocument(doc.id)}
-                          className="p-2 hover:bg-dark-600 rounded-lg transition-colors"
+                          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                           title="Download"
                         >
-                          <Download className="w-4 h-4 text-dark-400" />
+                          <Download className="w-4 h-4 text-slate-500" />
                         </button>
                       </div>
                     </div>
@@ -405,18 +405,18 @@ export default function BusinessDetailPage() {
 
             {/* SOS Verification Data */}
             {business.sos_verification_data && (
-              <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-6">
                 <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-primary-400" />
                   SOS Verification Data
                 </h2>
                 
-                <pre className="bg-dark-700 p-4 rounded-lg text-sm text-dark-300 overflow-auto">
+                <pre className="bg-slate-50 p-4 rounded-lg text-sm text-slate-600 overflow-auto">
                   {JSON.stringify(business.sos_verification_data, null, 2)}
                 </pre>
                 
                 {business.sos_verified_at && (
-                  <p className="text-sm text-dark-400 mt-2">
+                  <p className="text-sm text-slate-500 mt-2">
                     Verified on {formatDate(business.sos_verified_at)}
                   </p>
                 )}
@@ -428,7 +428,7 @@ export default function BusinessDetailPage() {
           <div className="space-y-6">
             {/* Owner Info */}
             {business.owner && (
-              <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-6">
                 <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <User className="w-5 h-5 text-primary-400" />
                   Business Owner
@@ -436,11 +436,11 @@ export default function BusinessDetailPage() {
                 
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-dark-400">Name</p>
+                    <p className="text-sm text-slate-500">Name</p>
                     <p className="text-white">{business.owner.full_name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-dark-400">Email</p>
+                    <p className="text-sm text-slate-500">Email</p>
                     <p className="text-white">{business.owner.email}</p>
                     {business.owner.email_verified && (
                       <span className="text-xs text-green-400">Verified</span>
@@ -448,13 +448,13 @@ export default function BusinessDetailPage() {
                   </div>
                   {business.owner.phone && (
                     <div>
-                      <p className="text-sm text-dark-400">Phone</p>
+                      <p className="text-sm text-slate-500">Phone</p>
                       <p className="text-white">{business.owner.phone}</p>
                     </div>
                   )}
                   {business.owner.last_login && (
                     <div>
-                      <p className="text-sm text-dark-400">Last Login</p>
+                      <p className="text-sm text-slate-500">Last Login</p>
                       <p className="text-white">{formatDate(business.owner.last_login)}</p>
                     </div>
                   )}
@@ -464,7 +464,7 @@ export default function BusinessDetailPage() {
 
             {/* Actions */}
             {canApprove && (
-              <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Actions</h2>
                 
                 <div className="space-y-3">
@@ -493,14 +493,14 @@ export default function BusinessDetailPage() {
                   </button>
                 </div>
                 
-                <p className="text-xs text-dark-500 mt-4">
+                <p className="text-xs text-slate-400 mt-4">
                   Approving will send a confirmation email to the business owner.
                 </p>
               </div>
             )}
 
             {/* Timeline */}
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+            <div className="bg-white border border-slate-200 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-primary-400" />
                 Timeline
@@ -511,7 +511,7 @@ export default function BusinessDetailPage() {
                   <div className="w-2 h-2 mt-2 rounded-full bg-green-500" />
                   <div>
                     <p className="text-sm text-white">Registered</p>
-                    <p className="text-xs text-dark-400">{formatDate(business.created_at)}</p>
+                    <p className="text-xs text-slate-500">{formatDate(business.created_at)}</p>
                   </div>
                 </div>
                 
@@ -520,7 +520,7 @@ export default function BusinessDetailPage() {
                     <div className="w-2 h-2 mt-2 rounded-full bg-blue-500" />
                     <div>
                       <p className="text-sm text-white">SOS Verified</p>
-                      <p className="text-xs text-dark-400">{formatDate(business.sos_verified_at)}</p>
+                      <p className="text-xs text-slate-500">{formatDate(business.sos_verified_at)}</p>
                     </div>
                   </div>
                 )}
@@ -530,7 +530,7 @@ export default function BusinessDetailPage() {
                     <div className="w-2 h-2 mt-2 rounded-full bg-purple-500" />
                     <div>
                       <p className="text-sm text-white">Documents Uploaded</p>
-                      <p className="text-xs text-dark-400">{business.documents.length} documents</p>
+                      <p className="text-xs text-slate-500">{business.documents.length} documents</p>
                     </div>
                   </div>
                 )}
@@ -543,10 +543,10 @@ export default function BusinessDetailPage() {
       {/* Reject Modal */}
       {showRejectModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
             <h2 className="text-xl font-semibold text-white mb-4">Reject Application</h2>
             
-            <p className="text-dark-400 mb-4">
+            <p className="text-slate-500 mb-4">
               Please provide a reason for rejection. This will be shared with the business owner.
             </p>
             
@@ -555,13 +555,13 @@ export default function BusinessDetailPage() {
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Enter rejection reason..."
               rows={4}
-              className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-red-500 resize-none"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-red-500 resize-none"
             />
             
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => setShowRejectModal(false)}
-                className="flex-1 px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
               >
                 Cancel
               </button>

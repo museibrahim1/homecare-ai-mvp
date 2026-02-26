@@ -131,33 +131,33 @@ export default function CompliancePage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">Compliance Alerts</h1>
-              <p className="text-dark-400 mt-1">Monitor expiring documents and licenses</p>
+              <p className="text-slate-500 mt-1">Monitor expiring documents and licenses</p>
             </div>
           </div>
           <button
             onClick={fetchData}
             disabled={loading}
-            className="p-2 bg-dark-800 rounded-lg hover:bg-dark-700 transition disabled:opacity-50"
+            className="p-2 bg-white rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
           >
-            <RefreshCw className={`w-5 h-5 text-dark-400 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
 
         {/* Summary Cards */}
         {summary && (
           <div className="grid grid-cols-5 gap-4 mb-8">
-            <div className="p-5 bg-dark-800 rounded-xl border border-dark-700">
-              <p className="text-dark-400 text-sm">Total Documents</p>
+            <div className="p-5 bg-white rounded-xl border border-slate-200">
+              <p className="text-slate-500 text-sm">Total Documents</p>
               <p className="text-2xl font-bold text-white mt-1">{summary.total_documents}</p>
             </div>
-            <div className="p-5 bg-dark-800 rounded-xl border border-dark-700">
-              <p className="text-dark-400 text-sm">Verified</p>
+            <div className="p-5 bg-white rounded-xl border border-slate-200">
+              <p className="text-slate-500 text-sm">Verified</p>
               <p className="text-2xl font-bold text-green-400 mt-1">{summary.verified_documents}</p>
             </div>
             <div className="p-5 bg-red-500/10 rounded-xl border border-red-500/30">
@@ -168,8 +168,8 @@ export default function CompliancePage() {
               <p className="text-yellow-400 text-sm">Expiring Soon</p>
               <p className="text-2xl font-bold text-yellow-400 mt-1">{summary.expiring_in_30_days}</p>
             </div>
-            <div className="p-5 bg-dark-800 rounded-xl border border-dark-700">
-              <p className="text-dark-400 text-sm">Compliance Rate</p>
+            <div className="p-5 bg-white rounded-xl border border-slate-200">
+              <p className="text-slate-500 text-sm">Compliance Rate</p>
               <p className={`text-2xl font-bold mt-1 ${summary.compliance_rate >= 80 ? 'text-green-400' : summary.compliance_rate >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
                 {summary.compliance_rate}%
               </p>
@@ -179,20 +179,20 @@ export default function CompliancePage() {
 
         {/* Filters */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="flex bg-dark-800 rounded-lg p-1">
+          <div className="flex bg-white rounded-lg p-1">
             {['all', 'critical', 'high', 'medium', 'low'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  filter === f ? 'bg-primary-500 text-white' : 'text-dark-400 hover:text-white'
+                  filter === f ? 'bg-primary-500 text-white' : 'text-slate-500 hover:text-white'
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
           </div>
-          <span className="text-dark-400 text-sm">
+          <span className="text-slate-500 text-sm">
             {filteredAlerts.length} alerts
           </span>
         </div>
@@ -204,10 +204,10 @@ export default function CompliancePage() {
               <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
             </div>
           ) : filteredAlerts.length === 0 ? (
-            <div className="text-center py-20 bg-dark-800 rounded-xl border border-dark-700">
+            <div className="text-center py-20 bg-white rounded-xl border border-slate-200">
               <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
               <p className="text-white font-medium">No compliance alerts</p>
-              <p className="text-dark-400 text-sm mt-1">All documents are up to date</p>
+              <p className="text-slate-500 text-sm mt-1">All documents are up to date</p>
             </div>
           ) : (
             filteredAlerts.map(alert => {
@@ -228,7 +228,7 @@ export default function CompliancePage() {
                       </div>
                       <div>
                         <p className="text-white font-medium">{alert.business_name}</p>
-                        <p className="text-dark-400 text-sm mt-1">
+                        <p className="text-slate-500 text-sm mt-1">
                           {alert.document_type.replace(/_/g, ' ')}
                         </p>
                       </div>
@@ -244,7 +244,7 @@ export default function CompliancePage() {
                         }
                       </p>
                       {alert.expiration_date && (
-                        <p className="text-dark-400 text-xs mt-1">
+                        <p className="text-slate-500 text-xs mt-1">
                           Expires {new Date(alert.expiration_date).toLocaleDateString()}
                         </p>
                       )}

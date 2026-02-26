@@ -122,7 +122,7 @@ export default function AdminBusinessesPage() {
   const paginatedBusinesses = businesses.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
-    <div className="min-h-screen bg-dark-900 flex">
+    <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       
       <main className="flex-1 p-8">
@@ -131,19 +131,19 @@ export default function AdminBusinessesPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">All Businesses</h1>
-              <p className="text-dark-400">View and manage all registered businesses</p>
+              <p className="text-slate-500">View and manage all registered businesses</p>
             </div>
           </div>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -161,62 +161,62 @@ export default function AdminBusinessesPage() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-5 gap-4 mb-8">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+            <div className="bg-white border border-slate-200 rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-dark-700 rounded-lg flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-dark-400" />
+                <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-slate-500" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{stats.total_businesses}</p>
-                  <p className="text-sm text-dark-400">Total</p>
+                  <p className="text-sm text-slate-500">Total</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-dark-800 border border-yellow-500/30 rounded-xl p-4">
+            <div className="bg-white border border-yellow-500/30 rounded-xl p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
                   <Clock className="w-5 h-5 text-yellow-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-yellow-400">{stats.pending_approval}</p>
-                  <p className="text-sm text-dark-400">Pending</p>
+                  <p className="text-sm text-slate-500">Pending</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-dark-800 border border-green-500/30 rounded-xl p-4">
+            <div className="bg-white border border-green-500/30 rounded-xl p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
                   <CheckCircle2 className="w-5 h-5 text-green-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-green-400">{stats.approved}</p>
-                  <p className="text-sm text-dark-400">Approved</p>
+                  <p className="text-sm text-slate-500">Approved</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-dark-800 border border-red-500/30 rounded-xl p-4">
+            <div className="bg-white border border-red-500/30 rounded-xl p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
                   <XCircle className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-red-400">{stats.rejected}</p>
-                  <p className="text-sm text-dark-400">Rejected</p>
+                  <p className="text-sm text-slate-500">Rejected</p>
                 </div>
               </div>
             </div>
             
-            <div className="bg-dark-800 border border-orange-500/30 rounded-xl p-4">
+            <div className="bg-white border border-orange-500/30 rounded-xl p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
                   <AlertCircle className="w-5 h-5 text-orange-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-orange-400">{stats.suspended}</p>
-                  <p className="text-sm text-dark-400">Suspended</p>
+                  <p className="text-sm text-slate-500">Suspended</p>
                 </div>
               </div>
             </div>
@@ -224,25 +224,25 @@ export default function AdminBusinessesPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6">
           <div className="flex items-center gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(0); }}
                 placeholder="Search businesses..."
-                className="w-full pl-10 pr-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
               />
             </div>
             
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-dark-400" />
+              <Filter className="w-5 h-5 text-slate-500" />
               <select
                 value={statusFilter}
                 onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
-                className="px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
               >
                 <option value="">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -257,46 +257,46 @@ export default function AdminBusinessesPage() {
         </div>
 
         {/* Business List */}
-        <div className="bg-dark-800 border border-dark-700 rounded-xl overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           {loading ? (
             <div className="p-12 text-center">
               <Loader2 className="w-8 h-8 text-primary-400 animate-spin mx-auto" />
             </div>
           ) : businesses.length === 0 ? (
             <div className="p-12 text-center">
-              <Building2 className="w-12 h-12 text-dark-600 mx-auto mb-4" />
+              <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-white mb-2">No businesses found</h3>
-              <p className="text-dark-400">
+              <p className="text-slate-500">
                 {statusFilter || search ? 'Try adjusting your filters' : 'No businesses have registered yet'}
               </p>
             </div>
           ) : (
             <table className="w-full">
-              <thead className="bg-dark-700/50">
+              <thead className="bg-slate-100">
                 <tr>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Business</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">State</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Status</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Documents</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Registered</th>
-                  <th className="text-right px-6 py-4 text-sm font-medium text-dark-400">Actions</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Business</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">State</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Status</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Documents</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Registered</th>
+                  <th className="text-right px-6 py-4 text-sm font-medium text-slate-500">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-dark-700">
+              <tbody className="divide-y divide-slate-200">
                 {paginatedBusinesses.map((business) => {
                   const statusConfig = STATUS_CONFIG[business.verification_status] || STATUS_CONFIG.pending;
                   const StatusIcon = statusConfig.icon;
                   
                   return (
-                    <tr key={business.id} className="hover:bg-dark-700/30 transition-colors">
+                    <tr key={business.id} className="hover:bg-slate-50/30 transition-colors">
                       <td className="px-6 py-4">
                         <div>
                           <p className="font-medium text-white">{business.name}</p>
-                          <p className="text-sm text-dark-400">{business.email}</p>
+                          <p className="text-sm text-slate-500">{business.email}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-dark-300">{business.state_of_incorporation || '-'}</span>
+                        <span className="text-slate-600">{business.state_of_incorporation || '-'}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm ${statusConfig.bgColor} ${statusConfig.color}`}>
@@ -305,15 +305,15 @@ export default function AdminBusinessesPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-dark-300">{business.documents_count} uploaded</span>
+                        <span className="text-slate-600">{business.documents_count} uploaded</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-dark-400 text-sm">{formatDate(business.created_at)}</span>
+                        <span className="text-slate-500 text-sm">{formatDate(business.created_at)}</span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link
                           href={`/admin/businesses/${business.id}`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-dark-700 hover:bg-dark-600 text-white text-sm rounded-lg transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-white text-sm rounded-lg transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                           Review
@@ -327,25 +327,25 @@ export default function AdminBusinessesPage() {
             </table>
           )}
           {businesses.length > pageSize && (
-            <div className="p-4 border-t border-dark-700 flex items-center justify-between">
-              <p className="text-dark-400 text-sm">
+            <div className="p-4 border-t border-slate-200 flex items-center justify-between">
+              <p className="text-slate-500 text-sm">
                 Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, businesses.length)} of {businesses.length}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage(Math.max(0, page - 1))}
                   disabled={page === 0}
-                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                  className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
                 >
-                  <ChevronLeft className="w-4 h-4 text-dark-400" />
+                  <ChevronLeft className="w-4 h-4 text-slate-500" />
                 </button>
-                <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
+                <span className="text-slate-500 px-3 text-sm">Page {page + 1}</span>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={(page + 1) * pageSize >= businesses.length}
-                  className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                  className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
                 >
-                  <ChevronRight className="w-4 h-4 text-dark-400" />
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
                 </button>
               </div>
             </div>

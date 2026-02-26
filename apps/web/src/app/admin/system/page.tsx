@@ -154,31 +154,31 @@ export default function SystemHealthPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">System Health</h1>
-              <p className="text-dark-400 mt-1">Infrastructure monitoring</p>
+              <p className="text-slate-500 mt-1">Infrastructure monitoring</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-dark-400 text-sm">
+            <label className="flex items-center gap-2 text-slate-500 text-sm">
               <input
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={e => setAutoRefresh(e.target.checked)}
-                className="w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary-500 focus:ring-primary-500"
+                className="w-4 h-4 rounded border-slate-200 bg-slate-50 text-primary-500 focus:ring-primary-500"
               />
               Auto-refresh
             </label>
             <button
               onClick={fetchData}
               disabled={loading}
-              className="p-2 bg-dark-800 rounded-lg hover:bg-dark-700 transition disabled:opacity-50"
+              className="p-2 bg-white rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
             >
-              <RefreshCw className={`w-5 h-5 text-dark-400 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -208,14 +208,14 @@ export default function SystemHealthPage() {
                 <p className={`text-xl font-bold ${allHealthy ? 'text-green-400' : 'text-red-400'}`}>
                   {allHealthy ? 'All Systems Operational' : 'System Issues Detected'}
                 </p>
-                <p className="text-dark-400 text-sm mt-1">
+                <p className="text-slate-500 text-sm mt-1">
                   Last checked: {health ? new Date(health.last_checked).toLocaleString() : 'Never'}
                 </p>
               </div>
             </div>
             {metrics && (
               <div className="text-right">
-                <p className="text-dark-400 text-sm">API Version</p>
+                <p className="text-slate-500 text-sm">API Version</p>
                 <p className="text-white font-mono">{metrics.api_version}</p>
               </div>
             )}
@@ -224,7 +224,7 @@ export default function SystemHealthPage() {
 
         {/* Service Status Cards */}
         <div className="grid grid-cols-2 gap-6 mb-8">
-          <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Server className="w-6 h-6 text-primary-400" />
@@ -235,7 +235,7 @@ export default function SystemHealthPage() {
             <StatusBadge status={health?.api_status || 'unknown'} />
           </div>
 
-          <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Database className="w-6 h-6 text-blue-400" />
@@ -249,7 +249,7 @@ export default function SystemHealthPage() {
             )}
           </div>
 
-          <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Activity className="w-6 h-6 text-purple-400" />
@@ -263,7 +263,7 @@ export default function SystemHealthPage() {
             )}
           </div>
 
-          <div className="p-6 bg-dark-800 rounded-xl border border-dark-700">
+          <div className="p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <HardDrive className="w-6 h-6 text-yellow-400" />
@@ -277,7 +277,7 @@ export default function SystemHealthPage() {
             )}
           </div>
 
-          <div className="col-span-2 p-6 bg-dark-800 rounded-xl border border-dark-700">
+          <div className="col-span-2 p-6 bg-white rounded-xl border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Cpu className="w-6 h-6 text-emerald-400" />
@@ -291,11 +291,11 @@ export default function SystemHealthPage() {
                 <>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-white">{metrics.worker_tasks_pending}</p>
-                    <p className="text-dark-400 text-xs">Pending</p>
+                    <p className="text-slate-500 text-xs">Pending</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-white">{metrics.worker_tasks_completed_today}</p>
-                    <p className="text-dark-400 text-xs">Completed Today</p>
+                    <p className="text-slate-500 text-xs">Completed Today</p>
                   </div>
                 </>
               )}
@@ -305,26 +305,26 @@ export default function SystemHealthPage() {
 
         {/* Metrics */}
         {metrics && (
-          <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h3 className="text-white font-medium mb-4">System Metrics</h3>
             <div className="grid grid-cols-4 gap-6">
               <div className="text-center">
                 <p className="text-3xl font-bold text-white">{metrics.total_api_requests_today}</p>
-                <p className="text-dark-400 text-sm">API Requests Today</p>
+                <p className="text-slate-500 text-sm">API Requests Today</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold text-white">{metrics.database_connections}</p>
-                <p className="text-dark-400 text-sm">DB Connections</p>
+                <p className="text-slate-500 text-sm">DB Connections</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold text-white">{metrics.storage_used_gb} GB</p>
-                <p className="text-dark-400 text-sm">Storage Used</p>
+                <p className="text-slate-500 text-sm">Storage Used</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold text-white">
                   {Math.floor(metrics.uptime_seconds / 3600)}h
                 </p>
-                <p className="text-dark-400 text-sm">Uptime</p>
+                <p className="text-slate-500 text-sm">Uptime</p>
               </div>
             </div>
           </div>

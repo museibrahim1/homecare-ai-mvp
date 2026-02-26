@@ -162,13 +162,13 @@ export default function NewVisitPage() {
           <div className="mb-8">
             <button
               onClick={() => router.push('/visits')}
-              className="flex items-center gap-2 text-dark-400 hover:text-white transition mb-4"
+              className="flex items-center gap-2 text-slate-500 hover:text-white transition mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Visits
             </button>
             <h1 className="text-3xl font-bold text-white mb-2">New Visit</h1>
-            <p className="text-dark-300">Create an assessment and add an intake call or transcript</p>
+            <p className="text-slate-600">Create an assessment and add an intake call or transcript</p>
           </div>
 
           {/* Progress Steps */}
@@ -192,20 +192,20 @@ export default function NewVisitPage() {
                       ? 'bg-accent-green/20' 
                       : isActive 
                       ? 'bg-primary-500/20' 
-                      : 'bg-dark-700'
+                      : 'bg-slate-50'
                     }
                   `}>
                     {isCompleted ? (
                       <Check className="w-5 h-5 text-accent-green" />
                     ) : (
-                      <s.icon className={`w-5 h-5 ${isActive ? 'text-primary-400' : 'text-dark-500'}`} />
+                      <s.icon className={`w-5 h-5 ${isActive ? 'text-primary-400' : 'text-slate-400'}`} />
                     )}
                   </div>
-                  <span className={`font-medium ${isActive ? 'text-white' : 'text-dark-400'}`}>
+                  <span className={`font-medium ${isActive ? 'text-white' : 'text-slate-500'}`}>
                     {s.label}
                   </span>
                   {index < 2 && (
-                    <ChevronRight className="w-5 h-5 text-dark-600 ml-4" />
+                    <ChevronRight className="w-5 h-5 text-slate-300 ml-4" />
                   )}
                 </div>
               );
@@ -220,7 +220,7 @@ export default function NewVisitPage() {
               <div className="space-y-5">
                 {/* Client Selection */}
                 <div>
-                  <label className="block text-dark-300 text-sm font-medium mb-2">
+                  <label className="block text-slate-600 text-sm font-medium mb-2">
                     <User className="w-4 h-4 inline mr-2" />
                     Client
                   </label>
@@ -237,8 +237,8 @@ export default function NewVisitPage() {
                       ))}
                     </select>
                   ) : (
-                    <div className="p-4 bg-dark-700/50 rounded-xl text-center">
-                      <p className="text-dark-400 text-sm mb-2">No clients yet</p>
+                    <div className="p-4 bg-slate-100 rounded-xl text-center">
+                      <p className="text-slate-500 text-sm mb-2">No clients yet</p>
                       <button
                         onClick={() => router.push('/clients')}
                         className="text-primary-400 text-sm hover:underline"
@@ -251,7 +251,7 @@ export default function NewVisitPage() {
 
                 {/* Scheduled Start */}
                 <div>
-                  <label className="block text-dark-300 text-sm font-medium mb-2">
+                  <label className="block text-slate-600 text-sm font-medium mb-2">
                     <Clock className="w-4 h-4 inline mr-2" />
                     Start Time
                   </label>
@@ -265,7 +265,7 @@ export default function NewVisitPage() {
 
                 {/* Scheduled End */}
                 <div>
-                  <label className="block text-dark-300 text-sm font-medium mb-2">
+                  <label className="block text-slate-600 text-sm font-medium mb-2">
                     <Clock className="w-4 h-4 inline mr-2" />
                     End Time
                   </label>
@@ -279,7 +279,7 @@ export default function NewVisitPage() {
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-dark-300 text-sm font-medium mb-2">
+                  <label className="block text-slate-600 text-sm font-medium mb-2">
                     Notes (optional)
                   </label>
                   <textarea
@@ -321,14 +321,14 @@ export default function NewVisitPage() {
           {step === 'source' && createdVisit && (
             <div className="card p-6">
               <h2 className="text-lg font-semibold text-white mb-2">Add Intake Data</h2>
-              <p className="text-dark-400 text-sm mb-6">
+              <p className="text-slate-500 text-sm mb-6">
                 Choose how to add data for this assessment
               </p>
               
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <button
                   onClick={() => handleSelectSource('audio')}
-                  className="p-5 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-primary-500 rounded-xl transition-all group text-left"
+                  className="p-5 bg-slate-100 hover:bg-slate-50 border border-slate-200 hover:border-primary-500 rounded-xl transition-all group text-left"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center group-hover:bg-primary-500/30 transition">
@@ -336,14 +336,14 @@ export default function NewVisitPage() {
                     </div>
                     <h3 className="text-white font-medium">Audio</h3>
                   </div>
-                  <p className="text-dark-400 text-sm">
+                  <p className="text-slate-500 text-sm">
                     Record or upload audio
                   </p>
                 </button>
                 
                 <button
                   onClick={() => handleSelectSource('transcript')}
-                  className="p-5 bg-dark-700/50 hover:bg-dark-700 border border-dark-600 hover:border-purple-500 rounded-xl transition-all group text-left"
+                  className="p-5 bg-slate-100 hover:bg-slate-50 border border-slate-200 hover:border-purple-500 rounded-xl transition-all group text-left"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center group-hover:bg-purple-500/30 transition">
@@ -351,7 +351,7 @@ export default function NewVisitPage() {
                     </div>
                     <h3 className="text-white font-medium">Transcript</h3>
                   </div>
-                  <p className="text-dark-400 text-sm">
+                  <p className="text-slate-500 text-sm">
                     Import text or SRT file
                   </p>
                 </button>
@@ -359,7 +359,7 @@ export default function NewVisitPage() {
               
               <button
                 onClick={handleSkipSource}
-                className="w-full text-center text-dark-400 hover:text-white py-2 transition text-sm"
+                className="w-full text-center text-slate-500 hover:text-white py-2 transition text-sm"
               >
                 Skip for now
               </button>
@@ -377,14 +377,14 @@ export default function NewVisitPage() {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => setStep('source')}
-                  className="text-dark-400 hover:text-white py-2 transition text-sm"
+                  className="text-slate-500 hover:text-white py-2 transition text-sm"
                 >
                   ← Back
                 </button>
-                <span className="text-dark-600">|</span>
+                <span className="text-slate-300">|</span>
                 <button
                   onClick={handleSkipSource}
-                  className="text-dark-400 hover:text-white py-2 transition text-sm"
+                  className="text-slate-500 hover:text-white py-2 transition text-sm"
                 >
                   Skip for now
                 </button>
@@ -403,14 +403,14 @@ export default function NewVisitPage() {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => setStep('source')}
-                  className="text-dark-400 hover:text-white py-2 transition text-sm"
+                  className="text-slate-500 hover:text-white py-2 transition text-sm"
                 >
                   ← Back
                 </button>
-                <span className="text-dark-600">|</span>
+                <span className="text-slate-300">|</span>
                 <button
                   onClick={handleSkipSource}
-                  className="text-dark-400 hover:text-white py-2 transition text-sm"
+                  className="text-slate-500 hover:text-white py-2 transition text-sm"
                 >
                   Skip for now
                 </button>
@@ -424,10 +424,10 @@ export default function NewVisitPage() {
                 <Check className="w-10 h-10 text-accent-green" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Visit Created!</h2>
-              <p className="text-dark-400 mb-6">
+              <p className="text-slate-500 mb-6">
                 Your {sourceType === 'audio' ? 'audio is uploaded' : 'transcript is imported'} and ready for processing. Redirecting to visit...
               </p>
-              <div className="flex items-center justify-center gap-2 text-dark-400">
+              <div className="flex items-center justify-center gap-2 text-slate-500">
                 <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
                 Redirecting...
               </div>

@@ -82,7 +82,7 @@ const SECTION_COLORS: Record<string, string> = {
   signatures: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
   assessment: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
   contract: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
-  unknown: 'text-dark-400 bg-dark-700/50 border-dark-600/50',
+  unknown: 'text-slate-500 bg-slate-100 border-slate-200',
 };
 
 type TabId = 'my-templates' | 'gallery';
@@ -264,7 +264,7 @@ export default function TemplatesPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">Contract Templates</h1>
-                <p className="text-dark-400 text-sm">
+                <p className="text-slate-500 text-sm">
                   Upload your own templates or use a starter — OCR maps fields to your database
                 </p>
               </div>
@@ -290,19 +290,19 @@ export default function TemplatesPage() {
           )}
 
           {/* Tabs */}
-          <div className="flex gap-1 mb-6 bg-dark-800/50 border border-dark-700/50 rounded-xl p-1">
+          <div className="flex gap-1 mb-6 bg-white border border-slate-200 rounded-xl p-1">
             <button
               onClick={() => setActiveTab('my-templates')}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition ${
                 activeTab === 'my-templates'
                   ? 'bg-primary-500/15 text-white border border-primary-500/30'
-                  : 'text-dark-400 hover:text-white'
+                  : 'text-slate-500 hover:text-white'
               }`}
             >
               <FileText className="w-4 h-4" />
               My Templates
               {templates.length > 0 && (
-                <span className="px-1.5 py-0.5 bg-dark-700 text-dark-300 text-xs rounded-full">{templates.length}</span>
+                <span className="px-1.5 py-0.5 bg-slate-50 text-slate-600 text-xs rounded-full">{templates.length}</span>
               )}
             </button>
             <button
@@ -310,13 +310,13 @@ export default function TemplatesPage() {
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition ${
                 activeTab === 'gallery'
                   ? 'bg-primary-500/15 text-white border border-primary-500/30'
-                  : 'text-dark-400 hover:text-white'
+                  : 'text-slate-500 hover:text-white'
               }`}
             >
               <BookOpen className="w-4 h-4" />
               Template Gallery
               {gallery.length > 0 && (
-                <span className="px-1.5 py-0.5 bg-dark-700 text-dark-300 text-xs rounded-full">{gallery.length}</span>
+                <span className="px-1.5 py-0.5 bg-slate-50 text-slate-600 text-xs rounded-full">{gallery.length}</span>
               )}
             </button>
           </div>
@@ -324,42 +324,42 @@ export default function TemplatesPage() {
           {/* Upload Modal */}
           {showUpload && (
             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-              <div className="bg-dark-800 border border-dark-700 rounded-2xl w-full max-w-lg p-6">
+              <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <Scan className="w-5 h-5 text-primary-400" />
                     Upload & Scan Template
                   </h2>
-                  <button onClick={() => setShowUpload(false)} className="text-dark-400 hover:text-white">
+                  <button onClick={() => setShowUpload(false)} className="text-slate-500 hover:text-white">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-dark-300 text-sm font-medium mb-2">Template Name *</label>
+                    <label className="block text-slate-600 text-sm font-medium mb-2">Template Name *</label>
                     <input
                       type="text"
                       value={uploadName}
                       onChange={(e) => setUploadName(e.target.value)}
                       placeholder="e.g. My Agency Service Agreement"
-                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-dark-300 text-sm font-medium mb-2">Description</label>
+                    <label className="block text-slate-600 text-sm font-medium mb-2">Description</label>
                     <input
                       type="text"
                       value={uploadDesc}
                       onChange={(e) => setUploadDesc(e.target.value)}
                       placeholder="Optional description..."
-                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-dark-300 text-sm font-medium mb-2">Contract File *</label>
+                    <label className="block text-slate-600 text-sm font-medium mb-2">Contract File *</label>
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -369,21 +369,21 @@ export default function TemplatesPage() {
                     />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full p-6 border-2 border-dashed border-dark-600 rounded-xl hover:border-primary-500/50 transition text-center"
+                      className="w-full p-6 border-2 border-dashed border-slate-200 rounded-xl hover:border-primary-500/50 transition text-center"
                     >
                       {uploadFile ? (
                         <div className="flex items-center gap-3 justify-center">
                           <FileText className="w-6 h-6 text-primary-400" />
                           <div className="text-left">
                             <p className="text-white font-medium">{uploadFile.name}</p>
-                            <p className="text-dark-400 text-xs">{(uploadFile.size / 1024).toFixed(0)} KB</p>
+                            <p className="text-slate-500 text-xs">{(uploadFile.size / 1024).toFixed(0)} KB</p>
                           </div>
                         </div>
                       ) : (
                         <div>
-                          <Upload className="w-8 h-8 text-dark-500 mx-auto mb-2" />
-                          <p className="text-dark-400">Click to select your agency&apos;s contract PDF or DOCX</p>
-                          <p className="text-dark-500 text-xs mt-1">Max 20MB — OCR will extract all fields</p>
+                          <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                          <p className="text-slate-500">Click to select your agency&apos;s contract PDF or DOCX</p>
+                          <p className="text-slate-400 text-xs mt-1">Max 20MB — OCR will extract all fields</p>
                         </div>
                       )}
                     </button>
@@ -399,7 +399,7 @@ export default function TemplatesPage() {
                   <div className="flex gap-3 pt-2">
                     <button
                       onClick={() => setShowUpload(false)}
-                      className="flex-1 px-4 py-2.5 border border-dark-600 text-dark-300 rounded-lg hover:text-white transition"
+                      className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-lg hover:text-white transition"
                     >
                       Cancel
                     </button>
@@ -434,10 +434,10 @@ export default function TemplatesPage() {
                   <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
                 </div>
               ) : templates.length === 0 ? (
-                <div className="text-center py-16 bg-dark-800/50 border border-dark-700/50 rounded-2xl">
-                  <FileText className="w-16 h-16 text-dark-600 mx-auto mb-4" />
+                <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl">
+                  <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-white mb-2">No Templates Yet</h3>
-                  <p className="text-dark-400 mb-6 max-w-md mx-auto">
+                  <p className="text-slate-500 mb-6 max-w-md mx-auto">
                     Upload your agency&apos;s contract PDF or DOCX, or pick a starter from the gallery.
                     OCR will detect all form fields and map them to your database.
                   </p>
@@ -451,7 +451,7 @@ export default function TemplatesPage() {
                     </button>
                     <button
                       onClick={() => setActiveTab('gallery')}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 border border-dark-600 text-dark-300 hover:text-white hover:border-dark-500 rounded-lg transition font-medium"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-200 text-slate-600 hover:text-white hover:border-slate-300 rounded-lg transition font-medium"
                     >
                       <BookOpen className="w-4 h-4" />
                       Browse Gallery
@@ -467,7 +467,7 @@ export default function TemplatesPage() {
                     const unmappedCount = tmpl.unmapped_count ?? (detail?.unmapped_fields?.length || 0);
 
                     return (
-                      <div key={tmpl.id} className="bg-dark-800/50 border border-dark-700/50 rounded-xl overflow-hidden">
+                      <div key={tmpl.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
                         {/* Template Header */}
                         <button
                           onClick={() => {
@@ -478,7 +478,7 @@ export default function TemplatesPage() {
                               loadTemplateDetail(tmpl.id);
                             }
                           }}
-                          className="w-full p-5 flex items-center gap-4 text-left hover:bg-dark-700/20 transition"
+                          className="w-full p-5 flex items-center gap-4 text-left hover:bg-slate-50/20 transition"
                         >
                           <div className="w-10 h-10 bg-primary-500/20 rounded-xl flex items-center justify-center shrink-0">
                             <FileText className="w-5 h-5 text-primary-400" />
@@ -486,7 +486,7 @@ export default function TemplatesPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <h3 className="text-white font-semibold truncate">{tmpl.name}</h3>
-                              <span className="px-2 py-0.5 bg-dark-700 text-dark-400 text-xs rounded-full shrink-0">
+                              <span className="px-2 py-0.5 bg-slate-50 text-slate-500 text-xs rounded-full shrink-0">
                                 v{tmpl.version}
                               </span>
                               {tmpl.is_active && (
@@ -496,8 +496,8 @@ export default function TemplatesPage() {
                               )}
                             </div>
                             <div className="flex items-center gap-4 mt-1">
-                              <span className="text-dark-400 text-xs uppercase">{tmpl.file_type}</span>
-                              <span className="text-dark-500 text-xs">{fieldCount} fields</span>
+                              <span className="text-slate-500 text-xs uppercase">{tmpl.file_type}</span>
+                              <span className="text-slate-400 text-xs">{fieldCount} fields</span>
                               {unmappedCount > 0 && (
                                 <span className="text-amber-400 text-xs flex items-center gap-1">
                                   <AlertTriangle className="w-3 h-3" />
@@ -506,25 +506,25 @@ export default function TemplatesPage() {
                               )}
                             </div>
                           </div>
-                          {isExpanded ? <ChevronUp className="w-5 h-5 text-dark-400" /> : <ChevronDown className="w-5 h-5 text-dark-400" />}
+                          {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-500" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
                         </button>
 
                         {/* Expanded Detail */}
                         {isExpanded && detail && (
-                          <div className="border-t border-dark-700/50">
+                          <div className="border-t border-slate-200">
                             {/* Actions */}
-                            <div className="p-4 flex items-center gap-2 border-b border-dark-700/50 bg-dark-800/30">
+                            <div className="p-4 flex items-center gap-2 border-b border-slate-200 bg-white">
                               <button
                                 onClick={() => handleRescan(tmpl.id)}
                                 disabled={rescanning === tmpl.id}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-dark-700 hover:bg-dark-600 text-dark-300 hover:text-white rounded-lg text-sm transition"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-white rounded-lg text-sm transition"
                               >
                                 {rescanning === tmpl.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                                 Re-scan OCR
                               </button>
                               <button
                                 onClick={() => handleDelete(tmpl.id)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-dark-700 hover:bg-red-500/10 text-dark-300 hover:text-red-400 rounded-lg text-sm transition"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-red-500/10 text-slate-600 hover:text-red-400 rounded-lg text-sm transition"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                                 Delete
@@ -540,17 +540,17 @@ export default function TemplatesPage() {
                                     {detail.unmapped_fields.length} Unmapped Fields
                                   </span>
                                 </div>
-                                <p className="text-dark-400 text-xs mb-3">
+                                <p className="text-slate-500 text-xs mb-3">
                                   These fields don&apos;t match a database column. Map them or they&apos;ll stay empty in generated contracts.
                                 </p>
                                 <div className="space-y-2">
                                   {detail.unmapped_fields.map((field) => (
-                                    <div key={field.field_id} className="flex items-center gap-3 bg-dark-800/50 rounded-lg p-3">
+                                    <div key={field.field_id} className="flex items-center gap-3 bg-white rounded-lg p-3">
                                       <div className="flex-1">
                                         <span className="text-white text-sm font-medium">{field.label || field.field_id}</span>
                                         <div className="flex items-center gap-2 mt-0.5">
                                           <span className={`px-1.5 py-0.5 text-xs rounded border ${SECTION_COLORS[field.section] || SECTION_COLORS.unknown}`}>{field.section}</span>
-                                          <span className="text-dark-500 text-xs">{field.type}</span>
+                                          <span className="text-slate-400 text-xs">{field.type}</span>
                                         </div>
                                       </div>
                                       {mappingField === field.field_id ? (
@@ -558,7 +558,7 @@ export default function TemplatesPage() {
                                           <select
                                             value={mappingTarget}
                                             onChange={(e) => setMappingTarget(e.target.value)}
-                                            className="px-2 py-1 bg-dark-700 border border-dark-600 rounded text-white text-xs focus:border-primary-500 focus:outline-none"
+                                            className="px-2 py-1 bg-slate-50 border border-slate-200 rounded text-white text-xs focus:border-primary-500 focus:outline-none"
                                           >
                                             <option value="">Select DB field...</option>
                                             {registry.map((rf) => (
@@ -568,7 +568,7 @@ export default function TemplatesPage() {
                                           <button onClick={() => mappingTarget && handleMapField(tmpl.id, field.field_id, mappingTarget)} disabled={!mappingTarget} className="p-1 text-green-400 hover:text-green-300 disabled:opacity-40">
                                             <Check className="w-4 h-4" />
                                           </button>
-                                          <button onClick={() => { setMappingField(null); setMappingTarget(''); }} className="p-1 text-dark-400 hover:text-white">
+                                          <button onClick={() => { setMappingField(null); setMappingTarget(''); }} className="p-1 text-slate-500 hover:text-white">
                                             <X className="w-4 h-4" />
                                           </button>
                                         </div>
@@ -594,9 +594,9 @@ export default function TemplatesPage() {
                                 {detail.detected_fields.map((field, idx) => {
                                   const isMapped = !!detail.field_mapping[field.field_id];
                                   return (
-                                    <div key={idx} className={`flex items-center gap-3 p-3 rounded-lg border ${isMapped ? 'bg-green-500/5 border-green-500/20' : 'bg-dark-700/30 border-dark-600/30'}`}>
-                                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${isMapped ? 'bg-green-500/20' : 'bg-dark-600/50'}`}>
-                                        {isMapped ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Unlink className="w-3.5 h-3.5 text-dark-400" />}
+                                    <div key={idx} className={`flex items-center gap-3 p-3 rounded-lg border ${isMapped ? 'bg-green-500/5 border-green-500/20' : 'bg-slate-50/30 border-slate-200/30'}`}>
+                                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${isMapped ? 'bg-green-500/20' : 'bg-slate-100/50'}`}>
+                                        {isMapped ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Unlink className="w-3.5 h-3.5 text-slate-500" />}
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
@@ -613,7 +613,7 @@ export default function TemplatesPage() {
                                           )}
                                         </div>
                                       </div>
-                                      <span className="text-dark-500 text-xs shrink-0">{field.type}</span>
+                                      <span className="text-slate-400 text-xs shrink-0">{field.type}</span>
                                     </div>
                                   );
                                 })}
@@ -621,19 +621,19 @@ export default function TemplatesPage() {
                             </div>
 
                             {/* Summary */}
-                            <div className="p-4 border-t border-dark-700/50 bg-dark-800/30">
+                            <div className="p-4 border-t border-slate-200 bg-white">
                               <div className="grid grid-cols-3 gap-4">
                                 <div className="text-center">
                                   <p className="text-2xl font-bold text-white">{detail.detected_fields.length}</p>
-                                  <p className="text-dark-400 text-xs">Total Fields</p>
+                                  <p className="text-slate-500 text-xs">Total Fields</p>
                                 </div>
                                 <div className="text-center">
                                   <p className="text-2xl font-bold text-green-400">{Object.keys(detail.field_mapping).length}</p>
-                                  <p className="text-dark-400 text-xs">Mapped to DB</p>
+                                  <p className="text-slate-500 text-xs">Mapped to DB</p>
                                 </div>
                                 <div className="text-center">
-                                  <p className={`text-2xl font-bold ${detail.unmapped_fields.length > 0 ? 'text-amber-400' : 'text-dark-500'}`}>{detail.unmapped_fields.length}</p>
-                                  <p className="text-dark-400 text-xs">Unmapped</p>
+                                  <p className={`text-2xl font-bold ${detail.unmapped_fields.length > 0 ? 'text-amber-400' : 'text-slate-400'}`}>{detail.unmapped_fields.length}</p>
+                                  <p className="text-slate-500 text-xs">Unmapped</p>
                                 </div>
                               </div>
                             </div>
@@ -651,7 +651,7 @@ export default function TemplatesPage() {
           {activeTab === 'gallery' && (
             <>
               <div className="mb-6">
-                <p className="text-dark-400 text-sm">
+                <p className="text-slate-500 text-sm">
                   Pre-made contract templates with fields already mapped. Add one to your account to start using it — or upload your own.
                 </p>
               </div>
@@ -661,10 +661,10 @@ export default function TemplatesPage() {
                   <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
                 </div>
               ) : gallery.length === 0 ? (
-                <div className="text-center py-16 bg-dark-800/50 border border-dark-700/50 rounded-2xl">
-                  <BookOpen className="w-16 h-16 text-dark-600 mx-auto mb-4" />
+                <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl">
+                  <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-white mb-2">No Gallery Templates</h3>
-                  <p className="text-dark-400 mb-6">No starter templates available yet. Upload your own instead.</p>
+                  <p className="text-slate-500 mb-6">No starter templates available yet. Upload your own instead.</p>
                   <button
                     onClick={() => { setActiveTab('my-templates'); setShowUpload(true); }}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition font-medium"
@@ -679,22 +679,22 @@ export default function TemplatesPage() {
                     const alreadyAdded = templates.some((t) => t.name === item.name);
 
                     return (
-                      <div key={item.slug} className="bg-dark-800/50 border border-dark-700/50 rounded-xl p-5 flex flex-col">
+                      <div key={item.slug} className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col">
                         <div className="flex items-start gap-3 mb-4">
                           <div className="w-10 h-10 bg-gradient-to-br from-primary-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center shrink-0">
                             <Sparkles className="w-5 h-5 text-primary-400" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="text-white font-semibold">{item.name}</h3>
-                            <p className="text-dark-400 text-sm mt-0.5">{item.description}</p>
+                            <p className="text-slate-500 text-sm mt-0.5">{item.description}</p>
                           </div>
                         </div>
 
                         {/* Stats */}
                         <div className="flex items-center gap-4 mb-4">
                           <div className="flex items-center gap-1.5">
-                            <Database className="w-3.5 h-3.5 text-dark-500" />
-                            <span className="text-dark-300 text-xs">{item.field_count} fields</span>
+                            <Database className="w-3.5 h-3.5 text-slate-400" />
+                            <span className="text-slate-600 text-xs">{item.field_count} fields</span>
                           </div>
                           <div className="flex items-center gap-1.5">
                             <Check className="w-3.5 h-3.5 text-green-400" />

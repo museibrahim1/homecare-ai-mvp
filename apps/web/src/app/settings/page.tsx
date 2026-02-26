@@ -556,7 +556,7 @@ export default function SettingsPage() {
           )}
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-dark-700 pb-4 overflow-x-auto">
+          <div className="flex gap-2 mb-6 border-b border-slate-200 pb-4 overflow-x-auto">
             {tabs.map((tab) => {
               const TabIcon = tab.icon;
               return (
@@ -566,7 +566,7 @@ export default function SettingsPage() {
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-primary-500/20 text-primary-400'
-                      : 'text-dark-400 hover:text-white hover:bg-dark-700/50'
+                      : 'text-slate-500 hover:text-white hover:bg-slate-100'
                   }`}
                 >
                   <TabIcon className="w-4 h-4" />
@@ -587,7 +587,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-white font-semibold mb-1">Auto-Fill Company Info</h3>
-                    <p className="text-dark-300 text-sm mb-3">
+                    <p className="text-slate-600 text-sm mb-3">
                       Upload any document with your company letterhead, and AI will extract your business information automatically.
                     </p>
                     <div className="flex gap-3">
@@ -623,7 +623,7 @@ export default function SettingsPage() {
                         <img 
                           src={logoPreview} 
                           alt="Company logo" 
-                          className="w-32 h-32 object-contain bg-dark-700 rounded-xl border border-dark-600"
+                          className="w-32 h-32 object-contain bg-slate-50 rounded-xl border border-slate-200"
                         />
                         <button
                           onClick={removeLogo}
@@ -635,10 +635,10 @@ export default function SettingsPage() {
                     ) : (
                       <div 
                         onClick={() => logoInputRef.current?.click()}
-                        className="w-32 h-32 bg-dark-700 rounded-xl border-2 border-dashed border-dark-600 hover:border-primary-500 flex flex-col items-center justify-center cursor-pointer transition"
+                        className="w-32 h-32 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 hover:border-primary-500 flex flex-col items-center justify-center cursor-pointer transition"
                       >
-                        <Upload className="w-8 h-8 text-dark-500 mb-2" />
-                        <span className="text-dark-400 text-xs">Upload Logo</span>
+                        <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                        <span className="text-slate-500 text-xs">Upload Logo</span>
                       </div>
                     )}
                     <input
@@ -650,10 +650,10 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <p className="text-dark-300 text-sm mb-2">
+                    <p className="text-slate-600 text-sm mb-2">
                       Upload your company logo. This will appear on contracts, invoices, and documents.
                     </p>
-                    <p className="text-dark-500 text-xs">
+                    <p className="text-slate-400 text-xs">
                       PNG, JPG, or SVG. At least 200x200px. Max 5MB.
                     </p>
                   </div>
@@ -668,7 +668,7 @@ export default function SettingsPage() {
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-dark-300 text-sm mb-1">Company Name *</label>
+                    <label className="block text-slate-600 text-sm mb-1">Company Name *</label>
                     <input
                       type="text"
                       value={agency.name}
@@ -678,7 +678,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-dark-300 text-sm mb-1">Street Address</label>
+                    <label className="block text-slate-600 text-sm mb-1">Street Address</label>
                     <input
                       type="text"
                       value={agency.address}
@@ -688,7 +688,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-dark-300 text-sm mb-1">City</label>
+                    <label className="block text-slate-600 text-sm mb-1">City</label>
                     <input
                       type="text"
                       value={agency.city}
@@ -699,7 +699,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-dark-300 text-sm mb-1">State</label>
+                      <label className="block text-slate-600 text-sm mb-1">State</label>
                       <input
                         type="text"
                         value={agency.state}
@@ -709,7 +709,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-dark-300 text-sm mb-1">ZIP</label>
+                      <label className="block text-slate-600 text-sm mb-1">ZIP</label>
                       <input
                         type="text"
                         value={agency.zip_code}
@@ -720,7 +720,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-dark-300 text-sm mb-1">Phone</label>
+                    <label className="block text-slate-600 text-sm mb-1">Phone</label>
                     <input
                       type="tel"
                       value={agency.phone}
@@ -730,7 +730,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-dark-300 text-sm mb-1">Email</label>
+                    <label className="block text-slate-600 text-sm mb-1">Email</label>
                     <input
                       type="email"
                       value={agency.email}
@@ -740,7 +740,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-dark-300 text-sm mb-1">Website</label>
+                    <label className="block text-slate-600 text-sm mb-1">Website</label>
                     <input
                       type="url"
                       value={agency.website}
@@ -757,7 +757,7 @@ export default function SettingsPage() {
                 <h2 className="text-lg font-semibold text-white mb-4">Business Identifiers</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-dark-300 text-sm mb-1">License Number</label>
+                    <label className="block text-slate-600 text-sm mb-1">License Number</label>
                     <input
                       type="text"
                       value={agency.license_number}
@@ -767,7 +767,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-dark-300 text-sm mb-1">NPI Number</label>
+                    <label className="block text-slate-600 text-sm mb-1">NPI Number</label>
                     <input
                       type="text"
                       value={agency.npi_number}
@@ -784,7 +784,7 @@ export default function SettingsPage() {
                 <h2 className="text-lg font-semibold text-white mb-4">Primary Contact</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-dark-300 text-sm mb-1">Contact Name</label>
+                    <label className="block text-slate-600 text-sm mb-1">Contact Name</label>
                     <input
                       type="text"
                       value={agency.contact_person}
@@ -794,7 +794,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-dark-300 text-sm mb-1">Title / Position</label>
+                    <label className="block text-slate-600 text-sm mb-1">Title / Position</label>
                     <input
                       type="text"
                       value={agency.contact_title}
@@ -811,7 +811,7 @@ export default function SettingsPage() {
                 <h2 className="text-lg font-semibold text-white mb-4">Brand Colors</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-dark-300 text-sm mb-2">Primary Color</label>
+                    <label className="block text-slate-600 text-sm mb-2">Primary Color</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
@@ -828,7 +828,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-dark-300 text-sm mb-2">Secondary Color</label>
+                    <label className="block text-slate-600 text-sm mb-2">Secondary Color</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
@@ -858,14 +858,14 @@ export default function SettingsPage() {
                   <Upload className="w-5 h-5 text-primary-400" />
                   Upload Documents
                 </h2>
-                <p className="text-dark-300 text-sm mb-4">
+                <p className="text-slate-600 text-sm mb-4">
                   Upload your policies, procedures, contract templates, and other business documents. 
                   AI will extract relevant information to auto-fill forms.
                 </p>
                 
                 {/* Category Selection */}
                 <div className="mb-4">
-                  <label className="block text-dark-300 text-sm mb-2">Document Category</label>
+                  <label className="block text-slate-600 text-sm mb-2">Document Category</label>
                   <div className="flex flex-wrap gap-2">
                     {documentCategories.map((cat) => {
                       const CatIcon = cat.icon;
@@ -876,7 +876,7 @@ export default function SettingsPage() {
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
                             selectedCategory === cat.id
                               ? 'bg-primary-500/20 text-primary-400 border border-primary-500/50'
-                              : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-dark-500'
+                              : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
                           }`}
                         >
                           <CatIcon className="w-4 h-4" />
@@ -893,7 +893,7 @@ export default function SettingsPage() {
                   className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                     uploadingDoc 
                       ? 'border-primary-500/50 bg-primary-500/5' 
-                      : 'border-dark-600 hover:border-primary-500 bg-dark-700/30'
+                      : 'border-slate-200 hover:border-primary-500 bg-slate-50/30'
                   }`}
                 >
                   {uploadingDoc ? (
@@ -903,9 +903,9 @@ export default function SettingsPage() {
                     </div>
                   ) : (
                     <>
-                      <Upload className="w-10 h-10 text-dark-500 mx-auto mb-3" />
+                      <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
                       <p className="text-white font-medium mb-1">Click to upload document</p>
-                      <p className="text-dark-400 text-sm">PDF, DOCX, DOC, PNG, JPG • Max 25MB</p>
+                      <p className="text-slate-500 text-sm">PDF, DOCX, DOC, PNG, JPG • Max 25MB</p>
                     </>
                   )}
                 </div>
@@ -924,9 +924,9 @@ export default function SettingsPage() {
                 
                 {agency.documents.length === 0 ? (
                   <div className="text-center py-8">
-                    <FileText className="w-12 h-12 text-dark-600 mx-auto mb-3" />
-                    <p className="text-dark-400">No documents uploaded yet</p>
-                    <p className="text-dark-500 text-sm">Upload policies, procedures, and templates above</p>
+                    <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-slate-500">No documents uploaded yet</p>
+                    <p className="text-slate-400 text-sm">Upload policies, procedures, and templates above</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -937,7 +937,7 @@ export default function SettingsPage() {
                       return (
                         <div 
                           key={doc.id}
-                          className="flex items-center justify-between p-4 bg-dark-700/50 rounded-xl border border-dark-600"
+                          className="flex items-center justify-between p-4 bg-slate-100 rounded-xl border border-slate-200"
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
@@ -945,7 +945,7 @@ export default function SettingsPage() {
                             </div>
                             <div>
                               <p className="text-white font-medium">{doc.name}</p>
-                              <p className="text-dark-400 text-sm">{category?.label} • Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}</p>
+                              <p className="text-slate-500 text-sm">{category?.label} • Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}</p>
                             </div>
                           </div>
                           <button
@@ -964,12 +964,12 @@ export default function SettingsPage() {
               {/* Default Policies */}
               <div className="card p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Default Policies</h2>
-                <p className="text-dark-400 text-sm mb-4">
+                <p className="text-slate-500 text-sm mb-4">
                   These will be used as defaults when generating contracts. You can also upload policy documents above for more detailed extraction.
                 </p>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-dark-300 text-sm mb-2">Cancellation Policy</label>
+                    <label className="block text-slate-600 text-sm mb-2">Cancellation Policy</label>
                     <textarea
                       value={agency.cancellation_policy}
                       onChange={(e) => setAgency(prev => ({ ...prev, cancellation_policy: e.target.value }))}
@@ -978,7 +978,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-dark-300 text-sm mb-2">Terms & Conditions</label>
+                    <label className="block text-slate-600 text-sm mb-2">Terms & Conditions</label>
                     <textarea
                       value={agency.terms_and_conditions}
                       onChange={(e) => setAgency(prev => ({ ...prev, terms_and_conditions: e.target.value }))}
@@ -1000,7 +1000,7 @@ export default function SettingsPage() {
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-dark-300 text-sm mb-1">Full Name</label>
+                  <label className="block text-slate-600 text-sm mb-1">Full Name</label>
                   <input
                     type="text"
                     value={agency.contact_person}
@@ -1010,7 +1010,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-dark-300 text-sm mb-1">Email</label>
+                  <label className="block text-slate-600 text-sm mb-1">Email</label>
                   <input
                     type="email"
                     value={agency.email}
@@ -1020,7 +1020,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-dark-300 text-sm mb-1">Phone</label>
+                  <label className="block text-slate-600 text-sm mb-1">Phone</label>
                   <input
                     type="tel"
                     value={agency.phone}
@@ -1040,7 +1040,7 @@ export default function SettingsPage() {
               {teamLimits && (
                 <div className={`p-4 rounded-xl border ${
                   teamLimits.can_invite 
-                    ? 'bg-dark-800 border-dark-700'
+                    ? 'bg-white border-slate-200'
                     : 'bg-yellow-500/10 border-yellow-500/30'
                 }`}>
                   <div className="flex items-center justify-between">
@@ -1054,7 +1054,7 @@ export default function SettingsPage() {
                         <p className="text-white font-medium">
                           {teamLimits.current_users} / {teamLimits.max_users} Team Members
                         </p>
-                        <p className="text-dark-400 text-sm">
+                        <p className="text-slate-500 text-sm">
                           {teamLimits.plan_name} Plan
                           {teamLimits.remaining_seats !== undefined && teamLimits.remaining_seats > 0 && (
                             <span> · {teamLimits.remaining_seats} seat{teamLimits.remaining_seats !== 1 ? 's' : ''} available</span>
@@ -1073,7 +1073,7 @@ export default function SettingsPage() {
                   </div>
                   
                   {/* Progress bar */}
-                  <div className="mt-3 h-2 bg-dark-700 rounded-full overflow-hidden">
+                  <div className="mt-3 h-2 bg-slate-50 rounded-full overflow-hidden">
                     <div 
                       className={`h-full transition-all duration-300 ${
                         teamLimits.can_invite ? 'bg-primary-500' : 'bg-yellow-500'
@@ -1092,7 +1092,7 @@ export default function SettingsPage() {
                       <Users className="w-5 h-5 text-primary-400" />
                       Team Members
                     </h2>
-                    <p className="text-dark-400 text-sm mt-1">Manage your team and their permissions</p>
+                    <p className="text-slate-500 text-sm mt-1">Manage your team and their permissions</p>
                   </div>
                   {teamLimits?.can_invite ? (
                     <button
@@ -1121,12 +1121,12 @@ export default function SettingsPage() {
                   </div>
                 ) : teamMembers.length === 0 ? (
                   <div className="text-center py-8">
-                    <Users className="w-12 h-12 text-dark-600 mx-auto mb-3" />
-                    <p className="text-dark-400">No team members yet</p>
-                    <p className="text-dark-500 text-sm">Invite your first team member to get started</p>
+                    <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-slate-500">No team members yet</p>
+                    <p className="text-slate-400 text-sm">Invite your first team member to get started</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-dark-700/50">
+                  <div className="divide-y divide-slate-200/50">
                     {teamMembers.map((member) => (
                       <div key={member.id} className="py-4 flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -1137,14 +1137,14 @@ export default function SettingsPage() {
                           </div>
                           <div>
                             <p className="text-white font-medium">{member.full_name}</p>
-                            <p className="text-dark-400 text-sm">{member.email}</p>
+                            <p className="text-slate-500 text-sm">{member.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <select
                             value={member.role}
                             onChange={(e) => handleUpdateMember(member.id, { role: e.target.value })}
-                            className="bg-dark-700 border border-dark-600 rounded-lg px-3 py-1.5 text-sm text-white"
+                            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-white"
                           >
                             <option value="owner">Owner</option>
                             <option value="admin">Admin</option>
@@ -1173,7 +1173,7 @@ export default function SettingsPage() {
                   <Volume2 className="w-6 h-6 text-primary-400 flex-shrink-0" />
                   <div>
                     <h3 className="text-white font-medium mb-1">Voice ID for Team Members</h3>
-                    <p className="text-dark-400 text-sm">
+                    <p className="text-slate-500 text-sm">
                       Each team member can set up their Voice ID in Settings &gt; Voice ID. This allows the system 
                       to automatically identify who is speaking during assessments.
                     </p>
@@ -1186,14 +1186,14 @@ export default function SettingsPage() {
           {/* Invite Modal */}
           {showInviteModal && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-dark-800 rounded-2xl p-6 w-full max-w-md border border-dark-700">
+              <div className="bg-white rounded-2xl p-6 w-full max-w-md border border-slate-200">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                     <UserPlus className="w-5 h-5 text-primary-400" />
                     Invite Team Member
                   </h3>
-                  <button onClick={() => { setShowInviteModal(false); setInviteError(null); setInviteSuccess(null); }} className="p-2 hover:bg-dark-700 rounded-lg">
-                    <X className="w-5 h-5 text-dark-400" />
+                  <button onClick={() => { setShowInviteModal(false); setInviteError(null); setInviteSuccess(null); }} className="p-2 hover:bg-slate-50 rounded-lg">
+                    <X className="w-5 h-5 text-slate-500" />
                   </button>
                 </div>
                 
@@ -1204,7 +1204,7 @@ export default function SettingsPage() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-dark-300 mb-2">Full Name *</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-2">Full Name *</label>
                       <input
                         type="text"
                         value={inviteName}
@@ -1214,7 +1214,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-dark-300 mb-2">Email Address *</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-2">Email Address *</label>
                       <input
                         type="email"
                         value={inviteEmail}
@@ -1224,7 +1224,7 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-dark-300 mb-2">Role</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-2">Role</label>
                       <select
                         value={inviteRole}
                         onChange={(e) => setInviteRole(e.target.value)}
@@ -1270,18 +1270,18 @@ export default function SettingsPage() {
           {/* Upgrade Modal */}
           {showUpgradeModal && teamLimits?.upgrade_options && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-dark-800 rounded-2xl p-6 w-full max-w-lg border border-dark-700">
+              <div className="bg-white rounded-2xl p-6 w-full max-w-lg border border-slate-200">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary-400" />
                     Upgrade Your Plan
                   </h3>
-                  <button onClick={() => setShowUpgradeModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
-                    <X className="w-5 h-5 text-dark-400" />
+                  <button onClick={() => setShowUpgradeModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                    <X className="w-5 h-5 text-slate-500" />
                   </button>
                 </div>
                 
-                <p className="text-dark-400 text-sm mb-6">
+                <p className="text-slate-500 text-sm mb-6">
                   Your current <span className="text-white font-medium">{teamLimits.plan_name}</span> plan 
                   allows {teamLimits.max_users} team member{teamLimits.max_users !== 1 ? 's' : ''}. 
                   Upgrade to add more users and unlock additional features.
@@ -1294,7 +1294,7 @@ export default function SettingsPage() {
                       className={`p-4 rounded-xl border transition-all cursor-pointer ${
                         index === 0 
                           ? 'bg-primary-500/10 border-primary-500/30 hover:border-primary-500/50' 
-                          : 'bg-dark-700/50 border-dark-600 hover:border-dark-500'
+                          : 'bg-slate-100 border-slate-200 hover:border-slate-300'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -1309,10 +1309,10 @@ export default function SettingsPage() {
                           )}
                         </div>
                         <p className="text-white font-bold">
-                          ${plan.monthly_price}<span className="text-dark-400 font-normal text-sm">/mo</span>
+                          ${plan.monthly_price}<span className="text-slate-500 font-normal text-sm">/mo</span>
                         </p>
                       </div>
-                      <p className="text-dark-400 text-sm">
+                      <p className="text-slate-500 text-sm">
                         Up to {plan.max_users} team members 
                         <span className="text-green-400 ml-1">
                           (+{plan.additional_users} more than current)
@@ -1322,7 +1322,7 @@ export default function SettingsPage() {
                   ))}
                 </div>
                 
-                <div className="mt-6 pt-4 border-t border-dark-700">
+                <div className="mt-6 pt-4 border-t border-slate-200">
                   <a 
                     href="/pricing" 
                     className="btn-primary w-full flex items-center justify-center gap-2"
@@ -1330,7 +1330,7 @@ export default function SettingsPage() {
                     <Sparkles className="w-4 h-4" />
                     View All Plans & Pricing
                   </a>
-                  <p className="text-dark-500 text-xs text-center mt-3">
+                  <p className="text-slate-400 text-xs text-center mt-3">
                     Contact us for custom enterprise pricing
                   </p>
                 </div>
@@ -1353,13 +1353,13 @@ export default function SettingsPage() {
                   { label: 'New Client Alerts', key: 'new_client_alerts' as const },
                   { label: 'Contract Expiration Alerts', key: 'contract_expiration_alerts' as const },
                 ]).map((setting) => (
-                  <div key={setting.key} className="flex items-center justify-between py-3 border-b border-dark-600/50 last:border-0">
-                    <span className="text-dark-200">{setting.label}</span>
+                  <div key={setting.key} className="flex items-center justify-between py-3 border-b border-slate-200 last:border-0">
+                    <span className="text-slate-700">{setting.label}</span>
                     <button
                       role="switch"
                       aria-checked={notifications[setting.key]}
                       onClick={() => setNotifications(prev => ({ ...prev, [setting.key]: !prev[setting.key] }))}
-                      className={`w-12 h-6 rounded-full transition-colors relative ${notifications[setting.key] ? 'bg-primary-500' : 'bg-dark-600'}`}
+                      className={`w-12 h-6 rounded-full transition-colors relative ${notifications[setting.key] ? 'bg-primary-500' : 'bg-slate-100'}`}
                     >
                       <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${notifications[setting.key] ? 'translate-x-6' : 'translate-x-0.5'}`} />
                     </button>
@@ -1378,17 +1378,17 @@ export default function SettingsPage() {
                   Security Settings
                 </h2>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b border-dark-600/50">
+                  <div className="flex items-center justify-between py-3 border-b border-slate-200">
                     <div>
-                      <p className="text-dark-200">Two-Factor Authentication</p>
-                      <p className="text-dark-500 text-sm">Add an extra layer of security</p>
+                      <p className="text-slate-700">Two-Factor Authentication</p>
+                      <p className="text-slate-400 text-sm">Add an extra layer of security</p>
                     </div>
                     <button onClick={() => setError('Two-factor authentication setup is coming soon.')} className="btn-secondary text-sm">Enable</button>
                   </div>
                   <div className="flex items-center justify-between py-3">
                     <div>
-                      <p className="text-dark-200">Change Password</p>
-                      <p className="text-dark-500 text-sm">Update your account password</p>
+                      <p className="text-slate-700">Change Password</p>
+                      <p className="text-slate-400 text-sm">Update your account password</p>
                     </div>
                     <button onClick={() => router.push('/forgot-password')} className="btn-secondary text-sm">Change</button>
                   </div>
@@ -1401,18 +1401,18 @@ export default function SettingsPage() {
                   <Laptop className="w-5 h-5 text-primary-400" />
                   Active Sessions
                 </h2>
-                <p className="text-dark-400 text-sm mb-6">
+                <p className="text-slate-500 text-sm mb-6">
                   If you suspect unauthorized access or left your account signed in on another device, 
                   you can sign out of all devices at once. You will need to sign in again everywhere.
                 </p>
-                <div className="flex items-center justify-between p-4 bg-dark-700/30 rounded-xl border border-dark-700/50">
+                <div className="flex items-center justify-between p-4 bg-slate-50/30 rounded-xl border border-slate-200">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
                       <LogOut className="w-5 h-5 text-orange-400" />
                     </div>
                     <div>
                       <p className="text-white font-medium">Log out of all devices</p>
-                      <p className="text-dark-400 text-sm">Invalidates all active sessions including this one</p>
+                      <p className="text-slate-500 text-sm">Invalidates all active sessions including this one</p>
                     </div>
                   </div>
                   <button
@@ -1437,8 +1437,8 @@ export default function SettingsPage() {
                 </h2>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-dark-200">Delete Account</p>
-                    <p className="text-dark-500 text-sm">Permanently delete your account and all data</p>
+                    <p className="text-slate-700">Delete Account</p>
+                    <p className="text-slate-400 text-sm">Permanently delete your account and all data</p>
                   </div>
                   <button
                     onClick={() => {

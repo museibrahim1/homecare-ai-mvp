@@ -200,7 +200,7 @@ export default function BillingPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-dark-950">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -227,7 +227,7 @@ export default function BillingPage() {
   });
 
   return (
-    <div className="flex min-h-screen bg-dark-950">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -235,13 +235,13 @@ export default function BillingPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white">Billing & Subscription</h1>
-            <p className="text-dark-400 mt-1">Manage your plan, payment method, and invoices</p>
+            <p className="text-slate-500 mt-1">Manage your plan, payment method, and invoices</p>
           </div>
           {subscription?.stripe_customer_id && (
             <button
               onClick={handleManageBilling}
               disabled={portalLoading}
-              className="flex items-center gap-2 px-5 py-2.5 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-white rounded-xl transition-all font-medium text-sm"
+              className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-white rounded-xl transition-all font-medium text-sm"
             >
               {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
               Manage in Stripe
@@ -250,8 +250,8 @@ export default function BillingPage() {
         </div>
 
         {/* Current Plan Card */}
-        <div className="bg-dark-900/50 backdrop-blur border border-dark-800 rounded-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-primary-600/20 via-purple-600/10 to-transparent p-6 md:p-8 border-b border-dark-800">
+        <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-primary-600/20 via-purple-600/10 to-transparent p-6 md:p-8 border-b border-slate-200">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
@@ -267,7 +267,7 @@ export default function BillingPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-dark-400 text-sm mt-0.5">
+                  <p className="text-slate-500 text-sm mt-0.5">
                     {subscription?.billing_cycle === 'annual' ? 'Annual billing' : 'Monthly billing'}
                     {subscription?.current_period_end && ` · Renews ${formatDate(subscription.current_period_end)}`}
                   </p>
@@ -278,7 +278,7 @@ export default function BillingPage() {
                   {plan ? formatCurrency(subscription?.billing_cycle === 'annual'
                     ? plan.annual_price / 12
                     : plan.monthly_price) : '$0'}
-                  <span className="text-sm font-normal text-dark-400">/mo</span>
+                  <span className="text-sm font-normal text-slate-500">/mo</span>
                 </div>
                 {subscription?.billing_cycle === 'annual' && plan && (
                   <p className="text-xs text-emerald-400 mt-1">
@@ -319,20 +319,20 @@ export default function BillingPage() {
         {/* Payment Method + Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Payment Method */}
-          <div className="bg-dark-900/50 backdrop-blur border border-dark-800 rounded-2xl p-6">
+          <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <CreditCard className="w-5 h-5 text-primary-400" />
               <h3 className="text-lg font-semibold text-white">Payment Method</h3>
             </div>
             {subscription?.stripe_customer_id ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-4 bg-dark-800/50 rounded-xl border border-dark-700">
+                <div className="flex items-center gap-3 p-4 bg-white rounded-xl border border-slate-200">
                   <div className="w-12 h-8 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-md flex items-center justify-center">
                     <CreditCard className="w-5 h-3.5 text-white" />
                   </div>
                   <div className="flex-1">
                     <p className="text-white text-sm font-medium">Card on file via Stripe</p>
-                    <p className="text-dark-400 text-xs">Managed through Stripe Customer Portal</p>
+                    <p className="text-slate-500 text-xs">Managed through Stripe Customer Portal</p>
                   </div>
                 </div>
                 <button
@@ -346,15 +346,15 @@ export default function BillingPage() {
               </div>
             ) : (
               <div className="text-center py-6">
-                <CreditCard className="w-10 h-10 text-dark-600 mx-auto mb-3" />
-                <p className="text-dark-400 text-sm mb-3">No payment method on file</p>
-                <p className="text-dark-500 text-xs">Subscribe to a plan to add a payment method</p>
+                <CreditCard className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-500 text-sm mb-3">No payment method on file</p>
+                <p className="text-slate-400 text-xs">Subscribe to a plan to add a payment method</p>
               </div>
             )}
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-dark-900/50 backdrop-blur border border-dark-800 rounded-2xl p-6">
+          <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <Shield className="w-5 h-5 text-primary-400" />
               <h3 className="text-lg font-semibold text-white">Quick Actions</h3>
@@ -363,36 +363,36 @@ export default function BillingPage() {
               {subscription?.stripe_customer_id && (
                 <button
                   onClick={handleManageBilling}
-                  className="w-full flex items-center justify-between p-4 bg-dark-800/50 hover:bg-dark-800 rounded-xl border border-dark-700 transition-all group"
+                  className="w-full flex items-center justify-between p-4 bg-white hover:bg-white rounded-xl border border-slate-200 transition-all group"
                 >
                   <div className="flex items-center gap-3">
-                    <Receipt className="w-5 h-5 text-dark-400" />
+                    <Receipt className="w-5 h-5 text-slate-500" />
                     <span className="text-white text-sm font-medium">View Stripe Invoices</span>
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
+                  <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-primary-400 transition-colors" />
                 </button>
               )}
               {upgradePlans.length > 0 && (
                 <a
                   href="#upgrade"
-                  className="w-full flex items-center justify-between p-4 bg-dark-800/50 hover:bg-dark-800 rounded-xl border border-dark-700 transition-all group"
+                  className="w-full flex items-center justify-between p-4 bg-white hover:bg-white rounded-xl border border-slate-200 transition-all group"
                 >
                   <div className="flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-amber-400" />
                     <span className="text-white text-sm font-medium">Upgrade Plan</span>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
+                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-primary-400 transition-colors" />
                 </a>
               )}
               <Link
                 href="/pricing"
-                className="w-full flex items-center justify-between p-4 bg-dark-800/50 hover:bg-dark-800 rounded-xl border border-dark-700 transition-all group"
+                className="w-full flex items-center justify-between p-4 bg-white hover:bg-white rounded-xl border border-slate-200 transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <Calendar className="w-5 h-5 text-dark-400" />
+                  <Calendar className="w-5 h-5 text-slate-500" />
                   <span className="text-white text-sm font-medium">Compare All Plans</span>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-dark-500 group-hover:text-primary-400 transition-colors" />
+                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-primary-400 transition-colors" />
               </Link>
             </div>
           </div>
@@ -400,8 +400,8 @@ export default function BillingPage() {
 
         {/* Invoice History */}
         {invoices.length > 0 && (
-          <div className="bg-dark-900/50 backdrop-blur border border-dark-800 rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-dark-800">
+          <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-slate-200">
               <div className="flex items-center gap-3">
                 <Receipt className="w-5 h-5 text-primary-400" />
                 <h3 className="text-lg font-semibold text-white">Invoice History</h3>
@@ -410,18 +410,18 @@ export default function BillingPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-dark-800">
-                    <th className="text-left text-xs font-medium text-dark-400 uppercase tracking-wider px-6 py-3">Invoice</th>
-                    <th className="text-left text-xs font-medium text-dark-400 uppercase tracking-wider px-6 py-3">Date</th>
-                    <th className="text-left text-xs font-medium text-dark-400 uppercase tracking-wider px-6 py-3">Amount</th>
-                    <th className="text-left text-xs font-medium text-dark-400 uppercase tracking-wider px-6 py-3">Status</th>
+                  <tr className="border-b border-slate-200">
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Invoice</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Date</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Amount</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dark-800">
                   {invoices.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-dark-800/30 transition-colors">
+                    <tr key={inv.id} className="hover:bg-white transition-colors">
                       <td className="px-6 py-4 text-sm text-white font-medium">{inv.invoice_number || '—'}</td>
-                      <td className="px-6 py-4 text-sm text-dark-300">{formatDate(inv.invoice_date)}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{formatDate(inv.invoice_date)}</td>
                       <td className="px-6 py-4 text-sm text-white font-medium">{formatCurrency(inv.amount)}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
@@ -449,13 +449,13 @@ export default function BillingPage() {
                   <Sparkles className="w-6 h-6 text-amber-400" />
                   Upgrade Your Plan
                 </h2>
-                <p className="text-dark-400 mt-1">Get more power for your growing agency</p>
+                <p className="text-slate-500 mt-1">Get more power for your growing agency</p>
               </div>
-              <div className="flex items-center bg-dark-800 rounded-xl p-1 border border-dark-700">
+              <div className="flex items-center bg-white rounded-xl p-1 border border-slate-200">
                 <button
                   onClick={() => setBillingCycle('monthly')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    billingCycle === 'monthly' ? 'bg-primary-600 text-white shadow-lg' : 'text-dark-400 hover:text-white'
+                    billingCycle === 'monthly' ? 'bg-primary-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'
                   }`}
                 >
                   Monthly
@@ -463,7 +463,7 @@ export default function BillingPage() {
                 <button
                   onClick={() => setBillingCycle('annual')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    billingCycle === 'annual' ? 'bg-primary-600 text-white shadow-lg' : 'text-dark-400 hover:text-white'
+                    billingCycle === 'annual' ? 'bg-primary-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'
                   }`}
                 >
                   Annual
@@ -479,15 +479,15 @@ export default function BillingPage() {
                 return (
                   <div
                     key={p.id}
-                    className={`bg-dark-900/50 backdrop-blur border rounded-2xl p-6 transition-all ${
-                      isCurrentPlan ? 'border-primary-500/50 ring-1 ring-primary-500/20' : 'border-dark-800 hover:border-dark-700'
+                    className={`bg-slate-50/50 backdrop-blur border rounded-2xl p-6 transition-all ${
+                      isCurrentPlan ? 'border-primary-500/50 ring-1 ring-primary-500/20' : 'border-slate-200 hover:border-slate-200'
                     }`}
                   >
                     <h3 className="text-xl font-bold text-white mb-1">{p.name}</h3>
-                    <p className="text-dark-400 text-sm mb-4">{p.description || 'For growing agencies'}</p>
+                    <p className="text-slate-500 text-sm mb-4">{p.description || 'For growing agencies'}</p>
                     <div className="mb-6">
                       <span className="text-4xl font-bold text-white">{formatCurrency(price)}</span>
-                      <span className="text-dark-400">/mo</span>
+                      <span className="text-slate-500">/mo</span>
                       {billingCycle === 'annual' && (
                         <p className="text-xs text-emerald-400 mt-1">{formatCurrency(p.annual_price)}/year</p>
                       )}
@@ -512,7 +512,7 @@ export default function BillingPage() {
                     {p.features && (
                       <ul className="mt-5 space-y-2.5">
                         {(typeof p.features === 'string' ? JSON.parse(p.features) : p.features).slice(0, 5).map((f: string, i: number) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-dark-300">
+                          <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
                             <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
                             {f}
                           </li>
@@ -528,12 +528,12 @@ export default function BillingPage() {
 
         {/* No subscription state */}
         {!subscription && (
-          <div className="bg-dark-900/50 backdrop-blur border border-dark-800 rounded-2xl p-8 md:p-12 text-center">
+          <div className="bg-slate-50/50 backdrop-blur border border-slate-200 rounded-2xl p-8 md:p-12 text-center">
             <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary-500/20 to-purple-500/20 flex items-center justify-center">
               <CreditCard className="w-8 h-8 text-primary-400" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-3">No Active Subscription</h2>
-            <p className="text-dark-400 max-w-md mx-auto mb-8">
+            <p className="text-slate-500 max-w-md mx-auto mb-8">
               Choose a plan to unlock AI-powered assessments, automated contracts, and everything you need to grow your agency.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -567,14 +567,14 @@ function UsageMeter({ icon: Icon, label, used, limit, unit, percent }: {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-dark-400" />
-          <span className="text-sm text-dark-300">{label}</span>
+          <Icon className="w-4 h-4 text-slate-500" />
+          <span className="text-sm text-slate-600">{label}</span>
         </div>
         <span className="text-sm font-medium text-white">
           {used}{unit ? ` ${unit}` : ''} / {limit}{unit ? ` ${unit}` : ''}
         </span>
       </div>
-      <div className="h-2 bg-dark-800 rounded-full overflow-hidden">
+      <div className="h-2 bg-white rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${barColor}`}
           style={{ width: `${Math.max(2, percent)}%` }}

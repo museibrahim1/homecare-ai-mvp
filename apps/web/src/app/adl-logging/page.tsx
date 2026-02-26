@@ -189,7 +189,7 @@ export default function ADLLoggingPage() {
                 <HeartPulse className="w-7 h-7 text-primary-400" />
                 ADL & Care Logging
               </h1>
-              <p className="text-dark-400 mt-1">Track Activities of Daily Living per caregiver visit</p>
+              <p className="text-slate-500 mt-1">Track Activities of Daily Living per caregiver visit</p>
             </div>
           </div>
 
@@ -206,7 +206,7 @@ export default function ADLLoggingPage() {
                   <div className={`w-9 h-9 rounded-lg ${stat.bg} flex items-center justify-center`}>
                     <stat.icon className={`w-5 h-5 ${stat.color}`} />
                   </div>
-                  <span className="text-dark-400 text-sm">{stat.label}</span>
+                  <span className="text-slate-500 text-sm">{stat.label}</span>
                 </div>
                 <p className="text-2xl font-bold text-white">{stat.value}</p>
               </div>
@@ -216,31 +216,31 @@ export default function ADLLoggingPage() {
           {/* Filters */}
           <div className="flex flex-wrap gap-3">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search clients..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-dark-800 border border-dark-600 rounded-lg text-white text-sm placeholder:text-dark-500 focus:outline-none focus:border-primary-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white text-sm placeholder:text-slate-400 focus:outline-none focus:border-primary-500"
               />
             </div>
             <input
               type="date"
               value={filterDate}
               onChange={e => setFilterDate(e.target.value)}
-              className="px-4 py-2.5 bg-dark-800 border border-dark-600 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
+              className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white text-sm focus:outline-none focus:border-primary-500"
             />
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Visit List */}
             <div className="lg:col-span-1 space-y-3">
-              <h2 className="text-sm font-semibold text-dark-400 uppercase tracking-wider">Visit Logs</h2>
+              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Visit Logs</h2>
               {filteredVisits.length === 0 ? (
                 <div className="card p-8 text-center">
-                  <CalendarDays className="w-10 h-10 text-dark-500 mx-auto mb-3" />
-                  <p className="text-dark-400">No visits found for this date</p>
+                  <CalendarDays className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                  <p className="text-slate-500">No visits found for this date</p>
                 </div>
               ) : filteredVisits.map(visit => (
                 <button
@@ -250,12 +250,12 @@ export default function ADLLoggingPage() {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-white font-medium">{visit.clientName}</span>
-                    <span className="text-xs text-dark-400">{visit.entries.length} ADLs</span>
+                    <span className="text-xs text-slate-500">{visit.entries.length} ADLs</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-dark-400 mb-2">
+                  <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                     <User className="w-3 h-3" /> {visit.caregiverName}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-dark-400 mb-3">
+                  <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
                     <Clock className="w-3 h-3" /> {visit.clockIn} — {visit.clockOut || 'Active'}
                     <MapPin className="w-3 h-3 ml-2" /> {visit.location.split(',')[0]}
                   </div>
@@ -278,9 +278,9 @@ export default function ADLLoggingPage() {
             <div className="lg:col-span-2">
               {!selectedVisit ? (
                 <div className="card p-12 text-center">
-                  <HeartPulse className="w-12 h-12 text-dark-500 mx-auto mb-4" />
+                  <HeartPulse className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-white mb-2">Select a Visit</h3>
-                  <p className="text-dark-400">Click on a visit log to view and manage ADL entries</p>
+                  <p className="text-slate-500">Click on a visit log to view and manage ADL entries</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -289,7 +289,7 @@ export default function ADLLoggingPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <h2 className="text-lg font-bold text-white">{selectedVisit.clientName}</h2>
-                        <div className="flex items-center gap-4 text-sm text-dark-400 mt-1">
+                        <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
                           <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {selectedVisit.caregiverName}</span>
                           <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {selectedVisit.clockIn} — {selectedVisit.clockOut || 'Active'}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {selectedVisit.location}</span>
@@ -311,13 +311,13 @@ export default function ADLLoggingPage() {
                         return (
                           <div
                             key={cat}
-                            className={`flex-1 h-2 rounded-full ${has ? cfg.bg.replace('/15', '/60') : 'bg-dark-700'}`}
+                            className={`flex-1 h-2 rounded-full ${has ? cfg.bg.replace('/15', '/60') : 'bg-slate-50'}`}
                             title={`${cfg.label}: ${has ? 'Logged' : 'Not logged'}`}
                           />
                         );
                       })}
                     </div>
-                    <div className="flex justify-between mt-1 text-[10px] text-dark-500">
+                    <div className="flex justify-between mt-1 text-[10px] text-slate-400">
                       {(Object.keys(ADL_CATEGORIES) as ADLCategory[]).map(cat => (
                         <span key={cat}>{ADL_CATEGORIES[cat].label.split(' ')[0]}</span>
                       ))}
@@ -330,7 +330,7 @@ export default function ADLLoggingPage() {
                       <h3 className="text-sm font-semibold text-white mb-3">New ADL Entry</h3>
                       <div className="grid grid-cols-2 gap-3 mb-3">
                         <div>
-                          <label className="text-xs text-dark-400 mb-1 block">Category</label>
+                          <label className="text-xs text-slate-500 mb-1 block">Category</label>
                           <div className="grid grid-cols-4 gap-1.5">
                             {(Object.keys(ADL_CATEGORIES) as ADLCategory[]).map(cat => {
                               const cfg = ADL_CATEGORIES[cat];
@@ -340,7 +340,7 @@ export default function ADLLoggingPage() {
                                   key={cat}
                                   onClick={() => setNewCategory(cat)}
                                   className={`flex flex-col items-center gap-1 p-2 rounded-lg border text-xs transition ${
-                                    newCategory === cat ? `${cfg.bg} ${cfg.color} border-current` : 'border-dark-600 text-dark-400 hover:border-dark-500'
+                                    newCategory === cat ? `${cfg.bg} ${cfg.color} border-current` : 'border-slate-200 text-slate-500 hover:border-slate-300'
                                   }`}
                                 >
                                   <Icon className="w-4 h-4" />
@@ -351,7 +351,7 @@ export default function ADLLoggingPage() {
                           </div>
                         </div>
                         <div>
-                          <label className="text-xs text-dark-400 mb-1 block">Status</label>
+                          <label className="text-xs text-slate-500 mb-1 block">Status</label>
                           <div className="grid grid-cols-3 gap-1.5">
                             {(Object.keys(STATUS_CONFIG) as LogStatus[]).map(s => {
                               const cfg = STATUS_CONFIG[s];
@@ -360,7 +360,7 @@ export default function ADLLoggingPage() {
                                   key={s}
                                   onClick={() => setNewStatus(s)}
                                   className={`flex items-center gap-1 p-2 rounded-lg border text-xs transition ${
-                                    newStatus === s ? `${cfg.bg} ${cfg.color} border-current` : 'border-dark-600 text-dark-400 hover:border-dark-500'
+                                    newStatus === s ? `${cfg.bg} ${cfg.color} border-current` : 'border-slate-200 text-slate-500 hover:border-slate-300'
                                   }`}
                                 >
                                   <cfg.icon className="w-3 h-3" /> {cfg.label}
@@ -373,13 +373,13 @@ export default function ADLLoggingPage() {
 
                       {/* Quick-tap items */}
                       <div className="mb-3">
-                        <label className="text-xs text-dark-400 mb-1 block">Quick Select</label>
+                        <label className="text-xs text-slate-500 mb-1 block">Quick Select</label>
                         <div className="flex flex-wrap gap-1.5">
                           {ADL_CATEGORIES[newCategory].items.map(item => (
                             <button
                               key={item}
                               onClick={() => setNewNotes(prev => prev ? `${prev}, ${item}` : item)}
-                              className="px-2.5 py-1 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-full text-xs text-dark-300 transition"
+                              className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full text-xs text-slate-600 transition"
                             >
                               {item}
                             </button>
@@ -388,13 +388,13 @@ export default function ADLLoggingPage() {
                       </div>
 
                       <div className="mb-3">
-                        <label className="text-xs text-dark-400 mb-1 block">Notes</label>
+                        <label className="text-xs text-slate-500 mb-1 block">Notes</label>
                         <textarea
                           value={newNotes}
                           onChange={e => setNewNotes(e.target.value)}
                           placeholder="Add details..."
                           rows={2}
-                          className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder:text-dark-500 focus:outline-none focus:border-primary-500 resize-none"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white text-sm placeholder:text-slate-400 focus:outline-none focus:border-primary-500 resize-none"
                         />
                       </div>
                       <div className="flex gap-2">
@@ -422,7 +422,7 @@ export default function ADLLoggingPage() {
                               </div>
                               <div className="text-left">
                                 <span className="text-white font-medium">{cfg.label}</span>
-                                <span className="text-dark-400 text-xs ml-2">{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span>
+                                <span className="text-slate-500 text-xs ml-2">{entries.length} {entries.length === 1 ? 'entry' : 'entries'}</span>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -430,24 +430,24 @@ export default function ADLLoggingPage() {
                                 const sc = STATUS_CONFIG[e.status];
                                 return <span key={e.id} className={`w-2 h-2 rounded-full ${sc.bg.replace('/15', '')}`} title={sc.label} />;
                               })}
-                              {expanded ? <ChevronDown className="w-4 h-4 text-dark-400" /> : <ChevronRight className="w-4 h-4 text-dark-400" />}
+                              {expanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
                             </div>
                           </button>
                           {expanded && (
-                            <div className="border-t border-dark-700">
+                            <div className="border-t border-slate-200">
                               {entries.map(entry => {
                                 const sc = STATUS_CONFIG[entry.status];
                                 return (
-                                  <div key={entry.id} className="flex items-start gap-3 p-4 border-b border-dark-700/50 last:border-0">
+                                  <div key={entry.id} className="flex items-start gap-3 p-4 border-b border-slate-200 last:border-0">
                                     <div className={`mt-0.5 w-6 h-6 rounded-full ${sc.bg} flex items-center justify-center flex-shrink-0`}>
                                       <sc.icon className={`w-3.5 h-3.5 ${sc.color}`} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 mb-1">
                                         <span className={`text-xs px-2 py-0.5 rounded-full ${sc.bg} ${sc.color}`}>{sc.label}</span>
-                                        <span className="text-xs text-dark-500">{entry.time}</span>
+                                        <span className="text-xs text-slate-400">{entry.time}</span>
                                       </div>
-                                      <p className="text-sm text-dark-300">{entry.notes}</p>
+                                      <p className="text-sm text-slate-600">{entry.notes}</p>
                                     </div>
                                   </div>
                                 );

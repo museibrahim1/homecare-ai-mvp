@@ -152,31 +152,31 @@ export default function MessagesPage() {
       <Sidebar />
       <main className="flex-1 flex">
         {/* Conversations List */}
-        <div className="w-80 border-r border-dark-700/50 flex flex-col">
-          <div className="p-4 border-b border-dark-700/50">
+        <div className="w-80 border-r border-slate-200 flex flex-col">
+          <div className="p-4 border-b border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-xl font-bold text-white">Messages</h1>
               <button 
                 onClick={() => setShowNewConvoModal(true)}
-                className="p-2 hover:bg-dark-800 rounded-lg transition-colors"
+                className="p-2 hover:bg-white rounded-lg transition-colors"
               >
                 <Plus className="w-5 h-5 text-primary-400" />
               </button>
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search conversations..."
-                className="w-full pl-9 pr-4 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-white placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
               />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
             {conversations.length === 0 ? (
               <div className="p-6 text-center">
-                <MessagesSquare className="w-12 h-12 text-dark-600 mx-auto mb-3" />
-                <p className="text-dark-400 text-sm">No conversations yet</p>
+                <MessagesSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-500 text-sm">No conversations yet</p>
                 <button 
                   onClick={() => setShowNewConvoModal(true)}
                   className="mt-3 text-primary-400 text-sm hover:underline"
@@ -189,8 +189,8 @@ export default function MessagesPage() {
                 <button
                   key={conv.id}
                   onClick={() => handleSelectConversation(conv)}
-                  className={`w-full p-4 flex items-center gap-3 hover:bg-dark-800/50 transition-colors border-b border-dark-700/30 ${
-                    selectedConversation?.id === conv.id ? 'bg-dark-800/50' : ''
+                  className={`w-full p-4 flex items-center gap-3 hover:bg-white transition-colors border-b border-slate-200/30 ${
+                    selectedConversation?.id === conv.id ? 'bg-white' : ''
                   }`}
                 >
                   <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
@@ -199,9 +199,9 @@ export default function MessagesPage() {
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-medium text-white truncate">{conv.name}</span>
-                      <span className="text-xs text-dark-500">{conv.time}</span>
+                      <span className="text-xs text-slate-400">{conv.time}</span>
                     </div>
-                    <p className="text-sm text-dark-400 truncate">{conv.lastMessage || 'No messages yet'}</p>
+                    <p className="text-sm text-slate-500 truncate">{conv.lastMessage || 'No messages yet'}</p>
                   </div>
                   {conv.unread > 0 && (
                     <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
@@ -219,7 +219,7 @@ export default function MessagesPage() {
           {selectedConversation ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-dark-700/50 flex items-center justify-between">
+              <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
                     <span className="text-primary-400 font-medium">{selectedConversation.avatar}</span>
@@ -230,11 +230,11 @@ export default function MessagesPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="p-2 hover:bg-dark-800 rounded-lg transition-colors">
-                    <Phone className="w-5 h-5 text-dark-400" />
+                  <button className="p-2 hover:bg-white rounded-lg transition-colors">
+                    <Phone className="w-5 h-5 text-slate-500" />
                   </button>
-                  <button className="p-2 hover:bg-dark-800 rounded-lg transition-colors">
-                    <Video className="w-5 h-5 text-dark-400" />
+                  <button className="p-2 hover:bg-white rounded-lg transition-colors">
+                    <Video className="w-5 h-5 text-slate-500" />
                   </button>
                 </div>
               </div>
@@ -242,7 +242,7 @@ export default function MessagesPage() {
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {getConversationMessages().length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-dark-400">
+                  <div className="flex flex-col items-center justify-center h-full text-slate-500">
                     <MessageSquare className="w-12 h-12 mb-3 opacity-50" />
                     <p>No messages yet. Say hello!</p>
                   </div>
@@ -256,11 +256,11 @@ export default function MessagesPage() {
                         className={`max-w-md px-4 py-3 rounded-2xl ${
                           msg.sender === 'me'
                             ? 'bg-primary-500 text-white rounded-br-md'
-                            : 'bg-dark-800 text-white rounded-bl-md'
+                            : 'bg-white text-white rounded-bl-md'
                         }`}
                       >
                         <p className="text-sm">{msg.text}</p>
-                        <span className={`text-xs mt-1 block ${msg.sender === 'me' ? 'text-primary-200' : 'text-dark-500'}`}>
+                        <span className={`text-xs mt-1 block ${msg.sender === 'me' ? 'text-primary-200' : 'text-slate-400'}`}>
                           {msg.time}
                         </span>
                       </div>
@@ -270,10 +270,10 @@ export default function MessagesPage() {
               </div>
 
               {/* Message Input */}
-              <div className="p-4 border-t border-dark-700/50">
+              <div className="p-4 border-t border-slate-200">
                 <div className="flex items-center gap-3">
-                  <button className="p-2 hover:bg-dark-800 rounded-lg transition-colors">
-                    <Paperclip className="w-5 h-5 text-dark-400" />
+                  <button className="p-2 hover:bg-white rounded-lg transition-colors">
+                    <Paperclip className="w-5 h-5 text-slate-500" />
                   </button>
                   <input
                     type="text"
@@ -281,7 +281,7 @@ export default function MessagesPage() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Type a message..."
-                    className="flex-1 px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                    className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                   <button 
                     onClick={handleSendMessage}
@@ -293,7 +293,7 @@ export default function MessagesPage() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-dark-400">
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
               <MessagesSquare className="w-16 h-16 mb-4 opacity-50" />
               <p className="text-lg mb-2">Select a conversation</p>
               <p className="text-sm">or start a new one</p>
@@ -310,28 +310,28 @@ export default function MessagesPage() {
         {/* New Conversation Modal */}
         {showNewConvoModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md max-h-[70vh] overflow-y-auto">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md max-h-[70vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white">New Conversation</h2>
-                <button onClick={() => setShowNewConvoModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
-                  <X className="w-5 h-5 text-dark-400" />
+                <button onClick={() => setShowNewConvoModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               
               {clients.length === 0 ? (
                 <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-dark-600 mx-auto mb-3" />
-                  <p className="text-dark-400 mb-2">No clients found</p>
-                  <p className="text-sm text-dark-500">Add clients to start conversations</p>
+                  <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 mb-2">No clients found</p>
+                  <p className="text-sm text-slate-400">Add clients to start conversations</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-sm text-dark-400 mb-3">Select a client to message:</p>
+                  <p className="text-sm text-slate-500 mb-3">Select a client to message:</p>
                   {clients.map((client: any) => (
                     <button
                       key={client.id}
                       onClick={() => handleStartConversation(client)}
-                      className="w-full flex items-center gap-3 p-3 bg-dark-700/50 hover:bg-dark-700 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-3 p-3 bg-slate-100 hover:bg-slate-50 rounded-lg transition-colors"
                     >
                       <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center">
                         <span className="text-primary-400 font-medium">
@@ -340,7 +340,7 @@ export default function MessagesPage() {
                       </div>
                       <div className="text-left">
                         <p className="font-medium text-white">{client.full_name}</p>
-                        <p className="text-sm text-dark-400">{client.email || 'No email'}</p>
+                        <p className="text-sm text-slate-500">{client.email || 'No email'}</p>
                       </div>
                     </button>
                   ))}

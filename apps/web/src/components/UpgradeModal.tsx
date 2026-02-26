@@ -81,11 +81,11 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
       />
 
       {/* Modal */}
-      <div className="relative bg-dark-800 rounded-2xl border border-dark-600 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="relative bg-white rounded-2xl border border-slate-200 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-dark-700 rounded-lg text-dark-400 hover:text-white transition z-10"
+          className="absolute top-4 right-4 p-2 hover:bg-slate-50 rounded-lg text-slate-500 hover:text-white transition z-10"
         >
           <X className="w-5 h-5" />
         </button>
@@ -99,7 +99,7 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
           <h2 className="text-2xl font-bold text-white mb-2">
             Upgrade to Continue
           </h2>
-          <p className="text-dark-400 max-w-lg mx-auto">
+          <p className="text-slate-500 max-w-lg mx-auto">
             You&apos;ve completed <span className="text-white font-semibold">{usedCount}</span> of{' '}
             <span className="text-white font-semibold">{maxCount}</span> free assessments.
             Upgrade your plan to unlock unlimited assessments and more features.
@@ -107,11 +107,11 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
 
           {/* Usage bar */}
           <div className="mt-4 max-w-xs mx-auto">
-            <div className="flex justify-between text-sm text-dark-400 mb-1">
+            <div className="flex justify-between text-sm text-slate-500 mb-1">
               <span>Assessments used</span>
               <span className="text-amber-400 font-medium">{usedCount}/{maxCount}</span>
             </div>
-            <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-slate-50 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full transition-all"
                 style={{ width: `${Math.min((usedCount / maxCount) * 100, 100)}%` }}
@@ -128,8 +128,8 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
                 key={plan.name}
                 className={`relative rounded-xl border ${
                   plan.popular
-                    ? `${plan.borderColor} bg-dark-700/50`
-                    : 'border-dark-600 bg-dark-750'
+                    ? `${plan.borderColor} bg-slate-100`
+                    : 'border-slate-200 bg-dark-750'
                 } p-6 flex flex-col`}
               >
                 {plan.popular && (
@@ -140,18 +140,18 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
                 )}
 
                 <h3 className="text-lg font-bold text-white mt-1">{plan.name}</h3>
-                <p className="text-dark-400 text-sm mt-1">{plan.description}</p>
+                <p className="text-slate-500 text-sm mt-1">{plan.description}</p>
 
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-3xl font-bold text-white">${plan.price}</span>
-                  <span className="text-dark-400 text-sm">{plan.period}</span>
+                  <span className="text-slate-500 text-sm">{plan.period}</span>
                 </div>
 
                 <ul className="mt-4 space-y-2 flex-1">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2 text-sm">
                       <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-dark-300">{feature}</span>
+                      <span className="text-slate-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -171,7 +171,7 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
             ))}
           </div>
 
-          <p className="text-center text-dark-500 text-sm mt-6">
+          <p className="text-center text-slate-400 text-sm mt-6">
             All plans include a 14-day free trial. Cancel anytime.
           </p>
         </div>

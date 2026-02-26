@@ -12,9 +12,9 @@ const PRIVACY_EMAIL = 'support@palmtai.com';
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="border-b border-dark-700/50 bg-dark-800/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center overflow-hidden">
@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
             </div>
             <span className="text-xl font-bold text-white">{COMPANY}</span>
           </Link>
-          <Link href="/" className="text-dark-300 hover:text-white transition flex items-center gap-2">
+          <Link href="/" className="text-slate-600 hover:text-white transition flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
@@ -38,10 +38,10 @@ export default function PrivacyPolicyPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Privacy Policy</h1>
-              <p className="text-dark-400 text-sm">Last updated: {LAST_UPDATED}</p>
+              <p className="text-slate-500 text-sm">Last updated: {LAST_UPDATED}</p>
             </div>
           </div>
-          <p className="text-dark-300 leading-relaxed">
+          <p className="text-slate-600 leading-relaxed">
             {COMPANY} (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is committed to protecting the privacy and security of your personal information. This Privacy Policy describes how we collect, use, disclose, and safeguard your information when you use our platform at {WEBSITE} and any related services (collectively, the &quot;Service&quot;).
           </p>
         </div>
@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
         <div className="space-y-10">
           <Section title="1. Information We Collect">
             <Subsection title="Information You Provide">
-              <ul className="list-disc list-inside space-y-2 text-dark-300">
+              <ul className="list-disc list-inside space-y-2 text-slate-600">
                 <li><strong className="text-white">Account Information:</strong> Name, email address, phone number, company/agency name, and password when you register for an account.</li>
                 <li><strong className="text-white">Business Information:</strong> Agency name, state of incorporation, business registration number, address, and licensing details.</li>
                 <li><strong className="text-white">Client & Care Data:</strong> Client names, care assessments, caregiver information, visit records, and related care documentation that you input into the platform.</li>
@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
               </ul>
             </Subsection>
             <Subsection title="Information Collected Automatically">
-              <ul className="list-disc list-inside space-y-2 text-dark-300">
+              <ul className="list-disc list-inside space-y-2 text-slate-600">
                 <li><strong className="text-white">Usage & Engagement Data:</strong> Pages visited, features used, timestamps, session duration, login frequency, and interaction patterns used for platform analytics and engagement scoring.</li>
                 <li><strong className="text-white">Device Information:</strong> Browser type, operating system, IP address, and device identifiers.</li>
                 <li><strong className="text-white">Cookies:</strong> We use essential cookies for authentication and session management. See Section 8 for details.</li>
@@ -70,8 +70,8 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="2. How We Use Your Information">
-            <p className="text-dark-300 mb-4">We use the information we collect to:</p>
-            <ul className="list-disc list-inside space-y-2 text-dark-300">
+            <p className="text-slate-600 mb-4">We use the information we collect to:</p>
+            <ul className="list-disc list-inside space-y-2 text-slate-600">
               <li>Provide, operate, and maintain the Service, including AI-powered transcription, contract generation, and care documentation.</li>
               <li>Process your transactions and manage your subscription.</li>
               <li>Send transactional emails (account verification, password resets, billing receipts).</li>
@@ -83,8 +83,8 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="3. Data Sharing & Disclosure">
-            <p className="text-dark-300 mb-4">We do not sell your personal information. We may share information with:</p>
-            <ul className="list-disc list-inside space-y-2 text-dark-300">
+            <p className="text-slate-600 mb-4">We do not sell your personal information. We may share information with:</p>
+            <ul className="list-disc list-inside space-y-2 text-slate-600">
               <li><strong className="text-white">Service Providers:</strong> Third-party vendors who assist in operating the Service (e.g., cloud hosting, payment processing, email delivery). These providers are contractually obligated to protect your data.</li>
               <li><strong className="text-white">AI Processing Partners:</strong> Audio and transcript data may be processed by AI service providers (e.g., OpenAI) for transcription and analysis. Data is transmitted securely and is not used to train third-party models.</li>
               <li><strong className="text-white">Legal Requirements:</strong> When required by law, subpoena, or government request, or to protect our rights, safety, or property.</li>
@@ -93,8 +93,8 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="4. Healthcare Data & HIPAA">
-            <p className="text-dark-300 mb-4">We recognize that the Service may be used to process Protected Health Information (PHI) as defined under the Health Insurance Portability and Accountability Act (HIPAA). We implement the following safeguards:</p>
-            <ul className="list-disc list-inside space-y-2 text-dark-300">
+            <p className="text-slate-600 mb-4">We recognize that the Service may be used to process Protected Health Information (PHI) as defined under the Health Insurance Portability and Accountability Act (HIPAA). We implement the following safeguards:</p>
+            <ul className="list-disc list-inside space-y-2 text-slate-600">
               <li><strong className="text-white">Encryption:</strong> All data is encrypted in transit (TLS 1.2+) and at rest (AES-256).</li>
               <li><strong className="text-white">Access Controls:</strong> Role-based access with secure authentication, session timeouts, and audit logging.</li>
               <li><strong className="text-white">Data Isolation:</strong> Each agency&apos;s data is logically isolated and inaccessible to other customers.</li>
@@ -104,15 +104,15 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="5. Audio Recording & Consent Disclosures">
-            <p className="text-dark-300 mb-4">
+            <p className="text-slate-600 mb-4">
               {COMPANY} processes audio recordings of care assessments to generate transcripts, visit notes, service contracts, and billable item documentation. Recording consent requirements vary by state.
             </p>
             <Subsection title="Two-Party (All-Party) Consent States">
-              <p className="text-dark-300 mb-3">
+              <p className="text-slate-600 mb-3">
                 If you or your clients are located in any of the following states, <strong className="text-white">all parties must consent</strong> before any audio recording takes place:
               </p>
-              <div className="bg-dark-800 rounded-xl border border-dark-700 p-4 mb-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-dark-300 text-sm">
+              <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-slate-600 text-sm">
                   <span>California</span>
                   <span>Connecticut</span>
                   <span>Delaware</span>
@@ -128,12 +128,12 @@ export default function PrivacyPolicyPage() {
                   <span>Washington</span>
                 </div>
               </div>
-              <p className="text-dark-300 text-sm">
+              <p className="text-slate-600 text-sm">
                 All other states follow one-party consent rules under federal law (18 U.S.C. &sect;2511), meaning at least one participant (typically the person recording) must consent.
               </p>
             </Subsection>
             <Subsection title="Your Consent Obligations">
-              <ul className="list-disc list-inside space-y-2 text-dark-300">
+              <ul className="list-disc list-inside space-y-2 text-slate-600">
                 <li><strong className="text-white">Provider Responsibility:</strong> As the agency using {COMPANY}, you are responsible for obtaining appropriate consent from clients and caregivers before recording assessments.</li>
                 <li><strong className="text-white">Cross-State Calls:</strong> When participants are in different states, the stricter state&apos;s consent law applies. When in doubt, obtain consent from all parties.</li>
                 <li><strong className="text-white">Consent Documentation:</strong> We recommend documenting consent in writing as part of your intake or service agreement process.</li>
@@ -141,7 +141,7 @@ export default function PrivacyPolicyPage() {
               </ul>
             </Subsection>
             <Subsection title="How We Process Recordings">
-              <ul className="list-disc list-inside space-y-2 text-dark-300">
+              <ul className="list-disc list-inside space-y-2 text-slate-600">
                 <li><strong className="text-white">Transcription:</strong> Audio is converted to text using AI speech-to-text technology.</li>
                 <li><strong className="text-white">Speaker Identification:</strong> AI identifies different speakers in the recording (provider vs. client).</li>
                 <li><strong className="text-white">Documentation:</strong> Transcripts are analyzed to generate visit notes, extract billable services, and create service agreements.</li>
@@ -152,7 +152,7 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="6. Data Retention">
-            <ul className="list-disc list-inside space-y-2 text-dark-300">
+            <ul className="list-disc list-inside space-y-2 text-slate-600">
               <li>Account data is retained for the duration of your active subscription and for 90 days following account closure.</li>
               <li>Audio recordings are retained for 30 days after processing, then permanently deleted unless you choose to retain them.</li>
               <li>Generated contracts, notes, and care documentation are retained for the life of your account.</li>
@@ -162,8 +162,8 @@ export default function PrivacyPolicyPage() {
           </Section>
 
           <Section title="7. Data Security">
-            <p className="text-dark-300 mb-4">We implement industry-standard technical and organizational measures to protect your data, including:</p>
-            <ul className="list-disc list-inside space-y-2 text-dark-300">
+            <p className="text-slate-600 mb-4">We implement industry-standard technical and organizational measures to protect your data, including:</p>
+            <ul className="list-disc list-inside space-y-2 text-slate-600">
               <li>256-bit AES encryption for data at rest</li>
               <li>TLS 1.2+ encryption for data in transit</li>
               <li>Secure password hashing (bcrypt)</li>
@@ -171,67 +171,67 @@ export default function PrivacyPolicyPage() {
               <li>Multi-factor authentication support</li>
               <li>Automatic session timeouts after periods of inactivity</li>
             </ul>
-            <p className="text-dark-300 mt-4">While we strive to protect your information, no method of electronic storage or transmission is 100% secure. We cannot guarantee absolute security.</p>
+            <p className="text-slate-600 mt-4">While we strive to protect your information, no method of electronic storage or transmission is 100% secure. We cannot guarantee absolute security.</p>
           </Section>
 
           <Section title="8. Cookies & Tracking">
-            <p className="text-dark-300 mb-4">We use the following types of cookies:</p>
-            <ul className="list-disc list-inside space-y-2 text-dark-300">
+            <p className="text-slate-600 mb-4">We use the following types of cookies:</p>
+            <ul className="list-disc list-inside space-y-2 text-slate-600">
               <li><strong className="text-white">Essential Cookies:</strong> Required for authentication, session management, and security. These cannot be disabled.</li>
               <li><strong className="text-white">Analytics Cookies:</strong> Help us understand how users interact with the Service to improve the experience. These can be opted out of.</li>
             </ul>
-            <p className="text-dark-300 mt-4">We do not use advertising cookies or sell data to advertisers.</p>
+            <p className="text-slate-600 mt-4">We do not use advertising cookies or sell data to advertisers.</p>
           </Section>
 
           <Section title="9. Your Rights">
-            <p className="text-dark-300 mb-4">Depending on your jurisdiction, you may have the following rights:</p>
-            <ul className="list-disc list-inside space-y-2 text-dark-300">
+            <p className="text-slate-600 mb-4">Depending on your jurisdiction, you may have the following rights:</p>
+            <ul className="list-disc list-inside space-y-2 text-slate-600">
               <li><strong className="text-white">Access:</strong> Request a copy of the personal data we hold about you.</li>
               <li><strong className="text-white">Correction:</strong> Request correction of inaccurate or incomplete data.</li>
               <li><strong className="text-white">Deletion:</strong> Request deletion of your personal data, subject to legal retention requirements.</li>
               <li><strong className="text-white">Portability:</strong> Request a machine-readable export of your data.</li>
               <li><strong className="text-white">Opt-Out:</strong> Unsubscribe from marketing emails at any time using the link in any email.</li>
             </ul>
-            <p className="text-dark-300 mt-4">To exercise any of these rights, contact us at <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a>. We will respond within 30 days.</p>
+            <p className="text-slate-600 mt-4">To exercise any of these rights, contact us at <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a>. We will respond within 30 days.</p>
           </Section>
 
           <Section title="10. California Privacy Rights (CCPA)">
-            <p className="text-dark-300">If you are a California resident, you have the right to know what personal information we collect, request its deletion, and opt out of any sale of personal information. We do not sell personal information. To make a request, contact <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a>.</p>
+            <p className="text-slate-600">If you are a California resident, you have the right to know what personal information we collect, request its deletion, and opt out of any sale of personal information. We do not sell personal information. To make a request, contact <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a>.</p>
           </Section>
 
           <Section title="11. Children&apos;s Privacy">
-            <p className="text-dark-300">The Service is not directed to individuals under 18 years of age. We do not knowingly collect personal information from children. If we learn we have collected information from a child under 18, we will promptly delete it.</p>
+            <p className="text-slate-600">The Service is not directed to individuals under 18 years of age. We do not knowingly collect personal information from children. If we learn we have collected information from a child under 18, we will promptly delete it.</p>
           </Section>
 
           <Section title="12. Third-Party Links">
-            <p className="text-dark-300">The Service may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies.</p>
+            <p className="text-slate-600">The Service may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies.</p>
           </Section>
 
           <Section title="13. Changes to This Policy">
-            <p className="text-dark-300">We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy on this page with a new &quot;Last updated&quot; date. For significant changes, we will also send a notification to the email associated with your account.</p>
+            <p className="text-slate-600">We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy on this page with a new &quot;Last updated&quot; date. For significant changes, we will also send a notification to the email associated with your account.</p>
           </Section>
 
           <Section title="14. Contact Us">
-            <p className="text-dark-300 mb-4">If you have questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
-            <div className="bg-dark-800 rounded-xl border border-dark-700 p-5 space-y-2">
+            <p className="text-slate-600 mb-4">If you have questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
+            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-2">
               <p className="text-white font-medium">{COMPANY}</p>
-              <p className="text-dark-300">Email: <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a></p>
-              <p className="text-dark-300">Website: <a href={`https://${WEBSITE}`} className="text-primary-400 hover:text-primary-300">{WEBSITE}</a></p>
+              <p className="text-slate-600">Email: <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a></p>
+              <p className="text-slate-600">Website: <a href={`https://${WEBSITE}`} className="text-primary-400 hover:text-primary-300">{WEBSITE}</a></p>
             </div>
           </Section>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-dark-700/50 py-8 px-6 mt-16">
+      <footer className="border-t border-slate-200 py-8 px-6 mt-16">
         <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-dark-400 text-sm">
+          <div className="flex items-center gap-2 text-slate-500 text-sm">
             <Shield className="w-4 h-4" />
             <span>HIPAA-Ready Security</span>
             <span className="mx-2">&middot;</span>
             <span>256-bit Encryption</span>
           </div>
-          <p className="text-dark-500 text-sm">&copy; 2026 {COMPANY}. All rights reserved.</p>
+          <p className="text-slate-400 text-sm">&copy; 2026 {COMPANY}. All rights reserved.</p>
         </div>
       </footer>
     </div>
@@ -250,7 +250,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Subsection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-4">
-      <h3 className="text-base font-semibold text-dark-200 mb-2">{title}</h3>
+      <h3 className="text-base font-semibold text-slate-700 mb-2">{title}</h3>
       {children}
     </div>
   );

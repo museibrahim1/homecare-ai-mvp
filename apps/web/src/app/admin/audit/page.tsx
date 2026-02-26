@@ -25,7 +25,7 @@ interface AuditLog {
 
 const ACTION_COLORS: Record<string, string> = {
   user_login: 'bg-green-500/20 text-green-400',
-  user_logout: 'bg-dark-500/20 text-dark-400',
+  user_logout: 'bg-slate-200/20 text-slate-500',
   visit_created: 'bg-blue-500/20 text-blue-400',
   audio_uploaded: 'bg-purple-500/20 text-purple-400',
   contract_generated: 'bg-yellow-500/20 text-yellow-400',
@@ -168,19 +168,19 @@ export default function AuditLogsPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-dark-400" />
+              <ArrowLeft className="w-5 h-5 text-slate-500" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-white">Audit Logs</h1>
-              <p className="text-dark-400 mt-1">System activity tracking</p>
+              <p className="text-slate-500 mt-1">System activity tracking</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={exportLogs}
-              className="flex items-center gap-2 px-4 py-2 bg-dark-800 rounded-lg hover:bg-dark-700 transition text-dark-400"
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg hover:bg-slate-50 transition text-slate-500"
             >
               <Download className="w-4 h-4" />
               Export CSV
@@ -188,9 +188,9 @@ export default function AuditLogsPage() {
             <button
               onClick={fetchLogs}
               disabled={loading}
-              className="p-2 bg-dark-800 rounded-lg hover:bg-dark-700 transition disabled:opacity-50"
+              className="p-2 bg-white rounded-lg hover:bg-slate-50 transition disabled:opacity-50"
             >
-              <RefreshCw className={`w-5 h-5 text-dark-400 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -208,7 +208,7 @@ export default function AuditLogsPage() {
           <select
             value={filter.action}
             onChange={e => { setFilter({ ...filter, action: e.target.value }); setPage(0); }}
-            className="px-4 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
           >
             <option value="">All Actions</option>
             {actions.map(action => (
@@ -216,29 +216,29 @@ export default function AuditLogsPage() {
             ))}
           </select>
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
             <input
               type="text"
               value={filter.user_email}
               onChange={e => setFilter({ ...filter, user_email: e.target.value })}
               onKeyDown={e => e.key === 'Enter' && fetchLogs()}
               placeholder="Filter by user email..."
-              className="w-full pl-10 pr-4 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
             />
           </div>
         </div>
 
         {/* Logs Table */}
-        <div className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-dark-700">
-                <th className="text-left p-4 text-dark-400 font-medium">Timestamp</th>
-                <th className="text-left p-4 text-dark-400 font-medium">User</th>
-                <th className="text-left p-4 text-dark-400 font-medium">Action</th>
-                <th className="text-left p-4 text-dark-400 font-medium">Entity</th>
-                <th className="text-left p-4 text-dark-400 font-medium">Description</th>
-                <th className="text-left p-4 text-dark-400 font-medium">IP</th>
+              <tr className="border-b border-slate-200">
+                <th className="text-left p-4 text-slate-500 font-medium">Timestamp</th>
+                <th className="text-left p-4 text-slate-500 font-medium">User</th>
+                <th className="text-left p-4 text-slate-500 font-medium">Action</th>
+                <th className="text-left p-4 text-slate-500 font-medium">Entity</th>
+                <th className="text-left p-4 text-slate-500 font-medium">Description</th>
+                <th className="text-left p-4 text-slate-500 font-medium">IP</th>
               </tr>
             </thead>
             <tbody>
@@ -250,18 +250,18 @@ export default function AuditLogsPage() {
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-dark-400">
+                  <td colSpan={6} className="p-8 text-center text-slate-500">
                     No audit logs found
                   </td>
                 </tr>
               ) : (
                 logs.map(log => (
-                  <tr key={log.id} className="border-b border-dark-700 hover:bg-dark-700/30">
+                  <tr key={log.id} className="border-b border-slate-200 hover:bg-slate-50/30">
                     <td className="p-4">
                       <p className="text-white text-sm">
                         {new Date(log.created_at).toLocaleDateString()}
                       </p>
-                      <p className="text-dark-400 text-xs">
+                      <p className="text-slate-500 text-xs">
                         {new Date(log.created_at).toLocaleTimeString()}
                       </p>
                     </td>
@@ -269,20 +269,20 @@ export default function AuditLogsPage() {
                       <p className="text-white text-sm">{log.user_email || 'System'}</p>
                     </td>
                     <td className="p-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${ACTION_COLORS[log.action] || 'bg-dark-600 text-dark-300'}`}>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${ACTION_COLORS[log.action] || 'bg-slate-100 text-slate-600'}`}>
                         {log.action.replace(/_/g, ' ')}
                       </span>
                     </td>
                     <td className="p-4">
-                      <p className="text-dark-400 text-sm">{log.entity_type || '-'}</p>
+                      <p className="text-slate-500 text-sm">{log.entity_type || '-'}</p>
                     </td>
                     <td className="p-4">
-                      <p className="text-dark-400 text-sm truncate max-w-xs" title={log.description || ''}>
+                      <p className="text-slate-500 text-sm truncate max-w-xs" title={log.description || ''}>
                         {log.description || '-'}
                       </p>
                     </td>
                     <td className="p-4">
-                      <p className="text-dark-400 text-sm font-mono">{log.ip_address || '-'}</p>
+                      <p className="text-slate-500 text-sm font-mono">{log.ip_address || '-'}</p>
                     </td>
                   </tr>
                 ))
@@ -291,25 +291,25 @@ export default function AuditLogsPage() {
           </table>
           
           {/* Pagination */}
-          <div className="p-4 border-t border-dark-700 flex items-center justify-between">
-            <p className="text-dark-400 text-sm">
+          <div className="p-4 border-t border-slate-200 flex items-center justify-between">
+            <p className="text-slate-500 text-sm">
               Showing {page * pageSize + 1} - {page * pageSize + logs.length}
             </p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage(Math.max(0, page - 1))}
                 disabled={page === 0}
-                className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
               >
-                <ChevronLeft className="w-4 h-4 text-dark-400" />
+                <ChevronLeft className="w-4 h-4 text-slate-500" />
               </button>
-              <span className="text-dark-400 px-3">Page {page + 1}</span>
+              <span className="text-slate-500 px-3">Page {page + 1}</span>
               <button
                 onClick={() => setPage(page + 1)}
                 disabled={logs.length < pageSize}
-                className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition disabled:opacity-50"
+                className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
               >
-                <ChevronRight className="w-4 h-4 text-dark-400" />
+                <ChevronRight className="w-4 h-4 text-slate-500" />
               </button>
             </div>
           </div>
