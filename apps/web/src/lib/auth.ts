@@ -16,9 +16,12 @@ interface AuthUser {
   id: string;
   email: string;
   full_name: string;
+  name?: string;
   role: string;
   is_active: boolean;
   business_id?: string;
+  agency_name?: string;
+  business_name?: string;
 }
 
 interface AuthState {

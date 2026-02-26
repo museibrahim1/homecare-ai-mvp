@@ -73,11 +73,11 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
     );
   }
 
-  const structuredData = note.structured_data || {};
-  const visitInfo = structuredData.visit_info || {};
+  const structuredData = (note.structured_data || {}) as Record<string, any>;
+  const visitInfo = (structuredData.visit_info || {}) as Record<string, any>;
   const tasks = structuredData.tasks_performed || [];
-  const observations = structuredData.observations || '';
-  const concerns = structuredData.risks_concerns || 'None noted.';
+  const observations = (structuredData.observations || '') as string;
+  const concerns = (structuredData.risks_concerns || 'None noted.') as string;
 
   return (
     <div className="p-6">
