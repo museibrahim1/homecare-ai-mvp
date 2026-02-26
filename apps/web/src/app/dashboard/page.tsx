@@ -1111,11 +1111,11 @@ export default function DashboardPage() {
                               <p className="text-xl font-bold text-accent-cyan">{myUsage.top_pages?.length || 0}</p>
                             </div>
                           </div>
-                          {myUsage.daily_activity?.length > 0 && (
+                          {(myUsage.daily_activity?.length ?? 0) > 0 && (
                             <div>
                               <p className="text-xs text-dark-400 mb-2">Daily Activity</p>
                               <div className="flex items-end gap-0.5 h-16">
-                                {myUsage.daily_activity.slice(-14).map((d, i) => {
+                                {myUsage.daily_activity!.slice(-14).map((d, i) => {
                                   const maxVal = Math.max(...myUsage.daily_activity!.map((x) => x.count), 1);
                                   const h = Math.max((d.count / maxVal) * 100, 4);
                                   return (

@@ -1175,7 +1175,7 @@ export default function SalesLeadsPage() {
                         { label: 'Meeting Scheduled', value: analyticsData.funnel.meeting_scheduled, color: 'bg-amber-500' },
                         { label: 'Converted', value: analyticsData.funnel.converted, color: 'bg-green-500' },
                       ].map(({ label, value, color }) => {
-                        const maxVal = analyticsData.funnel.sent || 1;
+                        const maxVal = analyticsData.funnel!.sent || 1;
                         const pct = Math.round((value / maxVal) * 100);
                         return (
                           <div key={label} className="flex items-center gap-3">
@@ -1752,17 +1752,17 @@ export default function SalesLeadsPage() {
                             <p className="text-4xl font-bold text-white tracking-tight">{campaignResult.sent}</p>
                             <p className="text-xs text-gray-600 mt-1 uppercase tracking-wider">Delivered</p>
                           </div>
-                          {campaignResult.failed > 0 && (
+                          {(campaignResult.failed ?? 0) > 0 && (
                             <div>
                               <p className="text-4xl font-bold text-red-400 tracking-tight">{campaignResult.failed}</p>
                               <p className="text-xs text-gray-600 mt-1 uppercase tracking-wider">Failed</p>
                             </div>
                           )}
                         </div>
-                        {campaignResult.errors?.length > 0 && (
+                        {(campaignResult.errors?.length ?? 0) > 0 && (
                           <div className="mt-6 text-left bg-[#060612] rounded-lg p-4 border border-gray-800">
                             <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Errors</p>
-                            {campaignResult.errors.map((err, i) => (
+                            {campaignResult.errors!.map((err, i) => (
                               <p key={i} className="text-xs text-red-400/80 py-0.5">{err.lead}: {err.error}</p>
                             ))}
                           </div>
