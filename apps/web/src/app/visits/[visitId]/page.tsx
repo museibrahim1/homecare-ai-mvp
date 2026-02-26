@@ -380,7 +380,7 @@ export default function VisitDetailPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -388,7 +388,7 @@ export default function VisitDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-dark-900">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="flex items-center gap-3">
@@ -402,7 +402,7 @@ export default function VisitDetailPage() {
 
   if (!visit) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
           <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-dark-400" />
@@ -421,7 +421,7 @@ export default function VisitDetailPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-dark-900 overflow-x-hidden">
+    <div className="flex min-h-screen bg-slate-50 overflow-x-hidden">
       <Sidebar />
       
       {/* Main Content - push content right when panel is open */}

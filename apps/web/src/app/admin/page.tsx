@@ -135,7 +135,7 @@ export default function AdminDashboardPage() {
   // Only show loading during initial hydration, not on every navigation
   if (!hydrated || authLoading) {
     return (
-      <div className="flex min-h-screen bg-dark-900">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -184,7 +184,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
@@ -203,8 +203,8 @@ export default function AdminDashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">Platform Overview</h1>
-            <p className="text-dark-400 mt-1">Monitor your platform's health and performance</p>
+            <h1 className="text-2xl font-bold text-slate-900">Platform Overview</h1>
+            <p className="text-slate-500 mt-1">Monitor your platform's health and performance</p>
           </div>
           <button
             onClick={fetchData}

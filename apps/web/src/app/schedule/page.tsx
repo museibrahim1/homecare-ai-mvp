@@ -856,7 +856,7 @@ function ScheduleContent() {
 /* ─── Page Shell ─── */
 export default function SchedulePage() {
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 min-w-0 flex flex-col">
         <TopBar />

@@ -101,7 +101,7 @@ export default function CompliancePage() {
 
   if (!isAuthorized) {
     return (
-      <div className="flex min-h-screen bg-dark-900">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -111,7 +111,7 @@ export default function CompliancePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">

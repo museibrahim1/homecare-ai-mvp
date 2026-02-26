@@ -203,14 +203,14 @@ export default function ProposalsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Contract Proposals</h1>
-            <p className="text-dark-400">View, edit, and export client service agreements</p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Contract Proposals</h1>
+            <p className="text-slate-500">View, edit, and export client service agreements</p>
           </div>
           <div className="flex gap-3">
             <Link

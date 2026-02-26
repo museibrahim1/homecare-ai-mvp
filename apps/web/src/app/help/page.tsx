@@ -134,14 +134,14 @@ export default function HelpPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 min-w-0">
         <TopBar />

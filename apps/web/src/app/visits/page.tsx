@@ -379,14 +379,14 @@ export default function VisitsPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       
       <main className="flex-1 p-8">
@@ -394,8 +394,8 @@ export default function VisitsPage() {
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Assessments</h1>
-              <p className="text-dark-300">Review and manage care assessments</p>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">Assessments</h1>
+              <p className="text-slate-500">Review and manage care assessments</p>
             </div>
             <div className="flex gap-3">
               {/* Admin Cleanup Button - only for platform admins */}

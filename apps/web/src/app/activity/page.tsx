@@ -28,7 +28,7 @@ export default function ActivityPage() {
   const [activities] = useState(mockActivities);
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8">
         {/* Header */}

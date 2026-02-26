@@ -563,11 +563,11 @@ export default function SalesLeadsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <Target className="w-6 h-6 text-indigo-400" />
               Sales Leads CRM
             </h1>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               Private outbound campaign tracker — NE & IA home care agencies
             </p>
           </div>

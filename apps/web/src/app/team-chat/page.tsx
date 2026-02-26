@@ -428,7 +428,7 @@ export default function TeamChatPage() {
   const displayEmails = gmailConnected ? emails : [];
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 flex">
         {/* Channels & Team */}
