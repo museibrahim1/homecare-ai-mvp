@@ -50,7 +50,6 @@ export default function AudioRecorder({
 }: Props) {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [unavailable, setUnavailable] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -99,12 +98,10 @@ export default function AudioRecorder({
       intervalRef.current = setInterval(() => {
         setDuration((d: number) => d + 1);
       }, 1000);
-    } catch {
-      setUnavailable(true);
-      Alert.alert(
-        'Recording Unavailable',
-        'Audio recording is not available. Use a development build instead of Expo Go.',
-      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('Recording error:', msg);
+      Alert.alert('Recording Error', msg);
     }
   };
 
@@ -131,22 +128,6 @@ export default function AudioRecorder({
       Alert.alert('Error', 'Failed to stop recording.');
     }
   };
-
-  if (unavailable) {
-    return (
-      <View className="items-center py-4">
-        <View className="w-24 h-24 rounded-full bg-dark-800 items-center justify-center mb-4 border-2 border-dark-700">
-          <Ionicons name="mic-off" size={36} color="#829bcd" />
-        </View>
-        <Text className="text-dark-300 text-sm text-center px-4 font-medium">
-          Audio recording requires a development build.
-        </Text>
-        <Text className="text-dark-500 text-xs text-center mt-1.5">
-          Run: npx expo run:ios
-        </Text>
-      </View>
-    );
-  }
 
   return (
     <View className="items-center py-2">
