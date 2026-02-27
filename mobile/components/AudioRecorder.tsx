@@ -90,6 +90,11 @@ export default function AudioRecorder({
         return;
       }
 
+      await AudioModule.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
       recorder.record();
       setIsRecording(true);
       setDuration(0);
