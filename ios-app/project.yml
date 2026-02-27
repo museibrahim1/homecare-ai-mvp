@@ -1,0 +1,44 @@
+name: PalmCareAI
+options:
+  bundleIdPrefix: com.palmcare
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  PalmCareAI:
+    type: application
+    platform: iOS
+    sources:
+      - PalmCareAI
+    settings:
+      base:
+        INFOPLIST_FILE: PalmCareAI/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.palmcare.ai
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: X39W2Z5M96
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    info:
+      path: PalmCareAI/Info.plist
+      properties:
+        CFBundleName: PalmCareAI
+        CFBundleDisplayName: PalmCare AI
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundlePackageType: APPL
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSMicrophoneUsageDescription: "PalmCareAI needs microphone access to record client visits and assessments."
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        ITSAppUsesNonExemptEncryption: false
