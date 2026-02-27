@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { View, Text, Pressable, Alert } from 'react-native';
+import { View, Text, Pressable, Alert, Animated, Easing } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 let useAudioRecorder: (() => unknown) | null = null;
@@ -22,6 +22,38 @@ interface Props {
   disabled?: boolean;
 }
 
+function WaveformBar({ delay, isRecording }: { delay: number; isRecording: boolean }) {
+  const anim = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    if (isRecording) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(anim, { toValue: 1, duration: 400 + Math.random() * 300, easing: Easing.inOut(Easing.ease), useNativeDriver: true, delay }),
+          Animated.timing(anim, { toValue: 0.2 + Math.random() * 0.3, duration: 400 + Math.random() * 300, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ]),
+      );
+      loop.start();
+      return () => loop.stop();
+    } else {
+      Animated.timing(anim, { toValue: 0.3, duration: 300, useNativeDriver: true }).start();
+    }
+  }, [isRecording, anim, delay]);
+
+  return (
+    <Animated.View
+      style={{
+        width: 4,
+        height: 32,
+        borderRadius: 2,
+        backgroundColor: '#0d9488',
+        marginHorizontal: 2,
+        transform: [{ scaleY: anim }],
+      }}
+    />
+  );
+}
+
 export default function AudioRecorder({
   onRecordingComplete,
   onRecordingStart,
@@ -32,6 +64,7 @@ export default function AudioRecorder({
   const [duration, setDuration] = useState(0);
   const [unavailable, setUnavailable] = useState(!useAudioRecorder);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const recorder = useAudioRecorder ? (useAudioRecorder as Function)(
     RecordingPresets ? (RecordingPresets as Record<string, unknown>)['HIGH_QUALITY'] : {}
@@ -42,6 +75,21 @@ export default function AudioRecorder({
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (isRecording) {
+      const pulse = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.15, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ]),
+      );
+      pulse.start();
+      return () => pulse.stop();
+    } else {
+      pulseAnim.setValue(1);
+    }
+  }, [isRecording, pulseAnim]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -109,17 +157,14 @@ export default function AudioRecorder({
 
   if (unavailable) {
     return (
-      <View className="items-center">
-        <View
-          className="w-20 h-20 rounded-full items-center justify-center mb-4"
-          style={{ backgroundColor: '#1e3f76' }}
-        >
-          <Ionicons name="mic-off" size={32} color="#829bcd" />
+      <View className="items-center py-4">
+        <View className="w-24 h-24 rounded-full bg-dark-800 items-center justify-center mb-4 border-2 border-dark-700">
+          <Ionicons name="mic-off" size={36} color="#829bcd" />
         </View>
-        <Text className="text-dark-300 text-sm text-center px-4">
+        <Text className="text-dark-300 text-sm text-center px-4 font-medium">
           Audio recording requires a development build.
         </Text>
-        <Text className="text-dark-500 text-xs text-center mt-1">
+        <Text className="text-dark-500 text-xs text-center mt-1.5">
           Run: npx expo run:ios
         </Text>
       </View>
@@ -127,42 +172,74 @@ export default function AudioRecorder({
   }
 
   return (
-    <View className="items-center">
+    <View className="items-center py-2">
+      {/* Waveform visualization */}
+      <View className="flex-row items-center justify-center h-12 mb-6">
+        {isRecording ? (
+          Array.from({ length: 20 }).map((_, i) => (
+            <WaveformBar key={i} delay={i * 40} isRecording={isRecording} />
+          ))
+        ) : (
+          <View className="flex-row items-center">
+            <Ionicons name="mic-outline" size={18} color="#4b5563" />
+            <Text className="text-dark-500 text-sm ml-2">Ready to record</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Timer */}
       {isRecording && (
         <View className="items-center mb-6">
-          <View className="flex-row items-center mb-2">
-            <View className="w-3 h-3 rounded-full bg-red-500 mr-2" />
-            <Text className="text-red-400 font-medium text-sm">Recording</Text>
-          </View>
-          <Text className="text-white text-4xl font-light tracking-wider">
+          <Text className="text-white text-5xl font-extralight tracking-widest">
             {formatTime(duration)}
           </Text>
+          <View className="flex-row items-center mt-2">
+            <View className="w-2.5 h-2.5 rounded-full bg-red-500 mr-2" />
+            <Text className="text-red-400 font-medium text-sm">Recording</Text>
+          </View>
         </View>
       )}
 
+      {/* Record button */}
       <Pressable
         onPress={isRecording ? stopRecording : startRecording}
         disabled={disabled}
         className="items-center justify-center active:scale-95"
         style={{ opacity: disabled ? 0.4 : 1 }}
       >
-        <View
-          className="w-20 h-20 rounded-full items-center justify-center"
+        <Animated.View
           style={{
-            backgroundColor: isRecording ? '#ef4444' : '#0d9488',
-            shadowColor: isRecording ? '#ef4444' : '#0d9488',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.4,
-            shadowRadius: 12,
-            elevation: 8,
+            width: 88,
+            height: 88,
+            borderRadius: 44,
+            backgroundColor: isRecording ? '#ef444430' : '#0d948830',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transform: [{ scale: pulseAnim }],
           }}
         >
-          <Ionicons name={isRecording ? 'stop' : 'mic'} size={32} color="#ffffff" />
-        </View>
+          <View
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: 36,
+              backgroundColor: isRecording ? '#ef4444' : '#0d9488',
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: isRecording ? '#ef4444' : '#0d9488',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.4,
+              shadowRadius: 16,
+              elevation: 10,
+            }}
+          >
+            <Ionicons name={isRecording ? 'stop' : 'mic'} size={34} color="#ffffff" />
+          </View>
+        </Animated.View>
       </Pressable>
 
-      <Text className="text-dark-400 text-sm mt-4">
-        {isRecording ? 'Tap to stop' : 'Tap to record assessment'}
+      <Text className="text-dark-400 text-sm mt-5 font-medium">
+        {isRecording ? 'Tap to stop recording' : disabled ? 'Select a client first' : 'Tap to start assessment'}
       </Text>
     </View>
   );

@@ -8,24 +8,24 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#0f1d33',
-          borderTopColor: '#1e3f76',
+          backgroundColor: '#0a1628',
+          borderTopColor: '#1e3f7630',
           borderTopWidth: 0.5,
-          height: 85,
+          height: 88,
           paddingBottom: 28,
-          paddingTop: 8,
+          paddingTop: 10,
         },
         tabBarActiveTintColor: '#0d9488',
-        tabBarInactiveTintColor: '#829bcd',
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
+        tabBarInactiveTintColor: '#4b5563',
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -33,8 +33,8 @@ export default function TabLayout() {
         name="clients"
         options={{
           title: 'Clients',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'people' : 'people-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -42,12 +42,24 @@ export default function TabLayout() {
         name="record"
         options={{
           title: 'Record',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ focused }) => (
             <View
-              className="w-14 h-14 rounded-full items-center justify-center -mt-4"
-              style={{ backgroundColor: '#0d9488' }}
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 20,
+                marginTop: -20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#0d9488',
+                shadowColor: '#0d9488',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 8,
+              }}
             >
-              <Ionicons name="mic" size={28} color="#ffffff" />
+              <Ionicons name="mic" size={26} color="#ffffff" />
             </View>
           ),
           tabBarLabel: () => null,
@@ -57,8 +69,8 @@ export default function TabLayout() {
         name="calendar"
         options={{
           title: 'Calendar',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -66,8 +78,8 @@ export default function TabLayout() {
         name="more"
         options={{
           title: 'More',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="menu" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'grid' : 'grid-outline'} size={22} color={color} />
           ),
         }}
       />

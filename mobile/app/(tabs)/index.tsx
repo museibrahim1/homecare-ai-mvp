@@ -1,18 +1,38 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, Pressable, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, Pressable, ScrollView, RefreshControl, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import type { UsageStats, Visit } from '@/lib/types';
 
-function StatCard({ label, value, icon, color }: { label: string; value: string; icon: keyof typeof Ionicons.glyphMap; color: string }) {
+const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {
+  in_progress: { bg: '#0d948820', text: '#0d9488', label: 'In Progress' },
+  completed: { bg: '#22c55e20', text: '#22c55e', label: 'Completed' },
+  pending: { bg: '#eab30820', text: '#eab308', label: 'Pending' },
+  failed: { bg: '#ef444420', text: '#ef4444', label: 'Failed' },
+  new: { bg: '#3b82f620', text: '#3b82f6', label: 'New' },
+};
+
+function StatCard({ label, value, icon, gradient }: {
+  label: string; value: string; icon: keyof typeof Ionicons.glyphMap; gradient: [string, string];
+}) {
   return (
-    <View className="flex-1 bg-dark-800 rounded-2xl p-4 mr-2.5 last:mr-0">
-      <Ionicons name={icon} size={18} color={color} />
-      <Text className="text-white text-2xl font-bold mt-2.5">{value}</Text>
-      <Text className="text-dark-400 text-xs mt-1">{label}</Text>
+    <View className="flex-1 mr-3 last:mr-0">
+      <LinearGradient
+        colors={gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ borderRadius: 20, padding: 16 }}
+      >
+        <View className="w-10 h-10 rounded-2xl bg-white/20 items-center justify-center mb-3">
+          <Ionicons name={icon} size={20} color="#ffffff" />
+        </View>
+        <Text className="text-white/80 text-xs font-medium">{label}</Text>
+        <Text className="text-white text-3xl font-bold mt-0.5">{value}</Text>
+      </LinearGradient>
     </View>
   );
 }
@@ -51,6 +71,8 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const firstName = user?.full_name?.split(' ')[0] || 'there';
 
   return (
@@ -60,61 +82,115 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 32 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0d9488" />}
       >
-        <View className="px-5 pt-5 pb-6">
-          <Text className="text-dark-400 text-sm">Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},</Text>
-          <Text className="text-white text-2xl font-bold mt-0.5">{firstName}</Text>
-        </View>
-
-        <View className="flex-row px-5 mb-6">
-          <StatCard label="Clients" value={clients.length.toString()} icon="people" color="#0d9488" />
-          <StatCard label="Completed" value={usage?.completed_assessments?.toString() || '0'} icon="mic" color="#8b5cf6" />
-          <StatCard label="Total" value={usage?.total_assessments?.toString() || '0'} icon="bar-chart" color="#f59e0b" />
-        </View>
-
-        <View className="px-5 mb-6">
+        {/* Header */}
+        <View className="px-6 pt-5 pb-2 flex-row items-center justify-between">
+          <View>
+            <Text className="text-dark-400 text-sm">{greeting},</Text>
+            <Text className="text-white text-2xl font-bold mt-0.5">{firstName}</Text>
+          </View>
           <Pressable
-            onPress={() => router.push('/(tabs)/record')}
-            className="bg-palm-500 rounded-2xl py-4 px-5 flex-row items-center active:opacity-80"
+            onPress={() => router.push('/settings')}
+            className="w-11 h-11 rounded-2xl bg-dark-800 items-center justify-center active:opacity-80"
           >
-            <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center mr-3">
-              <Ionicons name="mic" size={22} color="#ffffff" />
-            </View>
-            <View className="flex-1">
-              <Text className="text-white font-semibold text-base">Record Assessment</Text>
-              <Text className="text-white/70 text-xs mt-0.5">Tap to start a new voice assessment</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#ffffff" />
+            <Ionicons name="settings-outline" size={20} color="#829bcd" />
           </Pressable>
         </View>
 
-        <View className="px-5">
-          <Text className="text-white font-semibold text-base mb-3">Recent</Text>
+        {/* Stats */}
+        <View className="flex-row px-6 mt-4 mb-6">
+          <StatCard label="Clients" value={clients.length.toString()} icon="people" gradient={['#0d9488', '#059669']} />
+          <StatCard label="Completed" value={usage?.completed_assessments?.toString() || '0'} icon="checkmark-done" gradient={['#7c3aed', '#6d28d9']} />
+          <StatCard label="Total" value={usage?.total_assessments?.toString() || '0'} icon="bar-chart" gradient={['#f59e0b', '#d97706']} />
+        </View>
+
+        {/* Quick Record CTA */}
+        <View className="px-6 mb-6">
+          <Pressable
+            onPress={() => router.push('/(tabs)/record')}
+            className="active:scale-[0.98]"
+          >
+            <LinearGradient
+              colors={['#0d9488', '#0f766e']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ borderRadius: 20, padding: 20, flexDirection: 'row', alignItems: 'center' }}
+            >
+              <View className="w-14 h-14 rounded-2xl bg-white/20 items-center justify-center mr-4">
+                <Ionicons name="mic" size={28} color="#ffffff" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-white font-bold text-lg">New Assessment</Text>
+                <Text className="text-white/70 text-sm mt-0.5">Record a voice assessment</Text>
+              </View>
+              <View className="w-10 h-10 rounded-xl bg-white/15 items-center justify-center">
+                <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+              </View>
+            </LinearGradient>
+          </Pressable>
+        </View>
+
+        {/* Recent Assessments */}
+        <View className="px-6">
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-white font-bold text-lg">Recent Assessments</Text>
+            {recentVisits.length > 0 && (
+              <Pressable className="active:opacity-60">
+                <Text className="text-palm-400 text-sm font-medium">See all</Text>
+              </Pressable>
+            )}
+          </View>
+
           {recentVisits.length === 0 ? (
-            <View className="bg-dark-800 rounded-2xl p-8 items-center">
-              <Ionicons name="document-text-outline" size={28} color="#4b5563" />
-              <Text className="text-dark-400 text-sm mt-3">No assessments yet</Text>
+            <View className="bg-dark-800 rounded-2xl p-10 items-center">
+              <View className="w-16 h-16 rounded-full bg-dark-700 items-center justify-center mb-4">
+                <Ionicons name="document-text-outline" size={28} color="#4b5563" />
+              </View>
+              <Text className="text-dark-300 text-base font-medium">No assessments yet</Text>
+              <Text className="text-dark-500 text-sm mt-1">Tap the mic to start recording</Text>
             </View>
           ) : (
-            recentVisits.map((visit) => (
-              <Pressable
-                key={visit.id}
-                onPress={() => router.push(`/pipeline/${visit.id}`)}
-                className="bg-dark-800 rounded-2xl px-4 py-3.5 mb-2 flex-row items-center active:opacity-80"
-              >
-                <View className="w-9 h-9 rounded-xl bg-palm-500/15 items-center justify-center mr-3">
-                  <Ionicons name="mic" size={16} color="#0d9488" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-white text-sm font-medium">
-                    {visit.client?.full_name || 'Assessment'}
-                  </Text>
-                  <Text className="text-dark-500 text-xs mt-0.5">
-                    {new Date(visit.created_at).toLocaleDateString()}
-                  </Text>
-                </View>
-                <Text className="text-dark-400 text-xs capitalize">{visit.status.replace(/_/g, ' ')}</Text>
-              </Pressable>
-            ))
+            recentVisits.map((visit, i) => {
+              const badge = STATUS_BADGE[visit.status] || STATUS_BADGE.new;
+              const date = new Date(visit.created_at);
+              const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+              return (
+                <Pressable
+                  key={visit.id}
+                  onPress={() => router.push(`/pipeline/${visit.id}`)}
+                  className="bg-dark-800 rounded-2xl px-4 py-4 mb-3 active:opacity-80"
+                  style={{
+                    borderLeftWidth: 3,
+                    borderLeftColor: badge.text,
+                  }}
+                >
+                  <View className="flex-row items-center">
+                    <View className="w-11 h-11 rounded-2xl bg-palm-500/10 items-center justify-center mr-3">
+                      <Ionicons name="mic" size={18} color="#0d9488" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-white text-[15px] font-semibold">
+                        {visit.client?.full_name || 'Assessment'}
+                      </Text>
+                      <Text className="text-dark-500 text-xs mt-1">
+                        {dateStr} at {timeStr}
+                      </Text>
+                    </View>
+                    <View className="items-end">
+                      <View
+                        className="rounded-lg px-2.5 py-1"
+                        style={{ backgroundColor: badge.bg }}
+                      >
+                        <Text className="text-xs font-semibold" style={{ color: badge.text }}>
+                          {badge.label}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </Pressable>
+              );
+            })
           )}
         </View>
       </ScrollView>
