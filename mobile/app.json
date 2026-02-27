@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.palmtechnologies.palmcare",
+      "entitlements": {},
       "infoPlist": {
         "NSMicrophoneUsageDescription": "PalmCare AI needs microphone access to record care assessments."
       }
@@ -40,13 +41,6 @@
         "expo-audio",
         {
           "microphonePermission": "PalmCare AI needs microphone access to record care assessments."
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#0d9488"
         }
       ],
       "expo-splash-screen"
