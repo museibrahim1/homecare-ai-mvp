@@ -1,19 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, Pressable, Alert, Animated, Easing } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-let useAudioRecorder: (() => unknown) | null = null;
-let AudioModule: { requestRecordingPermissionsAsync?: () => Promise<{ granted: boolean }> } | null = null;
-let RecordingPresets: Record<string, unknown> | null = null;
-
-try {
-  const expoAudio = require('expo-audio');
-  useAudioRecorder = expoAudio.useAudioRecorder;
-  AudioModule = expoAudio.AudioModule;
-  RecordingPresets = expoAudio.RecordingPresets;
-} catch {
-  // expo-audio not available
-}
+import { useAudioRecorder, AudioModule, RecordingPresets } from 'expo-audio';
 
 interface Props {
   onRecordingComplete: (uri: string) => void;
@@ -62,13 +50,11 @@ export default function AudioRecorder({
 }: Props) {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [unavailable, setUnavailable] = useState(!useAudioRecorder);
+  const [unavailable, setUnavailable] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  const recorder = useAudioRecorder ? (useAudioRecorder as Function)(
-    RecordingPresets ? (RecordingPresets as Record<string, unknown>)['HIGH_QUALITY'] : {}
-  ) : null;
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
   useEffect(() => {
     return () => {
@@ -98,17 +84,8 @@ export default function AudioRecorder({
   };
 
   const startRecording = async () => {
-    if (!recorder || !AudioModule) {
-      setUnavailable(true);
-      Alert.alert(
-        'Development Build Required',
-        'Audio recording requires a development build. Run `npx expo run:ios` to create one.',
-      );
-      return;
-    }
-
     try {
-      const permission = await AudioModule.requestRecordingPermissionsAsync!();
+      const permission = await AudioModule.requestRecordingPermissionsAsync();
       if (!permission.granted) {
         Alert.alert('Permission Required', 'Microphone access is needed to record assessments.');
         return;
