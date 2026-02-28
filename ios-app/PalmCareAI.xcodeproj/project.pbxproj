@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1E6982F07CAC5C3021B4BFB3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0C57AEB89851A6C9CF3C1D /* Models.swift */; };
+		3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 694B1D5D023FE459648FA84F /* LandingView.swift */; };
 		441ED8E4CA766509026656D4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F2F27F9C01421C91DAE203 /* HomeView.swift */; };
 		6699DA1B3C377734838CD895 /* PalmCareAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */; };
 		66B8766816DFAE60BD26C157 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DC7E34D4B0393336B0CBB48 /* APIService.swift */; };
@@ -24,6 +25,7 @@
 		25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorderService.swift; sourceTree = "<group>"; };
 		2DEA75021BD113DD86530A11 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
 		4DC7E34D4B0393336B0CBB48 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+		694B1D5D023FE459648FA84F /* LandingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandingView.swift; sourceTree = "<group>"; };
 		965C098053DF16C330D69A47 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		A62F08AE1496C16DBFA9D619 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmCareAIApp.swift; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 		A61FA3F51B4488047745D54A /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				694B1D5D023FE459648FA84F /* LandingView.swift */,
 				A62F08AE1496C16DBFA9D619 /* LoginView.swift */,
 				965C098053DF16C330D69A47 /* RegisterView.swift */,
 			);
@@ -203,6 +206,7 @@
 				7955D7C2A2D22D6AEF1DF236 /* AudioRecorderService.swift in Sources */,
 				A00F019F5C3997BF6F3B5A0E /* ClientsView.swift in Sources */,
 				441ED8E4CA766509026656D4 /* HomeView.swift in Sources */,
+				3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */,
 				C37109ADE391ED8B9F1A9A57 /* LoginView.swift in Sources */,
 				C14C3133F283022BF06C01B1 /* MainTabView.swift in Sources */,
 				1E6982F07CAC5C3021B4BFB3 /* Models.swift in Sources */,

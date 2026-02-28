@@ -69,25 +69,21 @@ class APIService: ObservableObject {
         try await request("GET", path: "/auth/me")
     }
     
+    // Register business
+    func register(body: [String: Any]) async throws {
+        let _: RegisterResponse = try await request("POST", path: "/auth/business/register", body: body, noAuth: true)
+    }
+    
     // Clients
     func fetchClients() async throws -> [Client] {
-        // API may return array or { items: [...] }
-        do {
-            return try await request("GET", path: "/clients")
-        } catch {
-            let wrapper: ClientsWrapper = try await request("GET", path: "/clients")
-            return wrapper.items ?? wrapper.clients ?? []
-        }
+        let wrapper: ClientsWrapper = try await request("GET", path: "/clients")
+        return wrapper.items ?? wrapper.clients ?? []
     }
     
     // Visits  
     func fetchVisits() async throws -> [Visit] {
-        do {
-            return try await request("GET", path: "/visits")
-        } catch {
-            let wrapper: VisitsWrapper = try await request("GET", path: "/visits")
-            return wrapper.items ?? wrapper.visits ?? []
-        }
+        let wrapper: VisitsWrapper = try await request("GET", path: "/visits")
+        return wrapper.items ?? wrapper.visits ?? []
     }
     
     // Upload audio
@@ -132,6 +128,11 @@ class APIService: ObservableObject {
 
 struct ErrorResponse: Codable {
     let detail: String?
+}
+
+struct RegisterResponse: Codable {
+    let business_id: String?
+    let message: String?
 }
 
 struct ClientsWrapper: Codable {

@@ -213,13 +213,7 @@ struct RegisterView: View {
 
         Task {
             do {
-                let _: [String: String] = try await api.request(
-                    "POST",
-                    path: "/business/register",
-                    body: body,
-                    noAuth: true
-                )
-                // Auto-login after registration
+                try await api.register(body: body)
                 let loginResponse = try await api.login(email: email, password: password)
                 await MainActor.run {
                     if let token = loginResponse.access_token {
