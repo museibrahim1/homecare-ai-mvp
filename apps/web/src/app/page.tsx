@@ -844,6 +844,7 @@ export default function LandingPage() {
                 )}
               </div>
 
+              <Link href="/mobile-app" className="px-3 py-2 text-dark-300 hover:text-white transition">Mobile App</Link>
               <a href="#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Schedule Demo</a>
             </div>
 
@@ -861,6 +862,7 @@ export default function LandingPage() {
             <div className="lg:hidden pt-4 pb-2 space-y-3 border-t border-dark-700 mt-4">
               <Link href="/features" className="block py-2 text-dark-300 hover:text-white">Features</Link>
               <a href="#solutions" className="block py-2 text-dark-300 hover:text-white">Solutions</a>
+              <Link href="/mobile-app" className="block py-2 text-dark-300 hover:text-white">Mobile App</Link>
               <a href="#book-demo" className="block py-2 text-dark-300 hover:text-white">Schedule Demo</a>
               <Link href="/contact" className="block py-2 text-dark-300 hover:text-white">Contact</Link>
               <Link href="/login" className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
@@ -1160,6 +1162,7 @@ export default function LandingPage() {
               <h3 className="font-semibold text-white mb-4 text-base">Product</h3>
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/features" className="hover:text-white transition">Features</Link></li>
+                <li><Link href="/mobile-app" className="hover:text-white transition">Mobile App</Link></li>
                 <li><a href="#book-demo" className="hover:text-white transition">Schedule Demo</a></li>
                 <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
                 <li><Link href="/status" className="hover:text-white transition">System Status</Link></li>
