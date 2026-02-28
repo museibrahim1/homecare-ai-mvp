@@ -89,14 +89,9 @@ struct HomeView: View {
                                 .foregroundColor(.white.opacity(0.9))
                         }
                         .padding(20)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.palmPrimary, Color.palmPrimary.opacity(0.8)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
+                        .background(LinearGradient.palmPrimary)
                         .cornerRadius(16)
+                        .shadow(color: Color.palmPrimary.opacity(0.3), radius: 12, y: 4)
                     }
                     .padding(.horizontal, 20)
 
@@ -142,7 +137,7 @@ struct HomeView: View {
                     Spacer().frame(height: 100)
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.palmBackground)
             .refreshable {
                 await loadData()
             }

@@ -72,7 +72,7 @@ struct ClientsView: View {
                     }
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.palmBackground)
             .navigationTitle("Clients")
             .searchable(text: $searchText, prompt: "Search by name, phone, or diagnosis")
             .refreshable {

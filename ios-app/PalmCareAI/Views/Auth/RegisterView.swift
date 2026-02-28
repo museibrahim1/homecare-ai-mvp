@@ -28,6 +28,17 @@ struct RegisterView: View {
             VStack(spacing: 24) {
                 Spacer().frame(height: 12)
 
+                // Logo
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.palmPrimary)
+                        .frame(width: 48, height: 48)
+                    Image(systemName: "hand.raised.fill")
+                        .font(.system(size: 22))
+                        .foregroundColor(.white)
+                }
+                .padding(.bottom, 4)
+
                 // Header
                 VStack(spacing: 8) {
                     Text("Create account")
@@ -147,7 +158,7 @@ struct RegisterView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(formIsValid ? Color.palmPrimary : Color.palmPrimary.opacity(0.4))
+                    .background(formIsValid ? LinearGradient.palmPrimary : LinearGradient(colors: [Color.palmPrimary.opacity(0.5), Color.palmAccent.opacity(0.5)], startPoint: .leading, endPoint: .trailing))
                     .cornerRadius(12)
                 }
                 .disabled(!formIsValid || isLoading)

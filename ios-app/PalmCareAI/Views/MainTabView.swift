@@ -52,9 +52,9 @@ struct CustomTabBar: View {
                     } label: {
                         ZStack {
                             Circle()
-                                .fill(Color.palmPrimary)
+                                .fill(LinearGradient.palmPrimary)
                                 .frame(width: 56, height: 56)
-                                .shadow(color: Color.palmPrimary.opacity(0.35), radius: 8, y: 4)
+                                .shadow(color: Color.palmPrimary.opacity(0.4), radius: 10, y: 4)
 
                             Image(systemName: tabs[index].icon)
                                 .font(.system(size: 22, weight: .semibold))
@@ -114,7 +114,7 @@ struct CalendarPlaceholderView: View {
                     .foregroundColor(.palmSecondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color(.systemGroupedBackground))
+            .background(Color.palmBackground)
             .navigationTitle("Calendar")
         }
     }

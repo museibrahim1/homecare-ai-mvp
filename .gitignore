@@ -27,6 +27,9 @@ ENV/
 *.swo
 .DS_Store
 
+# Xcode preview snapshots
+ios-app/preview_*.png
+
 # Build outputs
 dist/
 build/
@@ -60,3 +63,4 @@ tmp/
 temp/
 *.tmp
 mobile/ios/
+ios-app/preview_*.png

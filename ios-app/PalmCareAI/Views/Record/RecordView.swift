@@ -92,14 +92,10 @@ struct RecordView: View {
                         }
 
                         Circle()
-                            .fill(
-                                recorder.isRecording
-                                    ? Color.red
-                                    : Color.palmTeal
-                            )
+                            .fill(recorder.isRecording ? Color.red : Color.palmPrimary)
                             .frame(width: 88, height: 88)
                             .shadow(
-                                color: (recorder.isRecording ? Color.red : Color.palmTeal).opacity(0.35),
+                                color: (recorder.isRecording ? Color.red : Color.palmPrimary).opacity(0.4),
                                 radius: 12, y: 4
                             )
 
@@ -145,7 +141,7 @@ struct RecordView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color.palmPrimary)
+                            .background(LinearGradient.palmPrimary)
                             .cornerRadius(12)
                         }
                         .disabled(isUploading || selectedClient == nil)
@@ -172,7 +168,7 @@ struct RecordView: View {
 
                 Spacer().frame(height: 100)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color.palmBackground)
             .navigationTitle("Record")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showClientPicker) {

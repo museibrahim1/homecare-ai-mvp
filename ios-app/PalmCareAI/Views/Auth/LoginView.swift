@@ -1,14 +1,5 @@
 import SwiftUI
 
-extension Color {
-    static let palmPrimary = Color(red: 37/255, green: 99/255, blue: 235/255)       // #2563EB
-    static let palmFieldBg = Color(red: 249/255, green: 250/255, blue: 251/255)     // #F9FAFB
-    static let palmBorder = Color(red: 243/255, green: 244/255, blue: 246/255)      // #F3F4F6
-    static let palmText = Color(red: 17/255, green: 24/255, blue: 39/255)           // #111827
-    static let palmSecondary = Color(red: 107/255, green: 114/255, blue: 128/255)   // #6B7280
-    static let palmTeal = Color(red: 13/255, green: 148/255, blue: 136/255)         // #0D9488
-}
-
 struct LoginView: View {
     @EnvironmentObject var api: APIService
     @State private var email = ""
@@ -26,26 +17,27 @@ struct LoginView: View {
                 VStack(spacing: 28) {
                     Spacer().frame(height: 40)
 
-                    // Shield icon
+                    // Logo (matches web)
                     ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.palmPrimary.opacity(0.1))
-                            .frame(width: 72, height: 72)
-
-                        Image(systemName: "shield.checkered")
-                            .font(.system(size: 32, weight: .semibold))
-                            .foregroundColor(.palmPrimary)
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.palmPrimary)
+                            .frame(width: 48, height: 48)
+                        Image(systemName: "hand.raised.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(.white)
                     }
+                    .padding(.bottom, 4)
 
-                    // Title
+                    // Title (matches web copy)
                     VStack(spacing: 8) {
-                        Text("Sign in to your Account")
-                            .font(.system(size: 26, weight: .bold))
+                        Text("Welcome back")
+                            .font(.system(size: 28, weight: .bold))
                             .foregroundColor(.palmText)
 
-                        Text("Welcome back! Please enter your details.")
+                        Text("Sign in to generate contracts from care assessments")
                             .font(.subheadline)
                             .foregroundColor(.palmSecondary)
+                            .multilineTextAlignment(.center)
                     }
 
                     // Form fields
@@ -150,14 +142,15 @@ struct LoginView: View {
                                 ProgressView()
                                     .tint(.white)
                             }
-                            Text("Log In")
+                            Text("Sign in")
                                 .font(.body.weight(.semibold))
                         }
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.palmPrimary)
+                        .background(LinearGradient.palmPrimary)
                         .cornerRadius(12)
+                        .shadow(color: Color.palmPrimary.opacity(0.3), radius: 8, y: 2)
                     }
                     .disabled(isLoading || email.isEmpty || password.isEmpty)
                     .opacity((email.isEmpty || password.isEmpty) ? 0.6 : 1)

@@ -10,6 +10,7 @@
 		1E6982F07CAC5C3021B4BFB3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0C57AEB89851A6C9CF3C1D /* Models.swift */; };
 		3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 694B1D5D023FE459648FA84F /* LandingView.swift */; };
 		441ED8E4CA766509026656D4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F2F27F9C01421C91DAE203 /* HomeView.swift */; };
+		5EA469E56F749FDCF74408EF /* PalmCareTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE0C6D4F6B7BC50F2DF9EDD2 /* PalmCareTheme.swift */; };
 		6699DA1B3C377734838CD895 /* PalmCareAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */; };
 		66B8766816DFAE60BD26C157 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DC7E34D4B0393336B0CBB48 /* APIService.swift */; };
 		7955D7C2A2D22D6AEF1DF236 /* AudioRecorderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */; };
@@ -29,6 +30,7 @@
 		965C098053DF16C330D69A47 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		A62F08AE1496C16DBFA9D619 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmCareAIApp.swift; sourceTree = "<group>"; };
+		AE0C6D4F6B7BC50F2DF9EDD2 /* PalmCareTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmCareTheme.swift; sourceTree = "<group>"; };
 		AE6E6ABEA65540D82DF2FF30 /* ClientsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientsView.swift; sourceTree = "<group>"; };
 		B7134EA3FF1A06C5E549D8A6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BA7229E0471D9D4E3D984E2C /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
@@ -109,6 +111,14 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		D7BF912698A62D34C9C42A9F /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				AE0C6D4F6B7BC50F2DF9EDD2 /* PalmCareTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
 		E2F4AC760CB3F4A97E0A5375 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -126,6 +136,7 @@
 				A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */,
 				1A73B0B1771A855E8EC6CD20 /* Models */,
 				E2F4AC760CB3F4A97E0A5375 /* Services */,
+				D7BF912698A62D34C9C42A9F /* Theme */,
 				CE1793DBBDAA61AB430DBDA5 /* Views */,
 			);
 			path = PalmCareAI;
@@ -211,6 +222,7 @@
 				C14C3133F283022BF06C01B1 /* MainTabView.swift in Sources */,
 				1E6982F07CAC5C3021B4BFB3 /* Models.swift in Sources */,
 				6699DA1B3C377734838CD895 /* PalmCareAIApp.swift in Sources */,
+				5EA469E56F749FDCF74408EF /* PalmCareTheme.swift in Sources */,
 				EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */,
 				9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */,
 			);
