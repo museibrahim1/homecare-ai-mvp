@@ -167,6 +167,46 @@ class APIService: ObservableObject {
         try await request("GET", path: "/pipeline/visits/\(visitId)/status")
     }
 
+    // MARK: - Live Transcription
+
+    func liveTranscribe(audioData: Data, diarize: Bool = true) async throws -> LiveTranscriptResponse {
+        guard let url = URL(string: "\(baseURL)/live/transcribe?language=en&diarize=\(diarize)") else {
+            throw APIError.invalidURL
+        }
+
+        let boundary = UUID().uuidString
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"chunk.m4a\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: audio/m4a\r\n\r\n".data(using: .utf8)!)
+        body.append(audioData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+
+        request.httpBody = body
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorBody = try? jsonDecoder.decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorBody.detail ?? errorBody.message ?? "Transcription failed")
+            }
+            throw APIError.serverError("Transcription failed (\(httpResponse.statusCode))")
+        }
+
+        return try jsonDecoder.decode(LiveTranscriptResponse.self, from: data)
+    }
+
     // MARK: - Logout
 
     func logout() {

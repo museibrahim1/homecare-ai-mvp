@@ -231,7 +231,7 @@ struct LandingView: View {
                         Button {
                             navigateToRegister = true
                         } label: {
-                            Text("PALM IT — GET STARTED")
+                            Text("GET STARTED")
                                 .font(.system(size: 14, weight: .heavy))
                                 .tracking(0.2)
                                 .foregroundColor(.white)
