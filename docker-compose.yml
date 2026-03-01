@@ -101,9 +101,8 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-claude-sonnet-4-20250514}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.7}
-      PYANNOTE_API_KEY: ${PYANNOTE_API_KEY:-}
-      HF_TOKEN: ${HF_TOKEN:-}
-      SKIP_DIARIZATION: ${SKIP_DIARIZATION:-false}
+      DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
+      SKIP_DIARIZATION: "true"
       PARALLEL_PIPELINE: ${PARALLEL_PIPELINE:-true}
     volumes:
       - ./apps/worker:/app

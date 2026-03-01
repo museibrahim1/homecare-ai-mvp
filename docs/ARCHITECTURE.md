@@ -78,17 +78,16 @@ AI Voice Contracter/
 
 | Service | Provider | Purpose |
 |---------|----------|---------|
-| ASR (primary) | Deepgram Nova-3 | Speech-to-text transcription |
-| ASR (fallback) | OpenAI Whisper | Fallback transcription |
-| LLM (primary) | Anthropic Claude Sonnet 4 | Visit notes, contracts, analysis, chat |
-| LLM (secondary) | OpenAI GPT | Supplementary AI tasks |
-| Diarization | pyannote | Speaker identification |
+| ASR + Diarization | Deepgram Nova-3 | Speech-to-text with built-in speaker diarization |
+| ASR (fallback) | OpenAI Whisper | Fallback transcription (no diarization) |
+| LLM (primary) | Anthropic Claude Sonnet 4 | Visit notes, contracts, analysis, landing chat |
+| LLM (fallback) | OpenAI GPT | Emergency LLM fallback |
 | Email | Resend | Transactional email |
 | Payments | Stripe | Subscription billing |
 | Storage | MinIO (S3) | Audio files, documents |
 | OCR | Stirling-PDF | Contract template processing |
-| Voiceover | WaveSpeed + ElevenLabs v3 | Marketing audio |
-| Image Gen | WaveSpeed + Nano Banana Pro | Marketing images |
+| Voiceover | WaveSpeed + ElevenLabs v3 | Marketing audio (scripts only) |
+| Image Gen | WaveSpeed + Nano Banana Pro | Marketing images (scripts only) |
 | OAuth | Google | SSO, Calendar, Drive, Gmail |
 
 ---
@@ -97,13 +96,11 @@ AI Voice Contracter/
 
 ```
 1. Upload Audio  →  API stores in MinIO (S3)
-2. Transcribe    →  Worker: Deepgram Nova-3 (or Whisper fallback)
-3. Diarize       →  Worker: pyannote speaker diarization (parallel with step 2)
-4. Align         →  Worker: Merge transcript + diarization
-5. Bill          →  Worker: Rules-based + LLM billable block detection
-6. Note          →  Worker: AI visit notes (Claude Sonnet 4)
-7. Contract      →  Worker: AI contract generation (Claude Sonnet 4 + DOCX templates)
-8. Export        →  Stirling-PDF (OCR) + python-docx (DOCX templates)
+2. Transcribe    →  Worker: Deepgram Nova-3 with diarize=true (transcription + speaker labels in one step)
+3. Bill          →  Worker: Rules-based + LLM billable block detection
+4. Note          →  Worker: AI visit notes (Claude Sonnet 4)
+5. Contract      →  Worker: AI contract generation (Claude Sonnet 4 + DOCX templates)
+6. Export        →  Stirling-PDF (OCR) + python-docx (DOCX templates)
 ```
 
 ---

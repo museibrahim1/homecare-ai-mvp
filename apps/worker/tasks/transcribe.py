@@ -68,17 +68,19 @@ def transcribe_visit(self, visit_id: str):
             download_file_to_path(audio_asset.s3_key, tmp_path)
             
             # Transcribe: prefer Deepgram Nova-3 > OpenAI Whisper > local
+            # Deepgram's built-in diarization replaces the separate pyannote step,
+            # so we always request diarize=True when using Deepgram.
             use_deepgram = (
                 settings.use_deepgram
                 and settings.deepgram_api_key
             )
             
             if use_deepgram:
-                logger.info("Using Deepgram Nova-3 for transcription")
+                logger.info("Using Deepgram Nova-3 for transcription + diarization")
                 segments = transcribe_with_deepgram(
                     tmp_path,
                     api_key=settings.deepgram_api_key,
-                    diarize=not settings.skip_diarization,
+                    diarize=True,
                 )
             else:
                 logger.info("Using OpenAI Whisper for transcription")

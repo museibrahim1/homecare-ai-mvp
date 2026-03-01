@@ -27,14 +27,15 @@ class Settings(BaseSettings):
     # Set to True to use OpenAI API instead of local model
     use_openai_whisper: bool = True
     
-    # Deepgram Nova-3 - Better quality + built-in diarization (~$0.0077/min)
-    # Set DEEPGRAM_API_KEY to enable; takes priority over Whisper when set
+    # Deepgram Nova-3 - Transcription + built-in diarization (~$0.0077/min)
+    # Set DEEPGRAM_API_KEY to enable; takes priority over Whisper when set.
+    # Deepgram's diarize=True replaces the old pyannote step, saving ~$0.08/assessment.
     deepgram_api_key: str = ""
     use_deepgram: bool = True  # Use Deepgram when API key is available
     
-    # Diarization
-    hf_token: str = ""  # Hugging Face token for pyannote models
-    skip_diarization: bool = True  # Skip diarization for faster processing
+    # Legacy diarization config (pyannote removed — Deepgram handles this now)
+    hf_token: str = ""  # Kept for backward compat; no longer used at runtime
+    skip_diarization: bool = True  # Always True — Deepgram diarizes inline
     
     # LLM Configuration
     openai_api_key: str = ""

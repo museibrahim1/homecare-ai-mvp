@@ -88,7 +88,9 @@ def run_full_pipeline(self, visit_id: str):
     logger.info(f"Starting optimized full pipeline for visit {visit_id}")
     
     use_parallel = settings.parallel_pipeline
-    skip_diarization = settings.skip_diarization
+    # Diarization is now handled by Deepgram during transcription (diarize=True),
+    # so the separate pyannote diarization step is always skipped.
+    skip_diarization = True
     
     # =========================================================================
     # CLEAR OLD DATA - Ensure fresh processing for this visit

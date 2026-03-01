@@ -2,7 +2,7 @@
 Landing Page AI Chat Agent
 
 Public endpoint for the marketing site chat widget.
-Uses OpenAI to answer visitor questions about PalmCare AI.
+Uses Anthropic Claude Haiku for fast, low-cost responses about PalmCare AI.
 Rate-limited per IP to prevent abuse.
 """
 
@@ -97,34 +97,34 @@ async def chat_message(body: ChatRequest, request: Request):
     if len(body.message) > 2000:
         raise HTTPException(status_code=400, detail="Message too long (max 2000 characters).")
 
-    api_key = os.getenv("OPENAI_API_KEY", "")
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
-        logger.error("OPENAI_API_KEY not configured for landing chat")
+        logger.error("ANTHROPIC_API_KEY not configured for landing chat")
         raise HTTPException(status_code=503, detail="Chat is temporarily unavailable.")
 
     try:
-        from openai import AsyncOpenAI
+        import anthropic
 
-        client = AsyncOpenAI(api_key=api_key)
+        client = anthropic.AsyncAnthropic(api_key=api_key)
 
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-
+        user_messages: list[dict] = []
         for msg in body.history[-10:]:
             role = msg.get("role", "user")
             content = msg.get("content", "")
             if role in ("user", "assistant") and content:
-                messages.append({"role": role, "content": content[:2000]})
+                user_messages.append({"role": role, "content": content[:2000]})
 
-        messages.append({"role": "user", "content": body.message.strip()})
+        user_messages.append({"role": "user", "content": body.message.strip()})
 
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
+        response = await client.messages.create(
+            model="claude-3-haiku-20240307",
             max_tokens=400,
+            system=SYSTEM_PROMPT,
+            messages=user_messages,
             temperature=0.7,
         )
 
-        reply = response.choices[0].message.content or "I'm sorry, I couldn't generate a response. Please try again."
+        reply = response.content[0].text if response.content else "I'm sorry, I couldn't generate a response. Please try again."
 
         return ChatResponse(reply=reply)
 
