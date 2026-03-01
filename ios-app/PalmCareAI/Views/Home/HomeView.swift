@@ -166,7 +166,14 @@ struct HomeView: View {
                     } else {
                         VStack(spacing: 8) {
                             ForEach(visits.prefix(5)) { visit in
-                                VisitRow(visit: visit)
+                                if let client = visit.client {
+                                    NavigationLink(destination: ClientDetailView(client: client).environmentObject(api)) {
+                                        VisitRow(visit: visit)
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
+                                    VisitRow(visit: visit)
+                                }
                             }
                         }
                         .padding(.horizontal, 14)

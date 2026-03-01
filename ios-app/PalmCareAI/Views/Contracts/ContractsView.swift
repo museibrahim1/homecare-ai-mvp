@@ -207,9 +207,6 @@ struct ContractsView: View {
             let response = try await api.fetchDocuments()
             await MainActor.run {
                 documents = response.documents
-                // Auto-expand all clients on first load
-                let ids = Set(response.documents.compactMap { $0.client_id ?? "unknown" })
-                expandedClients = ids
                 isLoading = false
             }
         } catch {

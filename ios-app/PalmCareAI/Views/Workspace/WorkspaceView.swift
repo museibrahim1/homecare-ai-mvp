@@ -4,7 +4,7 @@ struct WorkspaceView: View {
     @EnvironmentObject var api: APIService
     @State private var selectedSection = 0
 
-    private let sections = ["Calendar", "Contracts", "Templates", "Tasks"]
+    private let sections = ["Calendar", "Contracts", "Tasks"]
 
     var body: some View {
         NavigationStack {
@@ -19,11 +19,8 @@ struct WorkspaceView: View {
                     ContractsView()
                         .tag(1)
 
-                    TemplatesView()
-                        .tag(2)
-
                     TasksView()
-                        .tag(3)
+                        .tag(2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.2), value: selectedSection)
@@ -35,20 +32,22 @@ struct WorkspaceView: View {
     }
 
     private var sectionPicker: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 0) {
             ForEach(Array(sections.enumerated()), id: \.offset) { index, title in
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) { selectedSection = index }
                 } label: {
                     HStack(spacing: 5) {
                         Image(systemName: iconFor(index))
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.system(size: 11, weight: .semibold))
 
                         Text(title)
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.system(size: 12, weight: .semibold))
+                            .lineLimit(1)
+                            .fixedSize()
                     }
                     .foregroundColor(selectedSection == index ? .white : .palmSecondary)
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .background(
                         selectedSection == index
@@ -61,6 +60,9 @@ struct WorkspaceView: View {
                             .stroke(selectedSection == index ? Color.clear : Color.palmBorder, lineWidth: 1)
                     )
                 }
+                if index < sections.count - 1 {
+                    Spacer().frame(width: 8)
+                }
             }
         }
         .padding(.horizontal, 18)
@@ -71,8 +73,7 @@ struct WorkspaceView: View {
         switch index {
         case 0: return "calendar"
         case 1: return "doc.text.fill"
-        case 2: return "doc.badge.gearshape"
-        case 3: return "checklist"
+        case 2: return "checklist"
         default: return "folder"
         }
     }

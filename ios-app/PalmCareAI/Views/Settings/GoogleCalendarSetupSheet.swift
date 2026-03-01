@@ -172,15 +172,19 @@ struct GoogleCalendarSetupSheet: View {
 
         Task {
             do {
-                let status = try await api.connectGoogleCalendar()
+                let status = try await api.checkGoogleCalendarStatus()
                 await MainActor.run {
-                    isConnected = status
+                    if status {
+                        isConnected = true
+                    } else {
+                        errorMessage = "Google Calendar connection requires setup through the web app at palmcare.ai. Sign in on the web to connect your Google account, then it will sync here automatically."
+                    }
                     isLoading = false
                 }
             } catch {
                 await MainActor.run {
                     isLoading = false
-                    errorMessage = error.localizedDescription
+                    errorMessage = "Google Calendar connection requires setup through the web app. Sign in at palmcare.ai to connect your Google account."
                 }
             }
         }

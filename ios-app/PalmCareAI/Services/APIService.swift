@@ -235,6 +235,10 @@ class APIService: ObservableObject {
     // MARK: - Google Calendar Integration
 
     func connectGoogleCalendar() async throws -> Bool {
+        try await checkGoogleCalendarStatus()
+    }
+
+    func checkGoogleCalendarStatus() async throws -> Bool {
         let result: [String: AnyCodable] = try await request("GET", path: "/calendar/status", allowSoftUnauthorized: true)
         return (result["connected"]?.value as? Bool) ?? false
     }

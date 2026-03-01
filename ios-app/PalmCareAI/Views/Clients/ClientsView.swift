@@ -113,7 +113,10 @@ struct ClientsView: View {
                         ScrollView(showsIndicators: false) {
                             LazyVStack(spacing: 8) {
                                 ForEach(filteredClients) { client in
-                                    ClientCard(client: client, avatarColors: Self.avatarColors)
+                                    NavigationLink(destination: ClientDetailView(client: client).environmentObject(api)) {
+                                        ClientCard(client: client, avatarColors: Self.avatarColors)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
 
                                 if filteredClients.isEmpty {

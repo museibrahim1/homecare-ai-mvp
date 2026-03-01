@@ -9,11 +9,13 @@ struct SettingsView: View {
     @State private var showSubscription = false
     @State private var showLogoutConfirm = false
     @State private var showGoogleCalAuth = false
+    @State private var showPasswordChange = false
+    @State private var showTerms = false
     @AppStorage("googleCalendarConnected") private var googleCalConnected = false
 
     @AppStorage("useFaceID") private var useFaceID = false
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
-    @AppStorage("appTheme") private var appTheme = "Dark"
+    @AppStorage("appTheme") private var appTheme = "Light"
 
     var body: some View {
         NavigationStack {
@@ -40,6 +42,12 @@ struct SettingsView: View {
             .sheet(isPresented: $showGoogleCalAuth) {
                 GoogleCalendarSetupSheet(isConnected: $googleCalConnected)
                     .environmentObject(api)
+            }
+            .sheet(isPresented: $showPasswordChange) {
+                ChangePasswordSheet().environmentObject(api)
+            }
+            .sheet(isPresented: $showTerms) {
+                TermsPrivacySheet()
             }
             .task { await loadData() }
         }
@@ -126,7 +134,9 @@ struct SettingsView: View {
 
     private var accountSection: some View {
         SettingsSection(title: "Account") {
-            SettingsNavRow(icon: "lock.fill", iconColor: .palmSecondary, title: "Password")
+            Button { showPasswordChange = true } label: {
+                SettingsNavRow(icon: "lock.fill", iconColor: .palmSecondary, title: "Password")
+            }
 
             SettingsDivider()
 
@@ -254,7 +264,9 @@ struct SettingsView: View {
 
     private var legalSection: some View {
         SettingsSection(title: "Legal") {
-            SettingsNavRow(icon: "doc.plaintext", iconColor: .palmSecondary, title: "Terms and Privacy Policy")
+            Button { showTerms = true } label: {
+                SettingsNavRow(icon: "doc.plaintext", iconColor: .palmSecondary, title: "Terms and Privacy Policy")
+            }
 
             SettingsDivider()
 
@@ -413,5 +425,246 @@ struct SettingsDivider: View {
             .fill(Color.palmBorder.opacity(0.5))
             .frame(height: 1)
             .padding(.leading, 58)
+    }
+}
+
+// MARK: - Change Password Sheet
+
+struct ChangePasswordSheet: View {
+    @EnvironmentObject var api: APIService
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var currentPassword = ""
+    @State private var newPassword = ""
+    @State private var confirmPassword = ""
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    @State private var success = false
+
+    private var canSubmit: Bool {
+        !currentPassword.isEmpty && newPassword.count >= 8 && newPassword == confirmPassword
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    VStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.palmPrimary.opacity(0.1))
+                                .frame(width: 64, height: 64)
+                            Image(systemName: "lock.rotation")
+                                .font(.system(size: 26))
+                                .foregroundColor(.palmPrimary)
+                        }
+                        Text("Change Password")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.palmText)
+                    }
+                    .padding(.top, 8)
+
+                    if success {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                            Text("Password updated successfully").font(.system(size: 14, weight: .medium)).foregroundColor(.green)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green.opacity(0.08))
+                        .cornerRadius(12)
+                    }
+
+                    VStack(spacing: 14) {
+                        passwordField("Current Password", text: $currentPassword)
+                        passwordField("New Password", text: $newPassword)
+                        passwordField("Confirm New Password", text: $confirmPassword)
+
+                        if newPassword.count > 0 && newPassword.count < 8 {
+                            Text("Password must be at least 8 characters")
+                                .font(.system(size: 12))
+                                .foregroundColor(.orange)
+                        }
+
+                        if !confirmPassword.isEmpty && newPassword != confirmPassword {
+                            Text("Passwords don't match")
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
+                        }
+                    }
+
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.system(size: 13))
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    Button { changePassword() } label: {
+                        HStack {
+                            if isLoading { ProgressView().tint(.white).scaleEffect(0.8) }
+                            Text("Update Password")
+                                .font(.system(size: 15, weight: .bold))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(canSubmit ? Color.palmPrimary : Color.palmSecondary.opacity(0.3))
+                        .cornerRadius(12)
+                    }
+                    .disabled(!canSubmit || isLoading)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+            }
+            .background(Color.palmBackground)
+            .navigationTitle("Password")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func passwordField(_ placeholder: String, text: Binding<String>) -> some View {
+        SecureField(placeholder, text: text)
+            .font(.system(size: 14))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Color.palmFieldBg)
+            .cornerRadius(10)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
+    }
+
+    private func changePassword() {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                let _: [String: AnyCodable] = try await api.request(
+                    "POST", path: "/auth/change-password",
+                    body: ["current_password": currentPassword, "new_password": newPassword]
+                )
+                await MainActor.run {
+                    isLoading = false
+                    success = true
+                    currentPassword = ""
+                    newPassword = ""
+                    confirmPassword = ""
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Terms & Privacy Sheet
+
+struct TermsPrivacySheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Terms of Service")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.palmText)
+
+                        Text("Last updated: February 2026")
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmSecondary)
+                    }
+
+                    termsSection(
+                        title: "1. Acceptance of Terms",
+                        body: "By accessing or using PalmCare AI, you agree to be bound by these Terms of Service. If you do not agree, do not use the service."
+                    )
+
+                    termsSection(
+                        title: "2. Service Description",
+                        body: "PalmCare AI provides AI-powered care documentation tools including voice recording, transcription, contract generation, and client management for care professionals."
+                    )
+
+                    termsSection(
+                        title: "3. User Responsibilities",
+                        body: "You are responsible for maintaining the confidentiality of your account credentials and for all activities under your account. You agree to use the service in compliance with all applicable laws including HIPAA regulations."
+                    )
+
+                    termsSection(
+                        title: "4. Data Privacy",
+                        body: "We take your privacy seriously. Client data and recordings are encrypted at rest and in transit. We do not sell or share your data with third parties. Audio recordings are processed for transcription and then stored securely."
+                    )
+
+                    termsSection(
+                        title: "5. HIPAA Compliance",
+                        body: "PalmCare AI is designed to support HIPAA compliance for healthcare providers. We implement administrative, physical, and technical safeguards to protect electronic protected health information (ePHI)."
+                    )
+
+                    termsSection(
+                        title: "6. Subscription & Billing",
+                        body: "Paid features require an active subscription. You may cancel at any time. Refunds are handled on a case-by-case basis within 30 days of purchase."
+                    )
+
+                    termsSection(
+                        title: "7. Limitation of Liability",
+                        body: "PalmCare AI is provided \"as is\" without warranties. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service."
+                    )
+
+                    Divider().padding(.vertical, 8)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Privacy Policy")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.palmText)
+                    }
+
+                    termsSection(
+                        title: "Information We Collect",
+                        body: "We collect account information (name, email), client data you enter, audio recordings, and usage analytics. We use this data solely to provide and improve the service."
+                    )
+
+                    termsSection(
+                        title: "Data Retention",
+                        body: "Your data is retained as long as your account is active. Upon account deletion, all associated data is permanently removed within 30 days."
+                    )
+
+                    termsSection(
+                        title: "Contact",
+                        body: "For questions about these terms or your privacy, contact us at support@palmcare.ai"
+                    )
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 40)
+            }
+            .background(Color.palmBackground)
+            .navigationTitle("Terms & Privacy")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func termsSection(title: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.palmText)
+            Text(body)
+                .font(.system(size: 13))
+                .foregroundColor(.palmSecondary)
+                .lineSpacing(3)
+        }
     }
 }
