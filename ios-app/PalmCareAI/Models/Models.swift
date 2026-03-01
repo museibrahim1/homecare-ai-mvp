@@ -226,7 +226,7 @@ struct DocumentItem: Codable, Identifiable {
     let name: String
     let type: String?
     let format: String?
-    let size: Int?
+    let size: String?
     let folder: String?
     let client_id: String?
     let client_name: String?
@@ -235,10 +235,17 @@ struct DocumentItem: Codable, Identifiable {
     let download_url: String?
 }
 
+struct DocumentFolder: Codable {
+    let id: Int
+    let name: String
+    let count: Int
+    let icon: String?
+}
+
 struct DocumentsResponse: Codable {
     let documents: [DocumentItem]
     let total: Int
-    let folders: [String]?
+    let folders: [DocumentFolder]?
 }
 
 // MARK: - Tasks

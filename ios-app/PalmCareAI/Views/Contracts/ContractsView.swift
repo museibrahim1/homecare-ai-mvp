@@ -138,6 +138,7 @@ struct ContractsView: View {
                 isLoading = false
             }
         } catch {
+            print("[ContractsView] Failed to load documents: \(error)")
             await MainActor.run { isLoading = false }
         }
     }
@@ -168,13 +169,8 @@ struct DocumentRow: View {
     }
 
     private var formattedSize: String {
-        guard let bytes = document.size else { return "" }
-        if bytes > 1_000_000 {
-            return String(format: "%.1f MB", Double(bytes) / 1_000_000)
-        } else if bytes > 1_000 {
-            return String(format: "%.0f KB", Double(bytes) / 1_000)
-        }
-        return "\(bytes) B"
+        guard let s = document.size, s != "-" else { return "" }
+        return s
     }
 
     private var formattedDate: String {
@@ -232,11 +228,14 @@ struct DocumentRow: View {
                     .foregroundColor(.palmSecondary)
             }
 
-            if let url = document.download_url, let downloadURL = URL(string: url) {
-                Link(destination: downloadURL) {
-                    Image(systemName: "arrow.down.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.palmPrimary)
+            if let path = document.download_url {
+                let fullURL = path.hasPrefix("http") ? path : "\(api.baseURL)\(path)"
+                if let downloadURL = URL(string: fullURL) {
+                    Link(destination: downloadURL) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.palmPrimary)
+                    }
                 }
             }
         }
