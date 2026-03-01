@@ -4,6 +4,7 @@ import { DemoVideo } from "./compositions/DemoVideo";
 import { DemoVideoV2 } from "./compositions/DemoVideoV2";
 import { DemoVideoV3 } from "./compositions/DemoVideoV3";
 import { AdVideo } from "./compositions/AdVideo";
+import { PalmCareAd } from "./compositions/PalmCareAd";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -125,6 +126,16 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{
           showAudio: true,
         }}
+      />
+      {/* ===== PALMCARE AI VIDEO AD ===== */}
+      {/* Enhanced ElevenLabs footage with animated overlays — 32s */}
+      <Composition
+        id="PalmCareAd"
+        component={PalmCareAd}
+        durationInFrames={960}
+        fps={30}
+        width={1920}
+        height={1080}
       />
     </>
   );
