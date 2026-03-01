@@ -13,7 +13,7 @@ const nextConfig = {
     const apiUrl =
       process.env.API_URL ||
       process.env.NEXT_PUBLIC_API_BASE_URL ||
-      'http://localhost:8000';
+      'https://api-production-a0a2.up.railway.app';
     return [
       {
         source: '/api/:path*',
