@@ -5,56 +5,98 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PalmCare AI — Email Campaign Preview</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0a0a14;
-    color: #fff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f1f5f9;
+    color: #0f172a;
     min-height: 100vh;
   }
-  .header {
-    border-bottom: 1px solid #1a1a2e;
-    padding: 24px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .page-header {
+    background: linear-gradient(135deg, #0d9488, #0891b2);
+    padding: 40px;
+    text-align: center;
   }
-  .header h1 {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
   }
-  .header h1 span { color: #6366f1; }
-  .header p { font-size: 12px; color: #666; margin-top: 2px; }
-  .badge {
+  .page-header p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 8px;
+  }
+  .page-header .slogan {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 16px;
+    border-radius: 50px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .stat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.08);
+  }
+  .stat-card .number {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #0d9488;
+  }
+  .stat-card .label {
     font-size: 11px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    color: #6366f1;
+    color: #64748b;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
   }
-  .container { max-width: 1200px; margin: 0 auto; padding: 40px; }
+
   .section-title {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: #555;
+    color: #64748b;
     margin-bottom: 20px;
+    font-weight: 600;
   }
   .email-grid { display: flex; flex-direction: column; gap: 32px; }
 
   .email-card {
-    background: #0e0e20;
-    border: 1px solid #1a1a2e;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.08);
   }
   .email-meta {
     padding: 16px 24px;
     display: flex;
     align-items: center;
     gap: 16px;
-    border-bottom: 1px solid #1a1a2e;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
   }
   .email-meta .day {
     width: 48px;
@@ -69,31 +111,39 @@
     color: #fff;
     flex-shrink: 0;
   }
-  .email-meta .day span { font-size: 9px; font-weight: 500; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.1em; }
-  .email-meta .info h3 { font-size: 15px; font-weight: 600; color: #fff; }
-  .email-meta .info p { font-size: 12px; color: #666; margin-top: 2px; }
+  .email-meta .day span {
+    font-size: 9px;
+    font-weight: 600;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .email-meta .info h3 { font-size: 15px; font-weight: 700; color: #0f172a; }
+  .email-meta .info p { font-size: 12px; color: #64748b; margin-top: 2px; }
   .email-meta .subject {
     margin-left: auto;
     font-size: 12px;
-    font-family: monospace;
-    color: #888;
-    background: #0a0a14;
-    padding: 4px 10px;
-    border-radius: 6px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: #0d9488;
+    background: rgba(13,148,136,0.08);
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(13,148,136,0.15);
+    font-weight: 500;
   }
 
   .email-render {
-    background: #fff;
+    background: #f8fafc;
     margin: 16px;
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
   }
   .email-toolbar {
-    background: #f8f9fa;
+    background: #ffffff;
     padding: 12px 16px;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e2e8f0;
   }
   .dots { display: flex; gap: 6px; margin-bottom: 8px; }
   .dots div { width: 10px; height: 10px; border-radius: 50%; }
@@ -108,61 +158,28 @@
   }
   .email-toolbar .field label {
     font-size: 11px;
-    color: #999;
+    color: #94a3b8;
     width: 48px;
     flex-shrink: 0;
+    font-weight: 500;
   }
-  .email-toolbar .field span {
-    font-size: 12px;
-    color: #333;
-  }
-  .email-toolbar .field span.subj { font-weight: 600; color: #111; }
-  .email-body { padding: 24px; }
+  .email-toolbar .field span { font-size: 12px; color: #475569; }
+  .email-toolbar .field span.subj { font-weight: 600; color: #0f172a; }
+  .email-body { padding: 0; background: #f1f5f9; }
 
-  .gradient-1 { background: linear-gradient(135deg, #f59e0b, #fb923c); }
-  .gradient-2 { background: linear-gradient(135deg, #8b5cf6, #d946ef); }
-  .gradient-3 { background: linear-gradient(135deg, #6366f1, #a855f7); }
-  .gradient-4 { background: linear-gradient(135deg, #10b981, #06b6d4); }
-  .gradient-5 { background: linear-gradient(135deg, #64748b, #6b7280); }
-
-  .stat-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 48px;
-  }
-  .stat-card {
-    background: #0e0e20;
-    border: 1px solid #1a1a2e;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-  }
-  .stat-card .number {
-    font-size: 32px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #6366f1, #a855f7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .stat-card .label {
-    font-size: 11px;
-    color: #555;
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
+  .gradient-1 { background: linear-gradient(135deg, #0d9488, #0891b2); }
+  .gradient-2 { background: linear-gradient(135deg, #7c3aed, #db2777); }
+  .gradient-3 { background: linear-gradient(135deg, #0d9488, #0f766e); }
+  .gradient-4 { background: linear-gradient(135deg, #059669, #0891b2); }
+  .gradient-5 { background: linear-gradient(135deg, #475569, #64748b); }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div>
-    <h1>Email Campaign Preview <span>/ PalmCare AI</span></h1>
-    <p>5-email outreach sequence, research-backed, brand-informed</p>
-  </div>
-  <span class="badge">REVIEW BEFORE COMMIT</span>
+<div class="page-header">
+  <h1>PALM IT.</h1>
+  <p>5-Email Outreach Sequence &middot; PalmCare AI Campaign Preview</p>
+  <div class="slogan">Record it. Transcribe it. Contract it. All in your palm.</div>
 </div>
 
 <div class="container">
@@ -196,34 +213,60 @@
         <div class="day gradient-1"><span>Day</span>1</div>
         <div class="info">
           <h3>The Warm Open</h3>
-          <p>Warm introduction, no pitch, just genuine curiosity</p>
+          <p>Confident intro with PALM IT energy. Genuine curiosity, brand-aware.</p>
         </div>
-        <div class="subject">quick question, Comfort Home Care</div>
+        <div class="subject">Comfort Home Care — quick question</div>
       </div>
       <div class="email-render">
         <div class="email-toolbar">
           <div class="dots"><div class="r"></div><div class="y"></div><div class="g"></div></div>
           <div class="field"><label>From</label><span>Muse Ibrahim &lt;sales@palmtai.com&gt;</span></div>
-          <div class="field"><label>Subject</label><span class="subj">quick question, Comfort Home Care</span></div>
+          <div class="field"><label>Subject</label><span class="subj">Comfort Home Care — quick question</span></div>
         </div>
         <div class="email-body">
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; max-width: 580px; margin: 0 auto; color: #1a1a1a; font-size: 15px; line-height: 1.8;">
-            <p style="margin: 0 0 16px 0;">Hi,</p>
-            <p style="margin: 0 0 16px 0;">I came across Comfort Home Care while looking at home care agencies in Omaha. Building something in this industry takes real grit, and I respect it.</p>
-            <p style="margin: 0 0 16px 0;">I'm genuinely curious: how are you handling client assessments and documentation right now? Mostly paper, or have you found something digital that works?</p>
-            <p style="margin: 0 0 16px 0;">No pitch, just trying to understand how agency owners in Nebraska actually run things day to day.</p>
-            <p style="margin-top: 28px; margin-bottom: 0; font-weight: 600;">Muse Ibrahim</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">President &amp; CEO</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">Palm Technologies, INC.</p>
-            <p style="margin: 2px 0 0;"><a href="https://palmcareai.com" style="color: #6366f1; text-decoration: none; font-size: 13px;">palmcareai.com</a></p>
-            <div style="margin-top: 32px; text-align: center;">
-              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 480px; width: 100%; border-radius: 12px; border: 1px solid #e5e5e5;" /></a>
+          <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #0d9488, #0891b2); padding: 32px 40px; text-align: center;">
+              <p style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">PalmCare AI</p>
+              <p style="margin: 6px 0 0; font-size: 12px; color: rgba(255,255,255,0.8); letter-spacing: 0.05em;">WHERE CARE MEETS INTELLIGENCE</p>
             </div>
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #999; line-height: 1.6;">
-              <a href="https://palmcareai.com" style="text-decoration: none; display: inline-block; margin-bottom: 12px;"><img src="/qr-code.png" alt="Scan to visit palmcareai.com" style="width: 72px; height: 72px; border-radius: 6px;" /></a><br>
-              Palm Technologies &middot; Omaha, NE<br>
-              You received this because Comfort Home Care is listed in public agency directories.<br>
-              <a href="#" style="color: #999;">Unsubscribe</a>
+            <!-- Body -->
+            <div style="padding: 40px; color: #0f172a; font-size: 15px; line-height: 1.7;">
+              <p style="margin: 0 0 16px 0;">Hi,</p>
+              <div style="margin-bottom: 28px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">Why I reached out</p>
+                <p style="margin: 0; font-size: 15px; color: #0f172a; line-height: 1.7;">I came across Comfort Home Care while researching home care agencies in Omaha. Building something in this industry takes real grit &mdash; I respect it.</p>
+              </div>
+              <p style="margin: 0 0 16px 0;">Quick question: how is your team handling client assessments and documentation right now? Still paper-based, or have you found something digital that actually works?</p>
+              <div style="margin-bottom: 28px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">What we do</p>
+                <p style="margin: 0; font-size: 15px; color: #0f172a; line-height: 1.7;">PalmCare AI turns care assessments into signed contracts &mdash; automatically. Staff record the interview on their phone. AI transcribes it, generates the care plan, and produces a ready-to-sign agreement in seconds.</p>
+              </div>
+              <p style="margin: 0 0 16px 0; color: #475569; font-size: 14px;">No pitch today &mdash; just curious how agency owners in Nebraska actually run things day to day.</p>
+            </div>
+            <!-- Signature -->
+            <div style="padding: 0 40px 32px; border-top: 1px solid #e2e8f0; padding-top: 24px;">
+              <p style="margin: 0; font-weight: 700; font-size: 15px; color: #0f172a;">Muse Ibrahim</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">President &amp; CEO</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">Palm Technologies, Inc.</p>
+              <p style="margin: 6px 0 0;"><a href="https://palmcareai.com" style="color: #0d9488; text-decoration: none; font-size: 13px; font-weight: 500;">palmcareai.com</a></p>
+            </div>
+            <!-- Product Image -->
+            <div style="padding: 0 40px 32px; text-align: center;">
+              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;" /></a>
+            </div>
+            <!-- CTA Banner -->
+            <div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); border-radius: 12px; padding: 28px 32px; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>
+              <p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">Record it. Transcribe it. Contract it. All in your palm.</p>
+              <a href="https://palmcareai.com/#book-demo" style="display: inline-block; background-color: #ffffff; color: #0f766e; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">See It In Action</a>
+            </div>
+            <!-- Footer -->
+            <div style="padding: 24px 40px; background-color: #f1f5f9; border-top: 1px solid #e2e8f0; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #0f172a;">PalmCare AI</p>
+              <p style="margin: 0 0 12px; font-size: 12px; color: #475569;">Built for care professionals</p>
+              <p style="margin: 0 0 12px; font-size: 11px; color: #94a3b8;">Palm Technologies, Inc. &middot; Omaha, NE<br>You received this because Comfort Home Care is listed in public agency directories.</p>
+              <p style="margin: 0;"><a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Privacy</a>&nbsp;&middot;&nbsp;<a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a></p>
             </div>
           </div>
         </div>
@@ -236,35 +279,68 @@
         <div class="day gradient-2"><span>Day</span>3</div>
         <div class="info">
           <h3>The Pattern Interrupt</h3>
-          <p>Honest, self-aware, cuts through inbox noise</p>
+          <p>Self-aware, punchy. One killer stat, one CTA. PALM IT energy.</p>
         </div>
-        <div class="subject">not another software pitch</div>
+        <div class="subject">this isn't another software pitch</div>
       </div>
       <div class="email-render">
         <div class="email-toolbar">
           <div class="dots"><div class="r"></div><div class="y"></div><div class="g"></div></div>
           <div class="field"><label>From</label><span>Muse Ibrahim &lt;sales@palmtai.com&gt;</span></div>
-          <div class="field"><label>Subject</label><span class="subj">not another software pitch</span></div>
+          <div class="field"><label>Subject</label><span class="subj">this isn't another software pitch</span></div>
         </div>
         <div class="email-body">
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; max-width: 580px; margin: 0 auto; color: #1a1a1a; font-size: 15px; line-height: 1.8;">
-            <p style="margin: 0 0 16px 0;">Hi,</p>
-            <p style="margin: 0 0 16px 0;">I know, your inbox is full of people trying to sell you things. This isn't that. (Well, not yet.)</p>
-            <p style="margin: 0 0 16px 0;">Here's what I actually wanted to share: agencies using voice-to-documentation tools are cutting <strong>12+ hours of admin work per week</strong>. That's a nurse and a half worth of time going back to patient care.</p>
-            <p style="margin: 0 0 16px 0;">If that number sounds interesting, I'd love to show you how it works. 10 minutes, no slides.</p>
-            <p style="margin: 0 0 16px 0;">Worth a quick chat?</p>
-            <p style="margin-top: 28px; margin-bottom: 0; font-weight: 600;">Muse Ibrahim</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">President &amp; CEO</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">Palm Technologies, INC.</p>
-            <p style="margin: 2px 0 0;"><a href="https://palmcareai.com" style="color: #6366f1; text-decoration: none; font-size: 13px;">palmcareai.com</a></p>
-            <div style="margin-top: 32px; text-align: center;">
-              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 480px; width: 100%; border-radius: 12px; border: 1px solid #e5e5e5;" /></a>
+          <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #0d9488, #0891b2); padding: 32px 40px; text-align: center;">
+              <p style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">PalmCare AI</p>
+              <p style="margin: 6px 0 0; font-size: 12px; color: rgba(255,255,255,0.8); letter-spacing: 0.05em;">WHERE CARE MEETS INTELLIGENCE</p>
             </div>
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #999; line-height: 1.6;">
-              <a href="https://palmcareai.com" style="text-decoration: none; display: inline-block; margin-bottom: 12px;"><img src="/qr-code.png" alt="Scan to visit palmcareai.com" style="width: 72px; height: 72px; border-radius: 6px;" /></a><br>
-              Palm Technologies &middot; Omaha, NE<br>
-              You received this because Comfort Home Care is listed in public agency directories.<br>
-              <a href="#" style="color: #999;">Unsubscribe</a>
+            <div style="padding: 40px; color: #0f172a; font-size: 15px; line-height: 1.7;">
+              <p style="margin: 0 0 16px 0;">Hi,</p>
+              <p style="margin: 0 0 16px 0;">Your inbox is full of people selling things. This is different.</p>
+              <div style="margin-bottom: 28px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">One number worth knowing</p>
+                <p style="margin: 0; font-size: 15px; color: #0f172a; line-height: 1.7;">Agencies using voice-to-documentation tools are cutting <strong>12+ hours of admin work per week</strong>. That&rsquo;s a nurse and a half worth of time going back to patient care.</p>
+              </div>
+              <!-- Stats -->
+              <div style="text-align: center; margin: 24px 0;">
+                <div style="display: inline-block; text-align: center; padding: 16px 24px; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 8px 12px 0;">
+                  <div style="font-size: 28px; font-weight: 800; color: #0d9488;">12+</div>
+                  <div style="font-size: 11px; color: #475569; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Hours saved / week</div>
+                </div>
+                <div style="display: inline-block; text-align: center; padding: 16px 24px; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 8px 12px 0;">
+                  <div style="font-size: 28px; font-weight: 800; color: #0d9488;">10x</div>
+                  <div style="font-size: 11px; color: #475569; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Faster assessments</div>
+                </div>
+                <div style="display: inline-block; text-align: center; padding: 16px 24px; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 8px 12px 0;">
+                  <div style="font-size: 28px; font-weight: 800; color: #0d9488;">95%</div>
+                  <div style="font-size: 11px; color: #475569; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Accuracy rate</div>
+                </div>
+              </div>
+              <p style="margin: 0 0 16px 0;">10 minutes. No slides. Just a live demo of how it works.</p>
+              <div style="text-align: center; margin: 24px 0;">
+                <a href="https://palmcareai.com/#book-demo" style="display: inline-block; background: linear-gradient(135deg, #0d9488, #0f766e); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 10px;">Palm It &mdash; Book a Demo</a>
+              </div>
+            </div>
+            <div style="padding: 0 40px 32px; border-top: 1px solid #e2e8f0; padding-top: 24px;">
+              <p style="margin: 0; font-weight: 700; font-size: 15px; color: #0f172a;">Muse Ibrahim</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">President &amp; CEO</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">Palm Technologies, Inc.</p>
+              <p style="margin: 6px 0 0;"><a href="https://palmcareai.com" style="color: #0d9488; text-decoration: none; font-size: 13px; font-weight: 500;">palmcareai.com</a></p>
+            </div>
+            <div style="padding: 0 40px 32px; text-align: center;">
+              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;" /></a>
+            </div>
+            <div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); border-radius: 12px; padding: 28px 32px; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>
+              <p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">Record it. Transcribe it. Contract it. All in your palm.</p>
+              <a href="https://palmcareai.com/#book-demo" style="display: inline-block; background-color: #ffffff; color: #0f766e; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">See It In Action</a>
+            </div>
+            <div style="padding: 24px 40px; background-color: #f1f5f9; border-top: 1px solid #e2e8f0; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #0f172a;">PalmCare AI</p>
+              <p style="margin: 0 0 12px; font-size: 12px; color: #475569;">Built for care professionals</p>
+              <p style="margin: 0 0 12px; font-size: 11px; color: #94a3b8;">Palm Technologies, Inc. &middot; Omaha, NE<br>You received this because Comfort Home Care is listed in public agency directories.</p>
+              <p style="margin: 0;"><a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Privacy</a>&nbsp;&middot;&nbsp;<a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a></p>
             </div>
           </div>
         </div>
@@ -277,35 +353,62 @@
         <div class="day gradient-3"><span>Day</span>7</div>
         <div class="info">
           <h3>The Aspiration</h3>
-          <p>Paints the picture of who they become</p>
+          <p>Paints the picture. Shows the workflow transformation. Identity-driven.</p>
         </div>
-        <div class="subject">imagine finishing paperwork before lunch</div>
+        <div class="subject">close clients before you leave their home</div>
       </div>
       <div class="email-render">
         <div class="email-toolbar">
           <div class="dots"><div class="r"></div><div class="y"></div><div class="g"></div></div>
           <div class="field"><label>From</label><span>Muse Ibrahim &lt;sales@palmtai.com&gt;</span></div>
-          <div class="field"><label>Subject</label><span class="subj">imagine finishing paperwork before lunch</span></div>
+          <div class="field"><label>Subject</label><span class="subj">close clients before you leave their home</span></div>
         </div>
         <div class="email-body">
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; max-width: 580px; margin: 0 auto; color: #1a1a1a; font-size: 15px; line-height: 1.8;">
-            <p style="margin: 0 0 16px 0;">Hi,</p>
-            <p style="margin: 0 0 16px 0;">Picture this: you sit down with a new client, talk through the assessment on your phone for a few minutes, and a complete care plan, SOAP notes, and service contract are ready before you leave their home.</p>
-            <p style="margin: 0 0 16px 0;">That's what PalmCare AI does for providers in Nebraska.</p>
-            <p style="margin: 0 0 16px 0;">No training manuals. No data entry. Just talk and it's done.</p>
-            <p style="margin: 0 0 16px 0;">Want to see it work with your actual workflow?</p>
-            <p style="margin-top: 28px; margin-bottom: 0; font-weight: 600;">Muse Ibrahim</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">President &amp; CEO</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">Palm Technologies, INC.</p>
-            <p style="margin: 2px 0 0;"><a href="https://palmcareai.com" style="color: #6366f1; text-decoration: none; font-size: 13px;">palmcareai.com</a></p>
-            <div style="margin-top: 32px; text-align: center;">
-              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 480px; width: 100%; border-radius: 12px; border: 1px solid #e5e5e5;" /></a>
+          <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #0d9488, #0891b2); padding: 32px 40px; text-align: center;">
+              <p style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">PalmCare AI</p>
+              <p style="margin: 6px 0 0; font-size: 12px; color: rgba(255,255,255,0.8); letter-spacing: 0.05em;">WHERE CARE MEETS INTELLIGENCE</p>
             </div>
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #999; line-height: 1.6;">
-              <a href="https://palmcareai.com" style="text-decoration: none; display: inline-block; margin-bottom: 12px;"><img src="/qr-code.png" alt="Scan to visit palmcareai.com" style="width: 72px; height: 72px; border-radius: 6px;" /></a><br>
-              Palm Technologies &middot; Omaha, NE<br>
-              You received this because Comfort Home Care is listed in public agency directories.<br>
-              <a href="#" style="color: #999;">Unsubscribe</a>
+            <div style="padding: 40px; color: #0f172a; font-size: 15px; line-height: 1.7;">
+              <p style="margin: 0 0 16px 0;">Hi,</p>
+              <div style="margin-bottom: 28px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">Picture this</p>
+                <p style="margin: 0; font-size: 15px; color: #0f172a; line-height: 1.7;">You sit down with a new client. You talk through the assessment on your phone for a few minutes. Before you leave their home &mdash; a complete care plan, assessment, and service contract are ready to sign.</p>
+              </div>
+              <div style="margin-bottom: 28px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">How it works</p>
+                <p style="margin: 0; font-size: 15px; color: #0f172a; line-height: 1.7;">
+                  <strong>1.</strong> Record the assessment interview on your phone<br>
+                  <strong>2.</strong> AI transcribes everything in real time<br>
+                  <strong>3.</strong> AI generates the care plan + service agreement<br>
+                  <strong>4.</strong> Contract sent to client &mdash; ready to sign
+                </p>
+              </div>
+              <p style="margin: 0 0 16px 0;">No training manuals. No data entry. No delays.<br><strong>Just tap, talk, and Palm It.</strong></p>
+              <p style="margin: 0 0 16px 0; color: #475569; font-size: 14px;">Want to see it work with Comfort Home Care&rsquo;s actual workflow?</p>
+              <div style="text-align: center; margin: 24px 0;">
+                <a href="https://palmcareai.com/#book-demo" style="display: inline-block; background: linear-gradient(135deg, #0d9488, #0f766e); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 10px;">See It In Action</a>
+              </div>
+            </div>
+            <div style="padding: 0 40px 32px; border-top: 1px solid #e2e8f0; padding-top: 24px;">
+              <p style="margin: 0; font-weight: 700; font-size: 15px; color: #0f172a;">Muse Ibrahim</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">President &amp; CEO</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">Palm Technologies, Inc.</p>
+              <p style="margin: 6px 0 0;"><a href="https://palmcareai.com" style="color: #0d9488; text-decoration: none; font-size: 13px; font-weight: 500;">palmcareai.com</a></p>
+            </div>
+            <div style="padding: 0 40px 32px; text-align: center;">
+              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;" /></a>
+            </div>
+            <div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); border-radius: 12px; padding: 28px 32px; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>
+              <p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">Record it. Transcribe it. Contract it. All in your palm.</p>
+              <a href="https://palmcareai.com/#book-demo" style="display: inline-block; background-color: #ffffff; color: #0f766e; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">See It In Action</a>
+            </div>
+            <div style="padding: 24px 40px; background-color: #f1f5f9; border-top: 1px solid #e2e8f0; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #0f172a;">PalmCare AI</p>
+              <p style="margin: 0 0 12px; font-size: 12px; color: #475569;">Built for care professionals</p>
+              <p style="margin: 0 0 12px; font-size: 11px; color: #94a3b8;">Palm Technologies, Inc. &middot; Omaha, NE<br>You received this because Comfort Home Care is listed in public agency directories.</p>
+              <p style="margin: 0;"><a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Privacy</a>&nbsp;&middot;&nbsp;<a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a></p>
             </div>
           </div>
         </div>
@@ -318,34 +421,71 @@
         <div class="day gradient-4"><span>Day</span>14</div>
         <div class="info">
           <h3>The Proof Point</h3>
-          <p>Data-driven, one stat in their language</p>
+          <p>Data-driven with traction proof. Stats in their language. Competitive edge.</p>
         </div>
-        <div class="subject">12 hours back every week</div>
+        <div class="subject">never lose a client to paperwork again</div>
       </div>
       <div class="email-render">
         <div class="email-toolbar">
           <div class="dots"><div class="r"></div><div class="y"></div><div class="g"></div></div>
           <div class="field"><label>From</label><span>Muse Ibrahim &lt;sales@palmtai.com&gt;</span></div>
-          <div class="field"><label>Subject</label><span class="subj">12 hours back every week</span></div>
+          <div class="field"><label>Subject</label><span class="subj">never lose a client to paperwork again</span></div>
         </div>
         <div class="email-body">
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; max-width: 580px; margin: 0 auto; color: #1a1a1a; font-size: 15px; line-height: 1.8;">
-            <p style="margin: 0 0 16px 0;">Hi,</p>
-            <p style="margin: 0 0 16px 0;">Quick number for you: the average home care agency spends <strong>15+ hours per week</strong> on documentation alone. PalmCare AI brings that down to about 3.</p>
-            <p style="margin: 0 0 16px 0;">For Comfort Home Care, that could mean 12 hours back. Every single week. Time for more client visits, caregiver training, or honestly just getting home at a reasonable hour.</p>
-            <p style="margin: 0 0 16px 0;">Would that kind of time savings make a difference for your team?</p>
-            <p style="margin-top: 28px; margin-bottom: 0; font-weight: 600;">Muse Ibrahim</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">President &amp; CEO</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">Palm Technologies, INC.</p>
-            <p style="margin: 2px 0 0;"><a href="https://palmcareai.com" style="color: #6366f1; text-decoration: none; font-size: 13px;">palmcareai.com</a></p>
-            <div style="margin-top: 32px; text-align: center;">
-              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 480px; width: 100%; border-radius: 12px; border: 1px solid #e5e5e5;" /></a>
+          <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #0d9488, #0891b2); padding: 32px 40px; text-align: center;">
+              <p style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">PalmCare AI</p>
+              <p style="margin: 6px 0 0; font-size: 12px; color: rgba(255,255,255,0.8); letter-spacing: 0.05em;">WHERE CARE MEETS INTELLIGENCE</p>
             </div>
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #999; line-height: 1.6;">
-              <a href="https://palmcareai.com" style="text-decoration: none; display: inline-block; margin-bottom: 12px;"><img src="/qr-code.png" alt="Scan to visit palmcareai.com" style="width: 72px; height: 72px; border-radius: 6px;" /></a><br>
-              Palm Technologies &middot; Omaha, NE<br>
-              You received this because Comfort Home Care is listed in public agency directories.<br>
-              <a href="#" style="color: #999;">Unsubscribe</a>
+            <div style="padding: 40px; color: #0f172a; font-size: 15px; line-height: 1.7;">
+              <p style="margin: 0 0 16px 0;">Hi,</p>
+              <div style="margin-bottom: 28px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">The paperwork problem</p>
+                <p style="margin: 0; font-size: 15px; color: #0f172a; line-height: 1.7;">The average home care agency spends <strong>15+ hours per week</strong> on documentation alone. That&rsquo;s time that should go to client visits, caregiver training, or honestly just getting home at a reasonable hour.</p>
+              </div>
+              <!-- Stats -->
+              <div style="text-align: center; margin: 24px 0;">
+                <div style="display: inline-block; text-align: center; padding: 16px 24px; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 8px 12px 0;">
+                  <div style="font-size: 28px; font-weight: 800; color: #0d9488;">15hrs</div>
+                  <div style="font-size: 11px; color: #475569; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Typical weekly docs</div>
+                </div>
+                <div style="display: inline-block; text-align: center; padding: 16px 24px; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 8px 12px 0;">
+                  <div style="font-size: 28px; font-weight: 800; color: #0d9488;">3hrs</div>
+                  <div style="font-size: 11px; color: #475569; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">With PalmCare AI</div>
+                </div>
+                <div style="display: inline-block; text-align: center; padding: 16px 24px; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; margin: 0 8px 12px 0;">
+                  <div style="font-size: 28px; font-weight: 800; color: #0d9488;">12hrs</div>
+                  <div style="font-size: 11px; color: #475569; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Back every week</div>
+                </div>
+              </div>
+              <div style="margin-bottom: 28px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">Why agencies are switching</p>
+                <p style="margin: 0; font-size: 15px; color: #0f172a; line-height: 1.7;"><strong>60+ agencies</strong> on the waitlist. <strong>24 active pilot users.</strong> <strong>300+ assessments</strong> generated with 68% accuracy improvement. No other platform does AI assessment generation, AI contract creation, and voice-to-contract &mdash; we&rsquo;re the first.</p>
+              </div>
+              <p style="margin: 0 0 16px 0;">For Comfort Home Care, that could mean 12 hours back. Every single week.</p>
+              <div style="text-align: center; margin: 24px 0;">
+                <a href="https://palmcareai.com/#book-demo" style="display: inline-block; background: linear-gradient(135deg, #0d9488, #0f766e); color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 10px;">Palm It &mdash; Get Started</a>
+              </div>
+            </div>
+            <div style="padding: 0 40px 32px; border-top: 1px solid #e2e8f0; padding-top: 24px;">
+              <p style="margin: 0; font-weight: 700; font-size: 15px; color: #0f172a;">Muse Ibrahim</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">President &amp; CEO</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">Palm Technologies, Inc.</p>
+              <p style="margin: 6px 0 0;"><a href="https://palmcareai.com" style="color: #0d9488; text-decoration: none; font-size: 13px; font-weight: 500;">palmcareai.com</a></p>
+            </div>
+            <div style="padding: 0 40px 32px; text-align: center;">
+              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;" /></a>
+            </div>
+            <div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); border-radius: 12px; padding: 28px 32px; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>
+              <p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">Record it. Transcribe it. Contract it. All in your palm.</p>
+              <a href="https://palmcareai.com/#book-demo" style="display: inline-block; background-color: #ffffff; color: #0f766e; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">See It In Action</a>
+            </div>
+            <div style="padding: 24px 40px; background-color: #f1f5f9; border-top: 1px solid #e2e8f0; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #0f172a;">PalmCare AI</p>
+              <p style="margin: 0 0 12px; font-size: 12px; color: #475569;">Built for care professionals</p>
+              <p style="margin: 0 0 12px; font-size: 11px; color: #94a3b8;">Palm Technologies, Inc. &middot; Omaha, NE<br>You received this because Comfort Home Care is listed in public agency directories.</p>
+              <p style="margin: 0;"><a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Privacy</a>&nbsp;&middot;&nbsp;<a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a></p>
             </div>
           </div>
         </div>
@@ -358,34 +498,51 @@
         <div class="day gradient-5"><span>Day</span>28</div>
         <div class="info">
           <h3>The Graceful Exit</h3>
-          <p>Short, respectful, no pressure, restraint signals confidence</p>
+          <p>Short, confident, respectful. Restraint signals strength. Door stays open.</p>
         </div>
-        <div class="subject">closing the loop</div>
+        <div class="subject">closing the loop, Comfort Home Care</div>
       </div>
       <div class="email-render">
         <div class="email-toolbar">
           <div class="dots"><div class="r"></div><div class="y"></div><div class="g"></div></div>
           <div class="field"><label>From</label><span>Muse Ibrahim &lt;sales@palmtai.com&gt;</span></div>
-          <div class="field"><label>Subject</label><span class="subj">closing the loop</span></div>
+          <div class="field"><label>Subject</label><span class="subj">closing the loop, Comfort Home Care</span></div>
         </div>
         <div class="email-body">
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; max-width: 580px; margin: 0 auto; color: #1a1a1a; font-size: 15px; line-height: 1.8;">
-            <p style="margin: 0 0 16px 0;">Hi,</p>
-            <p style="margin: 0 0 16px 0;">I've reached out a couple of times and I know you're busy. Running Comfort Home Care in Omaha is a full-time-and-a-half job.</p>
-            <p style="margin: 0 0 16px 0;">I won't keep filling your inbox. If the timing is ever right for a simpler way to handle documentation, I'm here.</p>
-            <p style="margin: 0 0 16px 0;">No worries either way. Wishing you and your team the best.</p>
-            <p style="margin-top: 28px; margin-bottom: 0; font-weight: 600;">Muse Ibrahim</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">President &amp; CEO</p>
-            <p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">Palm Technologies, INC.</p>
-            <p style="margin: 2px 0 0;"><a href="https://palmcareai.com" style="color: #6366f1; text-decoration: none; font-size: 13px;">palmcareai.com</a></p>
-            <div style="margin-top: 32px; text-align: center;">
-              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 480px; width: 100%; border-radius: 12px; border: 1px solid #e5e5e5;" /></a>
+          <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+            <div style="background: linear-gradient(135deg, #0d9488, #0891b2); padding: 32px 40px; text-align: center;">
+              <p style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px;">PalmCare AI</p>
+              <p style="margin: 6px 0 0; font-size: 12px; color: rgba(255,255,255,0.8); letter-spacing: 0.05em;">WHERE CARE MEETS INTELLIGENCE</p>
             </div>
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #999; line-height: 1.6;">
-              <a href="https://palmcareai.com" style="text-decoration: none; display: inline-block; margin-bottom: 12px;"><img src="/qr-code.png" alt="Scan to visit palmcareai.com" style="width: 72px; height: 72px; border-radius: 6px;" /></a><br>
-              Palm Technologies &middot; Omaha, NE<br>
-              You received this because Comfort Home Care is listed in public agency directories.<br>
-              <a href="#" style="color: #999;">Unsubscribe</a>
+            <div style="padding: 40px; color: #0f172a; font-size: 15px; line-height: 1.7;">
+              <p style="margin: 0 0 16px 0;">Hi,</p>
+              <p style="margin: 0 0 16px 0;">I&rsquo;ve reached out a few times and I know you&rsquo;re busy. Running Comfort Home Care in Omaha is more than a full-time job.</p>
+              <p style="margin: 0 0 16px 0;">I won&rsquo;t keep filling your inbox.</p>
+              <div style="margin-bottom: 28px;">
+                <p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 0.08em;">When you're ready</p>
+                <p style="margin: 0; font-size: 15px; color: #0f172a; line-height: 1.7;">If the timing is ever right for a faster way to handle assessments, contracts, and documentation &mdash; we&rsquo;re here. One tap, AI handles the rest.</p>
+              </div>
+              <p style="margin: 0 0 16px 0; color: #475569; font-size: 14px;">Your next client is waiting. So are we.</p>
+            </div>
+            <div style="padding: 0 40px 32px; border-top: 1px solid #e2e8f0; padding-top: 24px;">
+              <p style="margin: 0; font-weight: 700; font-size: 15px; color: #0f172a;">Muse Ibrahim</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">President &amp; CEO</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #0d9488;">Palm Technologies, Inc.</p>
+              <p style="margin: 6px 0 0;"><a href="https://palmcareai.com" style="color: #0d9488; text-decoration: none; font-size: 13px; font-weight: 500;">palmcareai.com</a></p>
+            </div>
+            <div style="padding: 0 40px 32px; text-align: center;">
+              <a href="https://palmcareai.com"><img src="/product-showcase.png" alt="PalmCare AI" style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;" /></a>
+            </div>
+            <div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); border-radius: 12px; padding: 28px 32px; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>
+              <p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">Record it. Transcribe it. Contract it. All in your palm.</p>
+              <a href="https://palmcareai.com/#book-demo" style="display: inline-block; background-color: #ffffff; color: #0f766e; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">See It In Action</a>
+            </div>
+            <div style="padding: 24px 40px; background-color: #f1f5f9; border-top: 1px solid #e2e8f0; text-align: center;">
+              <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: #0f172a;">PalmCare AI</p>
+              <p style="margin: 0 0 12px; font-size: 12px; color: #475569;">Built for care professionals</p>
+              <p style="margin: 0 0 12px; font-size: 11px; color: #94a3b8;">Palm Technologies, Inc. &middot; Omaha, NE<br>You received this because Comfort Home Care is listed in public agency directories.</p>
+              <p style="margin: 0;"><a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Privacy</a>&nbsp;&middot;&nbsp;<a href="#" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a></p>
             </div>
           </div>
         </div>

@@ -170,128 +170,252 @@ class SequenceLaunchRequest(BaseModel):
     exclude_already_emailed: bool = True
 
 
-_EMAIL_STYLE = (
-    'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, '
-    '"Helvetica Neue", sans-serif; max-width: 580px; margin: 0 auto; '
-    "color: #1a1a1a; font-size: 15px; line-height: 1.8;"
-)
-_P = "margin: 0 0 16px 0;"
 _SITE = "https://palmcareai.com"
-_SIG = (
-    '<p style="margin-top: 28px; margin-bottom: 0; font-weight: 600;">Muse Ibrahim</p>'
-    '<p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">President &amp; CEO</p>'
-    '<p style="margin: 2px 0 0; color: #6366f1; font-size: 13px;">Palm Technologies, INC.</p>'
-    '<p style="margin: 6px 0 0;"><a href="https://palmcareai.com" '
-    'style="color: #6366f1; text-decoration: none; font-size: 13px;">palmcareai.com</a></p>'
-)
-_PRODUCT_IMG = (
-    '<div style="margin-top: 32px; text-align: center;">'
-    '<a href="https://palmcareai.com" style="text-decoration: none;">'
-    '<img src="https://palmcareai.com/product-showcase.png" '
-    'alt="PalmCare AI - Voice-powered home care management" '
-    'style="max-width: 480px; width: 100%; border-radius: 12px; border: 1px solid #e5e5e5;" />'
-    "</a></div>"
-)
-_FOOTER = (
-    '<div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; '
-    'text-align: center; font-size: 11px; color: #999; line-height: 1.6;">'
-    '<a href="https://palmcareai.com" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">'
-    '<img src="https://palmcareai.com/qr-code.png" '
-    'alt="Scan to visit palmcareai.com" '
-    'style="width: 72px; height: 72px; border-radius: 6px;" />'
-    "</a><br>"
-    "Palm Technologies &middot; Omaha, NE<br>"
-    "You received this because {provider_name} is listed in public agency directories.<br>"
-    '<a href="https://palmcareai.com/unsubscribe" style="color: #999;">Unsubscribe</a>'
-    "</div>"
-)
+_TEAL = "#0d9488"
+_TEAL_DARK = "#0f766e"
+_CYAN = "#0891b2"
+_SLATE_900 = "#0f172a"
+_SLATE_600 = "#475569"
+_SLATE_200 = "#e2e8f0"
+_SLATE_100 = "#f1f5f9"
 
 
-def _wrap(body_html: str) -> str:
-    return f'<div style="{_EMAIL_STYLE}">{body_html}{_SIG}{_PRODUCT_IMG}{_FOOTER}</div>'
+def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> str:
+    """Apple-style clean email wrapper with PALM IT branding."""
+    return (
+        '<div style="font-family: Inter, -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, '
+        'sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">'
+        # Header
+        '<div style="background: linear-gradient(135deg, #0d9488, #0891b2); '
+        'padding: 32px 40px; text-align: center; border-radius: 0;">'
+        '<p style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff; '
+        'letter-spacing: -0.3px;">PalmCare AI</p>'
+        '<p style="margin: 6px 0 0; font-size: 12px; color: rgba(255,255,255,0.8); '
+        'letter-spacing: 0.05em;">WHERE CARE MEETS INTELLIGENCE</p>'
+        '</div>'
+        # Body
+        f'<div style="padding: 40px; color: {_SLATE_900}; font-size: 15px; line-height: 1.7;">'
+        f'{body_sections}'
+        '</div>'
+        # Signature
+        f'<div style="padding: 0 40px 32px; border-top: 1px solid {_SLATE_200}; padding-top: 24px;">'
+        f'<p style="margin: 0; font-weight: 700; font-size: 15px; color: {_SLATE_900};">Muse Ibrahim</p>'
+        f'<p style="margin: 2px 0 0; font-size: 13px; color: {_TEAL};">President &amp; CEO</p>'
+        f'<p style="margin: 2px 0 0; font-size: 13px; color: {_TEAL};">Palm Technologies, Inc.</p>'
+        f'<p style="margin: 6px 0 0;"><a href="{_SITE}" '
+        f'style="color: {_TEAL}; text-decoration: none; font-size: 13px; font-weight: 500;">'
+        f'palmcareai.com</a></p>'
+        '</div>'
+        # Product showcase
+        '<div style="padding: 0 40px 32px; text-align: center;">'
+        f'<a href="{_SITE}" style="text-decoration: none;">'
+        f'<img src="{_SITE}/product-showcase.png" '
+        'alt="PalmCare AI — Record. Transcribe. Contract." '
+        'style="max-width: 520px; width: 100%; border-radius: 12px; '
+        f'border: 1px solid {_SLATE_200};" />'
+        '</a></div>'
+        # CTA banner
+        '<div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); '
+        'border-radius: 12px; padding: 28px 32px; text-align: center;">'
+        f'<p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>'
+        '<p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">'
+        'Record it. Transcribe it. Contract it. All in your palm.</p>'
+        f'<a href="{_SITE}/#book-demo" style="display: inline-block; background-color: #ffffff; '
+        f'color: {_TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 600; '
+        'padding: 12px 28px; border-radius: 8px;">See It In Action</a>'
+        '</div>'
+        # Footer
+        f'<div style="padding: 24px 40px; background-color: {_SLATE_100}; '
+        f'border-top: 1px solid {_SLATE_200}; text-align: center;">'
+        f'<p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: {_SLATE_900};">'
+        'PalmCare AI</p>'
+        f'<p style="margin: 0 0 12px; font-size: 12px; color: {_SLATE_600};">'
+        'Built for care professionals</p>'
+        f'<p style="margin: 0 0 12px; font-size: 11px; color: #94a3b8;">'
+        f'Palm Technologies, Inc. &middot; Omaha, NE<br>'
+        f'You received this because {provider_name} is listed in public agency directories.</p>'
+        '<p style="margin: 0;">'
+        f'<a href="{_SITE}/privacy" style="color: #94a3b8; text-decoration: underline; '
+        'font-size: 11px;">Privacy</a>'
+        '&nbsp;&middot;&nbsp;'
+        f'<a href="{_SITE}/unsubscribe" style="color: #94a3b8; text-decoration: underline; '
+        'font-size: 11px;">Unsubscribe</a>'
+        '</p></div>'
+        '</div>'
+    )
+
+
+def _section(heading: str, body: str) -> str:
+    """Apple-style content section with teal heading accent."""
+    return (
+        f'<div style="margin-bottom: 28px;">'
+        f'<p style="margin: 0 0 8px; font-size: 13px; font-weight: 700; color: {_TEAL}; '
+        f'text-transform: uppercase; letter-spacing: 0.08em;">{heading}</p>'
+        f'<p style="margin: 0; font-size: 15px; color: {_SLATE_900}; line-height: 1.7;">{body}</p>'
+        f'</div>'
+    )
+
+
+def _stat_block(stat: str, label: str) -> str:
+    """Inline stat block for data-driven emails."""
+    return (
+        f'<div style="display: inline-block; text-align: center; padding: 16px 24px; '
+        f'background-color: {_SLATE_100}; border: 1px solid {_SLATE_200}; border-radius: 12px; '
+        f'margin: 0 8px 12px 0;">'
+        f'<div style="font-size: 28px; font-weight: 800; color: {_TEAL};">{stat}</div>'
+        f'<div style="font-size: 11px; color: {_SLATE_600}; font-weight: 600; margin-top: 4px; '
+        f'text-transform: uppercase; letter-spacing: 0.05em;">{label}</div>'
+        f'</div>'
+    )
+
+
+_P = f"margin: 0 0 16px 0; color: {_SLATE_900};"
+_P_MUTED = f"margin: 0 0 16px 0; color: {_SLATE_600}; font-size: 14px;"
 
 
 EMAIL_TEMPLATES = {
     "warm_open": {
         "id": "warm_open",
         "name": "The Warm Open",
-        "subject": "quick question, {provider_name}",
+        "subject": "{provider_name} — quick question",
         "sequence_day": 1,
-        "description": "Day 1 — Warm, personal introduction. No pitch, just genuine curiosity. Opens the relationship.",
-        "body": _wrap(
+        "description": "Day 1 — Confident intro with PALM IT energy. Genuine curiosity, brand-aware.",
+        "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">I came across {{provider_name}} while looking at home care agencies in '
-            f"{{city}}. Building something in this industry takes real grit, and I respect it.</p>"
-            f'<p style="{_P}">I&rsquo;m genuinely curious: how are you handling client assessments and '
-            f"documentation right now? Mostly paper, or have you found something digital that works?</p>"
-            f'<p style="{_P}">No pitch, just trying to understand how agency owners in {{state_full}} '
-            f"actually run things day to day.</p>"
+            + _section(
+                "Why I reached out",
+                "I came across {provider_name} while researching home care agencies in {city}. "
+                "Building something in this industry takes real grit &mdash; I respect it."
+            )
+            + f'<p style="{_P}">Quick question: how is your team handling client assessments and '
+            'documentation right now? Still paper-based, or have you found something digital that '
+            'actually works?</p>'
+            + _section(
+                "What we do",
+                "PalmCare AI turns care assessments into signed contracts &mdash; automatically. "
+                "Staff record the interview on their phone. AI transcribes it, generates the care plan, "
+                "and produces a ready-to-sign agreement in seconds."
+            )
+            + f'<p style="{_P_MUTED}">No pitch today &mdash; just curious how agency owners in '
+            '{state_full} actually run things day to day.</p>',
+            "{provider_name}",
         ),
     },
     "pattern_interrupt": {
         "id": "pattern_interrupt",
         "name": "The Pattern Interrupt",
-        "subject": "not another software pitch",
+        "subject": "this isn't another software pitch",
         "sequence_day": 3,
-        "description": "Day 3 — Honest, self-aware, cuts through inbox noise. One data point, one soft CTA.",
-        "body": _wrap(
+        "description": "Day 3 — Self-aware, punchy. One killer stat, one CTA. PALM IT energy.",
+        "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">I know, your inbox is full of people trying to sell you things. '
-            f"This isn&rsquo;t that. (Well, not yet.)</p>"
-            f'<p style="{_P}">Here&rsquo;s what I actually wanted to share: agencies using '
-            f"voice-to-documentation tools are cutting <strong>12+ hours of admin work per week</strong>. "
-            f"That&rsquo;s a nurse and a half worth of time going back to patient care.</p>"
-            f'<p style="{_P}">If that number sounds interesting, I&rsquo;d love to show you how it works. '
-            f"10 minutes, no slides.</p>"
-            f'<p style="{_P}">Worth a quick chat?</p>'
+            f'<p style="{_P}">Your inbox is full of people selling things. This is different.</p>'
+            + _section(
+                "One number worth knowing",
+                "Agencies using voice-to-documentation tools are cutting "
+                "<strong>12+ hours of admin work per week</strong>. "
+                "That&rsquo;s a nurse and a half worth of time going back to patient care."
+            )
+            + '<div style="text-align: center; margin: 24px 0;">'
+            + _stat_block("12+", "Hours saved / week")
+            + _stat_block("10x", "Faster assessments")
+            + _stat_block("95%", "Accuracy rate")
+            + '</div>'
+            + f'<p style="{_P}">10 minutes. No slides. Just a live demo of how it works.</p>'
+            + f'<div style="text-align: center; margin: 24px 0;">'
+            f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
+            f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
+            'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
+            'border-radius: 10px;">Palm It &mdash; Book a Demo</a></div>',
+            "{provider_name}",
         ),
     },
     "aspiration": {
         "id": "aspiration",
         "name": "The Aspiration",
-        "subject": "imagine finishing paperwork before lunch",
+        "subject": "close clients before you leave their home",
         "sequence_day": 7,
-        "description": "Day 7 — Paints the picture of who they become. Identity-focused, not feature-focused.",
-        "body": _wrap(
+        "description": "Day 7 — Paints the picture. Shows the workflow transformation. Identity-driven.",
+        "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">Picture this: you sit down with a new client, talk through the '
-            f"assessment on your phone for a few minutes, and a complete care plan, SOAP notes, "
-            f"and service contract are ready before you leave their home.</p>"
-            f'<p style="{_P}">That&rsquo;s what PalmCare AI does for providers in {{state_full}}.</p>'
-            f'<p style="{_P}">No training manuals. No data entry. Just talk and it&rsquo;s done.</p>'
-            f'<p style="{_P}">Want to see it work with your actual workflow?</p>'
+            + _section(
+                "Picture this",
+                "You sit down with a new client. You talk through the assessment on your phone "
+                "for a few minutes. Before you leave their home &mdash; a complete care plan, "
+                "assessment, and service contract are ready to sign."
+            )
+            + _section(
+                "How it works",
+                "<strong>1.</strong> Record the assessment interview on your phone<br>"
+                "<strong>2.</strong> AI transcribes everything in real time<br>"
+                "<strong>3.</strong> AI generates the care plan + service agreement<br>"
+                "<strong>4.</strong> Contract sent to client &mdash; ready to sign"
+            )
+            + f'<p style="{_P}">No training manuals. No data entry. No delays.<br>'
+            '<strong>Just tap, talk, and Palm It.</strong></p>'
+            + '<p style="' + _P_MUTED + '">Want to see it work with {provider_name}&rsquo;s actual workflow?</p>'
+            + f'<div style="text-align: center; margin: 24px 0;">'
+            f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
+            f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
+            'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
+            'border-radius: 10px;">See It In Action</a></div>',
+            "{provider_name}",
         ),
     },
     "proof_point": {
         "id": "proof_point",
         "name": "The Proof Point",
-        "subject": "12 hours back every week",
+        "subject": "never lose a client to paperwork again",
         "sequence_day": 14,
-        "description": "Day 14 — Data-driven, concrete. One stat translated into their language.",
-        "body": _wrap(
+        "description": "Day 14 — Data-driven with traction proof. Stats in their language. Competitive edge.",
+        "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">Quick number for you: the average home care agency spends '
-            f"<strong>15+ hours per week</strong> on documentation alone. PalmCare AI brings that "
-            f"down to about 3.</p>"
-            f'<p style="{_P}">For {{provider_name}}, that could mean 12 hours back. Every '
-            f"single week. Time for more client visits, caregiver training, or honestly just getting "
-            f"home at a reasonable hour.</p>"
-            f'<p style="{_P}">Would that kind of time savings make a difference for your team?</p>'
+            + _section(
+                "The paperwork problem",
+                "The average home care agency spends <strong>15+ hours per week</strong> on "
+                "documentation alone. That&rsquo;s time that should go to client visits, "
+                "caregiver training, or honestly just getting home at a reasonable hour."
+            )
+            + '<div style="text-align: center; margin: 24px 0;">'
+            + _stat_block("15hrs", "Typical weekly docs")
+            + _stat_block("3hrs", "With PalmCare AI")
+            + _stat_block("12hrs", "Back every week")
+            + '</div>'
+            + _section(
+                "Why agencies are switching",
+                "<strong>60+ agencies</strong> on the waitlist. "
+                "<strong>24 active pilot users.</strong> "
+                "<strong>300+ assessments</strong> generated with 68% accuracy improvement. "
+                "No other platform does AI assessment generation, AI contract creation, "
+                "and voice-to-contract &mdash; we&rsquo;re the first."
+            )
+            + '<p style="' + _P + '">For {provider_name}, that could mean 12 hours back. Every single week.</p>'
+            + f'<div style="text-align: center; margin: 24px 0;">'
+            f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
+            f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
+            'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
+            'border-radius: 10px;">Palm It &mdash; Get Started</a></div>',
+            "{provider_name}",
         ),
     },
     "graceful_exit": {
         "id": "graceful_exit",
         "name": "The Graceful Exit",
-        "subject": "closing the loop",
+        "subject": "closing the loop, {provider_name}",
         "sequence_day": 28,
-        "description": "Day 28 — Short, respectful, no pressure. Ferrari-level restraint that signals confidence.",
-        "body": _wrap(
+        "description": "Day 28 — Short, confident, respectful. Restraint signals strength. Door stays open.",
+        "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">I&rsquo;ve reached out a couple of times and I know you&rsquo;re busy. '
-            f"Running {{provider_name}} in {{city}} is a full-time-and-a-half job.</p>"
-            f'<p style="{_P}">I won&rsquo;t keep filling your inbox. If the timing is ever right for '
-            f"a simpler way to handle documentation, I&rsquo;m here.</p>"
-            f'<p style="{_P}">No worries either way. Wishing you and your team the best.</p>'
+            f'<p style="{_P}">I&rsquo;ve reached out a few times and I know you&rsquo;re busy. '
+            'Running {provider_name} in {city} is more than a full-time job.</p>'
+            f'<p style="{_P}">I won&rsquo;t keep filling your inbox.</p>'
+            + _section(
+                "When you're ready",
+                "If the timing is ever right for a faster way to handle assessments, contracts, "
+                "and documentation &mdash; we&rsquo;re here. One tap, AI handles the rest."
+            )
+            + f'<p style="{_P_MUTED}">Your next client is waiting. So are we.</p>',
+            "{provider_name}",
         ),
     },
 }
