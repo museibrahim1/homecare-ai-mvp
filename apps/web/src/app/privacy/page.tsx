@@ -86,7 +86,7 @@ export default function PrivacyPolicyPage() {
             <p className="text-slate-600 mb-4">We do not sell your personal information. We may share information with:</p>
             <ul className="list-disc list-inside space-y-2 text-slate-600">
               <li><strong className="text-white">Service Providers:</strong> Third-party vendors who assist in operating the Service (e.g., cloud hosting, payment processing, email delivery). These providers are contractually obligated to protect your data.</li>
-              <li><strong className="text-white">AI Processing Partners:</strong> Audio and transcript data may be processed by AI service providers (e.g., OpenAI) for transcription and analysis. Data is transmitted securely and is not used to train third-party models.</li>
+              <li><strong className="text-white">AI Processing Partners:</strong> Audio and transcript data may be processed by AI service providers (e.g., Deepgram for transcription, Anthropic Claude for analysis) for transcription and document generation. Data is transmitted securely and is not used to train third-party models.</li>
               <li><strong className="text-white">Legal Requirements:</strong> When required by law, subpoena, or government request, or to protect our rights, safety, or property.</li>
               <li><strong className="text-white">Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets, with notice to affected users.</li>
             </ul>

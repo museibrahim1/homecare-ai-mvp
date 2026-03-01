@@ -3,7 +3,7 @@ Live Transcription Endpoint
 
 Provides a REST endpoint for streaming-style transcription.
 The mobile app sends audio chunks, and gets back partial transcripts
-in real-time using Deepgram Nova-3 (or OpenAI Whisper as fallback).
+in real-time using Deepgram Nova-3 (primary) with OpenAI Whisper as fallback.
 """
 
 import os

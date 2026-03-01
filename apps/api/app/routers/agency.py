@@ -242,21 +242,21 @@ async def extract_company_info(
     Extract company information from an uploaded document using AI.
     Supports letterheads, policy documents, contracts, etc.
     """
-    openai_key = os.getenv("OPENAI_API_KEY")
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    openai_key = os.getenv("OPENAI_API_KEY")
     
-    # Try OpenAI first (more reliable), then fall back to Anthropic
-    if openai_key:
-        result = await _extract_with_openai(request.content, request.document_type, openai_key)
-        if result.name or result.address or result.phone or result.email:
-            return result
-    
+    # Try Claude first (preferred), then fall back to OpenAI
     if anthropic_key:
         result = await _extract_with_claude(request.content, request.document_type, anthropic_key)
         if result.name or result.address or result.phone or result.email:
             return result
     
-    if not openai_key and not anthropic_key:
+    if openai_key:
+        result = await _extract_with_openai(request.content, request.document_type, openai_key)
+        if result.name or result.address or result.phone or result.email:
+            return result
+    
+    if not anthropic_key and not openai_key:
         logger.warning("No LLM API key found for document extraction")
     
     return ExtractedInfo()

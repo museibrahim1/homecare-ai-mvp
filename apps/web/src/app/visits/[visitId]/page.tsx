@@ -43,7 +43,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_
 // Pipeline steps
 const pipelineSteps = [
   { id: 'transcribe', key: 'transcription', label: 'Transcribe', icon: Mic, enabled: true },
-  { id: 'diarize', key: 'diarization', label: 'Diarize', icon: Users, enabled: true },
+  { id: 'diarize', key: 'diarization', label: 'Speakers', icon: Users, enabled: true },
   { id: 'bill', key: 'billing', label: 'Bill', icon: DollarSign, enabled: true },
   { id: 'note', key: 'note', label: 'Notes', icon: ClipboardList, enabled: true },
   { id: 'contract', key: 'contract', label: 'Contract', icon: FileCheck, enabled: true },

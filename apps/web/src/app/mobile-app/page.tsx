@@ -478,7 +478,7 @@ export default function MobileAppPage() {
           </div>
           <h2 className="ma-download-title">Ready to <em>Palm It?</em></h2>
           <p className="ma-download-sub">
-            Join thousands of home care professionals who save 3+ hours every day with PalmCare AI.
+            Care professionals are saving 3+ hours every day with PalmCare AI. Close faster. Document smarter. Never lose a client to paperwork again.
           </p>
           <div className="ma-download-btns">
             <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" className="ma-appstore-btn">
@@ -513,7 +513,7 @@ export default function MobileAppPage() {
             <Link href="/privacy">Privacy</Link>
             <Link href="/contact">Contact</Link>
           </div>
-          <p className="ma-footer-copy">© 2026 PalmCare AI (Palm Technologies LLC). All rights reserved.</p>
+          <p className="ma-footer-copy">© 2026 PalmCare AI (Palm Technologies Inc). All rights reserved.</p>
         </div>
       </footer>
     </div>

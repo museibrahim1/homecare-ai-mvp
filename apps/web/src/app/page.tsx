@@ -781,25 +781,27 @@ export default function LandingPage() {
                   Features <ChevronDown className="w-4 h-4" />
                 </button>
                 {navDropdown === 'features' && (
-                  <div className="absolute top-full left-0 mt-1 w-[520px] bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-4 grid grid-cols-2 gap-3">
-                    {[
-                      { href: '/features#ai', icon: Brain, label: 'AI Intelligence', desc: 'Voice assessments & smart contracts' },
-                      { href: '/features#ops', icon: ClipboardList, label: 'Agency Operations', desc: 'CRM, scheduling & visit management' },
-                      { href: '/features#billing', icon: BarChart3, label: 'Billing & Reports', desc: 'Automated billing & analytics' },
-                      { href: '/features#caregiver', icon: Smartphone, label: 'Caregiver Tools', desc: 'Mobile app & ADL logging' },
-                      { href: '/features#templates', icon: FileText, label: 'Templates & OCR', desc: 'Upload & auto-fill contracts' },
-                      { href: '/features#security', icon: Lock, label: 'Security & Compliance', desc: 'HIPAA compliant & encrypted' },
-                    ].map(item => (
-                      <Link key={item.href} href={item.href} className="flex items-start gap-3 p-3 rounded-lg hover:bg-dark-700 transition group">
-                        <div className="w-10 h-10 bg-primary-500/10 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-primary-500/20 transition">
-                          <item.icon className="w-5 h-5 text-primary-400" />
-                        </div>
-                        <div>
-                          <p className="text-white font-medium text-sm">{item.label}</p>
-                          <p className="text-dark-400 text-xs">{item.desc}</p>
-                        </div>
-                      </Link>
-                    ))}
+                  <div className="absolute top-full left-0 pt-2 w-[520px]">
+                    <div className="bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-4 grid grid-cols-2 gap-3">
+                      {[
+                        { href: '/features#ai', icon: Brain, label: 'AI Intelligence', desc: 'Voice assessments & smart contracts' },
+                        { href: '/features#ops', icon: ClipboardList, label: 'Agency Operations', desc: 'CRM, scheduling & visit management' },
+                        { href: '/features#billing', icon: BarChart3, label: 'Billing & Reports', desc: 'Automated billing & analytics' },
+                        { href: '/features#caregiver', icon: Smartphone, label: 'Caregiver Tools', desc: 'Mobile app & ADL logging' },
+                        { href: '/features#templates', icon: FileText, label: 'Templates & OCR', desc: 'Upload & auto-fill contracts' },
+                        { href: '/features#security', icon: Lock, label: 'Security & Compliance', desc: 'HIPAA compliant & encrypted' },
+                      ].map(item => (
+                        <Link key={item.href} href={item.href} className="flex items-start gap-3 p-3 rounded-lg hover:bg-dark-700 transition group">
+                          <div className="w-10 h-10 bg-primary-500/10 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-primary-500/20 transition">
+                            <item.icon className="w-5 h-5 text-primary-400" />
+                          </div>
+                          <div>
+                            <p className="text-white font-medium text-sm">{item.label}</p>
+                            <p className="text-dark-400 text-xs">{item.desc}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -810,17 +812,19 @@ export default function LandingPage() {
                   Solutions <ChevronDown className="w-4 h-4" />
                 </button>
                 {navDropdown === 'solutions' && (
-                  <div className="absolute top-full left-0 mt-1 w-72 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
-                    {[
-                      { label: 'Small Agencies', desc: 'Up to 30 clients', href: '#solutions' },
-                      { label: 'Medium Agencies', desc: '30–200 clients', href: '#solutions' },
-                      { label: 'Enterprise', desc: '200+ clients', href: '#solutions' },
-                    ].map(item => (
-                      <a key={item.label} href={item.href} className="block p-3 rounded-lg hover:bg-dark-700 transition">
-                        <p className="text-white font-medium text-sm">{item.label}</p>
-                        <p className="text-dark-400 text-xs">{item.desc}</p>
-                      </a>
-                    ))}
+                  <div className="absolute top-full left-0 pt-2 w-72">
+                    <div className="bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
+                      {[
+                        { label: 'Small Agencies', desc: 'Up to 30 clients', href: '#solutions' },
+                        { label: 'Medium Agencies', desc: '30–200 clients', href: '#solutions' },
+                        { label: 'Enterprise', desc: '200+ clients', href: '#solutions' },
+                      ].map(item => (
+                        <a key={item.label} href={item.href} onClick={() => setNavDropdown(null)} className="block p-3 rounded-lg hover:bg-dark-700 transition">
+                          <p className="text-white font-medium text-sm">{item.label}</p>
+                          <p className="text-dark-400 text-xs">{item.desc}</p>
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -831,15 +835,17 @@ export default function LandingPage() {
                   Resources <ChevronDown className="w-4 h-4" />
                 </button>
                 {navDropdown === 'resources' && (
-                  <div className="absolute top-full left-0 mt-1 w-64 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
-                    {[
-                      { label: 'Help Center', href: '/help' },
-                      { label: 'System Status', href: '/status' },
-                      { label: 'Privacy Policy', href: '/privacy' },
-                      { label: 'Contact Us', href: '/contact' },
-                    ].map(item => (
-                      <Link key={item.label} href={item.href} className="block p-3 rounded-lg hover:bg-dark-700 transition text-white text-sm font-medium">{item.label}</Link>
-                    ))}
+                  <div className="absolute top-full left-0 pt-2 w-64">
+                    <div className="bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
+                      {[
+                        { label: 'Help Center', href: '/help' },
+                        { label: 'System Status', href: '/status' },
+                        { label: 'Privacy Policy', href: '/privacy' },
+                        { label: 'Contact Us', href: '/contact' },
+                      ].map(item => (
+                        <Link key={item.label} href={item.href} className="block p-3 rounded-lg hover:bg-dark-700 transition text-white text-sm font-medium">{item.label}</Link>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -860,13 +866,13 @@ export default function LandingPage() {
 
           {mobileMenuOpen && (
             <div className="lg:hidden pt-4 pb-2 space-y-3 border-t border-dark-700 mt-4">
-              <Link href="/features" className="block py-2 text-dark-300 hover:text-white">Features</Link>
-              <a href="#solutions" className="block py-2 text-dark-300 hover:text-white">Solutions</a>
-              <Link href="/mobile-app" className="block py-2 text-dark-300 hover:text-white">Mobile App</Link>
-              <a href="#book-demo" className="block py-2 text-dark-300 hover:text-white">Schedule Demo</a>
-              <Link href="/contact" className="block py-2 text-dark-300 hover:text-white">Contact</Link>
-              <Link href="/login" className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
-              <a href="#book-demo" className="block btn-primary py-2 px-5 text-sm text-center mt-4">Schedule Demo</a>
+              <Link href="/features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Features</Link>
+              <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Solutions</a>
+              <Link href="/mobile-app" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Mobile App</Link>
+              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Schedule Demo</a>
+              <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Contact</Link>
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
+              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Schedule Demo</a>
             </div>
           )}
         </div>
