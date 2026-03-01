@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import UniformTypeIdentifiers
 
 // MARK: - Animated Voice Orb
 
@@ -173,6 +174,8 @@ struct RecordView: View {
     @State private var showError = false
     @State private var isProcessing = false
     @State private var showUpgrade = false
+    @State private var showFilePicker = false
+    @State private var uploadProgress: String?
 
     var body: some View {
         NavigationStack {
@@ -196,7 +199,7 @@ struct RecordView: View {
                         Spacer()
                         HStack(spacing: 10) {
                             ProgressView().tint(.white).scaleEffect(0.8)
-                            Text("Generating contract...")
+                            Text(uploadProgress ?? "Generating contract...")
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundColor(.white)
                         }
@@ -234,6 +237,11 @@ struct RecordView: View {
             .sheet(isPresented: $showUpgrade) {
                 SubscriptionView()
                     .environmentObject(api)
+            }
+            .sheet(isPresented: $showFilePicker) {
+                AudioFilePicker { url in
+                    handlePickedAudioFile(url)
+                }
             }
             .task {
                 await loadClients()
@@ -320,6 +328,22 @@ struct RecordView: View {
                 .font(.system(size: 12))
                 .foregroundColor(.white.opacity(0.4))
                 .padding(.top, 4)
+
+            Button { showFilePicker = true } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.up.doc.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("Upload Audio File")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .foregroundColor(.palmPrimaryLight)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
+                .background(Color.white.opacity(0.06))
+                .cornerRadius(20)
+                .overlay(Capsule().stroke(Color.palmPrimary.opacity(0.3), lineWidth: 1))
+            }
+            .padding(.top, 20)
 
             Spacer()
 
@@ -483,6 +507,62 @@ struct RecordView: View {
         }
     }
 
+    private func handlePickedAudioFile(_ url: URL) {
+        guard let clientId = selectedClient?.id else {
+            errorMessage = "Please select a client first."
+            showError = true
+            return
+        }
+
+        withAnimation {
+            isProcessing = true
+            uploadProgress = "Uploading audio file..."
+        }
+
+        Task {
+            do {
+                let usage = try? await api.fetchUsage()
+                if usage?.isAtLimit == true {
+                    await MainActor.run {
+                        withAnimation { isProcessing = false }
+                        uploadProgress = nil
+                        showUpgrade = true
+                    }
+                    return
+                }
+
+                let accessing = url.startAccessingSecurityScopedResource()
+                defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+
+                let data = try Data(contentsOf: url)
+                let filename = url.lastPathComponent
+
+                await MainActor.run { uploadProgress = "Creating assessment..." }
+                let visit = try await api.createVisit(clientId: clientId)
+
+                await MainActor.run { uploadProgress = "Processing audio..." }
+                _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: filename, autoProcess: true)
+
+                await MainActor.run {
+                    withAnimation { isProcessing = false }
+                    uploadProgress = nil
+                }
+            } catch {
+                await MainActor.run {
+                    withAnimation { isProcessing = false }
+                    uploadProgress = nil
+                    let msg = error.localizedDescription.lowercased()
+                    if msg.contains("limit") || msg.contains("plan") || msg.contains("upgrade") || msg.contains("quota") || msg.contains("exceeded") {
+                        showUpgrade = true
+                    } else {
+                        errorMessage = error.localizedDescription
+                        showError = true
+                    }
+                }
+            }
+        }
+    }
+
     private func loadClients() async {
         do {
             let fetched = try await api.fetchClients()
@@ -569,6 +649,36 @@ struct ClientPickerSheet: View {
                 })
                 .environmentObject(api)
             }
+        }
+    }
+}
+
+// MARK: - Audio File Picker
+
+struct AudioFilePicker: UIViewControllerRepresentable {
+    let onPick: (URL) -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(onPick: onPick) }
+
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let types: [UTType] = [.audio, .mpeg4Audio, .mp3, .wav, .aiff,
+                               UTType("com.apple.m4a-audio") ?? .audio,
+                               UTType("public.mp3") ?? .audio]
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: true)
+        picker.delegate = context.coordinator
+        picker.allowsMultipleSelection = false
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let onPick: (URL) -> Void
+        init(onPick: @escaping (URL) -> Void) { self.onPick = onPick }
+
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            guard let url = urls.first else { return }
+            onPick(url)
         }
     }
 }

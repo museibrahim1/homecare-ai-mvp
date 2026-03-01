@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Free tier limit
-FREE_ASSESSMENT_LIMIT = 2
+FREE_ASSESSMENT_LIMIT = 50
 
 
 def _get_user_subscription(db: Session, user: User):

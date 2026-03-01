@@ -128,19 +128,25 @@ struct SubscriptionPlan: Codable, Identifiable {
 
 struct UserSubscription: Codable {
     let plan_name: String?
-    let status: String?
-    let runs_used: Int?
-    let runs_limit: Int?
-    let current_period_end: String?
+    let plan_tier: String?
+    let has_paid_plan: Bool?
+    let completed_assessments: Int?
+    let total_assessments: Int?
+    let max_allowed: Int?
+    let can_create: Bool?
+    let upgrade_required: Bool?
+
+    // Legacy aliases for Settings display
+    var runs_used: Int? { total_assessments }
+    var runs_limit: Int? { max_allowed }
 
     var isAtLimit: Bool {
-        guard let used = runs_used, let limit = runs_limit else { return false }
-        return used >= limit
+        upgrade_required ?? false
     }
 
     var runsRemaining: Int {
-        guard let used = runs_used, let limit = runs_limit else { return 0 }
-        return max(0, limit - used)
+        guard let total = total_assessments, let max = max_allowed else { return 0 }
+        return Swift.max(0, max - total)
     }
 }
 
