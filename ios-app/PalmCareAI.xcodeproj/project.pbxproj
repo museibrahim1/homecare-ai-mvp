@@ -14,6 +14,7 @@
 		6699DA1B3C377734838CD895 /* PalmCareAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */; };
 		66B8766816DFAE60BD26C157 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DC7E34D4B0393336B0CBB48 /* APIService.swift */; };
 		7955D7C2A2D22D6AEF1DF236 /* AudioRecorderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */; };
+		8A1B2C3D4E5F6A7B8C9D0E1F /* LiveTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* LiveTranscriptionService.swift */; };
 		9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965C098053DF16C330D69A47 /* RegisterView.swift */; };
 		A00F019F5C3997BF6F3B5A0E /* ClientsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE6E6ABEA65540D82DF2FF30 /* ClientsView.swift */; };
 		C14C3133F283022BF06C01B1 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7229E0471D9D4E3D984E2C /* MainTabView.swift */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1A2B3C4D5E6F7A8B9C0D1E2F /* LiveTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscriptionService.swift; sourceTree = "<group>"; };
 		25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorderService.swift; sourceTree = "<group>"; };
 		2DEA75021BD113DD86530A11 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
 		4DC7E34D4B0393336B0CBB48 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 			children = (
 				4DC7E34D4B0393336B0CBB48 /* APIService.swift */,
 				25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */,
+				1A2B3C4D5E6F7A8B9C0D1E2F /* LiveTranscriptionService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -215,6 +218,7 @@
 			files = (
 				66B8766816DFAE60BD26C157 /* APIService.swift in Sources */,
 				7955D7C2A2D22D6AEF1DF236 /* AudioRecorderService.swift in Sources */,
+				8A1B2C3D4E5F6A7B8C9D0E1F /* LiveTranscriptionService.swift in Sources */,
 				A00F019F5C3997BF6F3B5A0E /* ClientsView.swift in Sources */,
 				441ED8E4CA766509026656D4 /* HomeView.swift in Sources */,
 				3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */,

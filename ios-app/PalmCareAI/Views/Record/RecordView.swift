@@ -1,9 +1,393 @@
 import SwiftUI
 import AVFoundation
 
+// MARK: - Animated Voice Orb (Deepgram-inspired)
+
+struct VoiceOrb: View {
+    let isActive: Bool
+    let audioLevel: Float
+
+    @State private var rotation: Double = 0
+    @State private var morphPhase: CGFloat = 0
+
+    private var normalizedLevel: CGFloat {
+        CGFloat(max(0, min(1, audioLevel)))
+    }
+
+    var body: some View {
+        ZStack {
+            // Outer glow rings
+            ForEach(0..<3, id: \.self) { ring in
+                OrbRing(
+                    phase: morphPhase + CGFloat(ring) * 0.7,
+                    audioLevel: normalizedLevel,
+                    ringIndex: ring
+                )
+                .frame(width: orbSize(for: ring), height: orbSize(for: ring))
+                .rotationEffect(.degrees(rotation + Double(ring) * 40))
+            }
+
+            // Core orb
+            OrbShape(phase: morphPhase, audioLevel: normalizedLevel)
+                .fill(
+                    AngularGradient(
+                        colors: isActive
+                            ? [
+                                Color.palmPrimary,
+                                Color.palmAccent,
+                                Color(red: 139/255, green: 92/255, blue: 246/255),
+                                Color.palmPrimaryLight,
+                                Color.palmPrimary,
+                            ]
+                            : [
+                                Color.palmPrimary.opacity(0.7),
+                                Color.palmAccent.opacity(0.5),
+                                Color.palmPrimaryDark.opacity(0.6),
+                                Color.palmPrimary.opacity(0.7),
+                            ],
+                        center: .center
+                    )
+                )
+                .frame(width: 140, height: 140)
+                .shadow(color: Color.palmPrimary.opacity(isActive ? 0.6 : 0.3), radius: isActive ? 30 : 15, y: 0)
+                .overlay(
+                    OrbShape(phase: morphPhase, audioLevel: normalizedLevel)
+                        .fill(
+                            RadialGradient(
+                                colors: [.white.opacity(0.25), .clear],
+                                center: .topLeading,
+                                startRadius: 0,
+                                endRadius: 80
+                            )
+                        )
+                        .frame(width: 140, height: 140)
+                )
+
+            // Center icon
+            if isActive {
+                // Animated waveform bars
+                HStack(spacing: 3) {
+                    ForEach(0..<5, id: \.self) { i in
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.white)
+                            .frame(width: 3, height: barHeight(for: i))
+                    }
+                }
+            } else {
+                Image(systemName: "mic.fill")
+                    .font(.system(size: 36, weight: .medium))
+                    .foregroundColor(.white)
+            }
+        }
+        .onAppear {
+            withAnimation(.linear(duration: 12).repeatForever(autoreverses: false)) {
+                rotation = 360
+            }
+            withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                morphPhase = 1
+            }
+        }
+    }
+
+    private func orbSize(for ring: Int) -> CGFloat {
+        let base: CGFloat = 170 + CGFloat(ring) * 30
+        let pulse = isActive ? normalizedLevel * 15 : 0
+        return base + pulse
+    }
+
+    private func barHeight(for index: Int) -> CGFloat {
+        let base: CGFloat = 12
+        let audioBoost = normalizedLevel * 24
+        let variation = sin(morphPhase * .pi * 2 + CGFloat(index) * 1.2) * 8
+        return max(6, base + audioBoost + variation)
+    }
+}
+
+struct OrbShape: Shape {
+    var phase: CGFloat
+    var audioLevel: CGFloat
+
+    var animatableData: AnimatablePair<CGFloat, CGFloat> {
+        get { AnimatablePair(phase, audioLevel) }
+        set { phase = newValue.first; audioLevel = newValue.second }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let radius = min(rect.width, rect.height) / 2
+        let points = 120
+        var path = Path()
+
+        for i in 0...points {
+            let angle = CGFloat(i) / CGFloat(points) * .pi * 2
+            let wobble1 = sin(angle * 3 + phase * .pi * 2) * (4 + audioLevel * 8)
+            let wobble2 = cos(angle * 2 - phase * .pi * 1.5) * (3 + audioLevel * 6)
+            let wobble3 = sin(angle * 5 + phase * .pi * 3) * (2 + audioLevel * 4)
+            let r = radius + wobble1 + wobble2 + wobble3
+
+            let point = CGPoint(
+                x: center.x + r * cos(angle),
+                y: center.y + r * sin(angle)
+            )
+
+            if i == 0 {
+                path.move(to: point)
+            } else {
+                path.addLine(to: point)
+            }
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+struct OrbRing: View {
+    let phase: CGFloat
+    let audioLevel: CGFloat
+    let ringIndex: Int
+
+    var body: some View {
+        OrbShape(phase: phase, audioLevel: audioLevel * 0.5)
+            .stroke(
+                AngularGradient(
+                    colors: ringColors,
+                    center: .center
+                ),
+                lineWidth: ringIndex == 0 ? 2 : 1.5
+            )
+            .opacity(0.3 - Double(ringIndex) * 0.08)
+    }
+
+    private var ringColors: [Color] {
+        switch ringIndex {
+        case 0: return [Color.palmPrimary, Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimary]
+        case 1: return [Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimaryLight, Color.palmAccent]
+        default: return [Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimary, Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255)]
+        }
+    }
+}
+
+// MARK: - Waveform Visualizer (Deepgram-style)
+
+struct WaveformBar: View {
+    let level: Float
+    let isActive: Bool
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 1)
+            .fill(isActive ? Color.palmPrimary : Color.palmPrimary.opacity(0.3))
+            .frame(width: 2, height: max(2, CGFloat(level) * 20))
+    }
+}
+
+struct LiveWaveform: View {
+    let audioLevel: Float
+    let isRecording: Bool
+    @State private var levels: [Float] = Array(repeating: 0.1, count: 50)
+
+    var body: some View {
+        HStack(spacing: 1.5) {
+            ForEach(0..<levels.count, id: \.self) { i in
+                WaveformBar(level: levels[i], isActive: i < Int(Float(levels.count) * 0.7))
+            }
+        }
+        .frame(height: 24)
+        .onChange(of: audioLevel) { newLevel in
+            if isRecording {
+                levels.removeFirst()
+                levels.append(max(0.08, newLevel))
+            }
+        }
+    }
+}
+
+// MARK: - Live Transcript Panel
+
+struct TranscriptPanel: View {
+    let segments: [TranscriptSegment]
+    let isTranscribing: Bool
+    let elapsedTime: TimeInterval
+    let audioLevel: Float
+    let isRecording: Bool
+
+    private static let speakerColors: [Color] = [
+        Color.palmPrimary,
+        Color(red: 59/255, green: 130/255, blue: 246/255),
+        Color(red: 139/255, green: 92/255, blue: 246/255),
+        Color(red: 217/255, green: 119/255, blue: 6/255),
+    ]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header bar (Deepgram-style)
+            HStack {
+                HStack(spacing: 8) {
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.palmPrimary)
+
+                    Text("PalmCare AI")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.white)
+                }
+
+                Spacer()
+
+                HStack(spacing: 6) {
+                    Text("Live Assessment")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.6))
+
+                    if isTranscribing {
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 6, height: 6)
+                    }
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color(red: 24/255, green: 24/255, blue: 27/255))
+
+            // Waveform + timer bar
+            HStack(spacing: 10) {
+                Text(formatTime(elapsedTime))
+                    .font(.system(size: 11, weight: .medium).monospacedDigit())
+                    .foregroundColor(.palmPrimary)
+
+                LiveWaveform(audioLevel: audioLevel, isRecording: isRecording)
+
+                Text(formatTime(max(0, elapsedTime)))
+                    .font(.system(size: 11, weight: .medium).monospacedDigit())
+                    .foregroundColor(.white.opacity(0.4))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Color(red: 30/255, green: 30/255, blue: 33/255))
+
+            // Transcript content
+            ScrollViewReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        if segments.isEmpty && isTranscribing {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .tint(.palmPrimary)
+                                    .scaleEffect(0.8)
+                                Text("Listening...")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.white.opacity(0.5))
+                            }
+                            .padding(.top, 20)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        } else if segments.isEmpty {
+                            VStack(spacing: 8) {
+                                Image(systemName: "waveform")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(.white.opacity(0.2))
+                                Text("Start recording to see live transcription")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.white.opacity(0.35))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 30)
+                        }
+
+                        ForEach(segments) { segment in
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 6) {
+                                    Circle()
+                                        .fill(speakerColor(for: segment.speaker))
+                                        .frame(width: 8, height: 8)
+
+                                    Text(segment.speakerLabel + ":")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(speakerColor(for: segment.speaker))
+                                }
+
+                                HighlightedText(text: segment.text)
+                            }
+                            .id(segment.id)
+                        }
+                    }
+                    .padding(14)
+                }
+                .onChange(of: segments.count) { _ in
+                    if let last = segments.last {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            proxy.scrollTo(last.id, anchor: .bottom)
+                        }
+                    }
+                }
+            }
+            .frame(maxHeight: .infinity)
+            .background(Color(red: 39/255, green: 39/255, blue: 42/255))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.3), radius: 12, y: 4)
+    }
+
+    private func speakerColor(for speaker: Int) -> Color {
+        Self.speakerColors[speaker % Self.speakerColors.count]
+    }
+
+    private func formatTime(_ interval: TimeInterval) -> String {
+        let m = Int(interval) / 60
+        let s = Int(interval) % 60
+        return String(format: "%02d:%02d", m, s)
+    }
+}
+
+// MARK: - Highlighted Text (medical keywords)
+
+struct HighlightedText: View {
+    let text: String
+
+    var body: some View {
+        let words = text.split(separator: " ").map(String.init)
+        let result = buildAttributedWords(words)
+        return result
+    }
+
+    @ViewBuilder
+    private func buildAttributedWords(_ words: [String]) -> some View {
+        WrappingHStack(words: words)
+    }
+}
+
+struct WrappingHStack: View {
+    let words: [String]
+
+    var body: some View {
+        var text = Text("")
+        for (i, word) in words.enumerated() {
+            let isKeyword = LiveTranscriptionService.isMedicalKeyword(word)
+            let separator = i > 0 ? Text(" ") : Text("")
+            if isKeyword {
+                text = text + separator + Text(word)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.palmPrimaryLight)
+            } else {
+                text = text + separator + Text(word)
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.88))
+            }
+        }
+        return text
+            .lineSpacing(4)
+    }
+}
+
+// MARK: - Main Record View
+
 struct RecordView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var recorder = AudioRecorderService()
+    @State private var liveTranscription: LiveTranscriptionService?
 
     @State private var clients: [Client] = []
     @State private var selectedClient: Client?
@@ -19,180 +403,25 @@ struct RecordView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                VStack(spacing: 2) {
-                    Text("New Assessment")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.palmText)
-
-                    Text("PALM IT — AI IS LISTENING")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.palmPrimary)
-                        .tracking(1.2)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.white)
-                .overlay(
-                    Rectangle().fill(Color.palmBorder).frame(height: 1),
-                    alignment: .bottom
-                )
+            ZStack {
+                // Dark background
+                Color(red: 12/255, green: 12/255, blue: 14/255)
+                    .ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    Button { showClientPicker = true } label: {
-                        HStack {
-                            HStack(spacing: 10) {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.palmBackground)
-                                        .frame(width: 30, height: 30)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.palmBorder, style: StrokeStyle(lineWidth: 1.5, dash: [4]))
-                                        )
+                    // Top bar
+                    topBar
+                        .padding(.bottom, 8)
 
-                                    Image(systemName: "person")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.palmSecondary)
-                                }
-
-                                Text(selectedClient?.full_name ?? "Select a client")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(selectedClient != nil ? .palmText : .palmSecondary)
-                            }
-
-                            Spacer()
-
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 14))
-                                .foregroundColor(.palmSecondary)
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 11)
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1.5))
-                        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
+                    if recorder.isRecording || !transcriptSegments.isEmpty {
+                        recordingLayout
+                    } else if recordingFinishedURL != nil {
+                        finishedLayout
+                    } else {
+                        idleLayout
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 20)
-                    .padding(.bottom, 28)
-
-                    Text(timeString(recorder.duration))
-                        .font(.system(size: 58, weight: .heavy, design: .default))
-                        .foregroundColor(.palmText)
-                        .tracking(-2)
-                        .monospacedDigit()
-                        .padding(.bottom, 4)
-
-                    Text(statusText.uppercased())
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.palmSecondary)
-                        .tracking(1.5)
-                        .padding(.bottom, 36)
-
-                    VStack(spacing: 13) {
-                        ZStack {
-                            Circle()
-                                .fill(recorder.isRecording ? Color.red.opacity(0.05) : Color.palmPrimary.opacity(0.05))
-                                .frame(width: 130, height: 130)
-                                .overlay(
-                                    Circle()
-                                        .stroke(
-                                            recorder.isRecording ? Color.red.opacity(0.15) : Color.palmPrimary.opacity(0.15),
-                                            lineWidth: 1.5
-                                        )
-                                )
-                                .scaleEffect(recorder.isRecording ? (1.0 + CGFloat(recorder.audioLevel) * 0.15) : 1.0)
-                                .animation(.easeInOut(duration: 0.15), value: recorder.audioLevel)
-
-                            Circle()
-                                .fill(
-                                    recorder.isRecording
-                                        ? LinearGradient(colors: [.red, .red.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                        : LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                )
-                                .frame(width: 82, height: 82)
-                                .shadow(
-                                    color: (recorder.isRecording ? Color.red : Color.palmPrimary).opacity(0.45),
-                                    radius: 10, y: 3
-                                )
-                                .overlay(
-                                    Group {
-                                        if recorder.isRecording {
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .fill(Color.white)
-                                                .frame(width: 26, height: 26)
-                                        } else {
-                                            Image(systemName: "mic.fill")
-                                                .font(.system(size: 32))
-                                                .foregroundColor(.white)
-                                        }
-                                    }
-                                )
-                        }
-                        .onTapGesture { handleRecordTap() }
-
-                        Text(recorder.isRecording ? "Tap to stop recording" : "Tap to start · AI handles the rest")
-                            .font(.system(size: 12))
-                            .foregroundColor(.palmSecondary)
-                    }
-
-                    Spacer()
-
-                    if recordingFinishedURL != nil && !recorder.isRecording {
-                        VStack(spacing: 12) {
-                            if let statusMsg = uploadStatusMessage {
-                                Text(statusMsg)
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(.palmPrimary)
-                                    .padding(.bottom, 4)
-                            }
-
-                            Button { uploadRecording() } label: {
-                                HStack(spacing: 8) {
-                                    if isUploading {
-                                        ProgressView().tint(.white)
-                                    } else {
-                                        Image(systemName: "arrow.up.circle.fill")
-                                            .font(.system(size: 18))
-                                    }
-                                    Text(isUploading ? "Processing..." : "Upload & Process")
-                                        .font(.system(size: 14, weight: .heavy))
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 13)
-                                .background(LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .cornerRadius(12)
-                                .shadow(color: Color.palmPrimary.opacity(0.35), radius: 7, y: 3)
-                            }
-                            .disabled(isUploading || selectedClient == nil)
-                            .opacity(selectedClient == nil ? 0.5 : 1)
-
-                            if selectedClient == nil {
-                                Text("Please select a client before uploading")
-                                    .font(.caption)
-                                    .foregroundColor(.orange)
-                            }
-
-                            Button {
-                                discardRecording()
-                            } label: {
-                                Text("Discard")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(.red)
-                            }
-                        }
-                        .padding(.horizontal, 18)
-                        .padding(.bottom, 16)
-                    }
-
-                    Spacer().frame(height: 80)
                 }
-                .frame(maxWidth: .infinity)
             }
-            .background(Color.palmBackground)
             .sheet(isPresented: $showClientPicker) {
                 ClientPickerSheet(clients: clients, selected: $selectedClient)
             }
@@ -207,11 +436,9 @@ struct RecordView: View {
                 Text("PalmCareAI needs microphone access to record visits. Please enable it in Settings.")
             }
             .alert("Upload Successful", isPresented: $uploadSuccess) {
-                Button("OK") {
-                    discardRecording()
-                }
+                Button("OK") { discardRecording() }
             } message: {
-                Text("Your recording has been uploaded and the AI pipeline is processing it. Check the home screen for status updates.")
+                Text("Your recording has been uploaded and the AI pipeline is processing it.")
             }
             .alert("Error", isPresented: $showError) {
                 Button("OK", role: .cancel) {}
@@ -222,24 +449,264 @@ struct RecordView: View {
                 await loadClients()
                 permissionGranted = await recorder.requestPermission()
             }
+            .onAppear {
+                if liveTranscription == nil {
+                    liveTranscription = LiveTranscriptionService(api: api)
+                }
+            }
         }
     }
 
-    private var statusText: String {
-        if recorder.isRecording {
-            return "Recording... Tap to stop"
-        } else if isUploading {
-            return "Uploading & processing"
-        } else if recordingFinishedURL != nil {
-            return "Recording complete"
-        } else {
-            return "Ready to Palm It"
+    private var transcriptSegments: [TranscriptSegment] {
+        liveTranscription?.segments ?? []
+    }
+
+    // MARK: - Top Bar
+
+    private var topBar: some View {
+        HStack {
+            // Client selector
+            Button { showClientPicker = true } label: {
+                HStack(spacing: 8) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.palmPrimary.opacity(0.15))
+                            .frame(width: 28, height: 28)
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmPrimary)
+                    }
+
+                    Text(selectedClient?.full_name ?? "Select Client")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(selectedClient != nil ? .white : .white.opacity(0.5))
+                        .lineLimit(1)
+
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white.opacity(0.4))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.white.opacity(0.06))
+                .cornerRadius(20)
+                .overlay(
+                    Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1)
+                )
+            }
+
+            Spacer()
+
+            // Timer
+            if recorder.isRecording {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 7, height: 7)
+
+                    Text(timeString(recorder.duration))
+                        .font(.system(size: 14, weight: .bold).monospacedDigit())
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.red.opacity(0.15))
+                .cornerRadius(16)
+                .overlay(Capsule().stroke(Color.red.opacity(0.3), lineWidth: 1))
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+    }
+
+    // MARK: - Idle Layout (before recording)
+
+    private var idleLayout: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // Orb
+            VoiceOrb(isActive: false, audioLevel: 0)
+                .frame(width: 240, height: 240)
+                .onTapGesture { handleRecordTap() }
+
+            Text("Tap to start recording")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.palmPrimaryLight)
+                .padding(.top, 16)
+
+            Text("AI handles the rest")
+                .font(.system(size: 12))
+                .foregroundColor(.white.opacity(0.4))
+                .padding(.top, 4)
+
+            Spacer()
+
+            // Bottom info
+            HStack(spacing: 16) {
+                FeaturePill(icon: "waveform", text: "Live Transcription")
+                FeaturePill(icon: "person.2", text: "Speaker ID")
+                FeaturePill(icon: "doc.text", text: "Auto Contract")
+            }
+            .padding(.bottom, 90)
         }
     }
+
+    // MARK: - Recording Layout (orb + transcript)
+
+    private var recordingLayout: some View {
+        VStack(spacing: 12) {
+            // Compact orb
+            VoiceOrb(isActive: true, audioLevel: recorder.audioLevel)
+                .frame(width: 120, height: 120)
+                .onTapGesture { handleRecordTap() }
+
+            Text("Tap orb to stop")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.white.opacity(0.4))
+
+            // Live transcript panel
+            TranscriptPanel(
+                segments: transcriptSegments,
+                isTranscribing: liveTranscription?.isTranscribing ?? false,
+                elapsedTime: recorder.duration,
+                audioLevel: recorder.audioLevel,
+                isRecording: recorder.isRecording
+            )
+            .padding(.horizontal, 14)
+
+            Spacer().frame(height: 80)
+        }
+    }
+
+    // MARK: - Finished Layout (after recording, before upload)
+
+    private var finishedLayout: some View {
+        VStack(spacing: 0) {
+            // Show transcript if we have one
+            if !transcriptSegments.isEmpty {
+                TranscriptPanel(
+                    segments: transcriptSegments,
+                    isTranscribing: false,
+                    elapsedTime: recorder.duration,
+                    audioLevel: 0,
+                    isRecording: false
+                )
+                .padding(.horizontal, 14)
+                .padding(.top, 8)
+            } else {
+                Spacer()
+
+                VStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.palmPrimary.opacity(0.1))
+                            .frame(width: 80, height: 80)
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.palmPrimary)
+                    }
+
+                    Text("Recording Complete")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+
+                    Text(timeString(recorder.duration))
+                        .font(.system(size: 14).monospacedDigit())
+                        .foregroundColor(.white.opacity(0.5))
+                }
+            }
+
+            Spacer()
+
+            // Upload section
+            VStack(spacing: 10) {
+                if let statusMsg = uploadStatusMessage {
+                    HStack(spacing: 6) {
+                        ProgressView().tint(.palmPrimary).scaleEffect(0.7)
+                        Text(statusMsg)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.palmPrimary)
+                    }
+                }
+
+                Button { uploadRecording() } label: {
+                    HStack(spacing: 8) {
+                        if isUploading {
+                            ProgressView().tint(.white)
+                        } else {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .font(.system(size: 18))
+                        }
+                        Text(isUploading ? "Processing..." : "Upload & Process")
+                            .font(.system(size: 14, weight: .heavy))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.palmPrimary, Color.palmAccent],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(14)
+                    .shadow(color: Color.palmPrimary.opacity(0.4), radius: 10, y: 4)
+                }
+                .disabled(isUploading || selectedClient == nil)
+                .opacity(selectedClient == nil ? 0.5 : 1)
+
+                if selectedClient == nil {
+                    Text("Select a client above before uploading")
+                        .font(.system(size: 11))
+                        .foregroundColor(.orange.opacity(0.8))
+                }
+
+                Button { discardRecording() } label: {
+                    Text("Discard Recording")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.red.opacity(0.8))
+                }
+                .padding(.top, 4)
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 90)
+        }
+    }
+
+    // MARK: - Feature Pill
+
+    struct FeaturePill: View {
+        let icon: String
+        let text: String
+
+        var body: some View {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 10))
+                Text(text)
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .foregroundColor(.white.opacity(0.35))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(Color.white.opacity(0.04))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.white.opacity(0.06), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Actions
 
     private func handleRecordTap() {
         if recorder.isRecording {
-            recordingFinishedURL = recorder.stopRecording()
+            let url = recorder.stopRecording()
+            recordingFinishedURL = url
+            liveTranscription?.stopTranscribing()
         } else {
             if !permissionGranted {
                 permissionGranted = recorder.checkPermissionStatus()
@@ -250,8 +717,12 @@ struct RecordView: View {
             }
             recordingFinishedURL = nil
             uploadStatusMessage = nil
+            liveTranscription?.segments = []
             do {
                 try recorder.startRecording()
+                if let url = recorder.recordingURL {
+                    liveTranscription?.startTranscribing(recordingURL: url)
+                }
             } catch {
                 errorMessage = "Failed to start recording: \(error.localizedDescription)"
                 showError = true
@@ -270,10 +741,7 @@ struct RecordView: View {
         Task {
             do {
                 let visit = try await api.createVisit(clientId: clientId)
-
-                await MainActor.run {
-                    uploadStatusMessage = "Uploading audio..."
-                }
+                await MainActor.run { uploadStatusMessage = "Uploading audio..." }
 
                 let data = try Data(contentsOf: url)
                 let filename = url.lastPathComponent
@@ -302,6 +770,8 @@ struct RecordView: View {
         recordingFinishedURL = nil
         recorder.recordingURL = nil
         uploadStatusMessage = nil
+        liveTranscription?.segments = []
+        liveTranscription?.fullTranscript = ""
     }
 
     private func loadClients() async {
@@ -314,9 +784,9 @@ struct RecordView: View {
     }
 
     private func timeString(_ interval: TimeInterval) -> String {
-        let minutes = Int(interval) / 60
-        let seconds = Int(interval) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        let m = Int(interval) / 60
+        let s = Int(interval) % 60
+        return String(format: "%02d:%02d", m, s)
     }
 }
 
