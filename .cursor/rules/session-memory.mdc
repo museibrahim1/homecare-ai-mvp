@@ -8,34 +8,138 @@
 
 | Field | Value |
 |-------|-------|
-| Legal Entity | PalmTai Inc. (C Corp, Nebraska) |
+| Legal Entity | Palm Technologies Inc (C Corp, Nebraska) |
 | DBA | PalmCare AI |
 | HQ | Omaha, Nebraska |
-| CEO | Muse Ibrahim |
+| CEO/President | Muse Ibrahim |
 | CEO Email | museibrahim@palmtai.com (NEVER use as sender for transactional emails) |
 | CEO Phone | (213) 569-7693 |
 | Domains | palmcareai.com (website), palmtai.com (app/API) |
-| Product | AI care assessment engine for home care agencies |
-| Flow | Visit audio → transcription → diarization → SOAP notes → contracts → billables |
+| Employees | 1 (lean & building) |
+| Funding | Self-funded |
+| Industry | Healthcare Technology |
+| Publicly Traded | No |
+| OpenAI Org ID | org-NR84d0XFs134RXZ6aEI085x8 |
 
-## Brand
+### What We Do
+AI-powered patient assessment and contract generation platform for home care agencies. Staff records assessment interview on phone, AI transcribes in real time, generates assessment + care plan + service agreement, contract sent to client ready to sign. "One tap. AI handles the rest."
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| palmPrimary | #0d9488 | Main teal |
-| palmPrimaryDark | #115e59 | Buttons, gradients |
-| palmPrimaryLight | #2dd4bf | Highlights, accents |
-| palmAccent | #0891b2 | Cyan accent |
-| palmText | #0f172a | Body text (slate-900) |
-| palmTextMuted | #475569 | Labels (slate-600) |
-| palmSecondary | #64748b | Captions (slate-500) |
-| palmFieldBg | #f8fafc | Input backgrounds |
-| palmBorder | #e2e8f0 | Borders (slate-200) |
-| palmBackground | #f1f5f9 | Page background |
+### The Problem
+Agencies lose hours/week to manual documentation. Assessments hand-written after visits, contracts templated and generic, paperwork delays client onboarding.
 
-- Brand voice: confident, direct, "PALM IT"
-- No em/en dashes — use commas or periods
-- Company is "Palm Technologies Inc" (not LLC)
+### HIPAA Classification
+Non-healthcare-only Business Associate of organizations subject to HIPAA. Palm Technologies provides general purpose products/services that may receive PHI from covered entities.
+
+---
+
+## Brand Identity (from official Brand Guidelines doc)
+
+### Naming Rules
+- **Always:** PalmCare AI (capital P, capital C, capital AI)
+- **Never:** Palmcare, Palm Care, palmcare ai, PalmcareAI
+
+### Slogan
+**"PALM IT"** — primary brand slogan and core CTA. Appears on every screen, every CTA, every marketing material. It is a verb, an action. When someone uses PalmCare AI, they are "Palm-ing It."
+
+Full tagline: "Record it. Transcribe it. Contract it. All in your palm."
+
+### Supporting Taglines (use across all channels)
+- "Where care meets intelligence"
+- "Built for care professionals"
+- "Your next client is waiting"
+- "AI handles the rest"
+- "Record. Transcribe. Contract."
+- "Close faster. Document smarter."
+- "Never lose a client to paperwork again."
+
+### Brand Voice
+- Confident & direct (NOT formal or stiff)
+- Punchy & memorable (NOT overly technical)
+- Community-driven & inclusive (NOT cold or transactional)
+- Empowering for care professionals (NOT condescending)
+
+### One-Liner
+"PalmCare AI turns care assessments into signed contracts — automatically."
+
+---
+
+## Visual Identity (from Brand Guidelines)
+
+### Design Philosophy
+Clean, modern SaaS. Lots of white space, minimal decoration, teal dominant accent. Premium productivity tool, NOT clinical medical app. Think Linear, Vercel, Stripe — but for home care.
+
+| Element | Value |
+|---------|-------|
+| Primary Font | Inter (weights 300-900) |
+| Icon Library | Lucide Icons (stroke, 20-22px) |
+| Border Radius | 12px (cards), 8px (inputs), 50% (FABs) |
+| Page Background | #f1f5f9 (Slate 100) |
+| Card Background | #ffffff |
+| Card Border | 1px solid #e2e8f0 (Slate 200) |
+| Box Shadow | 0 1px 3px rgba(15,23,42,.08) |
+| **DO NOT USE** | Glassmorphism, glow effects, neon, serif fonts |
+
+### Complete Teal Palette
+
+| Swatch | Name | Hex | Usage |
+|--------|------|-----|-------|
+| 50 | Teal 50 | #F0FDFA | Lightest bg tint, icon backgrounds |
+| 100 | Teal 100 | #CCFBF1 | Light backgrounds, active state fills |
+| 200 | Teal 200 | #99F6E4 | Light accents, hover borders |
+| 300 | Teal 300 | #5EEAD4 | Hover states |
+| 400 | Teal 400 | #2DD4BF | Active/highlight, waveform bars (palmPrimaryLight) |
+| 500 | Teal 500 | #0D9488 | **MAIN BRAND COLOR** — primary buttons, FAB (palmPrimary) |
+| 600 | Teal 600 | #0F766E | Button hover, gradient end, active nav |
+| 700 | Teal 700 | #115E59 | Dark primary, headings on light bg (palmPrimaryDark) |
+| 800 | Teal 800 | #134E4A | Very dark primary |
+| 900 | Teal 900 | #042F2E | Deepest primary, landing bg base |
+
+### Accent Colors
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| Cyan | #0891B2 | Secondary brand, brand gradient end (palmAccent) |
+| Blue | #3B82F6 | Info states, links, processing badges |
+| Green | #059669 | Success states, "Complete" badges |
+| Orange | #D97706 | Warnings, "Pending" badges |
+| Pink | #DB2777 | Highlights, promotional accents |
+| Purple | #7C3AED | Feature accents, avatar color |
+
+### Neutrals (Slate)
+
+| Swatch | Hex | Usage |
+|--------|-----|-------|
+| 50 | #F8FAFC | Field backgrounds (palmFieldBg) |
+| 100 | #F1F5F9 | Page backgrounds (palmBackground) |
+| 200 | #E2E8F0 | Borders, dividers (palmBorder) |
+| 500 | #64748B | Secondary text, placeholders (palmSecondary) |
+| 600 | #475569 | Muted text, inactive nav (palmTextMuted) |
+| 900 | #0F172A | Primary text, all headings (palmText) |
+
+### Key Gradients
+
+| Name | Value | Usage |
+|------|-------|-------|
+| Primary Button | linear-gradient(135deg, #0d9488 → #0f766e) | All primary CTAs |
+| Brand Gradient | linear-gradient(135deg, #0d9488 → #0891b2) | Logo icon bg, CTA banners |
+| **Never on** | Body text, backgrounds larger than a card or button | |
+
+### SwiftUI Theme Tokens (PalmCareTheme.swift)
+
+| Token | Hex |
+|-------|-----|
+| .palmPrimary | #0d9488 |
+| .palmPrimaryDark | #115e59 |
+| .palmPrimaryLight | #2dd4bf |
+| .palmAccent | #0891b2 |
+| .palmText | #0f172a |
+| .palmTextMuted | #475569 |
+| .palmSecondary | #64748b |
+| .palmFieldBg | #f8fafc |
+| .palmBorder | #e2e8f0 |
+| .palmBackground | #f1f5f9 |
+
+---
 
 ## Tech Stack
 
@@ -53,6 +157,8 @@
 | Video | Remotion 4 |
 | OCR | Stirling-PDF (self-hosted) |
 | Hosting | Railway (api, worker, web) |
+
+---
 
 ## iOS App Architecture
 
@@ -76,6 +182,20 @@ ios-app/PalmCareAI/
     ├── Clients/ClientsView.swift # Search + client cards
     └── Record/RecordView.swift   # Animated orb + live transcript panel
 ```
+
+### App Screen Brand Moments (from Brand Guidelines)
+
+| Screen | Key Brand Moments |
+|--------|-------------------|
+| Landing | Dark teal bg, animated orb, "PALM IT." slogan, CTAs: "GET STARTED" / "Sign in" |
+| Sign In | "Welcome back. Let's Palm It." / "Your next client is waiting." / CTA: "Sign In & Palm It" |
+| Register | "Join the pros who Palm It." / "Close faster, document smarter" / CTA: "Create Account — Palm It" |
+| Home | "Palm It, [Name]" greeting, "Palm It Now" CTA banner, stats + recent visits |
+| Record | "AI IS LISTENING" subtitle, "Ready to Palm It" status, animated orb, live transcript |
+| Clients | Search bar, client cards with name/diagnosis/phone, "Add Client" teal button |
+| **Bottom Nav** | Center FAB always labeled "Palm It" (NOT "Record"). Turns red when recording active. |
+
+---
 
 ## API Base URL
 
@@ -101,6 +221,8 @@ ios-app/PalmCareAI/
 2. Upload audio: `POST /uploads/audio` with multipart `visit_id` + `file` + `auto_process=true`
 3. Pipeline auto-runs: transcribe → diarize → align → bill → note → contract
 
+---
+
 ## Record Page Design
 
 - **Dark background** (#0C0C0E)
@@ -112,7 +234,7 @@ ios-app/PalmCareAI/
 ## Landing Page Design
 
 - Deep dark teal gradient background with blurred orbs
-- Animated pulsing orb (same style as record page, ambient version)
+- Animated pulsing orb (same style as record page, ambient version with mic icon)
 - "PALM IT." slogan with brand row
 - "Record. Transcribe. Contract." subtitle
 - Page indicator dots
@@ -129,21 +251,60 @@ ios-app/PalmCareAI/
 - iOS 16 fallback uses AVAudioSession.requestRecordPermission()
 - Bluetooth support (.allowBluetooth option)
 
-## Pricing
+---
 
-| Plan | Price |
-|------|-------|
-| Starter | $379.99/mo |
-| Growth | $639.99/mo |
-| Pro | $1,299/mo |
+## Pricing & Market
 
-Internal: ~$13/seat, ~$0.37 per 30-min assessment ($0.23 Deepgram + $0.14 Claude)
+| Plan | Price | Contracts/Clients | Seats |
+|------|-------|-------------------|-------|
+| Starter | $380/mo | 3 contracts, 15 clients | 8 caregivers |
+| Growth (Most Popular) | $640/mo | 10 contracts, 50 clients | 25 caregivers |
+| Pro | $1,299/mo | 25 contracts, 150 clients | 75 caregivers (+$12/seat) |
 
-## HIPAA Status: ~89%
+| Metric | Value |
+|--------|-------|
+| Internal cost/seat | ~$13 |
+| Cost per 30-min assessment | ~$0.37 ($0.23 Deepgram + $0.14 Claude) |
+| US Market | 35,000+ home care agencies |
+| 2026 Target | 350 agencies (1%), $2.8M ARR |
+| 2027 Target | 700 agencies (2%), $5.6M ARR |
+| Blended ARPU | $668/mo |
+| Gross Margin | 82% |
+| Churn Target | <3% monthly |
+| CAC | $800 |
+| Current Waitlist | 60+ agencies |
+| Active Pilots | 24 |
+| Assessments Generated | 300+ (68% accuracy improvement) |
+| ARR Pipeline | $92K at avg $640/mo deal |
 
-Remaining: voiceprint encryption, MFA for admins, password history (last 5)
+### Competitors
+AxisCare, WellSky/ClearCare, CareTime — legacy EVV + scheduling + billing. NOT AI-first. Outdated UIs. No AI assessment or contract generation. PalmCare AI is the first AI-native documentation platform for this workflow.
 
-## Media Generation (from CLAUDE.md)
+---
+
+## HIPAA & Compliance
+
+**Status: ~89%**
+
+Remaining to 100%:
+1. Field-level encryption for voiceprints (~2 hours dev)
+2. Enforce MFA for admin accounts (~1-2 hours dev)
+3. Password history — prevent reuse of last 5 (~1-2 hours dev)
+
+### BAA Status
+
+| Vendor | Status |
+|--------|--------|
+| OpenAI | BBA application submitted (org-NR84d0XFs134RXZ6aEI085x8) — awaiting response |
+| Anthropic | Contacted sales — awaiting response |
+| Railway | Emailed solutions@railway.app — awaiting response |
+| Resend | NOT needed (no PHI in emails) |
+| Stripe | NOT needed (no PHI) |
+| Stirling-PDF | NOT needed (self-hosted) |
+
+---
+
+## Media Generation
 
 | Task | Provider | Model |
 |------|----------|-------|
@@ -154,6 +315,15 @@ Remaining: voiceprint encryption, MFA for admins, password history (last 5)
 
 WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
 
+### Marketing Image Prompt (from Brand Guidelines)
+"A care professional in dark teal scrubs sits across from an elderly client at an outdoor terrace table, conducting a home care assessment interview. The professional holds a smartphone displaying a clean teal and white mobile app interface. Warm golden afternoon light. Lush tall palm trees sway gently in the background. The terrace has modern white furniture, potted tropical plants, and a calm, professional atmosphere. Color palette: teal (#0d9488), white, warm sand tones, tropical greens. Shot on 50mm lens, shallow depth of field, background slightly bokeh. Photorealistic, cinematic lighting."
+
+### Voiceover Scripts (ElevenLabs)
+- **Hero (15s):** "You're sitting with your client — present, attentive, building trust. Meanwhile, the app is handling everything else. Record the assessment. AI transcribes it. Your contract is ready before you leave the chair. PalmCare AI. Palm It."
+- **Short (8s):** "Record. Transcribe. Contract. PalmCare AI. Palm It."
+
+---
+
 ## Email Setup
 
 - Provider: Resend
@@ -161,6 +331,8 @@ WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719
 - 5-email drip sequence (Day 1, 3, 7, 14, 28)
 - Tracking via Resend webhooks
 - Gmail MX records restored in Cloudflare (were overwritten by Resend inbound)
+
+---
 
 ## Known Issues Fixed
 
@@ -173,6 +345,11 @@ WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719
 - onChange(of:) two-param version is iOS 17+ only
 - hasSeenOnboarding flag was skipping landing page → removed
 - ISO8601 date parsing needed both fractional and non-fractional support
+- Pyannote removed — diarization now handled by Deepgram (diarize=true)
+- Route ordering: static routes before {id} params
+- Dynamic Tailwind classes don't work — use static classes
+
+---
 
 ## User Preferences
 
@@ -182,3 +359,5 @@ WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719
 - Deepgram-style animated orb for record button
 - Live transcription with speaker diarization during recording
 - Medical keyword highlighting in transcripts
+- No em/en dashes in copy — use commas or periods
+- Email style: plain-text founder emails, <100 words, <7-word subjects
