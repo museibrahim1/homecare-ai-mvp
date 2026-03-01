@@ -1,4 +1,5 @@
 import SwiftUI
+import QuickLook
 
 struct ContractsView: View {
     @EnvironmentObject var api: APIService
@@ -7,8 +8,11 @@ struct ContractsView: View {
     @State private var isLoading = true
     @State private var searchText = ""
     @State private var selectedFilter = "All"
+    @State private var previewURL: URL?
+    @State private var downloadingId: String?
+    @State private var errorMessage: String?
 
-    private let filters = ["All", "contract", "note", "transcript"]
+    private let filters = ["All", "contract", "note", "audio"]
 
     var filteredDocuments: [DocumentItem] {
         var result = documents
@@ -29,6 +33,21 @@ struct ContractsView: View {
             filterBar
             searchBar
 
+            if let msg = errorMessage {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                    Text(msg)
+                        .font(.system(size: 12))
+                }
+                .foregroundColor(.red)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.red.opacity(0.06))
+                .onTapGesture { errorMessage = nil }
+            }
+
             Group {
                 if isLoading {
                     VStack { Spacer(); ProgressView("Loading documents..."); Spacer() }
@@ -41,6 +60,7 @@ struct ContractsView: View {
         }
         .background(Color.palmBackground)
         .task { await loadDocuments() }
+        .quickLookPreview($previewURL)
     }
 
     // MARK: - Filter Bar
@@ -99,7 +119,11 @@ struct ContractsView: View {
         ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 8) {
                 ForEach(filteredDocuments) { doc in
-                    DocumentRow(document: doc, api: api)
+                    DocumentRow(
+                        document: doc,
+                        isDownloading: downloadingId == doc.id,
+                        onTap: { await downloadAndPreview(doc) }
+                    )
                 }
             }
             .padding(.horizontal, 18)
@@ -139,7 +163,37 @@ struct ContractsView: View {
             }
         } catch {
             print("[ContractsView] Failed to load documents: \(error)")
-            await MainActor.run { isLoading = false }
+            await MainActor.run {
+                errorMessage = "Failed to load documents"
+                isLoading = false
+            }
+        }
+    }
+
+    // MARK: - Download & Preview
+
+    private func downloadAndPreview(_ doc: DocumentItem) async {
+        guard let path = doc.download_url, !path.isEmpty else {
+            await MainActor.run { errorMessage = "No download link available for this document" }
+            return
+        }
+
+        await MainActor.run {
+            downloadingId = doc.id
+            errorMessage = nil
+        }
+
+        do {
+            let localURL = try await api.downloadFile(path: path, suggestedFilename: doc.name)
+            await MainActor.run {
+                downloadingId = nil
+                previewURL = localURL
+            }
+        } catch {
+            await MainActor.run {
+                downloadingId = nil
+                errorMessage = "Download failed: \(error.localizedDescription)"
+            }
         }
     }
 }
@@ -148,12 +202,14 @@ struct ContractsView: View {
 
 struct DocumentRow: View {
     let document: DocumentItem
-    let api: APIService
+    let isDownloading: Bool
+    let onTap: () async -> Void
 
     private var iconName: String {
         switch document.type?.lowercased() {
         case "contract": return "doc.text.fill"
         case "note": return "note.text"
+        case "audio": return "waveform"
         case "transcript": return "waveform"
         default: return "doc.fill"
         }
@@ -162,8 +218,9 @@ struct DocumentRow: View {
     private var iconColor: Color {
         switch document.type?.lowercased() {
         case "contract": return .palmPrimary
-        case "note": return .palmBlue
-        case "transcript": return .palmPurple
+        case "note": return .blue
+        case "audio": return .purple
+        case "transcript": return .purple
         default: return .palmSecondary
         }
     }
@@ -181,69 +238,87 @@ struct DocumentRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: iconName)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(iconColor)
+        Button {
+            Task { await onTap() }
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    Image(systemName: iconName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(iconColor)
+                }
                 .frame(width: 40, height: 40)
                 .background(iconColor.opacity(0.1))
                 .cornerRadius(10)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(document.name)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.palmText)
-                    .lineLimit(1)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(document.name)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.palmText)
+                        .lineLimit(1)
 
-                HStack(spacing: 6) {
-                    if let client = document.client_name, !client.isEmpty {
-                        Text(client)
-                            .font(.system(size: 11))
-                            .foregroundColor(.palmSecondary)
+                    HStack(spacing: 6) {
+                        if let client = document.client_name, !client.isEmpty {
+                            Text(client)
+                                .font(.system(size: 11))
+                                .foregroundColor(.palmSecondary)
+                        }
+                        if !formattedDate.isEmpty {
+                            Text("·").foregroundColor(.palmBorder)
+                            Text(formattedDate)
+                                .font(.system(size: 11))
+                                .foregroundColor(.palmSecondary)
+                        }
                     }
-                    if !formattedDate.isEmpty {
-                        Text("·").foregroundColor(.palmBorder)
-                        Text(formattedDate)
-                            .font(.system(size: 11))
-                            .foregroundColor(.palmSecondary)
-                    }
-                }
 
-                if let type = document.type {
-                    Text(type.capitalized)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(iconColor)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(iconColor.opacity(0.08))
-                        .cornerRadius(4)
-                }
-            }
-
-            Spacer()
-
-            if !formattedSize.isEmpty {
-                Text(formattedSize)
-                    .font(.system(size: 10))
-                    .foregroundColor(.palmSecondary)
-            }
-
-            if let path = document.download_url {
-                let fullURL = path.hasPrefix("http") ? path : "\(api.baseURL)\(path)"
-                if let downloadURL = URL(string: fullURL) {
-                    Link(destination: downloadURL) {
-                        Image(systemName: "arrow.down.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(.palmPrimary)
+                    HStack(spacing: 6) {
+                        if let type = document.type {
+                            Text(type.capitalized)
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(iconColor)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(iconColor.opacity(0.08))
+                                .cornerRadius(4)
+                        }
+                        if let fmt = document.format {
+                            Text(fmt.uppercased())
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.palmSecondary)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(Color.palmFieldBg)
+                                .cornerRadius(3)
+                        }
                     }
                 }
+
+                Spacer()
+
+                if !formattedSize.isEmpty {
+                    Text(formattedSize)
+                        .font(.system(size: 10))
+                        .foregroundColor(.palmSecondary)
+                }
+
+                if isDownloading {
+                    ProgressView()
+                        .frame(width: 24, height: 24)
+                } else {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundColor(.palmPrimary)
+                }
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .buttonStyle(.plain)
+        .disabled(isDownloading)
+        .opacity(isDownloading ? 0.7 : 1)
     }
 }

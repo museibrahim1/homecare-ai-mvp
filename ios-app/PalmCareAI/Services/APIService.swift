@@ -249,8 +249,34 @@ class APIService: ObservableObject {
         try await request("GET", path: "/documents")
     }
 
-    func getContractPDFURL(visitId: String) -> URL? {
-        URL(string: "\(baseURL)/exports/visits/\(visitId)/contract.pdf")
+    /// Download a file from an API path with authentication, saving to a temp file.
+    /// Returns the local file URL on success.
+    func downloadFile(path: String, suggestedFilename: String) async throws -> URL {
+        let fullPath = path.hasPrefix("http") ? path : "\(baseURL)\(path)"
+        guard let url = URL(string: fullPath) else { throw APIError.invalidURL }
+
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.timeoutInterval = 60
+        if let token = token {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
+
+        if http.statusCode == 401 {
+            await MainActor.run { self.token = nil }
+            throw APIError.unauthorized
+        }
+        guard (200...299).contains(http.statusCode) else {
+            throw APIError.serverError("Download failed (\(http.statusCode))")
+        }
+
+        let tmpDir = FileManager.default.temporaryDirectory
+        let fileURL = tmpDir.appendingPathComponent(suggestedFilename)
+        try data.write(to: fileURL, options: .atomic)
+        return fileURL
     }
 
     // MARK: - Tasks
