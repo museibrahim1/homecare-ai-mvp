@@ -110,6 +110,45 @@ struct VisitListResponse: Codable {
     let page_size: Int
 }
 
+// MARK: - Subscription & Billing
+
+struct SubscriptionPlan: Codable, Identifiable {
+    let id: String
+    let name: String
+    let runs_per_month: Int?
+    let price_monthly: Double
+    let price_per_run: Double?
+    let old_price: Double?
+    let stripe_price_id: String?
+    let is_popular: Bool?
+    let features: [String]?
+
+    var isEnterprise: Bool { runs_per_month == nil }
+}
+
+struct UserSubscription: Codable {
+    let plan_name: String?
+    let status: String?
+    let runs_used: Int?
+    let runs_limit: Int?
+    let current_period_end: String?
+
+    var isAtLimit: Bool {
+        guard let used = runs_used, let limit = runs_limit else { return false }
+        return used >= limit
+    }
+
+    var runsRemaining: Int {
+        guard let used = runs_used, let limit = runs_limit else { return 0 }
+        return max(0, limit - used)
+    }
+}
+
+struct CheckoutResponse: Codable {
+    let checkout_url: String
+    let session_id: String
+}
+
 // MARK: - Live Transcription
 
 struct LiveTranscriptResponse: Codable {

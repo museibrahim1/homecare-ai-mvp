@@ -20,6 +20,7 @@
 		C14C3133F283022BF06C01B1 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7229E0471D9D4E3D984E2C /* MainTabView.swift */; };
 		C37109ADE391ED8B9F1A9A57 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62F08AE1496C16DBFA9D619 /* LoginView.swift */; };
 		EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEA75021BD113DD86530A11 /* RecordView.swift */; };
+		AB1C2D3E4F5A6B7C8D9E0F1A /* SubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA2C3D4E5F6A7B8C9D0E1F2A /* SubscriptionView.swift */; };
 		FBF988D7FAE8979B88BE0767 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4FFE119E970F306B1F7A575 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -39,6 +40,7 @@
 		D4FFE119E970F306B1F7A575 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D8F2F27F9C01421C91DAE203 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		E8E9F160EB8FA04B4131FCB4 /* PalmCareAI.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PalmCareAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA2C3D4E5F6A7B8C9D0E1F2A /* SubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionView.swift; sourceTree = "<group>"; };
 		FF0C57AEB89851A6C9CF3C1D /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -101,6 +103,14 @@
 			path = Clients;
 			sourceTree = "<group>";
 		};
+		CA3D4E5F6A7B8C9D0E1F2A3B /* Subscription */ = {
+			isa = PBXGroup;
+			children = (
+				BA2C3D4E5F6A7B8C9D0E1F2A /* SubscriptionView.swift */,
+			);
+			path = Subscription;
+			sourceTree = "<group>";
+		};
 		CE1793DBBDAA61AB430DBDA5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -109,6 +119,7 @@
 				B6CB35F663CA9552B2496579 /* Clients */,
 				1E3C8272722B68225537C8DC /* Home */,
 				0E963202E75E9B9E4B279805 /* Record */,
+				CA3D4E5F6A7B8C9D0E1F2A3B /* Subscription */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -229,6 +240,7 @@
 				5EA469E56F749FDCF74408EF /* PalmCareTheme.swift in Sources */,
 				EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */,
 				9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */,
+				AB1C2D3E4F5A6B7C8D9E0F1A /* SubscriptionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

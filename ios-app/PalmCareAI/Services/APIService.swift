@@ -207,6 +207,27 @@ class APIService: ObservableObject {
         return try jsonDecoder.decode(LiveTranscriptResponse.self, from: data)
     }
 
+    // MARK: - Billing & Subscription
+
+    func fetchSubscription() async throws -> UserSubscription {
+        try await request("GET", path: "/billing/subscription")
+    }
+
+    func fetchPlans() async throws -> [SubscriptionPlan] {
+        try await request("GET", path: "/billing/plans")
+    }
+
+    func createCheckout(planId: String, billingCycle: String = "monthly") async throws -> CheckoutResponse {
+        try await request("POST", path: "/billing/checkout", body: [
+            "plan_id": planId,
+            "billing_cycle": billingCycle
+        ])
+    }
+
+    func fetchUsage() async throws -> UserSubscription {
+        try await request("GET", path: "/visits/usage")
+    }
+
     // MARK: - Logout
 
     func logout() {

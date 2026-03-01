@@ -172,6 +172,7 @@ struct RecordView: View {
     @State private var errorMessage: String?
     @State private var showError = false
     @State private var isProcessing = false
+    @State private var showUpgrade = false
 
     var body: some View {
         NavigationStack {
@@ -226,6 +227,10 @@ struct RecordView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage ?? "An error occurred.")
+            }
+            .sheet(isPresented: $showUpgrade) {
+                SubscriptionView()
+                    .environmentObject(api)
             }
             .task {
                 await loadClients()
@@ -406,15 +411,30 @@ struct RecordView: View {
             showPermissionAlert = true
             return
         }
-        liveTranscription?.segments = []
-        do {
-            try recorder.startRecording()
-            if let url = recorder.recordingURL {
-                liveTranscription?.startTranscribing(recordingURL: url)
+
+        Task {
+            do {
+                let usage = try await api.fetchUsage()
+                if usage.isAtLimit {
+                    await MainActor.run { showUpgrade = true }
+                    return
+                }
+            } catch {
+                // If usage check fails, allow recording anyway
             }
-        } catch {
-            errorMessage = "Failed to start recording: \(error.localizedDescription)"
-            showError = true
+
+            await MainActor.run {
+                liveTranscription?.segments = []
+                do {
+                    try recorder.startRecording()
+                    if let url = recorder.recordingURL {
+                        liveTranscription?.startTranscribing(recordingURL: url)
+                    }
+                } catch {
+                    errorMessage = "Failed to start recording: \(error.localizedDescription)"
+                    showError = true
+                }
+            }
         }
     }
 
@@ -448,8 +468,13 @@ struct RecordView: View {
             } catch {
                 await MainActor.run {
                     withAnimation { isProcessing = false }
-                    errorMessage = error.localizedDescription
-                    showError = true
+                    let msg = error.localizedDescription.lowercased()
+                    if msg.contains("limit") || msg.contains("plan") || msg.contains("upgrade") || msg.contains("quota") || msg.contains("exceeded") {
+                        showUpgrade = true
+                    } else {
+                        errorMessage = error.localizedDescription
+                        showError = true
+                    }
                 }
             }
         }
