@@ -7,18 +7,13 @@ struct LocalPlan: Identifiable {
     let name: String
     let runs: String
     let priceMonthly: String
-    let pricePerRun: String
-    let oldPrice: String
     let isPopular: Bool
-    let isEnterprise: Bool
 }
 
 private let hardcodedPlans: [LocalPlan] = [
-    LocalPlan(id: "new", name: "New", runs: "5", priceMonthly: "$149", pricePerRun: "$14.90", oldPrice: "$249", isPopular: false, isEnterprise: false),
-    LocalPlan(id: "starter", name: "Starter", runs: "15", priceMonthly: "$199", pricePerRun: "$13.27", oldPrice: "$380", isPopular: false, isEnterprise: false),
-    LocalPlan(id: "growth", name: "Growth", runs: "25", priceMonthly: "$349", pricePerRun: "$13.96", oldPrice: "$640", isPopular: true, isEnterprise: false),
-    LocalPlan(id: "pro", name: "Pro", runs: "50", priceMonthly: "$599", pricePerRun: "$11.98", oldPrice: "$1,299", isPopular: false, isEnterprise: false),
-    LocalPlan(id: "enterprise", name: "Enterprise", runs: "∞", priceMonthly: "Custom", pricePerRun: "Negotiated", oldPrice: "Custom", isPopular: false, isEnterprise: true),
+    LocalPlan(id: "starter", name: "Starter", runs: "15", priceMonthly: "$199", isPopular: false),
+    LocalPlan(id: "growth", name: "Growth", runs: "25", priceMonthly: "$349", isPopular: true),
+    LocalPlan(id: "pro", name: "Pro", runs: "50", priceMonthly: "$599", isPopular: false),
 ]
 
 // MARK: - Subscription View
@@ -29,7 +24,7 @@ struct SubscriptionView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var remotePlans: [SubscriptionPlan] = []
-    @State private var selectedPlanIndex: Int = 2
+    @State private var selectedPlanIndex: Int = 1
     @State private var isLoading = false
     @State private var checkoutLoading: String?
     @State private var errorMessage: String?
@@ -141,7 +136,7 @@ struct SubscriptionView: View {
 
     private var planCards: some View {
         VStack(spacing: 12) {
-            ForEach(Array(hardcodedPlans.enumerated().filter { !$0.element.isEnterprise }), id: \.element.id) { index, plan in
+            ForEach(Array(hardcodedPlans.enumerated()), id: \.element.id) { index, plan in
                 PlanCard(
                     plan: plan,
                     isSelected: selectedPlanIndex == index,
@@ -319,27 +314,6 @@ struct PlanCard: View {
                         Text("/ month")
                             .font(.system(size: 13))
                             .foregroundColor(.white.opacity(0.4))
-                    }
-
-                    HStack(spacing: 12) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "tag.fill")
-                                .font(.system(size: 10))
-                                .foregroundColor(.palmGreen)
-                            Text("\(plan.pricePerRun)/run")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.palmGreen)
-                        }
-
-                        HStack(spacing: 4) {
-                            Text("Value:")
-                                .font(.system(size: 11))
-                                .foregroundColor(.white.opacity(0.35))
-                            Text(plan.oldPrice)
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(.white.opacity(0.35))
-                                .strikethrough(color: .white.opacity(0.3))
-                        }
                     }
                 }
 
