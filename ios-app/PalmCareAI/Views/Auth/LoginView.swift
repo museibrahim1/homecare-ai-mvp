@@ -184,7 +184,7 @@ struct LoginView: View {
                             if isLoading {
                                 ProgressView().tint(.white)
                             }
-                            Text("Sign In & Palm It")
+                            Text("Sign In ")
                                 .font(.system(size: 14, weight: .heavy))
                         }
                         .foregroundColor(.white)
