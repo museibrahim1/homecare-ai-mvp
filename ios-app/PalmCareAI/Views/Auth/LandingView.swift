@@ -1,78 +1,131 @@
 import SwiftUI
 
-// MARK: - Animated Waveform
-struct AnimatedWaveform: View {
-    let barCount: Int
-    let barWidth: CGFloat
-    let minHeight: CGFloat
-    let maxHeight: CGFloat
-    let color: Color
-    @State private var phase: CGFloat = 0
+// MARK: - Landing Orb (ambient pulsing version)
 
-    init(barCount: Int = 17, barWidth: CGFloat = 3, minHeight: CGFloat = 8, maxHeight: CGFloat = 48, color: Color = .white) {
-        self.barCount = barCount
-        self.barWidth = barWidth
-        self.minHeight = minHeight
-        self.maxHeight = maxHeight
-        self.color = color
-    }
+struct LandingOrb: View {
+    @State private var rotation: Double = 0
+    @State private var morphPhase: CGFloat = 0
+    @State private var glowPulse: CGFloat = 0
 
     var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<barCount, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(color.opacity(0.25 + 0.6 * waveValue(for: index)))
-                    .frame(width: barWidth, height: barHeight(for: index))
+        ZStack {
+            ForEach(0..<3, id: \.self) { ring in
+                LandingOrbRing(phase: morphPhase + CGFloat(ring) * 0.7, ringIndex: ring)
+                    .frame(width: ringSize(for: ring), height: ringSize(for: ring))
+                    .rotationEffect(.degrees(rotation + Double(ring) * 40))
             }
+
+            LandingOrbShape(phase: morphPhase)
+                .fill(
+                    AngularGradient(
+                        colors: [
+                            Color.palmPrimary,
+                            Color.palmAccent,
+                            Color(red: 139/255, green: 92/255, blue: 246/255),
+                            Color.palmPrimaryLight,
+                            Color.palmPrimary,
+                        ],
+                        center: .center
+                    )
+                )
+                .frame(width: 120, height: 120)
+                .shadow(color: Color.palmPrimary.opacity(0.4 + glowPulse * 0.2), radius: 25 + glowPulse * 10, y: 0)
+                .overlay(
+                    LandingOrbShape(phase: morphPhase)
+                        .fill(
+                            RadialGradient(
+                                colors: [.white.opacity(0.2), .clear],
+                                center: .topLeading,
+                                startRadius: 0,
+                                endRadius: 70
+                            )
+                        )
+                        .frame(width: 120, height: 120)
+                )
+
+            Image(systemName: "mic.fill")
+                .font(.system(size: 32, weight: .medium))
+                .foregroundColor(.white)
+                .shadow(color: .white.opacity(0.3), radius: 4)
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                phase = 1
+            withAnimation(.linear(duration: 20).repeatForever(autoreverses: false)) {
+                rotation = 360
+            }
+            withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
+                morphPhase = 1
+            }
+            withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                glowPulse = 1
             }
         }
     }
 
-    private func waveValue(for index: Int) -> CGFloat {
-        let normalized = CGFloat(index) / CGFloat(barCount)
-        return 0.5 + 0.5 * sin(phase * .pi * 2 + normalized * .pi * 3)
-    }
-
-    private func barHeight(for index: Int) -> CGFloat {
-        let wave = sin(phase * .pi * 2 + CGFloat(index) * 0.4) * 0.5 + 0.5
-        return minHeight + (maxHeight - minHeight) * wave
+    private func ringSize(for ring: Int) -> CGFloat {
+        150 + CGFloat(ring) * 28
     }
 }
 
-// MARK: - Live Badge
-struct LiveBadge: View {
-    @State private var blinking = false
+struct LandingOrbShape: Shape {
+    var phase: CGFloat
+
+    var animatableData: CGFloat {
+        get { phase }
+        set { phase = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let radius = min(rect.width, rect.height) / 2
+        let points = 100
+        var path = Path()
+
+        for i in 0...points {
+            let angle = CGFloat(i) / CGFloat(points) * .pi * 2
+            let wobble1 = sin(angle * 3 + phase * .pi * 2) * 5
+            let wobble2 = cos(angle * 2 - phase * .pi * 1.5) * 4
+            let wobble3 = sin(angle * 5 + phase * .pi * 3) * 2.5
+            let r = radius + wobble1 + wobble2 + wobble3
+
+            let point = CGPoint(
+                x: center.x + r * cos(angle),
+                y: center.y + r * sin(angle)
+            )
+
+            if i == 0 {
+                path.move(to: point)
+            } else {
+                path.addLine(to: point)
+            }
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+struct LandingOrbRing: View {
+    let phase: CGFloat
+    let ringIndex: Int
 
     var body: some View {
-        HStack(spacing: 5) {
-            Circle()
-                .fill(Color.red)
-                .frame(width: 7, height: 7)
-                .shadow(color: .red, radius: 3)
-                .opacity(blinking ? 0.2 : 1)
+        LandingOrbShape(phase: phase)
+            .stroke(
+                AngularGradient(colors: ringColors, center: .center),
+                lineWidth: ringIndex == 0 ? 1.5 : 1
+            )
+            .opacity(0.25 - Double(ringIndex) * 0.06)
+    }
 
-            Text("LIVE")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.white.opacity(0.8))
-                .tracking(1.5)
-        }
-        .padding(.horizontal, 11)
-        .padding(.vertical, 5)
-        .background(Color(red: 4/255, green: 47/255, blue: 46/255).opacity(0.6))
-        .background(.ultraThinMaterial.opacity(0.3))
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.14), lineWidth: 1))
-        .onAppear {
-            withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true)) {
-                blinking = true
-            }
+    private var ringColors: [Color] {
+        switch ringIndex {
+        case 0: return [Color.palmPrimary, Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimary]
+        case 1: return [Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimaryLight, Color.palmAccent]
+        default: return [Color(red: 139/255, green: 92/255, blue: 246/255), Color.palmPrimary, Color.palmAccent, Color(red: 139/255, green: 92/255, blue: 246/255)]
         }
     }
 }
+
+// MARK: - Landing View
 
 struct LandingView: View {
     @EnvironmentObject var api: APIService
@@ -83,7 +136,7 @@ struct LandingView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Deep dark teal background with radial gradients
+                // Deep dark teal background
                 ZStack {
                     LinearGradient(
                         colors: [
@@ -98,21 +151,18 @@ struct LandingView: View {
                         endPoint: .bottomTrailing
                     )
 
-                    // Cyan orb top-right
                     Circle()
                         .fill(Color.palmAccent.opacity(0.15))
                         .frame(width: 300, height: 300)
                         .blur(radius: 80)
                         .offset(x: 100, y: -200)
 
-                    // Teal orb bottom-left
                     Circle()
                         .fill(Color.palmPrimary.opacity(0.12))
                         .frame(width: 250, height: 250)
                         .blur(radius: 70)
                         .offset(x: -80, y: 200)
 
-                    // Bottom gradient fade
                     VStack {
                         Spacer()
                         LinearGradient(
@@ -130,27 +180,22 @@ struct LandingView: View {
                 }
                 .ignoresSafeArea()
 
-                // Live badge
+                // Center orb
                 VStack {
-                    HStack {
-                        Spacer()
-                        LiveBadge()
-                            .padding(.trailing, 16)
-                            .padding(.top, 8)
-                    }
+                    Spacer()
+                        .frame(height: UIScreen.main.bounds.height * 0.18)
+
+                    LandingOrb()
+                        .frame(width: 220, height: 220)
+
                     Spacer()
                 }
-
-                // Center waveform
-                AnimatedWaveform(barCount: 17, barWidth: 3, minHeight: 8, maxHeight: 48, color: .white)
-                    .opacity(0.7)
 
                 // Bottom content
                 VStack(spacing: 0) {
                     Spacer()
 
                     VStack(alignment: .leading, spacing: 0) {
-                        // Brand row
                         HStack(spacing: 9) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 11)
@@ -184,7 +229,6 @@ struct LandingView: View {
                         }
                         .padding(.bottom, 18)
 
-                        // PALM IT. slogan
                         VStack(alignment: .leading, spacing: 0) {
                             Text("PALM")
                                 .font(.system(size: 42, weight: .black))
@@ -199,7 +243,6 @@ struct LandingView: View {
                         }
                         .padding(.bottom, 10)
 
-                        // Subtitle
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Record. Transcribe. Contract.")
                                 .font(.system(size: 12, weight: .semibold))
@@ -212,7 +255,6 @@ struct LandingView: View {
                         }
                         .padding(.bottom, 20)
 
-                        // Page dots
                         HStack(spacing: 5) {
                             Capsule()
                                 .fill(Color.palmPrimaryLight)
@@ -227,7 +269,6 @@ struct LandingView: View {
                         .padding(.bottom, 16)
                         .animation(.easeInOut(duration: 0.25), value: currentPage)
 
-                        // CTA buttons
                         Button {
                             navigateToRegister = true
                         } label: {

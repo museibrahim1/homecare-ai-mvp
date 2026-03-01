@@ -1,85 +1,184 @@
 # Session Memory — PalmCare AI
 
-## Company Info
-- **Legal Entity:** PalmTai Inc. (C Corporation, incorporated in Nebraska)
-- **DBA:** PalmCare AI
-- **Headquarters:** Omaha, Nebraska
-- **CEO:** Muse Ibrahim
-- **CEO Email:** museibrahim@palmtai.com (NEVER use as sender for transactional emails)
-- **CEO Phone:** (213) 569-7693
-- **Domains:** palmcareai.com (primary website), palmtai.com (app/API)
+## SCOPE: All work in this chat is for the iOS mobile app (SwiftUI) unless explicitly stated otherwise.
+
+---
+
+## Company
+
+| Field | Value |
+|-------|-------|
+| Legal Entity | PalmTai Inc. (C Corp, Nebraska) |
+| DBA | PalmCare AI |
+| HQ | Omaha, Nebraska |
+| CEO | Muse Ibrahim |
+| CEO Email | museibrahim@palmtai.com (NEVER use as sender for transactional emails) |
+| CEO Phone | (213) 569-7693 |
+| Domains | palmcareai.com (website), palmtai.com (app/API) |
+| Product | AI care assessment engine for home care agencies |
+| Flow | Visit audio → transcription → diarization → SOAP notes → contracts → billables |
+
+## Brand
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| palmPrimary | #0d9488 | Main teal |
+| palmPrimaryDark | #115e59 | Buttons, gradients |
+| palmPrimaryLight | #2dd4bf | Highlights, accents |
+| palmAccent | #0891b2 | Cyan accent |
+| palmText | #0f172a | Body text (slate-900) |
+| palmTextMuted | #475569 | Labels (slate-600) |
+| palmSecondary | #64748b | Captions (slate-500) |
+| palmFieldBg | #f8fafc | Input backgrounds |
+| palmBorder | #e2e8f0 | Borders (slate-200) |
+| palmBackground | #f1f5f9 | Page background |
+
+- Brand voice: confident, direct, "PALM IT"
+- No em/en dashes — use commas or periods
+- Company is "Palm Technologies Inc" (not LLC)
 
 ## Tech Stack
-- **Frontend:** Next.js 14, React, Tailwind CSS, deployed on Railway
-- **Backend:** FastAPI, SQLAlchemy, PostgreSQL, Redis, Celery workers
-- **AI:** OpenAI (Whisper transcription, GPT), Anthropic (Claude for contracts/notes)
-- **Email:** Resend (onboarding@, welcome@, sales@, support@ palmtai.com) — NO PHI in emails
-- **Payments:** Stripe integration
-- **OCR:** Stirling-PDF (self-hosted)
-- **Diarization:** Pyannote.ai
-- **Hosting:** Railway (SOC 2 Type II, encryption at rest confirmed)
-- **NOT using:** Twilio (removed from stack), Medicaid billing (not EVS)
-- **No EIN encryption needed** — not doing EVS
+
+| Layer | Tech |
+|-------|------|
+| Web Frontend | Next.js 14, React 18, Tailwind CSS, Zustand |
+| Backend API | FastAPI, SQLAlchemy, Alembic, PostgreSQL, Redis, Celery |
+| AI/ASR | Deepgram Nova-3 (primary STT + diarization), Claude Sonnet 4 (notes/contracts) |
+| Fallback ASR | OpenAI Whisper |
+| Email | Resend (sales@palmtai.com) |
+| Payments | Stripe |
+| Storage | S3/MinIO |
+| iOS App | Swift, SwiftUI, AVFoundation (deployment target iOS 16.0) |
+| Mobile (Expo) | Expo 55, React Native 0.83 (secondary) |
+| Video | Remotion 4 |
+| OCR | Stirling-PDF (self-hosted) |
+| Hosting | Railway (api, worker, web) |
+
+## iOS App Architecture
+
+```
+ios-app/PalmCareAI/
+├── PalmCareAIApp.swift          # Entry point, auth gate
+├── Info.plist                    # Microphone permission
+├── Models/Models.swift           # User, Client, Visit, LoginResponse, UploadResponse, LiveTranscriptResponse, TranscriptWord, TranscriptSegment, AnyCodable
+├── Services/
+│   ├── APIService.swift          # Singleton, JWT auth, all API calls
+│   ├── AudioRecorderService.swift # AVAudioRecorder + metering + delegate
+│   └── LiveTranscriptionService.swift # Chunked live transcription (8s intervals)
+├── Theme/PalmCareTheme.swift     # Color + LinearGradient extensions
+└── Views/
+    ├── MainTabView.swift         # 5 tabs: Home, Clients, Record (raised orb), Calendar, More
+    ├── Auth/
+    │   ├── LandingView.swift     # Dark teal bg + animated orb + PALM IT slogan
+    │   ├── LoginView.swift       # Email/password + social + remember me
+    │   └── RegisterView.swift    # Business registration form
+    ├── Home/HomeView.swift       # Stats, CTA bar, recent visits
+    ├── Clients/ClientsView.swift # Search + client cards
+    └── Record/RecordView.swift   # Animated orb + live transcript panel
+```
+
+## API Base URL
+
+`https://api-production-a0a2.up.railway.app`
+
+### Key Endpoints Used by iOS App
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | /auth/login | Login (returns access_token) |
+| POST | /auth/business/register | Register business |
+| GET | /auth/me | Current user |
+| GET | /clients | List clients (returns plain array) |
+| POST | /clients | Create client |
+| GET | /visits | List visits (returns VisitListResponse with items/total/page/page_size) |
+| POST | /visits | Create visit (requires client_id) |
+| POST | /uploads/audio | Upload audio (multipart: visit_id + file + auto_process) |
+| POST | /live/transcribe | Live transcription chunk (multipart: file, query: diarize, language) |
+| GET | /pipeline/visits/{id}/status | Pipeline status |
+
+### Upload Flow (CRITICAL)
+1. Create visit: `POST /visits` with `{"client_id": "..."}` → get visit.id
+2. Upload audio: `POST /uploads/audio` with multipart `visit_id` + `file` + `auto_process=true`
+3. Pipeline auto-runs: transcribe → diarize → align → bill → note → contract
+
+## Record Page Design
+
+- **Dark background** (#0C0C0E)
+- **Animated Voice Orb**: organic blob shape (triple-sine wobble), teal/cyan/purple AngularGradient, 3 outer rings rotating, pulses with audio level
+- **Three states**: idle (large orb + feature pills), recording (compact orb + live transcript panel), finished (transcript + upload buttons)
+- **Live Transcript Panel**: dark card, Deepgram-inspired, waveform bar, speaker diarization (colored labels), medical keyword highlighting (teal)
+- **Client selector**: top bar compact pill
+
+## Landing Page Design
+
+- Deep dark teal gradient background with blurred orbs
+- Animated pulsing orb (same style as record page, ambient version)
+- "PALM IT." slogan with brand row
+- "Record. Transcribe. Contract." subtitle
+- Page indicator dots
+- GET STARTED + Sign in buttons
+- NO live badge, NO waveform bars
+
+## Audio Recording
+
+- Format: M4A (AAC), 44100Hz, mono, 128kbps
+- Saved to Documents/Recordings/ (not temp dir)
+- AVAudioRecorderDelegate for error handling
+- Audio level metering at 0.1s intervals
+- iOS 17+ uses AVAudioApplication.requestRecordPermission()
+- iOS 16 fallback uses AVAudioSession.requestRecordPermission()
+- Bluetooth support (.allowBluetooth option)
 
 ## Pricing
-- Starter: $379.99/mo — per-seat price NOT public facing
-- Growth: $639.99/mo
-- Pro: $1,299/mo
-- All tiers based on $13/seat internally
 
-## HIPAA Compliance Status — 89%
-- **Completed:** Risk assessment, privacy policy, security policy, breach notification, BAA template, vendor tracker, technical audit, training plan, PHI log sanitization, SSL on Postgres, encryption at rest verified, session timeout verified, emergency access documented, audit log review scheduled
-- **Remaining to 100%:**
-  1. Field-level encryption for voiceprints (~2 hours dev)
-  2. Enforce MFA for admin accounts (~1-2 hours dev)
-  3. Password history — prevent reuse of last 5 passwords (~1-2 hours dev)
-- **BAAs requested (emails sent by CEO Feb 22, 2026):**
-  - OpenAI: emailed baa@openai.com — awaiting response
-  - Anthropic: contacted sales via anthropic.com — awaiting response
-  - Railway: emailed solutions@railway.app — awaiting response
-- **BAAs NOT needed:** Resend (no PHI in emails), Stripe (no PHI), Stirling-PDF (self-hosted), Twilio (not used)
-- **Compliance docs location:** /compliance/ directory (8 documents)
+| Plan | Price |
+|------|-------|
+| Starter | $379.99/mo |
+| Growth | $639.99/mo |
+| Pro | $1,299/mo |
 
-## Features Page Screenshot Mapping (all verified Feb 22, 2026)
-- Voice-Powered Assessments → voice-assessment.png
-- Smart Contract Generation → contract-preview.png
-- Intelligent Data Extraction → transcript.png
-- OCR Template Engine → templates-gallery.png
-- Client Management (CRM) → client-crm.png
-- Contract Management → contract-form.png (actual creation form)
-- Scheduling & Visits → scheduling.png
-- Custom Forms & Templates → settings.png
-- Automatic Billing Extraction → billing-extraction.png
-- Revenue Analytics → dashboard.png
-- Custom Reporting → reports.png
-- Caregiver Mobile App → care-tracker.png
-- ADL & Care Logging → adl-logging.png (kept for web providers)
-- Agency Dashboard → pipeline.png
-- HIPAA Compliance → hipaa-compliance.png (generated infographic)
-- Data Encryption → data-encryption.png (generated infographic)
-- Dedicated Support → help-support.png
+Internal: ~$13/seat, ~$0.37 per 30-min assessment ($0.23 Deepgram + $0.14 Claude)
 
-## Key Decisions
-- ADL Logging stays on web app for providers (was briefly removed, then re-added)
-- Resend stays — no PHI in emails, no migration needed
-- Twilio removed from stack entirely
-- No EIN field encryption needed (not doing EVS)
-- Vanta too expensive for now — doing DIY HIPAA compliance
-- Mobile companion app planned (React Native/Expo) for caregivers (clock in/out, ADL logging) and agencies (assessments, caregiver tracking)
-- Status page created for downtime updates (like Airtable's)
-- Contract system has both pipeline-generated and standalone creation paths
+## HIPAA Status: ~89%
 
-## Sidebar Navigation Structure
-- Dashboard, Deals Pipeline, Leads, My Schedule
-- All Clients, Assessments, Care Tracker, ADL Logging, Policies & Renewals
-- Team Chat
-- Proposals, Create Contract, OCR Templates, Documents
-- Reports, Help & Support, Team Members, Billing
-- Activity Monitor, Integrations, Settings
-- Admin section: Dashboard, Approvals, Subscriptions, Stripe Config, Compliance, Support, Audit Logs, Platform Users, System Health, Status Page
+Remaining: voiceprint encryption, MFA for admins, password history (last 5)
 
-## Known Issues / Technical Debt
-- Page bouncing when clicking sidebar nav items (was reported, needs verification)
-- Contract preview had multiple issues (fixed: service text placement, phone duplication, dollar signs, policy styling, signature fields)
-- useRequireAuth() returns { isLoading } not { loading }
-- Set iteration needs Array.from(new Set(...)) for TypeScript downlevelIteration
+## Media Generation (from CLAUDE.md)
+
+| Task | Provider | Model |
+|------|----------|-------|
+| Voiceover | WaveSpeed | ElevenLabs v3 (voice: Alice recommended) |
+| Images | WaveSpeed | Nano Banana Pro (fal-ai/nano-banana-pro) |
+| Video | Remotion | Code-based |
+| Dev TTS | OpenAI | tts-1-hd (nova, onyx, alloy, fable, shimmer) |
+
+WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+
+## Email Setup
+
+- Provider: Resend
+- Sender: Muse Ibrahim <sales@palmtai.com>
+- 5-email drip sequence (Day 1, 3, 7, 14, 28)
+- Tracking via Resend webhooks
+- Gmail MX records restored in Cloudflare (were overwritten by Resend inbound)
+
+## Known Issues Fixed
+
+- Upload endpoint was /visits/upload → fixed to /uploads/audio
+- Multipart fields were client_id/audio → fixed to visit_id/file
+- Clients endpoint returned plain array, not wrapped
+- Visit model was missing caregiver_id, pipeline_state, timestamps
+- Client.status was non-optional but API returns optional
+- requestRecordPermission deprecated on iOS 17+
+- onChange(of:) two-param version is iOS 17+ only
+- hasSeenOnboarding flag was skipping landing page → removed
+- ISO8601 date parsing needed both fractional and non-fractional support
+
+## User Preferences
+
+- Everything in current chat scope = iOS mobile app only
+- Enterprise UI style (WellSky-inspired) for web dashboard
+- Dark theme for landing/marketing pages
+- Deepgram-style animated orb for record button
+- Live transcription with speaker diarization during recording
+- Medical keyword highlighting in transcripts
