@@ -19,158 +19,182 @@ struct RecordView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Client picker
-                Button {
-                    showClientPicker = true
-                } label: {
-                    HStack {
-                        Image(systemName: "person.circle")
-                            .font(.system(size: 20))
-                            .foregroundColor(.palmPrimary)
-
-                        Text(selectedClient?.full_name ?? "Select a client")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundColor(selectedClient != nil ? .palmText : .palmSecondary)
-
-                        Spacer()
-
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.palmSecondary)
-                    }
-                    .padding(16)
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-
-                Spacer()
-
-                // Recording area
-                VStack(spacing: 32) {
-                    // Timer
-                    Text(timeString(recorder.duration))
-                        .font(.system(size: 48, weight: .light, design: .monospaced))
+                // Top bar
+                VStack(spacing: 2) {
+                    Text("New Assessment")
+                        .font(.system(size: 15, weight: .bold))
                         .foregroundColor(.palmText)
 
-                    // Waveform animation
-                    if recorder.isRecording {
-                        WaveformView()
-                            .frame(height: 60)
-                            .padding(.horizontal, 40)
-                    } else if recordingFinishedURL != nil {
-                        HStack(spacing: 4) {
-                            ForEach(0..<20, id: \.self) { _ in
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(Color.palmTeal.opacity(0.4))
-                                    .frame(width: 4, height: CGFloat.random(in: 8...30))
-                            }
-                        }
-                        .frame(height: 60)
-                        .padding(.horizontal, 40)
-                    } else {
-                        Rectangle()
-                            .fill(Color.clear)
-                            .frame(height: 60)
-                    }
+                    Text("PALM IT — AI IS LISTENING")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.palmPrimary)
+                        .tracking(1.2)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color.white)
+                .overlay(
+                    Rectangle().fill(Color.palmBorder).frame(height: 1),
+                    alignment: .bottom
+                )
 
-                    // Record button
-                    ZStack {
-                        // Pulsing ring when recording
-                        if recorder.isRecording {
+                // Content
+                VStack(spacing: 0) {
+                    // Client selector
+                    Button { showClientPicker = true } label: {
+                        HStack {
+                            HStack(spacing: 10) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.palmBackground)
+                                        .frame(width: 30, height: 30)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.palmBorder, style: StrokeStyle(lineWidth: 1.5, dash: [4]))
+                                        )
+
+                                    Image(systemName: "person")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.palmSecondary)
+                                }
+
+                                Text(selectedClient?.full_name ?? "Select a client")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(selectedClient != nil ? .palmText : .palmSecondary)
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 14))
+                                .foregroundColor(.palmSecondary)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 11)
+                        .background(Color.white)
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1.5))
+                        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.top, 20)
+                    .padding(.bottom, 28)
+
+                    // Timer
+                    Text(timeString(recorder.duration))
+                        .font(.system(size: 58, weight: .heavy, design: .default))
+                        .foregroundColor(.palmText)
+                        .tracking(-2)
+                        .monospacedDigit()
+                        .padding(.bottom, 4)
+
+                    // Status
+                    Text(statusText.uppercased())
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.palmSecondary)
+                        .tracking(1.5)
+                        .padding(.bottom, 36)
+
+                    // Mic button zone
+                    VStack(spacing: 13) {
+                        ZStack {
+                            // Pulsing ring
                             Circle()
-                                .stroke(Color.palmTeal.opacity(0.3), lineWidth: 3)
-                                .frame(width: 110, height: 110)
-                                .scaleEffect(recorder.isRecording ? 1.2 : 1.0)
-                                .opacity(recorder.isRecording ? 0.0 : 1.0)
-                                .animation(
-                                    .easeInOut(duration: 1.5).repeatForever(autoreverses: false),
-                                    value: recorder.isRecording
+                                .fill(recorder.isRecording ? Color.red.opacity(0.05) : Color.palmPrimary.opacity(0.05))
+                                .frame(width: 130, height: 130)
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            recorder.isRecording ? Color.red.opacity(0.15) : Color.palmPrimary.opacity(0.15),
+                                            lineWidth: 1.5
+                                        )
+                                )
+                                .scaleEffect(recorder.isRecording ? 1.05 : 1.0)
+                                .animation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true), value: recorder.isRecording)
+
+                            // Main button
+                            Circle()
+                                .fill(
+                                    recorder.isRecording
+                                        ? LinearGradient(colors: [.red, .red.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        : LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                )
+                                .frame(width: 82, height: 82)
+                                .shadow(
+                                    color: (recorder.isRecording ? Color.red : Color.palmPrimary).opacity(0.45),
+                                    radius: 10, y: 3
+                                )
+                                .overlay(
+                                    Group {
+                                        if recorder.isRecording {
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .fill(Color.white)
+                                                .frame(width: 26, height: 26)
+                                        } else {
+                                            Image(systemName: "mic.fill")
+                                                .font(.system(size: 32))
+                                                .foregroundColor(.white)
+                                        }
+                                    }
                                 )
                         }
+                        .onTapGesture { handleRecordTap() }
 
-                        Circle()
-                            .fill(recorder.isRecording ? Color.red : Color.palmPrimary)
-                            .frame(width: 88, height: 88)
-                            .shadow(
-                                color: (recorder.isRecording ? Color.red : Color.palmPrimary).opacity(0.4),
-                                radius: 12, y: 4
-                            )
-
-                        if recorder.isRecording {
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.white)
-                                .frame(width: 28, height: 28)
-                        } else {
-                            Image(systemName: "mic.fill")
-                                .font(.system(size: 32))
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .onTapGesture {
-                        handleRecordTap()
+                        Text("Tap to start · AI handles the rest")
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmSecondary)
                     }
 
-                    // Status text
-                    Text(statusText)
-                        .font(.subheadline)
-                        .foregroundColor(.palmSecondary)
-                }
+                    Spacer()
 
-                Spacer()
-
-                // Upload button (shown after recording)
-                if recordingFinishedURL != nil && !recorder.isRecording {
-                    VStack(spacing: 12) {
-                        Button {
-                            uploadRecording()
-                        } label: {
-                            HStack(spacing: 8) {
-                                if isUploading {
-                                    ProgressView()
-                                        .tint(.white)
-                                } else {
-                                    Image(systemName: "arrow.up.circle.fill")
-                                        .font(.system(size: 20))
+                    // Upload button (shown after recording)
+                    if recordingFinishedURL != nil && !recorder.isRecording {
+                        VStack(spacing: 12) {
+                            Button { uploadRecording() } label: {
+                                HStack(spacing: 8) {
+                                    if isUploading {
+                                        ProgressView().tint(.white)
+                                    } else {
+                                        Image(systemName: "arrow.up.circle.fill")
+                                            .font(.system(size: 18))
+                                    }
+                                    Text(isUploading ? "Uploading..." : "Upload Recording")
+                                        .font(.system(size: 14, weight: .heavy))
                                 }
-                                Text(isUploading ? "Uploading..." : "Upload Recording")
-                                    .font(.body.weight(.semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 13)
+                                .background(LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .cornerRadius(12)
+                                .shadow(color: Color.palmPrimary.opacity(0.35), radius: 7, y: 3)
                             }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(LinearGradient.palmPrimary)
-                            .cornerRadius(12)
-                        }
-                        .disabled(isUploading || selectedClient == nil)
-                        .opacity(selectedClient == nil ? 0.5 : 1)
+                            .disabled(isUploading || selectedClient == nil)
+                            .opacity(selectedClient == nil ? 0.5 : 1)
 
-                        if selectedClient == nil {
-                            Text("Please select a client before uploading")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                        }
+                            if selectedClient == nil {
+                                Text("Please select a client before uploading")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
 
-                        Button {
-                            recordingFinishedURL = nil
-                            recorder.recordingURL = nil
-                        } label: {
-                            Text("Discard")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundColor(.red)
+                            Button {
+                                recordingFinishedURL = nil
+                                recorder.recordingURL = nil
+                            } label: {
+                                Text("Discard")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.red)
+                            }
                         }
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 16)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
-                }
 
-                Spacer().frame(height: 100)
+                    Spacer().frame(height: 80)
+                }
+                .frame(maxWidth: .infinity)
             }
             .background(Color.palmBackground)
-            .navigationTitle("Record")
-            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showClientPicker) {
                 ClientPickerSheet(clients: clients, selected: $selectedClient)
             }
@@ -210,7 +234,7 @@ struct RecordView: View {
         } else if recordingFinishedURL != nil {
             return "Recording complete"
         } else {
-            return "Tap to start recording"
+            return "Ready to Palm It"
         }
     }
 
@@ -261,53 +285,13 @@ struct RecordView: View {
         do {
             let fetched = try await api.fetchClients()
             await MainActor.run { clients = fetched }
-        } catch {
-            // Silently fail; user can retry
-        }
+        } catch {}
     }
 
     private func timeString(_ interval: TimeInterval) -> String {
         let minutes = Int(interval) / 60
         let seconds = Int(interval) % 60
         return String(format: "%02d:%02d", minutes, seconds)
-    }
-}
-
-// MARK: - Waveform Animation
-
-struct WaveformView: View {
-    @State private var animating = false
-
-    var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<24, id: \.self) { index in
-                WaveformBar(delay: Double(index) * 0.05, animating: animating)
-            }
-        }
-        .onAppear { animating = true }
-        .onDisappear { animating = false }
-    }
-}
-
-struct WaveformBar: View {
-    let delay: Double
-    let animating: Bool
-
-    @State private var height: CGFloat = 8
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: 2)
-            .fill(Color.palmTeal)
-            .frame(width: 4, height: height)
-            .onAppear {
-                withAnimation(
-                    .easeInOut(duration: 0.4)
-                    .repeatForever(autoreverses: true)
-                    .delay(delay)
-                ) {
-                    height = CGFloat.random(in: 12...50)
-                }
-            }
     }
 }
 

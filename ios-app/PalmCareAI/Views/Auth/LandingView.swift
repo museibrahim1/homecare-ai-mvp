@@ -9,7 +9,7 @@ struct AnimatedWaveform: View {
     let color: Color
     @State private var phase: CGFloat = 0
 
-    init(barCount: Int = 24, barWidth: CGFloat = 4, minHeight: CGFloat = 8, maxHeight: CGFloat = 36, color: Color = .white) {
+    init(barCount: Int = 17, barWidth: CGFloat = 3, minHeight: CGFloat = 8, maxHeight: CGFloat = 48, color: Color = .white) {
         self.barCount = barCount
         self.barWidth = barWidth
         self.minHeight = minHeight
@@ -21,12 +21,12 @@ struct AnimatedWaveform: View {
         HStack(spacing: 3) {
             ForEach(0..<barCount, id: \.self) { index in
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(color.opacity(0.6 + 0.4 * waveValue(for: index)))
+                    .fill(color.opacity(0.25 + 0.6 * waveValue(for: index)))
                     .frame(width: barWidth, height: barHeight(for: index))
             }
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
                 phase = 1
             }
         }
@@ -43,54 +43,34 @@ struct AnimatedWaveform: View {
     }
 }
 
-// MARK: - AI Processing Dots
-struct AIProcessingDots: View {
-    let color: Color
-    @State private var animating = false
-
-    init(color: Color = .white) {
-        self.color = color
-    }
+// MARK: - Live Badge
+struct LiveBadge: View {
+    @State private var blinking = false
 
     var body: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<3, id: \.self) { index in
-                Circle()
-                    .fill(color)
-                    .frame(width: 6, height: 6)
-                    .scaleEffect(animating ? 1.2 : 0.8)
-                    .opacity(animating ? 1 : 0.5)
-                    .animation(
-                        .easeInOut(duration: 0.5)
-                        .repeatForever(autoreverses: true)
-                        .delay(Double(index) * 0.15),
-                        value: animating
-                    )
+        HStack(spacing: 5) {
+            Circle()
+                .fill(Color.red)
+                .frame(width: 7, height: 7)
+                .shadow(color: .red, radius: 3)
+                .opacity(blinking ? 0.2 : 1)
+
+            Text("LIVE")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(.white.opacity(0.8))
+                .tracking(1.5)
+        }
+        .padding(.horizontal, 11)
+        .padding(.vertical, 5)
+        .background(Color(red: 4/255, green: 47/255, blue: 46/255).opacity(0.6))
+        .background(.ultraThinMaterial.opacity(0.3))
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(Color.white.opacity(0.14), lineWidth: 1))
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true)) {
+                blinking = true
             }
         }
-        .onAppear { animating = true }
-    }
-}
-
-// MARK: - Pulsing Glow Ring
-struct PulsingGlowRing: View {
-    let color: Color
-    let size: CGFloat
-    @State private var scale: CGFloat = 1
-    @State private var opacity: Double = 0.5
-
-    var body: some View {
-        Circle()
-            .stroke(color, lineWidth: 2)
-            .frame(width: size, height: size)
-            .scaleEffect(scale)
-            .opacity(opacity)
-            .onAppear {
-                withAnimation(.easeOut(duration: 1.5).repeatForever(autoreverses: false)) {
-                    scale = 1.4
-                    opacity = 0
-                }
-            }
     }
 }
 
@@ -100,143 +80,187 @@ struct LandingView: View {
     @State private var navigateToLogin = false
     @State private var navigateToRegister = false
 
-    private let pages: [(icon: String, title: String, subtitle: String)] = [
-        (
-            "waveform.and.mic",
-            "Record & Transcribe",
-            "Capture client visits with one tap. AI transcribes and organizes everything automatically."
-        ),
-        (
-            "doc.text.magnifyingglass",
-            "Smart Documentation",
-            "Generate care notes, billing codes, and contracts from your recordings — no manual entry."
-        ),
-        (
-            "chart.bar.xaxis.ascending",
-            "Grow Your Practice",
-            "Track clients, manage visits, and stay on top of your home care business effortlessly."
-        ),
-    ]
-
     var body: some View {
         NavigationStack {
             ZStack {
-                // Dark teal background (matches web login left panel)
-                Color.palmPrimaryDark
-                    .ignoresSafeArea()
-                
-                // Subtle blur orbs
-                Circle()
-                    .fill(Color.white.opacity(0.05))
-                    .frame(width: 200, height: 200)
-                    .blur(radius: 60)
-                    .offset(x: 100, y: -150)
-                Circle()
-                    .fill(Color.white.opacity(0.05))
-                    .frame(width: 180, height: 180)
-                    .blur(radius: 50)
-                    .offset(x: -80, y: 200)
-                
-                // Ambient waveform layer (background)
-                VStack {
-                    Spacer()
-                    AnimatedWaveform(barCount: 40, barWidth: 3, minHeight: 4, maxHeight: 24, color: Color.white.opacity(0.15))
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 120)
+                // Deep dark teal background with radial gradients
+                ZStack {
+                    LinearGradient(
+                        colors: [
+                            Color(red: 7/255, green: 31/255, blue: 32/255),
+                            Color(red: 10/255, green: 47/255, blue: 42/255),
+                            Color(red: 13/255, green: 61/255, blue: 53/255),
+                            Color(red: 8/255, green: 40/255, blue: 40/255),
+                            Color(red: 5/255, green: 24/255, blue: 24/255),
+                            Color(red: 3/255, green: 15/255, blue: 15/255),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+
+                    // Cyan orb top-right
+                    Circle()
+                        .fill(Color.palmAccent.opacity(0.15))
+                        .frame(width: 300, height: 300)
+                        .blur(radius: 80)
+                        .offset(x: 100, y: -200)
+
+                    // Teal orb bottom-left
+                    Circle()
+                        .fill(Color.palmPrimary.opacity(0.12))
+                        .frame(width: 250, height: 250)
+                        .blur(radius: 70)
+                        .offset(x: -80, y: 200)
+
+                    // Bottom gradient fade
+                    VStack {
+                        Spacer()
+                        LinearGradient(
+                            colors: [
+                                Color(red: 4/255, green: 47/255, blue: 46/255).opacity(0),
+                                Color(red: 4/255, green: 47/255, blue: 46/255).opacity(0.55),
+                                Color(red: 4/255, green: 47/255, blue: 46/255).opacity(0.94),
+                                Color(red: 4/255, green: 47/255, blue: 46/255),
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 350)
+                    }
                 }
-                
+                .ignoresSafeArea()
+
+                // Live badge
+                VStack {
+                    HStack {
+                        Spacer()
+                        LiveBadge()
+                            .padding(.trailing, 16)
+                            .padding(.top, 8)
+                    }
+                    Spacer()
+                }
+
+                // Center waveform
+                AnimatedWaveform(barCount: 17, barWidth: 3, minHeight: 8, maxHeight: 48, color: .white)
+                    .opacity(0.7)
+
+                // Bottom content
                 VStack(spacing: 0) {
-                    // Logo & branding with pulsing rings
-                    HStack(spacing: 12) {
-                        ZStack {
-                            PulsingGlowRing(color: Color.palmPrimaryLight.opacity(0.6), size: 70)
-                            PulsingGlowRing(color: Color.palmAccent.opacity(0.4), size: 56)
-                                .scaleEffect(0.9)
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white.opacity(0.2))
-                                .frame(width: 48, height: 48)
-                            Image(systemName: "hand.raised.fill")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white)
-                        }
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("PalmCare AI")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                            HStack(spacing: 4) {
-                                AIProcessingDots(color: Color.palmPrimaryLight)
-                                Text("AI-Powered")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Brand row
+                        HStack(spacing: 9) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 11)
+                                    .fill(LinearGradient.palmPrimary)
+                                    .frame(width: 38, height: 38)
+                                    .shadow(color: Color.palmPrimary.opacity(0.5), radius: 6, y: 2)
+
+                                Image(systemName: "mic.fill")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.white)
                             }
+
+                            Text("PalmCare AI")
+                                .font(.system(size: 17, weight: .heavy))
+                                .foregroundColor(.white)
+                                .tracking(-0.3)
+
+                            Spacer()
+
+                            Text("AI-POWERED")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(0.8)
+                                .foregroundColor(Color.palmPrimaryLight)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 3)
+                                .background(Color.palmPrimary.opacity(0.25))
+                                .overlay(
+                                    Capsule().stroke(Color.palmPrimaryLight.opacity(0.35), lineWidth: 1)
+                                )
+                                .clipShape(Capsule())
                         }
-                    }
-                    .padding(.top, 20)
-                    .padding(.bottom, 8)
-                    
-                    Text("Turn care assessments into proposal-ready contracts")
-                        .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.85))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 24)
-                    
-                    // Swipeable feature cards
-                    TabView(selection: $currentPage) {
-                        ForEach(0..<pages.count, id: \.self) { index in
-                            OnboardingCard(
-                                icon: pages[index].icon,
-                                title: pages[index].title,
-                                subtitle: pages[index].subtitle,
-                                showWaveform: index == 0,
-                                showAIDots: index == 1
-                            )
-                            .tag(index)
+                        .padding(.bottom, 18)
+
+                        // PALM IT. slogan
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("PALM")
+                                .font(.system(size: 42, weight: .black))
+                                .foregroundColor(.white)
+                                .tracking(-1.5)
+
+                            Text("IT.")
+                                .font(.system(size: 42, weight: .black))
+                                .italic()
+                                .foregroundColor(Color.palmPrimaryLight)
+                                .tracking(-1.5)
                         }
-                    }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .animation(.easeInOut(duration: 0.3), value: currentPage)
-                    
-                    // Page indicators
-                    HStack(spacing: 8) {
-                        ForEach(0..<pages.count, id: \.self) { index in
+                        .padding(.bottom, 10)
+
+                        // Subtitle
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Record. Transcribe. Contract.")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.85))
+
+                            Text("Every care assessment — handled in seconds.\nYour clients get proposals. You get your time back.")
+                                .font(.system(size: 12))
+                                .foregroundColor(.white.opacity(0.55))
+                                .lineSpacing(4)
+                        }
+                        .padding(.bottom, 20)
+
+                        // Page dots
+                        HStack(spacing: 5) {
                             Capsule()
-                                .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                                .frame(width: index == currentPage ? 24 : 8, height: 8)
-                                .animation(.easeInOut(duration: 0.25), value: currentPage)
+                                .fill(Color.palmPrimaryLight)
+                                .frame(width: currentPage == 0 ? 18 : 5, height: 5)
+                            Capsule()
+                                .fill(currentPage == 1 ? Color.palmPrimaryLight : Color.white.opacity(0.22))
+                                .frame(width: currentPage == 1 ? 18 : 5, height: 5)
+                            Capsule()
+                                .fill(currentPage == 2 ? Color.palmPrimaryLight : Color.white.opacity(0.22))
+                                .frame(width: currentPage == 2 ? 18 : 5, height: 5)
                         }
-                    }
-                    .padding(.vertical, 28)
-                    
-                    // CTA buttons
-                    VStack(spacing: 12) {
+                        .padding(.bottom, 16)
+                        .animation(.easeInOut(duration: 0.25), value: currentPage)
+
+                        // CTA buttons
                         Button {
                             navigateToRegister = true
                         } label: {
-                            Text("Get Started")
-                                .font(.body.weight(.semibold))
+                            Text("PALM IT — GET STARTED")
+                                .font(.system(size: 14, weight: .heavy))
+                                .tracking(0.2)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(LinearGradient.palmPrimary)
-                                .cornerRadius(14)
-                                .shadow(color: Color.palmPrimary.opacity(0.4), radius: 12, y: 4)
+                                .padding(.vertical, 14)
+                                .background(LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .cornerRadius(12)
+                                .shadow(color: Color.palmPrimary.opacity(0.35), radius: 7, y: 3)
                         }
-                        
+                        .padding(.bottom, 9)
+
                         Button {
                             navigateToLogin = true
                         } label: {
-                            Text("I already have an account")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundColor(.white.opacity(0.9))
+                            Text("Already have an account? Sign in →")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.white.opacity(0.7))
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color.white.opacity(0.12))
-                                .cornerRadius(14)
+                                .padding(.vertical, 13)
+                                .background(Color.white.opacity(0.07))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.white.opacity(0.15), lineWidth: 1.5)
+                                )
+                                .cornerRadius(12)
                         }
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 40)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
                 }
             }
             .navigationDestination(isPresented: $navigateToLogin) {
@@ -248,65 +272,6 @@ struct LandingView: View {
                     .environmentObject(api)
             }
         }
-    }
-}
-
-struct OnboardingCard: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    var showWaveform: Bool = false
-    var showAIDots: Bool = false
-
-    var body: some View {
-        VStack(spacing: 24) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white.opacity(0.08))
-                    .frame(width: 80, height: 80)
-                
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(LinearGradient.palmPrimary)
-                    .frame(width: 64, height: 64)
-                
-                Image(systemName: icon)
-                    .font(.system(size: 28, weight: .medium))
-                    .foregroundColor(.white)
-            }
-            
-            // Waveform animation for Record card
-            if showWaveform {
-                AnimatedWaveform(barCount: 20, barWidth: 4, minHeight: 12, maxHeight: 32, color: Color.palmPrimaryLight)
-                    .frame(height: 36)
-                    .padding(.horizontal, 24)
-            }
-            
-            // AI processing dots for Smart Documentation card
-            if showAIDots {
-                HStack(spacing: 6) {
-                    AIProcessingDots(color: Color.palmPrimaryLight)
-                    Text("Processing...")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
-                }
-                .padding(.vertical, 4)
-            }
-            
-            VStack(spacing: 10) {
-                Text(title)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 20)
-            }
-        }
-        .padding(.horizontal, 32)
     }
 }
 

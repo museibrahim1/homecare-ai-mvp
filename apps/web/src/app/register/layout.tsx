@@ -3,11 +3,11 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Start Your Free Trial',
   description:
-    'Create your PalmCare AI account. 14-day free trial, no credit card required. AI-powered home care management for agencies of all sizes.',
+    'Join the pros who Palm It. 14-day free trial, no credit card required. Close faster, document smarter — never lose a client to paperwork again.',
   openGraph: {
     title: 'Start Your Free Trial — PalmCare AI',
     description:
-      'Sign up in 60 seconds. Turn voice assessments into contracts with AI.',
+      'Palm It — record assessments, generate contracts in seconds. Built for care professionals.',
   },
 };
 

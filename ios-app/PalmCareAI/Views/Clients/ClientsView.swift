@@ -7,6 +7,15 @@ struct ClientsView: View {
     @State private var searchText = ""
     @State private var isLoading = true
 
+    private static let avatarColors: [Color] = [
+        Color(red: 13/255, green: 148/255, blue: 136/255),
+        Color(red: 59/255, green: 130/255, blue: 246/255),
+        Color(red: 220/255, green: 38/255, blue: 38/255),
+        Color(red: 124/255, green: 58/255, blue: 237/255),
+        Color(red: 217/255, green: 119/255, blue: 6/255),
+        Color(red: 8/255, green: 145/255, blue: 178/255),
+    ]
+
     var filteredClients: [Client] {
         if searchText.isEmpty { return clients }
         return clients.filter {
@@ -18,69 +27,111 @@ struct ClientsView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if isLoading {
-                    VStack {
-                        Spacer()
-                        ProgressView("Loading clients...")
-                        Spacer()
-                    }
-                } else if clients.isEmpty {
-                    VStack(spacing: 16) {
-                        Spacer()
-
-                        Image(systemName: "person.2.slash")
-                            .font(.system(size: 48))
-                            .foregroundColor(.palmSecondary.opacity(0.4))
-
-                        Text("No Clients Yet")
-                            .font(.title3.weight(.semibold))
+            VStack(spacing: 0) {
+                // Top bar
+                VStack(spacing: 11) {
+                    HStack {
+                        Text("Clients")
+                            .font(.system(size: 20, weight: .heavy))
                             .foregroundColor(.palmText)
-
-                        Text("Your clients will appear here once added.")
-                            .font(.subheadline)
-                            .foregroundColor(.palmSecondary)
-                            .multilineTextAlignment(.center)
+                            .tracking(-0.4)
 
                         Spacer()
-                    }
-                    .padding(.horizontal, 40)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 10) {
-                            ForEach(filteredClients) { client in
-                                ClientCard(client: client)
-                            }
 
-                            if filteredClients.isEmpty {
-                                VStack(spacing: 8) {
-                                    Image(systemName: "magnifyingglass")
-                                        .font(.system(size: 32))
-                                        .foregroundColor(.palmSecondary.opacity(0.4))
-
-                                    Text("No results for \"\(searchText)\"")
-                                        .font(.subheadline)
-                                        .foregroundColor(.palmSecondary)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 40)
+                        Button {} label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 12, weight: .bold))
+                                Text("Add Client")
+                                    .font(.system(size: 12, weight: .bold))
                             }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .cornerRadius(8)
+                            .shadow(color: Color.palmPrimary.opacity(0.35), radius: 5, y: 2)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                        .padding(.bottom, 120)
+                    }
+
+                    // Search bar
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 14))
+                            .foregroundColor(.palmSecondary)
+
+                        TextField("Search name, phone, diagnosis…", text: $searchText)
+                            .font(.system(size: 12))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 9)
+                    .background(Color.palmFieldBg)
+                    .cornerRadius(8)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 14)
+                .padding(.bottom, 14)
+                .background(Color.white)
+                .overlay(
+                    Rectangle().fill(Color.palmBorder).frame(height: 1),
+                    alignment: .bottom
+                )
+
+                // Client list
+                Group {
+                    if isLoading {
+                        VStack {
+                            Spacer()
+                            ProgressView("Loading clients...")
+                            Spacer()
+                        }
+                    } else if clients.isEmpty {
+                        VStack(spacing: 16) {
+                            Spacer()
+                            Image(systemName: "person.2.slash")
+                                .font(.system(size: 48))
+                                .foregroundColor(.palmSecondary.opacity(0.4))
+                            Text("No Clients Yet")
+                                .font(.title3.weight(.semibold))
+                                .foregroundColor(.palmText)
+                            Text("Your clients will appear here once added.")
+                                .font(.subheadline)
+                                .foregroundColor(.palmSecondary)
+                                .multilineTextAlignment(.center)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 40)
+                    } else {
+                        ScrollView(showsIndicators: false) {
+                            LazyVStack(spacing: 8) {
+                                ForEach(filteredClients) { client in
+                                    ClientCard(client: client, avatarColors: Self.avatarColors)
+                                }
+
+                                if filteredClients.isEmpty {
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "magnifyingglass")
+                                            .font(.system(size: 32))
+                                            .foregroundColor(.palmSecondary.opacity(0.4))
+                                        Text("No results for \"\(searchText)\"")
+                                            .font(.subheadline)
+                                            .foregroundColor(.palmSecondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.top, 40)
+                                }
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.top, 12)
+                            .padding(.bottom, 100)
+                        }
                     }
                 }
             }
             .background(Color.palmBackground)
-            .navigationTitle("Clients")
-            .searchable(text: $searchText, prompt: "Search by name, phone, or diagnosis")
-            .refreshable {
-                await loadClients()
-            }
-            .task {
-                await loadClients()
-            }
+            .refreshable { await loadClients() }
+            .task { await loadClients() }
         }
     }
 
@@ -92,89 +143,61 @@ struct ClientsView: View {
                 isLoading = false
             }
         } catch {
-            await MainActor.run {
-                isLoading = false
-            }
+            await MainActor.run { isLoading = false }
         }
     }
 }
 
 struct ClientCard: View {
     let client: Client
-
-    var statusColor: Color {
-        switch client.status.lowercased() {
-        case "active": return .green
-        case "inactive": return .palmSecondary
-        case "pending": return .orange
-        default: return .palmSecondary
-        }
-    }
+    let avatarColors: [Color]
 
     var body: some View {
-        HStack(spacing: 14) {
-            // Avatar
-            ZStack {
-                Circle()
-                    .fill(Color.palmPrimary.opacity(0.1))
-                    .frame(width: 50, height: 50)
+        HStack(spacing: 11) {
+            let initials = client.full_name.split(separator: " ").map { String($0.prefix(1)) }.joined().uppercased()
+            let colorIndex = abs(client.full_name.hashValue) % avatarColors.count
 
-                Text(initials(for: client.full_name))
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.palmPrimary)
-            }
+            RoundedRectangle(cornerRadius: 11)
+                .fill(avatarColors[colorIndex])
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Text(initials)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.white)
+                        .tracking(-0.5)
+                )
 
-            // Info
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(client.full_name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.palmText)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(client.full_name)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.palmText)
 
-                    Spacer()
-
-                    Text(client.status.capitalized)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundColor(statusColor)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(statusColor.opacity(0.12))
-                        .cornerRadius(6)
+                if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
+                    Text(diagnosis)
+                        .font(.system(size: 11))
+                        .foregroundColor(.palmSecondary)
+                        .lineLimit(1)
                 }
 
                 if let phone = client.phone, !phone.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "phone")
-                            .font(.system(size: 10))
-                        Text(phone)
-                    }
-                    .font(.caption)
-                    .foregroundColor(.palmSecondary)
-                }
-
-                if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "heart.text.square")
-                            .font(.system(size: 10))
-                        Text(diagnosis)
-                    }
-                    .font(.caption)
-                    .foregroundColor(.palmSecondary)
-                    .lineLimit(1)
+                    Text(phone)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.palmPrimary)
                 }
             }
-        }
-        .padding(14)
-        .background(Color.white)
-        .cornerRadius(14)
-        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
-    }
 
-    private func initials(for name: String) -> String {
-        let parts = name.split(separator: " ")
-        let first = parts.first?.prefix(1) ?? ""
-        let last = parts.count > 1 ? parts.last!.prefix(1) : ""
-        return "\(first)\(last)".uppercased()
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13))
+                .foregroundColor(.palmBorder)
+        }
+        .padding(.horizontal, 13)
+        .padding(.vertical, 11)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
     }
 }
 

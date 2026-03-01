@@ -11,20 +11,20 @@ const FEATURE_SECTIONS = [
   {
     id: 'ai',
     title: 'AI Intelligence',
-    subtitle: 'The brain behind your operations',
-    description: 'PalmCare AI isn\'t just software with an AI label. Our platform was built from day one with artificial intelligence at its core — powering everything from voice transcription to contract generation.',
+    subtitle: 'Record. Transcribe. Contract.',
+    description: 'PalmCare AI isn\'t software with an AI label slapped on. It\'s the first AI-native platform built from the ground up for home care — powering everything from voice recording to signed contracts.',
     features: [
       {
         icon: Mic,
         title: 'Voice-Powered Assessments',
-        description: 'Record care assessments naturally — in person, over the phone, or upload existing recordings. Our AI transcribes conversations with 98%+ accuracy, identifies individual speakers, and understands care-specific terminology that generic transcription services miss.',
+        description: 'Staff records a client assessment on their phone — in person or over the phone. AI transcribes the conversation with 98%+ accuracy, identifies who is speaking, and captures care-specific terminology that generic tools miss. One tap to start. AI handles the rest.',
         highlights: ['98%+ transcription accuracy', 'Multi-speaker identification', 'Care-specific vocabulary'],
         image: '/screenshots/voice-assessment.png',
       },
       {
         icon: Brain,
         title: 'Smart Contract Generation',
-        description: 'AI reads your assessment transcripts and automatically generates professional, proposal-ready contracts. Services, schedules, rates, policies, and billing terms are all populated — saving hours of manual work per client.',
+        description: 'AI generates a complete assessment, care plan, and service agreement — all from a single recording. Services, schedules, rates, and billing terms are auto-populated. Contracts generated in seconds, not hours.',
         highlights: ['Auto-populated fields', 'Professional formatting', 'Customizable templates'],
         image: '/screenshots/contract-preview.png',
       },
@@ -192,11 +192,11 @@ export default function FeaturesPage() {
         <section className="px-6 pb-16">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl font-bold text-slate-900 mb-6">
-              Where Innovation Meets
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> Functionality</span>
+              Where Care Meets
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> Intelligence</span>
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              From AI-powered voice assessments to caregiver mobile tools, every feature was designed to help your agency deliver better care while spending less time on admin work.
+              PalmCare AI is the first AI-native documentation platform built specifically for home care. Every feature was designed to help you close faster, document smarter, and never lose a client to paperwork again.
             </p>
           </div>
         </section>
@@ -262,10 +262,10 @@ export default function FeaturesPage() {
         <section className="px-6 py-20">
           <div className="max-w-4xl mx-auto">
             <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-200">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready to See These Features in Action?</h2>
-              <p className="text-xl text-slate-600 mb-8">Book a free 30-minute demo and we&apos;ll show you exactly how PalmCare AI can streamline your agency.</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready to Palm It?</h2>
+              <p className="text-xl text-slate-600 mb-8">Book a free demo. See how PalmCare AI turns assessments into signed contracts — automatically.</p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></Link>
+                <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Palm It — Book a Demo<ArrowRight className="w-5 h-5" /></Link>
               </div>
             </div>
           </div>

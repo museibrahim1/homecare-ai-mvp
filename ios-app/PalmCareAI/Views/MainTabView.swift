@@ -23,7 +23,6 @@ struct MainTabView: View {
                     .tag(4)
             }
 
-            // Custom tab bar
             CustomTabBar(selectedTab: $selectedTab)
         }
         .edgesIgnoringSafeArea(.bottom)
@@ -37,36 +36,51 @@ struct CustomTabBar: View {
     private let tabs: [(icon: String, label: String)] = [
         ("house.fill", "Home"),
         ("person.2.fill", "Clients"),
-        ("mic.fill", "Record"),
+        ("mic.fill", "Palm It"),
         ("calendar", "Calendar"),
-        ("square.grid.2x2.fill", "More"),
+        ("ellipsis", "More"),
     ]
 
     var body: some View {
         HStack {
             ForEach(0..<tabs.count, id: \.self) { index in
                 if index == 2 {
-                    // Prominent record button
-                    Button {
-                        selectedTab = index
-                    } label: {
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient.palmPrimary)
-                                .frame(width: 56, height: 56)
-                                .shadow(color: Color.palmPrimary.opacity(0.4), radius: 10, y: 4)
+                    // Center "Palm It" button
+                    VStack(spacing: 3) {
+                        Button {
+                            selectedTab = index
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        selectedTab == 2
+                                            ? LinearGradient(colors: [.red, .red.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                            : LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    )
+                                    .frame(width: 50, height: 50)
+                                    .shadow(
+                                        color: (selectedTab == 2 ? Color.red : Color.palmPrimary).opacity(0.45),
+                                        radius: 7, y: 3
+                                    )
 
-                            Image(systemName: tabs[index].icon)
-                                .font(.system(size: 22, weight: .semibold))
-                                .foregroundColor(.white)
+                                Image(systemName: tabs[index].icon)
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(.white)
+                            }
                         }
-                        .offset(y: -16)
+                        .offset(y: -20)
+
+                        Text(tabs[index].label)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.palmSecondary)
+                            .offset(y: -17)
                     }
+                    .frame(maxWidth: .infinity)
                 } else {
                     Button {
                         selectedTab = index
                     } label: {
-                        VStack(spacing: 4) {
+                        VStack(spacing: 3) {
                             Image(systemName: tabs[index].icon)
                                 .font(.system(size: 20))
                                 .foregroundColor(
@@ -74,7 +88,7 @@ struct CustomTabBar: View {
                                 )
 
                             Text(tabs[index].label)
-                                .font(.system(size: 10, weight: .medium))
+                                .font(.system(size: 10, weight: .semibold))
                                 .foregroundColor(
                                     selectedTab == index ? .palmPrimary : .palmSecondary
                                 )
@@ -84,13 +98,17 @@ struct CustomTabBar: View {
                 }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 8)
+        .padding(.horizontal, 4)
+        .padding(.top, 6)
         .padding(.bottom, 24)
         .background(
             Rectangle()
                 .fill(.white)
-                .shadow(color: .black.opacity(0.08), radius: 12, y: -4)
+                .shadow(color: .black.opacity(0.06), radius: 8, y: -4)
+                .overlay(
+                    Rectangle().fill(Color.palmBorder).frame(height: 1),
+                    alignment: .top
+                )
         )
     }
 }

@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Sign In',
   description:
-    'Sign in to your PalmCare AI account. Manage clients, assessments, contracts, and caregivers from your dashboard.',
+    'Sign in to PalmCare AI. Record assessments, generate contracts, and manage your agency — all in your palm.',
   robots: { index: false, follow: true },
 };
 

@@ -57,19 +57,19 @@ const FEATURES_TABS = [
       {
         icon: Mic,
         title: 'Voice-Powered Assessments',
-        description: 'Record care assessments naturally — in person or over the phone. Our AI transcribes conversations, identifies speakers, and extracts care-specific terminology automatically.',
+        description: 'Staff records a client assessment interview on their phone. AI transcribes the audio, identifies speakers, and extracts care needs — automatically. Just tap, talk, and Palm It.',
         color: 'from-blue-500 to-cyan-500',
       },
       {
         icon: Brain,
         title: 'Smart Contract Generation',
-        description: 'AI reads your assessments and generates professional, proposal-ready contracts complete with services, schedule, rates, and billing terms — in seconds, not hours.',
+        description: 'AI generates a complete assessment, care plan, and service agreement — in seconds, not hours. Every client gets a proposal-ready contract before you leave the chair.',
         color: 'from-purple-500 to-pink-500',
       },
       {
         icon: Zap,
         title: 'Intelligent Data Extraction',
-        description: 'Automatically extract billable items, care needs, medications, and special requirements from voice recordings. No manual data entry needed.',
+        description: 'AI captures every detail from the assessment interview — billable items, care needs, medications, and special requirements. No manual data entry. No missed details.',
         color: 'from-yellow-500 to-orange-500',
       },
       {
@@ -229,7 +229,7 @@ const SOLUTIONS = [
   {
     size: 'Small Agencies',
     clients: 'Up to 30 Clients',
-    description: 'Simplify operations and provide exceptional care. Focus on building lasting client relationships while PalmCare AI handles the paperwork.',
+    description: 'Close faster, document smarter. Focus on building client relationships while PalmCare AI handles the paperwork. One tap — AI does the rest.',
     features: ['Voice-powered assessments', 'Contract auto-generation', 'Client CRM', 'Caregiver mobile app', 'Email support'],
     icon: Building2,
     gradient: 'from-blue-500 to-cyan-500',
@@ -237,7 +237,7 @@ const SOLUTIONS = [
   {
     size: 'Medium Agencies',
     clients: '30 - 200 Clients',
-    description: 'Optimize efficiency and scale your team. Improve caregiver coordination, enhance client satisfaction, and maintain operational excellence.',
+    description: 'Scale your team without scaling your admin work. Improve caregiver coordination, enhance client satisfaction, and close more clients — faster.',
     features: ['Everything in Small', 'Custom templates & forms', 'Advanced reporting', 'Multi-user access', 'Priority support'],
     icon: TrendingUp,
     gradient: 'from-purple-500 to-pink-500',
@@ -245,7 +245,7 @@ const SOLUTIONS = [
   {
     size: 'Enterprise',
     clients: '200+ Clients',
-    description: 'Unleash your full potential with customizable solutions. Manage multiple locations, complex billing, and large caregiver teams from one platform.',
+    description: 'Manage multiple locations, complex billing, and large caregiver teams — all from one AI-native platform built specifically for home care.',
     features: ['Everything in Medium', 'Multi-location management', 'Custom integrations', 'Dedicated account manager', 'SLA guarantee'],
     icon: Globe,
     gradient: 'from-orange-500 to-red-500',
@@ -880,21 +880,21 @@ export default function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full mb-6">
                 <Zap className="w-4 h-4 text-primary-400" />
-                <span className="text-sm text-primary-400">AI-Powered Home Care Management</span>
+                <span className="text-sm text-primary-400">Where Care Meets Intelligence</span>
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-                Turn Care Assessments Into
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> Contracts in Minutes</span>
+                Record It. Transcribe It.
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> Contract It.</span>
               </h1>
               
               <p className="text-xl text-dark-300 mb-8 leading-relaxed">
-                Stop spending hours on paperwork. Record assessments by voice, auto-generate contracts,
-                and manage your home care agency — all from one powerful AI platform.
+                PalmCare AI turns care assessments into signed contracts — automatically. 
+                One tap. AI handles the rest. Never lose a client to paperwork again.
               </p>
               
               <div className="flex flex-wrap gap-4">
-                <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></a>
+                <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Palm It — Get Started<ArrowRight className="w-5 h-5" /></a>
                 <button onClick={() => setDemoOpen(true)} className="btn-secondary flex items-center gap-2 py-4 px-8 text-lg"><Play className="w-5 h-5" />Watch Demo</button>
               </div>
 
@@ -951,7 +951,7 @@ export default function LandingPage() {
               <Settings className="w-4 h-4 text-primary-400" /><span className="text-sm text-primary-400">Platform Features</span>
             </div>
             <h2 className="text-4xl font-bold text-white mb-4">Everything You Need to Run Your Agency</h2>
-            <p className="text-xl text-dark-400 max-w-2xl mx-auto">Built specifically for home care agencies. Not adapted from generic software.</p>
+            <p className="text-xl text-dark-400 max-w-2xl mx-auto">Built for care professionals. Not retrofitted from generic software.</p>
           </div>
 
           {/* Tabs */}
@@ -989,14 +989,14 @@ export default function LandingPage() {
       <section className="py-20 px-6 bg-dark-800/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">From Assessment to Contract in 3 Steps</h2>
-            <p className="text-xl text-dark-400">Simple workflow, powerful results</p>
+            <h2 className="text-4xl font-bold text-white mb-4">Record. Transcribe. Contract.</h2>
+            <p className="text-xl text-dark-400">From assessment to signed contract in three steps. AI handles the rest.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: '1', title: 'Record Assessment', description: 'Use voice or upload existing recordings. Our AI understands care-specific terminology.', icon: Mic },
-              { step: '2', title: 'AI Processes Data', description: 'Automatic transcription, speaker identification, and extraction of care needs and billable items.', icon: Zap },
-              { step: '3', title: 'Generate Contract', description: 'Get a professional, proposal-ready contract with services, schedule, rates, and policies.', icon: FileText },
+              { step: '1', title: 'Record It', description: 'Staff records a client assessment interview on their phone — in person or over the phone. One tap to start.', icon: Mic },
+              { step: '2', title: 'Transcribe It', description: 'AI transcribes the conversation, identifies speakers, and extracts every care need and billable item automatically.', icon: Zap },
+              { step: '3', title: 'Contract It', description: 'A complete assessment, care plan, and service agreement is generated — ready to send and sign.', icon: FileText },
             ].map((item, i) => (
               <div key={i} className="relative">
                 <div className="absolute -top-4 -left-4 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30">{item.step}</div>
@@ -1047,8 +1047,8 @@ export default function LandingPage() {
       <section id="testimonials" className="py-20 px-6 bg-dark-800/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Loved by Home Care Agencies</h2>
-            <p className="text-xl text-dark-400">See what our customers are saying</p>
+            <h2 className="text-4xl font-bold text-white mb-4">Loved by Care Professionals</h2>
+            <p className="text-xl text-dark-400">See why agencies are choosing to Palm It</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t, i) => (
@@ -1098,13 +1098,13 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">Getting Started is Easy</h2>
-            <p className="text-xl text-dark-400">Three simple steps to transform your agency</p>
+            <p className="text-xl text-dark-400">Three simple steps — then Palm It</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: '1', title: 'Book a Free Demo', description: 'Fill out a short request form and one of our team members will schedule a personalized, no-obligation demo.', icon: Video },
-              { step: '2', title: 'See It in Action', description: 'Our experts walk you through the platform. See how voice assessments become contracts in real-time.', icon: Play },
-              { step: '3', title: 'Scale Your Agency', description: 'Start your 14-day trial and watch your paperwork disappear. Full onboarding support included.', icon: TrendingUp },
+              { step: '1', title: 'Book a Free Demo', description: 'Fill out a short form. Our team schedules a personalized, no-obligation walkthrough in under 24 hours.', icon: Video },
+              { step: '2', title: 'See It in Action', description: 'Watch a live assessment become a signed contract in real-time. 5 minutes — that\'s all it takes to see the difference.', icon: Play },
+              { step: '3', title: 'Palm It', description: 'Start your trial, onboard your team, and watch paperwork disappear. Your next client is waiting.', icon: TrendingUp },
             ].map((item, i) => (
               <div key={i} className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary-500/20">
@@ -1128,10 +1128,10 @@ export default function LandingPage() {
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-500/30">
-            <h2 className="text-4xl font-bold text-white mb-4">Ready to Transform Your Agency?</h2>
-            <p className="text-xl text-dark-300 mb-8">See how AI can streamline your agency&apos;s operations in a free demo.</p>
+            <h2 className="text-4xl font-bold text-white mb-4">Ready to Palm It?</h2>
+            <p className="text-xl text-dark-300 mb-8">Close faster. Document smarter. Never lose a client to paperwork again.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule Your Demo<ArrowRight className="w-5 h-5" /></a>
+              <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Palm It — Get Started<ArrowRight className="w-5 h-5" /></a>
             </div>
             <p className="text-dark-400 text-sm mt-6">Free personalized demo &bull; No commitment required</p>
           </div>
@@ -1149,7 +1149,7 @@ export default function LandingPage() {
                 <span className="text-xl font-bold text-white">PalmCare AI</span>
               </Link>
               <p className="text-dark-400 text-sm mb-4 leading-relaxed">
-                AI-powered home care management platform. Turn voice assessments into professional contracts in minutes, not hours.
+                Record it. Transcribe it. Contract it. All in your palm. Built for care professionals.
               </p>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
@@ -1204,9 +1204,9 @@ export default function LandingPage() {
       {/* ── STICKY CTA BAR ── */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 backdrop-blur-sm border-t border-dark-700 py-3 px-6 lg:hidden">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-white text-sm font-medium hidden sm:block">See PalmCare AI in action</p>
+          <p className="text-white text-sm font-medium hidden sm:block">Your next client is waiting</p>
           <div className="flex items-center gap-2 flex-1 sm:flex-none">
-            <a href="#book-demo" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Schedule a Demo</a>
+            <a href="#book-demo" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Palm It — Book a Demo</a>
           </div>
         </div>
       </div>

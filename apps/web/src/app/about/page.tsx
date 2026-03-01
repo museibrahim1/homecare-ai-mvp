@@ -33,12 +33,12 @@ export default function AboutPage() {
               <span className="text-sm text-primary-400">About PalmCare AI</span>
             </div>
             <h1 className="text-5xl font-bold text-slate-900 mb-6">
-              A Story of Innovation and
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> Compassionate Care</span>
+              Built by Someone Who Knows
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> the Grind</span>
             </h1>
             <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
-              We built PalmCare AI because we saw caregivers drowning in paperwork instead of doing what they do best — caring for people. 
-              Our platform puts AI to work on the administrative burden so agencies can focus on delivering exceptional care.
+              Home care agencies lose hours every week to manual documentation. Assessments are hand-written, contracts are generic, 
+              and paperwork delays cost time and money. PalmCare AI eliminates that entirely. One tap. AI handles the rest.
             </p>
           </div>
         </section>
@@ -48,18 +48,18 @@ export default function AboutPage() {
           <div className="max-w-7xl mx-auto">
             <div className="grid md:grid-cols-2 gap-16 items-center">
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-6">Our Mission: Empower Every Agency</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">Where Care Meets Intelligence</h2>
                 <p className="text-slate-600 mb-4 leading-relaxed">
-                  In home care, technology should enhance the human experience — not replace it. We chose a different path from legacy software vendors: 
-                  one that combines cutting-edge AI with deep understanding of how agencies actually operate.
+                  PalmCare AI was founded by Muse Ibrahim — someone who has worked in home care and knows the grind. 
+                  We chose a different path from legacy software: one that combines AI with deep understanding of how agencies actually operate.
                 </p>
                 <p className="text-slate-600 mb-4 leading-relaxed">
-                  Every feature in PalmCare AI was designed from the perspective of the people who use it — caregivers in the field, 
-                  administrators managing schedules, and agency owners scaling their businesses.
+                  Your caregivers shouldn&apos;t need software training. No forms to fill, no clicks to learn — just record and review. 
+                  Every feature was designed for the people who use it: caregivers in the field, administrators managing caseloads, and agency owners scaling their businesses.
                 </p>
                 <p className="text-slate-600 leading-relaxed">
-                  The result is a platform that feels intuitive from day one, eliminates hours of manual paperwork, 
-                  and gives agencies the data they need to make smart decisions and grow with confidence.
+                  The result is a platform that feels intuitive from day one. Staff records an assessment, AI generates the contract, 
+                  and the client signs — all before you leave the chair.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -89,7 +89,7 @@ export default function AboutPage() {
                 {
                   icon: Mic,
                   title: 'Voice-Native Intelligence',
-                  description: 'Other platforms make you type everything. PalmCare AI starts with voice — record an assessment, and AI does the rest. Transcription, data extraction, contract generation, and billing — all from a single recording.',
+                  description: 'Other platforms make you type everything. PalmCare AI starts with voice — one tap to start, AI handles the rest. Transcription, data extraction, contract generation, and billing — all from a single recording.',
                 },
                 {
                   icon: Zap,
@@ -98,8 +98,8 @@ export default function AboutPage() {
                 },
                 {
                   icon: Users,
-                  title: 'Built For Home Care, Not Adapted',
-                  description: 'We didn\'t build a generic business tool and add "home care" to the name. Every field, workflow, and automation was designed specifically for the unique needs of home care agencies — from intake assessments to caregiver scheduling.',
+                  title: 'Built For Care Professionals',
+                  description: 'We didn\'t build a generic business tool and add "home care" to the name. Every field, workflow, and automation was designed specifically for home care agency workflows — from intake assessments to signed contracts.',
                 },
                 {
                   icon: Award,

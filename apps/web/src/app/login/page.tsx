@@ -83,7 +83,7 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold" style={{ color: '#fff' }}>PalmCare AI</h1>
           </div>
           <p className="text-lg mt-4" style={{ color: 'rgba(255,255,255,0.8)' }}>
-            Turn care assessments into proposal-ready contracts
+            Record it. Transcribe it. Contract it. All in your palm.
           </p>
         </div>
 
@@ -93,9 +93,9 @@ export default function LoginPage() {
               <Waves className="w-6 h-6" style={{ color: '#fff' }} />
             </div>
             <div>
-              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Care Assessment Capture</h3>
+              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Record It</h3>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                Convert intake calls or transcripts into structured assessment signals
+                Staff records a client assessment on their phone — AI captures every detail
               </p>
             </div>
           </div>
@@ -105,9 +105,9 @@ export default function LoginPage() {
               <Zap className="w-6 h-6" style={{ color: '#fff' }} />
             </div>
             <div>
-              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Proposal-Ready Contracts</h3>
+              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Contract It</h3>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                Generate service contracts faster with AI-assisted drafting and templates
+                AI generates a complete assessment, care plan, and service agreement in seconds
               </p>
             </div>
           </div>
@@ -117,9 +117,9 @@ export default function LoginPage() {
               <Shield className="w-6 h-6" style={{ color: '#fff' }} />
             </div>
             <div>
-              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Human-in-the-Loop Review</h3>
+              <h3 className="font-semibold mb-1" style={{ color: '#fff' }}>Review & Send</h3>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                Review, edit, approve, and export contracts (plus notes/billing when needed)
+                Review, edit, and send — contract is ready for the client to sign
               </p>
             </div>
           </div>
@@ -144,8 +144,8 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome back</h2>
-            <p className="text-slate-500">Sign in to generate contracts from care assessments</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome back. Let&apos;s Palm It.</h2>
+            <p className="text-slate-500">Your next client is waiting</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -215,7 +215,7 @@ export default function LoginPage() {
 
           <div className="mt-8 text-center">
             <p className="text-slate-400 text-sm">
-              New to PalmCare AI?{' '}
+              Ready to Palm It?{' '}
               <Link href="/#book-demo" className="text-primary-500 hover:underline font-medium">
                 Schedule a demo
               </Link>

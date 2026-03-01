@@ -17,133 +17,166 @@ struct HomeView: View {
         }
     }
 
-    private var userName: String {
-        user?.full_name ?? "there"
+    private var firstName: String {
+        let full = user?.full_name ?? "there"
+        return full.split(separator: " ").first.map(String.init) ?? full
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Greeting header
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(greeting),")
-                            .font(.title3)
-                            .foregroundColor(.palmSecondary)
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Top bar
+                    HStack {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("PALM IT, \(firstName.uppercased()) 🌴")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.palmSecondary)
+                                .tracking(0.8)
 
-                        Text(userName)
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.palmText)
+                            Text(greeting)
+                                .font(.system(size: 20, weight: .heavy))
+                                .foregroundColor(.palmText)
+                                .tracking(-0.4)
+                        }
+
+                        Spacer()
+
+                        ZStack {
+                            Circle()
+                                .fill(LinearGradient.palmPrimary)
+                                .frame(width: 36, height: 36)
+
+                            Text(String(firstName.prefix(1)).uppercased())
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.white)
+                        }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
+                    .padding(.horizontal, 18)
+                    .padding(.top, 14)
+                    .padding(.bottom, 14)
 
-                    // Stats cards
-                    LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 12),
-                        GridItem(.flexible(), spacing: 12),
-                        GridItem(.flexible(), spacing: 12),
-                    ], spacing: 12) {
-                        StatCard(
-                            title: "Total Clients",
-                            value: "\(clients.count)",
+                    // Stats row
+                    HStack(spacing: 9) {
+                        HomeStatCard(
                             icon: "person.2.fill",
-                            color: .palmPrimary
+                            value: "\(clients.count)",
+                            label: "Clients",
+                            iconBg: Color.palmPrimary.opacity(0.08),
+                            iconColor: .palmPrimary
                         )
-
-                        StatCard(
-                            title: "This Week",
-                            value: "\(visitsThisWeek)",
+                        HomeStatCard(
                             icon: "calendar.badge.clock",
-                            color: .palmTeal
+                            value: "\(visitsThisWeek)",
+                            label: "This Week",
+                            iconBg: Color.blue.opacity(0.08),
+                            iconColor: .blue
                         )
-
-                        StatCard(
-                            title: "Pending",
+                        HomeStatCard(
+                            icon: "clock",
                             value: "\(pendingVisits)",
-                            icon: "clock.badge.exclamationmark",
-                            color: .orange
+                            label: "Pending",
+                            iconBg: Color.orange.opacity(0.08),
+                            iconColor: .orange
                         )
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 14)
 
-                    // New Assessment CTA
-                    Button {
-                        // Navigate to record tab
-                    } label: {
+                    // CTA bar
+                    Button {} label: {
                         HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("New Assessment")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("START RECORDING")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.white.opacity(0.6))
+                                    .tracking(1.5)
 
-                                Text("Record a visit with a client")
-                                    .font(.caption)
-                                    .foregroundColor(.white.opacity(0.8))
+                                Text("Palm It Now")
+                                    .font(.system(size: 16, weight: .heavy))
+                                    .foregroundColor(.white)
+                                    .tracking(-0.3)
+
+                                Text("Tap to record a new assessment")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.white.opacity(0.62))
                             }
 
                             Spacer()
 
-                            Image(systemName: "mic.circle.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(.white.opacity(0.9))
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white.opacity(0.18))
+                                    .frame(width: 42, height: 42)
+                                    .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
+
+                                Image(systemName: "mic.fill")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.white)
+                            }
                         }
-                        .padding(20)
-                        .background(LinearGradient.palmPrimary)
-                        .cornerRadius(16)
-                        .shadow(color: Color.palmPrimary.opacity(0.3), radius: 12, y: 4)
+                        .padding(16)
+                        .background(
+                            ZStack {
+                                LinearGradient.palmPrimary
+                                // Decorative circle
+                                Circle()
+                                    .fill(Color.white.opacity(0.07))
+                                    .frame(width: 100, height: 100)
+                                    .offset(x: 80, y: -30)
+                            }
+                        )
+                        .cornerRadius(12)
+                        .shadow(color: Color.palmPrimary.opacity(0.3), radius: 8, y: 4)
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 18)
 
                     // Recent Visits
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Recent Visits")
-                                .font(.title3.weight(.semibold))
-                                .foregroundColor(.palmText)
+                    HStack {
+                        Text("Recent Visits")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.palmText)
 
-                            Spacer()
+                        Spacer()
 
-                            Button("See all") {}
-                                .font(.subheadline.weight(.medium))
+                        Button {} label: {
+                            Text("See all")
+                                .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(.palmPrimary)
                         }
-                        .padding(.horizontal, 20)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 10)
 
-                        if isLoading {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                    .padding(40)
-                                Spacer()
-                            }
-                        } else if visits.isEmpty {
-                            EmptyStateCard(
-                                icon: "waveform.path",
-                                title: "No visits yet",
-                                subtitle: "Start a new assessment to see visits here"
-                            )
-                            .padding(.horizontal, 20)
-                        } else {
-                            LazyVStack(spacing: 8) {
-                                ForEach(visits.prefix(5)) { visit in
-                                    VisitRow(visit: visit)
-                                }
-                            }
-                            .padding(.horizontal, 20)
+                    if isLoading {
+                        HStack {
+                            Spacer()
+                            ProgressView().padding(40)
+                            Spacer()
                         }
+                    } else if visits.isEmpty {
+                        EmptyStateCard(
+                            icon: "waveform.path",
+                            title: "No visits yet",
+                            subtitle: "Start a new assessment to see visits here"
+                        )
+                        .padding(.horizontal, 14)
+                    } else {
+                        VStack(spacing: 8) {
+                            ForEach(visits.prefix(5)) { visit in
+                                VisitRow(visit: visit)
+                            }
+                        }
+                        .padding(.horizontal, 14)
                     }
 
                     Spacer().frame(height: 100)
                 }
             }
             .background(Color.palmBackground)
-            .refreshable {
-                await loadData()
-            }
-            .task {
-                await loadData()
-            }
+            .refreshable { await loadData() }
+            .task { await loadData() }
         }
     }
 
@@ -178,99 +211,124 @@ struct HomeView: View {
                 isLoading = false
             }
         } catch {
-            await MainActor.run {
-                isLoading = false
-            }
+            await MainActor.run { isLoading = false }
         }
     }
 }
 
 // MARK: - Subviews
 
-struct StatCard: View {
-    let title: String
-    let value: String
+struct HomeStatCard: View {
     let icon: String
-    let color: Color
+    let value: String
+    let label: String
+    let iconBg: Color
+    let iconColor: Color
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             ZStack {
-                Circle()
-                    .fill(color.opacity(0.12))
-                    .frame(width: 36, height: 36)
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(iconBg)
+                    .frame(width: 32, height: 32)
 
                 Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundColor(color)
+                    .font(.system(size: 14))
+                    .foregroundColor(iconColor)
             }
 
             Text(value)
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: 20, weight: .heavy))
                 .foregroundColor(.palmText)
+                .tracking(-0.5)
 
-            Text(title)
-                .font(.system(size: 11))
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
                 .foregroundColor(.palmSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
+        .padding(.vertical, 13)
+        .padding(.horizontal, 8)
         .background(Color.white)
-        .cornerRadius(14)
-        .shadow(color: .black.opacity(0.04), radius: 6, y: 2)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
     }
 }
 
 struct VisitRow: View {
     let visit: Visit
 
+    private static let avatarColors: [Color] = [
+        Color(red: 13/255, green: 148/255, blue: 136/255),
+        Color(red: 59/255, green: 130/255, blue: 246/255),
+        Color(red: 220/255, green: 38/255, blue: 38/255),
+        Color(red: 124/255, green: 58/255, blue: 237/255),
+        Color(red: 217/255, green: 119/255, blue: 6/255),
+        Color(red: 8/255, green: 145/255, blue: 178/255),
+    ]
+
     var statusColor: Color {
         switch visit.status.lowercased() {
         case "completed": return .green
-        case "processing": return .orange
-        case "pending": return .yellow
+        case "processing": return .blue
+        case "pending": return .orange
         default: return .palmSecondary
         }
     }
 
+    var statusBg: Color {
+        switch visit.status.lowercased() {
+        case "completed": return Color(red: 240/255, green: 253/255, blue: 244/255)
+        case "processing": return Color(red: 239/255, green: 246/255, blue: 255/255)
+        case "pending": return Color(red: 255/255, green: 251/255, blue: 235/255)
+        default: return Color.palmFieldBg
+        }
+    }
+
     var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(Color.palmPrimary.opacity(0.1))
-                    .frame(width: 44, height: 44)
+        HStack(spacing: 11) {
+            let name = visit.client?.full_name ?? "Client"
+            let initials = name.split(separator: " ").map { String($0.prefix(1)) }.joined().uppercased()
+            let colorIndex = abs(name.hashValue) % Self.avatarColors.count
 
-                Image(systemName: "waveform")
-                    .font(.system(size: 18))
-                    .foregroundColor(.palmPrimary)
-            }
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Self.avatarColors[colorIndex])
+                .frame(width: 38, height: 38)
+                .overlay(
+                    Text(initials)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.white)
+                        .tracking(-0.5)
+                )
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(visit.client?.full_name ?? "Client")
-                    .font(.subheadline.weight(.semibold))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(name)
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.palmText)
+                    .lineLimit(1)
 
                 Text(formattedDate(visit.created_at))
-                    .font(.caption)
+                    .font(.system(size: 11))
                     .foregroundColor(.palmSecondary)
             }
 
             Spacer()
 
             Text(visit.status.capitalized)
-                .font(.caption.weight(.medium))
+                .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(statusColor)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(statusColor.opacity(0.12))
-                .cornerRadius(8)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(statusBg)
+                .cornerRadius(20)
         }
-        .padding(14)
+        .padding(.horizontal, 13)
+        .padding(.vertical, 11)
         .background(Color.white)
         .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 4, y: 1)
+        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
     }
 
     private func formattedDate(_ isoString: String) -> String {

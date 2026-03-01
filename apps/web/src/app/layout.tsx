@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ['latin'] });
 const SITE_URL = 'https://palmcareai.com';
 const SITE_NAME = 'PalmCare AI';
 const SITE_DESCRIPTION =
-  'AI-powered home care management platform. Turn voice assessments into proposal-ready service contracts in minutes. Built for home care agencies.';
+  'PalmCare AI turns care assessments into signed contracts — automatically. Record it. Transcribe it. Contract it. All in your palm. Built for home care agencies.';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -26,25 +26,24 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — AI-Powered Home Care Management`,
+    default: `${SITE_NAME} — Where Care Meets Intelligence`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   keywords: [
-    'home care software',
-    'home care management',
-    'care assessment',
-    'home health aide',
-    'caregiver management',
-    'service contract generator',
-    'AI transcription',
-    'home care CRM',
-    'home care agency software',
-    'HIPAA compliant',
-    'electronic visit verification',
-    'EVV',
-    'ADL tracking',
     'PalmCare AI',
+    'Palm It',
+    'home care software',
+    'AI contract generation',
+    'voice-powered assessment',
+    'home care agency software',
+    'care assessment platform',
+    'caregiver management',
+    'home care CRM',
+    'AI transcription',
+    'service contract generator',
+    'HIPAA compliant',
+    'home care management',
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
@@ -60,20 +59,20 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — AI-Powered Home Care Management`,
+    title: `${SITE_NAME} — Where Care Meets Intelligence`,
     description: SITE_DESCRIPTION,
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: `${SITE_NAME} — Turn assessments into contracts in minutes`,
+        alt: `${SITE_NAME} — Record. Transcribe. Contract. Palm It.`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} — AI-Powered Home Care Management`,
+    title: `${SITE_NAME} — Where Care Meets Intelligence`,
     description: SITE_DESCRIPTION,
     images: ['/og-image.png'],
   },
@@ -120,9 +119,9 @@ const jsonLd = {
       },
       featureList: [
         'Voice-powered care assessments',
-        'AI contract generation',
+        'AI contract generation in seconds',
+        'Record. Transcribe. Contract.',
         'Client CRM pipeline',
-        'Billing and reports',
         'Caregiver management',
         'HIPAA compliant',
       ],
