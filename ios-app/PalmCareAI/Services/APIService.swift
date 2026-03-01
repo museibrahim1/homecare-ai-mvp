@@ -213,7 +213,16 @@ class APIService: ObservableObject {
         return try jsonDecoder.decode(LiveTranscriptResponse.self, from: data)
     }
 
-    // MARK: - Calendar (local-only, no API dependency)
+    // MARK: - Google Calendar Integration
+
+    func connectGoogleCalendar() async throws -> Bool {
+        let result: [String: AnyCodable] = try await request("GET", path: "/calendar/status", allowSoftUnauthorized: true)
+        return (result["connected"]?.value as? Bool) ?? false
+    }
+
+    func disconnectGoogleCalendar() async throws {
+        let _: [String: AnyCodable] = try await request("POST", path: "/calendar/disconnect")
+    }
 
     // MARK: - Documents
 

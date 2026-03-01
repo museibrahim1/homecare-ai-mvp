@@ -16,7 +16,7 @@ struct MainTabView: View {
                 RecordView()
                     .tag(2)
 
-                CalendarView()
+                WorkspaceView()
                     .tag(3)
 
                 SettingsView()
@@ -37,7 +37,7 @@ struct CustomTabBar: View {
         ("house.fill", "Home"),
         ("person.2.fill", "Clients"),
         ("mic.fill", "Palm It"),
-        ("calendar", "Calendar"),
+        ("square.grid.2x2.fill", "Workspace"),
         ("gearshape.fill", "Settings"),
     ]
 

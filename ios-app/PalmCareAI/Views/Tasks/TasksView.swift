@@ -34,16 +34,21 @@ struct TasksView: View {
             }
         }
         .background(Color.palmBackground)
-        .navigationTitle("Tasks")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showAddTask = true } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 22))
-                        .foregroundColor(.palmPrimary)
-                }
+        .overlay(alignment: .bottomTrailing) {
+            Button { showAddTask = true } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 48, height: 48)
+                    .background(
+                        LinearGradient(colors: [Color.palmPrimary, Color.palmTeal600],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+                    .cornerRadius(14)
+                    .shadow(color: Color.palmPrimary.opacity(0.4), radius: 8, y: 4)
             }
+            .padding(.trailing, 18)
+            .padding(.bottom, 100)
         }
         .sheet(isPresented: $showAddTask) {
             AddTaskSheet(onSave: { task in

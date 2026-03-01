@@ -7,9 +7,9 @@ struct SettingsView: View {
     @State private var user: User?
     @State private var subscription: UserSubscription?
     @State private var showSubscription = false
-    @State private var showContracts = false
-    @State private var showTasks = false
     @State private var showLogoutConfirm = false
+    @State private var showGoogleCalAuth = false
+    @AppStorage("googleCalendarConnected") private var googleCalConnected = false
 
     @AppStorage("useFaceID") private var useFaceID = false
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
@@ -22,8 +22,8 @@ struct SettingsView: View {
                     profileHeader
                     preferencesSection
                     accountSection
+                    integrationsSection
                     billingSection
-                    workspaceSection
                     legalSection
                     logoutButton
                 }
@@ -37,11 +37,9 @@ struct SettingsView: View {
             .sheet(isPresented: $showSubscription) {
                 SubscriptionView().environmentObject(api)
             }
-            .navigationDestination(isPresented: $showContracts) {
-                ContractsView()
-            }
-            .navigationDestination(isPresented: $showTasks) {
-                TasksView()
+            .sheet(isPresented: $showGoogleCalAuth) {
+                GoogleCalendarSetupSheet(isConnected: $googleCalConnected)
+                    .environmentObject(api)
             }
             .task { await loadData() }
         }
@@ -210,18 +208,44 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Workspace
+    // MARK: - Integrations
 
-    private var workspaceSection: some View {
-        SettingsSection(title: "Workspace") {
-            Button { showContracts = true } label: {
-                SettingsNavRow(icon: "doc.text.fill", iconColor: .palmOrange, title: "Contracts")
-            }
+    private var integrationsSection: some View {
+        SettingsSection(title: "Integrations") {
+            Button { showGoogleCalAuth = true } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.palmBlue)
+                        .frame(width: 32, height: 32)
+                        .background(Color.palmBlue.opacity(0.1))
+                        .cornerRadius(8)
 
-            SettingsDivider()
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Google Calendar")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.palmText)
+                        Text(googleCalConnected ? "Connected" : "Not connected")
+                            .font(.system(size: 11))
+                            .foregroundColor(googleCalConnected ? .palmGreen : .palmSecondary)
+                    }
 
-            Button { showTasks = true } label: {
-                SettingsNavRow(icon: "checklist", iconColor: .palmBlue, title: "Tasks")
+                    Spacer()
+
+                    Text(googleCalConnected ? "Manage" : "Connect")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(googleCalConnected ? .palmPrimary : .white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(
+                            googleCalConnected
+                                ? Color.palmPrimary.opacity(0.1)
+                                : Color.palmPrimary
+                        )
+                        .cornerRadius(12)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
             }
         }
     }

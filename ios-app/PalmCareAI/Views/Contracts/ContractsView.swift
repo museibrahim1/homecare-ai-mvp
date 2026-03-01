@@ -40,8 +40,6 @@ struct ContractsView: View {
             }
         }
         .background(Color.palmBackground)
-        .navigationTitle("Contracts & Documents")
-        .navigationBarTitleDisplayMode(.inline)
         .task { await loadDocuments() }
     }
 
