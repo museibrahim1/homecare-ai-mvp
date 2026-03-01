@@ -4,7 +4,7 @@ struct WorkspaceView: View {
     @EnvironmentObject var api: APIService
     @State private var selectedSection = 0
 
-    private let sections = ["Calendar", "Contracts", "Tasks"]
+    private let sections = ["Calendar", "Contracts", "Templates", "Tasks"]
 
     var body: some View {
         NavigationStack {
@@ -19,8 +19,11 @@ struct WorkspaceView: View {
                     ContractsView()
                         .tag(1)
 
-                    TasksView()
+                    TemplatesView()
                         .tag(2)
+
+                    TasksView()
+                        .tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.2), value: selectedSection)
@@ -68,7 +71,8 @@ struct WorkspaceView: View {
         switch index {
         case 0: return "calendar"
         case 1: return "doc.text.fill"
-        case 2: return "checklist"
+        case 2: return "doc.badge.gearshape"
+        case 3: return "checklist"
         default: return "folder"
         }
     }

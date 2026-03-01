@@ -109,6 +109,17 @@ async def get_all_documents(
                 if cid not in client_visit_map:
                     client_visit_map[cid] = str(v.id)
         
+        # Check if user has an active OCR template for template-filled exports
+        has_active_template = False
+        try:
+            from app.models.contract_template import ContractTemplate as CT
+            has_active_template = db.query(CT).filter(
+                CT.owner_id == current_user.id,
+                CT.is_active == True,
+            ).first() is not None
+        except Exception:
+            pass
+        
         for contract in contracts:
             client_name = client_map.get(str(contract.client_id), "Unknown")
             visit_id = client_visit_map.get(str(contract.client_id))
@@ -145,6 +156,22 @@ async def get_all_documents(
                     visit_id=visit_id,
                     created_at=contract.created_at,
                     download_url=f"/exports/visits/{visit_id}/contract.docx"
+                ))
+            
+            # Template-filled version (when user has an active OCR template)
+            if visit_id and has_active_template:
+                documents.append(DocumentItem(
+                    id=f"contract_template_{contract.id}",
+                    name=f"{client_name.replace(' ', '_')}_Contract_Template.docx",
+                    type="contract",
+                    format="TEMPLATE",
+                    size="-",
+                    folder="Contracts",
+                    client_id=str(contract.client_id),
+                    client_name=client_name,
+                    visit_id=visit_id,
+                    created_at=contract.created_at,
+                    download_url=f"/exports/visits/{visit_id}/contract-template.docx"
                 ))
     
     # 2. Get Visit Notes

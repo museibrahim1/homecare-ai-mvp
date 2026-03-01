@@ -279,6 +279,82 @@ class APIService: ObservableObject {
         return fileURL
     }
 
+    // MARK: - Contract Templates
+
+    func fetchTemplates() async throws -> [ContractTemplateItem] {
+        try await request("GET", path: "/contract-templates/?active_only=false")
+    }
+
+    func fetchTemplate(id: String) async throws -> ContractTemplateDetail {
+        try await request("GET", path: "/contract-templates/\(id)")
+    }
+
+    func deleteTemplate(id: String) async throws {
+        let _: [String: AnyCodable] = try await request("DELETE", path: "/contract-templates/\(id)")
+    }
+
+    func rescanTemplate(id: String) async throws -> ContractTemplateDetail {
+        try await request("POST", path: "/contract-templates/\(id)/rescan")
+    }
+
+    /// Upload a contract template (PDF or DOCX) for OCR scanning and field detection.
+    func uploadTemplate(fileData: Data, filename: String, name: String, description: String?) async throws -> TemplateUploadResponse {
+        guard let url = URL(string: "\(baseURL)/contract-templates/upload") else {
+            throw APIError.invalidURL
+        }
+
+        let boundary = UUID().uuidString
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 120
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        var body = Data()
+
+        // name field
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"name\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(name)\r\n".data(using: .utf8)!)
+
+        // description field
+        if let desc = description, !desc.isEmpty {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"description\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(desc)\r\n".data(using: .utf8)!)
+        }
+
+        // file
+        let mimeType = filename.lowercased().hasSuffix(".pdf")
+            ? "application/pdf"
+            : "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+
+        request.httpBody = body
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
+
+        if http.statusCode == 401 {
+            await MainActor.run { self.token = nil }
+            throw APIError.unauthorized
+        }
+        guard (200...299).contains(http.statusCode) else {
+            if let err = try? jsonDecoder.decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(err.detail ?? err.message ?? "Upload failed")
+            }
+            throw APIError.serverError("Upload failed (\(http.statusCode))")
+        }
+
+        return try jsonDecoder.decode(TemplateUploadResponse.self, from: data)
+    }
+
     // MARK: - Tasks
 
     func fetchTasks() async throws -> [TaskItem] {

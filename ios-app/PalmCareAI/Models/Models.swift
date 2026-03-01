@@ -248,6 +248,57 @@ struct DocumentsResponse: Codable {
     let folders: [DocumentFolder]?
 }
 
+// MARK: - Contract Templates
+
+struct ContractTemplateItem: Codable, Identifiable {
+    let id: String
+    let name: String
+    let version: Int
+    let is_active: Bool
+    let file_type: String
+    let field_count: Int
+    let unmapped_count: Int
+    let created_at: String
+}
+
+struct ContractTemplateDetail: Codable, Identifiable {
+    let id: String
+    let name: String
+    let version: Int
+    let description: String?
+    let is_active: Bool
+    let file_type: String
+    let detected_fields: [TemplateField]?
+    let field_mapping: [String: String]?
+    let unmapped_fields: [TemplateField]?
+    let created_at: String
+    let updated_at: String
+}
+
+struct TemplateField: Codable, Identifiable {
+    let field_id: String
+    let label: String?
+    let type: String?
+    let required: Bool?
+    let section: String?
+    let mapped_to: String?
+
+    var id: String { field_id }
+}
+
+struct TemplateUploadResponse: Codable {
+    let id: String
+    let name: String
+    let version: Int
+    let is_active: Bool
+    let file_type: String
+    let detected_fields: [TemplateField]?
+    let field_mapping: [String: String]?
+    let unmapped_fields: [TemplateField]?
+    let created_at: String
+    let updated_at: String
+}
+
 // MARK: - Tasks
 
 struct TaskItem: Codable, Identifiable {
