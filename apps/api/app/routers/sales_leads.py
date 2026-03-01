@@ -227,6 +227,11 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         # Footer
         f'<div style="padding: 24px 40px; background-color: {_SLATE_100}; '
         f'border-top: 1px solid {_SLATE_200}; text-align: center;">'
+        f'<a href="{_SITE}" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">'
+        f'<img src="{_SITE}/qr-code.png" alt="Scan to visit palmcareai.com" '
+        'style="width: 72px; height: 72px; border-radius: 8px; border: 1px solid #e2e8f0;" />'
+        '</a><br>'
+        f'<p style="margin: 0 0 4px; font-size: 11px; color: #94a3b8;">Scan to visit palmcareai.com</p>'
         f'<p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: {_SLATE_900};">'
         'PalmCare AI</p>'
         f'<p style="margin: 0 0 12px; font-size: 12px; color: {_SLATE_600};">'
