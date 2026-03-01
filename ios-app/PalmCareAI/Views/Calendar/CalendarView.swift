@@ -1,119 +1,100 @@
 import SwiftUI
 
-struct CalendarView: View {
-    @EnvironmentObject var api: APIService
+// MARK: - Local Event Store
 
-    @State private var events: [CalendarEvent] = []
+class EventStore: ObservableObject {
+    @Published var events: [CalendarEvent] = []
+
+    private let storageKey = "palmcare_calendar_events"
+
+    init() { load() }
+
+    func load() {
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let decoded = try? JSONDecoder().decode([CalendarEvent].self, from: data)
+        else { return }
+        events = decoded
+    }
+
+    func save() {
+        if let data = try? JSONEncoder().encode(events) {
+            UserDefaults.standard.set(data, forKey: storageKey)
+        }
+    }
+
+    func add(_ event: CalendarEvent) {
+        events.append(event)
+        save()
+    }
+
+    func delete(id: String) {
+        events.removeAll { $0.id == id }
+        save()
+    }
+
+    func events(on date: Date, calendar: Calendar = .current) -> [CalendarEvent] {
+        events
+            .filter { calendar.isDate($0.startDate, inSameDayAs: date) }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
+    func hasEvents(on date: Date, calendar: Calendar = .current) -> Bool {
+        events.contains { calendar.isDate($0.startDate, inSameDayAs: date) }
+    }
+}
+
+// MARK: - Calendar View
+
+struct CalendarView: View {
+    @StateObject private var store = EventStore()
+
     @State private var selectedDate = Date()
     @State private var displayedMonth = Date()
-    @State private var isLoading = true
     @State private var showAddEvent = false
-    @State private var errorMessage: String?
-    @State private var calendarNotConnected = false
 
-    private let calendar = Calendar.current
-    private let dayFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "d"
-        return f
-    }()
-    private let monthYearFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "MMMM yyyy"
-        return f
-    }()
-    private let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "h:mm a"
-        return f
-    }()
+    private let cal = Calendar.current
     private let weekdaySymbols = Calendar.current.shortWeekdaySymbols
+
+    private let dayFmt: DateFormatter = {
+        let f = DateFormatter(); f.dateFormat = "d"; return f
+    }()
+    private let monthYearFmt: DateFormatter = {
+        let f = DateFormatter(); f.dateFormat = "MMMM yyyy"; return f
+    }()
+    private let timeFmt: DateFormatter = {
+        let f = DateFormatter(); f.dateFormat = "h:mm a"; return f
+    }()
+    private let dateLabelFmt: DateFormatter = {
+        let f = DateFormatter(); f.dateFormat = "EEEE, MMM d"; return f
+    }()
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if calendarNotConnected {
-                    calendarNotConnectedView
-                } else {
-                    monthHeader
-                    weekdayHeader
-                    calendarGrid
-                    Divider().padding(.horizontal, 18)
-                    eventsList
-                }
+                monthHeader
+                weekdayHeader
+                calendarGrid
+                Divider().padding(.horizontal, 18)
+                eventsList
             }
             .background(Color.palmBackground)
             .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if !calendarNotConnected {
-                        Button { showAddEvent = true } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 22))
-                                .foregroundColor(.palmPrimary)
-                        }
+                    Button { showAddEvent = true } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(.palmPrimary)
                     }
                 }
             }
             .sheet(isPresented: $showAddEvent) {
-                AddEventSheet(onSave: { event in
-                    Task {
-                        do {
-                            let created = try await api.createCalendarEvent(event)
-                            await MainActor.run { events.append(created) }
-                        } catch {}
-                    }
-                })
-            }
-            .task { await loadEvents() }
-        }
-    }
-
-    private var calendarNotConnectedView: some View {
-        VStack(spacing: 16) {
-            Spacer()
-
-            Image(systemName: "calendar.badge.exclamationmark")
-                .font(.system(size: 48))
-                .foregroundColor(.palmSecondary.opacity(0.5))
-
-            Text("Google Calendar Not Connected")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.palmText)
-
-            Text("Connect your Google Calendar from the web app to sync your events here.")
-                .font(.system(size: 14))
-                .foregroundColor(.palmSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-
-            if let error = errorMessage {
-                Text(error)
-                    .font(.system(size: 12))
-                    .foregroundColor(.palmSecondary.opacity(0.6))
-                    .padding(.top, 4)
-            }
-
-            Button {
-                Task { await loadEvents() }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.clockwise")
-                    Text("Retry")
+                AddEventSheet { event in
+                    store.add(event)
                 }
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.palmPrimary)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 10)
-                .background(Color.palmPrimary.opacity(0.1))
-                .cornerRadius(10)
             }
-            .padding(.top, 8)
-
-            Spacer()
         }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Month Header
@@ -131,9 +112,24 @@ struct CalendarView: View {
 
             Spacer()
 
-            Text(monthYearFormatter.string(from: displayedMonth))
-                .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.palmText)
+            VStack(spacing: 2) {
+                Text(monthYearFmt.string(from: displayedMonth))
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.palmText)
+
+                if !cal.isDate(displayedMonth, equalTo: Date(), toGranularity: .month) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            displayedMonth = Date()
+                            selectedDate = Date()
+                        }
+                    } label: {
+                        Text("Today")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.palmPrimary)
+                    }
+                }
+            }
 
             Spacer()
 
@@ -174,7 +170,7 @@ struct CalendarView: View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
 
         return LazyVGrid(columns: columns, spacing: 4) {
-            ForEach(days, id: \.self) { date in
+            ForEach(Array(days.enumerated()), id: \.offset) { _, date in
                 if let date = date {
                     dayCell(date)
                 } else {
@@ -188,13 +184,15 @@ struct CalendarView: View {
     }
 
     private func dayCell(_ date: Date) -> some View {
-        let isSelected = calendar.isDate(date, inSameDayAs: selectedDate)
-        let isToday = calendar.isDateInToday(date)
-        let hasEvents = eventsForDate(date).count > 0
+        let isSelected = cal.isDate(date, inSameDayAs: selectedDate)
+        let isToday = cal.isDateInToday(date)
+        let hasEvt = store.hasEvents(on: date, calendar: cal)
 
-        return Button { selectedDate = date } label: {
+        return Button {
+            withAnimation(.easeInOut(duration: 0.15)) { selectedDate = date }
+        } label: {
             VStack(spacing: 2) {
-                Text(dayFormatter.string(from: date))
+                Text(dayFmt.string(from: date))
                     .font(.system(size: 14, weight: isSelected || isToday ? .bold : .regular))
                     .foregroundColor(
                         isSelected ? .white :
@@ -210,7 +208,7 @@ struct CalendarView: View {
                     .cornerRadius(10)
 
                 Circle()
-                    .fill(hasEvents ? Color.palmPrimary : Color.clear)
+                    .fill(hasEvt ? Color.palmPrimary : Color.clear)
                     .frame(width: 5, height: 5)
             }
             .frame(height: 42)
@@ -220,29 +218,23 @@ struct CalendarView: View {
     // MARK: - Events List
 
     private var eventsList: some View {
-        let dayEvents = eventsForDate(selectedDate)
-        let dateStr: String = {
-            let f = DateFormatter()
-            f.dateFormat = "EEEE, MMM d"
-            return f.string(from: selectedDate)
-        }()
+        let dayEvents = store.events(on: selectedDate, calendar: cal)
 
         return VStack(alignment: .leading, spacing: 0) {
-            Text(dateStr)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.palmText)
-                .padding(.horizontal, 18)
-                .padding(.top, 14)
-                .padding(.bottom, 8)
+            HStack {
+                Text(dateLabelFmt.string(from: selectedDate))
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.palmText)
+                Spacer()
+                Text("\(dayEvents.count) event\(dayEvents.count == 1 ? "" : "s")")
+                    .font(.system(size: 12))
+                    .foregroundColor(.palmSecondary)
+            }
+            .padding(.horizontal, 18)
+            .padding(.top, 14)
+            .padding(.bottom, 8)
 
-            if isLoading {
-                VStack {
-                    ProgressView()
-                        .padding(.top, 30)
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity)
-            } else if dayEvents.isEmpty {
+            if dayEvents.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "calendar.badge.plus")
                         .font(.system(size: 32))
@@ -250,6 +242,14 @@ struct CalendarView: View {
                     Text("No events")
                         .font(.system(size: 14))
                         .foregroundColor(.palmSecondary)
+                    Button {
+                        showAddEvent = true
+                    } label: {
+                        Text("Add Event")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.palmPrimary)
+                    }
+                    .padding(.top, 4)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 30)
@@ -258,7 +258,14 @@ struct CalendarView: View {
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 8) {
                         ForEach(dayEvents) { event in
-                            EventRow(event: event, timeFormatter: timeFormatter)
+                            EventRow(event: event, timeFmt: timeFmt)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        withAnimation { store.delete(id: event.id) }
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
                         }
                     }
                     .padding(.horizontal, 18)
@@ -271,61 +278,27 @@ struct CalendarView: View {
     // MARK: - Helpers
 
     private func shiftMonth(_ delta: Int) {
-        if let newMonth = calendar.date(byAdding: .month, value: delta, to: displayedMonth) {
-            withAnimation(.easeInOut(duration: 0.2)) { displayedMonth = newMonth }
+        if let m = cal.date(byAdding: .month, value: delta, to: displayedMonth) {
+            withAnimation(.easeInOut(duration: 0.2)) { displayedMonth = m }
         }
     }
 
     private func daysInMonth() -> [Date?] {
-        guard let range = calendar.range(of: .day, in: .month, for: displayedMonth),
-              let firstDay = calendar.date(from: calendar.dateComponents([.year, .month], from: displayedMonth))
+        guard let range = cal.range(of: .day, in: .month, for: displayedMonth),
+              let firstDay = cal.date(from: cal.dateComponents([.year, .month], from: displayedMonth))
         else { return [] }
 
-        let weekday = calendar.component(.weekday, from: firstDay)
-        let leadingBlanks = weekday - calendar.firstWeekday
-        let adjustedBlanks = leadingBlanks < 0 ? leadingBlanks + 7 : leadingBlanks
+        let weekday = cal.component(.weekday, from: firstDay)
+        let leading = weekday - cal.firstWeekday
+        let blanks = leading < 0 ? leading + 7 : leading
 
-        var days: [Date?] = Array(repeating: nil, count: adjustedBlanks)
+        var days: [Date?] = Array(repeating: nil, count: blanks)
         for day in range {
-            if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDay) {
-                days.append(date)
+            if let d = cal.date(byAdding: .day, value: day - 1, to: firstDay) {
+                days.append(d)
             }
         }
         return days
-    }
-
-    private func eventsForDate(_ date: Date) -> [CalendarEvent] {
-        events.filter { event in
-            guard let eventDate = event.startDate else { return false }
-            return calendar.isDate(eventDate, inSameDayAs: date)
-        }
-    }
-
-    private func loadEvents() async {
-        await MainActor.run {
-            isLoading = true
-            calendarNotConnected = false
-            errorMessage = nil
-        }
-        do {
-            let fetched = try await api.fetchCalendarEvents()
-            await MainActor.run {
-                events = fetched
-                isLoading = false
-            }
-        } catch let apiError as APIError {
-            await MainActor.run {
-                isLoading = false
-                calendarNotConnected = true
-                errorMessage = apiError.localizedDescription
-            }
-        } catch {
-            await MainActor.run {
-                isLoading = false
-                calendarNotConnected = true
-                errorMessage = error.localizedDescription
-            }
-        }
     }
 }
 
@@ -333,12 +306,12 @@ struct CalendarView: View {
 
 struct EventRow: View {
     let event: CalendarEvent
-    let timeFormatter: DateFormatter
+    let timeFmt: DateFormatter
 
     private static let barColors: [Color] = [.palmPrimary, .palmBlue, .palmOrange, .palmPurple, .palmGreen]
 
     var body: some View {
-        let colorIndex = abs((event.title).hashValue) % Self.barColors.count
+        let colorIndex = abs(event.title.hashValue) % Self.barColors.count
         let barColor = Self.barColors[colorIndex]
 
         HStack(spacing: 12) {
@@ -353,11 +326,10 @@ struct EventRow: View {
                     .lineLimit(1)
 
                 HStack(spacing: 6) {
-                    if let start = event.startDate, let end = event.endDate {
-                        Text("\(timeFormatter.string(from: start)) – \(timeFormatter.string(from: end))")
-                            .font(.system(size: 11))
-                            .foregroundColor(.palmSecondary)
-                    }
+                    Text("\(timeFmt.string(from: event.startDate)) – \(timeFmt.string(from: event.endDate))")
+                        .font(.system(size: 11))
+                        .foregroundColor(.palmSecondary)
+
                     if let loc = event.location, !loc.isEmpty {
                         Text("·")
                             .foregroundColor(.palmSecondary)
@@ -370,6 +342,12 @@ struct EventRow: View {
             }
 
             Spacer()
+
+            if let desc = event.description, !desc.isEmpty {
+                Image(systemName: "text.alignleft")
+                    .font(.system(size: 11))
+                    .foregroundColor(.palmSecondary.opacity(0.5))
+            }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
@@ -384,19 +362,13 @@ struct EventRow: View {
 
 struct AddEventSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let onSave: (CalendarEventCreate) -> Void
+    let onSave: (CalendarEvent) -> Void
 
     @State private var title = ""
     @State private var description = ""
     @State private var startTime = Date()
     @State private var endTime = Date().addingTimeInterval(3600)
     @State private var location = ""
-
-    private let isoFormatter: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f
-    }()
 
     var body: some View {
         NavigationStack {
@@ -405,6 +377,7 @@ struct AddEventSheet: View {
                     TextField("Title", text: $title)
                     TextField("Description (optional)", text: $description)
                     TextField("Location (optional)", text: $location)
+                        .textContentType(.fullStreetAddress)
                 }
 
                 Section("Time") {
@@ -420,11 +393,11 @@ struct AddEventSheet: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        let event = CalendarEventCreate(
-                            title: title,
+                        let event = CalendarEvent(
+                            title: title.trimmingCharacters(in: .whitespaces),
                             description: description.isEmpty ? nil : description,
-                            start_time: isoFormatter.string(from: startTime),
-                            end_time: isoFormatter.string(from: endTime),
+                            startDate: startTime,
+                            endDate: endTime,
                             location: location.isEmpty ? nil : location
                         )
                         onSave(event)

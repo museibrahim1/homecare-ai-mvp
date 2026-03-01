@@ -188,63 +188,24 @@ struct TranscriptSegment: Identifiable {
 
 // MARK: - Calendar
 
-struct CalendarEventsResponse: Codable {
-    let events: [GoogleCalendarItem]
-}
-
-struct GoogleCalendarItem: Codable {
-    let id: String?
-    let summary: String?
+struct CalendarEvent: Codable, Identifiable {
+    let id: String
+    let title: String
     let description: String?
+    let startDate: Date
+    let endDate: Date
     let location: String?
-    let start: GoogleCalendarTime?
-    let end: GoogleCalendarTime?
-    let created: String?
+    let createdAt: Date
 
-    func toCalendarEvent() -> CalendarEvent {
-        CalendarEvent(
-            eventId: id,
-            title: summary ?? "Untitled",
-            description: description,
-            start_time: start?.dateTime ?? start?.date ?? "",
-            end_time: end?.dateTime ?? end?.date ?? "",
-            location: location,
-            created_at: created
-        )
+    init(id: String = UUID().uuidString, title: String, description: String?, startDate: Date, endDate: Date, location: String?, createdAt: Date = Date()) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.startDate = startDate
+        self.endDate = endDate
+        self.location = location
+        self.createdAt = createdAt
     }
-}
-
-struct GoogleCalendarTime: Codable {
-    let dateTime: String?
-    let date: String?
-    let timeZone: String?
-}
-
-struct CalendarEvent: Identifiable {
-    let eventId: String?
-    let title: String
-    let description: String?
-    let start_time: String
-    let end_time: String
-    let location: String?
-    let created_at: String?
-
-    var id: String { eventId ?? "\(title)-\(start_time)" }
-    var startDate: Date? { ISO8601Flexible.parse(start_time) }
-    var endDate: Date? { ISO8601Flexible.parse(end_time) }
-}
-
-struct CalendarEventCreate: Codable {
-    let title: String
-    let description: String?
-    let start_time: String
-    let end_time: String
-    let location: String?
-}
-
-struct CalendarStatus: Codable {
-    let connected: Bool
-    let token_expiry: String?
 }
 
 // MARK: - Documents / Contracts
