@@ -25,7 +25,7 @@ class APIService: ObservableObject {
         return decoder
     }
 
-    func request<T: Decodable>(_ method: String, path: String, body: [String: Any]? = nil, noAuth: Bool = false) async throws -> T {
+    func request<T: Decodable>(_ method: String, path: String, body: [String: Any]? = nil, noAuth: Bool = false, allowSoftUnauthorized: Bool = false) async throws -> T {
         guard let url = URL(string: "\(baseURL)\(path)") else {
             throw APIError.invalidURL
         }
@@ -50,6 +50,12 @@ class APIService: ObservableObject {
         }
 
         if httpResponse.statusCode == 401 {
+            if allowSoftUnauthorized {
+                if let errorBody = try? jsonDecoder.decode(ErrorResponse.self, from: data) {
+                    throw APIError.serverError(errorBody.detail ?? errorBody.message ?? "Not authorized")
+                }
+                throw APIError.serverError("Not authorized for this resource")
+            }
             await MainActor.run { self.token = nil }
             throw APIError.unauthorized
         }
@@ -210,7 +216,8 @@ class APIService: ObservableObject {
     // MARK: - Calendar
 
     func fetchCalendarEvents() async throws -> [CalendarEvent] {
-        try await request("GET", path: "/calendar/events")
+        let wrapper: CalendarEventsResponse = try await request("GET", path: "/calendar/events", allowSoftUnauthorized: true)
+        return wrapper.events.map { $0.toCalendarEvent() }
     }
 
     func createCalendarEvent(_ event: CalendarEventCreate) async throws -> CalendarEvent {
@@ -221,15 +228,24 @@ class APIService: ObservableObject {
             "description": event.description ?? "",
             "location": event.location ?? ""
         ]
-        return try await request("POST", path: "/calendar/events", body: body)
+        let wrapper: [String: AnyCodable] = try await request("POST", path: "/calendar/events", body: body, allowSoftUnauthorized: true)
+        return CalendarEvent(
+            eventId: (wrapper["id"]?.value as? String),
+            title: event.title,
+            description: event.description,
+            start_time: event.start_time,
+            end_time: event.end_time,
+            location: event.location,
+            created_at: nil
+        )
     }
 
     func deleteCalendarEvent(id: String) async throws {
-        let _: [String: String] = try await request("DELETE", path: "/calendar/events/\(id)")
+        let _: [String: AnyCodable] = try await request("DELETE", path: "/calendar/events/\(id)", allowSoftUnauthorized: true)
     }
 
     func fetchCalendarStatus() async throws -> CalendarStatus {
-        try await request("GET", path: "/calendar/status")
+        try await request("GET", path: "/calendar/status", allowSoftUnauthorized: true)
     }
 
     // MARK: - Documents

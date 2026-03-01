@@ -8,6 +8,8 @@ struct CalendarView: View {
     @State private var displayedMonth = Date()
     @State private var isLoading = true
     @State private var showAddEvent = false
+    @State private var errorMessage: String?
+    @State private var calendarNotConnected = false
 
     private let calendar = Calendar.current
     private let dayFormatter: DateFormatter = {
@@ -30,21 +32,27 @@ struct CalendarView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                monthHeader
-                weekdayHeader
-                calendarGrid
-                Divider().padding(.horizontal, 18)
-                eventsList
+                if calendarNotConnected {
+                    calendarNotConnectedView
+                } else {
+                    monthHeader
+                    weekdayHeader
+                    calendarGrid
+                    Divider().padding(.horizontal, 18)
+                    eventsList
+                }
             }
             .background(Color.palmBackground)
             .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { showAddEvent = true } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 22))
-                            .foregroundColor(.palmPrimary)
+                    if !calendarNotConnected {
+                        Button { showAddEvent = true } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundColor(.palmPrimary)
+                        }
                     }
                 }
             }
@@ -60,6 +68,52 @@ struct CalendarView: View {
             }
             .task { await loadEvents() }
         }
+    }
+
+    private var calendarNotConnectedView: some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            Image(systemName: "calendar.badge.exclamationmark")
+                .font(.system(size: 48))
+                .foregroundColor(.palmSecondary.opacity(0.5))
+
+            Text("Google Calendar Not Connected")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.palmText)
+
+            Text("Connect your Google Calendar from the web app to sync your events here.")
+                .font(.system(size: 14))
+                .foregroundColor(.palmSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+
+            if let error = errorMessage {
+                Text(error)
+                    .font(.system(size: 12))
+                    .foregroundColor(.palmSecondary.opacity(0.6))
+                    .padding(.top, 4)
+            }
+
+            Button {
+                Task { await loadEvents() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Retry")
+                }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.palmPrimary)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 10)
+                .background(Color.palmPrimary.opacity(0.1))
+                .cornerRadius(10)
+            }
+            .padding(.top, 8)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Month Header
@@ -248,14 +302,29 @@ struct CalendarView: View {
     }
 
     private func loadEvents() async {
+        await MainActor.run {
+            isLoading = true
+            calendarNotConnected = false
+            errorMessage = nil
+        }
         do {
             let fetched = try await api.fetchCalendarEvents()
             await MainActor.run {
                 events = fetched
                 isLoading = false
             }
+        } catch let apiError as APIError {
+            await MainActor.run {
+                isLoading = false
+                calendarNotConnected = true
+                errorMessage = apiError.localizedDescription
+            }
         } catch {
-            await MainActor.run { isLoading = false }
+            await MainActor.run {
+                isLoading = false
+                calendarNotConnected = true
+                errorMessage = error.localizedDescription
+            }
         }
     }
 }

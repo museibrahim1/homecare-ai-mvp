@@ -188,8 +188,40 @@ struct TranscriptSegment: Identifiable {
 
 // MARK: - Calendar
 
-struct CalendarEvent: Codable, Identifiable {
-    let _id: String?
+struct CalendarEventsResponse: Codable {
+    let events: [GoogleCalendarItem]
+}
+
+struct GoogleCalendarItem: Codable {
+    let id: String?
+    let summary: String?
+    let description: String?
+    let location: String?
+    let start: GoogleCalendarTime?
+    let end: GoogleCalendarTime?
+    let created: String?
+
+    func toCalendarEvent() -> CalendarEvent {
+        CalendarEvent(
+            eventId: id,
+            title: summary ?? "Untitled",
+            description: description,
+            start_time: start?.dateTime ?? start?.date ?? "",
+            end_time: end?.dateTime ?? end?.date ?? "",
+            location: location,
+            created_at: created
+        )
+    }
+}
+
+struct GoogleCalendarTime: Codable {
+    let dateTime: String?
+    let date: String?
+    let timeZone: String?
+}
+
+struct CalendarEvent: Identifiable {
+    let eventId: String?
     let title: String
     let description: String?
     let start_time: String
@@ -197,14 +229,9 @@ struct CalendarEvent: Codable, Identifiable {
     let location: String?
     let created_at: String?
 
-    var id: String { _id ?? "\(title)-\(start_time)" }
+    var id: String { eventId ?? "\(title)-\(start_time)" }
     var startDate: Date? { ISO8601Flexible.parse(start_time) }
     var endDate: Date? { ISO8601Flexible.parse(end_time) }
-
-    enum CodingKeys: String, CodingKey {
-        case _id = "id"
-        case title, description, start_time, end_time, location, created_at
-    }
 }
 
 struct CalendarEventCreate: Codable {
