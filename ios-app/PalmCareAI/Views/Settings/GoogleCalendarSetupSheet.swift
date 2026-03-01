@@ -10,6 +10,10 @@ struct GoogleCalendarSetupSheet: View {
     @State private var errorMessage: String?
     @State private var showDisconnectConfirm = false
 
+    private let googleClientId = "668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com"
+    private let callbackScheme = "com.palmcare.ai"
+    private let scopes = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events"
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -23,11 +27,20 @@ struct GoogleCalendarSetupSheet: View {
                     }
 
                     if let error = errorMessage {
-                        Text(error)
-                            .font(.system(size: 13))
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 20)
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 13))
+                                .foregroundColor(.palmOrange)
+                            Text(error)
+                                .font(.system(size: 13))
+                                .foregroundColor(.palmText)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.palmOrange.opacity(0.08))
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmOrange.opacity(0.2), lineWidth: 1))
+                        .padding(.horizontal, 20)
                     }
                 }
                 .padding(.top, 24)
@@ -39,6 +52,7 @@ struct GoogleCalendarSetupSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") { dismiss() }
+                        .foregroundColor(.palmPrimary)
                 }
             }
             .alert("Disconnect Calendar", isPresented: $showDisconnectConfirm) {
@@ -81,7 +95,7 @@ struct GoogleCalendarSetupSheet: View {
             featureRow(icon: "person.2.fill", text: "See client appointments alongside events")
 
             Button {
-                connectCalendar()
+                startGoogleOAuth()
             } label: {
                 HStack(spacing: 8) {
                     if isLoading {
@@ -101,6 +115,7 @@ struct GoogleCalendarSetupSheet: View {
                                    startPoint: .leading, endPoint: .trailing)
                 )
                 .cornerRadius(12)
+                .shadow(color: Color.palmBlue.opacity(0.3), radius: 6, y: 3)
             }
             .disabled(isLoading)
             .padding(.top, 8)
@@ -166,26 +181,76 @@ struct GoogleCalendarSetupSheet: View {
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
     }
 
-    private func connectCalendar() {
+    // MARK: - Google OAuth via ASWebAuthenticationSession
+
+    private func startGoogleOAuth() {
         isLoading = true
         errorMessage = nil
 
-        Task {
-            do {
-                let status = try await api.checkGoogleCalendarStatus()
-                await MainActor.run {
-                    if status {
-                        isConnected = true
-                    } else {
-                        errorMessage = "Google Calendar connection requires setup through the web app at palmcare.ai. Sign in on the web to connect your Google account, then it will sync here automatically."
+        let redirectURI = "\(callbackScheme):/oauth2callback"
+        let encodedRedirectURI = redirectURI.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? redirectURI
+        let encodedScopes = scopes.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? scopes
+
+        let authURLString = "https://accounts.google.com/o/oauth2/v2/auth"
+            + "?client_id=\(googleClientId)"
+            + "&redirect_uri=\(encodedRedirectURI)"
+            + "&response_type=code"
+            + "&scope=\(encodedScopes)"
+            + "&access_type=offline"
+            + "&prompt=consent"
+
+        guard let authURL = URL(string: authURLString) else {
+            isLoading = false
+            errorMessage = "Failed to build authentication URL."
+            return
+        }
+
+        let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: callbackScheme) { callbackURL, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.isLoading = false
+                    if (error as NSError).code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+                        return
                     }
-                    isLoading = false
+                    self.errorMessage = "Authentication failed: \(error.localizedDescription)"
+                    return
                 }
-            } catch {
-                await MainActor.run {
-                    isLoading = false
-                    errorMessage = "Google Calendar connection requires setup through the web app. Sign in at palmcare.ai to connect your Google account."
+
+                guard let callbackURL = callbackURL,
+                      let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
+                      let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
+                    self.isLoading = false
+                    self.errorMessage = "Failed to get authorization code from Google."
+                    return
                 }
+
+                Task {
+                    await self.exchangeCodeForTokens(code: code, redirectURI: redirectURI)
+                }
+            }
+        }
+
+        session.prefersEphemeralWebBrowserSession = false
+        session.presentationContextProvider = GoogleAuthPresentationContext.shared
+        session.start()
+    }
+
+    private func exchangeCodeForTokens(code: String, redirectURI: String) async {
+        do {
+            let body: [String: Any] = [
+                "code": code,
+                "redirect_uri": redirectURI
+            ]
+            let _: [String: AnyCodable] = try await api.request("POST", path: "/calendar/connect", body: body)
+            await MainActor.run {
+                isConnected = true
+                isLoading = false
+                errorMessage = nil
+            }
+        } catch {
+            await MainActor.run {
+                isLoading = false
+                errorMessage = "Failed to connect calendar: \(error.localizedDescription)"
             }
         }
     }
@@ -199,5 +264,18 @@ struct GoogleCalendarSetupSheet: View {
                 await MainActor.run { errorMessage = error.localizedDescription }
             }
         }
+    }
+}
+
+// Provides the presentation anchor for ASWebAuthenticationSession
+private class GoogleAuthPresentationContext: NSObject, ASWebAuthenticationPresentationContextProviding {
+    static let shared = GoogleAuthPresentationContext()
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = scene.windows.first else {
+            return ASPresentationAnchor()
+        }
+        return window
     }
 }
