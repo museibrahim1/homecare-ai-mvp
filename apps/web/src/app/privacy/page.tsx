@@ -12,7 +12,7 @@ const PRIVACY_EMAIL = 'support@palmtai.com';
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-dark-900 landing-dark">
       {/* Header */}
       <header className="border-b border-dark-700/50 bg-dark-900/80 backdrop-blur-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">

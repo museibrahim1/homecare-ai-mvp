@@ -67,7 +67,7 @@ function ContactForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-dark-900 landing-dark flex items-center justify-center p-6">
         <div className="max-w-md text-center">
           <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-emerald-400" />
@@ -89,7 +89,7 @@ function ContactForm() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-dark-900 landing-dark">
       {/* Header */}
       <header className="border-b border-dark-700/50 bg-dark-900/80 backdrop-blur-lg">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -297,7 +297,7 @@ function ContactForm() {
 export default function ContactPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-dark-900 landing-dark flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
       </div>
     }>

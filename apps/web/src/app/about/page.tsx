@@ -6,7 +6,7 @@ import { Mic, ArrowRight, Shield, Heart, Zap, Globe, Users, Award, Lock } from '
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-dark-900 landing-dark">
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
