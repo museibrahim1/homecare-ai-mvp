@@ -25,7 +25,7 @@ struct ContractsView: View {
     @State private var errorMessage: String?
     @State private var expandedClients: Set<String> = []
 
-    private let filters = ["All", "contract", "note", "audio"]
+    private let filters = ["All", "Contract", "Note", "Audio"]
 
     // Group documents by client
     private var clientGroups: [ClientGroup] {
@@ -90,7 +90,12 @@ struct ContractsView: View {
 
             Group {
                 if isLoading {
-                    VStack { Spacer(); ProgressView("Loading documents..."); Spacer() }
+                    VStack {
+                        Spacer()
+                        ProgressView("Loading documents...")
+                            .foregroundColor(.palmSecondary)
+                        Spacer()
+                    }
                 } else if clientGroups.isEmpty {
                     emptyState
                 } else {
@@ -109,17 +114,18 @@ struct ContractsView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(filters, id: \.self) { filter in
+                    let isSelected = selectedFilter == filter
                     Button { withAnimation(.easeInOut(duration: 0.2)) { selectedFilter = filter } } label: {
-                        Text(filter.capitalized)
+                        Text(filter == "All" ? "All" : "\(filter)s")
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(selectedFilter == filter ? .white : .palmSecondary)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 7)
-                            .background(selectedFilter == filter ? Color.palmPrimary : Color.white)
-                            .cornerRadius(18)
+                            .foregroundColor(isSelected ? .white : .palmText)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(isSelected ? Color.palmPrimary : Color.palmFieldBg)
+                            .cornerRadius(20)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 18)
-                                    .stroke(selectedFilter == filter ? Color.clear : Color.palmBorder, lineWidth: 1)
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(isSelected ? Color.clear : Color.palmBorder, lineWidth: 1)
                             )
                     }
                 }
@@ -134,19 +140,27 @@ struct ContractsView: View {
 
     private var searchBar: some View {
         HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass").font(.system(size: 14)).foregroundColor(.palmSecondary)
-            TextField("Search by client or document...", text: $searchText).font(.system(size: 13))
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 14))
+                .foregroundColor(.palmSecondary)
+            TextField("Search by client or document...", text: $searchText)
+                .font(.system(size: 13))
+                .foregroundColor(.palmText)
             if !searchText.isEmpty {
                 Button { searchText = "" } label: {
-                    Image(systemName: "xmark.circle.fill").font(.system(size: 14)).foregroundColor(.palmSecondary)
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.palmSecondary)
                 }
             }
         }
-        .padding(.horizontal, 12).padding(.vertical, 9)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
         .background(Color.palmFieldBg)
         .cornerRadius(10)
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
-        .padding(.horizontal, 18).padding(.vertical, 8)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 8)
     }
 
     // MARK: - Grouped List
@@ -252,59 +266,70 @@ private struct ClientSection: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Client header
             Button(action: onToggle) {
-                HStack(spacing: 11) {
+                HStack(spacing: 12) {
                     let initials = group.name.split(separator: " ").map { String($0.prefix(1)) }.joined().uppercased()
                     let colorIdx = abs(group.name.hashValue) % Self.avatarColors.count
 
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 11)
                         .fill(Self.avatarColors[colorIdx])
-                        .frame(width: 38, height: 38)
+                        .frame(width: 40, height: 40)
                         .overlay(
-                            Text(initials.prefix(2))
-                                .font(.system(size: 13, weight: .bold))
+                            Text(String(initials.prefix(2)))
+                                .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white)
                         )
 
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text(group.name)
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.palmText)
                             .lineLimit(1)
 
                         HStack(spacing: 8) {
                             if !group.contracts.isEmpty {
-                                Label("\(group.contracts.count)", systemImage: "doc.text.fill")
+                                HStack(spacing: 3) {
+                                    Image(systemName: "doc.text.fill").font(.system(size: 9))
+                                    Text("\(group.contracts.count)")
+                                }
+                                .foregroundColor(.palmPrimary)
                             }
                             if !group.notes.isEmpty {
-                                Label("\(group.notes.count)", systemImage: "note.text")
+                                HStack(spacing: 3) {
+                                    Image(systemName: "note.text").font(.system(size: 9))
+                                    Text("\(group.notes.count)")
+                                }
+                                .foregroundColor(.palmBlue)
                             }
                             if !group.audio.isEmpty {
-                                Label("\(group.audio.count)", systemImage: "waveform")
+                                HStack(spacing: 3) {
+                                    Image(systemName: "waveform").font(.system(size: 9))
+                                    Text("\(group.audio.count)")
+                                }
+                                .foregroundColor(.palmPurple)
                             }
                         }
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.palmSecondary)
+                        .font(.system(size: 10, weight: .semibold))
                     }
 
                     Spacer()
 
                     Text("\(group.totalCount)")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.palmSecondary)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
+                        .foregroundColor(.palmText)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                         .background(Color.palmFieldBg)
-                        .cornerRadius(6)
+                        .cornerRadius(8)
 
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.palmBorder)
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.palmSecondary)
+                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
 
@@ -334,13 +359,16 @@ private struct ClientSection: View {
 
     private func docSection(title: String, icon: String, color: Color, docs: [DocumentItem]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 5) {
+            HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(color)
                 Text(title)
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(color)
+                    .foregroundColor(.palmText)
+                Text("(\(docs.count))")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.palmSecondary)
             }
             .padding(.horizontal, 14)
             .padding(.top, 10)
@@ -377,10 +405,10 @@ private struct CompactDocRow: View {
         Button { Task { await onTap() } } label: {
             HStack(spacing: 10) {
                 RoundedRectangle(cornerRadius: 3)
-                    .fill(color.opacity(0.6))
-                    .frame(width: 3, height: 28)
+                    .fill(color)
+                    .frame(width: 3, height: 30)
 
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(document.name)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.palmText)
@@ -389,17 +417,21 @@ private struct CompactDocRow: View {
                     HStack(spacing: 6) {
                         if let fmt = document.format {
                             Text(fmt.uppercased())
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(.palmSecondary)
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundColor(color)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 1)
+                                .background(color.opacity(0.1))
+                                .cornerRadius(3)
                         }
                         if !formattedDate.isEmpty {
                             Text(formattedDate)
-                                .font(.system(size: 9))
+                                .font(.system(size: 10))
                                 .foregroundColor(.palmSecondary)
                         }
                         if let s = document.size, s != "-", !s.isEmpty {
                             Text(s)
-                                .font(.system(size: 9))
+                                .font(.system(size: 10))
                                 .foregroundColor(.palmSecondary)
                         }
                     }
@@ -410,13 +442,13 @@ private struct CompactDocRow: View {
                 if isDownloading {
                     ProgressView().controlSize(.small)
                 } else {
-                    Image(systemName: "arrow.down.circle")
-                        .font(.system(size: 16))
-                        .foregroundColor(color.opacity(0.7))
+                    Image(systemName: "arrow.down.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(color.opacity(0.6))
                 }
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 7)
+            .padding(.vertical, 8)
         }
         .buttonStyle(.plain)
         .disabled(isDownloading)

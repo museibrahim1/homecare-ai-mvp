@@ -29,7 +29,6 @@ struct ClientsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Top bar
                 VStack(spacing: 11) {
                     HStack {
                         Text("Clients")
@@ -61,20 +60,20 @@ struct ClientsView: View {
                         }
                     }
 
-                    // Search bar
                     HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 14))
                             .foregroundColor(.palmSecondary)
 
-                        TextField("Search name, phone, diagnosis…", text: $searchText)
-                            .font(.system(size: 12))
+                        TextField("Search name, phone, diagnosis...", text: $searchText)
+                            .font(.system(size: 13))
+                            .foregroundColor(.palmText)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 9)
                     .background(Color.palmFieldBg)
-                    .cornerRadius(8)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
+                    .cornerRadius(10)
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 14)
@@ -85,12 +84,12 @@ struct ClientsView: View {
                     alignment: .bottom
                 )
 
-                // Client list
                 Group {
                     if isLoading {
                         VStack {
                             Spacer()
                             ProgressView("Loading clients...")
+                                .foregroundColor(.palmSecondary)
                             Spacer()
                         }
                     } else if clients.isEmpty {
@@ -100,10 +99,10 @@ struct ClientsView: View {
                                 .font(.system(size: 48))
                                 .foregroundColor(.palmSecondary.opacity(0.4))
                             Text("No Clients Yet")
-                                .font(.title3.weight(.semibold))
+                                .font(.system(size: 17, weight: .semibold))
                                 .foregroundColor(.palmText)
                             Text("Your clients will appear here once added.")
-                                .font(.subheadline)
+                                .font(.system(size: 13))
                                 .foregroundColor(.palmSecondary)
                                 .multilineTextAlignment(.center)
                             Spacer()
@@ -111,7 +110,7 @@ struct ClientsView: View {
                         .padding(.horizontal, 40)
                     } else {
                         ScrollView(showsIndicators: false) {
-                            LazyVStack(spacing: 8) {
+                            LazyVStack(spacing: 10) {
                                 ForEach(filteredClients) { client in
                                     NavigationLink(destination: ClientDetailView(client: client).environmentObject(api)) {
                                         ClientCard(client: client, avatarColors: Self.avatarColors)
@@ -125,14 +124,14 @@ struct ClientsView: View {
                                             .font(.system(size: 32))
                                             .foregroundColor(.palmSecondary.opacity(0.4))
                                         Text("No results for \"\(searchText)\"")
-                                            .font(.subheadline)
+                                            .font(.system(size: 13))
                                             .foregroundColor(.palmSecondary)
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.top, 40)
                                 }
                             }
-                            .padding(.horizontal, 14)
+                            .padding(.horizontal, 16)
                             .padding(.top, 12)
                             .padding(.bottom, 100)
                         }
@@ -168,52 +167,77 @@ struct ClientCard: View {
     let client: Client
     let avatarColors: [Color]
 
-    var body: some View {
-        HStack(spacing: 11) {
-            let initials = client.full_name.split(separator: " ").map { String($0.prefix(1)) }.joined().uppercased()
-            let colorIndex = abs(client.full_name.hashValue) % avatarColors.count
+    private var initials: String {
+        client.full_name.split(separator: " ").map { String($0.prefix(1)) }.joined().uppercased()
+    }
 
-            RoundedRectangle(cornerRadius: 11)
-                .fill(avatarColors[colorIndex])
-                .frame(width: 40, height: 40)
+    private var avatarColor: Color {
+        avatarColors[abs(client.full_name.hashValue) % avatarColors.count]
+    }
+
+    private var statusColor: Color {
+        switch (client.status ?? "active").lowercased() {
+        case "active": return .palmGreen
+        case "inactive": return .palmOrange
+        case "discharged": return .palmSecondary
+        default: return .palmGreen
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(avatarColor)
+                .frame(width: 44, height: 44)
                 .overlay(
                     Text(initials)
-                        .font(.system(size: 13, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
-                        .tracking(-0.5)
                 )
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(client.full_name)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.palmText)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(client.full_name)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.palmText)
+                        .lineLimit(1)
+
+                    Circle()
+                        .fill(statusColor)
+                        .frame(width: 6, height: 6)
+                }
 
                 if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
                     Text(diagnosis)
-                        .font(.system(size: 11))
+                        .font(.system(size: 12))
                         .foregroundColor(.palmSecondary)
                         .lineLimit(1)
                 }
 
                 if let phone = client.phone, !phone.isEmpty {
-                    Text(phone)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.palmPrimary)
+                    HStack(spacing: 4) {
+                        Image(systemName: "phone.fill")
+                            .font(.system(size: 9))
+                            .foregroundColor(.palmPrimary)
+                        Text(phone)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.palmPrimary)
+                    }
                 }
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 13))
-                .foregroundColor(.palmBorder)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.palmSecondary.opacity(0.5))
         }
-        .padding(.horizontal, 13)
-        .padding(.vertical, 11)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
         .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .cornerRadius(14)
+        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
     }
 }
 
