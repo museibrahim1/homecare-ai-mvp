@@ -9,10 +9,10 @@ interface Message {
   content: string;
 }
 
-const GREETING = "Hey! I'm Palm. Ask me anything about PalmCare AI, or let's get you set up with a free demo. What can I help with?";
+const GREETING = "Hey! I'm Palm — your AI assistant. Ask me anything about PalmCare AI, or let's get you set up with a free demo. Ready to Palm It?";
 
 const QUICK_PROMPTS = [
-  'What does PalmCare AI do?',
+  'How does Palm It work?',
   'How does voice assessment work?',
   'Is it HIPAA compliant?',
   'I want to schedule a demo',

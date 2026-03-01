@@ -25,8 +25,8 @@ interface SpotlightStep {
 const STEPS: SpotlightStep[] = [
   {
     id: 'welcome',
-    title: 'Welcome to PalmCare AI',
-    description: 'Let\'s take a quick tour of your dashboard. We\'ll highlight the key areas you\'ll use every day. Takes about a minute.',
+    title: 'Welcome to PalmCare AI — Let\'s Palm It',
+    description: 'Quick tour of your dashboard. We\'ll highlight the key areas you\'ll use every day to record, transcribe, and contract. Takes about a minute.',
     tip: 'Use arrow keys or click Next to navigate. Press Escape to exit anytime.',
     icon: Sparkles,
     iconBg: 'bg-gradient-to-br from-primary-500 to-accent-cyan',
@@ -107,8 +107,8 @@ const STEPS: SpotlightStep[] = [
   },
   {
     id: 'done',
-    title: 'You\'re All Set!',
-    description: 'You now know your way around the dashboard. Start by adding a client or recording an assessment. Reopen this tour from the user menu or Help & Support anytime.',
+    title: 'You\'re Ready to Palm It!',
+    description: 'You know your way around. Add a client, record an assessment, and let AI handle the rest. Reopen this tour from the user menu or Help & Support anytime.',
     icon: CheckCircle,
     iconBg: 'bg-gradient-to-br from-green-500 to-emerald-500',
     iconColor: 'text-white',

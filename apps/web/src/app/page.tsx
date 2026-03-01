@@ -255,11 +255,11 @@ const SOLUTIONS = [
 const FAQ_ITEMS = [
   {
     q: 'What makes PalmCare AI different from other home care software?',
-    a: 'PalmCare AI is the only platform built from the ground up with AI at its core. While other solutions retrofit AI onto legacy systems, our voice-powered assessment engine, automatic contract generation, and OCR template technology were designed together — meaning your data flows seamlessly from recording to signed contract without manual re-entry.',
+    a: 'PalmCare AI is the first AI-native documentation platform built specifically for home care. Our competitors — AxisCare, WellSky, CareTime — are legacy scheduling and billing systems. They are not AI-first. PalmCare AI was built from the ground up with voice-powered assessments, automatic contract generation, and OCR — your data flows from recording to signed contract without manual re-entry.',
   },
   {
     q: 'How does the voice assessment feature work?',
-    a: 'Simply record your care assessment conversation — in person, over the phone, or upload an existing audio file. Our AI transcribes the conversation, identifies who is speaking, and extracts care needs, services, schedules, medications, and billing items automatically. The entire process takes under 2 minutes.',
+    a: 'One tap to start. Staff records a client assessment on their phone — in person, over the phone, or by uploading an audio file. AI transcribes the conversation, identifies who is speaking, and extracts care needs, services, medications, and billing items automatically. No forms to fill, no clicks to learn — just record and review.',
   },
   {
     q: 'Is PalmCare AI HIPAA compliant?',
@@ -316,10 +316,10 @@ const CLIENT_RANGES = ['1-10', '11-25', '26-50', '51-100', '101-250', '250+'];
 const SOFTWARE_OPTIONS = ['None / Pen & Paper', 'AxisCare', 'ClearCare / WellSky', 'Alora', 'HHAeXchange', 'Axxess', 'MatrixCare', 'KanTime', 'Sandata', 'Other'];
 
 const DEMO_STEPS = [
-  { title: 'Step 1: Record Assessment', description: 'Caregiver records the client intake assessment using voice', duration: 5000 },
-  { title: 'Step 2: AI Transcription', description: 'Our AI transcribes and identifies speakers automatically', duration: 4000 },
-  { title: 'Step 3: Extract Care Needs', description: 'AI extracts services, schedule, and billable items', duration: 4000 },
-  { title: 'Step 4: Generate Contract', description: 'Professional contract is generated instantly', duration: 5000 },
+  { title: 'Step 1: Record It', description: 'Staff records the client assessment on their phone — one tap to start', duration: 5000 },
+  { title: 'Step 2: Transcribe It', description: 'AI transcribes the conversation and identifies who is speaking', duration: 4000 },
+  { title: 'Step 3: Extract It', description: 'AI captures care needs, services, schedule, and billable items', duration: 4000 },
+  { title: 'Step 4: Contract It', description: 'Complete care plan and service agreement — ready to sign', duration: 5000 },
 ];
 
 /* ───────────────────── DEMO MODAL ───────────────────── */
@@ -363,7 +363,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">Product Demo</h3>
-              <p className="text-sm text-dark-400">See how PalmCare AI works</p>
+              <p className="text-sm text-dark-400">See how Palm It works</p>
             </div>
           </div>
           <button aria-label="Close demo" onClick={onClose} className="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-700"><X className="w-6 h-6" /></button>

@@ -35,15 +35,15 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
   },
   {
     id: 'assessment',
-    title: 'Complete an assessment',
-    description: 'Record or upload a visit',
+    title: 'Record an assessment',
+    description: 'One tap — AI handles the rest',
     href: '/visits/new',
     icon: Mic,
   },
   {
     id: 'contract',
     title: 'Generate a contract',
-    description: 'Create your first service agreement',
+    description: 'AI creates your service agreement in seconds',
     href: '/contracts',
     icon: FileCheck,
   },

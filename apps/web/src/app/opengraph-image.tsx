@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'PalmCare AI — AI-Powered Home Care Management';
+export const alt = 'PalmCare AI — Where Care Meets Intelligence';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -64,7 +64,7 @@ export default async function Image() {
             margin: '0 0 40px 0',
           }}
         >
-          Turn voice assessments into proposal-ready service contracts in minutes
+          Record it. Transcribe it. Contract it. All in your palm.
         </p>
 
         <div
@@ -73,7 +73,7 @@ export default async function Image() {
             gap: '40px',
           }}
         >
-          {['Voice Assessments', 'AI Contracts', 'CRM Pipeline', 'HIPAA Compliant'].map(
+          {['Record It', 'Transcribe It', 'Contract It', 'HIPAA Compliant'].map(
             (feature) => (
               <div
                 key={feature}

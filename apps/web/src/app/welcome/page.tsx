@@ -56,7 +56,7 @@ export default function WelcomePage() {
     {
       id: 'assessment',
       title: 'Record an Assessment',
-      description: 'Use voice recording or upload an existing assessment. Our AI will transcribe and extract key information.',
+      description: 'One tap to start. Record in person or over the phone — AI transcribes and extracts everything automatically.',
       icon: Mic,
       action: 'Start Assessment',
       href: '/visits/new',
@@ -65,7 +65,7 @@ export default function WelcomePage() {
     {
       id: 'contract',
       title: 'Generate a Contract',
-      description: 'After the AI processes your assessment, review the extracted details and generate a professional contract.',
+      description: 'AI generates a complete care plan and service agreement. Review, approve, and send — contract ready to sign.',
       icon: FileCheck,
       action: 'View Contracts',
       href: '/contracts',
@@ -273,7 +273,7 @@ export default function WelcomePage() {
                 See It In Action
               </h2>
               <p className="text-slate-600 mb-6">
-                Watch how easy it is to record an assessment and generate a contract in under 5 minutes.
+                Record an assessment, AI generates the contract. All in under 5 minutes. Palm It.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
@@ -281,7 +281,7 @@ export default function WelcomePage() {
                   className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-600 transition"
                 >
                   <Play className="w-5 h-5" />
-                  Try Demo Assessment
+                  Palm It — Try Demo
                 </Link>
                 <Link
                   href="/visits"
@@ -296,7 +296,7 @@ export default function WelcomePage() {
                 <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Sparkles className="w-8 h-8 text-primary-400" />
                 </div>
-                <p className="text-slate-500 text-sm">AI-Powered Assessment</p>
+                <p className="text-slate-500 text-sm">Record. Transcribe. Contract.</p>
               </div>
             </div>
           </div>
@@ -310,7 +310,7 @@ export default function WelcomePage() {
               {
                 icon: Mic,
                 title: 'Voice Recording',
-                description: 'Record assessments hands-free. Our AI transcribes everything automatically.',
+                description: 'One tap to start. AI transcribes everything — speakers, care needs, billables.',
               },
               {
                 icon: Sparkles,
@@ -320,7 +320,7 @@ export default function WelcomePage() {
               {
                 icon: FileCheck,
                 title: 'Contract Generation',
-                description: 'Generate professional service contracts from your assessments.',
+                description: 'AI generates complete care plans and service agreements in seconds.',
               },
               {
                 icon: Calendar,

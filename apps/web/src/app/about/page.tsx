@@ -125,10 +125,10 @@ export default function AboutPage() {
         <section className="px-6 py-16">
           <div className="max-w-4xl mx-auto">
             <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-200">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready to See the Difference?</h2>
-              <p className="text-xl text-slate-600 mb-8">Book a free demo and see why 500+ agencies trust PalmCare AI.</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready to Palm It?</h2>
+              <p className="text-xl text-slate-600 mb-8">Book a free 5-minute demo. See how PalmCare AI turns assessments into signed contracts in seconds.</p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Schedule a Demo<ArrowRight className="w-5 h-5" /></Link>
+                <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Palm It — Book a Demo<ArrowRight className="w-5 h-5" /></Link>
               </div>
             </div>
           </div>

@@ -114,8 +114,8 @@ function ContactForm() {
             </h1>
             <p className="text-xl text-slate-600 mb-8">
               {inquiry === 'enterprise'
-                ? "Let's discuss custom solutions tailored to your organization's needs."
-                : "Have questions? We'd love to hear from you."
+                ? "Let's discuss custom solutions for your agency. Built for care professionals."
+                : "Have questions? We'd love to hear from you. Your next client is waiting."
               }
             </p>
 
