@@ -4,11 +4,13 @@ Google Calendar Integration Router
 Handles OAuth callbacks and calendar sync for users.
 """
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 import httpx
+import urllib.parse
 
 from app.core.deps import get_db, get_current_user
 from app.core.config import settings
@@ -52,6 +54,44 @@ async def get_calendar_status(
     return GoogleCalendarStatus(
         connected=current_user.google_calendar_connected,
         token_expiry=current_user.google_calendar_token_expiry,
+    )
+
+
+@router.get("/mobile-callback")
+async def mobile_oauth_callback(
+    code: str = Query(None),
+    error: str = Query(None),
+    state: str = Query(None),
+):
+    """
+    OAuth callback for iOS app. Google redirects here with the auth code,
+    then we redirect to the app's custom URL scheme with the code.
+    """
+    app_scheme = "com.palmcare.ai"
+
+    if error:
+        redirect = f"{app_scheme}://oauth2callback?error={urllib.parse.quote(error)}"
+        return HTMLResponse(
+            content=f'<html><head><meta http-equiv="refresh" content="0;url={redirect}"></head>'
+                    f'<body>Redirecting to PalmCare AI...</body></html>'
+        )
+
+    if not code:
+        redirect = f"{app_scheme}://oauth2callback?error=no_code"
+        return HTMLResponse(
+            content=f'<html><head><meta http-equiv="refresh" content="0;url={redirect}"></head>'
+                    f'<body>Redirecting to PalmCare AI...</body></html>'
+        )
+
+    redirect = f"{app_scheme}://oauth2callback?code={urllib.parse.quote(code)}"
+    if state:
+        redirect += f"&state={urllib.parse.quote(state)}"
+
+    return HTMLResponse(
+        content=f'<html><head><meta http-equiv="refresh" content="0;url={redirect}"></head>'
+                f'<body><p>Redirecting to PalmCare AI...</p>'
+                f'<p>If you are not redirected, <a href="{redirect}">tap here</a>.</p>'
+                f'</body></html>'
     )
 
 
