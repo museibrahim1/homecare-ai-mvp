@@ -6,7 +6,6 @@ struct PalmCareAIApp: App {
     @StateObject private var api = APIService.shared
     @AppStorage("useFaceID") private var useFaceID = false
     @State private var isBiometricUnlocked = false
-    @State private var showBiometricPrompt = false
 
     var body: some Scene {
         WindowGroup {
@@ -24,7 +23,7 @@ struct PalmCareAIApp: App {
                         .environmentObject(api)
                 }
             }
-            .onChange(of: api.isAuthenticated) { _, newValue in
+            .onChange(of: api.isAuthenticated) { newValue in
                 if !newValue { isBiometricUnlocked = false }
             }
         }

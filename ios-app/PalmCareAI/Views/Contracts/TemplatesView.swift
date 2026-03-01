@@ -540,7 +540,7 @@ struct UploadTemplateSheet: View {
                 )
 
                 let fieldCount = result.detected_fields?.count ?? 0
-                let unmappedCount = result.unmapped_fields?.count ?? 0
+                _ = result.unmapped_fields?.count ?? 0
 
                 await MainActor.run {
                     isUploading = false

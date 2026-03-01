@@ -13,7 +13,7 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
 
     func startRecording() throws {
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
         try session.setActive(true, options: .notifyOthersOnDeactivation)
 
         let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
