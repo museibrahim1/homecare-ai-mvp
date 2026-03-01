@@ -85,6 +85,11 @@ struct LoginResponse: Codable {
     let mfa_token: String?
 }
 
+struct BusinessLoginResponse: Codable {
+    let access_token: String
+    let token_type: String
+}
+
 struct UsageStats: Codable {
     let completed_assessments: Int
     let total_assessments: Int

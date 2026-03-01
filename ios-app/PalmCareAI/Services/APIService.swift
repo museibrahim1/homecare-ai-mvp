@@ -74,7 +74,26 @@ class APIService: ObservableObject {
     // MARK: - Auth
 
     func login(email: String, password: String) async throws -> LoginResponse {
-        try await request("POST", path: "/auth/login", body: ["email": email, "password": password], noAuth: true)
+        do {
+            return try await request("POST", path: "/auth/login", body: ["email": email, "password": password], noAuth: true)
+        } catch {
+            // If regular auth fails, try business auth (matches web app behavior)
+            do {
+                let bizResponse: BusinessLoginResponse = try await request(
+                    "POST", path: "/auth/business/login",
+                    body: ["email": email, "password": password], noAuth: true
+                )
+                return LoginResponse(
+                    access_token: bizResponse.access_token,
+                    token_type: bizResponse.token_type,
+                    requires_mfa: nil,
+                    mfa_token: nil
+                )
+            } catch {
+                // Both failed — throw the original regular auth error
+                throw error
+            }
+        }
     }
 
     func fetchUser() async throws -> User {
