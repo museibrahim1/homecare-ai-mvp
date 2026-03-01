@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var api: APIService
+    var onNavigateToRecord: (() -> Void)?
 
     @State private var user: User?
     @State private var clients: [Client] = []
@@ -84,7 +85,7 @@ struct HomeView: View {
                     .padding(.bottom, 14)
 
                     // CTA bar
-                    Button {} label: {
+                    Button { onNavigateToRecord?() } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("START RECORDING")
@@ -183,18 +184,28 @@ struct HomeView: View {
     private var visitsThisWeek: Int {
         let calendar = Calendar.current
         let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return visits.filter { visit in
-            if let date = formatter.date(from: visit.created_at) {
+            if let date = parseISO8601(visit.created_at) {
                 return date >= startOfWeek
             }
             return false
         }.count
     }
 
+    private func parseISO8601(_ string: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: string) { return date }
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: string)
+    }
+
     private var pendingVisits: Int {
-        visits.filter { $0.status.lowercased() == "pending" || $0.status.lowercased() == "processing" }.count
+        let pending = visits.filter {
+            let s = $0.status.lowercased()
+            return s == "pending" || s == "processing" || s == "uploading"
+        }
+        return pending.count
     }
 
     private func loadData() async {
@@ -334,11 +345,16 @@ struct VisitRow: View {
     private func formattedDate(_ isoString: String) -> String {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        guard let date = formatter.date(from: isoString) else { return isoString }
+        var date = formatter.date(from: isoString)
+        if date == nil {
+            formatter.formatOptions = [.withInternetDateTime]
+            date = formatter.date(from: isoString)
+        }
+        guard let parsedDate = date else { return isoString }
         let display = DateFormatter()
         display.dateStyle = .medium
         display.timeStyle = .short
-        return display.string(from: date)
+        return display.string(from: parsedDate)
     }
 }
 

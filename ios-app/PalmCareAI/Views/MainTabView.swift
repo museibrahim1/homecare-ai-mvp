@@ -7,7 +7,7 @@ struct MainTabView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
-                HomeView()
+                HomeView(onNavigateToRecord: { selectedTab = 2 })
                     .tag(0)
 
                 ClientsView()

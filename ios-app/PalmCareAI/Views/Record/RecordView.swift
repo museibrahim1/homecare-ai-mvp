@@ -15,11 +15,11 @@ struct RecordView: View {
     @State private var errorMessage: String?
     @State private var showError = false
     @State private var recordingFinishedURL: URL?
+    @State private var uploadStatusMessage: String?
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Top bar
                 VStack(spacing: 2) {
                     Text("New Assessment")
                         .font(.system(size: 15, weight: .bold))
@@ -38,9 +38,7 @@ struct RecordView: View {
                     alignment: .bottom
                 )
 
-                // Content
                 VStack(spacing: 0) {
-                    // Client selector
                     Button { showClientPicker = true } label: {
                         HStack {
                             HStack(spacing: 10) {
@@ -80,7 +78,6 @@ struct RecordView: View {
                     .padding(.top, 20)
                     .padding(.bottom, 28)
 
-                    // Timer
                     Text(timeString(recorder.duration))
                         .font(.system(size: 58, weight: .heavy, design: .default))
                         .foregroundColor(.palmText)
@@ -88,17 +85,14 @@ struct RecordView: View {
                         .monospacedDigit()
                         .padding(.bottom, 4)
 
-                    // Status
                     Text(statusText.uppercased())
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.palmSecondary)
                         .tracking(1.5)
                         .padding(.bottom, 36)
 
-                    // Mic button zone
                     VStack(spacing: 13) {
                         ZStack {
-                            // Pulsing ring
                             Circle()
                                 .fill(recorder.isRecording ? Color.red.opacity(0.05) : Color.palmPrimary.opacity(0.05))
                                 .frame(width: 130, height: 130)
@@ -109,10 +103,9 @@ struct RecordView: View {
                                             lineWidth: 1.5
                                         )
                                 )
-                                .scaleEffect(recorder.isRecording ? 1.05 : 1.0)
-                                .animation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true), value: recorder.isRecording)
+                                .scaleEffect(recorder.isRecording ? (1.0 + CGFloat(recorder.audioLevel) * 0.15) : 1.0)
+                                .animation(.easeInOut(duration: 0.15), value: recorder.audioLevel)
 
-                            // Main button
                             Circle()
                                 .fill(
                                     recorder.isRecording
@@ -140,16 +133,22 @@ struct RecordView: View {
                         }
                         .onTapGesture { handleRecordTap() }
 
-                        Text("Tap to start · AI handles the rest")
+                        Text(recorder.isRecording ? "Tap to stop recording" : "Tap to start · AI handles the rest")
                             .font(.system(size: 12))
                             .foregroundColor(.palmSecondary)
                     }
 
                     Spacer()
 
-                    // Upload button (shown after recording)
                     if recordingFinishedURL != nil && !recorder.isRecording {
                         VStack(spacing: 12) {
+                            if let statusMsg = uploadStatusMessage {
+                                Text(statusMsg)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.palmPrimary)
+                                    .padding(.bottom, 4)
+                            }
+
                             Button { uploadRecording() } label: {
                                 HStack(spacing: 8) {
                                     if isUploading {
@@ -158,7 +157,7 @@ struct RecordView: View {
                                         Image(systemName: "arrow.up.circle.fill")
                                             .font(.system(size: 18))
                                     }
-                                    Text(isUploading ? "Uploading..." : "Upload Recording")
+                                    Text(isUploading ? "Processing..." : "Upload & Process")
                                         .font(.system(size: 14, weight: .heavy))
                                 }
                                 .foregroundColor(.white)
@@ -178,8 +177,7 @@ struct RecordView: View {
                             }
 
                             Button {
-                                recordingFinishedURL = nil
-                                recorder.recordingURL = nil
+                                discardRecording()
                             } label: {
                                 Text("Discard")
                                     .font(.system(size: 13, weight: .semibold))
@@ -210,11 +208,10 @@ struct RecordView: View {
             }
             .alert("Upload Successful", isPresented: $uploadSuccess) {
                 Button("OK") {
-                    recordingFinishedURL = nil
-                    recorder.recordingURL = nil
+                    discardRecording()
                 }
             } message: {
-                Text("Your recording has been uploaded and is being processed.")
+                Text("Your recording has been uploaded and the AI pipeline is processing it. Check the home screen for status updates.")
             }
             .alert("Error", isPresented: $showError) {
                 Button("OK", role: .cancel) {}
@@ -231,6 +228,8 @@ struct RecordView: View {
     private var statusText: String {
         if recorder.isRecording {
             return "Recording... Tap to stop"
+        } else if isUploading {
+            return "Uploading & processing"
         } else if recordingFinishedURL != nil {
             return "Recording complete"
         } else {
@@ -242,11 +241,15 @@ struct RecordView: View {
         if recorder.isRecording {
             recordingFinishedURL = recorder.stopRecording()
         } else {
+            if !permissionGranted {
+                permissionGranted = recorder.checkPermissionStatus()
+            }
             guard permissionGranted else {
                 showPermissionAlert = true
                 return
             }
             recordingFinishedURL = nil
+            uploadStatusMessage = nil
             do {
                 try recorder.startRecording()
             } catch {
@@ -262,18 +265,29 @@ struct RecordView: View {
         else { return }
 
         isUploading = true
+        uploadStatusMessage = "Creating visit..."
+
         Task {
             do {
+                let visit = try await api.createVisit(clientId: clientId)
+
+                await MainActor.run {
+                    uploadStatusMessage = "Uploading audio..."
+                }
+
                 let data = try Data(contentsOf: url)
                 let filename = url.lastPathComponent
-                _ = try await api.uploadAudio(clientId: clientId, audioData: data, filename: filename)
+                _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: filename, autoProcess: true)
+
                 await MainActor.run {
                     isUploading = false
+                    uploadStatusMessage = nil
                     uploadSuccess = true
                 }
             } catch {
                 await MainActor.run {
                     isUploading = false
+                    uploadStatusMessage = nil
                     errorMessage = error.localizedDescription
                     showError = true
                 }
@@ -281,11 +295,22 @@ struct RecordView: View {
         }
     }
 
+    private func discardRecording() {
+        if let url = recordingFinishedURL {
+            try? FileManager.default.removeItem(at: url)
+        }
+        recordingFinishedURL = nil
+        recorder.recordingURL = nil
+        uploadStatusMessage = nil
+    }
+
     private func loadClients() async {
         do {
             let fetched = try await api.fetchClients()
             await MainActor.run { clients = fetched }
-        } catch {}
+        } catch {
+            print("Failed to load clients: \(error.localizedDescription)")
+        }
     }
 
     private func timeString(_ interval: TimeInterval) -> String {
@@ -320,6 +345,12 @@ struct ClientPickerSheet: View {
                             Text(client.full_name)
                                 .font(.subheadline.weight(.medium))
                                 .foregroundColor(.palmText)
+
+                            if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
+                                Text(diagnosis)
+                                    .font(.caption)
+                                    .foregroundColor(.palmSecondary)
+                            }
 
                             if let phone = client.phone {
                                 Text(phone)
