@@ -186,6 +186,139 @@ struct TranscriptSegment: Identifiable {
     }
 }
 
+// MARK: - Calendar
+
+struct CalendarEvent: Codable, Identifiable {
+    let _id: String?
+    let title: String
+    let description: String?
+    let start_time: String
+    let end_time: String
+    let location: String?
+    let created_at: String?
+
+    var id: String { _id ?? "\(title)-\(start_time)" }
+    var startDate: Date? { ISO8601Flexible.parse(start_time) }
+    var endDate: Date? { ISO8601Flexible.parse(end_time) }
+
+    enum CodingKeys: String, CodingKey {
+        case _id = "id"
+        case title, description, start_time, end_time, location, created_at
+    }
+}
+
+struct CalendarEventCreate: Codable {
+    let title: String
+    let description: String?
+    let start_time: String
+    let end_time: String
+    let location: String?
+}
+
+struct CalendarStatus: Codable {
+    let connected: Bool
+    let token_expiry: String?
+}
+
+// MARK: - Documents / Contracts
+
+struct DocumentItem: Codable, Identifiable {
+    let id: String
+    let name: String
+    let type: String?
+    let format: String?
+    let size: Int?
+    let folder: String?
+    let client_id: String?
+    let client_name: String?
+    let visit_id: String?
+    let created_at: String?
+    let download_url: String?
+}
+
+struct DocumentsResponse: Codable {
+    let documents: [DocumentItem]
+    let total: Int
+    let folders: [String]?
+}
+
+// MARK: - Tasks
+
+struct TaskItem: Codable, Identifiable {
+    let id: String
+    let user_id: String?
+    let smart_note_id: String?
+    let title: String
+    let description: String?
+    let status: String
+    let priority: String?
+    let due_date: String?
+    let completed_at: String?
+    let related_client_id: String?
+    let assigned_to_id: String?
+    let created_at: String?
+    let updated_at: String?
+
+    var dueDate: Date? {
+        guard let d = due_date else { return nil }
+        return ISO8601Flexible.parse(d)
+    }
+
+    var priorityLevel: Int {
+        switch priority?.lowercased() {
+        case "high": return 3
+        case "medium": return 2
+        case "low": return 1
+        default: return 0
+        }
+    }
+}
+
+struct TaskCreate: Codable {
+    let title: String
+    let description: String?
+    let status: String?
+    let priority: String?
+    let due_date: String?
+    let related_client_id: String?
+}
+
+struct TaskUpdate: Codable {
+    let title: String?
+    let description: String?
+    let status: String?
+    let priority: String?
+    let due_date: String?
+    let related_client_id: String?
+}
+
+// MARK: - ISO8601 Flexible Parser
+
+enum ISO8601Flexible {
+    private static let formatters: [DateFormatter] = {
+        let formats = [
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ",
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd"
+        ]
+        return formats.map { fmt in
+            let f = DateFormatter()
+            f.dateFormat = fmt
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.timeZone = TimeZone(secondsFromGMT: 0)
+            return f
+        }
+    }()
+
+    static func parse(_ string: String) -> Date? {
+        for f in formatters {
+            if let d = f.date(from: string) { return d }
+        }
+        return nil
+    }
+}
+
 // MARK: - AnyCodable for flexible JSON fields
 
 struct AnyCodable: Codable {

@@ -27,6 +27,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSFaceIDUsageDescription</key>
+	<string>PalmCareAI uses Face ID for quick and secure login.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>PalmCareAI needs microphone access to record client visits and assessments.</string>
 	<key>UILaunchScreen</key>

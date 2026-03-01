@@ -207,6 +207,69 @@ class APIService: ObservableObject {
         return try jsonDecoder.decode(LiveTranscriptResponse.self, from: data)
     }
 
+    // MARK: - Calendar
+
+    func fetchCalendarEvents() async throws -> [CalendarEvent] {
+        try await request("GET", path: "/calendar/events")
+    }
+
+    func createCalendarEvent(_ event: CalendarEventCreate) async throws -> CalendarEvent {
+        let body: [String: Any] = [
+            "title": event.title,
+            "start_time": event.start_time,
+            "end_time": event.end_time,
+            "description": event.description ?? "",
+            "location": event.location ?? ""
+        ]
+        return try await request("POST", path: "/calendar/events", body: body)
+    }
+
+    func deleteCalendarEvent(id: String) async throws {
+        let _: [String: String] = try await request("DELETE", path: "/calendar/events/\(id)")
+    }
+
+    func fetchCalendarStatus() async throws -> CalendarStatus {
+        try await request("GET", path: "/calendar/status")
+    }
+
+    // MARK: - Documents
+
+    func fetchDocuments() async throws -> DocumentsResponse {
+        try await request("GET", path: "/documents")
+    }
+
+    func getContractPDFURL(visitId: String) -> URL? {
+        URL(string: "\(baseURL)/exports/visits/\(visitId)/contract.pdf")
+    }
+
+    // MARK: - Tasks
+
+    func fetchTasks() async throws -> [TaskItem] {
+        try await request("GET", path: "/notes/tasks")
+    }
+
+    func createTask(_ task: TaskCreate) async throws -> TaskItem {
+        var body: [String: Any] = ["title": task.title]
+        if let d = task.description { body["description"] = d }
+        if let s = task.status { body["status"] = s }
+        if let p = task.priority { body["priority"] = p }
+        if let dd = task.due_date { body["due_date"] = dd }
+        if let c = task.related_client_id { body["related_client_id"] = c }
+        return try await request("POST", path: "/notes/tasks", body: body)
+    }
+
+    func updateTask(id: String, body: [String: Any]) async throws -> TaskItem {
+        try await request("PUT", path: "/notes/tasks/\(id)", body: body)
+    }
+
+    func completeTask(id: String) async throws -> TaskItem {
+        try await request("PUT", path: "/notes/tasks/\(id)/complete")
+    }
+
+    func deleteTask(id: String) async throws {
+        let _: [String: String] = try await request("DELETE", path: "/notes/tasks/\(id)")
+    }
+
     // MARK: - Billing & Subscription
 
     func fetchSubscription() async throws -> UserSubscription {

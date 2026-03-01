@@ -6,6 +6,7 @@ struct ClientsView: View {
     @State private var clients: [Client] = []
     @State private var searchText = ""
     @State private var isLoading = true
+    @State private var showAddClient = false
 
     private static let avatarColors: [Color] = [
         Color(red: 13/255, green: 148/255, blue: 136/255),
@@ -38,7 +39,7 @@ struct ClientsView: View {
 
                         Spacer()
 
-                        Button {} label: {
+                        Button { showAddClient = true } label: {
                             HStack(spacing: 5) {
                                 Image(systemName: "plus")
                                     .font(.system(size: 12, weight: .bold))
@@ -46,10 +47,16 @@ struct ClientsView: View {
                                     .font(.system(size: 12, weight: .bold))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-                            .background(LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .cornerRadius(8)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.palmPrimary, Color.palmTeal600],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(10)
                             .shadow(color: Color.palmPrimary.opacity(0.35), radius: 5, y: 2)
                         }
                     }
@@ -132,6 +139,12 @@ struct ClientsView: View {
             .background(Color.palmBackground)
             .refreshable { await loadClients() }
             .task { await loadClients() }
+            .sheet(isPresented: $showAddClient) {
+                AddClientSheet(onClientCreated: { newClient in
+                    clients.insert(newClient, at: 0)
+                })
+                .environmentObject(api)
+            }
         }
     }
 

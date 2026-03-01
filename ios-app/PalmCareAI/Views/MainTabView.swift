@@ -16,10 +16,10 @@ struct MainTabView: View {
                 RecordView()
                     .tag(2)
 
-                CalendarPlaceholderView()
+                CalendarView()
                     .tag(3)
 
-                MoreView()
+                SettingsView()
                     .tag(4)
             }
 
@@ -38,7 +38,7 @@ struct CustomTabBar: View {
         ("person.2.fill", "Clients"),
         ("mic.fill", "Palm It"),
         ("calendar", "Calendar"),
-        ("ellipsis", "More"),
+        ("gearshape.fill", "Settings"),
     ]
 
     var body: some View {
@@ -113,70 +113,7 @@ struct CustomTabBar: View {
     }
 }
 
-// MARK: - Placeholder Views
-
-struct CalendarPlaceholderView: View {
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 16) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 48))
-                    .foregroundColor(.palmPrimary.opacity(0.4))
-
-                Text("Calendar")
-                    .font(.title2.weight(.semibold))
-                    .foregroundColor(.palmText)
-
-                Text("Coming soon")
-                    .font(.subheadline)
-                    .foregroundColor(.palmSecondary)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.palmBackground)
-            .navigationTitle("Calendar")
-        }
-    }
-}
-
-struct MoreView: View {
-    @EnvironmentObject var api: APIService
-
-    var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    NavigationLink {
-                        Text("Profile Settings")
-                    } label: {
-                        Label("Profile", systemImage: "person.circle")
-                    }
-
-                    NavigationLink {
-                        Text("Notification Settings")
-                    } label: {
-                        Label("Notifications", systemImage: "bell")
-                    }
-
-                    NavigationLink {
-                        Text("Help & Support")
-                    } label: {
-                        Label("Help & Support", systemImage: "questionmark.circle")
-                    }
-                }
-
-                Section {
-                    Button(role: .destructive) {
-                        api.logout()
-                    } label: {
-                        Label("Log Out", systemImage: "rectangle.portrait.and.arrow.right")
-                            .foregroundColor(.red)
-                    }
-                }
-            }
-            .navigationTitle("More")
-        }
-    }
-}
+// CalendarPlaceholderView and MoreView removed — replaced by CalendarView and SettingsView
 
 #Preview {
     MainTabView()

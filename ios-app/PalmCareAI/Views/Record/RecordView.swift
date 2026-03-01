@@ -211,7 +211,10 @@ struct RecordView: View {
                 }
             }
             .sheet(isPresented: $showClientPicker) {
-                ClientPickerSheet(clients: clients, selected: $selectedClient)
+                ClientPickerSheet(clients: clients, selected: $selectedClient, onClientAdded: { newClient in
+                    clients.insert(newClient, at: 0)
+                })
+                .environmentObject(api)
             }
             .alert("Microphone Access", isPresented: $showPermissionAlert) {
                 Button("Open Settings") {
@@ -497,10 +500,13 @@ struct RecordView: View {
 // MARK: - Client Picker Sheet
 
 struct ClientPickerSheet: View {
+    @EnvironmentObject var api: APIService
     let clients: [Client]
     @Binding var selected: Client?
+    var onClientAdded: ((Client) -> Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var search = ""
+    @State private var showAddClient = false
 
     var filtered: [Client] {
         if search.isEmpty { return clients }
@@ -509,26 +515,40 @@ struct ClientPickerSheet: View {
 
     var body: some View {
         NavigationStack {
-            List(filtered) { client in
-                Button {
-                    selected = client
-                    dismiss()
-                } label: {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(client.full_name)
-                                .font(.subheadline.weight(.medium))
-                                .foregroundColor(.palmText)
-                            if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
-                                Text(diagnosis).font(.caption).foregroundColor(.palmSecondary)
-                            }
-                            if let phone = client.phone {
-                                Text(phone).font(.caption).foregroundColor(.palmSecondary)
-                            }
-                        }
+            List {
+                Button { showAddClient = true } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.palmPrimary)
+                        Text("Add New Client")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.palmPrimary)
                         Spacer()
-                        if selected?.id == client.id {
-                            Image(systemName: "checkmark.circle.fill").foregroundColor(.palmPrimary)
+                    }
+                }
+
+                ForEach(filtered) { client in
+                    Button {
+                        selected = client
+                        dismiss()
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(client.full_name)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundColor(.palmText)
+                                if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
+                                    Text(diagnosis).font(.caption).foregroundColor(.palmSecondary)
+                                }
+                                if let phone = client.phone {
+                                    Text(phone).font(.caption).foregroundColor(.palmSecondary)
+                                }
+                            }
+                            Spacer()
+                            if selected?.id == client.id {
+                                Image(systemName: "checkmark.circle.fill").foregroundColor(.palmPrimary)
+                            }
                         }
                     }
                 }
@@ -540,6 +560,14 @@ struct ClientPickerSheet: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showAddClient) {
+                AddClientSheet(onClientCreated: { newClient in
+                    selected = newClient
+                    onClientAdded?(newClient)
+                    dismiss()
+                })
+                .environmentObject(api)
             }
         }
     }
