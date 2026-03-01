@@ -128,11 +128,11 @@ export const RemotionRoot: React.FC = () => {
         }}
       />
       {/* ===== PALMCARE AI VIDEO AD ===== */}
-      {/* Enhanced ElevenLabs footage with animated overlays — 32s */}
+      {/* Enhanced ElevenLabs footage with voiceover, mobile screens — 38s */}
       <Composition
         id="PalmCareAd"
         component={PalmCareAd}
-        durationInFrames={960}
+        durationInFrames={1140}
         fps={30}
         width={1920}
         height={1080}
