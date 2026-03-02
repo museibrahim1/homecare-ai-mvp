@@ -43,11 +43,13 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         isRecording = true
         duration = 0
 
+        // Use RunLoop.common so timers keep firing in the background
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             DispatchQueue.main.async {
                 self?.duration += 1
             }
         }
+        RunLoop.current.add(timer!, forMode: .common)
 
         levelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self, let recorder = self.audioRecorder, recorder.isRecording else { return }
@@ -58,6 +60,7 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
                 self.audioLevel = normalizedLevel
             }
         }
+        RunLoop.current.add(levelTimer!, forMode: .common)
     }
 
     func stopRecording() -> URL? {
