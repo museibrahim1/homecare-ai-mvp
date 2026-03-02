@@ -138,7 +138,7 @@ struct ClientDetailView: View {
                     .foregroundColor(.palmText)
 
                 if let preferred = client.preferred_name, !preferred.isEmpty {
-                    Text(""\(preferred)"")
+                    Text("\"\(preferred)\"")
                         .font(.system(size: 13))
                         .foregroundColor(.palmSecondary)
                 }
