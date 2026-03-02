@@ -34,6 +34,11 @@ Non-healthcare-only Business Associate of organizations subject to HIPAA. Palm T
 
 ## Brand Identity (from official Brand Guidelines doc)
 
+### Logo
+- **Icon:** Hand/palm with spiral in the center (white on teal orb, or black on transparent)
+- **Logo files:** `~/Downloads/IconOnly_Transparent.png` (icon only, black on transparent RGBA), `~/Downloads/FullLogo_Transparent.png` (full logo with text)
+- **App icon:** Orb (from LandingOrbShape code) with white palm+spiral logo centered, dark teal background, 1024x1024
+
 ### Naming Rules
 - **Always:** PalmCare AI (capital P, capital C, capital AI)
 - **Never:** Palmcare, Palm Care, palmcare ai, PalmcareAI
@@ -160,40 +165,110 @@ Clean, modern SaaS. Lots of white space, minimal decoration, teal dominant accen
 
 ---
 
+## Deployment
+
+| Item | Value |
+|------|-------|
+| Platform | Railway |
+| API URL | `https://api-production-a0a2.up.railway.app` |
+| Web URL | `https://web-production-11611.up.railway.app` |
+| Custom Domains | `palmcareai.com` (website), `palmtai.com` (app), `api.palmtai.com` (API) |
+| Services | Next.js frontend (port 3000), FastAPI backend (port 8000), PostgreSQL, Redis, Celery workers |
+| Deploy Flow | Push to `origin/main` triggers auto-deploy |
+| Migrations | `alembic upgrade head` after deploy |
+| DATABASE_URL | From Railway env vars |
+
+---
+
 ## iOS App Architecture
+
+### Bundle & Identity
+
+| Item | Value |
+|------|-------|
+| Bundle ID | `com.palmtechnologies.palmcare` |
+| Display Name | PalmCare AI |
+| Deployment Target | iOS 16.0 |
+| Version | 1.0.0 (Build 1) |
+| URL Scheme | `com.palmcare.ai` (for Google OAuth callback) |
+| Orientation | Portrait only (`UIRequiresFullScreen = true`) |
+| Background Modes | `audio` (for background recording) |
+
+### File Structure
 
 ```
 ios-app/PalmCareAI/
-├── PalmCareAIApp.swift          # Entry point, auth gate
-├── Info.plist                    # Microphone permission
-├── Models/Models.swift           # User, Client, Visit, LoginResponse, UploadResponse, LiveTranscriptResponse, TranscriptWord, TranscriptSegment, AnyCodable
+├── PalmCareAIApp.swift              # Entry point, global nav bar styling, Face ID gate
+├── Info.plist                        # Permissions, URL schemes, background modes
+├── Assets.xcassets/AppIcon.appiconset/AppIcon.png  # 1024x1024 orb + palm logo
+├── Models/Models.swift               # User, Client, Visit, DocumentItem, ContractTemplateItem, AnyCodable
 ├── Services/
-│   ├── APIService.swift          # Singleton, JWT auth, all API calls
-│   ├── AudioRecorderService.swift # AVAudioRecorder + metering + delegate
+│   ├── APIService.swift              # Singleton, JWT auth, all API calls, baseURL
+│   ├── AudioRecorderService.swift    # AVAudioRecorder + background recording + metering
 │   └── LiveTranscriptionService.swift # Chunked live transcription (8s intervals)
-├── Theme/PalmCareTheme.swift     # Color + LinearGradient extensions
+├── Theme/PalmCareTheme.swift         # Color + LinearGradient extensions
 └── Views/
-    ├── MainTabView.swift         # 5 tabs: Home, Clients, Record (raised orb), Calendar, More
+    ├── MainTabView.swift             # 5 tabs: Home, Clients, Palm It (raised orb), Calendar, More
     ├── Auth/
-    │   ├── LandingView.swift     # Dark teal bg + animated orb + PALM IT slogan
-    │   ├── LoginView.swift       # Email/password + social + remember me
-    │   └── RegisterView.swift    # Business registration form
-    ├── Home/HomeView.swift       # Stats, CTA bar, recent visits
-    ├── Clients/ClientsView.swift # Search + client cards
-    └── Record/RecordView.swift   # Animated orb + live transcript panel
+    │   ├── LandingView.swift         # Dark teal bg + animated LandingOrb + PALM IT slogan
+    │   ├── LoginView.swift           # Email/password + social + remember me
+    │   └── RegisterView.swift        # Business registration form
+    ├── Home/HomeView.swift           # Stats, CTA bar, recent visits (tappable → ClientDetailView)
+    ├── Clients/
+    │   ├── ClientsView.swift         # Search + client cards (tappable → ClientDetailView)
+    │   ├── ClientDetailView.swift    # Profile, contact, medical, visits sections
+    │   └── AddClientSheet.swift      # Add new client form
+    ├── Record/RecordView.swift       # Animated orb + live transcript + upload audio
+    ├── Calendar/CalendarView.swift   # Local-only calendar (no Google dependency)
+    ├── Contracts/
+    │   ├── ContractsView.swift       # Documents grouped by client, collapsed by default
+    │   └── TemplatesView.swift       # OCR template management (hidden from mobile UI)
+    ├── Settings/
+    │   ├── SettingsView.swift        # Preferences, account, integrations, billing, legal
+    │   ├── GoogleCalendarSetupSheet.swift  # In-app OAuth via ASWebAuthenticationSession
+    │   ├── ChangePasswordSheet.swift # Change password form
+    │   └── TermsPrivacySheet.swift   # Terms of Service + Privacy Policy
+    ├── Subscription/SubscriptionView.swift  # Starter/Growth/Pro tiers
+    ├── Tasks/TasksView.swift
+    └── Workspace/WorkspaceView.swift # Tabs: Calendar, Contracts, Tasks (Templates removed)
 ```
 
-### App Screen Brand Moments (from Brand Guidelines)
+### Key Implementation Details
 
-| Screen | Key Brand Moments |
-|--------|-------------------|
-| Landing | Dark teal bg, animated orb, "PALM IT." slogan, CTAs: "GET STARTED" / "Sign in" |
-| Sign In | "Welcome back. Let's Palm It." / "Your next client is waiting." / CTA: "Sign In & Palm It" |
-| Register | "Join the pros who Palm It." / "Close faster, document smarter" / CTA: "Create Account — Palm It" |
-| Home | "Palm It, [Name]" greeting, "Palm It Now" CTA banner, stats + recent visits |
-| Record | "AI IS LISTENING" subtitle, "Ready to Palm It" status, animated orb, live transcript |
-| Clients | Search bar, client cards with name/diagnosis/phone, "Add Client" teal button |
-| **Bottom Nav** | Center FAB always labeled "Palm It" (NOT "Record"). Turns red when recording active. |
+**PalmCareAIApp.swift:**
+- Global `UINavigationBarAppearance` in `init()`: white bg, palmText titles, palmBorder shadow, palmPrimary tint
+- Face ID lock screen: shows `FaceIDLockScreen` if `useFaceID` is true and not yet unlocked
+- `onChange(of:)` uses iOS 16-compatible single-parameter closure syntax
+
+**AudioRecorderService.swift:**
+- Format: M4A (AAC), 44100Hz, mono, 128kbps
+- Saved to Documents/Recordings/
+- Background recording: reads `@AppStorage("backgroundRecording")` — when enabled, disables idle timer during recording
+- Timers added to `RunLoop.common` mode for background operation
+- Bluetooth support: `.allowBluetoothA2DP`
+- iOS 17+ uses `AVAudioApplication.requestRecordPermission()`
+- iOS 16 fallback uses `AVAudioSession.requestRecordPermission()`
+
+**Google Calendar OAuth (in-app):**
+- Uses `ASWebAuthenticationSession` for native OAuth flow
+- Redirect URI: `{api.baseURL}/calendar/mobile-callback` (backend endpoint)
+- Backend `/calendar/mobile-callback` receives Google auth code, redirects to `com.palmcare.ai://oauth2callback?code=...`
+- URL scheme `com.palmcare.ai` registered in Info.plist
+- Google Cloud Console must have redirect URI: `https://api-production-a0a2.up.railway.app/calendar/mobile-callback`
+
+**ContractsView.swift:**
+- Documents grouped by client name
+- Client sections collapsed by default, expand on tap
+- Filter tabs: All, Contracts, Notes, Audio
+- QuickLook preview for viewing documents
+- Authenticated download via bearer token
+
+**Settings Toggles (AppStorage keys):**
+- `useFaceID` — Face ID login
+- `notificationsEnabled` — Notifications
+- `backgroundRecording` — Keep recording when screen locks (off by default)
+- `appTheme` — Theme display (default "Light")
+- `googleCalendarConnected` — Google Calendar status
 
 ---
 
@@ -208,13 +283,23 @@ ios-app/PalmCareAI/
 | POST | /auth/login | Login (returns access_token) |
 | POST | /auth/business/register | Register business |
 | GET | /auth/me | Current user |
+| POST | /auth/change-password | Change password |
 | GET | /clients | List clients (returns plain array) |
 | POST | /clients | Create client |
-| GET | /visits | List visits (returns VisitListResponse with items/total/page/page_size) |
+| GET | /visits | List visits (VisitListResponse with items/total/page/page_size) |
 | POST | /visits | Create visit (requires client_id) |
 | POST | /uploads/audio | Upload audio (multipart: visit_id + file + auto_process) |
 | POST | /live/transcribe | Live transcription chunk (multipart: file, query: diarize, language) |
 | GET | /pipeline/visits/{id}/status | Pipeline status |
+| GET | /documents | List documents (supports client_id filter) |
+| GET | /documents/{id}/download | Download document (auth required) |
+| GET | /contract-templates | List OCR templates |
+| POST | /contract-templates/upload | Upload template for OCR scanning |
+| GET | /calendar/status | Google Calendar connection status |
+| POST | /calendar/connect | Exchange OAuth code for Google Calendar |
+| GET | /calendar/mobile-callback | OAuth redirect endpoint for iOS |
+| GET | /billing/subscription | Get subscription details |
+| GET | /billing/usage | Get usage limits |
 
 ### Upload Flow (CRITICAL)
 1. Create visit: `POST /visits` with `{"client_id": "..."}` → get visit.id
@@ -227,29 +312,38 @@ ios-app/PalmCareAI/
 
 - **Dark background** (#0C0C0E)
 - **Animated Voice Orb**: organic blob shape (triple-sine wobble), teal/cyan/purple AngularGradient, 3 outer rings rotating, pulses with audio level
-- **Three states**: idle (large orb + feature pills), recording (compact orb + live transcript panel), finished (transcript + upload buttons)
+- **Three states**: idle (large orb + feature pills + upload button), recording (compact orb + live transcript panel), finished (transcript + upload buttons)
 - **Live Transcript Panel**: dark card, Deepgram-inspired, waveform bar, speaker diarization (colored labels), medical keyword highlighting (teal)
 - **Client selector**: top bar compact pill
+- **Background recording indicator**: lock icon in timer bar when enabled
+- **Upload Audio File**: button in idle state, supports m4a/mp3/wav/aiff
 
 ## Landing Page Design
 
-- Deep dark teal gradient background with blurred orbs
-- Animated pulsing orb (same style as record page, ambient version with mic icon)
-- "PALM IT." slogan with brand row
+- Deep dark teal gradient background (7 color stops from #071F20 to #030F0F)
+- Blurred ambient glow circles (palmAccent top-right, palmPrimary bottom-left)
+- Animated pulsing LandingOrb (organic blob shape, AngularGradient, 3 concentric rings, glass highlight, mic icon)
+- "PalmCare AI" brand row with teal icon and "AI-POWERED" badge
+- "PALM IT." slogan (bold + italic)
 - "Record. Transcribe. Contract." subtitle
-- Page indicator dots
+- Page indicator dots (3)
 - GET STARTED + Sign in buttons
 - NO live badge, NO waveform bars
 
-## Audio Recording
+### LandingOrbShape Math (for icon recreation)
+```swift
+// Wobble formula at phase=0.5 for static snapshot:
+let wobble1 = sin(angle * 3 + phase * .pi * 2) * 5
+let wobble2 = cos(angle * 2 - phase * .pi * 1.5) * 4
+let wobble3 = sin(angle * 5 + phase * .pi * 3) * 2.5
+let r = radius + wobble1 + wobble2 + wobble3
 
-- Format: M4A (AAC), 44100Hz, mono, 128kbps
-- Saved to Documents/Recordings/ (not temp dir)
-- AVAudioRecorderDelegate for error handling
-- Audio level metering at 0.1s intervals
-- iOS 17+ uses AVAudioApplication.requestRecordPermission()
-- iOS 16 fallback uses AVAudioSession.requestRecordPermission()
-- Bluetooth support (.allowBluetooth option)
+// Angular gradient colors:
+[palmPrimary, palmAccent, purple(139,92,246), palmPrimaryLight, palmPrimary]
+
+// Ring sizes: 150 + ring_index * 28 (for 120px orb frame)
+// Ring colors per index: see LandingOrbRing in LandingView.swift
+```
 
 ---
 
@@ -276,9 +370,34 @@ ios-app/PalmCareAI/
 | Active Pilots | 24 |
 | Assessments Generated | 300+ (68% accuracy improvement) |
 | ARR Pipeline | $92K at avg $640/mo deal |
+| Free tier limit | 50 assessments |
 
 ### Competitors
 AxisCare, WellSky/ClearCare, CareTime — legacy EVV + scheduling + billing. NOT AI-first. Outdated UIs. No AI assessment or contract generation. PalmCare AI is the first AI-native documentation platform for this workflow.
+
+---
+
+## Google Integration
+
+| Item | Value |
+|------|-------|
+| Client ID | 668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com |
+| Client Type | Web (works for both web and iOS via backend redirect) |
+| Scopes | Calendar (read/write) |
+| iOS Redirect | `https://api-production-a0a2.up.railway.app/calendar/mobile-callback` → `com.palmcare.ai://oauth2callback` |
+| Web Redirect | `https://palmcareai.com/api/auth/google/callback`, `https://palmcareai.com/schedule` |
+| JS Origins | `https://palmcareai.com` (no trailing slash) |
+
+---
+
+## Stripe Billing
+
+| Item | Value |
+|------|-------|
+| Router | `stripe_billing.py` at `/stripe-billing` |
+| Billing Page | `https://palmcareai.com/billing` |
+| Admin | `/admin/subscriptions`, `/admin/billing` |
+| Env Vars | `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` |
 
 ---
 
@@ -315,13 +434,6 @@ Remaining to 100%:
 
 WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
 
-### Marketing Image Prompt (from Brand Guidelines)
-"A care professional in dark teal scrubs sits across from an elderly client at an outdoor terrace table, conducting a home care assessment interview. The professional holds a smartphone displaying a clean teal and white mobile app interface. Warm golden afternoon light. Lush tall palm trees sway gently in the background. The terrace has modern white furniture, potted tropical plants, and a calm, professional atmosphere. Color palette: teal (#0d9488), white, warm sand tones, tropical greens. Shot on 50mm lens, shallow depth of field, background slightly bokeh. Photorealistic, cinematic lighting."
-
-### Voiceover Scripts (ElevenLabs)
-- **Hero (15s):** "You're sitting with your client — present, attentive, building trust. Meanwhile, the app is handling everything else. Record the assessment. AI transcribes it. Your contract is ready before you leave the chair. PalmCare AI. Palm It."
-- **Short (8s):** "Record. Transcribe. Contract. PalmCare AI. Palm It."
-
 ---
 
 ## Email Setup
@@ -331,6 +443,57 @@ WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719
 - 5-email drip sequence (Day 1, 3, 7, 14, 28)
 - Tracking via Resend webhooks
 - Gmail MX records restored in Cloudflare (were overwritten by Resend inbound)
+
+---
+
+## App Store Launch Plan
+
+Full plan saved at `docs/APP_STORE_LAUNCH_PLAN.md` with checklist covering:
+1. Apple Developer Account ($99/yr)
+2. Xcode signing & provisioning
+3. App icon (orb + palm logo, 1024x1024) — DONE
+4. App Store Connect listing
+5. App description & keywords
+6. Screenshots (6.7" and 6.5")
+7. Privacy policy URL
+8. App Privacy nutrition labels
+9. Google Calendar redirect URI
+10. Archive & upload from Xcode
+11. TestFlight internal testing
+12. Review notes with demo account
+13. Submit for App Review
+14. Launch
+
+---
+
+## Recent Work Completed (Feb 2026)
+
+### iOS App Features Added
+- **Client Detail View** — tappable clients on Home and Clients pages navigate to profile/contact/medical/visits detail view
+- **Contracts grouped by client** — documents organized under client names, collapsed by default
+- **OCR template upload** — users can upload contract templates for auto-filling (backend feature, removed from mobile UI)
+- **In-app Google Calendar OAuth** — native ASWebAuthenticationSession, no web redirect
+- **Face ID login** — biometric gate on app launch when enabled
+- **Change Password sheet** — functional password change form
+- **Terms & Privacy sheet** — scrollable legal content
+- **Background audio recording** — continues recording when app backgrounded or screen locked (user opt-in toggle)
+- **Audio file upload** — pick and upload existing audio files for processing
+- **Subscription view** — 3-tier plan selection (Starter/Growth/Pro)
+
+### iOS App Fixes Applied
+- Global `UINavigationBarAppearance` — readable nav titles across all views
+- Text color/design consistency across Clients, Contracts, Settings
+- `onChange(of:)` iOS 16 compatibility (single-parameter closure)
+- `.allowBluetooth` → `.allowBluetoothA2DP` deprecation fix
+- Unused variable warnings resolved
+- `UIRequiresFullScreen = true` for portrait-only orientation
+- App icon resized to exactly 1024x1024
+- Business auth fallback for login
+- Contract authenticated download with bearer token
+
+### Backend Changes
+- `GET /calendar/mobile-callback` — OAuth redirect endpoint for iOS
+- Import fixes for `Query`, `HTMLResponse`, `urllib.parse` in calendar router
 
 ---
 
@@ -348,6 +511,8 @@ WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719
 - Pyannote removed — diarization now handled by Deepgram (diarize=true)
 - Route ordering: static routes before {id} params
 - Dynamic Tailwind classes don't work — use static classes
+- Google OAuth "Custom scheme URIs not allowed for WEB client type" → solved with backend redirect
+- Contracts "not authenticated" download → added bearer token to download requests
 
 ---
 
@@ -361,3 +526,6 @@ WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719
 - Medical keyword highlighting in transcripts
 - No em/en dashes in copy — use commas or periods
 - Email style: plain-text founder emails, <100 words, <7-word subjects
+- OCR templates = backend only, not in mobile UI
+- Contracts collapsed by default, expand on tap
+- App icon = orb from landing page code with palm+spiral logo (NOT a mic, NOT a palm tree)
