@@ -34,7 +34,7 @@ struct ClientDetailView: View {
         case "active": return .palmGreen
         case "inactive": return .palmOrange
         case "discharged": return .palmSecondary
-        case "pending", "intake": return .palmBlue
+        case "pending": return .palmBlue
         default: return .palmSecondary
         }
     }
@@ -43,14 +43,16 @@ struct ClientDetailView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 16) {
                 profileCard
-                contactSection
-                emergencySection
-                medicalSection
-                careSection
-                insuranceSection
-                schedulingSection
+
+                if hasContactInfo { contactSection }
+                if hasEmergencyInfo { emergencySection }
+                if hasMedicalInfo { medicalSection }
+                if hasCareInfo { careSection }
+                if hasInsuranceInfo { insuranceSection }
+                if hasSchedulingInfo { schedulingSection }
+                if hasNotes { notesSection }
+
                 visitsSection
-                notesSection
             }
             .padding(.horizontal, 18)
             .padding(.top, 10)
@@ -64,16 +66,56 @@ struct ClientDetailView: View {
                 Button {
                     showEditSheet = true
                 } label: {
-                    Image(systemName: "pencil.circle.fill")
-                        .font(.system(size: 20))
+                    Image(systemName: "pencil")
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.palmPrimary)
                 }
             }
         }
         .sheet(isPresented: $showEditSheet) {
             AddClientSheet(editingClient: client)
+                .environmentObject(api)
         }
         .task { await loadVisits() }
+    }
+
+    // MARK: - Section Checks
+
+    private var hasContactInfo: Bool {
+        [client.phone, client.phone_secondary, client.email, client.address]
+            .compactMap { $0 }.contains { !$0.isEmpty }
+    }
+
+    private var hasEmergencyInfo: Bool {
+        [client.emergency_contact_name, client.emergency_contact_2_name]
+            .compactMap { $0 }.contains { !$0.isEmpty }
+    }
+
+    private var hasMedicalInfo: Bool {
+        [client.primary_diagnosis, client.secondary_diagnoses, client.medications,
+         client.allergies, client.physician_name, client.mobility_status, client.cognitive_status, client.medical_notes]
+            .compactMap { $0 }.contains { !$0.isEmpty }
+    }
+
+    private var hasCareInfo: Bool {
+        [client.care_level, client.living_situation, client.care_plan, client.special_requirements]
+            .compactMap { $0 }.contains { !$0.isEmpty }
+    }
+
+    private var hasInsuranceInfo: Bool {
+        [client.insurance_provider, client.insurance_id, client.medicaid_id, client.medicare_id, client.billing_address]
+            .compactMap { $0 }.contains { !$0.isEmpty }
+    }
+
+    private var hasSchedulingInfo: Bool {
+        [client.preferred_days, client.preferred_times, client.intake_date, client.discharge_date,
+         client.external_id, client.external_source]
+            .compactMap { $0 }.contains { !$0.isEmpty }
+    }
+
+    private var hasNotes: Bool {
+        if let n = client.notes, !n.isEmpty { return true }
+        return false
     }
 
     // MARK: - Profile Card
@@ -138,16 +180,16 @@ struct ClientDetailView: View {
 
                 if let dob = client.date_of_birth, !dob.isEmpty {
                     HStack(spacing: 4) {
-                        Image(systemName: "calendar")
+                        Image(systemName: "birthday.cake")
                             .font(.system(size: 10))
-                            .foregroundColor(.palmBlue)
+                            .foregroundColor(.palmPurple)
                         Text(dob)
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.palmBlue)
+                            .foregroundColor(.palmPurple)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 5)
-                    .background(Color.palmBlue.opacity(0.08))
+                    .background(Color.palmPurple.opacity(0.08))
                     .cornerRadius(14)
                 }
             }
@@ -196,115 +238,128 @@ struct ClientDetailView: View {
 
     // MARK: - Contact Section
 
-    @ViewBuilder
     private var contactSection: some View {
-        let rows: [(String, String, String, Color)] = [
-            ("phone.fill", "Phone", client.phone ?? "", .palmPrimary),
-            ("phone", "Secondary Phone", client.phone_secondary ?? "", .palmPrimary),
-            ("envelope.fill", "Email", client.email ?? "", .palmBlue),
-            ("mappin.circle.fill", "Address", fullAddress, .palmOrange),
-        ].filter { !$0.2.isEmpty }
-
-        if !rows.isEmpty {
-            DetailSection(title: "Contact", icon: "phone.fill", iconColor: .palmPrimary) {
-                VStack(spacing: 0) {
-                    ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                        detailRow(icon: row.0, label: row.1, value: row.2, color: row.3)
-                        if index < rows.count - 1 { detailDivider }
-                    }
+        DetailSection(title: "Contact", icon: "phone.fill", iconColor: .palmPrimary) {
+            VStack(spacing: 0) {
+                if let phone = client.phone, !phone.isEmpty {
+                    detailRow(icon: "phone.fill", label: "Phone", value: phone, color: .palmPrimary)
+                }
+                if let phone2 = client.phone_secondary, !phone2.isEmpty {
+                    detailDivider
+                    detailRow(icon: "phone", label: "Secondary Phone", value: phone2, color: .palmPrimary)
+                }
+                if let email = client.email, !email.isEmpty {
+                    detailDivider
+                    detailRow(icon: "envelope.fill", label: "Email", value: email, color: .palmBlue)
+                }
+                if let address = client.address, !address.isEmpty {
+                    detailDivider
+                    let full = [address, client.city, client.state, client.zip_code]
+                        .compactMap { $0 }
+                        .filter { !$0.isEmpty }
+                        .joined(separator: ", ")
+                    detailRow(icon: "mappin.circle.fill", label: "Address", value: full, color: .palmOrange)
                 }
             }
         }
-    }
-
-    private var fullAddress: String {
-        [client.address, client.city, client.state, client.zip_code]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-            .joined(separator: ", ")
     }
 
     // MARK: - Emergency Section
 
-    @ViewBuilder
     private var emergencySection: some View {
-        let ec1 = emergencyContactText(name: client.emergency_contact_name, phone: client.emergency_contact_phone, relationship: client.emergency_contact_relationship)
-        let ec2 = emergencyContactText(name: client.emergency_contact_2_name, phone: client.emergency_contact_2_phone, relationship: client.emergency_contact_2_relationship)
-
-        if !ec1.isEmpty || !ec2.isEmpty {
-            DetailSection(title: "Emergency Contacts", icon: "exclamationmark.shield.fill", iconColor: .red) {
-                VStack(spacing: 0) {
-                    if !ec1.isEmpty {
-                        detailRow(icon: "person.fill", label: "Primary Contact", value: ec1, color: .red)
-                    }
-                    if !ec1.isEmpty && !ec2.isEmpty { detailDivider }
-                    if !ec2.isEmpty {
-                        detailRow(icon: "person.fill", label: "Secondary Contact", value: ec2, color: .palmOrange)
-                    }
+        DetailSection(title: "Emergency Contacts", icon: "exclamationmark.shield.fill", iconColor: .red) {
+            VStack(spacing: 0) {
+                if let ecName = client.emergency_contact_name, !ecName.isEmpty {
+                    let ecDetail = [ecName, client.emergency_contact_phone, client.emergency_contact_relationship]
+                        .compactMap { $0 }
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " · ")
+                    detailRow(icon: "1.circle.fill", label: "Primary Contact", value: ecDetail, color: .red)
+                }
+                if let ec2Name = client.emergency_contact_2_name, !ec2Name.isEmpty {
+                    detailDivider
+                    let ec2Detail = [ec2Name, client.emergency_contact_2_phone, client.emergency_contact_2_relationship]
+                        .compactMap { $0 }
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " · ")
+                    detailRow(icon: "2.circle.fill", label: "Secondary Contact", value: ec2Detail, color: .palmOrange)
                 }
             }
         }
-    }
-
-    private func emergencyContactText(name: String?, phone: String?, relationship: String?) -> String {
-        [name, phone, relationship]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-            .joined(separator: " · ")
     }
 
     // MARK: - Medical Section
 
-    @ViewBuilder
     private var medicalSection: some View {
-        let rows: [(String, String, String, Color)] = [
-            ("stethoscope", "Primary Diagnosis", client.primary_diagnosis ?? "", .palmPrimary),
-            ("cross.case.fill", "Secondary Diagnoses", client.secondary_diagnoses ?? "", .palmPrimary),
-            ("pills.fill", "Medications", client.medications ?? "", .palmPurple),
-            ("allergens", "Allergies", client.allergies ?? "", .red),
-            ("person.badge.shield.checkmark.fill", "Physician", physicianDisplay, .palmBlue),
-            ("figure.walk", "Mobility", client.mobility_status?.replacingOccurrences(of: "_", with: " ").capitalized ?? "", .palmOrange),
-            ("brain.head.profile", "Cognitive Status", client.cognitive_status?.replacingOccurrences(of: "_", with: " ").capitalized ?? "", .palmPurple),
-            ("note.text", "Medical Notes", client.medical_notes ?? "", .palmSecondary),
-        ].filter { !$0.2.isEmpty }
+        DetailSection(title: "Medical", icon: "heart.fill", iconColor: .red) {
+            VStack(spacing: 0) {
+                var showDivider = false
 
-        if !rows.isEmpty {
-            DetailSection(title: "Medical", icon: "heart.fill", iconColor: .red) {
-                VStack(spacing: 0) {
-                    ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                        detailRow(icon: row.0, label: row.1, value: row.2, color: row.3)
-                        if index < rows.count - 1 { detailDivider }
-                    }
+                if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
+                    detailRow(icon: "stethoscope", label: "Primary Diagnosis", value: diagnosis, color: .palmPrimary)
+                    let _ = (showDivider = true)
+                }
+                if let secondary = client.secondary_diagnoses, !secondary.isEmpty {
+                    if showDivider { detailDivider }
+                    detailRow(icon: "list.clipboard", label: "Secondary Diagnoses", value: secondary, color: .palmPrimary)
+                    let _ = (showDivider = true)
+                }
+                if let meds = client.medications, !meds.isEmpty {
+                    if showDivider { detailDivider }
+                    detailRow(icon: "pills.fill", label: "Medications", value: meds, color: .palmPurple)
+                    let _ = (showDivider = true)
+                }
+                if let allergies = client.allergies, !allergies.isEmpty {
+                    if showDivider { detailDivider }
+                    detailRow(icon: "allergens", label: "Allergies", value: allergies, color: .red)
+                    let _ = (showDivider = true)
+                }
+                if let physician = client.physician_name, !physician.isEmpty {
+                    if showDivider { detailDivider }
+                    let physicianDetail = [physician, client.physician_phone]
+                        .compactMap { $0 }
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " · ")
+                    detailRow(icon: "person.badge.shield.checkmark.fill", label: "Physician", value: physicianDetail, color: .palmBlue)
+                    let _ = (showDivider = true)
+                }
+                if let mobility = client.mobility_status, !mobility.isEmpty {
+                    if showDivider { detailDivider }
+                    detailRow(icon: "figure.walk", label: "Mobility", value: mobility.replacingOccurrences(of: "_", with: " ").capitalized, color: .palmPurple)
+                    let _ = (showDivider = true)
+                }
+                if let cognitive = client.cognitive_status, !cognitive.isEmpty {
+                    if showDivider { detailDivider }
+                    detailRow(icon: "brain.head.profile", label: "Cognitive", value: cognitive.replacingOccurrences(of: "_", with: " ").capitalized, color: .palmPurple)
+                    let _ = (showDivider = true)
+                }
+                if let medNotes = client.medical_notes, !medNotes.isEmpty {
+                    if showDivider { detailDivider }
+                    detailRow(icon: "note.text", label: "Medical Notes", value: medNotes, color: .palmSecondary)
                 }
             }
         }
     }
 
-    private var physicianDisplay: String {
-        [client.physician_name, client.physician_phone]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-            .joined(separator: " · ")
-    }
-
     // MARK: - Care Plan Section
 
-    @ViewBuilder
     private var careSection: some View {
-        let rows: [(String, String, String, Color)] = [
-            ("heart.fill", "Care Level", client.care_level ?? "", .palmPink),
-            ("house.fill", "Living Situation", client.living_situation?.replacingOccurrences(of: "_", with: " ").capitalized ?? "", .palmOrange),
-            ("doc.text.fill", "Care Plan", client.care_plan ?? "", .palmPrimary),
-            ("exclamationmark.triangle.fill", "Special Requirements", client.special_requirements ?? "", .palmOrange),
-        ].filter { !$0.2.isEmpty }
-
-        if !rows.isEmpty {
-            DetailSection(title: "Care Plan", icon: "doc.text.fill", iconColor: .palmPrimary) {
-                VStack(spacing: 0) {
-                    ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                        detailRow(icon: row.0, label: row.1, value: row.2, color: row.3)
-                        if index < rows.count - 1 { detailDivider }
-                    }
+        DetailSection(title: "Care Plan", icon: "doc.text.fill", iconColor: .palmPrimary) {
+            VStack(spacing: 0) {
+                if let level = client.care_level, !level.isEmpty {
+                    detailRow(icon: "heart.text.square", label: "Care Level", value: level, color: .palmPrimary)
+                }
+                if let living = client.living_situation, !living.isEmpty {
+                    detailDivider
+                    detailRow(icon: "house.fill", label: "Living Situation", value: living.replacingOccurrences(of: "_", with: " ").capitalized, color: .palmOrange)
+                }
+                if let plan = client.care_plan, !plan.isEmpty {
+                    detailDivider
+                    detailRow(icon: "doc.plaintext", label: "Care Plan", value: plan, color: .palmBlue)
+                }
+                if let special = client.special_requirements, !special.isEmpty {
+                    detailDivider
+                    detailRow(icon: "exclamationmark.triangle.fill", label: "Special Requirements", value: special, color: .palmOrange)
                 }
             }
         }
@@ -312,23 +367,27 @@ struct ClientDetailView: View {
 
     // MARK: - Insurance Section
 
-    @ViewBuilder
     private var insuranceSection: some View {
-        let rows: [(String, String, String, Color)] = [
-            ("shield.fill", "Insurance Provider", client.insurance_provider ?? "", .palmPrimary),
-            ("number", "Policy Number", client.insurance_id ?? "", .palmSecondary),
-            ("creditcard.fill", "Medicaid ID", client.medicaid_id ?? "", .palmGreen),
-            ("creditcard.fill", "Medicare ID", client.medicare_id ?? "", .palmBlue),
-            ("mappin.circle.fill", "Billing Address", client.billing_address ?? "", .palmOrange),
-        ].filter { !$0.2.isEmpty }
-
-        if !rows.isEmpty {
-            DetailSection(title: "Insurance & Billing", icon: "shield.fill", iconColor: .palmGreen) {
-                VStack(spacing: 0) {
-                    ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                        detailRow(icon: row.0, label: row.1, value: row.2, color: row.3)
-                        if index < rows.count - 1 { detailDivider }
-                    }
+        DetailSection(title: "Insurance", icon: "shield.fill", iconColor: .palmGreen) {
+            VStack(spacing: 0) {
+                if let provider = client.insurance_provider, !provider.isEmpty {
+                    let insuranceDetail = [provider, client.insurance_id]
+                        .compactMap { $0 }
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " · #")
+                    detailRow(icon: "shield.fill", label: "Insurance", value: insuranceDetail, color: .palmPrimary)
+                }
+                if let medicaid = client.medicaid_id, !medicaid.isEmpty {
+                    detailDivider
+                    detailRow(icon: "creditcard.fill", label: "Medicaid ID", value: medicaid, color: .palmGreen)
+                }
+                if let medicare = client.medicare_id, !medicare.isEmpty {
+                    detailDivider
+                    detailRow(icon: "creditcard", label: "Medicare ID", value: medicare, color: .palmBlue)
+                }
+                if let billing = client.billing_address, !billing.isEmpty {
+                    detailDivider
+                    detailRow(icon: "mappin.circle.fill", label: "Billing Address", value: billing, color: .palmOrange)
                 }
             }
         }
@@ -336,24 +395,31 @@ struct ClientDetailView: View {
 
     // MARK: - Scheduling Section
 
-    @ViewBuilder
     private var schedulingSection: some View {
-        let rows: [(String, String, String, Color)] = [
-            ("calendar", "Preferred Days", client.preferred_days ?? "", .palmPrimary),
-            ("clock.fill", "Preferred Times", client.preferred_times ?? "", .palmBlue),
-            ("arrow.right.circle.fill", "Intake Date", client.intake_date ?? "", .palmGreen),
-            ("arrow.left.circle.fill", "Discharge Date", client.discharge_date ?? "", .palmOrange),
-            ("building.2.fill", "External ID", client.external_id ?? "", .palmPurple),
-            ("link", "External Source", client.external_source ?? "", .palmSecondary),
-        ].filter { !$0.2.isEmpty }
-
-        if !rows.isEmpty {
-            DetailSection(title: "Scheduling", icon: "calendar", iconColor: .palmBlue) {
-                VStack(spacing: 0) {
-                    ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                        detailRow(icon: row.0, label: row.1, value: row.2, color: row.3)
-                        if index < rows.count - 1 { detailDivider }
-                    }
+        DetailSection(title: "Scheduling", icon: "calendar", iconColor: .palmBlue) {
+            VStack(spacing: 0) {
+                if let days = client.preferred_days, !days.isEmpty {
+                    detailRow(icon: "calendar.badge.clock", label: "Preferred Days", value: days, color: .palmPrimary)
+                }
+                if let times = client.preferred_times, !times.isEmpty {
+                    detailDivider
+                    detailRow(icon: "clock.fill", label: "Preferred Times", value: times, color: .palmBlue)
+                }
+                if let intake = client.intake_date, !intake.isEmpty {
+                    detailDivider
+                    detailRow(icon: "calendar.badge.plus", label: "Intake Date", value: intake, color: .palmGreen)
+                }
+                if let discharge = client.discharge_date, !discharge.isEmpty {
+                    detailDivider
+                    detailRow(icon: "calendar.badge.minus", label: "Discharge Date", value: discharge, color: .palmOrange)
+                }
+                if let extId = client.external_id, !extId.isEmpty {
+                    detailDivider
+                    let extDetail = [extId, client.external_source]
+                        .compactMap { $0 }
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " · ")
+                    detailRow(icon: "building.2.fill", label: "External ID", value: extDetail, color: .palmPurple)
                 }
             }
         }
@@ -361,15 +427,16 @@ struct ClientDetailView: View {
 
     // MARK: - Notes Section
 
-    @ViewBuilder
     private var notesSection: some View {
-        if let notes = client.notes, !notes.isEmpty {
-            DetailSection(title: "Notes", icon: "note.text", iconColor: .palmSecondary) {
-                Text(notes)
-                    .font(.system(size: 13))
-                    .foregroundColor(.palmText)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(14)
+        DetailSection(title: "Notes", icon: "note.text", iconColor: .palmSecondary) {
+            VStack(spacing: 0) {
+                if let notes = client.notes, !notes.isEmpty {
+                    Text(notes)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(.palmText)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(14)
+                }
             }
         }
     }
@@ -437,7 +504,7 @@ struct ClientDetailView: View {
     }
 
     private func visitRow(_ visit: Visit) -> some View {
-        let statusColor: Color = {
+        let visitStatusColor: Color = {
             switch visit.status.lowercased() {
             case "completed": return .palmGreen
             case "processing": return .palmBlue
@@ -448,12 +515,12 @@ struct ClientDetailView: View {
 
         return HStack(spacing: 12) {
             Circle()
-                .fill(statusColor.opacity(0.12))
+                .fill(visitStatusColor.opacity(0.12))
                 .frame(width: 34, height: 34)
                 .overlay(
                     Image(systemName: visit.status.lowercased() == "completed" ? "checkmark" : "clock")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(statusColor)
+                        .foregroundColor(visitStatusColor)
                 )
 
             VStack(alignment: .leading, spacing: 2) {
@@ -469,10 +536,10 @@ struct ClientDetailView: View {
 
             Text(visit.status.capitalized)
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(statusColor)
+                .foregroundColor(visitStatusColor)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(statusColor.opacity(0.1))
+                .background(visitStatusColor.opacity(0.1))
                 .cornerRadius(10)
         }
         .padding(.horizontal, 14)
