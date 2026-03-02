@@ -14,7 +14,6 @@ struct GoogleCalendarSetupSheet: View {
     private let googleClientId = "668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com"
     private let callbackScheme = "com.palmcare.ai"
     private let scopes = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events"
-    private let apiBaseURL = "https://api-production-a0a2.up.railway.app"
 
     var body: some View {
         NavigationStack {
@@ -163,7 +162,7 @@ struct GoogleCalendarSetupSheet: View {
         isLoading = true
         errorMessage = nil
 
-        let redirectURI = "\(apiBaseURL)/calendar/mobile-callback"
+        let redirectURI = "\(api.baseURL)/calendar/mobile-callback"
         let encodedRedirectURI = redirectURI.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? redirectURI
         let encodedScopes = scopes.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? scopes
 
