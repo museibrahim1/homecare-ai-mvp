@@ -114,6 +114,10 @@ class APIService: ObservableObject {
         try await request("POST", path: "/clients", body: body)
     }
 
+    func updateClient(id: String, body: [String: Any]) async throws -> Client {
+        try await request("PUT", path: "/clients/\(id)", body: body)
+    }
+
     // MARK: - Visits
 
     func fetchVisits() async throws -> [Visit] {

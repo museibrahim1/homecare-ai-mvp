@@ -27,6 +27,9 @@ struct Client: Codable, Identifiable {
     let emergency_contact_name: String?
     let emergency_contact_phone: String?
     let emergency_contact_relationship: String?
+    let emergency_contact_2_name: String?
+    let emergency_contact_2_phone: String?
+    let emergency_contact_2_relationship: String?
     let primary_diagnosis: String?
     let secondary_diagnoses: String?
     let allergies: String?

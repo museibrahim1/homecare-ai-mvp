@@ -205,6 +205,16 @@ struct ClientCard: View {
                     Circle()
                         .fill(statusColor)
                         .frame(width: 6, height: 6)
+
+                    if let careLevel = client.care_level, !careLevel.isEmpty {
+                        Text(careLevel)
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.palmPink)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.palmPink.opacity(0.1))
+                            .cornerRadius(4)
+                    }
                 }
 
                 if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
@@ -214,14 +224,26 @@ struct ClientCard: View {
                         .lineLimit(1)
                 }
 
-                if let phone = client.phone, !phone.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "phone.fill")
-                            .font(.system(size: 9))
-                            .foregroundColor(.palmPrimary)
-                        Text(phone)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.palmPrimary)
+                HStack(spacing: 8) {
+                    if let phone = client.phone, !phone.isEmpty {
+                        HStack(spacing: 4) {
+                            Image(systemName: "phone.fill")
+                                .font(.system(size: 9))
+                                .foregroundColor(.palmPrimary)
+                            Text(phone)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.palmPrimary)
+                        }
+                    }
+                    if let city = client.city, !city.isEmpty {
+                        HStack(spacing: 3) {
+                            Image(systemName: "mappin")
+                                .font(.system(size: 8))
+                                .foregroundColor(.palmSecondary)
+                            Text(city)
+                                .font(.system(size: 11))
+                                .foregroundColor(.palmSecondary)
+                        }
                     }
                 }
             }
