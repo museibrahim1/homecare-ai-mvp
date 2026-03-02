@@ -176,6 +176,7 @@ struct RecordView: View {
     @State private var showUpgrade = false
     @State private var showFilePicker = false
     @State private var uploadProgress: String?
+    @AppStorage("backgroundRecording") private var backgroundRecording = false
 
     var body: some View {
         NavigationStack {
@@ -296,6 +297,11 @@ struct RecordView: View {
                     Text(timeString(recorder.duration))
                         .font(.system(size: 14, weight: .bold).monospacedDigit())
                         .foregroundColor(.white)
+                    if backgroundRecording {
+                        Image(systemName: "lock.open.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(.palmPrimaryLight)
+                    }
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)

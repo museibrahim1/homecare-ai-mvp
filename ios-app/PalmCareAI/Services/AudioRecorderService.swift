@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import UIKit
 
 class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var isRecording = false
@@ -10,11 +11,23 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
     private var audioRecorder: AVAudioRecorder?
     private var timer: Timer?
     private var levelTimer: Timer?
+    private var previousIdleTimerDisabled = false
+
+    private var backgroundRecordingEnabled: Bool {
+        UserDefaults.standard.bool(forKey: "backgroundRecording")
+    }
 
     func startRecording() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
         try session.setActive(true, options: .notifyOthersOnDeactivation)
+
+        if backgroundRecordingEnabled {
+            DispatchQueue.main.async {
+                self.previousIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled
+                UIApplication.shared.isIdleTimerDisabled = true
+            }
+        }
 
         let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let recordingsDir = documentsDir.appendingPathComponent("Recordings", isDirectory: true)
@@ -71,6 +84,10 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         levelTimer = nil
         isRecording = false
         audioLevel = 0
+
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = self.previousIdleTimerDisabled
+        }
 
         let url = recordingURL
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)

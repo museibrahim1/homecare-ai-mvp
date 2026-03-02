@@ -15,6 +15,7 @@ struct SettingsView: View {
 
     @AppStorage("useFaceID") private var useFaceID = false
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
+    @AppStorage("backgroundRecording") private var backgroundRecording = false
     @AppStorage("appTheme") private var appTheme = "Light"
 
     var body: some View {
@@ -118,6 +119,15 @@ struct SettingsView: View {
                 iconColor: .palmOrange,
                 title: "Notifications & sounds",
                 isOn: $notificationsEnabled
+            )
+
+            SettingsDivider()
+
+            SettingsToggleRow(
+                icon: "record.circle",
+                iconColor: .red,
+                title: "Background recording",
+                isOn: $backgroundRecording
             )
 
             SettingsDivider()
