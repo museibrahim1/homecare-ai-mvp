@@ -190,6 +190,32 @@ class APIService: ObservableObject {
         return try jsonDecoder.decode(UploadResponse.self, from: data)
     }
 
+    // MARK: - Visit Detail
+
+    func fetchVisitTranscript(visitId: String) async throws -> VisitTranscriptResponse {
+        try await request("GET", path: "/visits/\(visitId)/transcript")
+    }
+
+    func fetchVisitBillables(visitId: String) async throws -> VisitBillablesResponse {
+        try await request("GET", path: "/visits/\(visitId)/billables")
+    }
+
+    func fetchVisitNote(visitId: String) async throws -> VisitNote {
+        try await request("GET", path: "/visits/\(visitId)/note")
+    }
+
+    func fetchVisitContract(visitId: String) async throws -> VisitContract {
+        try await request("GET", path: "/visits/\(visitId)/contract")
+    }
+
+    func runPipelineStep(visitId: String, step: String) async throws -> Visit {
+        try await request("POST", path: "/pipeline/visits/\(visitId)/\(step)")
+    }
+
+    func restartVisit(visitId: String) async throws -> Visit {
+        try await request("POST", path: "/visits/\(visitId)/restart")
+    }
+
     // MARK: - Pipeline
 
     func getPipelineStatus(visitId: String) async throws -> Visit {

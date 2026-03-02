@@ -141,7 +141,7 @@ struct HomeView: View {
 
                         Spacer()
 
-                        Button {} label: {
+                        NavigationLink(destination: AssessmentsListView().environmentObject(api)) {
                             Text("See all")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(.palmPrimary)
@@ -166,14 +166,15 @@ struct HomeView: View {
                     } else {
                         VStack(spacing: 8) {
                             ForEach(visits.prefix(5)) { visit in
-                                if let client = visit.client {
-                                    NavigationLink(destination: ClientDetailView(client: client).environmentObject(api)) {
-                                        VisitRow(visit: visit)
-                                    }
-                                    .buttonStyle(.plain)
-                                } else {
+                                NavigationLink(destination:
+                                    VisitDetailView(
+                                        visitId: visit.id,
+                                        clientName: visit.client?.full_name
+                                    ).environmentObject(api)
+                                ) {
                                     VisitRow(visit: visit)
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
                         .padding(.horizontal, 14)

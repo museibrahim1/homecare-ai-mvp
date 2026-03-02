@@ -30,6 +30,8 @@
 		D7A2B3C4D5E6F7A8B9C0D1E3 /* GoogleCalendarSetupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A2B3C4D5E6F7A8B9C0D1E3 /* GoogleCalendarSetupSheet.swift */; };
 		D8A2B3C4D5E6F7A8B9C0D1E4 /* TemplatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A2B3C4D5E6F7A8B9C0D1E4 /* TemplatesView.swift */; };
 		D9A2B3C4D5E6F7A8B9C0D1E5 /* ClientDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A2B3C4D5E6F7A8B9C0D1E5 /* ClientDetailView.swift */; };
+		DAA2B3C4D5E6F7A8B9C0D1E6 /* VisitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA2B3C4D5E6F7A8B9C0D1E6 /* VisitDetailView.swift */; };
+		DBB2B3C4D5E6F7A8B9C0D1E7 /* AssessmentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBB2B3C4D5E6F7A8B9C0D1E7 /* AssessmentsListView.swift */; };
 		FBF988D7FAE8979B88BE0767 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4FFE119E970F306B1F7A575 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -59,6 +61,8 @@
 		E7A2B3C4D5E6F7A8B9C0D1E3 /* GoogleCalendarSetupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarSetupSheet.swift; sourceTree = "<group>"; };
 		E8A2B3C4D5E6F7A8B9C0D1E4 /* TemplatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplatesView.swift; sourceTree = "<group>"; };
 		E9A2B3C4D5E6F7A8B9C0D1E5 /* ClientDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientDetailView.swift; sourceTree = "<group>"; };
+		EAA2B3C4D5E6F7A8B9C0D1E6 /* VisitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetailView.swift; sourceTree = "<group>"; };
+		EBB2B3C4D5E6F7A8B9C0D1E7 /* AssessmentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentsListView.swift; sourceTree = "<group>"; };
 		FF0C57AEB89851A6C9CF3C1D /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -173,6 +177,15 @@
 			path = Workspace;
 			sourceTree = "<group>";
 		};
+		F6A2B3C4D5E6F7A8B9C0D1E2 /* Visits */ = {
+			isa = PBXGroup;
+			children = (
+				EAA2B3C4D5E6F7A8B9C0D1E6 /* VisitDetailView.swift */,
+				EBB2B3C4D5E6F7A8B9C0D1E7 /* AssessmentsListView.swift */,
+			);
+			path = Visits;
+			sourceTree = "<group>";
+		};
 		CE1793DBBDAA61AB430DBDA5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -186,6 +199,7 @@
 				F1A2B3C4D5E6F7A8B9C0D1E2 /* Settings */,
 				CA3D4E5F6A7B8C9D0E1F2A3B /* Subscription */,
 				F4A2B3C4D5E6F7A8B9C0D1E2 /* Tasks */,
+				F6A2B3C4D5E6F7A8B9C0D1E2 /* Visits */,
 				F5A2B3C4D5E6F7A8B9C0D1E2 /* Workspace */,
 			);
 			path = Views;
@@ -317,6 +331,8 @@
 				D7A2B3C4D5E6F7A8B9C0D1E3 /* GoogleCalendarSetupSheet.swift in Sources */,
 				D8A2B3C4D5E6F7A8B9C0D1E4 /* TemplatesView.swift in Sources */,
 				D9A2B3C4D5E6F7A8B9C0D1E5 /* ClientDetailView.swift in Sources */,
+				DAA2B3C4D5E6F7A8B9C0D1E6 /* VisitDetailView.swift in Sources */,
+				DBB2B3C4D5E6F7A8B9C0D1E7 /* AssessmentsListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

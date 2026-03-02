@@ -462,7 +462,15 @@ struct ClientDetailView: View {
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(clientVisits.enumerated()), id: \.element.id) { index, visit in
-                        visitRow(visit)
+                        NavigationLink(destination:
+                            VisitDetailView(
+                                visitId: visit.id,
+                                clientName: client.full_name
+                            ).environmentObject(api)
+                        ) {
+                            visitRow(visit)
+                        }
+                        .buttonStyle(.plain)
                         if index < clientVisits.count - 1 {
                             Divider().padding(.leading, 54)
                         }

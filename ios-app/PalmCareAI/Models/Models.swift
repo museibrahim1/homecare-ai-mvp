@@ -200,6 +200,85 @@ struct TranscriptSegment: Identifiable {
     }
 }
 
+// MARK: - Visit Detail (Transcript, Billables, Note, Contract)
+
+struct VisitTranscriptResponse: Codable {
+    let segments: [VisitTranscriptSegment]?
+    let total_duration_ms: Int?
+    let word_count: Int?
+    let source: String?
+}
+
+struct VisitTranscriptSegment: Codable, Identifiable {
+    let id: String?
+    let visit_id: String?
+    let start_ms: Int?
+    let end_ms: Int?
+    let text: String
+    let speaker_label: String?
+
+    var stableId: String { id ?? UUID().uuidString }
+}
+
+struct VisitBillablesResponse: Codable {
+    let items: [BillableItem]?
+    let total_minutes: Double?
+    let total_adjusted_minutes: Double?
+    let categories: [String]?
+}
+
+struct BillableItem: Codable, Identifiable {
+    let id: String
+    let visit_id: String?
+    let code: String?
+    let category: String?
+    let description: String?
+    let start_ms: Int?
+    let end_ms: Int?
+    let minutes: Double?
+    let evidence: String?
+    let is_approved: Bool?
+    let adjusted_minutes: Double?
+}
+
+struct VisitNote: Codable, Identifiable {
+    let id: String
+    let visit_id: String?
+    let narrative: String?
+    let structured_data: NoteStructuredData?
+    let created_at: String?
+    let updated_at: String?
+}
+
+struct NoteStructuredData: Codable {
+    let subjective: String?
+    let objective: String?
+    let assessment: String?
+    let plan: String?
+    let tasks_performed: [String]?
+}
+
+struct VisitContract: Codable, Identifiable {
+    let id: String
+    let client_id: String?
+    let visit_id: String?
+    let title: String?
+    let services: String?
+    let schedule: String?
+    let hourly_rate: Double?
+    let weekly_hours: Double?
+    let content: String?
+    let status: String?
+    let created_at: String?
+    let updated_at: String?
+}
+
+struct PipelineStatusResponse: Codable {
+    let visit_id: String?
+    let status: String?
+    let pipeline_state: [String: AnyCodable]?
+}
+
 // MARK: - Calendar
 
 struct CalendarEvent: Codable, Identifiable {
