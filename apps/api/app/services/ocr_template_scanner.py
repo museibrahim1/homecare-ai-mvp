@@ -8,6 +8,7 @@ mapping template fields to database columns.
 
 import os
 import io
+import re
 import json
 import hashlib
 import logging
@@ -433,6 +434,96 @@ def build_field_mapping(detected_fields: list[dict]) -> tuple[dict, list[dict]]:
                 })
 
     return field_mapping, unmapped
+
+
+async def ai_auto_map_unmapped(unmapped_fields: list[dict], existing_mapping: dict[str, str]) -> tuple[dict[str, str], list[dict]]:
+    """
+    Use AI to attempt mapping for fields that couldn't be mapped by rules.
+    Returns (additional_mappings, still_unmapped).
+    """
+    if not unmapped_fields:
+        return {}, []
+
+    registry_keys = list(DB_FIELD_REGISTRY.keys())
+    registry_descriptions = {k: v.get("path", k) for k, v in DB_FIELD_REGISTRY.items()}
+
+    fields_text = "\n".join([
+        f"- field_id: {f['field_id']}, label: {f.get('label', '')}, section: {f.get('section', '')}"
+        for f in unmapped_fields
+    ])
+
+    prompt = f"""You are mapping form fields from a home care contract template to database fields.
+
+These fields could NOT be automatically mapped. Try to find the best match from the database registry.
+
+UNMAPPED FIELDS:
+{fields_text}
+
+DATABASE REGISTRY (field_id -> path):
+{json.dumps(registry_descriptions, indent=2)}
+
+For each unmapped field, return the best matching registry field_id, or null if no match.
+Return JSON array: [{{"field_id": "...", "mapped_to": "registry_field_id_or_null"}}]
+Only return matches you are confident about (>80% sure)."""
+
+    try:
+        import httpx
+        api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+
+        if os.environ.get("ANTHROPIC_API_KEY"):
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": api_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json",
+                    },
+                    json={
+                        "model": "claude-3-haiku-20240307",
+                        "max_tokens": 1024,
+                        "messages": [{"role": "user", "content": prompt}],
+                    },
+                )
+                text = resp.json()["content"][0]["text"]
+        else:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                    json={
+                        "model": "gpt-4o-mini",
+                        "messages": [{"role": "user", "content": prompt}],
+                        "temperature": 0,
+                    },
+                )
+                text = resp.json()["choices"][0]["message"]["content"]
+
+        json_match = re.search(r'\[.*\]', text, re.DOTALL)
+        if not json_match:
+            return {}, unmapped_fields
+
+        results = json.loads(json_match.group())
+        additional_mapping = {}
+        still_unmapped = []
+
+        mapped_ids = set()
+        for r in results:
+            fid = r.get("field_id", "")
+            mapped = r.get("mapped_to")
+            if mapped and mapped in DB_FIELD_REGISTRY:
+                additional_mapping[fid] = DB_FIELD_REGISTRY[mapped]["path"]
+                mapped_ids.add(fid)
+
+        for f in unmapped_fields:
+            if f["field_id"] not in mapped_ids:
+                still_unmapped.append(f)
+
+        return additional_mapping, still_unmapped
+
+    except Exception as e:
+        logger.warning(f"AI auto-mapping failed: {e}")
+        return {}, unmapped_fields
 
 
 def reconcile_versions(

@@ -257,7 +257,8 @@ async def export_contract_from_template(
                 ).first()
 
                 placeholders = get_template_placeholders(visit.client, contract, agency_settings)
-                filled_docx = fill_docx_template(template_bytes, placeholders)
+                template_fm = ocr_template.field_mapping if hasattr(ocr_template, 'field_mapping') else None
+                filled_docx = fill_docx_template(template_bytes, placeholders, template_field_mapping=template_fm)
 
                 client_name = (visit.client.full_name or 'Client').replace(' ', '_')
                 filename = f"Contract_{client_name}.docx"

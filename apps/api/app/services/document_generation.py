@@ -227,7 +227,7 @@ def get_template_placeholders(client: Any, contract: Any, agency_settings: Optio
     return placeholders
 
 
-def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> bytes:
+def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str], template_field_mapping: Optional[Dict[str, str]] = None) -> bytes:
     """
     Fill a DOCX template by replacing placeholders with actual values.
     
@@ -235,11 +235,37 @@ def fill_docx_template(template_bytes: bytes, placeholders: Dict[str, str]) -> b
     - {placeholder}, {{placeholder}}, [placeholder], [[placeholder]]
     - "Label:" format (e.g., "Name:" followed by blank space)
     - Case insensitive matching
+    - AI-detected field_mapping from OCR template scan
+    
+    Args:
+        template_bytes: The DOCX file bytes
+        placeholders: Dict of placeholder key -> value
+        template_field_mapping: Optional AI-detected field mapping from OCR scan
+                                {field_id: db_path} e.g. {"client_name": "client.full_name"}
     """
     try:
         from docx import Document
 
         doc = Document(io.BytesIO(template_bytes))
+
+        # If we have AI-detected field mappings, inject them as additional
+        # placeholder aliases so the fill logic can resolve them
+        if template_field_mapping:
+            for field_id, db_path in template_field_mapping.items():
+                # db_path is like "client.full_name" or "contract.hourly_rate"
+                # Convert to placeholder key format
+                path_key = db_path.replace(".", "_") if db_path else field_id
+                # Try to find the value from existing placeholders
+                value = placeholders.get(path_key, "")
+                if not value:
+                    # Try the field_id directly
+                    value = placeholders.get(field_id, "")
+                if not value:
+                    # Try stripping prefix like "client." and matching
+                    short_key = db_path.split(".")[-1] if "." in db_path else db_path
+                    value = placeholders.get(short_key, "")
+                if value and field_id not in placeholders:
+                    placeholders[field_id] = value
 
         # Ordered list of (label_pattern, placeholder_key).
         # Longer/more-specific labels come first so they match before shorter ones.

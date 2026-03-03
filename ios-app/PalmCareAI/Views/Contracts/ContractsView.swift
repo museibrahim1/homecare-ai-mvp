@@ -24,6 +24,7 @@ struct ContractsView: View {
     @State private var downloadingId: String?
     @State private var errorMessage: String?
     @State private var expandedClients: Set<String> = []
+    @State private var showUploadTemplate = false
 
     private let filters = ["All", "Contract", "Note", "Audio"]
 
@@ -104,8 +105,15 @@ struct ContractsView: View {
             }
         }
         .background(Color.palmBackground)
+        .overlay(alignment: .bottomTrailing) { uploadFAB }
         .task { await loadDocuments() }
         .quickLookPreview($previewURL)
+        .sheet(isPresented: $showUploadTemplate) {
+            UploadTemplateSheet {
+                await loadDocuments()
+            }
+            .environmentObject(api)
+        }
     }
 
     // MARK: - Filter Bar
@@ -184,6 +192,29 @@ struct ContractsView: View {
         }
     }
 
+    // MARK: - Upload FAB
+
+    private var uploadFAB: some View {
+        Button { showUploadTemplate = true } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "doc.badge.plus")
+                    .font(.system(size: 14, weight: .semibold))
+                Text("Upload Template")
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                LinearGradient(colors: [.palmPrimary, .palmTeal600], startPoint: .leading, endPoint: .trailing)
+            )
+            .cornerRadius(24)
+            .shadow(color: .palmPrimary.opacity(0.35), radius: 8, y: 4)
+        }
+        .padding(.trailing, 18)
+        .padding(.bottom, 90)
+    }
+
     // MARK: - Empty State
 
     private var emptyState: some View {
@@ -200,6 +231,28 @@ struct ContractsView: View {
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
+
+            Button { showUploadTemplate = true } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "doc.badge.plus")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("Upload Your Template")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 11)
+                .background(Color.palmPrimary)
+                .cornerRadius(10)
+            }
+            .padding(.top, 4)
+
+            Text("Upload your own contract template (PDF or DOCX) and our AI will automatically detect and map all the fields for you.")
+                .font(.system(size: 11))
+                .foregroundColor(.palmSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 50)
+
             Spacer()
         }
     }

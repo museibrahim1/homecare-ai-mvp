@@ -181,6 +181,16 @@ async def upload_and_scan_template(
     detected_fields = await detect_fields_with_ai(ocr_text, file.filename)
     field_mapping, unmapped_fields = build_field_mapping(detected_fields)
 
+    # AI second pass: try to map remaining unmapped fields
+    if unmapped_fields:
+        try:
+            from app.services.ocr_template_scanner import ai_auto_map_unmapped
+            extra_mapping, unmapped_fields = await ai_auto_map_unmapped(unmapped_fields, field_mapping)
+            field_mapping.update(extra_mapping)
+            logger.info(f"AI auto-mapped {len(extra_mapping)} additional fields, {len(unmapped_fields)} still unmapped")
+        except Exception as e:
+            logger.warning(f"AI auto-mapping second pass failed: {e}")
+
     file_url = f"data:{content_type};base64,{base64.b64encode(file_bytes).decode()}"
 
     template = ContractTemplate(
@@ -712,6 +722,14 @@ async def rescan_template(
     ocr_text = await extract_text(file_bytes, filename, content_type)
     detected_fields = await detect_fields_with_ai(ocr_text, filename)
     field_mapping, unmapped_fields = build_field_mapping(detected_fields)
+
+    if unmapped_fields:
+        try:
+            from app.services.ocr_template_scanner import ai_auto_map_unmapped
+            extra_mapping, unmapped_fields = await ai_auto_map_unmapped(unmapped_fields, field_mapping)
+            field_mapping.update(extra_mapping)
+        except Exception as e:
+            logger.warning(f"AI auto-mapping on rescan failed: {e}")
 
     template.ocr_text = ocr_text
     template.detected_fields = detected_fields
