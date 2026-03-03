@@ -41,12 +41,17 @@ interface Investor {
 interface InvestorStats {
   total: number;
   has_email: number;
-  vc_fund: number;
-  angel: number;
+  vc_funds: number;
+  angels: number;
   new: number;
   email_sent: number;
   responded: number;
   interested: number;
+  contacted: number;
+  meeting_scheduled: number;
+  passed: number;
+  committed: number;
+  avg_priority_score: number;
 }
 
 const STATUS_OPTIONS = [
@@ -391,12 +396,12 @@ export default function InvestorsPage() {
   return (
     <div className="min-h-screen bg-[#0a0a1a] flex">
       <Sidebar />
-      <main className="flex-1 ml-60 p-6">
+      <main className="flex-1 ml-64 p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <DollarSign className="w-6 h-6 text-primary-500" />
+              <TrendingUp className="w-6 h-6 text-primary-500" />
               Investor CRM
             </h1>
             <p className="text-sm text-dark-400 mt-1">
@@ -435,8 +440,8 @@ export default function InvestorsPage() {
             {[
               { label: 'Total', value: stats.total, color: 'text-white' },
               { label: 'Has Email', value: stats.has_email, color: 'text-emerald-400' },
-              { label: 'VC Funds', value: stats.vc_fund, color: 'text-violet-400' },
-              { label: 'Angels', value: stats.angel, color: 'text-amber-400' },
+              { label: 'VC Funds', value: stats.vc_funds, color: 'text-violet-400' },
+              { label: 'Angels', value: stats.angels, color: 'text-amber-400' },
               { label: 'New', value: stats.new, color: 'text-slate-300' },
               { label: 'Email Sent', value: stats.email_sent, color: 'text-indigo-400' },
               { label: 'Responded', value: stats.responded, color: 'text-cyan-400' },
