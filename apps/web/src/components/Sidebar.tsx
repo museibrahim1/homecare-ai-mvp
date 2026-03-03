@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { 
   Home, Calendar, Users, UserCheck, BarChart3, Settings, LogOut,
   Mic, Link2, FileText, ChevronRight, Shield, Building2, CreditCard,
-  AlertTriangle, Ticket, Activity, DollarSign, Target, CalendarDays,
+  AlertTriangle, Ticket, Activity, DollarSign, Target, CalendarDays, TrendingUp,
   MessageSquare, MessagesSquare, FolderOpen, UserCog, Eye, RefreshCw,
   HelpCircle, HeartPulse, FilePlus, Layers, Menu, X, Sun, Moon, Zap,
   ChevronDown, LucideIcon
@@ -78,7 +78,7 @@ const adminNavItems: NavItemData[] = [
   { href: '/admin/system', label: 'System Health', icon: Activity },
   { href: '/admin/incidents', label: 'Status Page', icon: AlertTriangle },
   { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target },
-  { href: '/admin/investors', label: 'Investors', icon: DollarSign },
+  { href: '/admin/investors', label: 'Investors', icon: TrendingUp },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 

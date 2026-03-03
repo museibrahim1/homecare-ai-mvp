@@ -242,11 +242,10 @@ struct RecordView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
-                NavigationLink(
-                    destination: VisitDetailView(visitId: completedVisitId ?? "", clientName: completedClientName)
-                        .environmentObject(api),
-                    isActive: $navigateToVisit
-                ) { EmptyView() }
+            }
+            .navigationDestination(isPresented: $navigateToVisit) {
+                VisitDetailView(visitId: completedVisitId ?? "", clientName: completedClientName)
+                    .environmentObject(api)
             }
             .sheet(isPresented: $showClientPicker) {
                 ClientPickerSheet(clients: clients, selected: $selectedClient, onClientAdded: { newClient in
@@ -582,7 +581,12 @@ struct RecordView: View {
 
                 for key in stepOrder {
                     if let stateVal = pipelineState[key]?.value {
-                        let stateStr = "\(stateVal)"
+                        var stateStr = "pending"
+                        if let dict = stateVal as? [String: Any], let s = dict["status"] as? String {
+                            stateStr = s
+                        } else if let s = stateVal as? String {
+                            stateStr = s
+                        }
                         let label = stepLabels[key] ?? key.capitalized
                         if stateStr == "skipped" { continue }
                         steps.append((label, stateStr))

@@ -218,7 +218,7 @@ class APIService: ObservableObject {
 
     // MARK: - Pipeline
 
-    func getPipelineStatus(visitId: String) async throws -> Visit {
+    func getPipelineStatus(visitId: String) async throws -> PipelineStatusResponse {
         try await request("GET", path: "/pipeline/visits/\(visitId)/status")
     }
 
