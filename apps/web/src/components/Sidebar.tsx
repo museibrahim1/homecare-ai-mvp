@@ -78,6 +78,7 @@ const adminNavItems: NavItemData[] = [
   { href: '/admin/system', label: 'System Health', icon: Activity },
   { href: '/admin/incidents', label: 'Status Page', icon: AlertTriangle },
   { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target },
+  { href: '/admin/investors', label: 'Investors', icon: DollarSign },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 

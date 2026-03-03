@@ -335,7 +335,7 @@ struct ClientDetailView: View {
                 }
                 if let medNotes = client.medical_notes, !medNotes.isEmpty {
                     if showDivider { detailDivider }
-                    detailRow(icon: "note.text", label: "Medical Notes", value: medNotes, color: .palmSecondary)
+                    medicalNotesView(medNotes)
                 }
             }
         }

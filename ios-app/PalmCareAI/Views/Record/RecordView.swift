@@ -178,6 +178,11 @@ struct RecordView: View {
     @State private var uploadProgress: String?
     @AppStorage("backgroundRecording") private var backgroundRecording = false
 
+    @State private var completedVisitId: String?
+    @State private var completedClientName: String?
+    @State private var navigateToVisit = false
+    @State private var pipelineSteps: [(String, String)] = []
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -194,25 +199,54 @@ struct RecordView: View {
                     }
                 }
 
-                // Processing toast
+                // Processing overlay with pipeline progress
                 if isProcessing {
                     VStack {
                         Spacer()
-                        HStack(spacing: 10) {
-                            ProgressView().tint(.white).scaleEffect(0.8)
-                            Text(uploadProgress ?? "Generating contract...")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.white)
+                        VStack(spacing: 12) {
+                            HStack(spacing: 10) {
+                                ProgressView().tint(.white).scaleEffect(0.8)
+                                Text(uploadProgress ?? "Processing assessment...")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.white)
+                            }
+
+                            if !pipelineSteps.isEmpty {
+                                VStack(spacing: 6) {
+                                    ForEach(pipelineSteps, id: \.0) { step, status in
+                                        HStack(spacing: 8) {
+                                            pipelineIcon(for: status)
+                                                .frame(width: 14, height: 14)
+                                            Text(step)
+                                                .font(.system(size: 11, weight: .medium))
+                                                .foregroundColor(.white.opacity(0.85))
+                                            Spacer()
+                                            Text(status.capitalized)
+                                                .font(.system(size: 10, weight: .semibold))
+                                                .foregroundColor(pipelineColor(for: status))
+                                        }
+                                    }
+                                }
+                                .padding(.top, 4)
+                            }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
-                        .background(Color.palmPrimary.opacity(0.9))
-                        .cornerRadius(24)
-                        .shadow(color: Color.palmPrimary.opacity(0.4), radius: 10, y: 4)
+                        .padding(.vertical, 14)
+                        .background(Color(red: 20/255, green: 20/255, blue: 24/255).opacity(0.95))
+                        .cornerRadius(16)
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmPrimary.opacity(0.3), lineWidth: 1))
+                        .shadow(color: Color.black.opacity(0.4), radius: 10, y: 4)
+                        .padding(.horizontal, 20)
                         .padding(.bottom, 100)
                     }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+
+                NavigationLink(
+                    destination: VisitDetailView(visitId: completedVisitId ?? "", clientName: completedClientName)
+                        .environmentObject(api),
+                    isActive: $navigateToVisit
+                ) { EmptyView() }
             }
             .sheet(isPresented: $showClientPicker) {
                 ClientPickerSheet(clients: clients, selected: $selectedClient, onClientAdded: { newClient in
@@ -484,23 +518,31 @@ struct RecordView: View {
             return
         }
 
+        let clientName = selectedClient?.full_name
         liveTranscription?.segments = []
 
-        withAnimation { isProcessing = true }
+        withAnimation {
+            isProcessing = true
+            uploadProgress = "Creating assessment..."
+            pipelineSteps = []
+        }
 
         Task {
             do {
                 let visit = try await api.createVisit(clientId: clientId)
                 let data = try Data(contentsOf: audioURL)
+
+                await MainActor.run { uploadProgress = "Uploading audio..." }
                 _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: audioURL.lastPathComponent, autoProcess: true)
                 try? FileManager.default.removeItem(at: audioURL)
 
-                await MainActor.run {
-                    withAnimation { isProcessing = false }
-                }
+                await MainActor.run { uploadProgress = "Pipeline running..." }
+                await pollPipeline(visitId: visit.id, clientName: clientName)
             } catch {
                 await MainActor.run {
                     withAnimation { isProcessing = false }
+                    uploadProgress = nil
+                    pipelineSteps = []
                     let msg = error.localizedDescription.lowercased()
                     if msg.contains("limit") || msg.contains("plan") || msg.contains("upgrade") || msg.contains("quota") || msg.contains("exceeded") {
                         showUpgrade = true
@@ -513,6 +555,84 @@ struct RecordView: View {
         }
     }
 
+    private func pollPipeline(visitId: String, clientName: String?) async {
+        let stepOrder = ["transcription", "diarization", "billing", "note", "contract"]
+        let stepLabels = [
+            "transcription": "Transcription",
+            "diarization": "Speaker ID",
+            "billing": "Billables",
+            "note": "Clinical Note",
+            "contract": "Contract"
+        ]
+
+        var attempts = 0
+        let maxAttempts = 120 // ~4 minutes max
+
+        while attempts < maxAttempts {
+            attempts += 1
+            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+
+            do {
+                let status = try await api.getPipelineStatus(visitId: visitId)
+                guard let pipelineState = status.pipeline_state else { continue }
+
+                var steps: [(String, String)] = []
+                var allDone = true
+                var anyFailed = false
+
+                for key in stepOrder {
+                    if let stateVal = pipelineState[key]?.value {
+                        let stateStr = "\(stateVal)"
+                        let label = stepLabels[key] ?? key.capitalized
+                        if stateStr == "skipped" { continue }
+                        steps.append((label, stateStr))
+                        if stateStr != "completed" && stateStr != "skipped" { allDone = false }
+                        if stateStr == "failed" { anyFailed = true }
+                    }
+                }
+
+                await MainActor.run {
+                    pipelineSteps = steps
+                    if let currentStep = steps.first(where: { $0.1 == "running" || $0.1 == "queued" }) {
+                        uploadProgress = "Running: \(currentStep.0)..."
+                    }
+                }
+
+                if allDone || anyFailed {
+                    await MainActor.run {
+                        completedVisitId = visitId
+                        completedClientName = clientName
+                        withAnimation {
+                            isProcessing = false
+                            uploadProgress = nil
+                            pipelineSteps = []
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            navigateToVisit = true
+                        }
+                    }
+                    return
+                }
+            } catch {
+                // Pipeline status fetch failed - keep polling
+            }
+        }
+
+        // Timed out - still navigate to the visit
+        await MainActor.run {
+            completedVisitId = visitId
+            completedClientName = clientName
+            withAnimation {
+                isProcessing = false
+                uploadProgress = nil
+                pipelineSteps = []
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                navigateToVisit = true
+            }
+        }
+    }
+
     private func handlePickedAudioFile(_ url: URL) {
         guard let clientId = selectedClient?.id else {
             errorMessage = "Please select a client first."
@@ -520,9 +640,12 @@ struct RecordView: View {
             return
         }
 
+        let clientName = selectedClient?.full_name
+
         withAnimation {
             isProcessing = true
             uploadProgress = "Uploading audio file..."
+            pipelineSteps = []
         }
 
         Task {
@@ -532,6 +655,7 @@ struct RecordView: View {
                     await MainActor.run {
                         withAnimation { isProcessing = false }
                         uploadProgress = nil
+                        pipelineSteps = []
                         showUpgrade = true
                     }
                     return
@@ -546,17 +670,16 @@ struct RecordView: View {
                 await MainActor.run { uploadProgress = "Creating assessment..." }
                 let visit = try await api.createVisit(clientId: clientId)
 
-                await MainActor.run { uploadProgress = "Processing audio..." }
+                await MainActor.run { uploadProgress = "Uploading audio..." }
                 _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: filename, autoProcess: true)
 
-                await MainActor.run {
-                    withAnimation { isProcessing = false }
-                    uploadProgress = nil
-                }
+                await MainActor.run { uploadProgress = "Pipeline running..." }
+                await pollPipeline(visitId: visit.id, clientName: clientName)
             } catch {
                 await MainActor.run {
                     withAnimation { isProcessing = false }
                     uploadProgress = nil
+                    pipelineSteps = []
                     let msg = error.localizedDescription.lowercased()
                     if msg.contains("limit") || msg.contains("plan") || msg.contains("upgrade") || msg.contains("quota") || msg.contains("exceeded") {
                         showUpgrade = true
@@ -566,6 +689,42 @@ struct RecordView: View {
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func pipelineIcon(for status: String) -> some View {
+        switch status.lowercased() {
+        case "completed":
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 12))
+                .foregroundColor(.palmGreen)
+        case "running":
+            ProgressView()
+                .scaleEffect(0.5)
+                .tint(.palmPrimary)
+        case "failed":
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 12))
+                .foregroundColor(.red)
+        case "queued":
+            Image(systemName: "clock.fill")
+                .font(.system(size: 12))
+                .foregroundColor(.palmOrange)
+        default:
+            Image(systemName: "circle")
+                .font(.system(size: 12))
+                .foregroundColor(.white.opacity(0.3))
+        }
+    }
+
+    private func pipelineColor(for status: String) -> Color {
+        switch status.lowercased() {
+        case "completed": return .palmGreen
+        case "running": return .palmPrimary
+        case "failed": return .red
+        case "queued": return .palmOrange
+        default: return .white.opacity(0.4)
         }
     }
 
