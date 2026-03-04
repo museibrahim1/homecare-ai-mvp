@@ -123,6 +123,7 @@ struct RegisterView: View {
 
                             SecureField("Create a password", text: $password)
                                 .font(.system(size: 13))
+                                .foregroundColor(.palmText)
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 10)
@@ -146,6 +147,7 @@ struct RegisterView: View {
 
                             SecureField("Confirm your password", text: $confirmPassword)
                                 .font(.system(size: 13))
+                                .foregroundColor(.palmText)
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 10)
@@ -312,6 +314,7 @@ struct FormField: View {
 
                 TextField(placeholder, text: $text)
                     .font(.system(size: 13))
+                    .foregroundColor(.palmText)
                     .keyboardType(keyboardType)
                     .textContentType(contentType)
                     .autocapitalization(keyboardType == .emailAddress ? .none : .words)

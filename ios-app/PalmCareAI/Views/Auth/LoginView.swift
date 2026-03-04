@@ -95,6 +95,7 @@ struct LoginView: View {
 
                             TextField("you@example.com", text: $email)
                                 .font(.system(size: 13))
+                                .foregroundColor(.palmText)
                                 .textContentType(.emailAddress)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
@@ -123,11 +124,13 @@ struct LoginView: View {
                             if showPassword {
                                 TextField("Enter your password", text: $password)
                                     .font(.system(size: 13))
+                                    .foregroundColor(.palmText)
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
                             } else {
                                 SecureField("Enter your password", text: $password)
                                     .font(.system(size: 13))
+                                    .foregroundColor(.palmText)
                             }
 
                             Button { showPassword.toggle() } label: {
@@ -426,6 +429,7 @@ struct ForgotPasswordSheet: View {
 
                                 TextField("you@example.com", text: $email)
                                     .font(.system(size: 13))
+                                    .foregroundColor(.palmText)
                                     .textContentType(.emailAddress)
                                     .keyboardType(.emailAddress)
                                     .autocapitalization(.none)

@@ -30,11 +30,13 @@ def update_pipeline_state(visit_id: str, step: str, status: str, error: str = No
     with get_db_session() as db:
         visit = db.query(Visit).filter(Visit.id == visit_id).first()
         if visit:
-            state = visit.pipeline_state or {}
-            state[step] = {"status": status}
+            step_data = {"status": status}
             if error:
-                state[step]["error"] = error
-            visit.pipeline_state = state
+                step_data["error"] = error
+            visit.pipeline_state = {
+                **(visit.pipeline_state or {}),
+                step: step_data,
+            }
             db.commit()
 
 

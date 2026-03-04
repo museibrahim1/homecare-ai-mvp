@@ -60,8 +60,13 @@ def transcribe_visit(self, visit_id: str):
         if not audio_asset:
             raise ValueError(f"No audio found for visit: {visit_id}")
         
-        # Download audio to temp file
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        # Use the original file extension so downstream ASR engines
+        # (Deepgram, OpenAI Whisper) detect the correct format.
+        original_ext = os.path.splitext(audio_asset.original_filename or "")[1].lower()
+        if not original_ext:
+            original_ext = ".wav"
+        
+        with tempfile.NamedTemporaryFile(suffix=original_ext, delete=False) as tmp:
             tmp_path = tmp.name
         
         try:
