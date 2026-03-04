@@ -224,7 +224,7 @@ struct VisitBillablesResponse: Codable {
     let items: [BillableItem]?
     let total_minutes: Double?
     let total_adjusted_minutes: Double?
-    let categories: [String]?
+    let categories: [String: AnyCodable]?
 }
 
 struct BillableItem: Codable, Identifiable {
@@ -236,7 +236,7 @@ struct BillableItem: Codable, Identifiable {
     let start_ms: Int?
     let end_ms: Int?
     let minutes: Double?
-    let evidence: String?
+    let evidence: AnyCodable?
     let is_approved: Bool?
     let adjusted_minutes: Double?
 }

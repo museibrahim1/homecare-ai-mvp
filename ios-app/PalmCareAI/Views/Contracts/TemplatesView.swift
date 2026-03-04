@@ -73,7 +73,7 @@ struct TemplatesView: View {
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Template List
@@ -332,7 +332,7 @@ struct TemplateRow: View {
             }
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(
@@ -373,7 +373,7 @@ struct UploadTemplateSheet: View {
                                 .font(.system(size: 14))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 10)
-                                .background(Color.white)
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(10)
                                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                         }
@@ -383,7 +383,7 @@ struct UploadTemplateSheet: View {
                                 .font(.system(size: 14))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 10)
-                                .background(Color.white)
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(10)
                                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                         }
@@ -412,7 +412,7 @@ struct UploadTemplateSheet: View {
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 12)
-                                .background(Color.white)
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(10)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)

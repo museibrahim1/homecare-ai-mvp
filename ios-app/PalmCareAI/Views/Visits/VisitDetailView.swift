@@ -393,7 +393,7 @@ struct VisitDetailView: View {
                 if let categories = billables?.categories, !categories.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            ForEach(categories, id: \.self) { cat in
+                            ForEach(Array(categories.keys).sorted(), id: \.self) { cat in
                                 Text(cat)
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(.palmPrimary)
@@ -449,8 +449,8 @@ struct VisitDetailView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                if let evidence = item.evidence, !evidence.isEmpty {
-                    Text(evidence)
+                if let evidence = item.evidence, let evidenceStr = evidence.value as? String, !evidenceStr.isEmpty {
+                    Text(evidenceStr)
                         .font(.system(size: 11))
                         .foregroundColor(.palmSecondary)
                         .lineLimit(2)
@@ -874,7 +874,8 @@ struct VisitDetailView: View {
 
     private func restartAssessment() async {
         do {
-            let v = try await api.restartVisit(visitId: visitId)
+            try await api.restartVisit(visitId: visitId)
+            let v = try await api.fetchVisit(id: visitId)
             await MainActor.run {
                 visit = v
                 transcript = nil

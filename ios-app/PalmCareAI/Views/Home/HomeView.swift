@@ -268,7 +268,7 @@ struct HomeStatCard: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 13)
         .padding(.horizontal, 8)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -344,7 +344,7 @@ struct VisitRow: View {
         }
         .padding(.horizontal, 13)
         .padding(.vertical, 11)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -388,7 +388,7 @@ struct EmptyStateCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(14)
     }
 }

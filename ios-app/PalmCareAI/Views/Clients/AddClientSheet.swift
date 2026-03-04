@@ -120,7 +120,7 @@ struct AddClientSheet: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
         }
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .overlay(Divider(), alignment: .bottom)
     }
 
@@ -394,7 +394,7 @@ struct AddClientSheet: View {
                         .foregroundColor(.palmSecondary)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 12)
-                        .background(Color.white)
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
                         .cornerRadius(10)
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                     }
@@ -445,7 +445,7 @@ struct AddClientSheet: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 12)
         }
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Field Components
@@ -464,7 +464,7 @@ struct AddClientSheet: View {
                 .autocapitalization(keyboard == .emailAddress ? .none : .words)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .background(Color.white)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
         }
@@ -481,7 +481,7 @@ struct AddClientSheet: View {
                 .lineLimit(lines...lines + 2)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .background(Color.white)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
         }
@@ -509,7 +509,7 @@ struct AddClientSheet: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .background(Color.white)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
             }
@@ -655,7 +655,7 @@ extension View {
             .font(.system(size: 14))
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(Color.white)
+            .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(10)
             .overlay(
                 RoundedRectangle(cornerRadius: 10)

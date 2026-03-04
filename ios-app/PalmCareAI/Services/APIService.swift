@@ -97,6 +97,36 @@ class APIService: ObservableObject {
         return try jsonDecoder.decode(T.self, from: data)
     }
 
+    func requestVoid(_ method: String, path: String, body: [String: Any]? = nil) async throws {
+        guard let url = URL(string: "\(baseURL)\(path)") else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        if let body = body {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        }
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        if httpResponse.statusCode == 401 {
+            await MainActor.run { self.token = nil }
+            throw APIError.unauthorized
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorBody = try? jsonDecoder.decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorBody.detail ?? errorBody.message ?? "Request failed")
+            }
+            throw APIError.serverError("Something went wrong. Please try again.")
+        }
+    }
+
     // MARK: - Auth
 
     func login(email: String, password: String) async throws -> LoginResponse {
@@ -197,21 +227,29 @@ class APIService: ObservableObject {
 
         var body = Data()
 
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"visit_id\"\r\n\r\n".data(using: .utf8)!)
-        body.append("\(visitId)\r\n".data(using: .utf8)!)
+        body.appendString("--\(boundary)\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"visit_id\"\r\n\r\n")
+        body.appendString("\(visitId)\r\n")
 
         if autoProcess {
-            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            body.append("Content-Disposition: form-data; name=\"auto_process\"\r\n\r\n".data(using: .utf8)!)
-            body.append("true\r\n".data(using: .utf8)!)
+            body.appendString("--\(boundary)\r\n")
+            body.appendString("Content-Disposition: form-data; name=\"auto_process\"\r\n\r\n")
+            body.appendString("true\r\n")
         }
 
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: audio/m4a\r\n\r\n".data(using: .utf8)!)
+        body.appendString("--\(boundary)\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
+        let audioMime: String
+        if filename.lowercased().hasSuffix(".wav") {
+            audioMime = "audio/wav"
+        } else if filename.lowercased().hasSuffix(".mp3") {
+            audioMime = "audio/mpeg"
+        } else {
+            audioMime = "audio/m4a"
+        }
+        body.appendString("Content-Type: \(audioMime)\r\n\r\n")
         body.append(audioData)
-        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        body.appendString("\r\n--\(boundary)--\r\n")
 
         request.httpBody = body
 
@@ -254,12 +292,12 @@ class APIService: ObservableObject {
         try await request("GET", path: "/visits/\(visitId)/contract")
     }
 
-    func runPipelineStep(visitId: String, step: String) async throws -> Visit {
-        try await request("POST", path: "/pipeline/visits/\(visitId)/\(step)")
+    func runPipelineStep(visitId: String, step: String) async throws {
+        let _: [String: AnyCodable] = try await request("POST", path: "/pipeline/visits/\(visitId)/\(step)")
     }
 
-    func restartVisit(visitId: String) async throws -> Visit {
-        try await request("POST", path: "/visits/\(visitId)/restart")
+    func restartVisit(visitId: String) async throws {
+        let _: [String: AnyCodable] = try await request("POST", path: "/visits/\(visitId)/restart")
     }
 
     // MARK: - Pipeline
@@ -285,11 +323,11 @@ class APIService: ObservableObject {
         }
 
         var body = Data()
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"chunk.m4a\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: audio/m4a\r\n\r\n".data(using: .utf8)!)
+        body.appendString("--\(boundary)\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"file\"; filename=\"chunk.m4a\"\r\n")
+        body.appendString("Content-Type: audio/m4a\r\n\r\n")
         body.append(audioData)
-        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        body.appendString("\r\n--\(boundary)--\r\n")
 
         request.httpBody = body
 
@@ -320,7 +358,7 @@ class APIService: ObservableObject {
     }
 
     func disconnectGoogleCalendar() async throws {
-        let _: [String: AnyCodable] = try await request("POST", path: "/calendar/disconnect")
+        try await requestVoid("POST", path: "/calendar/disconnect")
     }
 
     // MARK: - Documents
@@ -370,7 +408,7 @@ class APIService: ObservableObject {
     }
 
     func deleteTemplate(id: String) async throws {
-        let _: [String: AnyCodable] = try await request("DELETE", path: "/contract-templates/\(id)")
+        try await requestVoid("DELETE", path: "/contract-templates/\(id)")
     }
 
     func rescanTemplate(id: String) async throws -> ContractTemplateDetail {
@@ -394,27 +432,24 @@ class APIService: ObservableObject {
 
         var body = Data()
 
-        // name field
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"name\"\r\n\r\n".data(using: .utf8)!)
-        body.append("\(name)\r\n".data(using: .utf8)!)
+        body.appendString("--\(boundary)\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"name\"\r\n\r\n")
+        body.appendString("\(name)\r\n")
 
-        // description field
         if let desc = description, !desc.isEmpty {
-            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            body.append("Content-Disposition: form-data; name=\"description\"\r\n\r\n".data(using: .utf8)!)
-            body.append("\(desc)\r\n".data(using: .utf8)!)
+            body.appendString("--\(boundary)\r\n")
+            body.appendString("Content-Disposition: form-data; name=\"description\"\r\n\r\n")
+            body.appendString("\(desc)\r\n")
         }
 
-        // file
         let mimeType = filename.lowercased().hasSuffix(".pdf")
             ? "application/pdf"
             : "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+        body.appendString("--\(boundary)\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
+        body.appendString("Content-Type: \(mimeType)\r\n\r\n")
         body.append(fileData)
-        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        body.appendString("\r\n--\(boundary)--\r\n")
 
         request.httpBody = body
 
@@ -460,7 +495,7 @@ class APIService: ObservableObject {
     }
 
     func deleteTask(id: String) async throws {
-        let _: [String: String] = try await request("DELETE", path: "/notes/tasks/\(id)")
+        try await requestVoid("DELETE", path: "/notes/tasks/\(id)")
     }
 
     // MARK: - Billing & Subscription
@@ -512,7 +547,7 @@ class APIService: ObservableObject {
     }
     
     func deleteCalendarEvent(eventId: String) async throws {
-        let _: [String: AnyCodable] = try await request("DELETE", path: "/calendar/events/\(eventId)")
+        try await requestVoid("DELETE", path: "/calendar/events/\(eventId)")
     }
     
     func getCalendarStatus() async throws -> CalendarConnectionStatus {
@@ -554,6 +589,14 @@ enum APIError: LocalizedError {
                 return "Something went wrong. Please try again."
             }
             return msg
+        }
+    }
+}
+
+private extension Data {
+    mutating func appendString(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
         }
     }
 }

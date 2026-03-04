@@ -95,7 +95,7 @@ struct TasksView: View {
                         .foregroundColor(selectedFilter == filter ? .white : .palmSecondary)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 7)
-                        .background(selectedFilter == filter ? Color.palmPrimary : Color.white)
+                        .background(selectedFilter == filter ? Color.palmPrimary : Color(UIColor.secondarySystemGroupedBackground))
                         .cornerRadius(18)
                         .overlay(
                             RoundedRectangle(cornerRadius: 18)
@@ -107,7 +107,7 @@ struct TasksView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 10)
         }
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Task List

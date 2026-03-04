@@ -11,14 +11,14 @@ struct PalmCareAIApp: App {
     init() {
         let navAppearance = UINavigationBarAppearance()
         navAppearance.configureWithOpaqueBackground()
-        navAppearance.backgroundColor = UIColor.white
+        navAppearance.backgroundColor = UIColor.systemBackground
         navAppearance.titleTextAttributes = [
-            .foregroundColor: UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1)
+            .foregroundColor: UIColor.label
         ]
         navAppearance.largeTitleTextAttributes = [
-            .foregroundColor: UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1)
+            .foregroundColor: UIColor.label
         ]
-        navAppearance.shadowColor = UIColor(red: 226/255, green: 232/255, blue: 240/255, alpha: 1)
+        navAppearance.shadowColor = UIColor.separator
 
         UINavigationBar.appearance().standardAppearance = navAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navAppearance

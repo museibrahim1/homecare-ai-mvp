@@ -55,7 +55,7 @@ struct ContractsView: View {
             if grouped[key] == nil {
                 grouped[key] = (name: name, docs: [])
             }
-            grouped[key]!.docs.append(doc)
+            grouped[key, default: (name: name, docs: [])].docs.append(doc)
         }
 
         return grouped.map { key, val in
@@ -141,7 +141,7 @@ struct ContractsView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 10)
         }
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Search
@@ -404,7 +404,7 @@ private struct ClientSection: View {
                 .padding(.bottom, 8)
             }
         }
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))

@@ -78,7 +78,7 @@ struct ClientsView: View {
                 .padding(.horizontal, 18)
                 .padding(.top, 14)
                 .padding(.bottom, 14)
-                .background(Color.white)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
                 .overlay(
                     Rectangle().fill(Color.palmBorder).frame(height: 1),
                     alignment: .bottom
@@ -256,7 +256,7 @@ struct ClientCard: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
