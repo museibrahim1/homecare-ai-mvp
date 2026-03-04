@@ -8,6 +8,10 @@ This document contains instructions for tools, APIs, and skills that Claude shou
 1. [Video Creation (Remotion)](#video-creation-remotion)
 2. [Voiceover Generation (WaveSpeed + ElevenLabs)](#voiceover-generation-wavespeed--elevenlabs)
 3. [Image Generation (WaveSpeed + Nano Banana Pro)](#image-generation-wavespeed--nano-banana-pro)
+4. [Transcription (Deepgram Nova-3)](#transcription-deepgram-nova-3)
+5. [Project Memory (Session Log)](#project-memory-session-log)
+6. [Upcoming Tasks & Priorities](#upcoming-tasks--priorities)
+7. [Key Project Facts](#key-project-facts-quick-reference)
 
 ---
 
@@ -223,4 +227,201 @@ When learning a new tool or API:
 
 ---
 
-*Last updated: February 1, 2026*
+## Project Memory (Session Log)
+
+This section tracks what has been done across sessions so Claude can pick up context without re-reading full transcripts. Update this section at the end of every session.
+
+---
+
+### Session: February 25, 2026 (Session A) — Major Feature Sprint
+
+**What was done:**
+- **Sales Leads CRM**: Built from scratch — CMS API import (190+ agencies from NE/IA), `SalesLead` model, admin-only router, `/admin/sales-leads` page with filters, email tracking, activity timeline
+- **Contact research**: 6 parallel subagents found websites/emails for 190 agencies; 70 more added; 4 agents removed 58 government/hospital duplicates. Final: 201 leads, 73 with email
+- **Email campaigns**: 5-email cold outreach sequence (Warm Open, Pattern Interrupt, Aspiration, Proof Point, Graceful Exit), Resend webhook for open tracking, bulk send, campaign launcher modal
+- **Campaign analytics**: Sequence automation, per-template stats, funnel view, `email_campaign_events` table
+- **Churn analytics**: `/admin/analytics` page; provider "My Activity" widget; engagement scores
+- **HIPAA**: Log sanitization; voiceprint encryption, MFA, password history
+- **50-state knowledge base**: `docs/state-assessment-requirements.md` for all 50 states
+- **Pipeline UI**: Drag-and-drop, step progress, animations
+- **Twilio removal**: ~2,000 lines removed; Call model and related code deleted
+- **Voiceprint disabled**: Router disabled; pipeline step skipped; settings UI removed
+- **EIN**: Made optional in registration
+- **Privacy policy**: Updated with consent and recording disclosures
+- **Marketing research**: `docs/marketing-research.md` from 10 brands; plain-text email templates; Muse Ibrahim signature; product image; QR code
+
+**Key decisions:**
+- Plain-text emails preferred over HTML for cold outreach
+- Signature: Muse Ibrahim, President & CEO, Palm Technologies, INC.; send from `sales@palmtai.com`
+- Government/hospital agencies excluded from sales leads
+- Mobile app as companion app in `/mobile/` in same monorepo
+
+---
+
+### Session: February 25, 2026 (Session B) — Testing, Performance & Code Quality
+
+**What was done:**
+- **UI fixes**: Static Tailwind classes for chat bubbles; deterministic waveform bars; FAQ `aria-expanded`; mobile menu fix
+- **CSS cleanup**: Removed global `.text-white` override; scoped `bg-black`; gradient exceptions only
+- **Nav accessibility**: `aria-haspopup`, `aria-expanded`, keyboard handling (Enter/Space/ArrowDown/Escape), focus/blur
+- **Tests**: 76+ pipeline tests passing; API pipeline tests fixed; 22 passed with Python 3.11 + Postgres
+- **Pydantic v2 migration**: `class Config` → `ConfigDict` in schemas; warnings reduced from 29 to 4
+- **Performance testing**: k6 load tests; baseline (5 VUs) and spike (50 VUs); `POST /clients` identified as bottleneck
+- **Pyannote removal**: Diarization consolidated into Deepgram Nova-3; pyannote step skipped
+- **Landing chat**: Switched from OpenAI to Claude Haiku
+- **Cost model**: `docs/API_COST_MODEL.md` (~$0.37 per 30-min assessment); `ARCHITECTURE.md` updated
+
+**Key decisions:**
+- Deepgram Nova-3 for both transcription and diarization (no pyannote)
+- Cost target: ~$0.37 per assessment; ~5,400x–7,500x ROI per client
+- Docker/Postgres required for API pipeline tests
+
+---
+
+### Session: March 1, 2026 (Morning A) — Architecture & Email Setup
+
+**What was done:**
+- Created/updated `docs/ARCHITECTURE.md` with all 5 apps (Web, Expo, iOS, FastAPI, Celery)
+- Added MX and TXT records on `send.palmcareai.com` via Cloudflare API (Resend SPF)
+- Left root MX for `palmcareai.com` pointing to Gmail
+- User manually enabled Cloudflare Email Routing for forwarding
+
+**Key decisions:**
+- Use `send` subdomain for Resend (MX + TXT), not root domain, to avoid overriding Google Workspace MX
+- Use Cloudflare Email Routing for forwarding instead of Resend receiving
+
+---
+
+### Session: March 1, 2026 (Morning B) — Email Marketing Redesign
+
+**What was done:**
+- Rebuilt 5-email cold outreach sequence and mobile app launch email
+- Switched to PALM IT branding: teal (#0d9488), "Palm It" CTAs, "Where care meets intelligence"
+- Applied Apple-style layout: sectioned content, stat blocks, gradient CTAs
+- Updated subject lines and copy to match Brand Guidelines
+- Added QR code to all email footers
+- Updated `apps/api/app/routers/sales_leads.py`, `apps/web/public/email-preview.html`, `apps/web/src/emails/mobile-app-launch.html`
+
+**Key decisions:**
+- Teal instead of indigo for brand color
+- "Palm It" as the main CTA
+- Apple One email as the layout reference
+- QR code in footer of every email
+
+---
+
+### Session: March 1, 2026 (Afternoon) — Major Feature Sprint + CMS + Dark Mode
+
+**What was done:**
+- **Certification tracking**: `certification_expiry_dates` JSONB on caregivers, `GET /caregivers/expiring`, frontend badges and compliance alerts
+- **Notes backend**: SmartNote, Task, Reminder models, migration 024, CRUD API, Claude-based AI extraction
+- **Notes frontend**: `/notes` page with split view, task list, reminder badges, AI Extract button
+- **Follow-up alerts**: `nextFollowUp` on care tracker, overdue badges in timeline/board views
+- **Reminder system**: `ReminderPoller` (60s polling), email notifications via Resend
+- **Brand messaging**: Landing, auth, dashboard, marketing pages updated with "PALM IT" and brand voice
+- **Nav fixes**: Dropdown hover gap fixed, mobile menu closes on link click
+- **Mobile app page**: Restructured to hero + stats + features grid + app showcase (3 phones)
+- **Dark theme**: `.landing-dark` added to marketing pages; body, theme defaults, and Sidebar updated for dark mode
+- **API providers**: Backend prefers Claude over OpenAI; privacy page mentions Deepgram + Anthropic
+- **Investor CRM**: New Investor model, API, frontend page, bulk email, seed from vcsheet.com and other sources
+- **CMS import all states**: Import all US states, exclude government agencies, "Remove No-Email" cleanup, bulk import with emails
+- **Agencies**: 163 agencies with verified emails across 48 states; seed endpoint for sales leads
+- **Investor seed**: Clear-and-reseed endpoint; 60+ investors with emails
+
+**Key decisions:**
+- One migration (024) for certification and notes tables
+- Rename `getNote`/`updateNote` to `getSmartNote`/`updateSmartNote` to avoid conflicts
+- `.landing-dark` to fix inverted `dark-*` variables in default light theme
+- Default app theme to dark
+- Investor CRM kept separate from agencies list
+- CMS import excludes government agencies by default
+
+---
+
+### Session: March 1, 2026 (Evening) — Marketing Video
+
+**What was done:**
+- Built PalmCare AI marketing video using Remotion (4 iterations)
+- V1: Branded intro, Scene 1 (assessment) and Scene 2 (contract) with animated captions
+- V2: Real PalmCare logo, orb intro, mobile screenshots, 9-segment OpenAI TTS voiceover (nova), QR code
+- V3: Intro rebuilt from Expo/mobile code (rejected by user)
+- V4 (final): Real Xcode simulator screenshots: landing page with organic blob orb and record screen
+- Final output: `videos/output/palmcare-ad-v4.mp4` (39s, 1080p, 22 MB)
+
+**Key decisions:**
+- Used OpenAI TTS (tts-1-hd) because no WaveSpeed API key was available
+- iOS/Xcode app is the source of truth, not the Expo `/mobile/` folder
+- Real screenshots in the video instead of recreating UI in code
+
+---
+
+### Session: March 2, 2026 (Afternoon) — Fundraising Platform Profiles
+
+**What was done:**
+- **WeFunder**: Elevator pitch, website, 4 investor highlights, team bio — published live
+- **AngelList Stack**: Company description, contact email (museibrahim@palmtai.com), website — completed
+- **Gust**: Company basics, financials (ARR $92K, burn rate, year-by-year 2024-2028), funding round ($450K SAFE, $2.25M post-money), all 9 Business Details sections, Company Summary — mostly completed
+
+**Key decisions:**
+- All Gust sections kept under 450 characters
+- Financials derived from user's Excel model (quarterly rollup)
+- Expenditure = COGS + OpEx per quarter
+
+**Status:** Gust Executive Summary may still need to be filled in
+
+---
+
+### Session: March 2, 2026 (Evening) — Investor Outreach Copy
+
+**What was done:**
+- Multiple iterations of AngelList pitch script (final: ~450 chars, founder voice)
+- Final script: "I tap record. I talk. A contract appears. That's it..."
+- Use-of-funds breakdown: 40% Sales & Marketing, 30% Engineering, 20% Operations, 10% Reserve
+
+**Key decisions:**
+- In-chat responses only, no new files for investor copy
+- Original founder-style copy, not pitch-deck language
+- 450 character max for AngelList script
+
+---
+
+## Upcoming Tasks & Priorities
+
+### IMMEDIATE (March 3-4, 2026)
+1. **Investor Outreach** — Start reaching out to investors from the seeded investor list (60+ investors with emails)
+2. **Marketing Emails** — Launch the 5-email cold outreach sequence to 163+ agencies starting March 4
+3. **Gust Executive Summary** — May still need to be completed
+
+### IN PROGRESS
+- Dark mode refinement — checking dashboard and app pages for hardcoded light colors
+- Sidebar dark-mode updates
+
+### BACKLOG
+- `POST /clients` performance optimization (identified as bottleneck in k6 tests)
+- BAAs and Resend replacement for full HIPAA compliance
+- WaveSpeed API key setup for production voiceovers (currently using OpenAI TTS fallback)
+- Mobile companion app development (in `/mobile/`)
+
+---
+
+## Key Project Facts (Quick Reference)
+
+| Item | Value |
+|------|-------|
+| Product | PalmCare AI — voice-to-contract for home care |
+| Founder | Muse Ibrahim, President & CEO |
+| Company | Palm Technologies, INC. |
+| Website | palmcareai.com |
+| Email domain | palmtai.com (Google Workspace), send.palmcareai.com (Resend) |
+| Fundraising | $450K SAFE, $2.25M post-money valuation |
+| ARR | $92K |
+| Brand color | Teal (#0d9488) |
+| Tagline | "Where care meets intelligence" / "PALM IT" |
+| CMS Leads | 163 agencies with emails across 48 states |
+| Investors | 60+ seeded with emails |
+| Tech stack | Next.js (web), SwiftUI (iOS), FastAPI (API), Celery (worker), Deepgram (ASR), Claude (AI) |
+| Cost per assessment | ~$0.37 |
+
+---
+
+*Last updated: March 3, 2026*
