@@ -135,14 +135,29 @@ struct SubscriptionView: View {
     // MARK: - Plan Cards
 
     private var planCards: some View {
-        VStack(spacing: 12) {
-            ForEach(Array(hardcodedPlans.enumerated()), id: \.element.id) { index, plan in
+        let displayPlans: [(id: String, name: String, runs: String, price: String, isPopular: Bool)] = {
+            if !remotePlans.isEmpty {
+                return remotePlans.filter { !$0.isEnterprise }.map { plan in
+                    (
+                        id: plan.id,
+                        name: plan.name,
+                        runs: plan.runs_per_month.map { "\($0)" } ?? "∞",
+                        price: "$\(Int(plan.price_monthly))",
+                        isPopular: plan.is_popular ?? false
+                    )
+                }
+            }
+            return hardcodedPlans.map { (id: $0.id, name: $0.name, runs: $0.runs, price: $0.priceMonthly, isPopular: $0.isPopular) }
+        }()
+
+        return VStack(spacing: 12) {
+            ForEach(Array(displayPlans.enumerated()), id: \.element.id) { index, plan in
                 PlanCard(
-                    plan: plan,
+                    plan: LocalPlan(id: plan.id, name: plan.name, runs: plan.runs, priceMonthly: plan.price, isPopular: plan.isPopular),
                     isSelected: selectedPlanIndex == index,
                     isCheckingOut: checkoutLoading == plan.id,
                     onSelect: { selectedPlanIndex = index },
-                    onSubscribe: { await subscribe(plan: plan) }
+                    onSubscribe: { await subscribe(planId: plan.id, planName: plan.name) }
                 )
             }
         }
@@ -225,13 +240,10 @@ struct SubscriptionView: View {
         }
     }
 
-    private func subscribe(plan: LocalPlan) async {
-        checkoutLoading = plan.id
+    private func subscribe(planId: String, planName: String) async {
+        checkoutLoading = planId
 
         do {
-            let matchingRemote = remotePlans.first { $0.name.lowercased() == plan.name.lowercased() }
-            let planId = matchingRemote?.id ?? plan.id
-
             let checkout = try await api.createCheckout(planId: planId)
             if let url = URL(string: checkout.checkout_url) {
                 await MainActor.run { openURL(url) }

@@ -47,6 +47,9 @@ class EventStore: ObservableObject {
 
 struct CalendarView: View {
     @StateObject private var store = EventStore()
+    @EnvironmentObject var api: APIService
+    @AppStorage("googleCalendarConnected") private var googleCalConnected = false
+    @State private var apiEvents: [APICalendarEvent] = []
 
     @State private var selectedDate = Date()
     @State private var displayedMonth = Date()
@@ -77,6 +80,13 @@ struct CalendarView: View {
             eventsList
         }
         .background(Color.palmBackground)
+        .task {
+            if googleCalConnected {
+                do {
+                    apiEvents = try await api.fetchCalendarEvents()
+                } catch {}
+            }
+        }
         .overlay(alignment: .bottomTrailing) {
             Button { showAddEvent = true } label: {
                 Image(systemName: "plus")
@@ -189,7 +199,14 @@ struct CalendarView: View {
     private func dayCell(_ date: Date) -> some View {
         let isSelected = cal.isDate(date, inSameDayAs: selectedDate)
         let isToday = cal.isDateInToday(date)
-        let hasEvt = store.hasEvents(on: date, calendar: cal)
+        let hasLocalEvt = store.hasEvents(on: date, calendar: cal)
+        let hasApiEvt = apiEvents.contains { event in
+            if let d = ISO8601DateFormatter().date(from: event.start_time) {
+                return cal.isDate(d, inSameDayAs: date)
+            }
+            return false
+        }
+        let hasEvt = hasLocalEvt || hasApiEvt
 
         return Button {
             withAnimation(.easeInOut(duration: 0.15)) { selectedDate = date }
@@ -221,7 +238,22 @@ struct CalendarView: View {
     // MARK: - Events List
 
     private var eventsList: some View {
-        let dayEvents = store.events(on: selectedDate, calendar: cal)
+        let localEvents = store.events(on: selectedDate, calendar: cal)
+        let apiDayEvents = apiEvents.filter { event in
+            if let date = ISO8601DateFormatter().date(from: event.start_time) {
+                return cal.isDate(date, inSameDayAs: selectedDate)
+            }
+            return false
+        }
+        let dayEvents = localEvents + apiDayEvents.map { apiEvt in
+            CalendarEvent(
+                title: apiEvt.title,
+                description: apiEvt.description,
+                startDate: ISO8601DateFormatter().date(from: apiEvt.start_time) ?? Date(),
+                endDate: ISO8601DateFormatter().date(from: apiEvt.end_time) ?? Date(),
+                location: apiEvt.location
+            )
+        }
 
         return VStack(alignment: .leading, spacing: 0) {
             HStack {

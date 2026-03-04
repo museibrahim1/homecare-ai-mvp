@@ -279,6 +279,25 @@ struct PipelineStatusResponse: Codable {
     let pipeline_state: [String: AnyCodable]?
 }
 
+// MARK: - Calendar API Models
+
+struct APICalendarEvent: Codable, Identifiable {
+    let id: String
+    let title: String
+    let description: String?
+    let start_time: String
+    let end_time: String
+    let location: String?
+    let google_event_id: String?
+    let created_at: String?
+}
+
+struct CalendarConnectionStatus: Codable {
+    let connected: Bool
+    let email: String?
+    let calendar_id: String?
+}
+
 // MARK: - Calendar
 
 struct CalendarEvent: Codable, Identifiable {

@@ -13,6 +13,8 @@ struct RegisterView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showError = false
+    @State private var stateCode = ""
+    @State private var zipCode = ""
 
     var passwordsMatch: Bool {
         !password.isEmpty && password == confirmPassword
@@ -101,6 +103,11 @@ struct RegisterView: View {
                     FormField(label: "Business Name", icon: "building.2", placeholder: "Your agency name", text: $businessName, isRequired: false)
                     FormField(label: "Email address", icon: "envelope", placeholder: "john@example.com", text: $email, keyboardType: .emailAddress, contentType: .emailAddress)
                     FormField(label: "Phone Number", icon: "phone", placeholder: "(555) 123-4567", text: $phone, keyboardType: .phonePad, contentType: .telephoneNumber)
+
+                    HStack(spacing: 12) {
+                        FormField(label: "State", icon: "map", placeholder: "CA", text: $stateCode, isRequired: false)
+                        FormField(label: "Zip Code", icon: "mappin", placeholder: "90210", text: $zipCode, keyboardType: .numberPad, isRequired: false)
+                    }
 
                     // Password
                     VStack(alignment: .leading, spacing: 5) {
@@ -241,11 +248,11 @@ struct RegisterView: View {
         let body: [String: Any] = [
             "name": businessName.isEmpty ? fullName : businessName,
             "entity_type": "llc",
-            "state_of_incorporation": "CA",
+            "state_of_incorporation": stateCode.isEmpty ? "N/A" : stateCode,
             "address": "",
             "city": "",
-            "state": "CA",
-            "zip_code": "00000",
+            "state": stateCode.isEmpty ? "N/A" : stateCode,
+            "zip_code": zipCode.isEmpty ? "00000" : zipCode,
             "phone": phone,
             "email": email,
             "owner_name": fullName,

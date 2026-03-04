@@ -438,6 +438,41 @@ class APIService: ObservableObject {
         try await request("GET", path: "/visits/usage")
     }
 
+    // MARK: - Forgot Password
+    
+    func forgotPassword(email: String) async throws {
+        let _: [String: AnyCodable] = try await request("POST", path: "/auth/forgot-password", body: ["email": email], noAuth: true)
+    }
+    
+    // MARK: - Profile
+    
+    func updateProfile(body: [String: Any]) async throws -> User {
+        try await request("PUT", path: "/auth/business/profile", body: body)
+    }
+    
+    // MARK: - Calendar API
+    
+    func fetchCalendarEvents(startDate: String? = nil, endDate: String? = nil) async throws -> [APICalendarEvent] {
+        var path = "/calendar/events"
+        var params: [String] = []
+        if let s = startDate { params.append("start_date=\(s)") }
+        if let e = endDate { params.append("end_date=\(e)") }
+        if !params.isEmpty { path += "?" + params.joined(separator: "&") }
+        return try await request("GET", path: path)
+    }
+    
+    func createCalendarEvent(body: [String: Any]) async throws -> APICalendarEvent {
+        try await request("POST", path: "/calendar/events", body: body)
+    }
+    
+    func deleteCalendarEvent(eventId: String) async throws {
+        let _: [String: AnyCodable] = try await request("DELETE", path: "/calendar/events/\(eventId)")
+    }
+    
+    func getCalendarStatus() async throws -> CalendarConnectionStatus {
+        try await request("GET", path: "/calendar/status")
+    }
+
     // MARK: - Logout
 
     func logout() {

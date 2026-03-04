@@ -1,4 +1,5 @@
 import SwiftUI
+import AuthenticationServices
 
 struct LoginView: View {
     @EnvironmentObject var api: APIService
@@ -10,12 +11,13 @@ struct LoginView: View {
     @State private var errorMessage: String?
     @State private var showError = false
     @State private var showRegister = false
+    @State private var showForgotPassword = false
+    @State private var showGoogleAlert = false
 
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Brand moment
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 10) {
                             ZStack {
@@ -42,7 +44,6 @@ struct LoginView: View {
                         }
                         .padding(.bottom, 20)
 
-                        // Slogan
                         VStack(alignment: .leading, spacing: 0) {
                             Text("Welcome")
                                 .font(.system(size: 30, weight: .black))
@@ -71,7 +72,6 @@ struct LoginView: View {
                     .padding(.top, 52)
                     .padding(.bottom, 20)
 
-                    // Divider
                     HStack(spacing: 10) {
                         Rectangle().fill(Color.palmBorder).frame(height: 1)
                         Text("Sign in to your account")
@@ -82,7 +82,6 @@ struct LoginView: View {
                     }
                     .padding(.bottom, 18)
 
-                    // Email field
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Email address")
                             .font(.system(size: 12, weight: .semibold))
@@ -110,7 +109,6 @@ struct LoginView: View {
                     }
                     .padding(.bottom, 14)
 
-                    // Password field
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Password")
                             .font(.system(size: 12, weight: .semibold))
@@ -147,7 +145,6 @@ struct LoginView: View {
                     }
                     .padding(.bottom, 18)
 
-                    // Remember + Forgot
                     HStack {
                         Button { rememberMe.toggle() } label: {
                             HStack(spacing: 7) {
@@ -170,7 +167,7 @@ struct LoginView: View {
 
                         Spacer()
 
-                        Button {} label: {
+                        Button { showForgotPassword = true } label: {
                             Text("Forgot password?")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(.palmPrimary)
@@ -178,7 +175,6 @@ struct LoginView: View {
                     }
                     .padding(.bottom, 18)
 
-                    // Sign In button
                     Button { performLogin() } label: {
                         HStack {
                             if isLoading {
@@ -198,7 +194,6 @@ struct LoginView: View {
                     .opacity((email.isEmpty || password.isEmpty) ? 0.5 : 1)
                     .padding(.bottom, 14)
 
-                    // Or divider
                     HStack(spacing: 10) {
                         Rectangle().fill(Color.palmBorder).frame(height: 1)
                         Text("or sign in with")
@@ -209,13 +204,36 @@ struct LoginView: View {
                     }
                     .padding(.bottom, 14)
 
-                    // Social buttons
-                    SocialLoginButton(icon: "g.circle.fill", text: "Continue with Google")
-                        .padding(.bottom, 8)
-                    SocialLoginButton(icon: "apple.logo", text: "Continue with Apple")
-                        .padding(.bottom, 12)
+                    SignInWithAppleButton(.signIn) { request in
+                        request.requestedScopes = [.fullName, .email]
+                    } onCompletion: { result in
+                        handleAppleSignIn(result)
+                    }
+                    .signInWithAppleButtonStyle(.black)
+                    .frame(height: 44)
+                    .cornerRadius(8)
+                    .padding(.bottom, 8)
 
-                    // Sign up link
+                    Button { showGoogleAlert = true } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "g.circle.fill")
+                                .font(.system(size: 18))
+                                .foregroundColor(.palmText)
+                                .frame(width: 20)
+
+                            Text("Continue with Google")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.palmTextMuted)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 11)
+                        .background(Color.white)
+                        .cornerRadius(8)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
+                        .shadow(color: .black.opacity(0.03), radius: 1, y: 1)
+                    }
+                    .padding(.bottom, 12)
+
                     HStack(spacing: 4) {
                         Text("New to PalmCare?")
                             .font(.system(size: 12))
@@ -227,7 +245,6 @@ struct LoginView: View {
                         }
                     }
 
-                    // Brand strip
                     HStack(spacing: 6) {
                         Circle().fill(Color.palmPrimaryLight).frame(width: 4, height: 4)
                         Text("PalmCare AI · Built for care professionals")
@@ -250,6 +267,14 @@ struct LoginView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage ?? "An unknown error occurred.")
+            }
+            .alert("Google Sign In", isPresented: $showGoogleAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Google Sign In is coming soon. Please use email/password or Apple Sign In.")
+            }
+            .sheet(isPresented: $showForgotPassword) {
+                ForgotPasswordSheet().environmentObject(api)
             }
         }
     }
@@ -279,30 +304,196 @@ struct LoginView: View {
             }
         }
     }
+
+    private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .success(let auth):
+            guard let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData = credential.identityToken,
+                  let idToken = String(data: tokenData, encoding: .utf8) else {
+                errorMessage = "Could not process Apple Sign In credentials."
+                showError = true
+                return
+            }
+
+            let appleEmail = credential.email
+            let fullName = [credential.fullName?.givenName, credential.fullName?.familyName]
+                .compactMap { $0 }
+                .joined(separator: " ")
+
+            isLoading = true
+            Task {
+                do {
+                    let response: LoginResponse = try await api.request(
+                        "POST", path: "/auth/apple-signin",
+                        body: [
+                            "id_token": idToken,
+                            "email": appleEmail as Any,
+                            "full_name": fullName.isEmpty ? nil as Any : fullName as Any
+                        ],
+                        noAuth: true
+                    )
+                    await MainActor.run {
+                        if let token = response.access_token {
+                            api.token = token
+                        }
+                        isLoading = false
+                    }
+                } catch {
+                    await MainActor.run {
+                        errorMessage = "Apple Sign In is not yet configured on the server. Please use email/password."
+                        showError = true
+                        isLoading = false
+                    }
+                }
+            }
+
+        case .failure(let error):
+            if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
+                errorMessage = error.localizedDescription
+                showError = true
+            }
+        }
+    }
 }
 
-struct SocialLoginButton: View {
-    let icon: String
-    let text: String
+// MARK: - Forgot Password Sheet
+
+struct ForgotPasswordSheet: View {
+    @EnvironmentObject var api: APIService
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var email = ""
+    @State private var isLoading = false
+    @State private var sent = false
+    @State private var errorMessage: String?
 
     var body: some View {
-        Button {} label: {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.palmText)
-                    .frame(width: 20)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    VStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.palmPrimary.opacity(0.1))
+                                .frame(width: 64, height: 64)
+                            Image(systemName: "envelope.badge.shield.half.filled")
+                                .font(.system(size: 26))
+                                .foregroundColor(.palmPrimary)
+                        }
 
-                Text(text)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.palmTextMuted)
+                        Text("Reset Password")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.palmText)
+
+                        Text("Enter your email and we'll send you a link to reset your password.")
+                            .font(.system(size: 13))
+                            .foregroundColor(.palmSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                    }
+                    .padding(.top, 8)
+
+                    if sent {
+                        HStack(spacing: 10) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.palmGreen)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Email Sent!")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.palmGreen)
+                                Text("Check your inbox for a password reset link.")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.palmSecondary)
+                            }
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.palmGreen.opacity(0.08))
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGreen.opacity(0.2), lineWidth: 1))
+                    } else {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("Email address")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.palmTextMuted)
+
+                            HStack(spacing: 10) {
+                                Image(systemName: "envelope")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.palmSecondary)
+                                    .frame(width: 20)
+
+                                TextField("you@example.com", text: $email)
+                                    .font(.system(size: 13))
+                                    .textContentType(.emailAddress)
+                                    .keyboardType(.emailAddress)
+                                    .autocapitalization(.none)
+                                    .disableAutocorrection(true)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .background(Color.palmFieldBg)
+                            .cornerRadius(8)
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
+                        }
+
+                        if let error = errorMessage {
+                            Text(error)
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
+                        }
+
+                        Button { sendReset() } label: {
+                            HStack {
+                                if isLoading { ProgressView().tint(.white).scaleEffect(0.8) }
+                                Text("Send Reset Link")
+                                    .font(.system(size: 15, weight: .bold))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                email.isEmpty
+                                    ? Color.palmSecondary.opacity(0.3)
+                                    : Color.palmPrimary
+                            )
+                            .cornerRadius(12)
+                        }
+                        .disabled(email.isEmpty || isLoading)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 11)
-            .background(Color.white)
-            .cornerRadius(8)
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
-            .shadow(color: .black.opacity(0.03), radius: 1, y: 1)
+            .background(Color.palmBackground)
+            .navigationTitle("Forgot Password")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(sent ? "Done" : "Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func sendReset() {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                try await api.forgotPassword(email: email)
+                await MainActor.run {
+                    isLoading = false
+                    withAnimation { sent = true }
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = error.localizedDescription
+                }
+            }
         }
     }
 }
