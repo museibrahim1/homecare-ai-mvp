@@ -91,8 +91,7 @@ class APIService: ObservableObject {
             if let errorBody = try? jsonDecoder.decode(ErrorResponse.self, from: data) {
                 throw APIError.serverError(errorBody.detail ?? errorBody.message ?? "Request failed")
             }
-            let bodyStr = String(data: data, encoding: .utf8) ?? ""
-            throw APIError.serverError("Request failed (\(httpResponse.statusCode)): \(bodyStr.prefix(200))")
+            throw APIError.serverError("Something went wrong. Please try again.")
         }
 
         return try jsonDecoder.decode(T.self, from: data)
@@ -547,10 +546,14 @@ enum APIError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .invalidURL: return "Invalid URL"
-        case .invalidResponse: return "Invalid response from server"
+        case .invalidURL: return "Unable to connect. Please try again."
+        case .invalidResponse: return "We received an unexpected response. Please try again."
         case .unauthorized: return "Session expired. Please log in again."
-        case .serverError(let msg): return msg
+        case .serverError(let msg):
+            if msg.contains("{") || msg.contains("status") || msg.count > 120 {
+                return "Something went wrong. Please try again."
+            }
+            return msg
         }
     }
 }

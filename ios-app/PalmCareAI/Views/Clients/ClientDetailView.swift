@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ClientDetailView: View {
     @EnvironmentObject var api: APIService
-    let client: Client
+    @State var client: Client
 
     @State private var visits: [Visit] = []
     @State private var isLoading = true
@@ -73,8 +73,10 @@ struct ClientDetailView: View {
             }
         }
         .sheet(isPresented: $showEditSheet) {
-            AddClientSheet(editingClient: client)
-                .environmentObject(api)
+            AddClientSheet(editingClient: client, onClientCreated: { updated in
+                client = updated
+            })
+            .environmentObject(api)
         }
         .task { await loadVisits() }
     }

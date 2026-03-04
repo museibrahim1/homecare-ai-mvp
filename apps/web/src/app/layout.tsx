@@ -134,10 +134,14 @@ const themeInitScript = `
 (function() {
   try {
     var theme = localStorage.getItem('palmcare-theme');
-    if (theme === 'dark') {
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
       document.documentElement.setAttribute('data-theme', 'dark');
     }
-  } catch(e) {}
+  } catch(e) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
 })();
 `;
 
@@ -155,7 +159,7 @@ export default function RootLayout({
         />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className={`${inter.className} bg-slate-50 text-slate-800 min-h-screen`}>
+      <body className={`${inter.className} landing-dark bg-dark-900 text-dark-100 min-h-screen`}>
         <ThemeProvider>
           <NotificationProvider>
             <WalkthroughProvider>

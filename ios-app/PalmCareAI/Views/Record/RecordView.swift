@@ -736,9 +736,7 @@ struct RecordView: View {
         do {
             let fetched = try await api.fetchClients()
             await MainActor.run { clients = fetched }
-        } catch {
-            print("RecordView: Failed to load clients: \(error)")
-        }
+        } catch { }
     }
 
     private func timeString(_ interval: TimeInterval) -> String {
@@ -829,9 +827,7 @@ struct ClientPickerSheet: View {
                 if clients.isEmpty {
                     do {
                         localClients = try await api.fetchClients()
-                    } catch {
-                        print("ClientPickerSheet: Failed to load clients: \(error)")
-                    }
+                    } catch { }
                 }
             }
         }

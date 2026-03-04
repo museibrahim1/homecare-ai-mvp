@@ -102,17 +102,17 @@ const NavItem = memo(function NavItem({
       onClick={handleClick}
       className={`flex items-center gap-2.5 px-3 py-[7px] rounded-md transition-all group cursor-pointer select-none text-[13px] ${
         isActive 
-          ? 'bg-primary-50 text-primary-700 font-semibold' 
-          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800 font-medium'
+          ? 'bg-primary-500/15 text-primary-400 font-semibold' 
+          : 'text-dark-200 hover:bg-dark-700/30 hover:text-dark-100 font-medium'
       }`}
     >
       <ItemIcon className={`w-4 h-4 flex-shrink-0 ${
-        isActive ? 'text-primary-500' : 'text-slate-400 group-hover:text-slate-500'
+        isActive ? 'text-primary-400' : 'text-dark-400 group-hover:text-dark-300'
       }`} />
       <span className="truncate flex-1">{item.label}</span>
       {item.badge !== undefined && (
         <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-          isActive ? 'bg-primary-100 text-primary-600' : 'bg-slate-100 text-slate-500'
+          isActive ? 'bg-primary-500/20 text-primary-400' : 'bg-dark-700 text-dark-300'
         }`}>
           {item.badge}
         </span>
@@ -141,10 +141,10 @@ const CollapsibleSection = memo(function CollapsibleSection({
         onClick={() => setOpen(!open)}
         className="flex items-center justify-between w-full px-3 py-2 group"
       >
-        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest group-hover:text-slate-500 transition-colors">
+        <span className="text-[10px] font-semibold text-dark-400 uppercase tracking-widest group-hover:text-dark-300 transition-colors">
           {title}
         </span>
-        <ChevronDown className={`w-3 h-3 text-slate-300 group-hover:text-slate-400 transition-transform ${open ? '' : '-rotate-90'}`} />
+        <ChevronDown className={`w-3 h-3 text-dark-400 group-hover:text-dark-300 transition-transform ${open ? '' : '-rotate-90'}`} />
       </button>
       {open && (
         <div className="space-y-px pb-2">
@@ -217,7 +217,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-dark-800 border border-dark-700 rounded-lg text-dark-200 hover:bg-dark-700 transition-colors shadow-sm"
         aria-label="Open menu"
       >
         <Menu className="w-5 h-5" />
@@ -230,7 +230,7 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside className={`
-        w-60 bg-white border-r border-slate-200 flex flex-col h-screen flex-shrink-0
+        w-60 bg-dark-800 border-r border-dark-700 flex flex-col h-screen flex-shrink-0
         fixed lg:sticky top-0 left-0 z-[60] pointer-events-auto
         transition-transform duration-200 ease-out
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -238,21 +238,21 @@ export default function Sidebar() {
         {/* Mobile Close */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="lg:hidden absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
+          className="lg:hidden absolute top-4 right-4 p-1.5 text-dark-400 hover:text-dark-200 transition-colors"
           aria-label="Close menu"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Logo */}
-        <div className="px-4 py-4 flex-shrink-0 border-b border-slate-100">
+        <div className="px-4 py-4 flex-shrink-0 border-b border-dark-700">
           <Link href="/dashboard" className="flex items-center gap-2.5" onClick={(e) => { e.preventDefault(); handleNavigate('/dashboard'); }}>
             <div className="w-8 h-8 flex-shrink-0 bg-primary-500 rounded-lg flex items-center justify-center overflow-hidden">
               <Image src="/hand-icon-white.png" alt="Palm Technologies" width={22} height={22} className="object-contain" />
             </div>
             <div className="min-w-0">
-              <span className="text-sm font-bold text-slate-900 block leading-tight">PalmCare AI</span>
-              <span className="text-[10px] text-slate-400 leading-tight">Home Care Platform</span>
+              <span className="text-sm font-bold text-dark-50 block leading-tight">PalmCare AI</span>
+              <span className="text-[10px] text-dark-400 leading-tight">Home Care Platform</span>
             </div>
           </Link>
         </div>
@@ -271,7 +271,7 @@ export default function Sidebar() {
                 onClick={() => {}}
                 className="flex items-center justify-between w-full px-3 py-2"
               >
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold text-dark-400 uppercase tracking-widest flex items-center gap-1.5">
                   <Shield className="w-3 h-3" />
                   Platform Admin
                 </span>
@@ -288,13 +288,13 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-slate-100 flex-shrink-0">
+        <div className="border-t border-dark-700 flex-shrink-0">
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-2 w-full px-4 py-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors text-[12px] font-medium"
+            className="flex items-center gap-2 w-full px-4 py-2 text-dark-300 hover:bg-dark-700/30 hover:text-dark-100 transition-colors text-[12px] font-medium"
           >
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-slate-400" />}
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-dark-400" />}
             {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
           </button>
 
@@ -306,16 +306,16 @@ export default function Sidebar() {
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-slate-800 font-medium truncate text-[12px] leading-tight">
+              <p className="text-dark-50 font-medium truncate text-[12px] leading-tight">
                 {user?.full_name || 'Admin User'}
               </p>
-              <p className="text-slate-400 text-[10px] truncate leading-tight">
+              <p className="text-dark-400 text-[10px] truncate leading-tight">
                 {user?.email || 'admin@palmtai.com'}
               </p>
             </div>
             <button
               onClick={handleLogout}
-              className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+              className="p-1.5 text-dark-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
               title="Sign out"
             >
               <LogOut className="w-3.5 h-3.5" />

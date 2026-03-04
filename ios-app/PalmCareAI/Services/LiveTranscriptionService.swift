@@ -67,9 +67,7 @@ class LiveTranscriptionService: ObservableObject {
             self.segments = newSegments
             self.fullTranscript = response.transcript
             self.lastChunkEnd = response.duration
-        } catch {
-            print("Live transcription chunk failed: \(error.localizedDescription)")
-        }
+        } catch { }
     }
 
     private func buildSegments(from words: [TranscriptWord]) -> [TranscriptSegment] {

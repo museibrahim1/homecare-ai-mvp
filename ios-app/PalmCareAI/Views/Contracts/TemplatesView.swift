@@ -171,7 +171,6 @@ struct TemplatesView: View {
                 isLoading = false
             }
         } catch {
-            print("[TemplatesView] Load error: \(error)")
             await MainActor.run {
                 errorMessage = "Failed to load templates"
                 isLoading = false
