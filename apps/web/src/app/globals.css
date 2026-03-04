@@ -32,24 +32,8 @@
   --scrollbar-thumb-hover: rgb(148 163 184);
 }
 
-/* Dark theme (toggle override) */
-[data-theme="dark"] {
-  --color-dark-50:  232 237 245;
-  --color-dark-100: 197 209 232;
-  --color-dark-200: 159 179 217;
-  --color-dark-300: 120 149 202;
-  --color-dark-400: 130 155 205;
-  --color-dark-500: 61 105 178;
-  --color-dark-600: 45 84 148;
-  --color-dark-700: 30 63 118;
-  --color-dark-800: 20 43 88;
-  --color-dark-900: 10 22 40;
-  --color-dark-950: 6 13 23;
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
-  --scrollbar-track: rgb(20 43 88);
-  --scrollbar-thumb: rgb(45 84 148);
-  --scrollbar-thumb-hover: rgb(61 105 178);
-}
+/* Dark theme toggle removed — enterprise light is the only app theme.
+   .landing-dark class handles dark overrides for marketing pages only. */
 
 * {
   box-sizing: border-box;

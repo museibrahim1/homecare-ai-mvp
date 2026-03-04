@@ -245,7 +245,7 @@ export default function InvestorsPage() {
   }, [isAuthorized]);
 
   const seedData = async () => {
-    if (!confirm('This will replace all investor data with the latest curated list (60+ investors with contact info). Continue?')) return;
+    if (!confirm('Add 60+ curated investors with contact info? Existing investors will be kept.')) return;
     setSeeding(true);
     try {
       const result = await fetchWithAuth('/platform/investors/seed-data', { method: 'POST' });

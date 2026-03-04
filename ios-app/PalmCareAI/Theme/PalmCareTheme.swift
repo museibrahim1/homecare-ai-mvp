@@ -27,13 +27,13 @@ extension Color {
     static let palmPink = Color(red: 219/255, green: 39/255, blue: 119/255)       // #DB2777 Highlights
     static let palmPurple = Color(red: 124/255, green: 58/255, blue: 237/255)     // #7C3AED Feature accents
 
-    // Neutrals (slate)
-    static let palmFieldBg = Color(red: 248/255, green: 250/255, blue: 252/255)   // #F8FAFC Slate 50
-    static let palmBackground = Color(red: 241/255, green: 245/255, blue: 249/255) // #F1F5F9 Slate 100
-    static let palmBorder = Color(red: 226/255, green: 232/255, blue: 240/255)    // #E2E8F0 Slate 200
-    static let palmSecondary = Color(red: 100/255, green: 116/255, blue: 139/255) // #64748B Slate 500
-    static let palmTextMuted = Color(red: 71/255, green: 85/255, blue: 105/255)   // #475569 Slate 600
-    static let palmText = Color(red: 15/255, green: 23/255, blue: 42/255)         // #0F172A Slate 900
+    // Neutrals — adaptive (auto dark/light via UIColor system colors)
+    static let palmFieldBg = Color(UIColor.secondarySystemGroupedBackground)
+    static let palmBackground = Color(UIColor.systemGroupedBackground)
+    static let palmBorder = Color(UIColor.separator)
+    static let palmSecondary = Color(UIColor.secondaryLabel)
+    static let palmTextMuted = Color(UIColor.secondaryLabel)
+    static let palmText = Color(UIColor.label)
 
     // Legacy alias
     static let palmTeal = palmPrimary

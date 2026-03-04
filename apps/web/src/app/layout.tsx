@@ -129,21 +129,8 @@ const jsonLd = {
   ],
 };
 
-// Inline script to set data-theme before first paint, preventing flash of wrong theme
-const themeInitScript = `
-(function() {
-  try {
-    var theme = localStorage.getItem('palmcare-theme');
-    if (theme === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  } catch(e) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  }
-})();
-`;
+// No theme switching — enterprise light is the only theme
+const themeInitScript = '';
 
 export default function RootLayout({
   children,
@@ -157,9 +144,9 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {themeInitScript && <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />}
       </head>
-      <body className={`${inter.className} landing-dark bg-dark-900 text-dark-100 min-h-screen`}>
+      <body className={`${inter.className} bg-slate-50 text-slate-800 min-h-screen`}>
         <ThemeProvider>
           <NotificationProvider>
             <WalkthroughProvider>
