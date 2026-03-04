@@ -49,7 +49,10 @@ struct VisitDetailView: View {
                 }
             }
         }
-        .task { await loadAllData() }
+        .task { await loadVisit() }
+        .onChange(of: activeTab) { _ in
+            Task { await loadTabDataIfNeeded() }
+        }
     }
 
     // MARK: - Tab Bar
@@ -724,7 +727,7 @@ struct VisitDetailView: View {
                 .font(.system(size: 13))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
-            Button("Retry") { Task { await loadAllData() } }
+            Button("Retry") { Task { await loadVisit() } }
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.white)
                 .padding(.horizontal, 24)
@@ -806,43 +809,48 @@ struct VisitDetailView: View {
 
     // MARK: - Data Loading
 
-    private func loadAllData() async {
+    private func loadVisit() async {
         isLoading = true
         errorMessage = nil
-
         do {
             let v = try await api.fetchVisit(id: visitId)
-            await MainActor.run { visit = v }
-
-            await withTaskGroup(of: Void.self) { group in
-                group.addTask {
-                    if let t = try? await api.fetchVisitTranscript(visitId: visitId) {
-                        await MainActor.run { transcript = t }
-                    }
-                }
-                group.addTask {
-                    if let b = try? await api.fetchVisitBillables(visitId: visitId) {
-                        await MainActor.run { billables = b }
-                    }
-                }
-                group.addTask {
-                    if let n = try? await api.fetchVisitNote(visitId: visitId) {
-                        await MainActor.run { note = n }
-                    }
-                }
-                group.addTask {
-                    if let c = try? await api.fetchVisitContract(visitId: visitId) {
-                        await MainActor.run { contract = c }
-                    }
-                }
+            await MainActor.run {
+                visit = v
+                isLoading = false
             }
-
-            await MainActor.run { isLoading = false }
+            await loadTabDataIfNeeded()
         } catch {
             await MainActor.run {
                 errorMessage = error.localizedDescription
                 isLoading = false
             }
+        }
+    }
+
+    private func loadTabDataIfNeeded() async {
+        switch activeTab {
+        case 1:
+            guard transcript == nil else { return }
+            if let t = try? await api.fetchVisitTranscript(visitId: visitId) {
+                await MainActor.run { transcript = t }
+            }
+        case 2:
+            guard billables == nil else { return }
+            if let b = try? await api.fetchVisitBillables(visitId: visitId) {
+                await MainActor.run { billables = b }
+            }
+        case 3:
+            guard note == nil else { return }
+            if let n = try? await api.fetchVisitNote(visitId: visitId) {
+                await MainActor.run { note = n }
+            }
+        case 4:
+            guard contract == nil else { return }
+            if let c = try? await api.fetchVisitContract(visitId: visitId) {
+                await MainActor.run { contract = c }
+            }
+        default:
+            break
         }
     }
 

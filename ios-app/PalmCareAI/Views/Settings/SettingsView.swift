@@ -340,8 +340,10 @@ struct SettingsView: View {
     // MARK: - Actions
 
     private func loadData() async {
-        do { user = try await api.fetchUser() } catch {}
-        do { subscription = try await api.fetchSubscription() } catch {}
+        async let fetchedUser = try api.fetchUser()
+        async let fetchedSub = try api.fetchSubscription()
+        user = try? await fetchedUser
+        subscription = try? await fetchedSub
     }
 
     private func authenticateBiometric(completion: @escaping (Bool) -> Void) {

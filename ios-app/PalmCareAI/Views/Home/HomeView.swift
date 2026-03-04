@@ -184,7 +184,7 @@ struct HomeView: View {
                 }
             }
             .background(Color.palmBackground)
-            .refreshable { await loadData() }
+            .refreshable { await loadData(forceRefresh: true) }
             .task { await loadData() }
         }
     }
@@ -216,11 +216,11 @@ struct HomeView: View {
         return pending.count
     }
 
-    private func loadData() async {
+    private func loadData(forceRefresh: Bool = false) async {
         do {
-            async let fetchedUser = api.fetchUser()
-            async let fetchedClients = api.fetchClients()
-            async let fetchedVisits = api.fetchVisits()
+            async let fetchedUser = api.fetchUser(forceRefresh: forceRefresh)
+            async let fetchedClients = api.fetchClients(forceRefresh: forceRefresh)
+            async let fetchedVisits = api.fetchVisits(forceRefresh: forceRefresh)
 
             let (u, c, v) = try await (fetchedUser, fetchedClients, fetchedVisits)
             await MainActor.run {

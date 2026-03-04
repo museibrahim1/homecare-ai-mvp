@@ -6,22 +6,23 @@ struct MainTabView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                HomeView(onNavigateToRecord: { selectedTab = 2 })
-                    .tag(0)
-
-                ClientsView()
-                    .tag(1)
-
-                RecordView()
-                    .tag(2)
-
-                WorkspaceView()
-                    .tag(3)
-
-                SettingsView()
-                    .tag(4)
+            Group {
+                switch selectedTab {
+                case 0:
+                    HomeView(onNavigateToRecord: { selectedTab = 2 })
+                case 1:
+                    ClientsView()
+                case 2:
+                    RecordView()
+                case 3:
+                    WorkspaceView()
+                case 4:
+                    SettingsView()
+                default:
+                    HomeView(onNavigateToRecord: { selectedTab = 2 })
+                }
             }
+            .padding(.bottom, 60)
 
             CustomTabBar(selectedTab: $selectedTab)
         }

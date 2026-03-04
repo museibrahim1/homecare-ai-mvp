@@ -578,10 +578,10 @@ async def send_bulk_investor_email(
 
 @router.post("/seed-data")
 def seed_investor_data(db: Session = Depends(get_db), user: User = Depends(require_ceo)):
-    """Seed the investor database with researched AI/HealthTech/SaaS investors."""
-    existing = db.query(func.count(Investor.id)).scalar() or 0
-    if existing > 0:
-        return {"message": f"Already have {existing} investors. Use DELETE /clear first.", "seeded": 0}
+    """Seed the investor database with researched AI/HealthTech/SaaS investors.
+    Clears existing data and re-seeds with the latest curated list."""
+    deleted = db.query(Investor).delete()
+    db.commit()
 
     investors_data = _get_seed_investors()
     for data in investors_data:
@@ -589,7 +589,7 @@ def seed_investor_data(db: Session = Depends(get_db), user: User = Depends(requi
         db.add(inv)
 
     db.commit()
-    return {"seeded": len(investors_data), "message": f"Added {len(investors_data)} investors"}
+    return {"seeded": len(investors_data), "deleted": deleted, "message": f"Cleared {deleted} old investors, added {len(investors_data)} with contact info"}
 
 
 @router.delete("/clear-all")

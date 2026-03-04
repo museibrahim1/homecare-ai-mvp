@@ -73,7 +73,7 @@ struct AssessmentsListView: View {
         .navigationTitle("Assessments")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $searchText, prompt: "Search by client name...")
-        .refreshable { await loadVisits() }
+        .refreshable { await loadVisits(forceRefresh: true) }
         .task { await loadVisits() }
     }
 
@@ -264,9 +264,9 @@ struct AssessmentsListView: View {
         return display.string(from: parsedDate)
     }
 
-    private func loadVisits() async {
+    private func loadVisits(forceRefresh: Bool = false) async {
         do {
-            let fetched = try await api.fetchVisits()
+            let fetched = try await api.fetchVisits(forceRefresh: forceRefresh)
             await MainActor.run {
                 visits = fetched.sorted { $0.created_at > $1.created_at }
                 isLoading = false

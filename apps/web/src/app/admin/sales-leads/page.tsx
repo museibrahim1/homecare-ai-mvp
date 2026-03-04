@@ -360,6 +360,20 @@ export default function SalesLeadsPage() {
     }
   };
 
+  const seedAgencies = async () => {
+    if (!confirm('Seed 163 home care agencies with verified emails across 48 US states?')) return;
+    setImporting(true);
+    try {
+      const result = await fetchWithAuth('/platform/sales/leads/seed-agencies', { method: 'POST' });
+      alert(result.message || `Added ${result.imported} agencies`);
+      loadData();
+    } catch (e) {
+      alert(`Seed failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const openLeadDetail = async (id: string) => {
     try {
       const data = await fetchWithAuth(`/platform/sales/leads/${id}`);

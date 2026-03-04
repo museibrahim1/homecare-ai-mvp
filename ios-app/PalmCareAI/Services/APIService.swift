@@ -10,20 +10,47 @@ class APIService: ObservableObject {
                 UserDefaults.standard.set(token, forKey: "auth_token")
             } else {
                 UserDefaults.standard.removeObject(forKey: "auth_token")
+                clearCache()
             }
         }
     }
 
     var isAuthenticated: Bool { token != nil }
 
+    // MARK: - In-Memory Cache
+
+    private struct CacheEntry<T> {
+        let value: T
+        let timestamp: Date
+        func isValid(ttl: TimeInterval) -> Bool {
+            Date().timeIntervalSince(timestamp) < ttl
+        }
+    }
+
+    private var cachedClients: CacheEntry<[Client]>?
+    private var cachedVisits: CacheEntry<[Visit]>?
+    private var cachedUser: CacheEntry<User>?
+    private let cacheTTL: TimeInterval = 30 // 30 seconds
+
+    func clearCache() {
+        cachedClients = nil
+        cachedVisits = nil
+        cachedUser = nil
+    }
+
+    func invalidateClients() { cachedClients = nil }
+    func invalidateVisits() { cachedVisits = nil }
+
     init() {
         token = UserDefaults.standard.string(forKey: "auth_token")
     }
 
-    private var jsonDecoder: JSONDecoder {
+    private let sharedDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
         return decoder
-    }
+    }()
+
+    private var jsonDecoder: JSONDecoder { sharedDecoder }
 
     func request<T: Decodable>(_ method: String, path: String, body: [String: Any]? = nil, noAuth: Bool = false, allowSoftUnauthorized: Bool = false) async throws -> T {
         guard let url = URL(string: "\(baseURL)\(path)") else {
@@ -96,8 +123,13 @@ class APIService: ObservableObject {
         }
     }
 
-    func fetchUser() async throws -> User {
-        try await request("GET", path: "/auth/me")
+    func fetchUser(forceRefresh: Bool = false) async throws -> User {
+        if !forceRefresh, let cached = cachedUser, cached.isValid(ttl: cacheTTL) {
+            return cached.value
+        }
+        let user: User = try await request("GET", path: "/auth/me")
+        cachedUser = CacheEntry(value: user, timestamp: Date())
+        return user
     }
 
     func register(body: [String: Any]) async throws {
@@ -106,27 +138,42 @@ class APIService: ObservableObject {
 
     // MARK: - Clients
 
-    func fetchClients() async throws -> [Client] {
-        try await request("GET", path: "/clients")
+    func fetchClients(forceRefresh: Bool = false) async throws -> [Client] {
+        if !forceRefresh, let cached = cachedClients, cached.isValid(ttl: cacheTTL) {
+            return cached.value
+        }
+        let clients: [Client] = try await request("GET", path: "/clients")
+        cachedClients = CacheEntry(value: clients, timestamp: Date())
+        return clients
     }
 
     func createClient(body: [String: Any]) async throws -> Client {
-        try await request("POST", path: "/clients", body: body)
+        let client: Client = try await request("POST", path: "/clients", body: body)
+        invalidateClients()
+        return client
     }
 
     func updateClient(id: String, body: [String: Any]) async throws -> Client {
-        try await request("PUT", path: "/clients/\(id)", body: body)
+        let client: Client = try await request("PUT", path: "/clients/\(id)", body: body)
+        invalidateClients()
+        return client
     }
 
     // MARK: - Visits
 
-    func fetchVisits() async throws -> [Visit] {
+    func fetchVisits(forceRefresh: Bool = false) async throws -> [Visit] {
+        if !forceRefresh, let cached = cachedVisits, cached.isValid(ttl: cacheTTL) {
+            return cached.value
+        }
         let wrapper: VisitListResponse = try await request("GET", path: "/visits")
+        cachedVisits = CacheEntry(value: wrapper.items, timestamp: Date())
         return wrapper.items
     }
 
     func createVisit(clientId: String) async throws -> Visit {
-        try await request("POST", path: "/visits", body: ["client_id": clientId])
+        let visit: Visit = try await request("POST", path: "/visits", body: ["client_id": clientId])
+        invalidateVisits()
+        return visit
     }
 
     func fetchVisit(id: String) async throws -> Visit {
