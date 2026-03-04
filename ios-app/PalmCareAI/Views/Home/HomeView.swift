@@ -302,12 +302,7 @@ struct VisitRow: View {
     }
 
     var statusBg: Color {
-        switch visit.status.lowercased() {
-        case "completed": return Color(red: 240/255, green: 253/255, blue: 244/255)
-        case "processing": return Color(red: 239/255, green: 246/255, blue: 255/255)
-        case "pending": return Color(red: 255/255, green: 251/255, blue: 235/255)
-        default: return Color.palmFieldBg
-        }
+        statusColor.opacity(0.12)
     }
 
     var body: some View {
