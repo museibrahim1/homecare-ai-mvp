@@ -39,14 +39,14 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8 justify-center">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
             <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-dark-50">PalmCare AI</h1>
+          <h1 className="text-2xl font-bold text-slate-900">PalmCare AI</h1>
         </div>
 
         {sent ? (
@@ -55,18 +55,18 @@ export default function ForgotPasswordPage() {
             <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-dark-50 mb-2">Check Your Email</h2>
-            <p className="text-dark-300 mb-6">
-              If an account exists for <span className="text-dark-50 font-medium">{email}</span>, 
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Check Your Email</h2>
+            <p className="text-slate-600 mb-6">
+              If an account exists for <span className="text-slate-900 font-medium">{email}</span>, 
               we&apos;ve sent a password reset link. It will expire in 1 hour.
             </p>
-            <p className="text-dark-400 text-sm mb-6">
+            <p className="text-slate-500 text-sm mb-6">
               Don&apos;t see it? Check your spam folder or try again.
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => { setSent(false); setEmail(''); }}
-                className="w-full py-3 px-4 bg-dark-900 hover:bg-dark-700 text-white rounded-xl font-medium transition-colors border border-dark-700"
+                className="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 text-white rounded-xl font-medium transition-colors border border-slate-200"
               >
                 Try a different email
               </button>
@@ -85,8 +85,8 @@ export default function ForgotPasswordPage() {
               <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-8 h-8 text-primary-400" />
               </div>
-              <h2 className="text-2xl font-bold text-dark-50 mb-2">Forgot Password?</h2>
-              <p className="text-dark-300 text-sm">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Forgot Password?</h2>
+              <p className="text-slate-600 text-sm">
                 Enter the email address associated with your account and we&apos;ll send you a link to reset your password.
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
               )}
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-dark-200 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                   Email address
                 </label>
                 <input

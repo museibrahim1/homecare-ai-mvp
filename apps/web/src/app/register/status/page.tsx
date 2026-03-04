@@ -100,22 +100,22 @@ function StatusContent() {
   const StatusIcon = statusConfig?.icon || Clock;
 
   return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
       <div className="w-full max-w-xl">
         <div className="mb-8">
           <button
             onClick={() => router.push('/register')}
-            className="flex items-center gap-2 text-dark-400 hover:text-dark-50 transition"
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Registration
           </button>
         </div>
 
-        <div className="bg-dark-800 rounded-2xl border border-dark-700 overflow-hidden">
-          <div className="p-6 border-b border-dark-700">
-            <h1 className="text-2xl font-bold text-dark-50">Registration Status</h1>
-            <p className="text-dark-400 mt-1">Track your business verification progress</p>
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div className="p-6 border-b border-slate-200">
+            <h1 className="text-2xl font-bold text-slate-900">Registration Status</h1>
+            <p className="text-slate-500 mt-1">Track your business verification progress</p>
           </div>
 
           <div className="p-6">
@@ -126,10 +126,10 @@ function StatusContent() {
             ) : error ? (
               <div className="text-center py-12">
                 <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-                <p className="text-dark-300">{error}</p>
+                <p className="text-slate-600">{error}</p>
                 <button
                   onClick={fetchStatus}
-                  className="mt-4 px-4 py-2 bg-dark-900 text-white rounded-lg hover:bg-dark-700 transition"
+                  className="mt-4 px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
                 >
                   Try Again
                 </button>
@@ -140,67 +140,67 @@ function StatusContent() {
                 <div className={`p-6 rounded-xl ${
                   status.verification_status === 'approved' ? 'bg-emerald-50' :
                   status.verification_status === 'rejected' ? 'bg-red-50' :
-                  'bg-dark-900'
+                  'bg-slate-50'
                 }`}>
                   <div className="flex items-center gap-4">
                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
                       status.verification_status === 'approved' ? 'bg-emerald-50' :
                       status.verification_status === 'rejected' ? 'bg-red-50' :
-                      'bg-dark-700'
+                      'bg-slate-100'
                     }`}>
                       <StatusIcon className={`w-8 h-8 ${statusConfig?.color}`} />
                     </div>
                     <div>
-                      <p className="text-sm text-dark-400">Status</p>
+                      <p className="text-sm text-slate-500">Status</p>
                       <p className={`text-2xl font-bold ${statusConfig?.color}`}>
                         {statusConfig?.label}
                       </p>
                     </div>
                   </div>
-                  <p className="mt-4 text-dark-300">{statusConfig?.message}</p>
+                  <p className="mt-4 text-slate-600">{statusConfig?.message}</p>
                 </div>
 
                 {/* Business Info */}
-                <div className="p-4 bg-dark-900 rounded-xl">
-                  <p className="text-sm text-dark-400">Business Name</p>
-                  <p className="text-dark-50 font-medium">{status.business_name}</p>
+                <div className="p-4 bg-slate-50 rounded-xl">
+                  <p className="text-sm text-slate-500">Business Name</p>
+                  <p className="text-slate-900 font-medium">{status.business_name}</p>
                 </div>
 
                 {/* Verification Steps */}
                 <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-dark-400 uppercase tracking-wide">
+                  <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wide">
                     Verification Progress
                   </h3>
                   
-                  <div className="flex items-center gap-3 p-3 bg-dark-900 rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                     {status.sos_verified ? (
                       <CheckCircle className="w-5 h-5 text-emerald-600" />
                     ) : (
-                      <Clock className="w-5 h-5 text-dark-400" />
+                      <Clock className="w-5 h-5 text-slate-500" />
                     )}
-                    <span className={status.sos_verified ? 'text-white' : 'text-dark-400'}>
+                    <span className={status.sos_verified ? 'text-white' : 'text-slate-500'}>
                       State Registration Verified
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 bg-dark-900 rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                     {status.documents_submitted > 0 ? (
                       <CheckCircle className="w-5 h-5 text-emerald-600" />
                     ) : (
-                      <Clock className="w-5 h-5 text-dark-400" />
+                      <Clock className="w-5 h-5 text-slate-500" />
                     )}
-                    <span className={status.documents_submitted > 0 ? 'text-white' : 'text-dark-400'}>
+                    <span className={status.documents_submitted > 0 ? 'text-white' : 'text-slate-500'}>
                       Documents Uploaded ({status.documents_submitted} / 3)
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 bg-dark-900 rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                     {status.verification_status === 'approved' ? (
                       <CheckCircle className="w-5 h-5 text-emerald-600" />
                     ) : (
-                      <Clock className="w-5 h-5 text-dark-400" />
+                      <Clock className="w-5 h-5 text-slate-500" />
                     )}
-                    <span className={status.verification_status === 'approved' ? 'text-white' : 'text-dark-400'}>
+                    <span className={status.verification_status === 'approved' ? 'text-white' : 'text-slate-500'}>
                       Admin Review Complete
                     </span>
                   </div>
@@ -212,7 +212,7 @@ function StatusContent() {
                     <p className="text-amber-600 font-medium mb-2">Missing Documents</p>
                     <ul className="space-y-1">
                       {status.documents_required.map(doc => (
-                        <li key={doc} className="text-dark-300 text-sm flex items-center gap-2">
+                        <li key={doc} className="text-slate-600 text-sm flex items-center gap-2">
                           <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full" />
                           {doc.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </li>
@@ -225,7 +225,7 @@ function StatusContent() {
                 {status.rejection_reason && (
                   <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
                     <p className="text-red-600 font-medium mb-2">Rejection Reason</p>
-                    <p className="text-dark-300">{status.rejection_reason}</p>
+                    <p className="text-slate-600">{status.rejection_reason}</p>
                   </div>
                 )}
 
@@ -233,7 +233,7 @@ function StatusContent() {
                 <div className="flex gap-4 pt-4">
                   <button
                     onClick={fetchStatus}
-                    className="flex items-center gap-2 px-4 py-2 bg-dark-900 text-white rounded-lg hover:bg-dark-700 transition"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
                   >
                     <RefreshCw className="w-4 h-4" />
                     Refresh Status
@@ -260,7 +260,7 @@ function StatusContent() {
 export default function RegistrationStatusPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
       </div>
     }>

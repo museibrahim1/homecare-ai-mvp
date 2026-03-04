@@ -133,19 +133,19 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-dark-800">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
             <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center overflow-hidden">
               <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
             </div>
-            <h1 className="text-2xl font-bold text-dark-50">PalmCare AI</h1>
+            <h1 className="text-2xl font-bold text-slate-900">PalmCare AI</h1>
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-dark-50 mb-2">Welcome back. Let&apos;s Palm It.</h2>
-            <p className="text-dark-400">Your next client is waiting</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome back. Let&apos;s Palm It.</h2>
+            <p className="text-slate-500">Your next client is waiting</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -156,7 +156,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-dark-200 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                 Email address
               </label>
               <input
@@ -166,14 +166,14 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="you@company.com"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-sm font-medium text-dark-200">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700">
                   Password
                 </label>
                 <Link href="/forgot-password" className="text-sm text-primary-500 hover:text-primary-600 hover:underline">
@@ -187,7 +187,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="••••••••"
               />
             </div>
@@ -214,7 +214,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-8 text-center">
-            <p className="text-dark-400 text-sm">
+            <p className="text-slate-400 text-sm">
               Ready to Palm It?{' '}
               <Link href="/#book-demo" className="text-primary-500 hover:underline font-medium">
                 Schedule a demo

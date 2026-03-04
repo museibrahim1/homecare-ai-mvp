@@ -744,7 +744,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
   if (!contract) {
     return (
-      <div className="p-8 text-center text-dark-400">
+      <div className="p-8 text-center text-slate-500">
         <FileSignature className="w-12 h-12 mx-auto mb-4 opacity-50" />
         <p>No contract generated yet.</p>
         <p className="text-sm mt-2">Run the pipeline to generate a service contract.</p>
@@ -754,7 +754,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
   if (generating) {
     return (
-      <div className="p-8 text-center text-dark-400">
+      <div className="p-8 text-center text-slate-500">
         <RefreshCw className="w-12 h-12 mx-auto mb-4 animate-spin text-primary-400" />
         <p className="text-white">Regenerating contract...</p>
         <p className="text-sm mt-2">This may take a moment</p>
@@ -767,7 +767,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
   return (
     <div className="flex flex-col min-h-full">
       {/* Header Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4 border-b border-dark-700 bg-dark-800 print:hidden flex-shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4 border-b border-slate-200 bg-white print:hidden flex-shrink-0">
         <div className="flex items-center gap-3">
           {agency.contract_template_name && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg">
@@ -787,7 +787,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             <>
               <button 
                 onClick={() => setEditMode(false)} 
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-dark-900 text-dark-300 rounded-lg hover:bg-dark-700/50 transition text-xs sm:text-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition text-xs sm:text-sm"
                 disabled={saving}
               >
                 <X className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
@@ -806,14 +806,14 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             <>
               <button 
                 onClick={() => setEditMode(true)} 
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-dark-900 text-dark-200 rounded-lg hover:bg-dark-700/50 transition text-xs sm:text-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 transition text-xs sm:text-sm"
               >
                 <Edit3 className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                 <span className="hidden sm:inline">Edit</span>
               </button>
               <button 
                 onClick={handleRegenerate} 
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-dark-900 text-dark-200 rounded-lg hover:bg-dark-700/50 transition text-xs sm:text-sm"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 transition text-xs sm:text-sm"
               >
                 <RefreshCw className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                 <span className="hidden sm:inline">Regenerate</span>
@@ -846,14 +846,14 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       </div>
 
       {/* Document Type Selector */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-dark-700 bg-dark-800 flex-shrink-0">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-200 bg-white flex-shrink-0">
         {templatePreview?.has_template && (
           <button
             onClick={() => setDocumentType('template')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               documentType === 'template'
                 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                : 'text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 border border-transparent'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
             }`}
           >
             {templatePreview.template_name || 'My Template'}
@@ -864,7 +864,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             documentType === 'proposal'
               ? 'bg-primary-50 text-primary-400 border border-primary-200'
-              : 'text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 border border-transparent'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
           }`}
         >
           Proposal
@@ -874,12 +874,12 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             documentType === 'agreement'
               ? 'bg-primary-50 text-primary-400 border border-primary-200'
-              : 'text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 border border-transparent'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
           }`}
         >
           Service Agreement
         </button>
-        <span className="text-dark-400 text-xs ml-2 hidden sm:inline">
+        <span className="text-slate-400 text-xs ml-2 hidden sm:inline">
           {documentType === 'template' ? 'Preview of your uploaded template' : documentType === 'proposal' ? 'Send first to present care options' : 'Formal contract for signatures'}
         </span>
       </div>
@@ -895,21 +895,21 @@ export default function ContractPreview({ contract, client, visitId, onContractU
       <div className="flex-1 p-3 sm:p-4">
         <div 
           ref={printRef}
-          className="bg-dark-800 rounded-lg shadow-lg max-w-4xl mx-auto"
+          className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto"
           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
         >
           {documentType === 'template' && templatePreview?.has_template ? (
           /* ===== OCR TEMPLATE PREVIEW ===== */
           <div className="contract-document">
             {/* Template header bar */}
-            <div className="px-6 py-3 bg-dark-900 border-b border-dark-700 flex items-center justify-between">
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
               <div>
-                <span className="text-sm font-semibold text-dark-200">
+                <span className="text-sm font-semibold text-gray-700">
                   {templatePreview.template_name}
                 </span>
-                <span className="text-xs text-dark-400 ml-2">v{templatePreview.template_version}</span>
+                <span className="text-xs text-gray-400 ml-2">v{templatePreview.template_version}</span>
               </div>
-              <div className="text-xs text-dark-400">
+              <div className="text-xs text-gray-500">
                 {templatePreview.fields?.filter(f => f.value).length || 0}/{templatePreview.fields?.length || 0} fields populated
                 {(templatePreview.fields?.filter(f => !f.is_mapped).length || 0) > 0 && (
                   <span className="text-amber-500 ml-2">
@@ -922,18 +922,18 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             {/* Full document preview — rendered from actual DOCX */}
             {templatePreview.document_html ? (
               <div
-                className="p-8 text-dark-100"
+                className="p-8 text-gray-800"
                 style={{ fontFamily: 'Calibri, Arial, sans-serif', lineHeight: 1.6 }}
                 dangerouslySetInnerHTML={{ __html: templatePreview.document_html }}
               />
             ) : (
               /* Fallback: structured field table if HTML not available */
-              <div className="p-8 text-dark-100">
+              <div className="p-8 text-gray-800">
                 <h2 className="text-center text-xl font-bold pb-3 mb-2 border-b-2" style={{ color: agency.primary_color, borderColor: agency.primary_color }}>
                   CLIENT SERVICE CONTRACT
                 </h2>
-                <p className="text-center text-dark-400 italic mb-8">
-                  Prepared for: <strong className="text-dark-100">{data.client_name}</strong> &mdash; {data.effective_date}
+                <p className="text-center text-gray-500 italic mb-8">
+                  Prepared for: <strong className="text-gray-800">{data.client_name}</strong> &mdash; {data.effective_date}
                 </p>
 
                 {(() => {
@@ -963,14 +963,14 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                         <table className="w-full border-collapse mb-2">
                           <tbody>
                             {sectionFields.map((field) => (
-                              <tr key={field.field_id} className="border-b border-dark-700">
-                                <td className="py-2 px-3 text-sm font-medium text-dark-200 w-2/5 bg-dark-900">
+                              <tr key={field.field_id} className="border-b border-gray-100">
+                                <td className="py-2 px-3 text-sm font-medium text-gray-700 w-2/5 bg-gray-50">
                                   {field.label}
                                   {field.required && <span className="text-red-500 ml-1">*</span>}
                                 </td>
                                 <td className="py-2 px-3 text-sm">
                                   {field.value ? (
-                                    <span className="text-dark-50">{field.value}</span>
+                                    <span className="text-gray-900">{field.value}</span>
                                   ) : field.is_mapped ? (
                                     <span className="text-amber-500 italic">No data in database</span>
                                   ) : (
@@ -998,7 +998,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             )}
 
             {/* Footer */}
-            <div className="text-center py-4 px-6 text-sm text-dark-400 border-t border-dark-700">
+            <div className="text-center py-4 px-6 text-sm text-gray-500 border-t border-gray-200">
               {data.agency_name} | {data.agency_phone} | {data.agency_email}
             </div>
           </div>
@@ -1016,21 +1016,21 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                 <img 
                   src={data.agency_logo} 
                   alt="Logo" 
-                  className="mx-auto mb-3 rounded-lg bg-dark-800 p-2"
+                  className="mx-auto mb-3 rounded-lg bg-white p-2"
                   style={{ maxWidth: '80px', maxHeight: '80px' }} 
                 />
               )}
               <h1 className="text-2xl font-bold mb-1" style={{ color: agency.primary_color }}>
                 {data.agency_name}
               </h1>
-              <p className="text-dark-300 text-sm">{data.agency_full_address}</p>
-              <p className="text-dark-300 text-sm">
+              <p className="text-gray-600 text-sm">{data.agency_full_address}</p>
+              <p className="text-gray-600 text-sm">
                 Phone: {data.agency_phone} | Email: {data.agency_email}
               </p>
             </div>
 
             {/* Body */}
-            <div className="p-8 text-dark-100">
+            <div className="p-8 text-gray-800">
               <h2 
                 className="contract-title text-center text-xl font-bold pb-3 mb-6 border-b-2"
                 style={{ color: agency.primary_color, borderColor: agency.primary_color }}
@@ -1045,7 +1045,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   />
                 ) : data.documentTitle}
               </h2>
-              <p className="effective-date text-center text-dark-400 italic mb-8">
+              <p className="effective-date text-center text-gray-500 italic mb-8">
                 Effective Date: {data.effective_date}
               </p>
 
@@ -1056,15 +1056,15 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               <table className="parties-table w-full mb-6">
                 <tbody>
                   <tr>
-                    <td className="p-4 bg-dark-900 align-top border border-dark-700">
-                      <strong className="block mb-2 text-dark-50">SERVICE PROVIDER:</strong>
+                    <td className="p-4 bg-gray-50 align-top border border-gray-200">
+                      <strong className="block mb-2 text-gray-900">SERVICE PROVIDER:</strong>
                       {data.agency_name}<br />
                       {data.agency_full_address}<br />
                       Phone: {data.agency_phone}<br />
                       Email: {data.agency_email}
                     </td>
-                    <td className="p-4 bg-dark-900 align-top border border-dark-700">
-                      <strong className="block mb-2 text-dark-50">CLIENT:</strong>
+                    <td className="p-4 bg-gray-50 align-top border border-gray-200">
+                      <strong className="block mb-2 text-gray-900">CLIENT:</strong>
                       {data.client_name}<br />
                       {data.client_address}<br />
                       Phone: {data.client_phone}
@@ -1077,14 +1077,14 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               <h3 className="section-title text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
                 2. CARE ASSESSMENT
               </h3>
-              <div className="assessment-box bg-dark-900 p-4 rounded-lg mb-6 border border-dark-700">
+              <div className="assessment-box bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
                 <p className="mb-2">
-                  <strong className="text-dark-50">Care Need Level: </strong>
+                  <strong className="text-gray-900">Care Need Level: </strong>
                   {editMode ? (
                     <select 
                       value={editData.care_level}
                       onChange={(e) => setEditData({ ...editData, care_level: e.target.value })}
-                      className="ml-2 px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                      className="ml-2 px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                     >
                       <option value="LOW">LOW</option>
                       <option value="MODERATE">MODERATE</option>
@@ -1097,46 +1097,46 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   )}
                 </p>
                 <p className="mb-2">
-                  <strong className="text-dark-50">Primary Diagnosis: </strong>
+                  <strong className="text-gray-900">Primary Diagnosis: </strong>
                   {editMode ? (
                     <input 
                       type="text" 
                       value={editData.primary_diagnosis}
                       onChange={(e) => setEditData({ ...editData, primary_diagnosis: e.target.value })}
-                      className="ml-2 px-3 py-1 border border-dark-600 rounded-lg text-sm w-64 bg-dark-800"
+                      className="ml-2 px-3 py-1 border border-gray-300 rounded-lg text-sm w-64 bg-white"
                     />
                   ) : data.primary_diagnosis}
                 </p>
                 <p className="mb-2">
-                  <strong className="text-dark-50">Mobility Status: </strong>
+                  <strong className="text-gray-900">Mobility Status: </strong>
                   {editMode ? (
                     <input 
                       type="text" 
                       value={editData.mobility_status}
                       onChange={(e) => setEditData({ ...editData, mobility_status: e.target.value })}
-                      className="ml-2 px-3 py-1 border border-dark-600 rounded-lg text-sm w-64 bg-dark-800"
+                      className="ml-2 px-3 py-1 border border-gray-300 rounded-lg text-sm w-64 bg-white"
                     />
                   ) : data.mobility_status}
                 </p>
                 <p className="mb-2">
-                  <strong className="text-dark-50">Cognitive Status: </strong>
+                  <strong className="text-gray-900">Cognitive Status: </strong>
                   {editMode ? (
                     <input 
                       type="text" 
                       value={editData.cognitive_status}
                       onChange={(e) => setEditData({ ...editData, cognitive_status: e.target.value })}
-                      className="ml-2 px-3 py-1 border border-dark-600 rounded-lg text-sm w-64 bg-dark-800"
+                      className="ml-2 px-3 py-1 border border-gray-300 rounded-lg text-sm w-64 bg-white"
                     />
                   ) : data.cognitive_status}
                 </p>
                 <p className="mb-0">
-                  <strong className="text-dark-50">Living Situation: </strong>
+                  <strong className="text-gray-900">Living Situation: </strong>
                   {editMode ? (
                     <input 
                       type="text" 
                       value={editData.living_situation}
                       onChange={(e) => setEditData({ ...editData, living_situation: e.target.value })}
-                      className="ml-2 px-3 py-1 border border-dark-600 rounded-lg text-sm w-64 bg-dark-800"
+                      className="ml-2 px-3 py-1 border border-gray-300 rounded-lg text-sm w-64 bg-white"
                     />
                   ) : data.living_situation}
                 </p>
@@ -1151,7 +1151,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   <div className="space-y-2">
                     {editData.services.map((service: any, idx: number) => (
                       <div key={idx} className="flex items-center gap-2">
-                        <span className="text-dark-400">{idx + 1}.</span>
+                        <span className="text-gray-500">{idx + 1}.</span>
                         <input 
                           type="text"
                           value={service.name || service}
@@ -1160,7 +1160,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                             newServices[idx] = { ...newServices[idx], name: e.target.value };
                             setEditData({ ...editData, services: newServices });
                           }}
-                          className="flex-1 px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                          className="flex-1 px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                           placeholder="Service name"
                         />
                       </div>
@@ -1182,8 +1182,8 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                           return (
                             <div key={i} className="service-item mb-2 pl-4">
                               <strong>{i + 1}. {name}</strong>
-                              {desc && <span className="text-dark-300">: {desc}</span>}
-                              {freq && <span className="text-dark-400 italic"> ({freq})</span>}
+                              {desc && <span className="text-gray-600">: {desc}</span>}
+                              {freq && <span className="text-gray-500 italic"> ({freq})</span>}
                             </div>
                           );
                         })
@@ -1199,54 +1199,54 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               <table className="schedule-table w-full mb-6">
                 <tbody>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700 w-2/5">Frequency:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200 w-2/5">Frequency:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
                         <input 
                           type="text" 
                           value={editData.schedule_frequency}
                           onChange={(e) => setEditData({ ...editData, schedule_frequency: e.target.value })}
-                          className="w-full px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                          className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                         />
                       ) : data.schedule_frequency}
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Days:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Days:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
                         <input 
                           type="text" 
                           value={editData.schedule_days}
                           onChange={(e) => setEditData({ ...editData, schedule_days: e.target.value })}
-                          className="w-full px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                          className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                           placeholder="Monday, Wednesday, Friday"
                         />
                       ) : data.schedule_days}
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Preferred Time:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Preferred Time:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
                         <input 
                           type="text" 
                           value={editData.schedule_time}
                           onChange={(e) => setEditData({ ...editData, schedule_time: e.target.value })}
-                          className="w-full px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                          className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                         />
                       ) : data.schedule_time}
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Hours per Week:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Hours per Week:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
                         <input 
                           type="number" 
                           value={editData.weekly_hours}
                           onChange={(e) => setEditData({ ...editData, weekly_hours: parseFloat(e.target.value) || 0 })}
-                          className="w-24 px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                          className="w-24 px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                         />
                       ) : data.weekly_hours}
                     </td>
@@ -1261,8 +1261,8 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               <table className="rates-table w-full mb-6">
                 <tbody>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700 w-1/2">Hourly Rate:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200 w-1/2">Hourly Rate:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
                         <div className="flex items-center gap-1">
                           <span>$</span>
@@ -1271,7 +1271,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                             step="0.01"
                             value={editData.hourly_rate}
                             onChange={(e) => setEditData({ ...editData, hourly_rate: parseFloat(e.target.value) || 0 })}
-                            className="w-24 px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                            className="w-24 px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                           />
                         </div>
                       ) : (
@@ -1280,12 +1280,12 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Estimated Weekly Cost:</td>
-                    <td className="p-3 border border-dark-700">${data.weekly_estimate.toFixed(2)}</td>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Estimated Weekly Cost:</td>
+                    <td className="p-3 border border-gray-200">${data.weekly_estimate.toFixed(2)}</td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Estimated Monthly Cost:</td>
-                    <td className="p-3 border border-dark-700 font-bold">${data.monthly_estimate.toFixed(2)}</td>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Estimated Monthly Cost:</td>
+                    <td className="p-3 border border-gray-200 font-bold">${data.monthly_estimate.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -1299,7 +1299,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   <textarea 
                     value={editData.special_requirements}
                     onChange={(e) => setEditData({ ...editData, special_requirements: e.target.value })}
-                    className="w-full px-3 py-2 border border-dark-600 rounded-lg text-sm bg-dark-800 min-h-[80px]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white min-h-[80px]"
                     placeholder="Enter special requirements (one per line)"
                   />
                 ) : (
@@ -1323,7 +1323,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   <textarea 
                     value={editData.safety_concerns}
                     onChange={(e) => setEditData({ ...editData, safety_concerns: e.target.value })}
-                    className="w-full px-3 py-2 border border-dark-600 rounded-lg text-sm bg-dark-800 min-h-[80px]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white min-h-[80px]"
                     placeholder="Enter safety concerns (one per line)"
                   />
                 ) : (
@@ -1342,24 +1342,24 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               <h3 className="section-title text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
                 8. SIGNATURES
               </h3>
-              <p className="text-dark-300 mb-6">
+              <p className="text-gray-600 mb-6">
                 By signing below, both parties agree to the terms of this Service Agreement.
               </p>
               <table className="signature-table w-full mt-8">
                 <tbody>
                   <tr>
                     <td className="p-5 align-top w-2/5">
-                      <p className="text-dark-400 mb-10">Client / Authorized Representative:</p>
+                      <p className="text-gray-500 mb-10">Client / Authorized Representative:</p>
                       <div className="signature-line border-b-2 border-gray-800 h-10 mb-1"></div>
-                      <p className="signature-label text-dark-400 text-sm">Signature</p>
+                      <p className="signature-label text-gray-500 text-sm">Signature</p>
                       <p className="mt-4">Printed Name: <u className="ml-2">{data.client_name}</u></p>
                       <p className="mt-2">Date: _______________________</p>
                     </td>
                     <td className="w-1/5"></td>
                     <td className="p-5 align-top w-2/5">
-                      <p className="text-dark-400 mb-10">Agency Representative:</p>
+                      <p className="text-gray-500 mb-10">Agency Representative:</p>
                       <div className="signature-line border-b-2 border-gray-800 h-10 mb-1"></div>
-                      <p className="signature-label text-dark-400 text-sm">Signature</p>
+                      <p className="signature-label text-gray-500 text-sm">Signature</p>
                       <p className="mt-4">Printed Name: _______________________</p>
                       <p className="mt-2">Date: _______________________</p>
                     </td>
@@ -1370,7 +1370,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
             {/* Footer */}
             <div 
-              className="contract-footer text-center py-4 px-6 text-sm text-dark-400 border-t border-dark-700"
+              className="contract-footer text-center py-4 px-6 text-sm text-gray-500 border-t border-gray-200"
             >
               {data.agency_name} | {data.agency_phone} | {data.agency_email}
             </div>
@@ -1384,15 +1384,15 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               style={{ borderColor: agency.primary_color, background: 'linear-gradient(to right, #f0f4ff, #e0e7ff)' }}
             >
               {data.agency_logo && (
-                <img src={data.agency_logo} alt="Logo" className="mx-auto mb-3 rounded-lg bg-dark-800 p-2" style={{ maxWidth: '80px', maxHeight: '80px' }} />
+                <img src={data.agency_logo} alt="Logo" className="mx-auto mb-3 rounded-lg bg-white p-2" style={{ maxWidth: '80px', maxHeight: '80px' }} />
               )}
               <h1 className="text-2xl font-bold mb-1" style={{ color: agency.primary_color }}>{data.agency_name}</h1>
-              <p className="text-dark-300 text-sm">{data.agency_full_address}</p>
-              <p className="text-dark-300 text-sm">Phone: {data.agency_phone} | Email: {data.agency_email}</p>
+              <p className="text-gray-600 text-sm">{data.agency_full_address}</p>
+              <p className="text-gray-600 text-sm">Phone: {data.agency_phone} | Email: {data.agency_email}</p>
             </div>
 
             {/* Proposal Body */}
-            <div className="p-8 text-dark-100">
+            <div className="p-8 text-gray-800">
               {/* Title */}
               <h2 
                 className="text-center text-xl font-bold pb-3 mb-2 border-b-2"
@@ -1408,31 +1408,31 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   />
                 ) : data.documentTitle}
               </h2>
-              <p className="text-center text-dark-400 italic mb-1">Prepared for: <strong className="text-dark-100">{data.client_name}</strong></p>
-              <p className="text-center text-dark-400 italic mb-8">Date: {data.effective_date}</p>
+              <p className="text-center text-gray-500 italic mb-1">Prepared for: <strong className="text-gray-800">{data.client_name}</strong></p>
+              <p className="text-center text-gray-500 italic mb-8">Date: {data.effective_date}</p>
 
               {/* Executive Summary */}
               <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
                 EXECUTIVE SUMMARY
               </h3>
-              <div className="bg-dark-900 p-4 rounded-lg mb-6 border border-dark-700">
+              <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
                 {editMode ? (
                   <textarea 
                     value={editData.executiveSummary}
                     onChange={(e) => setEditData({ ...editData, executiveSummary: e.target.value })}
-                    className="w-full px-3 py-2 border border-dark-600 rounded-lg text-sm bg-dark-800 min-h-[100px]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white min-h-[100px]"
                     placeholder="Executive summary of care proposal..."
                   />
                 ) : (
-                  <p className="text-dark-200 text-sm leading-relaxed">{data.executiveSummary}</p>
+                  <p className="text-gray-700 text-sm leading-relaxed">{data.executiveSummary}</p>
                 )}
                 <div className="mt-3 flex items-center gap-2">
-                  <span className="text-dark-50 font-bold text-sm">Care Need Level:</span>
+                  <span className="text-gray-900 font-bold text-sm">Care Need Level:</span>
                   {editMode ? (
                     <select 
                       value={editData.care_level}
                       onChange={(e) => setEditData({ ...editData, care_level: e.target.value })}
-                      className="px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                      className="px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                     >
                       <option value="LOW">LOW</option>
                       <option value="MODERATE">MODERATE</option>
@@ -1457,7 +1457,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   <div className="space-y-2">
                     {editData.services.map((service: any, idx: number) => (
                       <div key={idx} className="flex items-start gap-2">
-                        <span className="text-dark-400 mt-1">{idx + 1}.</span>
+                        <span className="text-gray-500 mt-1">{idx + 1}.</span>
                         <div className="flex-1 space-y-1">
                           <input 
                             type="text"
@@ -1467,7 +1467,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                               newServices[idx] = { ...newServices[idx], name: e.target.value };
                               setEditData({ ...editData, services: newServices });
                             }}
-                            className="w-full px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800 font-medium"
+                            className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white font-medium"
                             placeholder="Service name"
                           />
                           <input 
@@ -1478,7 +1478,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                               newServices[idx] = { ...newServices[idx], description: e.target.value };
                               setEditData({ ...editData, services: newServices });
                             }}
-                            className="w-full px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800"
+                            className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white"
                             placeholder="Description (optional)"
                           />
                         </div>
@@ -1509,13 +1509,13 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                           const freq = typeof s === 'string' ? '' : s.frequency;
                           return (
                             <div key={i} className="mb-3 pl-4">
-                              <strong className="text-dark-100">{i + 1}. {name}</strong>
-                              {desc && <p className="text-dark-300 text-sm mt-0.5">{desc}</p>}
-                              {freq && <p className="text-dark-400 text-xs italic">{freq}</p>}
+                              <strong className="text-gray-800">{i + 1}. {name}</strong>
+                              {desc && <p className="text-gray-600 text-sm mt-0.5">{desc}</p>}
+                              {freq && <p className="text-gray-500 text-xs italic">{freq}</p>}
                             </div>
                           );
                         })
-                      : <p className="text-dark-400">Services to be determined based on care plan.</p>}
+                      : <p className="text-gray-500">Services to be determined based on care plan.</p>}
                   </div>
                 )}
               </div>
@@ -1527,34 +1527,34 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               <table className="w-full mb-6 border-collapse">
                 <tbody>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700 w-2/5">Frequency:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200 w-2/5">Frequency:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
-                        <input type="text" value={editData.schedule_frequency} onChange={(e) => setEditData({ ...editData, schedule_frequency: e.target.value })} className="w-full px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800" />
+                        <input type="text" value={editData.schedule_frequency} onChange={(e) => setEditData({ ...editData, schedule_frequency: e.target.value })} className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" />
                       ) : data.schedule_frequency}
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Days:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Days:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
-                        <input type="text" value={editData.schedule_days} onChange={(e) => setEditData({ ...editData, schedule_days: e.target.value })} className="w-full px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800" placeholder="Monday, Wednesday, Friday" />
+                        <input type="text" value={editData.schedule_days} onChange={(e) => setEditData({ ...editData, schedule_days: e.target.value })} className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" placeholder="Monday, Wednesday, Friday" />
                       ) : data.schedule_days}
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Preferred Time:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Preferred Time:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
-                        <input type="text" value={editData.schedule_time} onChange={(e) => setEditData({ ...editData, schedule_time: e.target.value })} className="w-full px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800" />
+                        <input type="text" value={editData.schedule_time} onChange={(e) => setEditData({ ...editData, schedule_time: e.target.value })} className="w-full px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" />
                       ) : data.schedule_time}
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Hours per Week:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Hours per Week:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
-                        <input type="number" value={editData.weekly_hours} onChange={(e) => setEditData({ ...editData, weekly_hours: parseFloat(e.target.value) || 0 })} className="w-24 px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800" />
+                        <input type="number" value={editData.weekly_hours} onChange={(e) => setEditData({ ...editData, weekly_hours: parseFloat(e.target.value) || 0 })} className="w-24 px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" />
                       ) : data.weekly_hours}
                     </td>
                   </tr>
@@ -1568,12 +1568,12 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               <table className="w-full mb-6 border-collapse">
                 <tbody>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700 w-1/2">Hourly Rate:</td>
-                    <td className="p-3 border border-dark-700">
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200 w-1/2">Hourly Rate:</td>
+                    <td className="p-3 border border-gray-200">
                       {editMode ? (
                         <div className="flex items-center gap-1">
                           <span>$</span>
-                          <input type="number" step="0.01" value={editData.hourly_rate} onChange={(e) => setEditData({ ...editData, hourly_rate: parseFloat(e.target.value) || 0 })} className="w-24 px-3 py-1 border border-dark-600 rounded-lg text-sm bg-dark-800" />
+                          <input type="number" step="0.01" value={editData.hourly_rate} onChange={(e) => setEditData({ ...editData, hourly_rate: parseFloat(e.target.value) || 0 })} className="w-24 px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white" />
                         </div>
                       ) : (
                         <span className="text-green-600 font-bold text-lg">${data.hourly_rate.toFixed(2)}</span>
@@ -1581,12 +1581,12 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Estimated Weekly Cost:</td>
-                    <td className="p-3 border border-dark-700">${data.weekly_estimate.toFixed(2)}</td>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Estimated Weekly Cost:</td>
+                    <td className="p-3 border border-gray-200">${data.weekly_estimate.toFixed(2)}</td>
                   </tr>
                   <tr>
-                    <td className="p-3 bg-dark-900 font-bold border border-dark-700">Estimated Monthly Cost:</td>
-                    <td className="p-3 border border-dark-700 font-bold">${data.monthly_estimate.toFixed(2)}</td>
+                    <td className="p-3 bg-gray-50 font-bold border border-gray-200">Estimated Monthly Cost:</td>
+                    <td className="p-3 border border-gray-200 font-bold">${data.monthly_estimate.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -1600,7 +1600,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   <textarea 
                     value={editData.whyChooseUs}
                     onChange={(e) => setEditData({ ...editData, whyChooseUs: e.target.value })}
-                    className="w-full px-3 py-2 border border-dark-600 rounded-lg text-sm bg-dark-800 min-h-[100px]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white min-h-[100px]"
                     placeholder="One benefit per line (start with • or -)"
                   />
                 ) : (
@@ -1630,33 +1630,33 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               </div>
 
               {/* Contact CTA */}
-              <div className="text-center p-6 bg-dark-900 rounded-lg mb-8 border border-dark-700">
-                <p className="text-dark-200 text-sm mb-2">Questions about this proposal? We&apos;re here to help.</p>
-                <p className="text-dark-50 font-medium">{data.agency_phone} | {data.agency_email}</p>
+              <div className="text-center p-6 bg-gray-50 rounded-lg mb-8 border border-gray-200">
+                <p className="text-gray-700 text-sm mb-2">Questions about this proposal? We&apos;re here to help.</p>
+                <p className="text-gray-900 font-medium">{data.agency_phone} | {data.agency_email}</p>
               </div>
 
               {/* Acceptance */}
               <h3 className="text-base font-bold mb-3 pb-2 border-b" style={{ color: agency.primary_color }}>
                 ACCEPTANCE
               </h3>
-              <p className="text-dark-300 mb-6 text-sm">
+              <p className="text-gray-600 mb-6 text-sm">
                 By signing below, I acknowledge receipt of this proposal and wish to proceed with the outlined care services.
               </p>
               <table className="w-full mt-4">
                 <tbody>
                   <tr>
                     <td className="p-5 align-top w-2/5">
-                      <p className="text-dark-400 mb-10">Client / Authorized Representative:</p>
+                      <p className="text-gray-500 mb-10">Client / Authorized Representative:</p>
                       <div className="border-b-2 border-gray-800 h-10 mb-1"></div>
-                      <p className="text-dark-400 text-sm">Signature</p>
+                      <p className="text-gray-500 text-sm">Signature</p>
                       <p className="mt-4">Printed Name: <u className="ml-2">{data.client_name}</u></p>
                       <p className="mt-2">Date: _______________________</p>
                     </td>
                     <td className="w-1/5"></td>
                     <td className="p-5 align-top w-2/5">
-                      <p className="text-dark-400 mb-10">Agency Representative:</p>
+                      <p className="text-gray-500 mb-10">Agency Representative:</p>
                       <div className="border-b-2 border-gray-800 h-10 mb-1"></div>
-                      <p className="text-dark-400 text-sm">Signature</p>
+                      <p className="text-gray-500 text-sm">Signature</p>
                       <p className="mt-4">Printed Name: _______________________</p>
                       <p className="mt-2">Date: _______________________</p>
                     </td>
@@ -1666,7 +1666,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
             </div>
 
             {/* Proposal Footer */}
-            <div className="text-center py-4 px-6 text-sm text-dark-400 border-t border-dark-700">
+            <div className="text-center py-4 px-6 text-sm text-gray-500 border-t border-gray-200">
               {data.agency_name} | {data.agency_phone} | {data.agency_email}
             </div>
           </div>
@@ -1681,25 +1681,25 @@ export default function ContractPreview({ contract, client, visitId, onContractU
           onClick={() => setShowEmailModal(false)}
         >
           <div 
-            className="bg-dark-800 rounded-xl border border-dark-700 w-full max-w-lg overflow-hidden"
+            className="bg-white rounded-xl border border-slate-200 w-full max-w-lg overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-dark-700">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
                   <Mail className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-dark-50">Email Contract</h3>
-                  <p className="text-xs text-dark-400">Send the contract PDF as an attachment</p>
+                  <h3 className="text-lg font-semibold text-slate-900">Email Contract</h3>
+                  <p className="text-xs text-slate-500">Send the contract PDF as an attachment</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowEmailModal(false)}
-                className="p-2 hover:bg-dark-700/30 rounded-lg transition"
+                className="p-2 hover:bg-slate-50 rounded-lg transition"
               >
-                <X className="w-5 h-5 text-dark-400" />
+                <X className="w-5 h-5 text-slate-500" />
               </button>
             </div>
 
@@ -1710,70 +1710,70 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                   <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Check className="w-8 h-8 text-emerald-600" />
                   </div>
-                  <h4 className="text-lg font-semibold text-dark-50 mb-2">Email Sent!</h4>
-                  <p className="text-dark-400">The contract has been sent successfully.</p>
+                  <h4 className="text-lg font-semibold text-slate-900 mb-2">Email Sent!</h4>
+                  <p className="text-slate-500">The contract has been sent successfully.</p>
                 </div>
               ) : (
                 <>
                   <div>
-                    <label className="block text-dark-400 text-sm mb-1.5">Recipient Email *</label>
+                    <label className="block text-slate-500 text-sm mb-1.5">Recipient Email *</label>
                     <input
                       type="email"
                       value={emailForm.recipient_email}
                       onChange={(e) => setEmailForm({ ...emailForm, recipient_email: e.target.value })}
                       placeholder="client@email.com"
-                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-dark-400 text-sm mb-1.5">Recipient Name</label>
+                    <label className="block text-slate-500 text-sm mb-1.5">Recipient Name</label>
                     <input
                       type="text"
                       value={emailForm.recipient_name}
                       onChange={(e) => setEmailForm({ ...emailForm, recipient_name: e.target.value })}
                       placeholder="John Smith"
-                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-dark-400 text-sm mb-1.5">CC Email (optional)</label>
+                    <label className="block text-slate-500 text-sm mb-1.5">CC Email (optional)</label>
                     <input
                       type="email"
                       value={emailForm.cc_email}
                       onChange={(e) => setEmailForm({ ...emailForm, cc_email: e.target.value })}
                       placeholder="copy@email.com"
-                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-dark-400 text-sm mb-1.5">Subject</label>
+                    <label className="block text-slate-500 text-sm mb-1.5">Subject</label>
                     <input
                       type="text"
                       value={emailForm.subject}
                       onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
                       placeholder="Service Agreement"
-                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-dark-400 text-sm mb-1.5">Personal Message (optional)</label>
+                    <label className="block text-slate-500 text-sm mb-1.5">Personal Message (optional)</label>
                     <textarea
                       value={emailForm.message}
                       onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
                       rows={3}
                       placeholder="Add a personal note to accompany the contract..."
-                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 p-3 bg-dark-700 rounded-lg">
+                  <div className="flex items-center gap-2 p-3 bg-slate-100 rounded-lg">
                     <FileText className="w-5 h-5 text-purple-600" />
-                    <span className="text-dark-300 text-sm">Service_Agreement_{(client?.full_name || 'Client').replace(/ /g, '_')}.pdf</span>
-                    <span className="text-dark-400 text-xs ml-auto">Attached</span>
+                    <span className="text-slate-600 text-sm">Service_Agreement_{(client?.full_name || 'Client').replace(/ /g, '_')}.pdf</span>
+                    <span className="text-slate-400 text-xs ml-auto">Attached</span>
                   </div>
 
                   {error && (
@@ -1788,10 +1788,10 @@ export default function ContractPreview({ contract, client, visitId, onContractU
 
             {/* Modal Footer */}
             {!emailSent && (
-              <div className="flex justify-end gap-3 p-4 border-t border-dark-700">
+              <div className="flex justify-end gap-3 p-4 border-t border-slate-200">
                 <button
                   onClick={() => setShowEmailModal(false)}
-                  className="px-4 py-2 bg-dark-900 text-dark-300 rounded-lg hover:bg-dark-700/50 transition"
+                  className="px-4 py-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 transition"
                 >
                   Cancel
                 </button>

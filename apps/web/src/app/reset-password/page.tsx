@@ -70,14 +70,14 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8 justify-center">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center overflow-hidden">
             <Image src="/hand-icon-white.png" alt="PalmCare AI" width={36} height={36} className="object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-dark-50">PalmCare AI</h1>
+          <h1 className="text-2xl font-bold text-slate-900">PalmCare AI</h1>
         </div>
 
         {success ? (
@@ -86,8 +86,8 @@ export default function ResetPasswordPage() {
             <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-dark-50 mb-2">Password Reset!</h2>
-            <p className="text-dark-300 mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Password Reset!</h2>
+            <p className="text-slate-600 mb-6">
               Your password has been updated successfully. 
               You&apos;ll be redirected to sign in momentarily.
             </p>
@@ -105,8 +105,8 @@ export default function ResetPasswordPage() {
               <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-8 h-8 text-primary-400" />
               </div>
-              <h2 className="text-2xl font-bold text-dark-50 mb-2">Set New Password</h2>
-              <p className="text-dark-300 text-sm">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Set New Password</h2>
+              <p className="text-slate-600 text-sm">
                 Enter your new password below. Make sure it&apos;s at least 6 characters.
               </p>
             </div>
@@ -120,7 +120,7 @@ export default function ResetPasswordPage() {
               )}
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-dark-200 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
                   New Password
                 </label>
                 <div className="relative">
@@ -139,7 +139,7 @@ export default function ResetPasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-dark-200 transition"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
               </div>
 
               <div>
-                <label htmlFor="confirm-password" className="block text-sm font-medium text-dark-200 mb-2">
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-slate-700 mb-2">
                   Confirm New Password
                 </label>
                 <input
@@ -192,7 +192,7 @@ export default function ResetPasswordPage() {
               >
                 Request a new reset link
               </Link>
-              <span className="text-dark-400 mx-2">|</span>
+              <span className="text-slate-300 mx-2">|</span>
               <Link
                 href="/login"
                 className="text-primary-400 hover:text-primary-300 text-sm font-medium"

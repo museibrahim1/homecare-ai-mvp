@@ -101,8 +101,8 @@ const STEPS: SpotlightStep[] = [
     title: 'Profile & Settings',
     description: 'Access your profile, agency settings, and this tour anytime from here. Select "App Tour" to replay this walkthrough whenever you need a refresher.',
     icon: Settings,
-    iconBg: 'bg-dark-700',
-    iconColor: 'text-dark-300',
+    iconBg: 'bg-slate-100',
+    iconColor: 'text-slate-600',
     preferredSide: 'bottom',
   },
   {
@@ -324,21 +324,21 @@ export default function WalkthroughGuide() {
         }}
       >
         <div
-          className="bg-dark-800 border border-dark-700 rounded-2xl shadow-lg overflow-hidden"
+          className="bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Progress bar */}
-          <div className="h-1 bg-dark-900">
+          <div className="h-1 bg-slate-50">
             <div className="h-full bg-gradient-to-r from-primary-500 to-accent-cyan transition-all duration-500" style={{ width: `${pct}%` }} />
           </div>
 
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-3.5 pb-0">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-3.5 h-3.5 text-dark-400" />
-              <span className="text-[11px] font-medium text-dark-400 uppercase tracking-wider">{step + 1} / {STEPS.length}</span>
+              <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">{step + 1} / {STEPS.length}</span>
             </div>
-            <button onClick={close} className="p-1.5 text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 rounded-lg transition-colors">
+            <button onClick={close} className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -352,8 +352,8 @@ export default function WalkthroughGuide() {
               <h2 className={`text-base font-bold ${isLast ? 'text-emerald-600' : 'text-white'}`}>{cur.title}</h2>
             </div>
 
-            <p className="text-dark-300 text-sm leading-relaxed mb-2.5">
-              {cur.description.split('**').map((p, i) => i % 2 === 1 ? <strong key={i} className="text-dark-50 font-semibold">{p}</strong> : p)}
+            <p className="text-slate-600 text-sm leading-relaxed mb-2.5">
+              {cur.description.split('**').map((p, i) => i % 2 === 1 ? <strong key={i} className="text-slate-900 font-semibold">{p}</strong> : p)}
             </p>
 
             {cur.tip && (
@@ -365,12 +365,12 @@ export default function WalkthroughGuide() {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-5 py-3 border-t border-dark-700">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-slate-200">
             <div>
               {isFirst ? (
-                <button onClick={close} className="text-xs text-dark-400 hover:text-dark-300 transition-colors">Skip tour</button>
+                <button onClick={close} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">Skip tour</button>
               ) : (
-                <button onClick={() => go(-1)} className="flex items-center gap-1 text-xs text-dark-400 hover:text-dark-50 transition-colors">
+                <button onClick={() => go(-1)} className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 transition-colors">
                   <ChevronLeft className="w-3.5 h-3.5" /> Back
                 </button>
               )}
@@ -378,7 +378,7 @@ export default function WalkthroughGuide() {
 
             <div className="flex items-center gap-1">
               {STEPS.map((_, i) => (
-                <div key={i} className={`rounded-full transition-all duration-300 ${i === step ? 'w-4 h-1.5 bg-primary-500' : i < step ? 'w-1.5 h-1.5 bg-primary-500/40' : 'w-1.5 h-1.5 bg-dark-700'}`} />
+                <div key={i} className={`rounded-full transition-all duration-300 ${i === step ? 'w-4 h-1.5 bg-primary-500' : i < step ? 'w-1.5 h-1.5 bg-primary-500/40' : 'w-1.5 h-1.5 bg-slate-100'}`} />
               ))}
             </div>
 
@@ -387,7 +387,7 @@ export default function WalkthroughGuide() {
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 isLast ? 'bg-green-500 hover:bg-green-600 text-white'
                 : isFirst ? 'bg-primary-500 hover:bg-primary-600 text-white'
-                : 'bg-dark-900 hover:bg-dark-700/50 text-white'
+                : 'bg-slate-50 hover:bg-slate-100 text-white'
               }`}
             >
               {isLast ? <>Get Started <ArrowRight className="w-3.5 h-3.5" /></>

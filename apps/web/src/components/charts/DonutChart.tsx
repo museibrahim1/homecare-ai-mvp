@@ -84,10 +84,10 @@ export default function DonutChart({
       {(centerLabel || centerValue) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {centerValue !== undefined && (
-            <span className="text-2xl font-bold text-dark-50">{centerValue}</span>
+            <span className="text-2xl font-bold text-slate-900">{centerValue}</span>
           )}
           {centerLabel && (
-            <span className="text-[11px] text-dark-400">{centerLabel}</span>
+            <span className="text-[11px] text-slate-400">{centerLabel}</span>
           )}
         </div>
       )}
