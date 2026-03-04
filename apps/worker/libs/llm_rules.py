@@ -379,7 +379,7 @@ def get_rules_for_prompt() -> str:
 - LOW Care Level: ${HOURLY_RATES['LOW']:.2f}/hour
 - Overtime (weekends/holidays): {OVERTIME_MULTIPLIER}x regular rate
 
-### Medicaid Rates (Fixed - Not adjustable)
+### Medicaid Rates (Default — agency can customize)
 - Companion Care: ${MEDICAID_RATES['COMPANION']:.2f}/hour (supervision, socialization, light housekeeping)
 - Personal Care: ${MEDICAID_RATES['PERSONAL_CARE']:.2f}/hour (ADLs, medication, health monitoring)
 - Hospice: ${MEDICAID_RATES['HOSPICE']:.2f}/hour

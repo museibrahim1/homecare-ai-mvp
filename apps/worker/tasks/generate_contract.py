@@ -60,7 +60,31 @@ def generate_service_contract(self, visit_id: str):
         client = visit.client
         if not client:
             raise ValueError(f"No client found for visit: {visit_id}")
-        
+
+        # Resolve agency state and info from business or user record
+        agency_state = None
+        agency_user = None
+        agency_settings = None
+        agency_business = None
+        try:
+            from models import User, Business, BusinessUser, AgencySettings
+            agency_user = db.query(User).filter(User.id == visit.user_id).first()
+            if agency_user:
+                agency_settings = db.query(AgencySettings).filter(AgencySettings.user_id == agency_user.id).first()
+                if agency_settings and agency_settings.state:
+                    agency_state = agency_settings.state
+                if not agency_state and hasattr(agency_user, "business_id") and agency_user.business_id:
+                    agency_business = db.query(Business).filter(Business.id == agency_user.business_id).first()
+                    if agency_business:
+                        agency_state = agency_business.state or agency_business.state_of_incorporation
+        except Exception as e:
+            logger.warning(f"Could not resolve agency state: {e}")
+
+        if agency_state:
+            logger.info(f"Agency state resolved: {agency_state}")
+        else:
+            logger.info("Agency state not found — using general assessment rules")
+
         # Get transcript segments
         segments = db.query(TranscriptSegment).filter(
             TranscriptSegment.visit_id == visit.id
@@ -99,6 +123,7 @@ def generate_service_contract(self, visit_id: str):
         assessment_data = llm_service.analyze_transcript_for_contract(
             transcript_text=transcript_text,
             client_info=client_info,
+            agency_state=agency_state,
         )
         
         # Get care need level and client profile early - needed for rate calculation
@@ -392,11 +417,27 @@ def generate_service_contract(self, visit_id: str):
             "terms_and_conditions": "",  # Use default from template
         }
         
+        # Build agency info from DB (AgencySettings or Business record)
+        agency_info_dict = None
+        if agency_settings:
+            agency_info_dict = {
+                "name": agency_settings.name or "Home Care Services Agency",
+                "address": ", ".join(filter(None, [agency_settings.address, agency_settings.city, agency_settings.state, agency_settings.zip_code])) or "",
+                "phone": agency_settings.phone or "",
+            }
+        elif agency_business:
+            agency_info_dict = {
+                "name": agency_business.name or agency_business.dba_name or "Home Care Services Agency",
+                "address": ", ".join(filter(None, [agency_business.address, agency_business.city, agency_business.state, agency_business.zip_code])) or "",
+                "phone": agency_business.phone or "",
+            }
+
         # Generate contract text (for preview/display)
         contract_text = generate_contract_from_template(
             contract_data=contract_data,
             client_info=client_info,
             assessment_data=assessment_data,
+            agency_info=agency_info_dict,
         )
         
         # =====================================================================

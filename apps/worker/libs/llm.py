@@ -1161,17 +1161,28 @@ class LLMService:
             "safety_observations": "Home environment safe, no hazards noted"
         })
     
-    def analyze_transcript_for_contract(self, transcript_text: str, client_info: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze_transcript_for_contract(self, transcript_text: str, client_info: Dict[str, Any], agency_state: str = None) -> Dict[str, Any]:
         """
         Analyze a care assessment transcript to extract contract-relevant information.
-        Based on Nebraska DHHS Medicaid billing and Iowa Case Management Assessment (Form 470-4694).
+        Dynamically loads the correct state's assessment requirements, billing codes,
+        and regulatory rules based on the agency's location.
         Uses temperature=0 for consistent, deterministic results.
         """
         # Save original temperature and use 0 for consistent extraction
         original_temp = self.temperature
         self.temperature = 0.0  # Deterministic - same input = same output
+
+        # Load state-specific rules
+        state_context = ""
+        try:
+            from libs.state_rules import get_state_rules_for_prompt
+            if agency_state:
+                state_context = get_state_rules_for_prompt(agency_state)
+        except ImportError:
+            pass
         
-        system_prompt = """You are a HOME CARE assessment specialist trained on Nebraska DHHS Medicaid billing requirements and Iowa Case Management Comprehensive Assessment (Form 470-4694).
+        system_prompt = f"""You are a HOME CARE assessment specialist with expertise in all 50 US states' Medicaid billing requirements, HCBS waiver programs, and home care assessment standards.
+{state_context}
 
 ## YOUR MISSION: EXTRACT COMPREHENSIVE CARE ASSESSMENT DATA
 
@@ -1683,8 +1694,8 @@ Return ONLY valid JSON with ALL fields populated based on transcript analysis:
         "maintenance_goals": ["Ongoing goals to prevent decline"]
     },
     "billing_codes": {
-        "primary_codes": ["Nebraska Medicaid codes that apply: G0156, S9122, etc."],
-        "code_rationale": "Why these codes apply"
+        "primary_codes": ["State-specific Medicaid billing codes that apply based on services identified"],
+        "code_rationale": "Why these codes apply under this state's Medicaid program"
     }
 }
 
