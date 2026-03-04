@@ -228,7 +228,7 @@ export default function NewContractPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -236,15 +236,15 @@ export default function NewContractPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-dark-900">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center p-8">
           <div className="text-center">
             <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <Check className="w-10 h-10 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Contract Created!</h2>
-            <p className="text-slate-500 mb-4">
+            <h2 className="text-2xl font-bold text-dark-50 mb-2">Contract Created!</h2>
+            <p className="text-dark-400 mb-4">
               Your contract has been saved as a draft. Redirecting to proposals...
             </p>
             <Loader2 className="w-5 h-5 text-primary-400 animate-spin mx-auto" />
@@ -255,7 +255,7 @@ export default function NewContractPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
 
       <main className="flex-1 p-8 overflow-y-auto">
@@ -264,7 +264,7 @@ export default function NewContractPage() {
           <div className="mb-8">
             <button
               onClick={() => router.push('/proposals')}
-              className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition mb-4"
+              className="flex items-center gap-2 text-dark-400 hover:text-dark-50 transition mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Proposals
@@ -274,8 +274,8 @@ export default function NewContractPage() {
                 <FileText className="w-5 h-5 text-primary-400" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Create Contract</h1>
-                <p className="text-slate-500 text-sm">
+                <h1 className="text-2xl font-bold text-dark-50">Create Contract</h1>
+                <p className="text-dark-400 text-sm">
                   Build a service agreement manually — no pipeline needed
                 </p>
               </div>
@@ -293,21 +293,21 @@ export default function NewContractPage() {
           {/* Form */}
           <div className="space-y-6">
             {/* Section 1: Client & Title */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-dark-50 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-primary-400" />
                 Client & Title
               </h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                  <label className="block text-dark-300 text-sm font-medium mb-2">
                     Client *
                   </label>
                   {loadingClients ? (
-                    <div className="flex items-center gap-2 p-3 bg-slate-100 rounded-lg">
-                      <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
-                      <span className="text-slate-500">Loading clients...</span>
+                    <div className="flex items-center gap-2 p-3 bg-dark-700 rounded-lg">
+                      <Loader2 className="w-4 h-4 animate-spin text-dark-400" />
+                      <span className="text-dark-400">Loading clients...</span>
                     </div>
                   ) : clients.length > 0 ? (
                     <select
@@ -318,7 +318,7 @@ export default function NewContractPage() {
                           setTimeout(autoGenerateTitle, 0);
                         }
                       }}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
                     >
                       <option value="">Select a client...</option>
                       {clients.map((client) => (
@@ -329,8 +329,8 @@ export default function NewContractPage() {
                       ))}
                     </select>
                   ) : (
-                    <div className="p-4 bg-slate-100 rounded-lg text-center">
-                      <p className="text-slate-500 text-sm mb-2">No clients yet</p>
+                    <div className="p-4 bg-dark-700 rounded-lg text-center">
+                      <p className="text-dark-400 text-sm mb-2">No clients yet</p>
                       <button
                         onClick={() => router.push('/clients')}
                         className="text-primary-400 text-sm hover:underline"
@@ -342,7 +342,7 @@ export default function NewContractPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                  <label className="block text-dark-300 text-sm font-medium mb-2">
                     Contract Title *
                   </label>
                   <div className="flex gap-2">
@@ -351,12 +351,12 @@ export default function NewContractPage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Personal Care Service Agreement — Jane Doe"
-                      className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="flex-1 px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                     {selectedClient && (
                       <button
                         onClick={autoGenerateTitle}
-                        className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-900 hover:border-slate-300 transition text-sm whitespace-nowrap"
+                        className="px-3 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-dark-400 hover:text-dark-50 hover:border-dark-600 transition text-sm whitespace-nowrap"
                         title="Auto-generate title from services and client"
                       >
                         Auto
@@ -369,18 +369,18 @@ export default function NewContractPage() {
 
             {/* Section: Template Selection */}
             {templates.length > 0 && (
-              <div className="bg-white border border-slate-200 rounded-xl p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+                <h2 className="text-lg font-semibold text-dark-50 mb-4 flex items-center gap-2">
                   <Layers className="w-5 h-5 text-cyan-600" />
                   OCR Template
                 </h2>
-                <p className="text-slate-500 text-sm mb-3">
+                <p className="text-dark-400 text-sm mb-3">
                   Select a scanned template to auto-fill the contract with OCR-mapped fields.
                 </p>
                 <select
                   value={selectedTemplate}
                   onChange={(e) => setSelectedTemplate(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
                 >
                   <option value="">No template (manual entry)</option>
                   {templates.map((tmpl) => (
@@ -400,15 +400,15 @@ export default function NewContractPage() {
             )}
 
             {/* Section 2: Services */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-dark-50 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
                 Services
               </h2>
 
               {/* Quick-add chips */}
               <div className="mb-4">
-                <p className="text-slate-500 text-xs mb-2">Quick add:</p>
+                <p className="text-dark-400 text-xs mb-2">Quick add:</p>
                 <div className="flex flex-wrap gap-2">
                   {COMMON_SERVICES.filter(
                     (s) => !services.some((svc) => svc.name === s)
@@ -418,7 +418,7 @@ export default function NewContractPage() {
                       <button
                         key={svc}
                         onClick={() => addCommonService(svc)}
-                        className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-full text-xs text-slate-600 hover:text-slate-900 hover:border-primary-500/50 transition"
+                        className="px-3 py-1 bg-dark-900 border border-dark-700 rounded-full text-xs text-dark-300 hover:text-dark-50 hover:border-primary-500/50 transition"
                       >
                         + {svc}
                       </button>
@@ -431,17 +431,17 @@ export default function NewContractPage() {
                 {services.map((service, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-3 bg-slate-50/30 border border-slate-200 rounded-lg p-3"
+                    className="flex items-center gap-3 bg-dark-900/30 border border-dark-700 rounded-lg p-3"
                   >
                     <input
                       type="text"
                       value={service.name}
                       onChange={(e) => updateServiceLine(index, 'name', e.target.value)}
                       placeholder="Service name"
-                      className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none text-sm"
+                      className="flex-1 px-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none text-sm"
                     />
                     <div className="flex items-center gap-1">
-                      <span className="text-slate-400 text-sm">$</span>
+                      <span className="text-dark-400 text-sm">$</span>
                       <input
                         type="number"
                         value={service.rate || ''}
@@ -449,13 +449,13 @@ export default function NewContractPage() {
                           updateServiceLine(index, 'rate', parseFloat(e.target.value) || 0)
                         }
                         placeholder="0"
-                        className="w-20 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none text-sm"
+                        className="w-20 px-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none text-sm"
                       />
                     </div>
                     <select
                       value={service.unit}
                       onChange={(e) => updateServiceLine(index, 'unit', e.target.value)}
-                      className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
+                      className="px-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-dark-50 text-sm focus:border-primary-500 focus:outline-none"
                     >
                       <option value="hour">/hr</option>
                       <option value="visit">/visit</option>
@@ -466,7 +466,7 @@ export default function NewContractPage() {
                     {services.length > 1 && (
                       <button
                         onClick={() => removeServiceLine(index)}
-                        className="p-2 text-slate-400 hover:text-red-600 transition"
+                        className="p-2 text-dark-400 hover:text-red-600 transition"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -485,8 +485,8 @@ export default function NewContractPage() {
             </div>
 
             {/* Section 3: Schedule */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-dark-50 mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-purple-600" />
                 Schedule
               </h2>
@@ -494,7 +494,7 @@ export default function NewContractPage() {
               <div className="space-y-4">
                 {/* Days of week */}
                 <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                  <label className="block text-dark-300 text-sm font-medium mb-2">
                     Service Days
                   </label>
                   <div className="flex gap-2">
@@ -505,7 +505,7 @@ export default function NewContractPage() {
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                           scheduleDays.includes(day.id)
                             ? 'bg-primary-500 text-white'
-                            : 'bg-slate-50 text-slate-500 hover:text-slate-900 border border-slate-200'
+                            : 'bg-dark-900 text-dark-400 hover:text-dark-50 border border-dark-700'
                         }`}
                       >
                         {day.label}
@@ -516,25 +516,25 @@ export default function NewContractPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-slate-600 text-sm font-medium mb-2">
+                    <label className="block text-dark-300 text-sm font-medium mb-2">
                       Start Time
                     </label>
                     <input
                       type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-600 text-sm font-medium mb-2">
+                    <label className="block text-dark-300 text-sm font-medium mb-2">
                       End Time
                     </label>
                     <input
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -542,15 +542,15 @@ export default function NewContractPage() {
             </div>
 
             {/* Section 4: Rates & Dates */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-dark-50 mb-4 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-emerald-600" />
                 Rates & Duration
               </h2>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                  <label className="block text-dark-300 text-sm font-medium mb-2">
                     Hourly Rate ($)
                   </label>
                   <input
@@ -559,11 +559,11 @@ export default function NewContractPage() {
                     onChange={(e) => setHourlyRate(parseFloat(e.target.value) || 0)}
                     placeholder="25.00"
                     step="0.01"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                  <label className="block text-dark-300 text-sm font-medium mb-2">
                     Weekly Hours
                   </label>
                   <input
@@ -571,29 +571,29 @@ export default function NewContractPage() {
                     value={weeklyHours || ''}
                     onChange={(e) => setWeeklyHours(parseFloat(e.target.value) || 0)}
                     placeholder="20"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                  <label className="block text-dark-300 text-sm font-medium mb-2">
                     Start Date
                   </label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 text-sm font-medium mb-2">
+                  <label className="block text-dark-300 text-sm font-medium mb-2">
                     End Date
                   </label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -602,12 +602,12 @@ export default function NewContractPage() {
               {hourlyRate > 0 && weeklyHours > 0 && (
                 <div className="mt-4 p-4 bg-emerald-50 border border-green-500/20 rounded-lg">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Estimated Weekly Total</span>
+                    <span className="text-dark-300">Estimated Weekly Total</span>
                     <span className="text-xl font-bold text-emerald-600">
                       ${calculateWeeklyTotal().toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
-                  <p className="text-slate-400 text-xs mt-1">
+                  <p className="text-dark-400 text-xs mt-1">
                     ${hourlyRate}/hr x {weeklyHours} hrs/week
                   </p>
                 </div>
@@ -615,44 +615,44 @@ export default function NewContractPage() {
             </div>
 
             {/* Section 5: Terms (Collapsible) */}
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl overflow-hidden">
               <button
                 onClick={() => setShowTerms(!showTerms)}
                 className="w-full p-6 flex items-center justify-between text-left"
               >
-                <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-dark-50 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-orange-600" />
                   Terms & Policies
                 </h2>
                 {showTerms ? (
-                  <ChevronUp className="w-5 h-5 text-slate-500" />
+                  <ChevronUp className="w-5 h-5 text-dark-400" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-slate-500" />
+                  <ChevronDown className="w-5 h-5 text-dark-400" />
                 )}
               </button>
 
               {showTerms && (
                 <div className="px-6 pb-6 space-y-4">
                   <div>
-                    <label className="block text-slate-600 text-sm font-medium mb-2">
+                    <label className="block text-dark-300 text-sm font-medium mb-2">
                       Cancellation Policy
                     </label>
                     <textarea
                       value={cancellationPolicy}
                       onChange={(e) => setCancellationPolicy(e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-600 text-sm font-medium mb-2">
+                    <label className="block text-dark-300 text-sm font-medium mb-2">
                       Terms & Conditions
                     </label>
                     <textarea
                       value={termsAndConditions}
                       onChange={(e) => setTermsAndConditions(e.target.value)}
                       rows={5}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
                     />
                   </div>
                 </div>
@@ -663,7 +663,7 @@ export default function NewContractPage() {
             <div className="flex items-center justify-between pt-2 pb-8">
               <button
                 onClick={() => router.push('/proposals')}
-                className="px-6 py-3 text-slate-500 hover:text-slate-900 transition"
+                className="px-6 py-3 text-dark-400 hover:text-dark-50 transition"
               >
                 Cancel
               </button>
