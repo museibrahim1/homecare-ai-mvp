@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 class APIService: ObservableObject {
     static let shared = APIService()
@@ -7,9 +8,9 @@ class APIService: ObservableObject {
     @Published var token: String? {
         didSet {
             if let token = token {
-                UserDefaults.standard.set(token, forKey: "auth_token")
+                KeychainHelper.save(token)
             } else {
-                UserDefaults.standard.removeObject(forKey: "auth_token")
+                KeychainHelper.delete()
                 clearCache()
             }
         }
@@ -42,7 +43,13 @@ class APIService: ObservableObject {
     func invalidateVisits() { cachedVisits = nil }
 
     init() {
-        token = UserDefaults.standard.string(forKey: "auth_token")
+        if let keychainToken = KeychainHelper.load() {
+            token = keychainToken
+        } else if let legacyToken = UserDefaults.standard.string(forKey: "auth_token") {
+            token = legacyToken
+            KeychainHelper.save(legacyToken)
+            UserDefaults.standard.removeObject(forKey: "auth_token")
+        }
     }
 
     private let sharedDecoder: JSONDecoder = {
@@ -590,6 +597,47 @@ enum APIError: LocalizedError {
             }
             return msg
         }
+    }
+}
+
+private enum KeychainHelper {
+    private static let service = "com.palmcare.ai"
+    private static let tokenKey = "auth_token"
+
+    static func save(_ token: String) {
+        guard let data = token.data(using: .utf8) else { return }
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: tokenKey,
+        ]
+        SecItemDelete(query as CFDictionary)
+        var addQuery = query
+        addQuery[kSecValueData as String] = data
+        SecItemAdd(addQuery as CFDictionary, nil)
+    }
+
+    static func load() -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: tokenKey,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess, let data = result as? Data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    static func delete() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: tokenKey,
+        ]
+        SecItemDelete(query as CFDictionary)
     }
 }
 
