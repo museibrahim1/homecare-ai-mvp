@@ -123,7 +123,7 @@ export default function NotesPage() {
   const [newReminderAt, setNewReminderAt] = useState('');
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const INPUT = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
+  const INPUT = "w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-dark-50 text-sm placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
 
   // ─── Data Loading ───
 
@@ -305,25 +305,25 @@ export default function NotesPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       <main className="flex-1 min-w-0 flex flex-col">
         <TopBar />
         <div className="flex-1 flex overflow-hidden">
 
           {/* ─── Left Panel: Note List ─── */}
-          <div className="w-80 xl:w-96 border-r border-slate-200 flex flex-col bg-dark-850 shrink-0">
+          <div className="w-80 xl:w-96 border-r border-dark-700 flex flex-col bg-dark-850 shrink-0">
             {/* List header */}
-            <div className="p-4 border-b border-slate-200 space-y-3">
+            <div className="p-4 border-b border-dark-700 space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-dark-50 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-primary-400" />
                   Notes & Tasks
                 </h2>
@@ -338,13 +338,13 @@ export default function NotesPage() {
 
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400" />
                 <input
                   type="text"
                   placeholder="Search notes..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                  className="w-full pl-9 pr-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-dark-50 text-sm placeholder-dark-400 focus:outline-none focus:border-primary-500"
                 />
               </div>
 
@@ -357,7 +357,7 @@ export default function NotesPage() {
                     className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
                       tagFilter === tag
                         ? 'bg-primary-50 text-primary-400 border border-primary-200'
-                        : 'bg-slate-100 text-slate-500 border border-slate-200 hover:text-slate-900'
+                        : 'bg-dark-700 text-dark-400 border border-dark-700 hover:text-dark-50'
                     }`}
                   >
                     {tag}
@@ -375,7 +375,7 @@ export default function NotesPage() {
               ) : filteredNotes.length === 0 ? (
                 <div className="text-center py-12 px-4">
                   <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-500 text-sm">No notes yet</p>
+                  <p className="text-dark-400 text-sm">No notes yet</p>
                   <button
                     onClick={() => setShowNewNote(true)}
                     className="mt-3 text-primary-400 text-sm hover:text-primary-300"
@@ -384,14 +384,14 @@ export default function NotesPage() {
                   </button>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-200/30">
+                <div className="divide-y divide-dark-700/30">
                   {filteredNotes.map(note => (
                     <button
                       key={note.id}
                       onClick={() => loadNoteDetail(note.id)}
-                      className={`w-full text-left px-4 py-3 hover:bg-slate-50/30 transition-colors border-l-[3px] ${
+                      className={`w-full text-left px-4 py-3 hover:bg-dark-700/30 transition-colors border-l-[3px] ${
                         selectedNote?.id === note.id
-                          ? `bg-slate-50/40 ${NOTE_COLORS[note.color] || NOTE_COLORS.default}`
+                          ? `bg-dark-900/40 ${NOTE_COLORS[note.color] || NOTE_COLORS.default}`
                           : `${NOTE_COLORS[note.color] || NOTE_COLORS.default}`
                       }`}
                     >
@@ -399,23 +399,23 @@ export default function NotesPage() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
                             {note.is_pinned && <Pin className="w-3 h-3 text-amber-600 shrink-0" />}
-                            <p className="text-sm font-medium text-slate-900 truncate">{note.title}</p>
+                            <p className="text-sm font-medium text-dark-50 truncate">{note.title}</p>
                           </div>
                           {note.ai_summary && (
-                            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{note.ai_summary}</p>
+                            <p className="text-xs text-dark-400 mt-0.5 line-clamp-2">{note.ai_summary}</p>
                           )}
                           {!note.ai_summary && note.content && (
-                            <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{note.content.slice(0, 100)}</p>
+                            <p className="text-xs text-dark-400 mt-0.5 line-clamp-1">{note.content.slice(0, 100)}</p>
                           )}
                         </div>
-                        <span className="text-[10px] text-slate-400 shrink-0 mt-0.5">
+                        <span className="text-[10px] text-dark-400 shrink-0 mt-0.5">
                           {timeAgo(note.updated_at)}
                         </span>
                       </div>
                       {note.tags && note.tags.length > 0 && (
                         <div className="flex gap-1 mt-1.5">
                           {note.tags.slice(0, 3).map(tag => (
-                            <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded">
+                            <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-dark-700 text-dark-400 rounded">
                               {tag}
                             </span>
                           ))}
@@ -433,18 +433,18 @@ export default function NotesPage() {
             {!selectedNote ? (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-8 h-8 text-slate-400" />
+                  <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-dark-400" />
                   </div>
-                  <p className="text-slate-500 text-sm">Select a note or create a new one</p>
+                  <p className="text-dark-400 text-sm">Select a note or create a new one</p>
                 </div>
               </div>
             ) : (
               <>
                 {/* Editor toolbar */}
-                <div className="flex items-center justify-between px-6 py-3 border-b border-slate-200 bg-white shrink-0">
+                <div className="flex items-center justify-between px-6 py-3 border-b border-dark-700 bg-dark-800 shrink-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-dark-400">
                       {saving ? (
                         <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Saving...</span>
                       ) : (
@@ -452,7 +452,7 @@ export default function NotesPage() {
                       )}
                     </span>
                     {selectedNote.source !== 'manual' && (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded">{selectedNote.source}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-dark-700 text-dark-400 rounded">{selectedNote.source}</span>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -465,21 +465,21 @@ export default function NotesPage() {
                       {extracting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                       AI Extract
                     </button>
-                    <button onClick={handleTogglePin} className="p-1.5 text-slate-500 hover:text-amber-600 transition-colors rounded-lg hover:bg-slate-100" title={selectedNote.is_pinned ? 'Unpin' : 'Pin'}>
+                    <button onClick={handleTogglePin} className="p-1.5 text-dark-400 hover:text-amber-600 transition-colors rounded-lg hover:bg-dark-700/50" title={selectedNote.is_pinned ? 'Unpin' : 'Pin'}>
                       {selectedNote.is_pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
                     </button>
                     <div className="relative">
-                      <button onClick={() => setShowTagPicker(!showTagPicker)} className="p-1.5 text-slate-500 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-100" title="Tags">
+                      <button onClick={() => setShowTagPicker(!showTagPicker)} className="p-1.5 text-dark-400 hover:text-dark-50 transition-colors rounded-lg hover:bg-dark-700/50" title="Tags">
                         <Tag className="w-4 h-4" />
                       </button>
                       {showTagPicker && (
-                        <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-2 z-20 min-w-[140px]">
+                        <div className="absolute right-0 top-full mt-1 bg-dark-800 border border-dark-700 rounded-lg shadow-xl p-2 z-20 min-w-[140px]">
                           {TAG_OPTIONS.map(tag => (
                             <button
                               key={tag}
                               onClick={() => handleToggleTag(tag)}
                               className={`w-full text-left px-2 py-1.5 text-xs rounded transition-colors flex items-center gap-2 ${
-                                editTags.includes(tag) ? 'text-primary-400 bg-primary-50' : 'text-slate-600 hover:bg-slate-50'
+                                editTags.includes(tag) ? 'text-primary-400 bg-primary-50' : 'text-dark-300 hover:bg-dark-700/30'
                               }`}
                             >
                               {editTags.includes(tag) && <Check className="w-3 h-3" />}
@@ -489,7 +489,7 @@ export default function NotesPage() {
                         </div>
                       )}
                     </div>
-                    <button onClick={handleDeleteNote} className="p-1.5 text-slate-500 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50" title="Delete note">
+                    <button onClick={handleDeleteNote} className="p-1.5 text-dark-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50" title="Delete note">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -503,7 +503,7 @@ export default function NotesPage() {
                       type="text"
                       value={editTitle}
                       onChange={e => handleTitleChange(e.target.value)}
-                      className="w-full text-2xl font-bold text-slate-900 bg-transparent border-none outline-none placeholder-dark-500"
+                      className="w-full text-2xl font-bold text-dark-50 bg-transparent border-none outline-none placeholder-dark-500"
                       placeholder="Note title..."
                     />
 
@@ -530,18 +530,18 @@ export default function NotesPage() {
                     <textarea
                       value={editContent}
                       onChange={e => handleContentChange(e.target.value)}
-                      className="w-full min-h-[200px] text-sm text-slate-700 bg-transparent border-none outline-none resize-none placeholder-dark-500 leading-relaxed"
+                      className="w-full min-h-[200px] text-sm text-dark-200 bg-transparent border-none outline-none resize-none placeholder-dark-500 leading-relaxed"
                       placeholder="Start writing your note..."
                     />
 
                     {/* ─── Tasks Section ─── */}
-                    <div className="border-t border-slate-200 pt-4">
+                    <div className="border-t border-dark-700 pt-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-dark-50 flex items-center gap-2">
                           <ListTodo className="w-4 h-4 text-blue-600" />
                           Tasks
                           {tasks.length > 0 && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded-full">
+                            <span className="text-[10px] px-1.5 py-0.5 bg-dark-900 text-dark-400 rounded-full">
                               {tasks.filter(t => t.status !== 'done').length} open
                             </span>
                           )}
@@ -556,7 +556,7 @@ export default function NotesPage() {
 
                       {/* Add task form */}
                       {showAddTask && (
-                        <div className="bg-white border border-slate-200 rounded-lg p-3 mb-3 space-y-2">
+                        <div className="bg-dark-800 border border-dark-700 rounded-lg p-3 mb-3 space-y-2">
                           <input
                             type="text"
                             value={newTaskTitle}
@@ -566,15 +566,15 @@ export default function NotesPage() {
                             onKeyDown={e => e.key === 'Enter' && handleAddTask()}
                           />
                           <div className="flex items-center gap-2">
-                            <select value={newTaskPriority} onChange={e => setNewTaskPriority(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-500">
+                            <select value={newTaskPriority} onChange={e => setNewTaskPriority(e.target.value)} className="px-2 py-1.5 bg-dark-900 border border-dark-700 rounded text-xs text-dark-400">
                               <option value="low">Low</option>
                               <option value="medium">Medium</option>
                               <option value="high">High</option>
                               <option value="urgent">Urgent</option>
                             </select>
-                            <input type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-500" />
+                            <input type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} className="px-2 py-1.5 bg-dark-900 border border-dark-700 rounded text-xs text-dark-400" />
                             <div className="flex-1" />
-                            <button onClick={() => setShowAddTask(false)} className="px-2 py-1 text-xs text-slate-500 hover:text-slate-900">Cancel</button>
+                            <button onClick={() => setShowAddTask(false)} className="px-2 py-1 text-xs text-dark-400 hover:text-dark-50">Cancel</button>
                             <button onClick={handleAddTask} disabled={!newTaskTitle.trim()} className="px-3 py-1 text-xs bg-primary-500 hover:bg-primary-600 text-white rounded disabled:opacity-50">Add</button>
                           </div>
                         </div>
@@ -588,22 +588,22 @@ export default function NotesPage() {
                           const isDone = task.status === 'done';
 
                           return (
-                            <div key={task.id} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-50/20 transition-colors group ${isDone ? 'opacity-50' : ''}`}>
+                            <div key={task.id} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-dark-700/20 transition-colors group ${isDone ? 'opacity-50' : ''}`}>
                               <button onClick={() => !isDone && handleCompleteTask(task.id)} className="shrink-0">
                                 {isDone ? (
                                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                                 ) : (
-                                  <Circle className="w-4 h-4 text-slate-400 hover:text-primary-400 transition-colors" />
+                                  <Circle className="w-4 h-4 text-dark-400 hover:text-primary-400 transition-colors" />
                                 )}
                               </button>
                               <div className="flex-1 min-w-0">
-                                <p className={`text-xs ${isDone ? 'line-through text-slate-400' : 'text-white'}`}>{task.title}</p>
+                                <p className={`text-xs ${isDone ? 'line-through text-dark-400' : 'text-white'}`}>{task.title}</p>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <span className={`text-[9px] px-1 py-0.5 rounded ${pCfg.bg} ${pCfg.color}`}>{pCfg.label}</span>
                                   {task.due_date && (
                                     <span className={`text-[9px] flex items-center gap-0.5 ${
                                       dueStatus === 'overdue' ? 'text-red-600' :
-                                      dueStatus === 'today' ? 'text-amber-600' : 'text-slate-400'
+                                      dueStatus === 'today' ? 'text-amber-600' : 'text-dark-400'
                                     }`}>
                                       <Calendar className="w-2.5 h-2.5" />
                                       {task.due_date}
@@ -611,22 +611,22 @@ export default function NotesPage() {
                                   )}
                                 </div>
                               </div>
-                              <button onClick={() => handleDeleteTask(task.id)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600 transition-all">
+                              <button onClick={() => handleDeleteTask(task.id)} className="opacity-0 group-hover:opacity-100 p-1 text-dark-400 hover:text-red-600 transition-all">
                                 <Trash2 className="w-3 h-3" />
                               </button>
                             </div>
                           );
                         })}
                         {tasks.length === 0 && !showAddTask && (
-                          <p className="text-xs text-slate-400 py-2 px-3">No tasks linked to this note</p>
+                          <p className="text-xs text-dark-400 py-2 px-3">No tasks linked to this note</p>
                         )}
                       </div>
                     </div>
 
                     {/* ─── Reminders Section ─── */}
-                    <div className="border-t border-slate-200 pt-4">
+                    <div className="border-t border-dark-700 pt-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-dark-50 flex items-center gap-2">
                           <Bell className="w-4 h-4 text-amber-600" />
                           Reminders
                         </h3>
@@ -640,7 +640,7 @@ export default function NotesPage() {
 
                       {/* Add reminder form */}
                       {showAddReminder && (
-                        <div className="bg-white border border-slate-200 rounded-lg p-3 mb-3 space-y-2">
+                        <div className="bg-dark-800 border border-dark-700 rounded-lg p-3 mb-3 space-y-2">
                           <input
                             type="text"
                             value={newReminderTitle}
@@ -649,8 +649,8 @@ export default function NotesPage() {
                             className={INPUT}
                           />
                           <div className="flex items-center gap-2">
-                            <input type="datetime-local" value={newReminderAt} onChange={e => setNewReminderAt(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-white flex-1" />
-                            <button onClick={() => setShowAddReminder(false)} className="px-2 py-1 text-xs text-slate-500 hover:text-slate-900">Cancel</button>
+                            <input type="datetime-local" value={newReminderAt} onChange={e => setNewReminderAt(e.target.value)} className="px-2 py-1.5 bg-dark-900 border border-dark-700 rounded text-xs text-white flex-1" />
+                            <button onClick={() => setShowAddReminder(false)} className="px-2 py-1 text-xs text-dark-400 hover:text-dark-50">Cancel</button>
                             <button onClick={handleAddReminder} disabled={!newReminderTitle.trim() || !newReminderAt} className="px-3 py-1 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded disabled:opacity-50">Set</button>
                           </div>
                         </div>
@@ -661,16 +661,16 @@ export default function NotesPage() {
                         {reminders.map(rem => {
                           const isPast = new Date(rem.remind_at) <= new Date();
                           return (
-                            <div key={rem.id} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-50/20 transition-colors group ${rem.is_dismissed ? 'opacity-40' : ''}`}>
-                              <Bell className={`w-4 h-4 shrink-0 ${isPast && !rem.is_dismissed ? 'text-amber-600' : 'text-slate-400'}`} />
+                            <div key={rem.id} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-dark-700/20 transition-colors group ${rem.is_dismissed ? 'opacity-40' : ''}`}>
+                              <Bell className={`w-4 h-4 shrink-0 ${isPast && !rem.is_dismissed ? 'text-amber-600' : 'text-dark-400'}`} />
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs text-slate-500">{rem.title}</p>
-                                <p className={`text-[10px] ${isPast && !rem.is_dismissed ? 'text-amber-600' : 'text-slate-400'}`}>
+                                <p className="text-xs text-dark-400">{rem.title}</p>
+                                <p className={`text-[10px] ${isPast && !rem.is_dismissed ? 'text-amber-600' : 'text-dark-400'}`}>
                                   {new Date(rem.remind_at).toLocaleString()}
                                 </p>
                               </div>
                               {!rem.is_dismissed && (
-                                <button onClick={() => handleDismissReminder(rem.id)} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-amber-600 transition-all" title="Dismiss">
+                                <button onClick={() => handleDismissReminder(rem.id)} className="opacity-0 group-hover:opacity-100 p-1 text-dark-400 hover:text-amber-600 transition-all" title="Dismiss">
                                   <BellOff className="w-3 h-3" />
                                 </button>
                               )}
@@ -678,7 +678,7 @@ export default function NotesPage() {
                           );
                         })}
                         {reminders.length === 0 && !showAddReminder && (
-                          <p className="text-xs text-slate-400 py-2 px-3">No reminders for this note</p>
+                          <p className="text-xs text-dark-400 py-2 px-3">No reminders for this note</p>
                         )}
                       </div>
                     </div>
@@ -694,10 +694,10 @@ export default function NotesPage() {
       {showNewNote && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowNewNote(false)} />
-          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-lg w-full max-w-md overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-slate-900">New Note</h2>
-              <button onClick={() => setShowNewNote(false)} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
+          <div className="relative bg-dark-800 border border-dark-700 rounded-2xl shadow-lg w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-dark-700">
+              <h2 className="text-base font-semibold text-dark-50">New Note</h2>
+              <button onClick={() => setShowNewNote(false)} className="p-1.5 text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5">
               <input
@@ -710,9 +710,9 @@ export default function NotesPage() {
                 onKeyDown={e => e.key === 'Enter' && handleCreateNote()}
               />
             </div>
-            <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-200">
-              <button onClick={() => setShowNewNote(false)} className="flex-1 px-4 py-2 text-sm text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
-              <button onClick={handleCreateNote} disabled={!newTitle.trim()} className="flex-1 px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 disabled:bg-slate-100 disabled:text-slate-500 text-white rounded-lg transition-colors">
+            <div className="flex items-center gap-3 px-5 py-4 border-t border-dark-700">
+              <button onClick={() => setShowNewNote(false)} className="flex-1 px-4 py-2 text-sm text-dark-300 hover:text-dark-50 bg-dark-900 hover:bg-dark-700/50 rounded-lg transition-colors">Cancel</button>
+              <button onClick={handleCreateNote} disabled={!newTitle.trim()} className="flex-1 px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 disabled:bg-dark-700 disabled:text-dark-400 text-white rounded-lg transition-colors">
                 Create
               </button>
             </div>

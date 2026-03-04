@@ -115,7 +115,7 @@ export default function IntegrationsPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -128,17 +128,17 @@ export default function IntegrationsPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">Integrations</h1>
-          <p className="text-slate-500 mt-1">Import clients from external systems or connect via webhooks</p>
+          <h1 className="text-2xl font-bold text-dark-50">Integrations</h1>
+          <p className="text-dark-400 mt-1">Import clients from external systems or connect via webhooks</p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-slate-200 pb-4">
+        <div className="flex gap-2 mb-6 border-b border-dark-700 pb-4">
           {tabs.map(tab => {
             const Icon = tab.icon;
             return (
@@ -152,7 +152,7 @@ export default function IntegrationsPage() {
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all ${
                   activeTab === tab.id
                     ? 'bg-primary-50 text-primary-400 border border-primary-200'
-                    : 'text-slate-500 hover:text-slate-900 hover:bg-white'
+                    : 'text-dark-400 hover:text-dark-50 hover:bg-dark-700'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -169,7 +169,7 @@ export default function IntegrationsPage() {
               <Check className="w-5 h-5 text-emerald-600" />
               <div>
                 <p className="text-emerald-600 font-medium">Import Complete</p>
-                <p className="text-slate-600 text-sm">
+                <p className="text-dark-300 text-sm">
                   {importResult.imported} imported, {importResult.skipped} skipped
                   {importResult.errors?.length > 0 && `, ${importResult.errors.length} errors`}
                 </p>
@@ -199,14 +199,14 @@ export default function IntegrationsPage() {
         {/* CSV Import Tab */}
         {activeTab === 'import' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Import from CSV</h2>
-              <p className="text-slate-500 text-sm mb-6">
+            <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+              <h2 className="text-lg font-semibold text-dark-50 mb-4">Import from CSV</h2>
+              <p className="text-dark-400 text-sm mb-6">
                 Upload a CSV file with client information. The file should have columns for name, phone, email, address, etc.
               </p>
 
               {/* File Upload */}
-              <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-primary-500/50 hover:bg-white transition">
+              <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-dark-700 rounded-xl cursor-pointer hover:border-primary-500/50 hover:bg-dark-700 transition">
                 <input
                   type="file"
                   accept=".csv"
@@ -216,14 +216,14 @@ export default function IntegrationsPage() {
                 {csvFile ? (
                   <div className="text-center">
                     <FileSpreadsheet className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
-                    <p className="text-slate-900 font-medium">{csvFile.name}</p>
-                    <p className="text-slate-500 text-sm">{(csvFile.size / 1024).toFixed(1)} KB</p>
+                    <p className="text-dark-50 font-medium">{csvFile.name}</p>
+                    <p className="text-dark-400 text-sm">{(csvFile.size / 1024).toFixed(1)} KB</p>
                   </div>
                 ) : (
                   <>
-                    <Upload className="w-10 h-10 text-slate-500 mb-2" />
-                    <p className="text-slate-900 font-medium">Drop CSV file here or click to browse</p>
-                    <p className="text-slate-500 text-sm mt-1">Supports .csv files</p>
+                    <Upload className="w-10 h-10 text-dark-400 mb-2" />
+                    <p className="text-dark-50 font-medium">Drop CSV file here or click to browse</p>
+                    <p className="text-dark-400 text-sm mt-1">Supports .csv files</p>
                   </>
                 )}
               </label>
@@ -252,16 +252,16 @@ export default function IntegrationsPage() {
             {/* CSV Format Help */}
             <div className="bg-primary-50 border border-primary-500/20 rounded-xl p-6">
               <h3 className="text-primary-400 font-semibold mb-3">CSV Format</h3>
-              <p className="text-slate-600 text-sm mb-4">Your CSV should include these columns (column names are flexible):</p>
+              <p className="text-dark-300 text-sm mb-4">Your CSV should include these columns (column names are flexible):</p>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="text-slate-500">• name / full_name <span className="text-red-600">*required</span></div>
-                <div className="text-slate-500">• phone / phone_number</div>
-                <div className="text-slate-500">• email / email_address</div>
-                <div className="text-slate-500">• address / street_address</div>
-                <div className="text-slate-500">• date_of_birth / dob</div>
-                <div className="text-slate-500">• emergency_contact_name</div>
-                <div className="text-slate-500">• emergency_contact_phone</div>
-                <div className="text-slate-500">• notes / comments</div>
+                <div className="text-dark-400">• name / full_name <span className="text-red-600">*required</span></div>
+                <div className="text-dark-400">• phone / phone_number</div>
+                <div className="text-dark-400">• email / email_address</div>
+                <div className="text-dark-400">• address / street_address</div>
+                <div className="text-dark-400">• date_of_birth / dob</div>
+                <div className="text-dark-400">• emergency_contact_name</div>
+                <div className="text-dark-400">• emergency_contact_phone</div>
+                <div className="text-dark-400">• notes / comments</div>
               </div>
             </div>
           </div>
@@ -270,37 +270,37 @@ export default function IntegrationsPage() {
         {/* Monday.com Tab */}
         {activeTab === 'monday' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Connect to Monday.com</h2>
-              <p className="text-slate-500 text-sm mb-6">
+            <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+              <h2 className="text-lg font-semibold text-dark-50 mb-4">Connect to Monday.com</h2>
+              <p className="text-dark-400 text-sm mb-6">
                 Import clients directly from your Monday.com boards. Enter your API key and board ID below.
               </p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-slate-600 mb-2">Monday.com API Key</label>
+                  <label className="block text-sm text-dark-300 mb-2">Monday.com API Key</label>
                   <input
                     type="password"
                     value={mondayApiKey}
                     onChange={(e) => setMondayApiKey(e.target.value)}
                     placeholder="Enter your Monday.com API key"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   />
-                  <p className="text-slate-400 text-xs mt-1">
+                  <p className="text-dark-400 text-xs mt-1">
                     Find your API key in Monday.com → Profile → Developer → API
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-slate-600 mb-2">Board ID</label>
+                  <label className="block text-sm text-dark-300 mb-2">Board ID</label>
                   <input
                     type="text"
                     value={mondayBoardId}
                     onChange={(e) => setMondayBoardId(e.target.value)}
                     placeholder="Enter the board ID (e.g., 1234567890)"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   />
-                  <p className="text-slate-400 text-xs mt-1">
+                  <p className="text-dark-400 text-xs mt-1">
                     Find the board ID in the URL when viewing your board
                   </p>
                 </div>
@@ -326,19 +326,19 @@ export default function IntegrationsPage() {
             </div>
 
             {/* Webhook Setup */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h3 className="text-slate-900 font-semibold mb-4">Auto-Sync with Webhooks</h3>
-              <p className="text-slate-500 text-sm mb-4">
+            <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+              <h3 className="text-dark-50 font-semibold mb-4">Auto-Sync with Webhooks</h3>
+              <p className="text-dark-400 text-sm mb-4">
                 Set up a webhook in Monday.com to automatically sync new clients when they're added to your board.
               </p>
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+              <div className="flex items-center gap-2 p-3 bg-dark-900 rounded-lg">
                 <code className="text-primary-400 text-sm flex-1 truncate">{mondayWebhookUrl}</code>
                 <button
                   onClick={() => copyToClipboard(mondayWebhookUrl)}
-                  className="p-2 hover:bg-slate-100 rounded transition"
+                  className="p-2 hover:bg-dark-700/50 rounded transition"
                   title="Copy URL"
                 >
-                  <Copy className="w-4 h-4 text-slate-500" />
+                  <Copy className="w-4 h-4 text-dark-400" />
                 </button>
               </div>
             </div>
@@ -348,23 +348,23 @@ export default function IntegrationsPage() {
         {/* Webhooks Tab */}
         {activeTab === 'webhook' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Generic Webhook</h2>
-              <p className="text-slate-500 text-sm mb-6">
+            <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+              <h2 className="text-lg font-semibold text-dark-50 mb-4">Generic Webhook</h2>
+              <p className="text-dark-400 text-sm mb-6">
                 Use this webhook URL to receive client data from any external system. Send a POST request with JSON data.
               </p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-slate-600 mb-2">Webhook URL</label>
-                  <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                  <label className="block text-sm text-dark-300 mb-2">Webhook URL</label>
+                  <div className="flex items-center gap-2 p-3 bg-dark-900 rounded-lg">
                     <code className="text-primary-400 text-sm flex-1 truncate">{webhookUrl}</code>
                     <button
                       onClick={() => copyToClipboard(webhookUrl)}
-                      className="p-2 hover:bg-slate-100 rounded transition"
+                      className="p-2 hover:bg-dark-700/50 rounded transition"
                       title="Copy URL"
                     >
-                      <Copy className="w-4 h-4 text-slate-500" />
+                      <Copy className="w-4 h-4 text-dark-400" />
                     </button>
                   </div>
                 </div>
@@ -374,7 +374,7 @@ export default function IntegrationsPage() {
             {/* JSON Format */}
             <div className="bg-primary-50 border border-primary-500/20 rounded-xl p-6">
               <h3 className="text-primary-400 font-semibold mb-3">Expected JSON Format</h3>
-              <pre className="bg-slate-50 p-4 rounded-lg text-sm text-slate-700 overflow-x-auto">
+              <pre className="bg-dark-900 p-4 rounded-lg text-sm text-dark-200 overflow-x-auto">
 {`{
   "clients": [
     {
@@ -393,22 +393,22 @@ export default function IntegrationsPage() {
             </div>
 
             {/* API Import */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h3 className="text-slate-900 font-semibold mb-4">Bulk API Import</h3>
-              <p className="text-slate-500 text-sm mb-4">
+            <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+              <h3 className="text-dark-50 font-semibold mb-4">Bulk API Import</h3>
+              <p className="text-dark-400 text-sm mb-4">
                 For authenticated bulk imports, use this endpoint:
               </p>
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg mb-4">
+              <div className="flex items-center gap-2 p-3 bg-dark-900 rounded-lg mb-4">
                 <span className="text-emerald-600 text-sm font-mono">POST</span>
                 <code className="text-primary-400 text-sm flex-1 truncate">{API_BASE}/integrations/import/bulk</code>
                 <button
                   onClick={() => copyToClipboard(`${API_BASE}/integrations/import/bulk`)}
-                  className="p-2 hover:bg-slate-100 rounded transition"
+                  className="p-2 hover:bg-dark-700/50 rounded transition"
                 >
-                  <Copy className="w-4 h-4 text-slate-500" />
+                  <Copy className="w-4 h-4 text-dark-400" />
                 </button>
               </div>
-              <p className="text-slate-400 text-xs">
+              <p className="text-dark-400 text-xs">
                 Requires Authorization header with Bearer token
               </p>
             </div>

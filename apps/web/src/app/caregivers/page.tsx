@@ -183,22 +183,22 @@ export default function CaregiversPage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-dark-900">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       <main className="flex-1 p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Caregivers</h1>
-              <p className="text-slate-500">Manage your caregiver team for client assignments</p>
+              <h1 className="text-3xl font-bold text-dark-50 mb-2">Caregivers</h1>
+              <p className="text-dark-400">Manage your caregiver team for client assignments</p>
             </div>
             <div className="flex gap-3">
               <button onClick={() => router.push('/integrations')} className="btn-secondary flex items-center gap-2">
@@ -236,8 +236,8 @@ export default function CaregiversPage() {
                     }`}>
                       {cert.badge === 'expired' ? 'EXPIRED' : cert.days_until_expiry <= 30 ? 'EXPIRING SOON' : `${cert.days_until_expiry}d left`}
                     </span>
-                    <span className="text-slate-900 font-medium">{cert.caregiver_name}</span>
-                    <span className="text-slate-500">— {cert.certification} (expires {cert.expiry_date})</span>
+                    <span className="text-dark-50 font-medium">{cert.caregiver_name}</span>
+                    <span className="text-dark-400">— {cert.certification} (expires {cert.expiry_date})</span>
                   </div>
                 ))}
                 {expiringCerts.length > 5 && (
@@ -250,23 +250,23 @@ export default function CaregiversPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="card p-5">
-              <p className="text-slate-500 text-sm mb-1">Total Caregivers</p>
-              <p className="text-3xl font-bold text-slate-900">{caregivers.length}</p>
+              <p className="text-dark-400 text-sm mb-1">Total Caregivers</p>
+              <p className="text-3xl font-bold text-dark-50">{caregivers.length}</p>
             </div>
             <div className="card p-5">
-              <p className="text-slate-500 text-sm mb-1">Active</p>
+              <p className="text-dark-400 text-sm mb-1">Active</p>
               <p className="text-3xl font-bold text-accent-green">
                 {caregivers.filter(c => c.status === 'active').length}
               </p>
             </div>
             <div className="card p-5">
-              <p className="text-slate-500 text-sm mb-1">High Care Qualified</p>
+              <p className="text-dark-400 text-sm mb-1">High Care Qualified</p>
               <p className="text-3xl font-bold text-primary-400">
                 {caregivers.filter(c => c.can_handle_high_care).length}
               </p>
             </div>
             <div className="card p-5">
-              <p className="text-slate-500 text-sm mb-1">Available</p>
+              <p className="text-dark-400 text-sm mb-1">Available</p>
               <p className="text-3xl font-bold text-accent-cyan">
                 {caregivers.filter(c => (c.current_client_count || 0) < (c.max_clients || 5)).length}
               </p>
@@ -275,7 +275,7 @@ export default function CaregiversPage() {
 
           {/* Search */}
           <div className="mb-6 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
             <input
               type="text"
               placeholder="Search by name, email, phone, or certification..."
@@ -292,13 +292,13 @@ export default function CaregiversPage() {
             </div>
           ) : filteredCaregivers.length === 0 ? (
             <div className="card p-12 text-center">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-slate-500" />
+              <div className="w-16 h-16 bg-dark-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-dark-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              <h3 className="text-lg font-semibold text-dark-50 mb-2">
                 {searchQuery ? 'No caregivers found' : 'No caregivers yet'}
               </h3>
-              <p className="text-slate-500 mb-4">Add caregivers to assign them to clients</p>
+              <p className="text-dark-400 mb-4">Add caregivers to assign them to clients</p>
               {!searchQuery && (
                 <button onClick={handleAddNew} className="btn-primary">Add Caregiver</button>
               )}
@@ -313,15 +313,15 @@ export default function CaregiversPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      caregiver.can_handle_high_care ? 'bg-primary-50' : 'bg-slate-50'
+                      caregiver.can_handle_high_care ? 'bg-primary-50' : 'bg-dark-900'
                     }`}>
                       <span className={`font-bold text-lg ${
-                        caregiver.can_handle_high_care ? 'text-primary-400' : 'text-slate-600'
+                        caregiver.can_handle_high_care ? 'text-primary-400' : 'text-dark-300'
                       }`}>{caregiver.full_name.charAt(0)}</span>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-semibold text-slate-900">{caregiver.full_name}</h3>
+                        <h3 className="font-semibold text-dark-50">{caregiver.full_name}</h3>
                         {caregiver.certification_level && (
                           <span className="px-2 py-0.5 rounded text-xs font-medium bg-primary-50 text-primary-400">
                             {caregiver.certification_level}
@@ -335,7 +335,7 @@ export default function CaregiversPage() {
                         <span className={`px-2 py-0.5 rounded text-xs ${
                           caregiver.status === 'active' ? 'bg-emerald-50 text-emerald-600' :
                           caregiver.status === 'on_leave' ? 'bg-amber-50 text-amber-600' :
-                          'bg-slate-100 text-slate-500'
+                          'bg-dark-700 text-dark-400'
                         }`}>
                           {caregiver.status || 'active'}
                         </span>
@@ -351,7 +351,7 @@ export default function CaregiversPage() {
                           );
                         })()}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-slate-500">
+                      <div className="flex items-center gap-4 text-sm text-dark-400">
                         {caregiver.phone && (
                           <div className="flex items-center gap-1.5">
                             <Phone className="w-4 h-4" />{caregiver.phone}
@@ -376,48 +376,48 @@ export default function CaregiversPage() {
                       {caregiver.specializations && caregiver.specializations.length > 0 && (
                         <div className="flex gap-2 mt-2">
                           {caregiver.specializations.slice(0, 4).map((spec, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-slate-50 rounded text-xs text-slate-600">
+                            <span key={i} className="px-2 py-0.5 bg-dark-900 rounded text-xs text-dark-300">
                               {spec}
                             </span>
                           ))}
                           {caregiver.specializations.length > 4 && (
-                            <span className="text-xs text-slate-400">+{caregiver.specializations.length - 4} more</span>
+                            <span className="text-xs text-dark-400">+{caregiver.specializations.length - 4} more</span>
                           )}
                         </div>
                       )}
                     </div>
                     <div className="text-right mr-4">
-                      <p className="text-sm text-slate-500">Clients</p>
-                      <p className="text-lg font-semibold text-slate-900">
+                      <p className="text-sm text-dark-400">Clients</p>
+                      <p className="text-lg font-semibold text-dark-50">
                         {caregiver.current_client_count || 0}/{caregiver.max_clients || 5}
                       </p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-primary-400 transition" />
+                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-400 transition" />
                   </div>
                 </div>
               ))}
             </div>
           )}
           {filteredCaregivers.length > pageSize && (
-            <div className="p-4 border-t border-slate-200 flex items-center justify-between mt-4">
-              <p className="text-slate-500 text-sm">
+            <div className="p-4 border-t border-dark-700 flex items-center justify-between mt-4">
+              <p className="text-dark-400 text-sm">
                 Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, filteredCaregivers.length)} of {filteredCaregivers.length}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage(Math.max(0, page - 1))}
                   disabled={page === 0}
-                  className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
+                  className="p-2 bg-dark-900 rounded-lg hover:bg-dark-700/50 transition disabled:opacity-50"
                 >
-                  <ChevronLeft className="w-4 h-4 text-slate-500" />
+                  <ChevronLeft className="w-4 h-4 text-dark-400" />
                 </button>
-                <span className="text-slate-500 px-3 text-sm">Page {page + 1}</span>
+                <span className="text-dark-400 px-3 text-sm">Page {page + 1}</span>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={(page + 1) * pageSize >= filteredCaregivers.length}
-                  className="p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition disabled:opacity-50"
+                  className="p-2 bg-dark-900 rounded-lg hover:bg-dark-700/50 transition disabled:opacity-50"
                 >
-                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                  <ChevronRight className="w-4 h-4 text-dark-400" />
                 </button>
               </div>
             </div>

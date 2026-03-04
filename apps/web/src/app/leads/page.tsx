@@ -182,7 +182,7 @@ export default function LeadsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-dark-900">
         <Sidebar />
         <main className="flex-1 p-8 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
@@ -192,14 +192,14 @@ export default function LeadsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       <main className="flex-1 p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Leads</h1>
-            <p className="text-slate-500">Manage and track potential clients</p>
+            <h1 className="text-3xl font-bold text-dark-50 mb-2">Leads</h1>
+            <p className="text-dark-400">Manage and track potential clients</p>
           </div>
           <button 
             onClick={() => setShowAddModal(true)}
@@ -213,16 +213,16 @@ export default function LeadsPage() {
         {/* Search & Filter */}
         <div className="flex gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search leads..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-dark-300 hover:text-dark-50 transition-colors">
             <Filter className="w-5 h-5" />
             Filter
           </button>
@@ -230,10 +230,10 @@ export default function LeadsPage() {
 
         {/* Empty State */}
         {leads.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-12 text-center">
             <UserPlus className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">No Leads Yet</h3>
-            <p className="text-slate-500 mb-6">Start tracking potential clients by adding your first lead</p>
+            <h3 className="text-xl font-semibold text-dark-50 mb-2">No Leads Yet</h3>
+            <p className="text-dark-400 mb-6">Start tracking potential clients by adding your first lead</p>
             <button 
               onClick={() => setShowAddModal(true)}
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
@@ -244,15 +244,15 @@ export default function LeadsPage() {
           </div>
         ) : (
           /* Leads Table */
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div className="bg-dark-800 border border-dark-700 rounded-xl overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Name</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Contact</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Source</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Status</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-500">Created</th>
+                <tr className="border-b border-dark-700">
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Name</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Contact</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Source</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Status</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-dark-400">Created</th>
                   <th className="px-6 py-4"></th>
                 </tr>
               </thead>
@@ -260,7 +260,7 @@ export default function LeadsPage() {
                 {filteredLeads.map(lead => (
                   <tr 
                     key={lead.id} 
-                    className="border-b border-slate-200/30 hover:bg-slate-50/20 transition-colors cursor-pointer"
+                    className="border-b border-dark-700/30 hover:bg-dark-700/20 transition-colors cursor-pointer"
                     onClick={() => { setSelectedLead(lead); setShowDetailModal(true); }}
                   >
                     <td className="px-6 py-4">
@@ -273,23 +273,23 @@ export default function LeadsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <div className="flex items-center gap-2 text-sm text-dark-300">
                           <Mail className="w-4 h-4" />
                           {lead.email || 'No email'}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <div className="flex items-center gap-2 text-sm text-dark-400">
                           <Phone className="w-4 h-4" />
                           {lead.phone || 'No phone'}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-600">{lead.source}</td>
+                    <td className="px-6 py-4 text-dark-300">{lead.source}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status] || 'bg-slate-100 text-slate-600'}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status] || 'bg-dark-700 text-dark-300'}`}>
                         {lead.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-500 text-sm">{lead.created}</td>
+                    <td className="px-6 py-4 text-dark-400 text-sm">{lead.created}</td>
                     <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                       <button 
                         onClick={() => handleDeleteLead(lead.id)}
@@ -299,7 +299,7 @@ export default function LeadsPage() {
                         {deletingId === lead.id ? (
                           <Loader2 className="w-5 h-5 text-red-600 animate-spin" />
                         ) : (
-                          <Trash2 className="w-5 h-5 text-slate-500 hover:text-red-600" />
+                          <Trash2 className="w-5 h-5 text-dark-400 hover:text-red-600" />
                         )}
                       </button>
                     </td>
@@ -313,61 +313,61 @@ export default function LeadsPage() {
         {/* Add Lead Modal */}
         {showAddModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-slate-900">Add New Lead</h2>
-                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
-                  <X className="w-5 h-5 text-slate-500" />
+                <h2 className="text-xl font-bold text-dark-50">Add New Lead</h2>
+                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-dark-700/30 rounded-lg">
+                  <X className="w-5 h-5 text-dark-400" />
                 </button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">Full Name *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Full Name *</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                     <input
                       type="text"
                       value={newLead.name}
                       onChange={(e) => setNewLead({ ...newLead, name: e.target.value })}
                       placeholder="Enter full name"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                     <input
                       type="email"
                       value={newLead.email}
                       onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
                       placeholder="email@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">Phone</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Phone</label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                     <input
                       type="tel"
                       value={newLead.phone}
                       onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })}
                       placeholder="(555) 123-4567"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">Source</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Source</label>
                   <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                     <select
                       value={newLead.source}
                       onChange={(e) => setNewLead({ ...newLead, source: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none appearance-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none appearance-none"
                     >
                       {sources.map(s => (
                         <option key={s} value={s}>{s}</option>
@@ -376,7 +376,7 @@ export default function LeadsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">Insurance Type</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Insurance Type</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
@@ -384,7 +384,7 @@ export default function LeadsPage() {
                       className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         newLead.insurance_type === 'medicaid'
                           ? 'bg-blue-50 text-blue-600 border border-blue-500/50'
-                          : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
+                          : 'bg-dark-900 text-dark-300 border border-dark-700 hover:border-dark-600'
                       }`}
                     >
                       Medicaid
@@ -395,7 +395,7 @@ export default function LeadsPage() {
                       className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         newLead.insurance_type === 'medicare'
                           ? 'bg-emerald-50 text-emerald-600 border border-green-500/50'
-                          : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
+                          : 'bg-dark-900 text-dark-300 border border-dark-700 hover:border-dark-600'
                       }`}
                     >
                       Medicare
@@ -406,7 +406,7 @@ export default function LeadsPage() {
                       className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         newLead.insurance_type === 'private'
                           ? 'bg-purple-50 text-purple-600 border border-purple-500/50'
-                          : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
+                          : 'bg-dark-900 text-dark-300 border border-dark-700 hover:border-dark-600'
                       }`}
                     >
                       Private
@@ -414,20 +414,20 @@ export default function LeadsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">Notes</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Notes</label>
                   <textarea
                     value={newLead.notes}
                     onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })}
                     placeholder="Additional notes about this lead..."
                     rows={3}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
                   />
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-dark-900 hover:bg-dark-700/50 text-white rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -445,29 +445,29 @@ export default function LeadsPage() {
         {/* Lead Detail Modal */}
         {showDetailModal && selectedLead && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-slate-900">{selectedLead.name}</h2>
-                <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
-                  <X className="w-5 h-5 text-slate-500" />
+                <h2 className="text-xl font-bold text-dark-50">{selectedLead.name}</h2>
+                <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-dark-700/30 rounded-lg">
+                  <X className="w-5 h-5 text-dark-400" />
                 </button>
               </div>
               <div className="space-y-4 mb-6">
-                <div className="flex items-center gap-3 text-slate-600">
-                  <Mail className="w-5 h-5 text-slate-500" />
+                <div className="flex items-center gap-3 text-dark-300">
+                  <Mail className="w-5 h-5 text-dark-400" />
                   {selectedLead.email || 'No email'}
                 </div>
-                <div className="flex items-center gap-3 text-slate-600">
-                  <Phone className="w-5 h-5 text-slate-500" />
+                <div className="flex items-center gap-3 text-dark-300">
+                  <Phone className="w-5 h-5 text-dark-400" />
                   {selectedLead.phone || 'No phone'}
                 </div>
-                <div className="flex items-center gap-3 text-slate-600">
-                  <Globe className="w-5 h-5 text-slate-500" />
+                <div className="flex items-center gap-3 text-dark-300">
+                  <Globe className="w-5 h-5 text-dark-400" />
                   Source: {selectedLead.source}
                 </div>
               </div>
               <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-600 mb-2">Update Status</label>
+                <label className="block text-sm font-medium text-dark-300 mb-2">Update Status</label>
                 <div className="flex gap-2">
                   {statuses.map(s => (
                     <button
@@ -476,7 +476,7 @@ export default function LeadsPage() {
                       className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         selectedLead.status === s
                           ? 'bg-primary-500 text-white'
-                          : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                          : 'bg-dark-900 text-dark-300 hover:bg-dark-700/50'
                       }`}
                     >
                       {s}
@@ -506,23 +506,23 @@ export default function LeadsPage() {
         {/* Convert to Client Modal */}
         {showConvertModal && selectedLead && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-slate-900">Convert to Client</h2>
-                <button onClick={() => setShowConvertModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
-                  <X className="w-5 h-5 text-slate-500" />
+                <h2 className="text-xl font-bold text-dark-50">Convert to Client</h2>
+                <button onClick={() => setShowConvertModal(false)} className="p-2 hover:bg-dark-700/30 rounded-lg">
+                  <X className="w-5 h-5 text-dark-400" />
                 </button>
               </div>
               
-              <div className="mb-6 p-4 bg-slate-50 rounded-lg">
-                <p className="text-slate-900 font-medium">{selectedLead.name}</p>
-                <p className="text-slate-500 text-sm">{selectedLead.email || 'No email'}</p>
-                <p className="text-slate-500 text-sm">{selectedLead.phone || 'No phone'}</p>
+              <div className="mb-6 p-4 bg-dark-900 rounded-lg">
+                <p className="text-dark-50 font-medium">{selectedLead.name}</p>
+                <p className="text-dark-400 text-sm">{selectedLead.email || 'No email'}</p>
+                <p className="text-dark-400 text-sm">{selectedLead.phone || 'No phone'}</p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">Insurance Type *</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Insurance Type *</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
@@ -530,7 +530,7 @@ export default function LeadsPage() {
                       className={`flex flex-col items-center gap-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${
                         convertData.insurance_type === 'medicaid'
                           ? 'bg-blue-50 text-blue-600 border-2 border-blue-500/50'
-                          : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:border-slate-300'
+                          : 'bg-dark-900 text-dark-300 border-2 border-transparent hover:border-dark-600'
                       }`}
                     >
                       <Building2 className="w-5 h-5" />
@@ -542,7 +542,7 @@ export default function LeadsPage() {
                       className={`flex flex-col items-center gap-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${
                         convertData.insurance_type === 'medicare'
                           ? 'bg-emerald-50 text-emerald-600 border-2 border-green-500/50'
-                          : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:border-slate-300'
+                          : 'bg-dark-900 text-dark-300 border-2 border-transparent hover:border-dark-600'
                       }`}
                     >
                       <Shield className="w-5 h-5" />
@@ -554,7 +554,7 @@ export default function LeadsPage() {
                       className={`flex flex-col items-center gap-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${
                         convertData.insurance_type === 'private'
                           ? 'bg-purple-50 text-purple-600 border-2 border-purple-500/50'
-                          : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:border-slate-300'
+                          : 'bg-dark-900 text-dark-300 border-2 border-transparent hover:border-dark-600'
                       }`}
                     >
                       <Heart className="w-5 h-5" />
@@ -565,7 +565,7 @@ export default function LeadsPage() {
 
                 {convertData.insurance_type && (
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-2">
+                    <label className="block text-sm font-medium text-dark-300 mb-2">
                       {convertData.insurance_type === 'medicaid' ? 'Medicaid ID' : 
                        convertData.insurance_type === 'medicare' ? 'Medicare ID' : 'Insurance Provider'}
                     </label>
@@ -574,17 +574,17 @@ export default function LeadsPage() {
                       value={convertData.insurance_id}
                       onChange={(e) => setConvertData(prev => ({ ...prev, insurance_id: e.target.value }))}
                       placeholder={convertData.insurance_type === 'private' ? 'Blue Cross Blue Shield' : 'Enter ID (optional)'}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-2">Care Level</label>
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Care Level</label>
                   <select
                     value={convertData.care_level}
                     onChange={(e) => setConvertData(prev => ({ ...prev, care_level: e.target.value }))}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
                   >
                     <option value="">Select care level...</option>
                     <option value="LOW">Low - Companionship</option>
@@ -597,14 +597,14 @@ export default function LeadsPage() {
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowConvertModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-dark-900 hover:bg-dark-700/50 text-white rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmConvert}
                   disabled={converting || !convertData.insurance_type}
-                  className="flex-1 px-4 py-2.5 bg-green-500 hover:bg-green-600 disabled:bg-slate-100 disabled:text-slate-500 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 bg-green-500 hover:bg-green-600 disabled:bg-dark-700 disabled:text-dark-400 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
                 >
                   {converting ? (
                     <>
@@ -620,7 +620,7 @@ export default function LeadsPage() {
                 </button>
               </div>
 
-              <p className="text-xs text-slate-400 mt-4 text-center">
+              <p className="text-xs text-dark-400 mt-4 text-center">
                 Client will be added to Intake with their insurance info and appear in All Clients tab
               </p>
             </div>

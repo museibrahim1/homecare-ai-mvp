@@ -42,7 +42,7 @@ const statusColors: Record<string, string> = {
   draft: 'bg-amber-50 text-amber-600 border-amber-200',
   pending: 'bg-blue-50 text-blue-600 border-blue-200',
   active: 'bg-emerald-50 text-emerald-600 border-emerald-200',
-  completed: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+  completed: 'bg-gray-500/20 text-dark-400 border-gray-500/30',
   cancelled: 'bg-red-50 text-red-600 border-red-200',
 };
 
@@ -203,14 +203,14 @@ export default function ProposalsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       <main className="flex-1 p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Contract Proposals</h1>
-            <p className="text-slate-500">View, edit, and export client service agreements</p>
+            <h1 className="text-3xl font-bold text-dark-50 mb-2">Contract Proposals</h1>
+            <p className="text-dark-400">View, edit, and export client service agreements</p>
           </div>
           <div className="flex gap-3">
             <Link
@@ -234,22 +234,22 @@ export default function ProposalsPage() {
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex-1 min-w-[250px]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by client name, title, or contract number..."
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-dark-400 focus:border-primary-500 focus:outline-none"
               />
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-slate-500" />
+            <Filter className="w-5 h-5 text-dark-400" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+              className="px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
             >
               <option value="all">All Status</option>
               <option value="draft">Draft</option>
@@ -276,24 +276,24 @@ export default function ProposalsPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <p className="text-slate-500 text-sm mb-1">Total Proposals</p>
-            <p className="text-2xl font-bold text-slate-900">{proposals.length}</p>
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+            <p className="text-dark-400 text-sm mb-1">Total Proposals</p>
+            <p className="text-2xl font-bold text-dark-50">{proposals.length}</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <p className="text-slate-500 text-sm mb-1">Active</p>
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+            <p className="text-dark-400 text-sm mb-1">Active</p>
             <p className="text-2xl font-bold text-emerald-600">
               {proposals.filter(p => p.status === 'active').length}
             </p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <p className="text-slate-500 text-sm mb-1">Pending</p>
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+            <p className="text-dark-400 text-sm mb-1">Pending</p>
             <p className="text-2xl font-bold text-blue-600">
               {proposals.filter(p => p.status === 'pending').length}
             </p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4">
-            <p className="text-slate-500 text-sm mb-1">Draft</p>
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+            <p className="text-dark-400 text-sm mb-1">Draft</p>
             <p className="text-2xl font-bold text-amber-600">
               {proposals.filter(p => p.status === 'draft').length}
             </p>
@@ -306,10 +306,10 @@ export default function ProposalsPage() {
             <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
           </div>
         ) : sortedProposals.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-12 text-center">
             <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">No Proposals Found</h3>
-            <p className="text-slate-500 mb-6">
+            <h3 className="text-xl font-semibold text-dark-50 mb-2">No Proposals Found</h3>
+            <p className="text-dark-400 mb-6">
               {searchQuery || statusFilter !== 'all' 
                 ? 'Try adjusting your search or filters'
                 : 'Create a contract manually or use the pipeline to generate one from an assessment'}
@@ -324,7 +324,7 @@ export default function ProposalsPage() {
               </Link>
               <Link
                 href="/visits/new"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors border border-slate-200"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-dark-900 hover:bg-dark-700/50 text-white rounded-lg transition-colors border border-dark-700"
               >
                 <FileText className="w-5 h-5" />
                 New from Pipeline
@@ -336,10 +336,10 @@ export default function ProposalsPage() {
             {sortedProposals.map(proposal => (
               <div
                 key={proposal.id}
-                className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-slate-200 transition-colors"
+                className="bg-dark-800 border border-dark-700 rounded-xl overflow-hidden hover:border-dark-700 transition-colors"
               >
                 {/* Card Header */}
-                <div className="p-5 border-b border-slate-200">
+                <div className="p-5 border-b border-dark-700">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center">
@@ -348,10 +348,10 @@ export default function ProposalsPage() {
                         </span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-slate-900">
+                        <h3 className="font-semibold text-dark-50">
                           {proposal.client?.full_name || 'Unknown Client'}
                         </h3>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-dark-400">
                           {proposal.contract_number || `Proposal #${proposal.id.slice(0, 8)}`}
                         </p>
                       </div>
@@ -360,28 +360,28 @@ export default function ProposalsPage() {
                       {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-600 line-clamp-1">{proposal.title}</p>
+                  <p className="text-sm text-dark-300 line-clamp-1">{proposal.title}</p>
                 </div>
 
                 {/* Card Body */}
                 <div className="p-5 space-y-3">
                   <div className="flex items-center gap-3 text-sm">
                     <DollarSign className="w-4 h-4 text-emerald-600" />
-                    <span className="text-slate-500">Rate:</span>
-                    <span className="text-slate-900 font-medium">
+                    <span className="text-dark-400">Rate:</span>
+                    <span className="text-dark-50 font-medium">
                       {formatCurrency(proposal.hourly_rate)}/hr
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <Clock className="w-4 h-4 text-blue-600" />
-                    <span className="text-slate-500">Hours:</span>
-                    <span className="text-slate-900 font-medium">
+                    <span className="text-dark-400">Hours:</span>
+                    <span className="text-dark-50 font-medium">
                       {proposal.weekly_hours || 0} hrs/week
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <Calendar className="w-4 h-4 text-purple-600" />
-                    <span className="text-slate-500">Updated:</span>
+                    <span className="text-dark-400">Updated:</span>
                     <span className="text-white">
                       {formatDate(proposal.updated_at)}
                     </span>
@@ -389,7 +389,7 @@ export default function ProposalsPage() {
                   {proposal.services && proposal.services.length > 0 && (
                     <div className="flex items-start gap-3 text-sm">
                       <FileText className="w-4 h-4 text-orange-600 mt-0.5" />
-                      <span className="text-slate-500">Services:</span>
+                      <span className="text-dark-400">Services:</span>
                       <span className="text-white flex-1 line-clamp-2">
                         {proposal.services.map(s => s.name || s).join(', ')}
                       </span>
@@ -398,10 +398,10 @@ export default function ProposalsPage() {
                 </div>
 
                 {/* Card Footer - Actions */}
-                <div className="p-4 bg-slate-50/50 border-t border-slate-200 flex gap-2">
+                <div className="p-4 bg-dark-900/50 border-t border-dark-700 flex gap-2">
                   <button
                     onClick={() => handleViewProposal(proposal)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-dark-900 hover:bg-dark-700/50 text-white rounded-lg transition-colors text-sm"
                   >
                     <Eye className="w-4 h-4" />
                     View

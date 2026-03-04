@@ -139,53 +139,53 @@ function AppointmentForm({
   googleConnected: boolean;
   isEdit: boolean;
 }) {
-  const INPUT = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
+  const INPUT = "w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-dark-50 text-sm placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent";
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white border border-slate-200 rounded-2xl shadow-lg w-full max-w-lg overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-          <h2 className="text-base font-semibold text-slate-900">{isEdit ? 'Edit Appointment' : 'New Appointment'}</h2>
-          <button onClick={onCancel} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
+      <div className="relative bg-dark-800 border border-dark-700 rounded-2xl shadow-lg w-full max-w-lg overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-dark-700">
+          <h2 className="text-base font-semibold text-dark-50">{isEdit ? 'Edit Appointment' : 'New Appointment'}</h2>
+          <button onClick={onCancel} className="p-1.5 text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 rounded-lg transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Title *</label>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Title *</label>
               <input type="text" value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="e.g., Initial Assessment" className={INPUT} />
             </div>
             <div className="col-span-2">
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Client *</label>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Client *</label>
               <input type="text" value={data.client} onChange={e => onChange({ ...data, client: e.target.value })} placeholder="Client name" className={INPUT} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Date</label>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Date</label>
               <input type="date" value={data.date} onChange={e => onChange({ ...data, date: e.target.value })} className={INPUT} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Time</label>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Time</label>
               <input type="time" value={data.time} onChange={e => onChange({ ...data, time: e.target.value })} className={INPUT} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Duration</label>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Duration</label>
               <select value={data.duration} onChange={e => onChange({ ...data, duration: e.target.value })} className={INPUT}>
                 {DURATION_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Type</label>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Type</label>
               <select value={data.type} onChange={e => onChange({ ...data, type: e.target.value as AppointmentType })} className={INPUT}>
                 {Object.entries(TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
             <div className="col-span-2">
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Location</label>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Location</label>
               <input type="text" value={data.location} onChange={e => onChange({ ...data, location: e.target.value })} placeholder="Address or 'Virtual'" className={INPUT} />
             </div>
             <div className="col-span-2">
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Notes</label>
+              <label className="block text-xs font-medium text-dark-400 mb-1.5">Notes</label>
               <textarea value={data.notes} onChange={e => onChange({ ...data, notes: e.target.value })} placeholder="Additional notes..." rows={2} className={`${INPUT} resize-none`} />
             </div>
           </div>
@@ -196,9 +196,9 @@ function AppointmentForm({
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-200">
-          <button onClick={onCancel} className="flex-1 px-4 py-2 text-sm text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
-          <button onClick={onSubmit} disabled={loading || !data.title.trim() || !data.client.trim()} className="flex-1 px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 disabled:bg-slate-100 disabled:text-slate-500 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
+        <div className="flex items-center gap-3 px-5 py-4 border-t border-dark-700">
+          <button onClick={onCancel} className="flex-1 px-4 py-2 text-sm text-dark-300 hover:text-dark-50 bg-dark-900 hover:bg-dark-700/50 rounded-lg transition-colors">Cancel</button>
+          <button onClick={onSubmit} disabled={loading || !data.title.trim() || !data.client.trim()} className="flex-1 px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 disabled:bg-dark-700 disabled:text-dark-400 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? 'Saving...' : submitLabel}
           </button>
@@ -239,14 +239,14 @@ function DayTimeline({
           >
             {/* Time label */}
             <div className="w-16 lg:w-20 shrink-0 pr-3 pt-0 text-right">
-              <span className={`text-xs ${isNowHour ? 'text-primary-400 font-semibold' : 'text-slate-400'}`}>
+              <span className={`text-xs ${isNowHour ? 'text-primary-400 font-semibold' : 'text-dark-400'}`}>
                 {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
               </span>
             </div>
 
             {/* Time slot */}
             <div
-              className="flex-1 border-t border-slate-200/40 relative cursor-pointer hover:bg-slate-50/10 transition-colors min-h-[64px]"
+              className="flex-1 border-t border-dark-700/40 relative cursor-pointer hover:bg-dark-700/10 transition-colors min-h-[64px]"
               onClick={() => onAddAtTime(minutesToTime(hour * 60))}
             >
               {/* Now indicator */}
@@ -277,8 +277,8 @@ function DayTimeline({
                     >
                       <div className="flex items-start justify-between gap-1">
                         <div className="min-w-0">
-                          <p className="text-xs font-medium text-slate-900 truncate leading-tight">{apt.title}</p>
-                          <p className="text-[10px] text-slate-500 truncate">{apt.client} &middot; {formatTime12(apt.time)}</p>
+                          <p className="text-xs font-medium text-dark-50 truncate leading-tight">{apt.title}</p>
+                          <p className="text-[10px] text-dark-400 truncate">{apt.client} &middot; {formatTime12(apt.time)}</p>
                         </div>
                         <button
                           onClick={(e) => { e.stopPropagation(); onDelete(apt); }}
@@ -288,7 +288,7 @@ function DayTimeline({
                         </button>
                       </div>
                       {heightPx > 40 && apt.location && (
-                        <p className="text-[10px] text-slate-400 truncate mt-0.5 flex items-center gap-1">
+                        <p className="text-[10px] text-dark-400 truncate mt-0.5 flex items-center gap-1">
                           <MapPin className="w-2.5 h-2.5 shrink-0" />{apt.location}
                         </p>
                       )}
@@ -299,7 +299,7 @@ function DayTimeline({
 
               {/* Hover add indicator */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity pointer-events-none">
-                <span className="text-[10px] text-slate-400">+ Add</span>
+                <span className="text-[10px] text-dark-400">+ Add</span>
               </div>
             </div>
           </div>
@@ -324,7 +324,7 @@ function WeekView({
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   return (
-    <div className="grid grid-cols-7 gap-px bg-slate-50/30 rounded-xl overflow-hidden border border-slate-200">
+    <div className="grid grid-cols-7 gap-px bg-dark-900/30 rounded-xl overflow-hidden border border-dark-700">
       {/* Day headers */}
       {weekDays.map((day) => {
         const dayStr = formatLocalDate(day);
@@ -336,14 +336,14 @@ function WeekView({
           <div
             key={dayStr}
             onClick={() => onSelectDate(day)}
-            className={`bg-white/80 p-2 lg:p-3 cursor-pointer hover:bg-slate-100 transition-colors min-h-[140px] ${
+            className={`bg-dark-800/80 p-2 lg:p-3 cursor-pointer hover:bg-dark-700/50 transition-colors min-h-[140px] ${
               isSelected ? 'ring-1 ring-primary-500/40 bg-primary-500/5' : ''
             }`}
           >
             {/* Day header */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-slate-500 uppercase">{format(day, 'EEE')}</span>
+                <span className="text-[10px] text-dark-400 uppercase">{format(day, 'EEE')}</span>
                 <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium ${
                   today ? 'bg-primary-500 text-white' : isSelected ? 'text-primary-400' : 'text-white'
                 }`}>
@@ -351,7 +351,7 @@ function WeekView({
                 </span>
               </div>
               {dayApts.length > 0 && (
-                <span className="text-[10px] text-slate-400">{dayApts.length}</span>
+                <span className="text-[10px] text-dark-400">{dayApts.length}</span>
               )}
             </div>
 
@@ -366,7 +366,7 @@ function WeekView({
                 );
               })}
               {dayApts.length > 3 && (
-                <p className="text-[10px] text-slate-400 pl-1">+{dayApts.length - 3} more</p>
+                <p className="text-[10px] text-dark-400 pl-1">+{dayApts.length - 3} more</p>
               )}
             </div>
           </div>
@@ -613,14 +613,14 @@ function ScheduleContent() {
           { label: 'Today', value: todayTotal, icon: Sun, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'This Week', value: weekTotal, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Upcoming', value: upcomingCount, icon: Clock, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Google Sync', value: googleConnected ? 'On' : 'Off', icon: Link2, color: googleConnected ? 'text-emerald-600' : 'text-slate-500', bg: googleConnected ? 'bg-emerald-50' : 'bg-slate-100' },
+          { label: 'Google Sync', value: googleConnected ? 'On' : 'Off', icon: Link2, color: googleConnected ? 'text-emerald-600' : 'text-dark-400', bg: googleConnected ? 'bg-emerald-50' : 'bg-dark-700' },
         ].map((s, i) => (
           <div key={i} className="card p-3 lg:p-4 flex items-center gap-3" onClick={i === 3 ? () => setShowConnectModal(true) : undefined} role={i === 3 ? 'button' : undefined}>
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.bg}`}>
               <s.icon className={`w-4 h-4 ${s.color}`} />
             </div>
             <div>
-              <p className="text-xs text-slate-500">{s.label}</p>
+              <p className="text-xs text-dark-400">{s.label}</p>
               <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
             </div>
           </div>
@@ -630,23 +630,23 @@ function ScheduleContent() {
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <button onClick={goToday} className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors">
+          <button onClick={goToday} className="px-3 py-1.5 text-xs font-medium text-dark-300 hover:text-dark-50 bg-dark-700 hover:bg-dark-700/30 border border-dark-700 rounded-lg transition-colors">
             Today
           </button>
           <div className="flex items-center">
-            <button onClick={goPrev} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-l-lg transition-colors border border-slate-200">
+            <button onClick={goPrev} className="p-1.5 text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 rounded-l-lg transition-colors border border-dark-700">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button onClick={goNext} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-r-lg transition-colors border border-slate-200 border-l-0">
+            <button onClick={goNext} className="p-1.5 text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 rounded-r-lg transition-colors border border-dark-700 border-l-0">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-          <h2 className="text-sm lg:text-base font-semibold text-slate-900 ml-1">{dateLabel}</h2>
+          <h2 className="text-sm lg:text-base font-semibold text-dark-50 ml-1">{dateLabel}</h2>
         </div>
 
         <div className="flex items-center gap-2">
           {/* View switcher */}
-          <div className="flex items-center bg-slate-50/30 rounded-lg p-0.5 border border-slate-200">
+          <div className="flex items-center bg-dark-900/30 rounded-lg p-0.5 border border-dark-700">
             {[
               { key: 'day' as const, label: 'Day', icon: List },
               { key: 'week' as const, label: 'Week', icon: LayoutGrid },
@@ -656,7 +656,7 @@ function ScheduleContent() {
                 key={v.key}
                 onClick={() => setView(v.key)}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                  view === v.key ? 'bg-slate-50 text-white' : 'text-slate-500 hover:text-slate-900'
+                  view === v.key ? 'bg-dark-900 text-white' : 'text-dark-400 hover:text-dark-50'
                 }`}
               >
                 <v.icon className="w-3.5 h-3.5" />
@@ -690,9 +690,9 @@ function ScheduleContent() {
           {/* Timeline */}
           <div className="lg:col-span-2 card p-4 lg:p-5 overflow-auto max-h-[calc(100vh-320px)]">
             {todayApts.length === 0 && (
-              <div className="text-center py-8 mb-4 bg-slate-50/20 rounded-xl">
+              <div className="text-center py-8 mb-4 bg-dark-900/20 rounded-xl">
                 <CalendarDays className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-slate-500 text-sm">No appointments for this day</p>
+                <p className="text-dark-400 text-sm">No appointments for this day</p>
                 <button onClick={() => { setFormData({ ...emptyForm(), date: dateStr }); setShowAddModal(true); }} className="text-primary-400 text-xs mt-1 hover:text-primary-300">+ Add one</button>
               </div>
             )}
@@ -701,7 +701,7 @@ function ScheduleContent() {
 
           {/* Sidebar: upcoming */}
           <div className="card p-4 lg:p-5">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Upcoming</h3>
+            <h3 className="text-sm font-semibold text-dark-50 mb-3">Upcoming</h3>
             <div className="space-y-2 max-h-[calc(100vh-380px)] overflow-y-auto">
               {appointments
                 .filter(a => a.date >= formatLocalDate(new Date()))
@@ -715,22 +715,22 @@ function ScheduleContent() {
                     <div
                       key={apt.id}
                       onClick={() => handleEdit(apt)}
-                      className={`p-2.5 rounded-lg border-l-2 ${cfg.border} bg-slate-50/30 hover:bg-slate-100 cursor-pointer transition-colors`}
+                      className={`p-2.5 rounded-lg border-l-2 ${cfg.border} bg-dark-900/30 hover:bg-dark-700/50 cursor-pointer transition-colors`}
                     >
                       <div className="flex items-center justify-between mb-0.5">
-                        <p className="text-xs font-medium text-slate-900 truncate">{apt.title}</p>
+                        <p className="text-xs font-medium text-dark-50 truncate">{apt.title}</p>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.color}`}>{cfg.label}</span>
                       </div>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-dark-400">
                         {today ? 'Today' : format(aptDate, 'EEE, MMM d')} &middot; {formatTime12(apt.time)}
                       </p>
-                      {apt.client && <p className="text-[10px] text-slate-400 truncate">{apt.client}</p>}
+                      {apt.client && <p className="text-[10px] text-dark-400 truncate">{apt.client}</p>}
                     </div>
                   );
                 })
               }
               {appointments.filter(a => a.date >= formatLocalDate(new Date())).length === 0 && (
-                <p className="text-xs text-slate-400 text-center py-4">No upcoming appointments</p>
+                <p className="text-xs text-dark-400 text-center py-4">No upcoming appointments</p>
               )}
             </div>
           </div>
@@ -745,7 +745,7 @@ function ScheduleContent() {
         <div className="card p-4 lg:p-5">
           <div className="grid grid-cols-7 gap-px">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className="text-center text-[10px] text-slate-400 uppercase tracking-wider py-2">{d}</div>
+              <div key={d} className="text-center text-[10px] text-dark-400 uppercase tracking-wider py-2">{d}</div>
             ))}
             {generateCalendarDays().map((day, i) => {
               const dayDate = day ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day) : null;
@@ -763,7 +763,7 @@ function ScheduleContent() {
                     !day ? '' :
                     isSelected ? 'bg-primary-50 ring-1 ring-primary-500/30' :
                     today ? 'bg-primary-500/5' :
-                    'hover:bg-slate-50/30'
+                    'hover:bg-dark-700/30'
                   }`}
                 >
                   {day && (
@@ -775,7 +775,7 @@ function ScheduleContent() {
                             {a.time.slice(0, 5)} {a.title}
                           </div>
                         ))}
-                        {dayApts.length > 2 && <p className="text-[9px] text-slate-400 pl-1">+{dayApts.length - 2}</p>}
+                        {dayApts.length > 2 && <p className="text-[9px] text-dark-400 pl-1">+{dayApts.length - 2}</p>}
                       </div>
                     </>
                   )}
@@ -816,30 +816,30 @@ function ScheduleContent() {
       {showConnectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowConnectModal(false)} />
-          <div className="relative bg-white border border-slate-200 rounded-2xl shadow-lg w-full max-w-sm overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-slate-900">Google Calendar</h2>
-              <button onClick={() => setShowConnectModal(false)} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
+          <div className="relative bg-dark-800 border border-dark-700 rounded-2xl shadow-lg w-full max-w-sm overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-dark-700">
+              <h2 className="text-base font-semibold text-dark-50">Google Calendar</h2>
+              <button onClick={() => setShowConnectModal(false)} className="p-1.5 text-dark-400 hover:text-dark-50 hover:bg-dark-700/30 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-5">
               {googleConnected ? (
                 <>
                   <div className="flex items-center gap-3 mb-4 p-3 bg-emerald-50 border border-green-500/20 rounded-xl">
                     <Check className="w-5 h-5 text-emerald-600" />
-                    <div><p className="text-slate-900 text-sm font-medium">Connected</p><p className="text-[11px] text-slate-500">Events sync automatically</p></div>
+                    <div><p className="text-dark-50 text-sm font-medium">Connected</p><p className="text-[11px] text-dark-400">Events sync automatically</p></div>
                   </div>
                   <button onClick={handleDisconnectGoogle} className="w-full px-4 py-2 text-sm bg-red-50 text-red-600 border border-red-500/20 rounded-lg hover:bg-red-50 transition-colors">Disconnect</button>
                 </>
               ) : (
                 <>
                   <div className="text-center mb-5">
-                    <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 bg-dark-900 rounded-xl flex items-center justify-center mx-auto mb-3">
                       <CalendarDays className="w-6 h-6 text-primary-400" />
                     </div>
-                    <p className="text-slate-600 text-sm mb-1">Sync with Google Calendar</p>
-                    <p className="text-[11px] text-slate-400">Appointments sync to all your devices</p>
+                    <p className="text-dark-300 text-sm mb-1">Sync with Google Calendar</p>
+                    <p className="text-[11px] text-dark-400">Appointments sync to all your devices</p>
                   </div>
-                  <button onClick={handleConnectGoogle} className="w-full px-4 py-2.5 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm flex items-center justify-center gap-2">
+                  <button onClick={handleConnectGoogle} className="w-full px-4 py-2.5 bg-dark-800 text-dark-50 rounded-lg hover:bg-dark-700/50 transition-colors font-medium text-sm flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                     Sign in with Google
                   </button>
@@ -856,7 +856,7 @@ function ScheduleContent() {
 /* ─── Page Shell ─── */
 export default function SchedulePage() {
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-dark-900">
       <Sidebar />
       <main className="flex-1 min-w-0 flex flex-col">
         <TopBar />
