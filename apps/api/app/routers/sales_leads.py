@@ -1467,6 +1467,78 @@ async def bulk_update_emails(
     return {"updated": updated, "not_found": not_found}
 
 
+class BulkImportEntry(BaseModel):
+    provider_name: str
+    state: str
+    city: Optional[str] = None
+    contact_email: str
+    website: Optional[str] = None
+    phone: Optional[str] = None
+    ownership_type: Optional[str] = None
+
+
+class BulkImportRequest(BaseModel):
+    leads: List[BulkImportEntry]
+
+
+@router.post("/leads/bulk/import-with-email")
+async def bulk_import_with_email(
+    data: BulkImportRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Bulk import agencies that already have verified emails. Skips duplicates by name+state."""
+    imported = 0
+    skipped = 0
+    for entry in data.leads:
+        if not entry.contact_email:
+            continue
+        existing = db.query(SalesLead).filter(
+            SalesLead.provider_name.ilike(f"%{entry.provider_name}%"),
+            SalesLead.state == entry.state.upper(),
+        ).first()
+        if existing:
+            if not existing.contact_email and entry.contact_email:
+                existing.contact_email = entry.contact_email
+                if entry.website and not existing.website:
+                    existing.website = entry.website
+                imported += 1
+            else:
+                skipped += 1
+            continue
+        lead = SalesLead(
+            provider_name=entry.provider_name.strip().title(),
+            state=entry.state.upper(),
+            city=(entry.city or "").strip().title() or None,
+            contact_email=entry.contact_email.strip(),
+            website=entry.website,
+            phone=entry.phone,
+            ownership_type=entry.ownership_type,
+            priority="medium",
+            source="web_research",
+        )
+        db.add(lead)
+        imported += 1
+    db.commit()
+    return {"imported": imported, "skipped": skipped}
+
+
+@router.delete("/leads/cleanup-no-email")
+async def cleanup_no_email(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Remove all leads that don't have a contact email."""
+    no_email = db.query(SalesLead).filter(
+        or_(SalesLead.contact_email.is_(None), SalesLead.contact_email == "")
+    ).all()
+    count = len(no_email)
+    for lead in no_email:
+        db.delete(lead)
+    db.commit()
+    return {"deleted": count, "message": f"Removed {count} leads without email addresses"}
+
+
 # =============================================================================
 # EMAIL CAMPAIGN
 # =============================================================================

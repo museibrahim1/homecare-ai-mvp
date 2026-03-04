@@ -349,6 +349,17 @@ export default function SalesLeadsPage() {
     }
   };
 
+  const cleanupNoEmail = async () => {
+    if (!confirm('Remove ALL leads without email addresses? This cannot be undone.')) return;
+    try {
+      const result = await fetchWithAuth('/platform/sales/leads/cleanup-no-email', { method: 'DELETE' });
+      alert(result.message || `Removed ${result.deleted} leads`);
+      loadData();
+    } catch (e) {
+      alert(`Cleanup failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    }
+  };
+
   const openLeadDetail = async (id: string) => {
     try {
       const data = await fetchWithAuth(`/platform/sales/leads/${id}`);
@@ -590,6 +601,13 @@ export default function SalesLeadsPage() {
             >
               {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               {importing ? 'Importing...' : 'Import All States'}
+            </button>
+            <button
+              onClick={cleanupNoEmail}
+              className="px-3 py-2 bg-[#1a1a2e] border border-red-800/50 rounded-lg text-red-400 hover:text-red-300 hover:border-red-700 flex items-center gap-2 text-sm"
+            >
+              <X className="w-4 h-4" />
+              Remove No-Email
             </button>
             <button
               onClick={() => { setShowSequenceLauncher(true); setSequenceResult(null); }}
