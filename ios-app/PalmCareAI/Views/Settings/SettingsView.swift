@@ -3,6 +3,7 @@ import LocalAuthentication
 
 struct SettingsView: View {
     @EnvironmentObject var api: APIService
+    @Environment(\.openURL) private var openURL
 
     @State private var user: User?
     @State private var subscription: UserSubscription?
@@ -12,12 +13,14 @@ struct SettingsView: View {
     @State private var showPasswordChange = false
     @State private var showTerms = false
     @State private var showEditProfile = false
+    @State private var showLanguagePicker = false
     @AppStorage("googleCalendarConnected") private var googleCalConnected = false
 
     @AppStorage("useFaceID") private var useFaceID = false
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
     @AppStorage("backgroundRecording") private var backgroundRecording = false
-    @AppStorage("appTheme") private var appTheme = "Light"
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    @AppStorage("appLanguage") private var appLanguage = "English"
 
     var body: some View {
         NavigationStack {
@@ -54,7 +57,11 @@ struct SettingsView: View {
             .sheet(isPresented: $showEditProfile) {
                 EditProfileSheet(user: user).environmentObject(api)
             }
+            .sheet(isPresented: $showLanguagePicker) {
+                LanguagePickerSheet(selectedLanguage: $appLanguage)
+            }
             .task { await loadData() }
+            .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
 
@@ -136,11 +143,18 @@ struct SettingsView: View {
 
             SettingsDivider()
 
-            SettingsNavRow(icon: "globe", iconColor: .palmBlue, title: "Language", detail: "English")
+            SettingsToggleRow(
+                icon: "moon.fill",
+                iconColor: .palmPurple,
+                title: "Dark mode",
+                isOn: $isDarkMode
+            )
 
             SettingsDivider()
 
-            SettingsNavRow(icon: "paintbrush.fill", iconColor: .palmPurple, title: "Theme", detail: appTheme)
+            Button { showLanguagePicker = true } label: {
+                SettingsNavRow(icon: "globe", iconColor: .palmBlue, title: "Language", detail: appLanguage)
+            }
         }
     }
 
@@ -174,7 +188,13 @@ struct SettingsView: View {
 
             SettingsDivider()
 
-            SettingsNavRow(icon: "questionmark.circle.fill", iconColor: .palmAccent, title: "Support")
+            Button {
+                if let url = URL(string: "mailto:support@palmtai.com?subject=PalmCare%20AI%20Support") {
+                    openURL(url)
+                }
+            } label: {
+                SettingsNavRow(icon: "questionmark.circle.fill", iconColor: .palmAccent, title: "Support", detail: "support@palmtai.com")
+            }
         }
     }
 
@@ -652,7 +672,7 @@ struct TermsPrivacySheet: View {
 
                     termsSection(
                         title: "Contact",
-                        body: "For questions about these terms or your privacy, contact us at support@palmcare.ai"
+                        body: "For questions about these terms or your privacy, contact us at support@palmtai.com"
                     )
                 }
                 .padding(.horizontal, 20)
@@ -863,6 +883,66 @@ struct EditProfileSheet: View {
                 await MainActor.run {
                     isLoading = false
                     errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Language Picker Sheet
+
+struct LanguagePickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selectedLanguage: String
+
+    private let languages: [(code: String, name: String, flag: String)] = [
+        ("en", "English", "🇺🇸"),
+        ("es", "Español", "🇪🇸"),
+        ("fr", "Français", "🇫🇷"),
+        ("pt", "Português", "🇧🇷"),
+        ("zh", "中文", "🇨🇳"),
+        ("ko", "한국어", "🇰🇷"),
+        ("vi", "Tiếng Việt", "🇻🇳"),
+        ("tl", "Tagalog", "🇵🇭"),
+        ("ht", "Kreyòl Ayisyen", "🇭🇹"),
+        ("ar", "العربية", "🇸🇦"),
+        ("ru", "Русский", "🇷🇺"),
+        ("hi", "हिन्दी", "🇮🇳"),
+    ]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(languages, id: \.code) { lang in
+                    Button {
+                        selectedLanguage = lang.name
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 14) {
+                            Text(lang.flag)
+                                .font(.system(size: 24))
+
+                            Text(lang.name)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.palmText)
+
+                            Spacer()
+
+                            if selectedLanguage == lang.name {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.palmPrimary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+            }
+            .navigationTitle("Language")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Done") { dismiss() }
                 }
             }
         }

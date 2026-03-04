@@ -103,10 +103,10 @@ struct CustomTabBar: View {
         .padding(.bottom, 24)
         .background(
             Rectangle()
-                .fill(.white)
+                .fill(Color(UIColor.systemBackground))
                 .shadow(color: .black.opacity(0.06), radius: 8, y: -4)
                 .overlay(
-                    Rectangle().fill(Color.palmBorder).frame(height: 1),
+                    Rectangle().fill(Color.palmBorder.opacity(0.5)).frame(height: 1),
                     alignment: .top
                 )
         )

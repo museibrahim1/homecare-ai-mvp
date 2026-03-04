@@ -5,6 +5,7 @@ import LocalAuthentication
 struct PalmCareAIApp: App {
     @StateObject private var api = APIService.shared
     @AppStorage("useFaceID") private var useFaceID = false
+    @AppStorage("isDarkMode") private var isDarkMode = false
     @State private var isBiometricUnlocked = false
 
     init() {
@@ -44,6 +45,7 @@ struct PalmCareAIApp: App {
             .onChange(of: api.isAuthenticated) { newValue in
                 if !newValue { isBiometricUnlocked = false }
             }
+            .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
 }

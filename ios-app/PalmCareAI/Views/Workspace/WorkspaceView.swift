@@ -4,7 +4,7 @@ struct WorkspaceView: View {
     @EnvironmentObject var api: APIService
     @State private var selectedSection = 0
 
-    private let sections = ["Calendar", "Contracts", "Tasks"]
+    private let sections = ["Calendar", "Documents"]
 
     var body: some View {
         NavigationStack {
@@ -18,9 +18,6 @@ struct WorkspaceView: View {
 
                     ContractsView()
                         .tag(1)
-
-                    TasksView()
-                        .tag(2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.2), value: selectedSection)
@@ -38,7 +35,7 @@ struct WorkspaceView: View {
                     withAnimation(.easeInOut(duration: 0.2)) { selectedSection = index }
                 } label: {
                     HStack(spacing: 5) {
-                        Image(systemName: iconFor(index))
+                        Image(systemName: index == 0 ? "calendar" : "doc.text.fill")
                             .font(.system(size: 11, weight: .semibold))
 
                         Text(title)
@@ -67,14 +64,5 @@ struct WorkspaceView: View {
         }
         .padding(.horizontal, 18)
         .padding(.bottom, 8)
-    }
-
-    private func iconFor(_ index: Int) -> String {
-        switch index {
-        case 0: return "calendar"
-        case 1: return "doc.text.fill"
-        case 2: return "checklist"
-        default: return "folder"
-        }
     }
 }
