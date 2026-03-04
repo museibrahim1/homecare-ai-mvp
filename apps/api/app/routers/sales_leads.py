@@ -1385,6 +1385,48 @@ async def bulk_update_status(
     return {"message": f"Updated {updated} leads"}
 
 
+class BulkEmailUpdate(BaseModel):
+    """Batch update contact emails for leads matched by provider_name."""
+    updates: List[dict]  # [{"provider_name": "...", "contact_email": "...", "website": "..."}]
+
+
+@router.post("/leads/bulk/update-emails")
+async def bulk_update_emails(
+    data: BulkEmailUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_ceo),
+):
+    """Batch update contact_email and website for leads by provider_name matching."""
+    updated = 0
+    not_found = 0
+    for entry in data.updates:
+        name = entry.get("provider_name", "")
+        email = entry.get("contact_email", "")
+        website = entry.get("website", "")
+        if not name or not email:
+            continue
+        lead = db.query(SalesLead).filter(
+            SalesLead.provider_name.ilike(f"%{name}%")
+        ).first()
+        if lead:
+            if email and not lead.contact_email:
+                lead.contact_email = email
+            if website and not lead.website:
+                lead.website = website
+            activity = lead.activity_log or []
+            activity.append({
+                "action": "Bulk email update",
+                "email": email,
+                "at": datetime.now(timezone.utc).isoformat(),
+            })
+            lead.activity_log = activity
+            updated += 1
+        else:
+            not_found += 1
+    db.commit()
+    return {"updated": updated, "not_found": not_found}
+
+
 # =============================================================================
 # EMAIL CAMPAIGN
 # =============================================================================

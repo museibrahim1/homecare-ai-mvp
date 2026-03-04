@@ -125,6 +125,9 @@ export default function InvestorsPage() {
   const [emailForm, setEmailForm] = useState({ subject: '', html_body: '', to_email: '' });
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  // Email templates
+  const [emailTemplates, setEmailTemplates] = useState<{ id: string; name: string; subject: string; description: string }[]>([]);
+
   // Create modal
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -218,6 +221,28 @@ export default function InvestorsPage() {
   useEffect(() => {
     if (isAuthorized) loadData();
   }, [filters, sortBy, sortDir, page]);
+
+  const loadTemplates = async () => {
+    try {
+      const data = await fetchWithAuth('/platform/investors/email-templates');
+      setEmailTemplates(data);
+    } catch { /* ignore */ }
+  };
+
+  const loadTemplate = async (templateId: string, target: 'bulk' | 'individual') => {
+    try {
+      const tmpl = await fetchWithAuth(`/platform/investors/email-templates/${templateId}`);
+      if (target === 'bulk') {
+        setBulkEmailForm({ subject: tmpl.subject, html_body: tmpl.body });
+      } else {
+        setEmailForm({ ...emailForm, subject: tmpl.subject, html_body: tmpl.body });
+      }
+    } catch { /* ignore */ }
+  };
+
+  useEffect(() => {
+    if (isAuthorized) loadTemplates();
+  }, [isAuthorized]);
 
   const seedData = async () => {
     setSeeding(true);
@@ -898,6 +923,19 @@ export default function InvestorsPage() {
 
                   {showEmailCompose && (
                     <div className="bg-dark-700 rounded-lg p-3 space-y-2 border border-dark-600">
+                      {emailTemplates.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pb-1">
+                          {emailTemplates.map((t) => (
+                            <button
+                              key={t.id}
+                              onClick={() => loadTemplate(t.id, 'individual')}
+                              className="px-2 py-1 bg-primary-500/10 border border-primary-500/30 rounded text-primary-400 text-xs hover:bg-primary-500/20 flex items-center gap-1"
+                            >
+                              <Sparkles className="w-3 h-3" /> {t.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                       <input
                         placeholder="To (leave empty to use contact email)"
                         value={emailForm.to_email}
@@ -969,6 +1007,19 @@ export default function InvestorsPage() {
               </div>
 
               <div className="p-6 space-y-4">
+                {emailTemplates.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {emailTemplates.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => loadTemplate(t.id, 'bulk')}
+                        className="px-3 py-1.5 bg-primary-500/10 border border-primary-500/30 rounded-lg text-primary-400 text-xs font-medium hover:bg-primary-500/20 flex items-center gap-1.5"
+                      >
+                        <Sparkles className="w-3 h-3" /> {t.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="bg-dark-800 border border-dark-700 rounded-lg p-3">
                   <p className="text-xs text-dark-400 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-primary-400" />
