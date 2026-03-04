@@ -149,6 +149,8 @@ class LeadStats(BaseModel):
 
 class ImportRequest(BaseModel):
     states: List[str] = ["NE", "IA"]
+    exclude_government: bool = True
+    limit_per_state: int = 1000
 
 
 class CampaignSendRequest(BaseModel):
@@ -1177,94 +1179,117 @@ async def import_cms_data(
     db: Session = Depends(get_db),
     admin: User = Depends(require_ceo),
 ):
-    """Pull home health agency data from CMS Provider Data API and import as leads."""
+    """Pull home health agency data from CMS Provider Data API and import as leads.
+    Uses pagination to pull ALL agencies (not just first 500).
+    Optionally excludes government-operated agencies."""
     CMS_API = "https://data.cms.gov/provider-data/api/1/datastore/query/6jpm-sxkc/0"
+    GOVERNMENT_KEYWORDS = ["government", "state", "county", "federal", "va ", "veterans"]
+    PAGE_SIZE = 500
 
     imported = 0
     skipped = 0
+    gov_skipped = 0
 
     for state in req.states:
-        payload = json.dumps({
-            "conditions": [{"property": "state", "value": state.upper(), "operator": "="}],
-            "limit": 500,
-            "keys": True,
-        }).encode()
+        offset = 0
+        while True:
+            payload = json.dumps({
+                "conditions": [{"property": "state", "value": state.upper(), "operator": "="}],
+                "limit": PAGE_SIZE,
+                "offset": offset,
+                "keys": True,
+            }).encode()
 
-        try:
-            request = urllib.request.Request(
-                CMS_API, data=payload, headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(request, timeout=30) as resp:
-                data = json.loads(resp.read())
-        except Exception as e:
-            logger.error(f"Failed to pull CMS data for {state}: {e}")
-            continue
+            try:
+                request = urllib.request.Request(
+                    CMS_API, data=payload, headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(request, timeout=30) as resp:
+                    data = json.loads(resp.read())
+            except Exception as e:
+                logger.error(f"Failed to pull CMS data for {state} offset={offset}: {e}")
+                break
 
-        results = data.get("results", [])
+            results = data.get("results", [])
+            if not results:
+                break
 
-        for r in results:
-            ccn = r.get("cms_certification_number_ccn")
-            if not ccn:
-                continue
+            for r in results:
+                ccn = r.get("cms_certification_number_ccn")
+                if not ccn:
+                    continue
 
-            existing = db.query(SalesLead).filter(SalesLead.ccn == ccn).first()
-            if existing:
-                skipped += 1
-                continue
+                ownership = (r.get("type_of_ownership") or "").strip().lower()
+                if req.exclude_government and any(kw in ownership for kw in GOVERNMENT_KEYWORDS):
+                    gov_skipped += 1
+                    continue
 
-            cert_date_str = r.get("certification_date", "")
-            years_old = None
-            if cert_date_str and cert_date_str != "-":
-                try:
-                    from datetime import datetime as dt
-                    cert_dt = dt.strptime(cert_date_str, "%m/%d/%Y")
-                    years_old = round((dt.now() - cert_dt).days / 365.25, 1)
-                except Exception:
-                    pass
+                existing = db.query(SalesLead).filter(SalesLead.ccn == ccn).first()
+                if existing:
+                    skipped += 1
+                    continue
 
-            phone_raw = r.get("telephone_number", "")
-            phone = None
-            if phone_raw and phone_raw != "-":
-                phone_raw = phone_raw.strip().replace("-", "").replace("(", "").replace(")", "").replace(" ", "")
-                if len(phone_raw) == 10:
-                    phone = f"({phone_raw[:3]}) {phone_raw[3:6]}-{phone_raw[6:]}"
-                else:
-                    phone = phone_raw
+                cert_date_str = r.get("certification_date", "")
+                years_old = None
+                if cert_date_str and cert_date_str != "-":
+                    try:
+                        from datetime import datetime as dt
+                        cert_dt = dt.strptime(cert_date_str, "%m/%d/%Y")
+                        years_old = round((dt.now() - cert_dt).days / 365.25, 1)
+                    except Exception:
+                        pass
 
-            priority = "high" if (years_old is not None and years_old <= 5) else (
-                "medium" if (years_old is not None and years_old <= 10) else "low"
-            )
+                phone_raw = r.get("telephone_number", "")
+                phone = None
+                if phone_raw and phone_raw != "-":
+                    phone_raw = phone_raw.strip().replace("-", "").replace("(", "").replace(")", "").replace(" ", "")
+                    if len(phone_raw) == 10:
+                        phone = f"({phone_raw[:3]}) {phone_raw[3:6]}-{phone_raw[6:]}"
+                    else:
+                        phone = phone_raw
 
-            lead = SalesLead(
-                provider_name=(r.get("provider_name") or "").strip().title(),
-                state=r.get("state", state),
-                city=(r.get("citytown") or "").strip().title(),
-                address=(r.get("address") or "").strip().title(),
-                zip_code=(r.get("zip_code") or "").strip(),
-                phone=phone,
-                ownership_type=(r.get("type_of_ownership") or "").strip().title() or None,
-                ccn=ccn,
-                certification_date=cert_date_str if cert_date_str != "-" else None,
-                years_in_operation=years_old,
-                star_rating=r.get("quality_of_patient_care_star_rating"),
-                offers_nursing=r.get("offers_nursing_care_services") == "Yes",
-                offers_pt=r.get("offers_physical_therapy_services") == "Yes",
-                offers_ot=r.get("offers_occupational_therapy_services") == "Yes",
-                offers_speech=r.get("offers_speech_pathology_services") == "Yes",
-                offers_social=r.get("offers_medical_social_services") == "Yes",
-                offers_aide=r.get("offers_home_health_aide_services") == "Yes",
-                priority=priority,
-                source="cms_provider_data",
-            )
-            db.add(lead)
-            imported += 1
+                priority = "high" if (years_old is not None and years_old <= 5) else (
+                    "medium" if (years_old is not None and years_old <= 10) else "low"
+                )
+
+                lead = SalesLead(
+                    provider_name=(r.get("provider_name") or "").strip().title(),
+                    state=r.get("state", state),
+                    city=(r.get("citytown") or "").strip().title(),
+                    address=(r.get("address") or "").strip().title(),
+                    zip_code=(r.get("zip_code") or "").strip(),
+                    phone=phone,
+                    ownership_type=(r.get("type_of_ownership") or "").strip().title() or None,
+                    ccn=ccn,
+                    certification_date=cert_date_str if cert_date_str != "-" else None,
+                    years_in_operation=years_old,
+                    star_rating=r.get("quality_of_patient_care_star_rating"),
+                    offers_nursing=r.get("offers_nursing_care_services") == "Yes",
+                    offers_pt=r.get("offers_physical_therapy_services") == "Yes",
+                    offers_ot=r.get("offers_occupational_therapy_services") == "Yes",
+                    offers_speech=r.get("offers_speech_pathology_services") == "Yes",
+                    offers_social=r.get("offers_medical_social_services") == "Yes",
+                    offers_aide=r.get("offers_home_health_aide_services") == "Yes",
+                    priority=priority,
+                    source="cms_provider_data",
+                )
+                db.add(lead)
+                imported += 1
+
+            if len(results) < PAGE_SIZE:
+                break
+            offset += PAGE_SIZE
+
+            if offset >= req.limit_per_state:
+                break
 
     db.commit()
 
     return {
-        "message": f"Import complete: {imported} new leads, {skipped} duplicates skipped",
+        "message": f"Import complete: {imported} new, {skipped} duplicates, {gov_skipped} government agencies excluded",
         "imported": imported,
         "skipped": skipped,
+        "government_excluded": gov_skipped,
         "states": req.states,
     }
 

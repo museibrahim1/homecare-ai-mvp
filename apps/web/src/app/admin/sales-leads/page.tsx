@@ -11,7 +11,7 @@ import {
   Check, X, Send, Clock,
   Target, TrendingUp, Users, Calendar, Eye,
   CheckCircle2, Circle, AlertCircle, ChevronLeft, ChevronRight,
-  Rocket, Sparkles, FileText, Zap, BarChart3, Play, Activity,
+  Rocket, Sparkles, FileText, Zap, BarChart3, Play, Activity, Database,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -334,9 +334,9 @@ export default function SalesLeadsPage() {
     try {
       const result = await fetchWithAuth('/platform/sales/leads/import-cms', {
         method: 'POST',
-        body: JSON.stringify({ states: ['NE', 'IA'] }),
+        body: JSON.stringify({ states: ['NE', 'IA'], exclude_government: true, limit_per_state: 1000 }),
       });
-      alert(`Imported ${result.imported} leads, ${result.skipped} duplicates skipped`);
+      alert(`Imported ${result.imported} new leads, ${result.skipped} duplicates skipped, ${result.government_excluded || 0} government agencies excluded`);
       loadData();
     } catch (e) {
       alert(`Import failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
@@ -578,6 +578,14 @@ export default function SalesLeadsPage() {
             >
               <RefreshCw className="w-4 h-4" />
               Refresh
+            </button>
+            <button
+              onClick={importCMS}
+              disabled={importing}
+              className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-slate-900 flex items-center gap-2 text-sm disabled:opacity-50"
+            >
+              {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+              {importing ? 'Importing...' : 'Import CMS'}
             </button>
             <button
               onClick={() => { setShowSequenceLauncher(true); setSequenceResult(null); }}
