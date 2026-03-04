@@ -97,6 +97,7 @@ struct CustomTabBar: View {
                         }
                         .frame(maxWidth: .infinity)
                     }
+                    .accessibilityLabel("\(tabs[index].label) tab")
                 }
             }
         }

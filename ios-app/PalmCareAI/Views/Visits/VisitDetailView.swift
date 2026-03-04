@@ -622,6 +622,7 @@ struct VisitDetailView: View {
                         .background(Color.palmPrimary.opacity(0.08))
                         .cornerRadius(8)
                     }
+                    .accessibilityLabel("Download contract as PDF")
                 }
 
                 if c.services != nil && !(c.services?.isEmpty ?? true) {

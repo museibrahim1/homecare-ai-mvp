@@ -112,6 +112,7 @@ struct SettingsView: View {
                     .background(Color.palmPrimary.opacity(0.1))
                     .cornerRadius(16)
             }
+            .accessibilityLabel("Edit profile")
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
@@ -155,6 +156,7 @@ struct SettingsView: View {
             Button { showLanguagePicker = true } label: {
                 SettingsNavRow(icon: "globe", iconColor: .palmBlue, title: "Language", detail: appLanguage)
             }
+            .accessibilityLabel("Language, \(appLanguage)")
         }
     }
 
@@ -165,6 +167,7 @@ struct SettingsView: View {
             Button { showPasswordChange = true } label: {
                 SettingsNavRow(icon: "lock.fill", iconColor: .palmSecondary, title: "Password")
             }
+            .accessibilityLabel("Change password")
 
             SettingsDivider()
 
@@ -195,6 +198,7 @@ struct SettingsView: View {
             } label: {
                 SettingsNavRow(icon: "questionmark.circle.fill", iconColor: .palmAccent, title: "Support", detail: "support@palmtai.com")
             }
+            .accessibilityLabel("Contact support")
         }
     }
 
@@ -228,6 +232,7 @@ struct SettingsView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
             }
+            .accessibilityLabel("Manage billing plan")
 
             SettingsDivider()
 
@@ -291,6 +296,7 @@ struct SettingsView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
             }
+            .accessibilityLabel(googleCalConnected ? "Manage Google Calendar" : "Connect Google Calendar")
         }
     }
 
@@ -301,6 +307,7 @@ struct SettingsView: View {
             Button { showTerms = true } label: {
                 SettingsNavRow(icon: "doc.plaintext", iconColor: .palmSecondary, title: "Terms and Privacy Policy")
             }
+            .accessibilityLabel("Terms and Privacy Policy")
 
             SettingsDivider()
 
@@ -309,6 +316,7 @@ struct SettingsView: View {
             } label: {
                 SettingsNavRow(icon: "trash.fill", iconColor: .palmSecondary, title: "Clear cache")
             }
+            .accessibilityLabel("Clear cache")
         }
     }
 
@@ -329,6 +337,7 @@ struct SettingsView: View {
             .cornerRadius(14)
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.red.opacity(0.15), lineWidth: 1))
         }
+        .accessibilityLabel("Log out")
         .alert("Log Out", isPresented: $showLogoutConfirm) {
             Button("Log Out", role: .destructive) { api.logout() }
             Button("Cancel", role: .cancel) {}
@@ -438,6 +447,7 @@ struct SettingsToggleRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
+        .accessibilityLabel(title)
     }
 }
 
