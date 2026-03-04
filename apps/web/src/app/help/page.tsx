@@ -134,22 +134,22 @@ export default function HelpPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 min-w-0">
         <TopBar />
         <div className="max-w-4xl mx-auto p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-dark-50">Help & Support</h1>
-            <p className="text-dark-400 mt-1">Find answers or get in touch with our team</p>
+            <h1 className="text-2xl font-bold text-slate-900">Help & Support</h1>
+            <p className="text-slate-500 mt-1">Find answers or get in touch with our team</p>
           </div>
 
           {/* Guided Tour Banner */}
@@ -163,14 +163,14 @@ export default function HelpPage() {
                 <BookOpen className="w-7 h-7 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-dark-50 mb-1">Interactive App Tour</h2>
-                <p className="text-dark-300 text-sm leading-relaxed">
+                <h2 className="text-lg font-bold text-slate-900 mb-1">Interactive App Tour</h2>
+                <p className="text-slate-600 text-sm leading-relaxed">
                   New to PalmCare AI? Take a guided walkthrough of all the key features — from recording assessments to generating contracts. Built for care professionals. Takes about 2 minutes.
                 </p>
               </div>
               <button
                 onClick={openTour}
-                className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-dark-50 font-medium rounded-xl transition-all shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30"
+                className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-slate-900 font-medium rounded-xl transition-all shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30"
               >
                 <Play className="w-4 h-4" />
                 Start Tour
@@ -182,26 +182,26 @@ export default function HelpPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <a
               href="mailto:support@palmtai.com"
-              className="flex items-center gap-4 p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-primary-500/50 transition"
+              className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500/50 transition"
             >
               <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center">
                 <Mail className="w-6 h-6 text-primary-400" />
               </div>
               <div>
-                <p className="text-dark-50 font-medium">Email Support</p>
-                <p className="text-dark-400 text-sm">support@palmtai.com</p>
+                <p className="text-slate-900 font-medium">Email Support</p>
+                <p className="text-slate-500 text-sm">support@palmtai.com</p>
               </div>
             </a>
             <a
               href="tel:+18005551234"
-              className="flex items-center gap-4 p-4 bg-dark-800 rounded-xl border border-dark-700 hover:border-primary-500/50 transition"
+              className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500/50 transition"
             >
               <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
                 <Phone className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-dark-50 font-medium">Phone Support</p>
-                <p className="text-dark-400 text-sm">(800) 555-1234</p>
+                <p className="text-slate-900 font-medium">Phone Support</p>
+                <p className="text-slate-500 text-sm">(800) 555-1234</p>
               </div>
             </a>
           </div>
@@ -213,7 +213,7 @@ export default function HelpPage() {
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 activeTab === 'faq'
                   ? 'bg-primary-500 text-white'
-                  : 'bg-dark-800 text-dark-300 hover:text-dark-50'
+                  : 'bg-white text-slate-600 hover:text-slate-900'
               }`}
             >
               <Book className="w-4 h-4 inline mr-2" />
@@ -224,7 +224,7 @@ export default function HelpPage() {
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 activeTab === 'ticket'
                   ? 'bg-primary-500 text-white'
-                  : 'bg-dark-800 text-dark-300 hover:text-dark-50'
+                  : 'bg-white text-slate-600 hover:text-slate-900'
               }`}
             >
               <MessageSquare className="w-4 h-4 inline mr-2" />
@@ -238,27 +238,27 @@ export default function HelpPage() {
               {FAQ_ITEMS.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden"
+                  className="bg-white rounded-xl border border-slate-200 overflow-hidden"
                 >
                   <button
                     onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                    className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-dark-700/50 transition"
+                    className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-100 transition"
                   >
-                    <span className="text-dark-50 font-medium">{item.question}</span>
+                    <span className="text-slate-900 font-medium">{item.question}</span>
                     <span className={`text-primary-400 transition-transform ${expandedFaq === index ? 'rotate-180' : ''}`}>
                       ▼
                     </span>
                   </button>
                   {expandedFaq === index && (
-                    <div className="px-5 pb-4 text-dark-300">
+                    <div className="px-5 pb-4 text-slate-600">
                       {item.answer}
                     </div>
                   )}
                 </div>
               ))}
               
-              <div className="mt-6 p-4 bg-dark-800 rounded-xl border border-dark-700 text-center">
-                <p className="text-dark-400 mb-3">Can't find what you're looking for?</p>
+              <div className="mt-6 p-4 bg-white rounded-xl border border-slate-200 text-center">
+                <p className="text-slate-500 mb-3">Can't find what you're looking for?</p>
                 <button
                   onClick={() => setActiveTab('ticket')}
                   className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
@@ -271,19 +271,19 @@ export default function HelpPage() {
 
           {/* Ticket Tab */}
           {activeTab === 'ticket' && (
-            <div className="bg-dark-800 rounded-xl border border-dark-700 p-6">
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
               {submitted ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="w-8 h-8 text-emerald-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-dark-50 mb-2">Ticket Submitted!</h3>
-                  <p className="text-dark-400 mb-6">
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Ticket Submitted!</h3>
+                  <p className="text-slate-500 mb-6">
                     We've received your support request and will respond within 1 business day.
                   </p>
                   <button
                     onClick={() => setSubmitted(false)}
-                    className="px-4 py-2 bg-dark-900 text-white rounded-lg hover:bg-dark-700/50 transition"
+                    className="px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
                   >
                     Submit Another Ticket
                   </button>
@@ -292,7 +292,7 @@ export default function HelpPage() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Category Selection */}
                   <div>
-                    <label className="block text-dark-400 text-sm mb-3">Category</label>
+                    <label className="block text-slate-500 text-sm mb-3">Category</label>
                     <div className="grid grid-cols-2 gap-3">
                       {TICKET_CATEGORIES.map((cat) => (
                         <button
@@ -302,14 +302,14 @@ export default function HelpPage() {
                           className={`p-4 rounded-xl border text-left transition ${
                             formData.category === cat.id
                               ? 'bg-primary-50 border-primary-500/50'
-                              : 'bg-dark-700 border-dark-700 hover:border-dark-600'
+                              : 'bg-slate-100 border-slate-200 hover:border-slate-300'
                           }`}
                         >
                           <cat.icon className={`w-5 h-5 mb-2 ${
-                            formData.category === cat.id ? 'text-primary-400' : 'text-dark-400'
+                            formData.category === cat.id ? 'text-primary-400' : 'text-slate-500'
                           }`} />
-                          <p className="text-dark-50 font-medium text-sm">{cat.label}</p>
-                          <p className="text-dark-400 text-xs mt-0.5">{cat.description}</p>
+                          <p className="text-slate-900 font-medium text-sm">{cat.label}</p>
+                          <p className="text-slate-400 text-xs mt-0.5">{cat.description}</p>
                         </button>
                       ))}
                     </div>
@@ -317,37 +317,37 @@ export default function HelpPage() {
 
                   {/* Subject */}
                   <div>
-                    <label className="block text-dark-400 text-sm mb-2">Subject *</label>
+                    <label className="block text-slate-500 text-sm mb-2">Subject *</label>
                     <input
                       type="text"
                       required
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       placeholder="Brief description of your issue"
-                      className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-xl text-white placeholder-dark-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
                   {/* Description */}
                   <div>
-                    <label className="block text-dark-400 text-sm mb-2">Description *</label>
+                    <label className="block text-slate-500 text-sm mb-2">Description *</label>
                     <textarea
                       required
                       rows={5}
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Please provide as much detail as possible..."
-                      className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-xl text-white placeholder-dark-400 focus:outline-none focus:border-primary-500 resize-none"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
                     />
                   </div>
 
                   {/* Priority */}
                   <div>
-                    <label className="block text-dark-400 text-sm mb-2">Priority</label>
+                    <label className="block text-slate-500 text-sm mb-2">Priority</label>
                     <select
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                      className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white focus:outline-none focus:border-primary-500"
                     >
                       <option value="low">Low - General question</option>
                       <option value="medium">Medium - Need help soon</option>

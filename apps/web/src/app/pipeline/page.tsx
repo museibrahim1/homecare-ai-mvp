@@ -215,7 +215,7 @@ export default function PipelinePage() {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -223,7 +223,7 @@ export default function PipelinePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-dark-900">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 p-8 flex items-center justify-center">
           <RefreshCw className="w-8 h-8 text-primary-500 animate-spin" />
@@ -233,19 +233,19 @@ export default function PipelinePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-dark-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-dark-50 mb-2">Deals Pipeline</h1>
-            <p className="text-dark-400">Track your clients through the care process</p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Deals Pipeline</h1>
+            <p className="text-slate-500">Track your clients through the care process</p>
           </div>
           <div className="flex gap-3">
             <button 
               onClick={loadPipelineData}
-              className="flex items-center gap-2 px-4 py-2.5 bg-dark-900 hover:bg-dark-700/50 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
             >
               <RefreshCw className="w-5 h-5" />
               Refresh
@@ -262,51 +262,51 @@ export default function PipelinePage() {
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
               <Target className="w-5 h-5 text-blue-600" />
-              <span className="text-dark-400 text-sm">Total Pipeline</span>
+              <span className="text-slate-500 text-sm">Total Pipeline</span>
             </div>
-            <p className="text-2xl font-bold text-dark-50">${deals.reduce((s, d) => s + d.value, 0).toLocaleString()}</p>
+            <p className="text-2xl font-bold text-slate-900">${deals.reduce((s, d) => s + d.value, 0).toLocaleString()}</p>
           </div>
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
               <Clock className="w-5 h-5 text-amber-600" />
-              <span className="text-dark-400 text-sm">In Progress</span>
+              <span className="text-slate-500 text-sm">In Progress</span>
             </div>
-            <p className="text-2xl font-bold text-dark-50">{deals.filter(d => d.stage !== 'active').length}</p>
+            <p className="text-2xl font-bold text-slate-900">{deals.filter(d => d.stage !== 'active').length}</p>
           </div>
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
               <CheckCircle className="w-5 h-5 text-emerald-600" />
-              <span className="text-dark-400 text-sm">Active Clients</span>
+              <span className="text-slate-500 text-sm">Active Clients</span>
             </div>
-            <p className="text-2xl font-bold text-dark-50">{deals.filter(d => d.stage === 'active').length}</p>
+            <p className="text-2xl font-bold text-slate-900">{deals.filter(d => d.stage === 'active').length}</p>
           </div>
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-2">
               <DollarSign className="w-5 h-5 text-emerald-600" />
-              <span className="text-dark-400 text-sm">Avg Deal Value</span>
+              <span className="text-slate-500 text-sm">Avg Deal Value</span>
             </div>
-            <p className="text-2xl font-bold text-dark-50">
+            <p className="text-2xl font-bold text-slate-900">
               ${deals.length > 0 ? Math.round(deals.reduce((s, d) => s + d.value, 0) / deals.length).toLocaleString() : 0}
             </p>
           </div>
         </div>
 
         {/* Stage Legend */}
-        <div className="bg-dark-800 rounded-xl p-4 border border-dark-700 mb-6">
-          <h3 className="text-sm font-medium text-dark-400 mb-3">
+        <div className="bg-white rounded-xl p-4 border border-slate-200 mb-6">
+          <h3 className="text-sm font-medium text-slate-500 mb-3">
             Client Journey: <span className="text-primary-400">Drag and drop</span> clients between stages, or click to edit
           </h3>
           <div className="flex items-center gap-2 flex-wrap">
             {stages.map((stage, idx) => (
               <div key={stage.id} className="flex items-center gap-2">
-                <div className={`px-3 py-1 rounded-full text-xs font-medium text-dark-50 ${stage.color}`}>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium text-slate-900 ${stage.color}`}>
                   {stage.name}
                 </div>
                 {idx < stages.length - 1 && (
-                  <span className="text-dark-400">→</span>
+                  <span className="text-slate-400">→</span>
                 )}
               </div>
             ))}
@@ -318,10 +318,10 @@ export default function PipelinePage() {
           {stages.map(stage => (
             <div key={stage.id} className="flex-shrink-0 w-72">
               <div 
-                className={`bg-dark-800 rounded-xl p-4 border-2 transition-all min-h-[400px] ${
+                className={`bg-white rounded-xl p-4 border-2 transition-all min-h-[400px] ${
                   dragOverStage === stage.id 
                     ? 'border-primary-500 bg-primary-50' 
-                    : 'border-dark-700'
+                    : 'border-slate-200'
                 }`}
                 onDragOver={(e) => handleDragOver(e, stage.id)}
                 onDragLeave={handleDragLeave}
@@ -331,12 +331,12 @@ export default function PipelinePage() {
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${stage.color}`} />
                     <span className="font-medium text-white">{stage.name}</span>
-                    <span className="text-xs bg-dark-900 text-dark-300 px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full">
                       {getDealsForStage(stage.id).length}
                     </span>
                   </div>
                 </div>
-                <div className="text-sm text-dark-400 mb-4">
+                <div className="text-sm text-slate-500 mb-4">
                   ${getStageValue(stage.id).toLocaleString()} total
                 </div>
                 <div className="space-y-3">
@@ -352,7 +352,7 @@ export default function PipelinePage() {
                       draggable
                       onDragStart={(e) => handleDragStart(e, deal)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-dark-800 border border-dark-700 rounded-lg p-4 hover:border-primary-200 transition-all cursor-grab active:cursor-grabbing group ${
+                      className={`bg-white border border-slate-200 rounded-lg p-4 hover:border-primary-200 transition-all cursor-grab active:cursor-grabbing group ${
                         draggedDeal?.id === deal.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
@@ -361,12 +361,12 @@ export default function PipelinePage() {
                         className="cursor-pointer"
                       >
                         <div className="flex items-start gap-2">
-                          <GripVertical className="w-4 h-4 text-dark-400 group-hover:text-dark-300 flex-shrink-0 mt-0.5" />
-                          <h3 className="font-medium text-dark-50 mb-2 flex-1">{deal.name}</h3>
+                          <GripVertical className="w-4 h-4 text-slate-400 group-hover:text-slate-600 flex-shrink-0 mt-0.5" />
+                          <h3 className="font-medium text-slate-900 mb-2 flex-1">{deal.name}</h3>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-emerald-600 font-medium">${deal.value.toLocaleString()}/mo</span>
-                          <span className="text-xs text-dark-400">{deal.daysInStage}d</span>
+                          <span className="text-xs text-slate-400">{deal.daysInStage}d</span>
                         </div>
                         {deal.hasContract && (
                           <div className="mt-2 flex items-center gap-1 text-xs text-primary-400">
@@ -377,11 +377,11 @@ export default function PipelinePage() {
                       </div>
                       
                       {/* Quick Stage Move Buttons */}
-                      <div className="flex gap-1 mt-3 pt-3 border-t border-dark-700">
+                      <div className="flex gap-1 mt-3 pt-3 border-t border-slate-200">
                         {prevStage && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleUpdateStage(deal, prevStage.id); }}
-                            className="flex-1 px-2 py-1.5 text-xs bg-dark-700 hover:bg-dark-700/50 text-dark-300 rounded transition-colors"
+                            className="flex-1 px-2 py-1.5 text-xs bg-slate-100 hover:bg-slate-100 text-slate-600 rounded transition-colors"
                             title={`Move to ${prevStage.name}`}
                           >
                             ← {prevStage.name.split(' ')[0]}
@@ -404,7 +404,7 @@ export default function PipelinePage() {
                     </div>
                   );})}
                   {getDealsForStage(stage.id).length === 0 && (
-                    <div className="text-center py-8 text-dark-400 text-sm">
+                    <div className="text-center py-8 text-slate-400 text-sm">
                       No clients in this stage
                     </div>
                   )}
@@ -417,59 +417,59 @@ export default function PipelinePage() {
         {/* Add Deal Modal */}
         {showAddModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-dark-50">Add New Client</h2>
-                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-dark-700/30 rounded-lg">
-                  <X className="w-5 h-5 text-dark-400" />
+                <h2 className="text-xl font-bold text-slate-900">Add New Client</h2>
+                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-2">Client Name *</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-2">Client Name *</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input
                       type="text"
                       value={newDeal.name}
                       onChange={(e) => setNewDeal({ ...newDeal, name: e.target.value })}
                       placeholder="Full name"
-                      className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-2">Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input
                       type="email"
                       value={newDeal.email}
                       onChange={(e) => setNewDeal({ ...newDeal, email: e.target.value })}
                       placeholder="email@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-2">Phone</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-2">Phone</label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input
                       type="tel"
                       value={newDeal.phone}
                       onChange={(e) => setNewDeal({ ...newDeal, phone: e.target.value })}
                       placeholder="(555) 123-4567"
-                      className="w-full pl-10 pr-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-2">Stage</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-2">Stage</label>
                   <select
                     value={newDeal.stage}
                     onChange={(e) => setNewDeal({ ...newDeal, stage: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
                   >
                     {stages.map(s => (
                       <option key={s.id} value={s.id}>{s.name}</option>
@@ -477,20 +477,20 @@ export default function PipelinePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-2">Notes</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-2">Notes</label>
                   <textarea
                     value={newDeal.notes}
                     onChange={(e) => setNewDeal({ ...newDeal, notes: e.target.value })}
                     placeholder="Additional notes..."
                     rows={3}
-                    className="w-full px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
                   />
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-dark-900 hover:bg-dark-700/50 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -508,24 +508,24 @@ export default function PipelinePage() {
         {/* Deal Detail Modal */}
         {showDetailModal && selectedDeal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 w-full max-w-md">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-dark-50">{selectedDeal.name}</h2>
-                <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-dark-700/30 rounded-lg">
-                  <X className="w-5 h-5 text-dark-400" />
+                <h2 className="text-xl font-bold text-slate-900">{selectedDeal.name}</h2>
+                <button onClick={() => setShowDetailModal(false)} className="p-2 hover:bg-slate-50 rounded-lg">
+                  <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
               <div className="space-y-4 mb-6">
-                <div className="flex items-center gap-3 text-dark-300">
-                  <Mail className="w-5 h-5 text-dark-400" />
+                <div className="flex items-center gap-3 text-slate-600">
+                  <Mail className="w-5 h-5 text-slate-500" />
                   {selectedDeal.email || 'No email'}
                 </div>
-                <div className="flex items-center gap-3 text-dark-300">
-                  <Phone className="w-5 h-5 text-dark-400" />
+                <div className="flex items-center gap-3 text-slate-600">
+                  <Phone className="w-5 h-5 text-slate-500" />
                   {selectedDeal.phone || 'No phone'}
                 </div>
-                <div className="flex items-center gap-3 text-dark-300">
-                  <DollarSign className="w-5 h-5 text-dark-400" />
+                <div className="flex items-center gap-3 text-slate-600">
+                  <DollarSign className="w-5 h-5 text-slate-500" />
                   ${selectedDeal.value.toLocaleString()}/month
                 </div>
                 {selectedDeal.hasContract && (
@@ -547,7 +547,7 @@ export default function PipelinePage() {
               )}
               
               <div>
-                <label className="block text-sm font-medium text-dark-300 mb-2">Move to Stage</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Move to Stage</label>
                 <div className="grid grid-cols-2 gap-2">
                   {stages.map(s => (
                     <button
@@ -556,7 +556,7 @@ export default function PipelinePage() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         selectedDeal.stage === s.id
                           ? 'bg-primary-500 text-white'
-                          : 'bg-dark-900 text-dark-300 hover:bg-dark-700/50'
+                          : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                       }`}
                     >
                       {s.name}
