@@ -7,7 +7,7 @@ This document contains instructions for tools, APIs, and skills that Claude shou
 ## Table of Contents
 1. [Video Creation (Remotion)](#video-creation-remotion)
 2. [Voiceover Generation (WaveSpeed + ElevenLabs)](#voiceover-generation-wavespeed--elevenlabs)
-3. [Image Generation (WaveSpeed + Nano Banana Pro)](#image-generation-wavespeed--nano-banana-pro)
+3. [Image Generation (WaveSpeed + Nano Banana 2)](#image-generation-wavespeed--nano-banana-2)
 4. [Transcription (Deepgram Nova-3)](#transcription-deepgram-nova-3)
 5. [Project Memory (Session Log)](#project-memory-session-log)
 6. [Upcoming Tasks & Priorities](#upcoming-tasks--priorities)
@@ -125,7 +125,7 @@ GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
 
 ---
 
-## Image Generation (WaveSpeed + Nano Banana Pro)
+## Image Generation (WaveSpeed + Nano Banana 2)
 
 ### When to Use
 When the user asks to generate images, pictures, illustrations, or graphics.
@@ -133,43 +133,88 @@ When the user asks to generate images, pictures, illustrations, or graphics.
 ### API Configuration
 ```
 Provider: WaveSpeed AI
-Model: Nano Banana Pro (fal-ai/nano-banana-pro)
+Model: Nano Banana 2 (google/nano-banana-2/text-to-image)
 API Key: Set WAVESPEED_API_KEY in .env
 ```
 
-### API Endpoint
+### Text-to-Image Endpoint
 ```
-POST https://api.wavespeed.ai/v1/generate
+# Submit task
+POST https://api.wavespeed.ai/api/v3/google/nano-banana-2/text-to-image
 Authorization: Bearer $WAVESPEED_API_KEY
+
+# Get result (poll until status=completed)
+GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
 ```
 
-### Request Format
+### Text-to-Image Request Format
 ```json
 {
-  "model": "fal-ai/nano-banana-pro",
-  "input": {
-    "prompt": "Your image description",
-    "negative_prompt": "blurry, low quality, distorted",
-    "image_size": "landscape_16_9",
-    "num_inference_steps": 30,
-    "guidance_scale": 7.5
-  }
+  "prompt": "Your image description",
+  "resolution": "1k",
+  "aspect_ratio": "16:9",
+  "enable_web_search": false,
+  "output_format": "png"
 }
 ```
 
-### Image Size Options
-- `square_hd` (1024x1024)
-- `square` (512x512)
-- `portrait_4_3` (768x1024)
-- `portrait_16_9` (576x1024)
-- `landscape_4_3` (1024x768)
-- `landscape_16_9` (1024x576)
+### Image Editing Endpoint
+```
+# Submit edit task
+POST https://api.wavespeed.ai/api/v3/google/nano-banana-2/edit-image
+Authorization: Bearer $WAVESPEED_API_KEY
+
+# Get result (poll until status=completed)
+GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
+```
+
+### Image Editing Request Format
+```json
+{
+  "prompt": "Describe the edit you want",
+  "image_url": "https://example.com/source-image.png",
+  "resolution": "1k",
+  "output_format": "png"
+}
+```
+
+### Resolution Options
+- `0.5k` — Fast, low-res previews
+- `1k` — Standard quality (recommended default)
+- `2k` — High quality
+- `4k` — Maximum quality (slower)
+
+### Aspect Ratio Options
+- `1:1` — Square
+- `16:9` — Widescreen landscape (recommended for video thumbnails)
+- `9:16` — Vertical/portrait (stories, reels)
+- `4:3` — Standard landscape
+- `3:4` — Standard portrait
+- `3:2` — Photo landscape
+- `2:3` — Photo portrait
+- `21:9` — Ultra-wide
+- `9:21` — Ultra-tall
+- `5:4` — Slight landscape
+- `4:5` — Slight portrait (Instagram)
+- `16:10` — Wide display
+- `10:16` — Tall display
+- `3:1` — Panoramic banner
+
+### Key Upgrades over Nano Banana Pro
+- Up to 4K resolution
+- Multi-character consistency (up to 5 characters)
+- Better text rendering in images
+- Web search grounding for real-time accuracy (`enable_web_search: true`)
+- 14 flexible aspect ratios
+- Image editing support (modify existing images with text prompts)
 
 ### Usage Instructions
-1. Use Nano Banana Pro for fast, high-quality image generation
-2. Include negative prompts to improve quality
-3. Use `landscape_16_9` for video thumbnails
-4. Use `square_hd` for social media posts
+1. Use Nano Banana 2 for high-quality image generation with flexible sizing
+2. Use `1k` resolution for most tasks, `4k` for final production assets
+3. Use `16:9` aspect ratio for video thumbnails
+4. Use `1:1` for social media posts
+5. Enable `enable_web_search` when the prompt references real-world entities or current events
+6. Use the edit endpoint to modify existing images instead of regenerating from scratch
 
 ---
 
@@ -209,7 +254,7 @@ Endpoint: https://api.deepgram.com/v1/listen
 |------|----------|-------|
 | Create video | Remotion | N/A (code-based) |
 | Generate voiceover | WaveSpeed | ElevenLabs v3 |
-| Generate image | WaveSpeed | Nano Banana Pro |
+| Generate image | WaveSpeed | Nano Banana 2 |
 | Quick TTS (dev) | OpenAI | tts-1-hd |
 | Transcription (primary) | Deepgram | Nova-3 |
 | Transcription (fallback) | OpenAI | Whisper-1 |

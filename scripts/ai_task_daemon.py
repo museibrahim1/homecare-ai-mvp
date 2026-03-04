@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-AI Task Daemon — Watches for tasks via email (Gmail IMAP) and file queue.
+AI Task Daemon — Watches for tasks via email (Resend inbound) and file queue.
 
-Supports three input methods:
-  1. Gmail IMAP: Reads emails sent to ai@palmcareai.com (forwarded to Gmail)
-  2. Resend inbound: Polls Resend API for inbound emails
-  3. File-based: Drop .task files into ~/.palmcare/tasks/
+Supports two input methods:
+  1. Resend inbound: Polls Resend API for emails to museibrahim@palmtai.com
+     (ai@palmcareai.com is forwarded here via Cloudflare Email Routing)
+  2. File-based: Drop .task files into ~/.palmcare/tasks/
 
 Results are emailed back via Resend.
 
@@ -21,9 +21,6 @@ import time
 import signal
 import logging
 import re
-import imaplib
-import email as email_lib
-from email.header import decode_header
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -53,16 +50,18 @@ ALLOWED_SENDERS = {
     "support@palmtai.com",
     "museibrahim@palmtai.com",
     "museibrahim@gmail.com",
+    "musajama89@gmail.com",
 }
 
-TARGET_KEYWORDS = ["ai@palmcareai.com", "ai task", "aitask"]
 REPLY_TO = "museibrahim@palmtai.com"
 FROM_ADDRESS = "PalmCare AI Agent <onboarding@resend.dev>"
 
-# Gmail IMAP config
-GMAIL_USER = os.getenv("GMAIL_USER", "museibrahim@palmtai.com")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
-GMAIL_IMAP_HOST = "imap.gmail.com"
+IGNORED_SENDERS = {
+    "onboarding@resend.dev",
+    "noreply@redditmail.com",
+    "noreply@google.com",
+    "workspace-noreply@google.com",
+}
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -130,17 +129,6 @@ def send_reply_email(to: str, subject: str, html: str) -> bool:
     return False
 
 
-def fetch_inbound_emails(limit: int = 20) -> list[dict]:
-    headers = get_resend_headers()
-    try:
-        resp = requests.get(f"{RESEND_BASE}/emails/receiving", headers=headers, params={"limit": limit}, timeout=15)
-        if resp.status_code != 200:
-            return []
-        return resp.json().get("data", [])
-    except requests.RequestException:
-        return []
-
-
 def get_email_detail(email_id: str) -> Optional[dict]:
     headers = get_resend_headers()
     for attempt in range(3):
@@ -158,117 +146,103 @@ def get_email_detail(email_id: str) -> Optional[dict]:
 
 
 # ---------------------------------------------------------------------------
-# Gmail IMAP polling
+# Resend inbound polling
 # ---------------------------------------------------------------------------
 
 
-def decode_mime_header(header_value: str) -> str:
-    if not header_value:
-        return ""
-    decoded_parts = decode_header(header_value)
-    result = []
-    for part, charset in decoded_parts:
-        if isinstance(part, bytes):
-            result.append(part.decode(charset or "utf-8", errors="replace"))
-        else:
-            result.append(part)
-    return " ".join(result)
+def extract_sender_email(from_field: str) -> str:
+    match = re.search(r'<([^>]+)>', from_field)
+    return match.group(1).lower() if match else from_field.lower().strip()
 
 
-def extract_email_address(header: str) -> str:
-    match = re.search(r'<([^>]+)>', header)
-    return match.group(1).lower() if match else header.lower().strip()
+def is_task_email(detail: dict) -> bool:
+    """Determine if an inbound email is a task for the AI agent."""
+    sender = extract_sender_email(detail.get("from", ""))
+
+    if sender in IGNORED_SENDERS:
+        return False
+
+    if sender in ALLOWED_SENDERS:
+        return True
+
+    subject = (detail.get("subject", "") or "").lower()
+    headers = detail.get("headers", []) or []
+
+    original_to = ""
+    for h in headers:
+        name = (h.get("name", "") or "").lower()
+        if name in ("x-forwarded-to", "x-original-to", "delivered-to"):
+            original_to = (h.get("value", "") or "").lower()
+            if "ai@palmcareai.com" in original_to:
+                return True
+
+    if any(kw in subject for kw in ["ai task", "aitask", "[task]", "[question]", "[status]"]):
+        return True
+
+    return False
 
 
-def get_email_text(msg) -> str:
-    """Extract plain text from email message."""
-    if msg.is_multipart():
-        for part in msg.walk():
-            content_type = part.get_content_type()
-            if content_type == "text/plain":
-                payload = part.get_payload(decode=True)
-                if payload:
-                    charset = part.get_content_charset() or "utf-8"
-                    return payload.decode(charset, errors="replace")
-            elif content_type == "text/html":
-                payload = part.get_payload(decode=True)
-                if payload:
-                    charset = part.get_content_charset() or "utf-8"
-                    html = payload.decode(charset, errors="replace")
+def poll_resend_inbound(state: dict) -> list[dict]:
+    """Poll Resend inbound API for new emails."""
+    headers = get_resend_headers()
+    tasks = []
+
+    try:
+        resp = requests.get(
+            f"{RESEND_BASE}/emails/receiving",
+            headers=headers,
+            params={"limit": 20},
+            timeout=15,
+        )
+        if resp.status_code != 200:
+            logger.warning(f"Resend inbound poll failed: {resp.status_code}")
+            return []
+
+        emails = resp.json().get("data", [])
+
+        for email_summary in reversed(emails):
+            eid = email_summary.get("id", "")
+            if eid in state.get("processed_ids", []):
+                continue
+
+            detail = get_email_detail(eid)
+            if not detail:
+                state["processed_ids"].append(eid)
+                save_state(state)
+                continue
+
+            if not is_task_email(detail):
+                state["processed_ids"].append(eid)
+                save_state(state)
+                continue
+
+            subject = detail.get("subject", "(no subject)")
+            text = detail.get("text", "") or ""
+            if not text:
+                html = detail.get("html", "")
+                if html:
                     text = re.sub(r'<style[^>]*>.*?</style>', '', html, flags=re.DOTALL)
                     text = re.sub(r'<script[^>]*>.*?</script>', '', text, flags=re.DOTALL)
                     text = re.sub(r'<[^>]+>', ' ', text)
-                    return re.sub(r'\s+', ' ', text).strip()
-    else:
-        payload = msg.get_payload(decode=True)
-        if payload:
-            charset = msg.get_content_charset() or "utf-8"
-            return payload.decode(charset, errors="replace")
-    return "(no body)"
+                    text = re.sub(r'\s+', ' ', text).strip()
 
+            if not text:
+                text = "(no body)"
 
-def poll_gmail(state: dict) -> list[dict]:
-    """Poll Gmail via IMAP for emails forwarded from ai@palmcareai.com."""
-    if not GMAIL_APP_PASSWORD:
-        return []
-
-    tasks = []
-    try:
-        mail = imaplib.IMAP4_SSL(GMAIL_IMAP_HOST)
-        mail.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-        mail.select("INBOX")
-
-        # Search for unread emails that mention ai@palmcareai.com or are from allowed senders
-        _, data = mail.search(None, "UNSEEN")
-        if not data[0]:
-            mail.logout()
-            return []
-
-        msg_ids = data[0].split()
-        logger.info(f"Gmail: {len(msg_ids)} unread emails found")
-
-        for msg_id in msg_ids[-20:]:  # Process last 20 unread
-            _, msg_data = mail.fetch(msg_id, "(RFC822)")
-            raw_email = msg_data[0][1]
-            msg = email_lib.message_from_bytes(raw_email)
-
-            message_id = msg.get("Message-ID", "")
-            if message_id in state.get("processed_ids", []):
-                continue
-
-            from_addr = decode_mime_header(msg.get("From", ""))
-            to_addr = decode_mime_header(msg.get("To", ""))
-            subject = decode_mime_header(msg.get("Subject", "(no subject)"))
-            sender_email = extract_email_address(from_addr)
-
-            # Check if this is a task email (sent to ai@palmcareai.com or from allowed sender)
-            is_ai_email = any(kw in to_addr.lower() for kw in TARGET_KEYWORDS)
-            is_ai_email = is_ai_email or any(kw in subject.lower() for kw in TARGET_KEYWORDS)
-            is_allowed = sender_email in ALLOWED_SENDERS
-
-            if not (is_ai_email and is_allowed):
-                continue
-
-            body = get_email_text(msg)
-
+            sender = extract_sender_email(detail.get("from", ""))
             tasks.append({
-                "source": "gmail",
-                "message_id": message_id,
-                "gmail_msg_id": msg_id,
-                "from": from_addr,
+                "source": "resend_inbound",
+                "id": eid,
+                "from": detail.get("from", ""),
+                "sender_email": sender,
                 "subject": subject,
-                "body": body,
+                "body": text,
             })
 
-            # Mark as read
-            mail.store(msg_id, "+FLAGS", "\\Seen")
-
-        mail.logout()
-
-    except imaplib.IMAP4.error as e:
-        logger.error(f"Gmail IMAP error: {e}")
+    except requests.RequestException as e:
+        logger.error(f"Resend inbound poll error: {e}")
     except Exception as e:
-        logger.error(f"Gmail polling error: {e}")
+        logger.exception(f"Unexpected error polling Resend inbound: {e}")
 
     return tasks
 
@@ -434,7 +408,7 @@ def build_report_html(task_title, result, apply_result, commit_hash, duration_se
 def poll_cycle(state: dict) -> int:
     processed = 0
 
-    # 1. File-based task queue
+    # 1. File-based task queue (local)
     for task in check_file_tasks():
         try:
             title = clean_subject(task["title"])
@@ -446,54 +420,20 @@ def poll_cycle(state: dict) -> int:
         except Exception as e:
             logger.exception(f"Error processing file task: {e}")
 
-    # 2. Gmail IMAP (primary email method)
-    if GMAIL_APP_PASSWORD:
-        for gmail_task in poll_gmail(state):
-            try:
-                title = clean_subject(gmail_task["subject"])
-                body = gmail_task["body"]
-                task_type = parse_task_type(gmail_task["subject"])
-                run_task(title, body, task_type, state)
-                state["processed_ids"].append(gmail_task["message_id"])
-                save_state(state)
-                processed += 1
-                time.sleep(2)
-            except Exception as e:
-                logger.exception(f"Error processing Gmail task: {e}")
-
-    # 3. Resend inbound (fallback)
-    try:
-        for email_data in reversed(fetch_inbound_emails(limit=20)):
-            eid = email_data.get("id", "")
-            if eid in state.get("processed_ids", []):
-                continue
-            sender = email_data.get("from", "")
-            recipients = email_data.get("to", [])
-            match = re.search(r'<([^>]+)>', sender)
-            sender_addr = match.group(1).lower() if match else sender.lower().strip()
-            if sender_addr not in ALLOWED_SENDERS:
-                state["processed_ids"].append(eid)
-                save_state(state)
-                continue
-            if not any("ai@palmcareai.com" in r.lower() for r in recipients):
-                continue
-            detail = get_email_detail(eid)
-            if not detail:
-                continue
-            subject = detail.get("subject", "(no subject)")
-            text = detail.get("text", "") or ""
-            if not text:
-                html = detail.get("html", "")
-                text = re.sub(r'<[^>]+>', ' ', html)
-                text = re.sub(r'\s+', ' ', text).strip()
-            title = clean_subject(subject)
-            run_task(title, text, parse_task_type(subject), state)
-            state["processed_ids"].append(eid)
+    # 2. Resend inbound (primary email method — no Gmail App Password needed)
+    for inbound_task in poll_resend_inbound(state):
+        try:
+            title = clean_subject(inbound_task["subject"])
+            body = inbound_task["body"]
+            task_type = parse_task_type(inbound_task["subject"])
+            logger.info(f"Resend inbound task from {inbound_task['sender_email']}: {title}")
+            run_task(title, body, task_type, state)
+            state["processed_ids"].append(inbound_task["id"])
             save_state(state)
             processed += 1
             time.sleep(2)
-    except Exception:
-        pass
+        except Exception as e:
+            logger.exception(f"Error processing Resend inbound task: {e}")
 
     state["last_poll"] = datetime.now(timezone.utc).isoformat()
     save_state(state)
@@ -505,8 +445,8 @@ def run_daemon():
     logger.info("PalmCare AI Task Daemon starting")
     logger.info(f"  Project:    {PROJECT_ROOT}")
     logger.info(f"  Tasks dir:  {TASKS_DIR}")
-    logger.info(f"  Gmail:      {'ENABLED' if GMAIL_APP_PASSWORD else 'DISABLED (set GMAIL_APP_PASSWORD)'}")
     logger.info(f"  Resend:     {'ENABLED' if os.getenv('RESEND_API_KEY') else 'DISABLED'}")
+    logger.info(f"  Email in:   Resend inbound polling (ai@palmcareai.com -> palmtai.com)")
     logger.info(f"  Polling:    every {POLL_INTERVAL}s")
     logger.info(f"  Reply to:   {REPLY_TO}")
     logger.info(f"  Log:        {LOG_FILE}")
