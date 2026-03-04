@@ -103,7 +103,7 @@ struct AssessmentsListView: View {
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
-                        .background(selectedFilter == value ? filterColor(value) : Color.white)
+                        .background(selectedFilter == value ? filterColor(value) : Color(UIColor.secondarySystemGroupedBackground))
                         .foregroundColor(selectedFilter == value ? .white : .palmSecondary)
                         .cornerRadius(10)
                         .overlay(
@@ -116,7 +116,7 @@ struct AssessmentsListView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .overlay(Divider(), alignment: .bottom)
     }
 
@@ -198,7 +198,7 @@ struct AssessmentsListView: View {
             }
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))

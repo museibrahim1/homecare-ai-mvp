@@ -241,7 +241,7 @@ struct LoginView: View {
                 }
                 .padding(.horizontal, 22)
             }
-            .background(Color.white)
+            .background(Color(UIColor.secondarySystemGroupedBackground))
             .navigationBarBackButtonHidden(false)
             .navigationDestination(isPresented: $showRegister) {
                 RegisterView().environmentObject(api)

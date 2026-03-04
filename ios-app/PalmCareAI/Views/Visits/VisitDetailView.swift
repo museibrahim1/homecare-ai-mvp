@@ -84,7 +84,7 @@ struct VisitDetailView: View {
             }
             .padding(.horizontal, 12)
         }
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .overlay(Divider(), alignment: .bottom)
     }
 
@@ -179,7 +179,7 @@ struct VisitDetailView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
@@ -233,7 +233,7 @@ struct VisitDetailView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmBorder, lineWidth: 1))
@@ -294,7 +294,7 @@ struct VisitDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
-            .background(Color.white)
+            .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(12)
             .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -362,7 +362,7 @@ struct VisitDetailView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(
@@ -464,7 +464,7 @@ struct VisitDetailView: View {
             }
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -521,7 +521,7 @@ struct VisitDetailView: View {
                             }
                         }
                         .padding(14)
-                        .background(Color.white)
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
                         .cornerRadius(12)
                         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -544,7 +544,7 @@ struct VisitDetailView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(14)
-                    .background(Color.white)
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(12)
                     .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -576,7 +576,7 @@ struct VisitDetailView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(
@@ -650,7 +650,7 @@ struct VisitDetailView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(14)
-                    .background(Color.white)
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(12)
                     .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -678,7 +678,7 @@ struct VisitDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -695,7 +695,7 @@ struct VisitDetailView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))

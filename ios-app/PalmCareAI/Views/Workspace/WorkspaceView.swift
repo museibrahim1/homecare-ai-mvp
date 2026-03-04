@@ -63,7 +63,7 @@ struct WorkspaceView: View {
                     .background(
                         selectedSection == index
                             ? AnyShapeStyle(LinearGradient(colors: [Color.palmPrimary, Color.palmTeal600], startPoint: .leading, endPoint: .trailing))
-                            : AnyShapeStyle(Color.white)
+                            : AnyShapeStyle(Color(UIColor.secondarySystemGroupedBackground))
                     )
                     .cornerRadius(10)
                     .overlay(

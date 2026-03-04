@@ -290,7 +290,7 @@ struct TaskCard: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))

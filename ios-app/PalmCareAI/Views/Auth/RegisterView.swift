@@ -220,7 +220,7 @@ struct RegisterView: View {
             }
             .padding(.horizontal, 22)
         }
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -229,7 +229,7 @@ struct RegisterView: View {
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(.palmTextMuted)
                         .frame(width: 32, height: 32)
-                        .background(Color.white)
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
                         .cornerRadius(8)
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
                         .shadow(color: .black.opacity(0.03), radius: 1, y: 1)

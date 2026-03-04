@@ -157,7 +157,7 @@ struct CalendarView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Weekday Header
@@ -173,7 +173,7 @@ struct CalendarView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     // MARK: - Calendar Grid
@@ -193,7 +193,7 @@ struct CalendarView: View {
         }
         .padding(.horizontal, 12)
         .padding(.bottom, 12)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 
     private func dayCell(_ date: Date) -> some View {
@@ -386,7 +386,7 @@ struct EventRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(Color.white)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
@@ -430,7 +430,7 @@ struct AddEventSheet: View {
                                 .font(.system(size: 14))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 10)
-                                .background(Color.white)
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(10)
                                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                         }
@@ -441,7 +441,7 @@ struct AddEventSheet: View {
                                 .lineLimit(2...4)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 10)
-                                .background(Color.white)
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(10)
                                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                         }
@@ -457,7 +457,7 @@ struct AddEventSheet: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.white)
+                            .background(Color(UIColor.secondarySystemGroupedBackground))
                             .cornerRadius(10)
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmBorder, lineWidth: 1))
                         }
@@ -550,7 +550,7 @@ struct AddEventSheet: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
             }
-            .background(Color.white)
+            .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(12)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
         }
