@@ -736,7 +736,9 @@ struct RecordView: View {
         do {
             let fetched = try await api.fetchClients()
             await MainActor.run { clients = fetched }
-        } catch {}
+        } catch {
+            print("RecordView: Failed to load clients: \(error)")
+        }
     }
 
     private func timeString(_ interval: TimeInterval) -> String {
@@ -756,10 +758,15 @@ struct ClientPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var search = ""
     @State private var showAddClient = false
+    @State private var localClients: [Client] = []
+
+    private var allClients: [Client] {
+        localClients.isEmpty ? clients : localClients
+    }
 
     var filtered: [Client] {
-        if search.isEmpty { return clients }
-        return clients.filter { $0.full_name.localizedCaseInsensitiveContains(search) }
+        if search.isEmpty { return allClients }
+        return allClients.filter { $0.full_name.localizedCaseInsensitiveContains(search) }
     }
 
     var body: some View {
@@ -817,6 +824,15 @@ struct ClientPickerSheet: View {
                     dismiss()
                 })
                 .environmentObject(api)
+            }
+            .task {
+                if clients.isEmpty {
+                    do {
+                        localClients = try await api.fetchClients()
+                    } catch {
+                        print("ClientPickerSheet: Failed to load clients: \(error)")
+                    }
+                }
             }
         }
     }
