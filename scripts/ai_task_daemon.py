@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-AI Task Daemon — Polls for inbound emails to ai@palmcareai.com and executes tasks.
+AI Task Daemon — Watches for tasks and executes them using Claude.
 
-Runs as a background daemon on macOS via launchd. Polls Resend inbound API
-every 60 seconds, processes tasks using Claude, and emails results back.
+Supports two input methods:
+  1. File-based: Drop .task files into ~/.palmcare/tasks/
+  2. Resend inbound: Email ai@palmcareai.com (when Cloudflare routing is set up)
+
+Results are emailed back via Resend and logged locally.
 
 Usage:
     python3 scripts/ai_task_daemon.py          # Run in foreground
@@ -16,7 +19,6 @@ import json
 import time
 import signal
 import logging
-import hashlib
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,7 +26,6 @@ from typing import Optional
 
 import requests
 
-# Add scripts dir to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ai_task_executor import execute_task, apply_changes, git_commit
 
@@ -33,11 +34,14 @@ from ai_task_executor import execute_task, apply_changes, git_commit
 # ---------------------------------------------------------------------------
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-STATE_FILE = PROJECT_ROOT / ".ai_task_state.json"
+DAEMON_HOME = Path.home() / ".palmcare"
+TASKS_DIR = DAEMON_HOME / "tasks"
+COMPLETED_DIR = DAEMON_HOME / "completed"
+STATE_FILE = DAEMON_HOME / "state.json"
 LOG_DIR = Path.home() / "Library" / "Logs"
 LOG_FILE = LOG_DIR / "palmcare-ai-tasks.log"
 
-POLL_INTERVAL = 60  # seconds
+POLL_INTERVAL = 30  # seconds — check for file tasks more frequently
 RESEND_BASE = "https://api.resend.com"
 
 ALLOWED_SENDERS = {
@@ -55,6 +59,8 @@ FROM_ADDRESS = "PalmCare AI Agent <onboarding@resend.dev>"
 # ---------------------------------------------------------------------------
 
 LOG_DIR.mkdir(parents=True, exist_ok=True)
+TASKS_DIR.mkdir(parents=True, exist_ok=True)
+COMPLETED_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -67,7 +73,7 @@ logging.basicConfig(
 logger = logging.getLogger("ai_task_daemon")
 
 # ---------------------------------------------------------------------------
-# State management — tracks which emails have been processed
+# State management
 # ---------------------------------------------------------------------------
 
 
@@ -111,11 +117,9 @@ def fetch_inbound_emails(limit: int = 20) -> list[dict]:
             logger.warning("Rate limited by Resend, will retry next cycle")
             return []
         if resp.status_code != 200:
-            logger.error(f"Resend API error {resp.status_code}: {resp.text[:200]}")
             return []
         return resp.json().get("data", [])
-    except requests.RequestException as e:
-        logger.error(f"Network error fetching emails: {e}")
+    except requests.RequestException:
         return []
 
 
@@ -134,10 +138,8 @@ def get_email_detail(email_id: str) -> Optional[dict]:
                 continue
             if resp.status_code == 200:
                 return resp.json()
-            logger.error(f"Failed to get email {email_id}: {resp.status_code}")
             return None
-        except requests.RequestException as e:
-            logger.error(f"Network error getting email {email_id}: {e}")
+        except requests.RequestException:
             time.sleep(2)
     return None
 
@@ -179,17 +181,14 @@ def send_reply_email(to: str, subject: str, html: str) -> bool:
 
 
 def is_valid_sender(email_from: str) -> bool:
-    """Check if sender is in the whitelist."""
     if not email_from:
         return False
-    # Extract email from "Name <email>" format
     match = re.search(r'<([^>]+)>', email_from)
     addr = match.group(1).lower() if match else email_from.lower().strip()
     return addr in ALLOWED_SENDERS
 
 
 def is_targeted_to_ai(email_to: list) -> bool:
-    """Check if the email was sent to ai@palmcareai.com."""
     if not email_to:
         return False
     for addr in email_to:
@@ -199,7 +198,6 @@ def is_targeted_to_ai(email_to: list) -> bool:
 
 
 def parse_task_type(subject: str) -> str:
-    """Detect task type from subject line tags."""
     subject_upper = subject.upper()
     if "[QUESTION]" in subject_upper:
         return "question"
@@ -209,27 +207,120 @@ def parse_task_type(subject: str) -> str:
 
 
 def clean_subject(subject: str) -> str:
-    """Remove tags from subject to get clean task title."""
     cleaned = re.sub(r'\[(URGENT|QUESTION|STATUS)\]', '', subject, flags=re.IGNORECASE)
     return cleaned.strip()
 
 
 def extract_text_body(email: dict) -> str:
-    """Extract plain text body from email, falling back to HTML stripping."""
     text = email.get("text", "")
     if text and text.strip():
         return text.strip()
-
     html = email.get("html", "")
     if html:
-        # Basic HTML tag stripping
         text = re.sub(r'<style[^>]*>.*?</style>', '', html, flags=re.DOTALL)
         text = re.sub(r'<script[^>]*>.*?</script>', '', text, flags=re.DOTALL)
         text = re.sub(r'<[^>]+>', ' ', text)
         text = re.sub(r'\s+', ' ', text).strip()
         return text
-
     return "(no body)"
+
+
+# ---------------------------------------------------------------------------
+# File-based task queue
+# ---------------------------------------------------------------------------
+
+
+def check_file_tasks() -> list[dict]:
+    """Check ~/.palmcare/tasks/ for new .task files."""
+    tasks = []
+    for task_file in sorted(TASKS_DIR.glob("*.task")):
+        try:
+            content = task_file.read_text(encoding="utf-8").strip()
+            if not content:
+                continue
+
+            lines = content.split("\n", 1)
+            title = lines[0].strip()
+            body = lines[1].strip() if len(lines) > 1 else ""
+
+            tasks.append({
+                "file": task_file,
+                "title": title,
+                "body": body,
+                "task_type": parse_task_type(title),
+            })
+        except Exception as e:
+            logger.error(f"Error reading task file {task_file}: {e}")
+    return tasks
+
+
+def process_file_task(task: dict, state: dict) -> bool:
+    """Process a file-based task."""
+    task_file = task["file"]
+    task_title = clean_subject(task["title"])
+    task_body = task["body"]
+    task_type = task["task_type"]
+
+    logger.info(f"Processing file task: {task_title} ({task_file.name})")
+
+    start_time = time.time()
+
+    result = execute_task(
+        task_title=task_title,
+        task_body=task_body,
+        task_type=task_type,
+    )
+
+    apply_result = None
+    commit_hash = None
+
+    if result.get("status") == "completed" and result.get("files_changed"):
+        apply_result = apply_changes(result)
+        commit_msg = f"AI Task: {task_title[:80]}"
+        commit_hash = git_commit(commit_msg)
+        if commit_hash:
+            logger.info(f"Changes committed: {commit_hash}")
+
+    duration = time.time() - start_time
+
+    report_html = build_report_html(
+        task_title=task_title,
+        result=result,
+        apply_result=apply_result,
+        commit_hash=commit_hash,
+        duration_seconds=duration,
+    )
+
+    status_emoji = {"completed": "Done", "failed": "Failed", "needs_clarification": "Question"}
+    status_tag = status_emoji.get(result.get("status", ""), "Update")
+    reply_subject = f"[{status_tag}] {task_title}"
+
+    send_reply_email(REPLY_TO, reply_subject, report_html)
+
+    # Move task file to completed/
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    completed_name = f"{timestamp}_{task_file.stem}.done"
+    task_file.rename(COMPLETED_DIR / completed_name)
+
+    # Save result alongside
+    result_file = COMPLETED_DIR / f"{timestamp}_{task_file.stem}.result.json"
+    result_file.write_text(json.dumps({
+        "title": task_title,
+        "status": result.get("status"),
+        "summary": result.get("summary"),
+        "commit": commit_hash,
+        "duration": duration,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }, indent=2))
+
+    if result.get("status") == "completed":
+        state["tasks_completed"] = state.get("tasks_completed", 0) + 1
+    else:
+        state["tasks_failed"] = state.get("tasks_failed", 0) + 1
+    save_state(state)
+
+    logger.info(f"File task complete: {result.get('status')} in {duration:.1f}s")
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -244,7 +335,6 @@ def build_report_html(
     commit_hash: Optional[str],
     duration_seconds: float,
 ) -> str:
-    """Build a beautiful HTML email report."""
     status = result.get("status", "unknown")
     summary = result.get("summary", "No summary")
     notes = result.get("notes", "")
@@ -306,7 +396,7 @@ def build_report_html(
             <h3 style="color:#92400e;font-size:16px;margin:0 0 8px 0;">Questions for You</h3>
             <ul style="margin:0;padding-left:20px;font-size:14px;">{q_list}</ul>
             <p style="color:#92400e;font-size:13px;margin:12px 0 0 0;">
-                Reply to this email to answer, and I'll continue the task.
+                Drop a new .task file to answer, and I'll continue.
             </p>
         </div>"""
 
@@ -333,7 +423,6 @@ def build_report_html(
             <h1 style="color:white;margin:0;font-size:22px;font-weight:700;">PalmCare AI Agent</h1>
             <p style="color:rgba(255,255,255,0.85);margin:6px 0 0 0;font-size:13px;">Task Execution Report</p>
         </div>
-
         <div style="padding:24px;">
             <div style="display:flex;align-items:center;margin-bottom:20px;">
                 <span style="background:{bg};color:{color};border:1px solid {border};padding:6px 14px;border-radius:20px;font-weight:600;font-size:13px;text-transform:uppercase;">
@@ -343,13 +432,10 @@ def build_report_html(
                     {duration_seconds:.1f}s
                 </span>
             </div>
-
             <h2 style="color:#1f2937;font-size:18px;margin:0 0 12px 0;">{task_title}</h2>
-
             <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:16px 0;border-left:4px solid #0d9488;">
                 <p style="color:#374151;font-size:14px;margin:0;line-height:1.6;">{summary}</p>
             </div>
-
             {files_html}
             {commands_html}
             {commit_html}
@@ -357,11 +443,10 @@ def build_report_html(
             {errors_html}
             {notes_html}
         </div>
-
         <div style="background:#f9fafb;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
             <p style="color:#0d9488;font-weight:600;margin:0 0 4px 0;font-size:13px;">PalmCare AI Agent</p>
             <p style="color:#9ca3af;font-size:11px;margin:0;">
-                Reply to this email to send a follow-up task.
+                Drop .task files in ~/.palmcare/tasks/ to send more tasks.
             </p>
         </div>
     </div>
@@ -369,12 +454,11 @@ def build_report_html(
 
 
 # ---------------------------------------------------------------------------
-# Core processing loop
+# Email processing (Resend inbound — used when Cloudflare routing is set up)
 # ---------------------------------------------------------------------------
 
 
 def process_email(email: dict, state: dict) -> bool:
-    """Process a single inbound email as a task. Returns True if processed."""
     email_id = email.get("id", "")
     sender = email.get("from", "")
     recipients = email.get("to", [])
@@ -384,7 +468,6 @@ def process_email(email: dict, state: dict) -> bool:
         return False
 
     if not is_valid_sender(sender):
-        logger.info(f"Skipping email from unauthorized sender: {sender}")
         state["processed_ids"].append(email_id)
         save_state(state)
         return False
@@ -392,7 +475,7 @@ def process_email(email: dict, state: dict) -> bool:
     if not is_targeted_to_ai(recipients):
         return False
 
-    logger.info(f"Processing task: {subject} (from {sender})")
+    logger.info(f"Processing email task: {subject} (from {sender})")
 
     detail = get_email_detail(email_id)
     if not detail:
@@ -404,16 +487,10 @@ def process_email(email: dict, state: dict) -> bool:
     task_body = extract_text_body(detail)
 
     start_time = time.time()
-
-    result = execute_task(
-        task_title=task_title,
-        task_body=task_body,
-        task_type=task_type,
-    )
+    result = execute_task(task_title=task_title, task_body=task_body, task_type=task_type)
 
     apply_result = None
     commit_hash = None
-
     if result.get("status") == "completed" and result.get("files_changed"):
         apply_result = apply_changes(result)
         commit_msg = f"AI Task: {task_title[:80]}"
@@ -422,21 +499,11 @@ def process_email(email: dict, state: dict) -> bool:
             logger.info(f"Changes committed: {commit_hash}")
 
     duration = time.time() - start_time
-
-    # Build and send report
-    report_html = build_report_html(
-        task_title=task_title,
-        result=result,
-        apply_result=apply_result,
-        commit_hash=commit_hash,
-        duration_seconds=duration,
-    )
+    report_html = build_report_html(task_title, result, apply_result, commit_hash, duration)
 
     status_emoji = {"completed": "Done", "failed": "Failed", "needs_clarification": "Question"}
     status_tag = status_emoji.get(result.get("status", ""), "Update")
-    reply_subject = f"[{status_tag}] {task_title}"
-
-    send_reply_email(REPLY_TO, reply_subject, report_html)
+    send_reply_email(REPLY_TO, f"[{status_tag}] {task_title}", report_html)
 
     state["processed_ids"].append(email_id)
     if result.get("status") == "completed":
@@ -445,24 +512,41 @@ def process_email(email: dict, state: dict) -> bool:
         state["tasks_failed"] = state.get("tasks_failed", 0) + 1
     save_state(state)
 
-    logger.info(f"Task complete: {result.get('status')} in {duration:.1f}s")
+    logger.info(f"Email task complete: {result.get('status')} in {duration:.1f}s")
     return True
 
 
-def poll_cycle(state: dict) -> int:
-    """Run one poll cycle. Returns number of tasks processed."""
-    emails = fetch_inbound_emails(limit=20)
-    if not emails:
-        return 0
+# ---------------------------------------------------------------------------
+# Core processing loop
+# ---------------------------------------------------------------------------
 
+
+def poll_cycle(state: dict) -> int:
+    """Run one poll cycle. Checks file tasks first, then Resend inbound."""
     processed = 0
-    for email in reversed(emails):  # Process oldest first
-        email_id = email.get("id", "")
-        if email_id in state.get("processed_ids", []):
-            continue
-        if process_email(email, state):
-            processed += 1
-            time.sleep(2)  # Brief pause between tasks
+
+    # 1. Check file-based task queue (primary method)
+    file_tasks = check_file_tasks()
+    for task in file_tasks:
+        try:
+            if process_file_task(task, state):
+                processed += 1
+                time.sleep(2)
+        except Exception as e:
+            logger.exception(f"Error processing file task: {e}")
+
+    # 2. Check Resend inbound emails (secondary method)
+    try:
+        emails = fetch_inbound_emails(limit=20)
+        for email in reversed(emails):
+            email_id = email.get("id", "")
+            if email_id in state.get("processed_ids", []):
+                continue
+            if process_email(email, state):
+                processed += 1
+                time.sleep(2)
+    except Exception:
+        pass  # Resend polling is best-effort
 
     state["last_poll"] = datetime.now(timezone.utc).isoformat()
     save_state(state)
@@ -473,23 +557,18 @@ def run_daemon():
     """Main daemon loop."""
     logger.info("=" * 60)
     logger.info("PalmCare AI Task Daemon starting")
-    logger.info(f"  Project: {PROJECT_ROOT}")
-    logger.info(f"  Polling: every {POLL_INTERVAL}s")
-    logger.info(f"  Inbox:   {TARGET_RECIPIENT}")
-    logger.info(f"  Reply:   {REPLY_TO}")
-    logger.info(f"  Log:     {LOG_FILE}")
+    logger.info(f"  Project:    {PROJECT_ROOT}")
+    logger.info(f"  Tasks dir:  {TASKS_DIR}")
+    logger.info(f"  Polling:    every {POLL_INTERVAL}s")
+    logger.info(f"  Reply to:   {REPLY_TO}")
+    logger.info(f"  Log:        {LOG_FILE}")
     logger.info("=" * 60)
 
-    # Verify required env vars
-    if not os.getenv("RESEND_API_KEY"):
-        logger.error("RESEND_API_KEY not set. Exiting.")
-        sys.exit(1)
     if not os.getenv("ANTHROPIC_API_KEY"):
         logger.error("ANTHROPIC_API_KEY not set. Exiting.")
         sys.exit(1)
 
     state = load_state()
-    # Keep only last 500 processed IDs to prevent unbounded growth
     state["processed_ids"] = state.get("processed_ids", [])[-500:]
 
     running = True
@@ -510,7 +589,6 @@ def run_daemon():
         except Exception as e:
             logger.exception(f"Error in poll cycle: {e}")
 
-        # Sleep in small increments so we can respond to signals
         for _ in range(POLL_INTERVAL):
             if not running:
                 break

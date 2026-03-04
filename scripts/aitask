@@ -1,0 +1,90 @@
+#!/bin/bash
+# aitask — Submit a task to the PalmCare AI Agent
+#
+# Usage:
+#   aitask "Fix the dark mode on the dashboard"
+#   aitask "Fix the dark mode" "The sidebar has white text on white background"
+#   aitask --question "How does the auth system work?"
+#   aitask --status
+#   echo "Fix the bug in login" | aitask
+#
+# Tasks are picked up by the daemon within 30 seconds.
+# Results are emailed to museibrahim@palmtai.com.
+
+TASKS_DIR="$HOME/.palmcare/tasks"
+COMPLETED_DIR="$HOME/.palmcare/completed"
+
+mkdir -p "$TASKS_DIR" "$COMPLETED_DIR"
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+# Handle --status flag
+if [ "$1" = "--status" ]; then
+    echo "=== AI Task Daemon Status ==="
+    if launchctl list | grep -q "com.palmcare.ai-tasks" 2>/dev/null; then
+        echo "  Daemon: RUNNING"
+    else
+        echo "  Daemon: STOPPED"
+    fi
+    
+    pending=$(ls "$TASKS_DIR"/*.task 2>/dev/null | wc -l | tr -d ' ')
+    completed=$(ls "$COMPLETED_DIR"/*.done 2>/dev/null | wc -l | tr -d ' ')
+    echo "  Pending tasks: $pending"
+    echo "  Completed tasks: $completed"
+    
+    echo ""
+    echo "=== Recent Results ==="
+    ls -t "$COMPLETED_DIR"/*.result.json 2>/dev/null | head -5 | while read f; do
+        python3 -c "
+import json, sys
+d = json.load(open('$f'))
+print(f'  [{d.get(\"status\",\"?\").upper()}] {d.get(\"title\",\"?\")} ({d.get(\"duration\",0):.1f}s) — {d.get(\"commit\",\"no commit\")}')
+" 2>/dev/null
+    done
+    
+    echo ""
+    echo "=== Pending Tasks ==="
+    for f in "$TASKS_DIR"/*.task 2>/dev/null; do
+        [ -f "$f" ] && echo "  $(basename "$f"): $(head -1 "$f")"
+    done
+    [ "$pending" = "0" ] && echo "  (none)"
+    
+    exit 0
+fi
+
+# Handle --question flag
+PREFIX=""
+if [ "$1" = "--question" ] || [ "$1" = "-q" ]; then
+    PREFIX="[QUESTION] "
+    shift
+fi
+
+# Get task content
+if [ $# -ge 1 ]; then
+    TITLE="${PREFIX}$1"
+    BODY="${2:-}"
+elif [ ! -t 0 ]; then
+    # Reading from pipe
+    INPUT=$(cat)
+    TITLE="${PREFIX}$(echo "$INPUT" | head -1)"
+    BODY="$(echo "$INPUT" | tail -n +2)"
+else
+    echo "Usage: aitask \"Task title\" [\"Task body/details\"]"
+    echo "       aitask --question \"Your question\""
+    echo "       aitask --status"
+    echo "       echo \"Task description\" | aitask"
+    exit 1
+fi
+
+# Create task file
+TASK_FILE="$TASKS_DIR/${TIMESTAMP}.task"
+if [ -n "$BODY" ]; then
+    printf "%s\n%s\n" "$TITLE" "$BODY" > "$TASK_FILE"
+else
+    printf "%s\n" "$TITLE" > "$TASK_FILE"
+fi
+
+echo "Task submitted: $TITLE"
+echo "  File: $TASK_FILE"
+echo "  The daemon will pick this up within 30 seconds."
+echo "  Results will be emailed to museibrahim@palmtai.com"
