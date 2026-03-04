@@ -644,7 +644,7 @@ struct ClientDetailView: View {
             let isHeader = sectionHeaders.contains(where: { trimmed.hasPrefix($0) })
             if isHeader {
                 flushSection()
-                let colonIdx = trimmed.firstIndex(of: ":")!
+                guard let colonIdx = trimmed.firstIndex(of: ":") else { continue }
                 let headerPart = String(trimmed[...colonIdx]).replacingOccurrences(of: ":", with: "")
                 let valuePart = String(trimmed[trimmed.index(after: colonIdx)...]).trimmingCharacters(in: .whitespaces)
                 currentTitle = headerPart

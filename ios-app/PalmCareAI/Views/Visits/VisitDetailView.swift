@@ -244,14 +244,14 @@ struct VisitDetailView: View {
             statCard(
                 icon: "text.quote",
                 label: "Transcript",
-                value: transcript?.word_count != nil ? "\(transcript!.word_count!) words" : "—",
+                value: transcript?.word_count.map { "\($0) words" } ?? "—",
                 color: .palmPrimary,
                 tapAction: { activeTab = 1 }
             )
             statCard(
                 icon: "dollarsign.circle.fill",
                 label: "Billables",
-                value: billables?.items != nil ? "\(billables!.items!.count) items" : "—",
+                value: billables?.items.map { "\($0.count) items" } ?? "—",
                 color: .palmGreen,
                 tapAction: { activeTab = 2 }
             )

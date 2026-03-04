@@ -23,13 +23,15 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         try session.setActive(true, options: .notifyOthersOnDeactivation)
 
         if backgroundRecordingEnabled {
-            DispatchQueue.main.async {
-                self.previousIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled
+            DispatchQueue.main.async { [weak self] in
+                self?.previousIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled
                 UIApplication.shared.isIdleTimerDisabled = true
             }
         }
 
-        let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw RecordingError.failedToStart
+        }
         let recordingsDir = documentsDir.appendingPathComponent("Recordings", isDirectory: true)
         try FileManager.default.createDirectory(at: recordingsDir, withIntermediateDirectories: true)
 
@@ -58,22 +60,22 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
 
         // Use RunLoop.common so timers keep firing in the background
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
                 self?.duration += 1
             }
         }
-        RunLoop.current.add(timer!, forMode: .common)
+        if let timer { RunLoop.current.add(timer, forMode: .common) }
 
         levelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self, let recorder = self.audioRecorder, recorder.isRecording else { return }
             recorder.updateMeters()
             let level = recorder.averagePower(forChannel: 0)
             let normalizedLevel = max(0, (level + 60) / 60)
-            DispatchQueue.main.async {
-                self.audioLevel = normalizedLevel
+            DispatchQueue.main.async { [weak self] in
+                self?.audioLevel = normalizedLevel
             }
         }
-        RunLoop.current.add(levelTimer!, forMode: .common)
+        if let levelTimer { RunLoop.current.add(levelTimer, forMode: .common) }
     }
 
     func stopRecording() -> URL? {
@@ -85,7 +87,8 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         isRecording = false
         audioLevel = 0
 
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             UIApplication.shared.isIdleTimerDisabled = self.previousIdleTimerDisabled
         }
 

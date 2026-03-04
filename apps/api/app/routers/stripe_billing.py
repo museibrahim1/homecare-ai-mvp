@@ -75,13 +75,16 @@ class StripePriceConfig(BaseModel):
 @router.get("/plans")
 async def get_public_plans(db: Session = Depends(get_db)):
     """Get all active plans (public endpoint for pricing page)."""
-    plans = db.query(Plan).filter(Plan.is_active == True).order_by(Plan.monthly_price).all()
-    
+    try:
+        plans = db.query(Plan).filter(Plan.is_active == True).order_by(Plan.monthly_price).all()
+    except Exception:
+        return []
+
     return [
         {
             "id": str(p.id),
             "name": p.name,
-            "tier": p.tier.value,
+            "tier": p.tier.value if hasattr(p.tier, "value") else str(p.tier),
             "description": p.description,
             "monthly_price": float(p.monthly_price) if p.monthly_price else 0,
             "annual_price": float(p.annual_price) if p.annual_price else 0,

@@ -223,21 +223,23 @@ async def seed_database():
         return
 
     try:
-        # Check if admin user exists — use ADMIN_PASSWORD env var or a secure default
         admin_exists = db.query(User).filter(User.email == "admin@palmtai.com").first()
         if not admin_exists:
-            admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
-            logger.info("Creating admin user...")
-            admin = User(
-                email="admin@palmtai.com",
-                hashed_password=get_password_hash(admin_password),
-                full_name="Admin User",
-                role=UserRole.admin,
-                is_active=True,
-            )
-            db.add(admin)
-            db.commit()
-            logger.info("Admin user created: admin@palmtai.com (password from ADMIN_PASSWORD env var)")
+            admin_password = os.environ.get("ADMIN_PASSWORD")
+            if not admin_password:
+                logger.warning("ADMIN_PASSWORD env var not set — skipping admin user creation")
+            else:
+                logger.info("Creating admin user...")
+                admin = User(
+                    email="admin@palmtai.com",
+                    hashed_password=get_password_hash(admin_password),
+                    full_name="Admin User",
+                    role=UserRole.admin,
+                    is_active=True,
+                )
+                db.add(admin)
+                db.commit()
+                logger.info("Admin user created: admin@palmtai.com")
         
         # Force-logout demo account on startup so any existing sessions are invalidated
         demo_user = db.query(User).filter(User.email == "demo@agency.com").first()

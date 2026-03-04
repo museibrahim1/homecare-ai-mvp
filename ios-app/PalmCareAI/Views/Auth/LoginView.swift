@@ -12,7 +12,7 @@ struct LoginView: View {
     @State private var showError = false
     @State private var showRegister = false
     @State private var showForgotPassword = false
-    @State private var showGoogleAlert = false
+    
 
     var body: some View {
         NavigationStack {
@@ -217,26 +217,6 @@ struct LoginView: View {
                     .cornerRadius(8)
                     .padding(.bottom, 8)
 
-                    Button { showGoogleAlert = true } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "g.circle.fill")
-                                .font(.system(size: 18))
-                                .foregroundColor(.palmText)
-                                .frame(width: 20)
-
-                            Text("Continue with Google")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.palmTextMuted)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 11)
-                        .background(Color.white)
-                        .cornerRadius(8)
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.palmBorder, lineWidth: 1.5))
-                        .shadow(color: .black.opacity(0.03), radius: 1, y: 1)
-                    }
-                    .padding(.bottom, 12)
-
                     HStack(spacing: 4) {
                         Text("New to PalmCare?")
                             .font(.system(size: 12))
@@ -270,11 +250,6 @@ struct LoginView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage ?? "An unknown error occurred.")
-            }
-            .alert("Google Sign In", isPresented: $showGoogleAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Google Sign In is coming soon. Please use email/password or Apple Sign In.")
             }
             .sheet(isPresented: $showForgotPassword) {
                 ForgotPasswordSheet().environmentObject(api)

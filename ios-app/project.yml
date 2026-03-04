@@ -40,5 +40,9 @@ targets:
           - UIInterfaceOrientationPortrait
         NSMicrophoneUsageDescription: "PalmCareAI needs microphone access to record client visits and assessments."
         NSAppTransportSecurity:
-          NSAllowsArbitraryLoads: true
+          NSAllowsArbitraryLoads: false
+          NSExceptionDomains:
+            railway.app:
+              NSIncludesSubdomains: true
+              NSExceptionAllowsInsecureHTTPLoads: false
         ITSAppUsesNonExemptEncryption: false
