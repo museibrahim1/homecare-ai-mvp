@@ -32,6 +32,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ai_task_executor import execute_task, apply_changes, git_commit
+from ai_subagents import detect_subagent, execute_with_subagent, SUBAGENTS
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -319,10 +320,16 @@ def check_file_tasks() -> list[dict]:
 
 
 def run_task(task_title: str, task_body: str, task_type: str, state: dict) -> dict:
-    """Execute a task and return the result with apply info."""
+    """Execute a task, routing to the appropriate subagent."""
     start_time = time.time()
 
-    result = execute_task(task_title=task_title, task_body=task_body, task_type=task_type)
+    agent_id = detect_subagent(task_title, task_body)
+    if agent_id in SUBAGENTS:
+        agent_name = SUBAGENTS[agent_id]["name"]
+        logger.info(f"Routing to subagent: {agent_name}")
+        result = execute_with_subagent(agent_id, task_title, task_body, task_type)
+    else:
+        result = execute_task(task_title=task_title, task_body=task_body, task_type=task_type)
 
     apply_result = None
     commit_hash = None
