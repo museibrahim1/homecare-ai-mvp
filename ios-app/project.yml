@@ -36,8 +36,14 @@ targets:
         CFBundlePackageType: APPL
         CFBundleExecutable: $(EXECUTABLE_NAME)
         UILaunchScreen: {}
+        UIRequiresFullScreen: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         NSMicrophoneUsageDescription: "PalmCareAI needs microphone access to record client visits and assessments."
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: false

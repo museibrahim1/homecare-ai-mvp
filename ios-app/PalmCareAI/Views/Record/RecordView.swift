@@ -53,8 +53,11 @@ struct VoiceOrb: View {
                     }
                 }
             } else {
-                Image(systemName: "mic.fill")
-                    .font(.system(size: 36, weight: .medium))
+                Image("PalmLogo")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 48, height: 48)
                     .foregroundColor(.white)
             }
         }
