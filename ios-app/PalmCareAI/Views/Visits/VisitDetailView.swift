@@ -32,21 +32,26 @@ struct VisitDetailView: View {
                     Button { Task { await exportFile(type: "note.pdf") } } label: {
                         Label("Export Notes (PDF)", systemImage: "doc.text")
                     }
+                    .accessibilityLabel("Export notes as PDF")
                     Button { Task { await exportFile(type: "contract.pdf") } } label: {
                         Label("Export Contract (PDF)", systemImage: "doc.fill")
                     }
+                    .accessibilityLabel("Export contract as PDF")
                     Button { Task { await exportFile(type: "timesheet.csv") } } label: {
                         Label("Export Timesheet (CSV)", systemImage: "tablecells")
                     }
+                    .accessibilityLabel("Export timesheet as CSV")
                     Divider()
                     Button(role: .destructive) { Task { await restartAssessment() } } label: {
                         Label("Restart Assessment", systemImage: "arrow.counterclockwise")
                     }
+                    .accessibilityLabel("Restart assessment")
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.palmPrimary)
                 }
+                .accessibilityLabel("Assessment actions")
             }
         }
         .task { await loadVisit() }
@@ -80,6 +85,7 @@ struct VisitDetailView: View {
                         .padding(.horizontal, 14)
                         .padding(.top, 10)
                     }
+                    .accessibilityLabel("\(tab) tab")
                 }
             }
             .padding(.horizontal, 12)
@@ -734,6 +740,7 @@ struct VisitDetailView: View {
                 .padding(.vertical, 10)
                 .background(Color.palmPrimary)
                 .cornerRadius(10)
+                .accessibilityLabel("Retry loading assessment")
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)

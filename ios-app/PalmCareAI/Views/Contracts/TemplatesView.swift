@@ -47,6 +47,7 @@ struct TemplatesView: View {
                     .cornerRadius(14)
                     .shadow(color: Color.palmPrimary.opacity(0.4), radius: 8, y: 4)
             }
+            .accessibilityLabel("Upload new template")
             .padding(.trailing, 18)
             .padding(.bottom, 100)
         }
@@ -136,6 +137,7 @@ struct TemplatesView: View {
                 .cornerRadius(12)
                 .shadow(color: Color.palmPrimary.opacity(0.3), radius: 6, y: 3)
             }
+            .accessibilityLabel("Upload template")
 
             Spacer()
         }
@@ -264,6 +266,7 @@ struct TemplateRow: View {
                         .foregroundColor(.palmSecondary)
                         .frame(width: 32, height: 32)
                 }
+                .accessibilityLabel("Template actions for \(template.name)")
             }
 
             if template.unmapped_count > 0 {
@@ -304,6 +307,7 @@ struct TemplateRow: View {
                         .background(Color.palmPrimary.opacity(0.08))
                         .cornerRadius(8)
                     }
+                    .accessibilityLabel("Re-scan template")
                     .disabled(isRescanning)
 
                     Spacer()
@@ -326,6 +330,7 @@ struct TemplateRow: View {
                         .background(Color.red.opacity(0.06))
                         .cornerRadius(8)
                     }
+                    .accessibilityLabel("Delete template")
                     .disabled(isDeleting)
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
@@ -419,6 +424,7 @@ struct UploadTemplateSheet: View {
                                         .stroke(selectedFileURL != nil ? Color.palmPrimary.opacity(0.4) : Color.palmBorder, lineWidth: 1)
                                 )
                             }
+                            .accessibilityLabel("Choose file")
                         }
                     }
                     .padding(.horizontal, 20)
@@ -458,6 +464,7 @@ struct UploadTemplateSheet: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
                         .foregroundColor(.palmSecondary)
+                        .accessibilityLabel("Cancel upload")
                 }
             }
             .sheet(isPresented: $showFilePicker) {

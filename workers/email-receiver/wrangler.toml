@@ -1,0 +1,11 @@
+name = "palmcare-email-receiver"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+account_id = "6e6012032e3e36b2ce65d9768ebc6152"
+
+[vars]
+API_SECRET = "palmcare-ai-daemon-2026"
+
+[[kv_namespaces]]
+binding = "TASKS"
+id = "d1259064d21a4c44b25d3a3edec05114"

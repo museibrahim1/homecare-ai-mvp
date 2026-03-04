@@ -45,6 +45,8 @@ LOG_FILE = LOG_DIR / "palmcare-ai-tasks.log"
 
 POLL_INTERVAL = 30
 RESEND_BASE = "https://api.resend.com"
+CF_WORKER_URL = "https://palmcare-email-receiver.museibrahim.workers.dev"
+CF_WORKER_SECRET = "palmcare-ai-daemon-2026"
 
 ALLOWED_SENDERS = {
     "support@palmtai.com",
@@ -146,7 +148,71 @@ def get_email_detail(email_id: str) -> Optional[dict]:
 
 
 # ---------------------------------------------------------------------------
-# Resend inbound polling
+# Cloudflare Worker polling (primary email method)
+# ---------------------------------------------------------------------------
+
+
+def poll_cf_worker(state: dict) -> list[dict]:
+    """Poll the Cloudflare Email Worker for new tasks stored in KV."""
+    tasks = []
+    try:
+        resp = requests.get(
+            f"{CF_WORKER_URL}/tasks",
+            headers={"Authorization": f"Bearer {CF_WORKER_SECRET}"},
+            timeout=15,
+        )
+        if resp.status_code != 200:
+            logger.warning(f"CF Worker poll failed: {resp.status_code}")
+            return []
+
+        pending = resp.json().get("tasks", [])
+        for task in pending:
+            task_id = task.get("id", "")
+            if task_id in state.get("processed_ids", []):
+                continue
+
+            sender = task.get("from", "").lower()
+            if sender in IGNORED_SENDERS:
+                ack_cf_task(task_id)
+                state["processed_ids"].append(task_id)
+                save_state(state)
+                continue
+
+            tasks.append({
+                "source": "cf_worker",
+                "id": task_id,
+                "from": task.get("from", ""),
+                "sender_email": sender,
+                "subject": task.get("subject", "(no subject)"),
+                "body": task.get("body", "(no body)"),
+            })
+
+    except requests.RequestException as e:
+        logger.error(f"CF Worker poll error: {e}")
+    except Exception as e:
+        logger.exception(f"Unexpected error polling CF Worker: {e}")
+
+    return tasks
+
+
+def ack_cf_task(task_id: str):
+    """Acknowledge a task in the CF Worker KV so it's not returned again."""
+    try:
+        requests.post(
+            f"{CF_WORKER_URL}/tasks/ack",
+            headers={
+                "Authorization": f"Bearer {CF_WORKER_SECRET}",
+                "Content-Type": "application/json",
+            },
+            json={"task_id": task_id},
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
+# Resend inbound polling (fallback)
 # ---------------------------------------------------------------------------
 
 
@@ -420,7 +486,23 @@ def poll_cycle(state: dict) -> int:
         except Exception as e:
             logger.exception(f"Error processing file task: {e}")
 
-    # 2. Resend inbound (primary email method — no Gmail App Password needed)
+    # 2. Cloudflare Worker (primary email method — emails to ai@palmcareai.com)
+    for cf_task in poll_cf_worker(state):
+        try:
+            title = clean_subject(cf_task["subject"])
+            body = cf_task["body"]
+            task_type = parse_task_type(cf_task["subject"])
+            logger.info(f"CF Worker task from {cf_task['sender_email']}: {title}")
+            run_task(title, body, task_type, state)
+            ack_cf_task(cf_task["id"])
+            state["processed_ids"].append(cf_task["id"])
+            save_state(state)
+            processed += 1
+            time.sleep(2)
+        except Exception as e:
+            logger.exception(f"Error processing CF Worker task: {e}")
+
+    # 3. Resend inbound (fallback)
     for inbound_task in poll_resend_inbound(state):
         try:
             title = clean_subject(inbound_task["subject"])
@@ -446,7 +528,8 @@ def run_daemon():
     logger.info(f"  Project:    {PROJECT_ROOT}")
     logger.info(f"  Tasks dir:  {TASKS_DIR}")
     logger.info(f"  Resend:     {'ENABLED' if os.getenv('RESEND_API_KEY') else 'DISABLED'}")
-    logger.info(f"  Email in:   Resend inbound polling (ai@palmcareai.com -> palmtai.com)")
+    logger.info(f"  CF Worker:  {CF_WORKER_URL}")
+    logger.info(f"  Email in:   CF Worker (ai@palmcareai.com -> Worker -> KV -> daemon)")
     logger.info(f"  Polling:    every {POLL_INTERVAL}s")
     logger.info(f"  Reply to:   {REPLY_TO}")
     logger.info(f"  Log:        {LOG_FILE}")

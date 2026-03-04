@@ -60,6 +60,7 @@ struct AssessmentsListView: View {
                             ) {
                                 assessmentCard(visit)
                             }
+                            .accessibilityLabel("Visit for \(visit.client?.full_name ?? "Unknown Client"), \(visit.status)")
                             .buttonStyle(.plain)
                         }
                     }
@@ -111,6 +112,7 @@ struct AssessmentsListView: View {
                                 .stroke(selectedFilter == value ? Color.clear : Color.palmBorder, lineWidth: 1)
                         )
                     }
+                    .accessibilityLabel("Filter by \(label)")
                 }
             }
             .padding(.horizontal, 16)

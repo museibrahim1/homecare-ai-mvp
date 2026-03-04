@@ -64,3 +64,4 @@ temp/
 *.tmp
 mobile/ios/
 ios-app/preview_*.png
+.wrangler/

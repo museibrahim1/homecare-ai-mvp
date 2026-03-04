@@ -83,6 +83,7 @@ struct ContractsView: View {
                     Button { errorMessage = nil } label: {
                         Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
                     }
+                    .accessibilityLabel("Dismiss error")
                 }
                 .foregroundColor(.red)
                 .padding(.horizontal, 18).padding(.vertical, 6)
@@ -136,6 +137,7 @@ struct ContractsView: View {
                                     .stroke(isSelected ? Color.clear : Color.palmBorder, lineWidth: 1)
                             )
                     }
+                    .accessibilityLabel("Filter by \(filter)")
                 }
             }
             .padding(.horizontal, 18)
@@ -154,12 +156,14 @@ struct ContractsView: View {
             TextField("Search by client or document...", text: $searchText)
                 .font(.system(size: 13))
                 .foregroundColor(.palmText)
+                .accessibilityLabel("Search documents")
             if !searchText.isEmpty {
                 Button { searchText = "" } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 14))
                         .foregroundColor(.palmSecondary)
                 }
+                .accessibilityLabel("Clear search")
             }
         }
         .padding(.horizontal, 12)
@@ -211,6 +215,7 @@ struct ContractsView: View {
             .cornerRadius(24)
             .shadow(color: .palmPrimary.opacity(0.35), radius: 8, y: 4)
         }
+        .accessibilityLabel("Upload contract template")
         .padding(.trailing, 18)
         .padding(.bottom, 90)
     }
@@ -384,6 +389,7 @@ private struct ClientSection: View {
                 .padding(.vertical, 12)
                 .contentShape(Rectangle())
             }
+            .accessibilityLabel("\(group.name), \(group.totalCount) documents")
             .buttonStyle(.plain)
 
             // Expanded content
@@ -503,6 +509,7 @@ private struct CompactDocRow: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
         }
+        .accessibilityLabel("Download \(document.name)")
         .buttonStyle(.plain)
         .disabled(isDownloading)
         .opacity(isDownloading ? 0.6 : 1)

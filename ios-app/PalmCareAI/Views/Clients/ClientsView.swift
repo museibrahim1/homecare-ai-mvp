@@ -58,6 +58,7 @@ struct ClientsView: View {
                             .cornerRadius(10)
                             .shadow(color: Color.palmPrimary.opacity(0.35), radius: 5, y: 2)
                         }
+                        .accessibilityLabel("Add new client")
                     }
 
                     HStack(spacing: 8) {
@@ -68,6 +69,7 @@ struct ClientsView: View {
                         TextField("Search name, phone, diagnosis...", text: $searchText)
                             .font(.system(size: 13))
                             .foregroundColor(.palmText)
+                            .accessibilityLabel("Search clients")
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 9)
@@ -115,6 +117,7 @@ struct ClientsView: View {
                                     NavigationLink(destination: ClientDetailView(client: client).environmentObject(api)) {
                                         ClientCard(client: client, avatarColors: Self.avatarColors)
                                     }
+                                    .accessibilityLabel("View \(client.full_name)")
                                     .buttonStyle(.plain)
                                 }
 

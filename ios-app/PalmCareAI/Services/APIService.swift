@@ -3,7 +3,12 @@ import Security
 
 class APIService: ObservableObject {
     static let shared = APIService()
-    let baseURL = "https://api-production-a0a2.up.railway.app"
+    let baseURL: String = {
+        if let url = Bundle.main.infoDictionary?["API_BASE_URL"] as? String, !url.isEmpty {
+            return url
+        }
+        return "https://api-production-a0a2.up.railway.app"
+    }()
 
     @Published var token: String? {
         didSet {

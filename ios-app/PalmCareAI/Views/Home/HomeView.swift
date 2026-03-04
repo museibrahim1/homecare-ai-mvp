@@ -52,6 +52,7 @@ struct HomeView: View {
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(.white)
                         }
+                        .accessibilityLabel("User profile")
                     }
                     .padding(.horizontal, 18)
                     .padding(.top, 14)
@@ -130,6 +131,7 @@ struct HomeView: View {
                         .cornerRadius(12)
                         .shadow(color: Color.palmPrimary.opacity(0.3), radius: 8, y: 4)
                     }
+                    .accessibilityLabel("Start new recording")
                     .padding(.horizontal, 14)
                     .padding(.bottom, 18)
 
@@ -146,6 +148,7 @@ struct HomeView: View {
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(.palmPrimary)
                         }
+                        .accessibilityLabel("See all visits")
                     }
                     .padding(.horizontal, 14)
                     .padding(.bottom, 10)
@@ -174,6 +177,7 @@ struct HomeView: View {
                                 ) {
                                     VisitRow(visit: visit)
                                 }
+                                .accessibilityLabel("Visit for \(visit.client?.full_name ?? "Unknown"), \(visit.status)")
                                 .buttonStyle(.plain)
                             }
                         }
@@ -272,6 +276,7 @@ struct HomeStatCard: View {
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .accessibilityLabel("\(label): \(value)")
     }
 }
 

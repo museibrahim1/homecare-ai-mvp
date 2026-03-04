@@ -62,6 +62,7 @@ struct SubscriptionView: View {
                         .background(Color.white.opacity(0.08))
                         .clipShape(Circle())
                 }
+                .accessibilityLabel("Close")
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
@@ -197,6 +198,7 @@ struct SubscriptionView: View {
                         .background(Color.palmPrimary.opacity(0.12))
                         .cornerRadius(20)
                 }
+                .accessibilityLabel("Contact sales for enterprise plan")
             }
             .padding(16)
             .background(
@@ -302,6 +304,7 @@ struct PlanCard: View {
                         }
                     }
                 }
+                .accessibilityLabel("Select \(plan.name) plan")
                 .padding(.top, 2)
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -360,6 +363,7 @@ struct PlanCard: View {
                     )
                     .cornerRadius(14)
                 }
+                .accessibilityLabel("Subscribe to \(plan.name)")
                 .disabled(isCheckingOut)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
