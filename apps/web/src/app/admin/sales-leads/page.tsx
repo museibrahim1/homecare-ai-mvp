@@ -126,7 +126,7 @@ const TEMPLATE_COLORS: Record<string, string> = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
-  new: { label: 'New', color: 'bg-slate-500/20 text-slate-300', icon: Circle },
+  new: { label: 'New', color: 'bg-slate-500/20 text-slate-600', icon: Circle },
   contacted: { label: 'Contacted', color: 'bg-blue-50 text-blue-600', icon: Phone },
   email_sent: { label: 'Email Sent', color: 'bg-indigo-50 text-indigo-600', icon: Mail },
   email_opened: { label: 'Opened', color: 'bg-purple-50 text-purple-600', icon: MailOpen },
@@ -136,7 +136,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   negotiating: { label: 'Negotiating', color: 'bg-orange-50 text-orange-600', icon: TrendingUp },
   converted: { label: 'Converted', color: 'bg-emerald-50 text-emerald-600', icon: CheckCircle2 },
   not_interested: { label: 'Not Interested', color: 'bg-red-50 text-red-600', icon: X },
-  no_response: { label: 'No Response', color: 'bg-gray-500/20 text-gray-400', icon: Clock },
+  no_response: { label: 'No Response', color: 'bg-gray-500/20 text-slate-500', icon: Clock },
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -579,14 +579,14 @@ export default function SalesLeadsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#0a0a1a] landing-dark flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] landing-dark flex">
+    <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       <main className="flex-1 ml-64 p-6">
         {/* Header */}
@@ -603,7 +603,7 @@ export default function SalesLeadsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => { if (activeTab === 'leads') loadData(); else if (activeTab === 'analytics') loadAnalytics(); else loadSequenceStatus(); }}
-              className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-slate-900 flex items-center gap-2 text-sm"
+              className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 flex items-center gap-2 text-sm"
             >
               <RefreshCw className="w-4 h-4" />
               Refresh
@@ -611,7 +611,7 @@ export default function SalesLeadsPage() {
             <button
               onClick={() => importCMS(true)}
               disabled={importing}
-              className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-slate-900 flex items-center gap-2 text-sm disabled:opacity-50"
+              className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 flex items-center gap-2 text-sm disabled:opacity-50"
             >
               {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               {importing ? 'Importing...' : 'Import All States'}
@@ -619,14 +619,14 @@ export default function SalesLeadsPage() {
             <button
               onClick={seedAgencies}
               disabled={importing}
-              className="px-3 py-2 bg-[#1a1a2e] border border-emerald-800/50 rounded-lg text-emerald-400 hover:text-emerald-300 hover:border-emerald-700 flex items-center gap-2 text-sm disabled:opacity-50"
+              className="px-3 py-2 bg-white border border-emerald-800/50 rounded-lg text-emerald-400 hover:text-emerald-600 hover:border-emerald-700 flex items-center gap-2 text-sm disabled:opacity-50"
             >
               {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               Seed 163 Agencies
             </button>
             <button
               onClick={cleanupNoEmail}
-              className="px-3 py-2 bg-[#1a1a2e] border border-red-800/50 rounded-lg text-red-400 hover:text-red-300 hover:border-red-700 flex items-center gap-2 text-sm"
+              className="px-3 py-2 bg-white border border-red-800/50 rounded-lg text-red-400 hover:text-red-600 hover:border-red-700 flex items-center gap-2 text-sm"
             >
               <X className="w-4 h-4" />
               Remove No-Email
@@ -649,7 +649,7 @@ export default function SalesLeadsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-4 bg-[#1a1a2e] border border-gray-700/50 rounded-lg p-1 w-fit">
+        <div className="flex gap-1 mb-4 bg-white border border-slate-200 rounded-lg p-1 w-fit">
           {([
             { id: 'leads' as const, label: 'Leads', icon: Users },
             { id: 'analytics' as const, label: 'Campaign Analytics', icon: BarChart3 },
@@ -661,7 +661,7 @@ export default function SalesLeadsPage() {
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-all ${
                 activeTab === id
                   ? 'bg-indigo-50 text-indigo-600 border border-indigo-500/30'
-                  : 'text-gray-400 hover:text-slate-900 hover:bg-white/5'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -676,7 +676,7 @@ export default function SalesLeadsPage() {
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
             {[
-              { label: 'Total', value: stats.total, color: 'text-white' },
+              { label: 'Total', value: stats.total, color: 'text-slate-900' },
               { label: 'Has Email', value: stats.has_email, color: 'text-emerald-400' },
               { label: 'Email Sent', value: stats.email_sent, color: 'text-indigo-600' },
               { label: 'Opened', value: stats.email_opened, color: 'text-purple-600' },
@@ -684,8 +684,8 @@ export default function SalesLeadsPage() {
               { label: 'Converted', value: stats.converted, color: 'text-emerald-600' },
               { label: '<5 Yrs', value: stats.last_5_years, color: 'text-red-600' },
             ].map(({ label, value, color }) => (
-              <div key={label} className="bg-[#1a1a2e] border border-gray-700/50 rounded-lg p-3">
-                <p className="text-xs text-gray-400">{label}</p>
+              <div key={label} className="bg-white border border-slate-200 rounded-lg p-3">
+                <p className="text-xs text-slate-500">{label}</p>
                 <p className={`text-xl font-bold ${color}`}>{value}</p>
               </div>
             ))}
@@ -693,22 +693,22 @@ export default function SalesLeadsPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-lg p-4 mb-4">
+        <div className="bg-white border border-slate-200 rounded-lg p-4 mb-4">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex-1 min-w-[200px] relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search agencies..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <select
               value={filters.state}
               onChange={(e) => setFilters({ ...filters, state: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">All States</option>
               <option value="NE">Nebraska</option>
@@ -717,7 +717,7 @@ export default function SalesLeadsPage() {
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">All Status</option>
               {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -727,7 +727,7 @@ export default function SalesLeadsPage() {
             <select
               value={filters.priority}
               onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">All Priority</option>
               <option value="high">High (0-5 yrs)</option>
@@ -737,7 +737,7 @@ export default function SalesLeadsPage() {
             <select
               value={filters.max_years}
               onChange={(e) => setFilters({ ...filters, max_years: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">Any Age</option>
               <option value="5">Last 5 years</option>
@@ -747,7 +747,7 @@ export default function SalesLeadsPage() {
             <select
               value={filters.has_email}
               onChange={(e) => setFilters({ ...filters, has_email: e.target.value })}
-              className="px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
             >
               <option value="">All Contacts</option>
               <option value="true">Has Email</option>
@@ -755,7 +755,7 @@ export default function SalesLeadsPage() {
             </select>
             <button
               onClick={() => setFilters({ state: '', status: '', priority: '', ownership: '', search: '', max_years: '', contacted: '', has_email: '' })}
-              className="px-3 py-2 text-gray-400 hover:text-slate-900 text-sm"
+              className="px-3 py-2 text-slate-500 hover:text-slate-900 text-sm"
             >
               Clear
             </button>
@@ -770,7 +770,7 @@ export default function SalesLeadsPage() {
         )}
 
         {/* Leads Table */}
-        <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-lg overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
@@ -780,7 +780,7 @@ export default function SalesLeadsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-700/50">
+                    <tr className="border-b border-slate-200">
                       {[
                         { key: 'provider_name', label: 'Agency' },
                         { key: 'city', label: 'Location' },
@@ -796,7 +796,7 @@ export default function SalesLeadsPage() {
                             if (sortBy === key) setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
                             else { setSortBy(key); setSortOrder('asc'); }
                           })()}
-                          className={`px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider ${key ? 'cursor-pointer hover:text-slate-900' : ''}`}
+                          className={`px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider ${key ? 'cursor-pointer hover:text-slate-900' : ''}`}
                         >
                           <div className="flex items-center gap-1">
                             {label}
@@ -815,7 +815,7 @@ export default function SalesLeadsPage() {
                       return (
                         <tr
                           key={lead.id}
-                          className="border-b border-gray-800/50 hover:bg-[#12122a] cursor-pointer transition-colors"
+                          className="border-b border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors"
                           onClick={() => openLeadDetail(lead.id)}
                         >
                           <td className="px-4 py-3">
@@ -827,13 +827,13 @@ export default function SalesLeadsPage() {
                                     <Mail className="w-2.5 h-2.5" /> email
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-500/15 text-gray-500 border border-gray-600/30">
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-500/15 text-slate-400 border border-slate-300">
                                     <Phone className="w-2.5 h-2.5" /> phone only
                                   </span>
                                 )}
                               </div>
                               <div className="flex items-center gap-2 mt-0.5">
-                                {lead.phone && <span className="text-xs text-gray-500">{lead.phone}</span>}
+                                {lead.phone && <span className="text-xs text-slate-400">{lead.phone}</span>}
                                 <span className={`text-xs px-1.5 py-0.5 rounded border ${PRIORITY_COLORS[lead.priority] || PRIORITY_COLORS.low}`}>
                                   {lead.priority}
                                 </span>
@@ -841,13 +841,13 @@ export default function SalesLeadsPage() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-1 text-sm text-gray-300">
-                              <MapPin className="w-3 h-3 text-gray-500" />
+                            <div className="flex items-center gap-1 text-sm text-slate-600">
+                              <MapPin className="w-3 h-3 text-slate-400" />
                               {lead.city}, {lead.state}
                             </div>
-                            <p className="text-xs text-gray-500">{lead.ownership_type}</p>
+                            <p className="text-xs text-slate-400">{lead.ownership_type}</p>
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-300">
+                          <td className="px-4 py-3 text-sm text-slate-600">
                             {lead.years_in_operation ? `${lead.years_in_operation.toFixed(1)} yr` : '—'}
                           </td>
                           <td className="px-4 py-3">
@@ -856,7 +856,7 @@ export default function SalesLeadsPage() {
                                 <Star className="w-3 h-3 text-amber-600 fill-yellow-400" />
                                 <span className="text-amber-600">{lead.star_rating}</span>
                               </div>
-                            ) : <span className="text-gray-600 text-sm">—</span>}
+                            ) : <span className="text-slate-500 text-sm">—</span>}
                           </td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${sc.color}`}>
@@ -876,13 +876,13 @@ export default function SalesLeadsPage() {
                                   <MailOpen className="w-3 h-3" /> {lead.email_open_count}
                                 </span>
                               )}
-                              {!lead.email_send_count && <span className="text-gray-600">None</span>}
+                              {!lead.email_send_count && <span className="text-slate-500">None</span>}
                             </div>
                           </td>
                           <td className="px-4 py-3">
                             <button
                               onClick={(e) => { e.stopPropagation(); openLeadDetail(lead.id); }}
-                              className="text-indigo-600 hover:text-indigo-300 text-xs"
+                              className="text-indigo-600 hover:text-indigo-600 text-xs"
                             >
                               View
                             </button>
@@ -895,8 +895,8 @@ export default function SalesLeadsPage() {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-700/50">
-                <p className="text-sm text-gray-400">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
+                <p className="text-sm text-slate-500">
                   Showing {page * pageSize + 1}–{page * pageSize + leads.length}
                   {stats ? ` of ${stats.total}` : ''}
                 </p>
@@ -904,14 +904,14 @@ export default function SalesLeadsPage() {
                   <button
                     onClick={() => setPage(Math.max(0, page - 1))}
                     disabled={page === 0}
-                    className="px-3 py-1 bg-[#0a0a1a] border border-gray-700 rounded text-gray-300 text-sm disabled:opacity-30"
+                    className="px-3 py-1 bg-slate-50 border border-slate-200 rounded text-slate-600 text-sm disabled:opacity-30"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setPage(page + 1)}
                     disabled={leads.length < pageSize}
-                    className="px-3 py-1 bg-[#0a0a1a] border border-gray-700 rounded text-gray-300 text-sm disabled:opacity-30"
+                    className="px-3 py-1 bg-slate-50 border border-slate-200 rounded text-slate-600 text-sm disabled:opacity-30"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -925,10 +925,10 @@ export default function SalesLeadsPage() {
         {showDetail && selectedLead && (
           <div className="fixed inset-0 z-50 flex justify-end">
             <div className="absolute inset-0 bg-black/60" onClick={() => setShowDetail(false)} />
-            <div className="relative w-full max-w-xl bg-[#12122a] border-l border-gray-700 overflow-y-auto">
-              <div className="sticky top-0 bg-[#12122a] border-b border-gray-700 px-6 py-4 flex items-center justify-between z-10">
+            <div className="relative w-full max-w-xl bg-slate-50 border-l border-slate-200 overflow-y-auto">
+              <div className="sticky top-0 bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
                 <h2 className="text-lg font-semibold text-slate-900 truncate">{selectedLead.provider_name}</h2>
-                <button onClick={() => setShowDetail(false)} className="text-gray-400 hover:text-slate-900">
+                <button onClick={() => setShowDetail(false)} className="text-slate-500 hover:text-slate-900">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -939,7 +939,7 @@ export default function SalesLeadsPage() {
                   <select
                     value={selectedLead.status}
                     onChange={(e) => updateLead(selectedLead.id, { status: e.target.value })}
-                    className="px-3 py-1.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm"
+                    className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm"
                   >
                     {Object.entries(STATUS_CONFIG).map(([k, v]) => (
                       <option key={k} value={k}>{v.label}</option>
@@ -948,7 +948,7 @@ export default function SalesLeadsPage() {
                   <select
                     value={selectedLead.priority}
                     onChange={(e) => updateLead(selectedLead.id, { priority: e.target.value })}
-                    className="px-3 py-1.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm"
+                    className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm"
                   >
                     <option value="high">High Priority</option>
                     <option value="medium">Medium Priority</option>
@@ -957,37 +957,37 @@ export default function SalesLeadsPage() {
                 </div>
 
                 {/* Agency Info */}
-                <div className="bg-[#0a0a1a] rounded-lg p-4 space-y-2">
-                  <h3 className="text-sm font-medium text-gray-400 mb-3">Agency Details</h3>
+                <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+                  <h3 className="text-sm font-medium text-slate-500 mb-3">Agency Details</h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <span className="text-gray-500">Location</span>
-                      <p className="text-white">{selectedLead.address}</p>
-                      <p className="text-gray-300">{selectedLead.city}, {selectedLead.state} {selectedLead.zip_code}</p>
+                      <span className="text-slate-400">Location</span>
+                      <p className="text-slate-900">{selectedLead.address}</p>
+                      <p className="text-slate-600">{selectedLead.city}, {selectedLead.state} {selectedLead.zip_code}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Phone</span>
-                      <p className="text-white">{selectedLead.phone || '—'}</p>
+                      <span className="text-slate-400">Phone</span>
+                      <p className="text-slate-900">{selectedLead.phone || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Ownership</span>
-                      <p className="text-white">{selectedLead.ownership_type || '—'}</p>
+                      <span className="text-slate-400">Ownership</span>
+                      <p className="text-slate-900">{selectedLead.ownership_type || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">CMS CCN</span>
-                      <p className="text-white">{selectedLead.ccn || '—'}</p>
+                      <span className="text-slate-400">CMS CCN</span>
+                      <p className="text-slate-900">{selectedLead.ccn || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Certified</span>
-                      <p className="text-white">{selectedLead.certification_date || '—'}</p>
+                      <span className="text-slate-400">Certified</span>
+                      <p className="text-slate-900">{selectedLead.certification_date || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Age</span>
-                      <p className="text-white">{selectedLead.years_in_operation ? `${selectedLead.years_in_operation.toFixed(1)} years` : '—'}</p>
+                      <span className="text-slate-400">Age</span>
+                      <p className="text-slate-900">{selectedLead.years_in_operation ? `${selectedLead.years_in_operation.toFixed(1)} years` : '—'}</p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Star Rating</span>
-                      <p className="text-white flex items-center gap-1">
+                      <span className="text-slate-400">Star Rating</span>
+                      <p className="text-slate-900 flex items-center gap-1">
                         {selectedLead.star_rating && selectedLead.star_rating !== '-' ? (
                           <><Star className="w-3 h-3 text-amber-600 fill-yellow-400" /> {selectedLead.star_rating}</>
                         ) : '—'}
@@ -995,7 +995,7 @@ export default function SalesLeadsPage() {
                     </div>
                   </div>
                   <div className="pt-2">
-                    <span className="text-gray-500 text-sm">Services</span>
+                    <span className="text-slate-400 text-sm">Services</span>
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {selectedLead.offers_nursing && <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded">Nursing</span>}
                       {selectedLead.offers_pt && <span className="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded">PT</span>}
@@ -1008,11 +1008,11 @@ export default function SalesLeadsPage() {
                 </div>
 
                 {/* Contact Info (Editable) */}
-                <div className="bg-[#0a0a1a] rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-medium text-gray-400">Contact Info</h3>
+                <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-slate-500">Contact Info</h3>
                   {['contact_name', 'contact_email', 'contact_title', 'website'].map((field) => (
                     <div key={field} className="flex items-center justify-between">
-                      <span className="text-gray-500 text-sm capitalize">{field.replace('contact_', '').replace('_', ' ')}</span>
+                      <span className="text-slate-400 text-sm capitalize">{field.replace('contact_', '').replace('_', ' ')}</span>
                       {editingField === field ? (
                         <div className="flex items-center gap-1">
                           <input
@@ -1026,7 +1026,7 @@ export default function SalesLeadsPage() {
                               }
                               if (e.key === 'Escape') setEditingField(null);
                             }}
-                            className="px-2 py-1 bg-[#1a1a2e] border border-indigo-500 rounded text-slate-900 text-sm w-48"
+                            className="px-2 py-1 bg-white border border-indigo-500 rounded text-slate-900 text-sm w-48"
                           />
                           <button onClick={() => { updateLead(selectedLead.id, { [field]: editValue }); setEditingField(null); }}>
                             <Check className="w-4 h-4 text-emerald-600" />
@@ -1037,7 +1037,7 @@ export default function SalesLeadsPage() {
                           onClick={() => { setEditingField(field); setEditValue(selectedLead[field as keyof LeadDetail] as string || ''); }}
                           className="text-slate-900 text-sm cursor-pointer hover:text-indigo-600"
                         >
-                          {(selectedLead[field as keyof LeadDetail] as string) || <span className="text-gray-600 italic">Click to add</span>}
+                          {(selectedLead[field as keyof LeadDetail] as string) || <span className="text-slate-500 italic">Click to add</span>}
                         </span>
                       )}
                     </div>
@@ -1045,20 +1045,20 @@ export default function SalesLeadsPage() {
                 </div>
 
                 {/* Email Actions */}
-                <div className="bg-[#0a0a1a] rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-medium text-gray-400">Email Campaign</h3>
+                <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-slate-500">Email Campaign</h3>
                   <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                    <div className="bg-[#1a1a2e] rounded p-2">
+                    <div className="bg-white rounded p-2">
                       <p className="text-indigo-600 font-bold">{selectedLead.email_send_count}</p>
-                      <p className="text-gray-500 text-xs">Sent</p>
+                      <p className="text-slate-400 text-xs">Sent</p>
                     </div>
-                    <div className="bg-[#1a1a2e] rounded p-2">
+                    <div className="bg-white rounded p-2">
                       <p className="text-purple-600 font-bold">{selectedLead.email_open_count}</p>
-                      <p className="text-gray-500 text-xs">Opened</p>
+                      <p className="text-slate-400 text-xs">Opened</p>
                     </div>
-                    <div className="bg-[#1a1a2e] rounded p-2">
+                    <div className="bg-white rounded p-2">
                       <p className="text-emerald-400 font-bold">{selectedLead.last_response_at ? 'Yes' : 'No'}</p>
-                      <p className="text-gray-500 text-xs">Replied</p>
+                      <p className="text-slate-400 text-xs">Replied</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -1083,25 +1083,25 @@ export default function SalesLeadsPage() {
                   </div>
 
                   {showEmailCompose && (
-                    <div className="bg-[#1a1a2e] rounded-lg p-3 space-y-2 border border-gray-700">
+                    <div className="bg-white rounded-lg p-3 space-y-2 border border-slate-200">
                       <input
                         placeholder="To (leave empty to use contact email)"
                         value={emailForm.to}
                         onChange={(e) => setEmailForm({ ...emailForm, to: e.target.value })}
-                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-slate-900 text-sm placeholder-gray-500"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-slate-900 text-sm placeholder-slate-400"
                       />
                       <input
                         placeholder="Subject"
                         value={emailForm.subject}
                         onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
-                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-slate-900 text-sm placeholder-gray-500"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-slate-900 text-sm placeholder-slate-400"
                       />
                       <textarea
                         placeholder="Email body (HTML)"
                         value={emailForm.body}
                         onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })}
                         rows={5}
-                        className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded text-slate-900 text-sm placeholder-gray-500 resize-none"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-slate-900 text-sm placeholder-slate-400 resize-none"
                       />
                       <button
                         onClick={sendEmail}
@@ -1116,31 +1116,31 @@ export default function SalesLeadsPage() {
                 </div>
 
                 {/* Notes */}
-                <div className="bg-[#0a0a1a] rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Notes</h3>
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-slate-500 mb-2">Notes</h3>
                   <textarea
                     value={selectedLead.notes || ''}
                     onChange={(e) => setSelectedLead({ ...selectedLead, notes: e.target.value })}
                     onBlur={() => updateLead(selectedLead.id, { notes: selectedLead.notes })}
                     placeholder="Add notes..."
                     rows={3}
-                    className="w-full px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded text-slate-900 text-sm placeholder-gray-500 resize-none"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded text-slate-900 text-sm placeholder-slate-400 resize-none"
                   />
                 </div>
 
                 {/* Activity Log */}
-                <div className="bg-[#0a0a1a] rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-400 mb-3">Activity Log</h3>
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-slate-500 mb-3">Activity Log</h3>
                   {selectedLead.activity_log && selectedLead.activity_log.length > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                       {[...selectedLead.activity_log].reverse().map((entry, i) => (
                         <div key={i} className="flex items-start gap-2 text-xs">
                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
                           <div>
-                            <span className="text-white">{entry.action}</span>
-                            {entry.subject && <span className="text-gray-500"> — {entry.subject}</span>}
-                            {entry.notes && <span className="text-gray-500"> — {entry.notes}</span>}
-                            <p className="text-gray-600">
+                            <span className="text-slate-900">{entry.action}</span>
+                            {entry.subject && <span className="text-slate-400"> — {entry.subject}</span>}
+                            {entry.notes && <span className="text-slate-400"> — {entry.notes}</span>}
+                            <p className="text-slate-500">
                               {entry.at ? new Date(entry.at).toLocaleString() : ''}
                             </p>
                           </div>
@@ -1148,7 +1148,7 @@ export default function SalesLeadsPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-600 text-sm">No activity yet</p>
+                    <p className="text-slate-500 text-sm">No activity yet</p>
                   )}
                 </div>
               </div>
@@ -1166,7 +1166,7 @@ export default function SalesLeadsPage() {
               <select
                 value={analyticsDays}
                 onChange={(e) => setAnalyticsDays(Number(e.target.value))}
-                className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-slate-900 text-sm"
+                className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm"
               >
                 <option value={7}>Last 7 days</option>
                 <option value={30}>Last 30 days</option>
@@ -1191,8 +1191,8 @@ export default function SalesLeadsPage() {
                     { label: 'Replied', value: analyticsData.totals?.total_replied || 0, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
                     { label: 'Bounced', value: analyticsData.totals?.total_bounced || 0, color: 'text-red-600', bg: 'bg-red-50' },
                   ].map(({ label, value, color, bg }) => (
-                    <div key={label} className={`${bg} border border-gray-700/30 rounded-xl p-4`}>
-                      <p className="text-xs text-gray-400">{label}</p>
+                    <div key={label} className={`${bg} border border-slate-200/30 rounded-xl p-4`}>
+                      <p className="text-xs text-slate-500">{label}</p>
                       <p className={`text-2xl font-bold ${color} mt-1`}>{value}</p>
                     </div>
                   ))}
@@ -1205,18 +1205,18 @@ export default function SalesLeadsPage() {
                     { label: 'Click Rate', value: `${analyticsData.totals?.overall_click_rate || 0}%`, target: '3%+', color: (analyticsData.totals?.overall_click_rate || 0) >= 3 ? 'text-emerald-400' : 'text-amber-600' },
                     { label: 'Reply Rate', value: `${analyticsData.totals?.overall_reply_rate || 0}%`, target: '5%+', color: (analyticsData.totals?.overall_reply_rate || 0) >= 5 ? 'text-emerald-400' : 'text-amber-600' },
                   ].map(({ label, value, target, color }) => (
-                    <div key={label} className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5 text-center">
-                      <p className="text-xs text-gray-500 mb-2">{label}</p>
+                    <div key={label} className="bg-white border border-slate-200 rounded-xl p-5 text-center">
+                      <p className="text-xs text-slate-400 mb-2">{label}</p>
                       <p className={`text-3xl font-bold ${color}`}>{value}</p>
-                      <p className="text-xs text-gray-600 mt-1">Target: {target}</p>
+                      <p className="text-xs text-slate-500 mt-1">Target: {target}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Funnel */}
                 {analyticsData.funnel && (
-                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
-                    <h3 className="text-sm font-medium text-gray-400 mb-4">Email Funnel</h3>
+                  <div className="bg-white border border-slate-200 rounded-xl p-5">
+                    <h3 className="text-sm font-medium text-slate-500 mb-4">Email Funnel</h3>
                     <div className="space-y-3">
                       {[
                         { label: 'Sent', value: analyticsData.funnel.sent, color: 'bg-indigo-500' },
@@ -1231,12 +1231,12 @@ export default function SalesLeadsPage() {
                         const pct = Math.round((value / maxVal) * 100);
                         return (
                           <div key={label} className="flex items-center gap-3">
-                            <span className="text-xs text-gray-400 w-32 shrink-0">{label}</span>
-                            <div className="flex-1 bg-gray-800 rounded-full h-4 overflow-hidden">
+                            <span className="text-xs text-slate-500 w-32 shrink-0">{label}</span>
+                            <div className="flex-1 bg-slate-200 rounded-full h-4 overflow-hidden">
                               <div className={`${color} h-full rounded-full transition-all`} style={{ width: `${Math.max(pct, 1)}%` }} />
                             </div>
-                            <span className="text-xs text-gray-300 w-12 text-right font-mono">{value}</span>
-                            <span className="text-xs text-gray-600 w-10 text-right">{pct}%</span>
+                            <span className="text-xs text-slate-600 w-12 text-right font-mono">{value}</span>
+                            <span className="text-xs text-slate-500 w-10 text-right">{pct}%</span>
                           </div>
                         );
                       })}
@@ -1245,21 +1245,21 @@ export default function SalesLeadsPage() {
                 )}
 
                 {/* Per-template performance */}
-                <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
-                  <h3 className="text-sm font-medium text-gray-400 mb-4">Performance by Email Template</h3>
+                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                  <h3 className="text-sm font-medium text-slate-500 mb-4">Performance by Email Template</h3>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-gray-700/50">
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Template</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Day</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Sent</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Opened</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Open %</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Clicked</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Replied</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Reply %</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Bounced</th>
+                        <tr className="border-b border-slate-200">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-slate-400 uppercase">Template</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">Day</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">Sent</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">Opened</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">Open %</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">Clicked</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">Replied</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">Reply %</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">Bounced</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1267,27 +1267,27 @@ export default function SalesLeadsPage() {
                           const Icon = TEMPLATE_ICONS[t.template_id] || FileText;
                           const gradient = TEMPLATE_COLORS[t.template_id] || 'from-gray-500 to-gray-600';
                           return (
-                            <tr key={t.template_id} className="border-b border-gray-800/50 hover:bg-[#12122a]">
+                            <tr key={t.template_id} className="border-b border-slate-200 hover:bg-slate-50">
                               <td className="px-3 py-3">
                                 <div className="flex items-center gap-2">
                                   <div className={`w-7 h-7 bg-gradient-to-br ${gradient} rounded-md flex items-center justify-center`}>
-                                    <Icon className="w-3.5 h-3.5 text-white" />
+                                    <Icon className="w-3.5 h-3.5 text-slate-900" />
                                   </div>
                                   <span className="text-sm text-slate-900 font-medium">{t.name}</span>
                                 </div>
                               </td>
-                              <td className="px-3 py-3 text-right text-xs text-gray-500 font-mono">Day {t.sequence_day}</td>
+                              <td className="px-3 py-3 text-right text-xs text-slate-400 font-mono">Day {t.sequence_day}</td>
                               <td className="px-3 py-3 text-right text-sm text-indigo-600 font-medium">{t.sent}</td>
                               <td className="px-3 py-3 text-right text-sm text-purple-600">{t.opened}</td>
                               <td className="px-3 py-3 text-right text-sm">
-                                <span className={t.open_rate >= 40 ? 'text-emerald-400' : t.open_rate >= 20 ? 'text-amber-600' : 'text-gray-500'}>
+                                <span className={t.open_rate >= 40 ? 'text-emerald-400' : t.open_rate >= 20 ? 'text-amber-600' : 'text-slate-400'}>
                                   {t.open_rate}%
                                 </span>
                               </td>
                               <td className="px-3 py-3 text-right text-sm text-cyan-600">{t.clicked}</td>
                               <td className="px-3 py-3 text-right text-sm text-emerald-400">{t.replied}</td>
                               <td className="px-3 py-3 text-right text-sm">
-                                <span className={t.reply_rate >= 5 ? 'text-emerald-400' : t.reply_rate >= 2 ? 'text-amber-600' : 'text-gray-500'}>
+                                <span className={t.reply_rate >= 5 ? 'text-emerald-400' : t.reply_rate >= 2 ? 'text-amber-600' : 'text-slate-400'}>
                                   {t.reply_rate}%
                                 </span>
                               </td>
@@ -1302,10 +1302,10 @@ export default function SalesLeadsPage() {
 
                 {/* No data state */}
                 {analyticsData.totals?.total_sent === 0 && (
-                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
-                    <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                  <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
+                    <BarChart3 className="w-12 h-12 text-slate-500 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-slate-900 mb-2">No campaign data yet</h3>
-                    <p className="text-sm text-gray-500 max-w-md mx-auto">
+                    <p className="text-sm text-slate-400 max-w-md mx-auto">
                       Launch your first email sequence or send a campaign to start tracking performance.
                       Analytics will show open rates, click rates, and reply rates for each template.
                     </p>
@@ -1313,8 +1313,8 @@ export default function SalesLeadsPage() {
                 )}
               </>
             ) : (
-              <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
-                <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
+                <BarChart3 className="w-12 h-12 text-slate-500 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-slate-900 mb-2">Loading analytics...</h3>
               </div>
             )}
@@ -1344,31 +1344,31 @@ export default function SalesLeadsPage() {
               <>
                 {/* Overview cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
-                    <p className="text-xs text-gray-500">In Sequence</p>
+                  <div className="bg-white border border-slate-200 rounded-xl p-5">
+                    <p className="text-xs text-slate-400">In Sequence</p>
                     <p className="text-3xl font-bold text-slate-900 mt-1">{sequenceStatus.total_in_sequence}</p>
                   </div>
-                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
-                    <p className="text-xs text-gray-500">Completed</p>
+                  <div className="bg-white border border-slate-200 rounded-xl p-5">
+                    <p className="text-xs text-slate-400">Completed</p>
                     <p className="text-3xl font-bold text-emerald-400 mt-1">{sequenceStatus.completed_sequences}</p>
                   </div>
-                  <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
-                    <p className="text-xs text-gray-500">Ready to Send</p>
+                  <div className="bg-white border border-slate-200 rounded-xl p-5">
+                    <p className="text-xs text-slate-400">Ready to Send</p>
                     <p className="text-3xl font-bold text-amber-600 mt-1">{sequenceStatus.pending_send_now}</p>
                     {sequenceStatus.pending_send_now > 0 && (
                       <p className="text-xs text-amber-600/70 mt-1">Click "Process Due Emails" to send</p>
                     )}
                   </div>
                   <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-xl p-5">
-                    <p className="text-xs text-indigo-300">5-Email Sequence</p>
-                    <p className="text-sm text-gray-400 mt-1">Day 1, 3, 7, 14, 28</p>
-                    <p className="text-xs text-gray-500 mt-1">Auto-scheduled after launch</p>
+                    <p className="text-xs text-indigo-600">5-Email Sequence</p>
+                    <p className="text-sm text-slate-500 mt-1">Day 1, 3, 7, 14, 28</p>
+                    <p className="text-xs text-slate-400 mt-1">Auto-scheduled after launch</p>
                   </div>
                 </div>
 
                 {/* Step breakdown */}
-                <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5">
-                  <h3 className="text-sm font-medium text-gray-400 mb-4">Leads at Each Sequence Step</h3>
+                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                  <h3 className="text-sm font-medium text-slate-500 mb-4">Leads at Each Sequence Step</h3>
                   <div className="grid grid-cols-5 gap-3">
                     {[
                       { id: 'warm_open', label: 'Warm Open', day: 1 },
@@ -1383,14 +1383,14 @@ export default function SalesLeadsPage() {
                       return (
                         <div key={id} className="text-center">
                           <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center mx-auto mb-2`}>
-                            <Icon className="w-5 h-5 text-white" />
+                            <Icon className="w-5 h-5 text-slate-900" />
                           </div>
                           <p className="text-xl font-bold text-slate-900">{count}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{label}</p>
-                          <p className="text-[10px] text-gray-600 font-mono">Day {day}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">{label}</p>
+                          <p className="text-[10px] text-slate-500 font-mono">Day {day}</p>
                           {i < 4 && (
                             <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2">
-                              <ChevronRight className="w-4 h-4 text-gray-700" />
+                              <ChevronRight className="w-4 h-4 text-slate-600" />
                             </div>
                           )}
                         </div>
@@ -1414,7 +1414,7 @@ export default function SalesLeadsPage() {
                             {sequenceResult.message || `Processed: ${sequenceResult.sent || 0} sent, ${sequenceResult.skipped || 0} skipped`}
                           </p>
                           {sequenceResult.sent !== undefined && (
-                            <p className="text-xs text-gray-500 mt-0.5">
+                            <p className="text-xs text-slate-400 mt-0.5">
                               {sequenceResult.sent} sent, {sequenceResult.failed || sequenceResult.skipped || 0} skipped
                               {sequenceResult.sequences_completed ? `, ${sequenceResult.sequences_completed} sequences completed` : ''}
                             </p>
@@ -1426,10 +1426,10 @@ export default function SalesLeadsPage() {
                 )}
               </>
             ) : (
-              <div className="bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-12 text-center">
-                <Activity className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
+                <Activity className="w-12 h-12 text-slate-500 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-slate-900 mb-2">No active sequences</h3>
-                <p className="text-sm text-gray-500 mb-4">Launch a 5-email sequence to start automating your outreach.</p>
+                <p className="text-sm text-slate-400 mb-4">Launch a 5-email sequence to start automating your outreach.</p>
                 <button
                   onClick={() => { setShowSequenceLauncher(true); setSequenceResult(null); }}
                   className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-500 hover:to-purple-500 text-sm font-semibold mx-auto"
@@ -1446,26 +1446,26 @@ export default function SalesLeadsPage() {
         {showSequenceLauncher && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowSequenceLauncher(false)} />
-            <div className="relative w-full max-w-lg bg-[#0d0d1f] border border-gray-700/50 rounded-2xl overflow-hidden shadow-lg shadow-black/50">
-              <div className="border-b border-gray-800 px-6 py-5 flex items-center justify-between">
+            <div className="relative w-full max-w-lg bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-lg shadow-slate-200/50">
+              <div className="border-b border-slate-200 px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <Rocket className="w-5 h-5 text-white" />
+                    <Rocket className="w-5 h-5 text-slate-900" />
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-slate-900">Launch Full Sequence</h2>
-                    <p className="text-xs text-gray-500">5 emails over 28 days, fully automated</p>
+                    <p className="text-xs text-slate-400">5 emails over 28 days, fully automated</p>
                   </div>
                 </div>
-                <button onClick={() => setShowSequenceLauncher(false)} className="text-gray-500 hover:text-slate-900">
+                <button onClick={() => setShowSequenceLauncher(false)} className="text-slate-400 hover:text-slate-900">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="p-6 space-y-4">
                 {/* Timeline preview */}
-                <div className="bg-[#0a0a18] rounded-xl p-4 border border-gray-800">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Sequence Timeline</p>
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-3">Sequence Timeline</p>
                   <div className="space-y-2">
                     {[
                       { day: 1, name: 'The Warm Open', desc: 'Personal intro, no pitch' },
@@ -1477,28 +1477,28 @@ export default function SalesLeadsPage() {
                       <div key={day} className="flex items-center gap-3">
                         <span className="text-[10px] font-mono text-indigo-600 bg-indigo-500/10 rounded px-2 py-0.5 w-14 text-center">Day {day}</span>
                         <span className="text-sm text-slate-900 font-medium">{name}</span>
-                        <span className="text-xs text-gray-600 ml-auto">{desc}</span>
+                        <span className="text-xs text-slate-500 ml-auto">{desc}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Campaign Name</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Campaign Name</label>
                   <input
                     value={sequenceFilters.campaign_name}
                     onChange={(e) => setSequenceFilters({ ...sequenceFilters, campaign_name: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">State</label>
+                    <label className="block text-xs text-slate-500 mb-1">State</label>
                     <select
                       value={sequenceFilters.state}
                       onChange={(e) => setSequenceFilters({ ...sequenceFilters, state: e.target.value })}
-                      className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm"
                     >
                       <option value="">All States</option>
                       <option value="NE">Nebraska</option>
@@ -1506,11 +1506,11 @@ export default function SalesLeadsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Priority</label>
+                    <label className="block text-xs text-slate-500 mb-1">Priority</label>
                     <select
                       value={sequenceFilters.priority}
                       onChange={(e) => setSequenceFilters({ ...sequenceFilters, priority: e.target.value })}
-                      className="w-full px-3 py-2 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm"
                     >
                       <option value="">All</option>
                       <option value="high">High</option>
@@ -1525,9 +1525,9 @@ export default function SalesLeadsPage() {
                     type="checkbox"
                     checked={sequenceFilters.exclude_already_emailed}
                     onChange={(e) => setSequenceFilters({ ...sequenceFilters, exclude_already_emailed: e.target.checked })}
-                    className="w-4 h-4 rounded border-gray-600 text-indigo-500"
+                    className="w-4 h-4 rounded border-slate-300 text-indigo-500"
                   />
-                  <span className="text-sm text-gray-300">Skip leads already in a sequence</span>
+                  <span className="text-sm text-slate-600">Skip leads already in a sequence</span>
                 </label>
 
                 {sequenceResult && (
@@ -1537,10 +1537,10 @@ export default function SalesLeadsPage() {
                 )}
               </div>
 
-              <div className="border-t border-gray-800 px-6 py-4 flex justify-between">
+              <div className="border-t border-slate-200 px-6 py-4 flex justify-between">
                 <button
                   onClick={() => setShowSequenceLauncher(false)}
-                  className="px-4 py-2.5 border border-gray-700 rounded-lg text-gray-400 hover:text-slate-900 text-sm"
+                  className="px-4 py-2.5 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-900 text-sm"
                 >
                   Cancel
                 </button>
@@ -1561,40 +1561,40 @@ export default function SalesLeadsPage() {
         {showCampaign && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCampaign(false)} />
-            <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#0d0d1f] border border-gray-700/50 rounded-2xl overflow-hidden flex flex-col shadow-lg shadow-black/50">
+            <div className="relative w-full max-w-3xl max-h-[90vh] bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden flex flex-col shadow-lg shadow-slate-200/50">
               {/* Modal Header with Palm branding */}
-              <div className="border-b border-gray-800 px-6 py-5 flex items-center justify-between">
+              <div className="border-b border-slate-200 px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <Rocket className="w-5 h-5 text-white" />
+                    <Rocket className="w-5 h-5 text-slate-900" />
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Email Campaign</h2>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-400">
                       {['Choose Email', 'Configure', 'Preview & Send', 'Results'][campaignStep]}
-                      <span className="text-gray-700 mx-1.5">/</span>
+                      <span className="text-slate-600 mx-1.5">/</span>
                       <span className="text-indigo-600">PalmCare AI</span>
                     </p>
                   </div>
                 </div>
-                <button onClick={() => setShowCampaign(false)} className="text-gray-500 hover:text-slate-900 transition-colors">
+                <button onClick={() => setShowCampaign(false)} className="text-slate-400 hover:text-slate-900 transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Step indicator */}
-              <div className="px-6 py-3 border-b border-gray-800/50 flex gap-1">
+              <div className="px-6 py-3 border-b border-slate-200 flex gap-1">
                 {['Template', 'Filters', 'Preview', 'Done'].map((label, i) => (
                   <div key={label} className="flex-1 flex items-center gap-2">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                       i < campaignStep ? 'bg-indigo-500 text-white' :
                       i === campaignStep ? 'bg-white text-[#0d0d1f]' :
-                      'bg-gray-800 text-gray-600'
+                      'bg-slate-200 text-slate-500'
                     }`}>
                       {i < campaignStep ? <Check className="w-3 h-3" /> : i + 1}
                     </div>
-                    <span className={`text-xs font-medium ${i <= campaignStep ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span>
-                    {i < 3 && <div className={`flex-1 h-px ${i < campaignStep ? 'bg-indigo-500/50' : 'bg-gray-800'}`} />}
+                    <span className={`text-xs font-medium ${i <= campaignStep ? 'text-slate-600' : 'text-slate-500'}`}>{label}</span>
+                    {i < 3 && <div className={`flex-1 h-px ${i < campaignStep ? 'bg-indigo-500/50' : 'bg-slate-200'}`} />}
                   </div>
                 ))}
               </div>
@@ -1605,8 +1605,8 @@ export default function SalesLeadsPage() {
                 {campaignStep === 0 && (
                   <div className="space-y-5">
                     <div>
-                      <p className="text-sm text-gray-400">Select an email from the 5-email outreach sequence:</p>
-                      <p className="text-xs text-gray-600 mt-1">Based on research from Apple, Nike, Tesla, and 7 other world-class brands.</p>
+                      <p className="text-sm text-slate-500">Select an email from the 5-email outreach sequence:</p>
+                      <p className="text-xs text-slate-500 mt-1">Based on research from Apple, Nike, Tesla, and 7 other world-class brands.</p>
                     </div>
                     <div className="grid gap-3">
                       {templates.map((tmpl) => {
@@ -1620,16 +1620,16 @@ export default function SalesLeadsPage() {
                             className={`w-full text-left p-4 rounded-xl border transition-all ${
                               isSelected
                                 ? 'border-indigo-500 bg-indigo-500/5 ring-1 ring-indigo-500/30'
-                                : 'border-gray-800 bg-[#0a0a18] hover:border-gray-700 hover:bg-[#0e0e22]'
+                                : 'border-slate-200 bg-slate-50 hover:border-slate-200 hover:bg-slate-100'
                             }`}
                           >
                             <div className="flex items-start gap-4">
                               <div className="flex flex-col items-center gap-1 shrink-0">
                                 <div className={`w-10 h-10 bg-gradient-to-br ${gradient} rounded-lg flex items-center justify-center`}>
-                                  <Icon className="w-5 h-5 text-white" />
+                                  <Icon className="w-5 h-5 text-slate-900" />
                                 </div>
                                 {tmpl.sequence_day && (
-                                  <span className="text-[10px] font-mono text-gray-600">Day {tmpl.sequence_day}</span>
+                                  <span className="text-[10px] font-mono text-slate-500">Day {tmpl.sequence_day}</span>
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
@@ -1637,9 +1637,9 @@ export default function SalesLeadsPage() {
                                   <h3 className="text-slate-900 font-medium text-sm">{tmpl.name}</h3>
                                   {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600" />}
                                 </div>
-                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{tmpl.description}</p>
+                                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{tmpl.description}</p>
                                 <div className="flex items-center gap-2 mt-2">
-                                  <span className="text-[11px] text-gray-600 bg-gray-800/50 rounded px-2 py-0.5 font-mono truncate">
+                                  <span className="text-[11px] text-slate-500 bg-slate-200 rounded px-2 py-0.5 font-mono truncate">
                                     {tmpl.subject}
                                   </span>
                                 </div>
@@ -1656,21 +1656,21 @@ export default function SalesLeadsPage() {
                 {campaignStep === 1 && (
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1.5">Campaign Name</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1.5">Campaign Name</label>
                       <input
                         value={campaignName}
                         onChange={(e) => setCampaignName(e.target.value)}
                         placeholder="e.g., feb-2026-ai-advantage"
-                        className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1.5">State</label>
+                        <label className="block text-sm font-medium text-slate-600 mb-1.5">State</label>
                         <select
                           value={campaignFilters.state}
                           onChange={(e) => setCampaignFilters({ ...campaignFilters, state: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                         >
                           <option value="">All States</option>
                           <option value="NE">Nebraska</option>
@@ -1678,11 +1678,11 @@ export default function SalesLeadsPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1.5">Priority</label>
+                        <label className="block text-sm font-medium text-slate-600 mb-1.5">Priority</label>
                         <select
                           value={campaignFilters.priority}
                           onChange={(e) => setCampaignFilters({ ...campaignFilters, priority: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                         >
                           <option value="">All Priorities</option>
                           <option value="high">High (newer agencies)</option>
@@ -1691,11 +1691,11 @@ export default function SalesLeadsPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1.5">Max Age (years)</label>
+                        <label className="block text-sm font-medium text-slate-600 mb-1.5">Max Age (years)</label>
                         <select
                           value={campaignFilters.max_years}
                           onChange={(e) => setCampaignFilters({ ...campaignFilters, max_years: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-[#0a0a1a] border border-gray-700 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm focus:border-indigo-500 focus:outline-none"
                         >
                           <option value="">Any</option>
                           <option value="5">Under 5 years</option>
@@ -1709,9 +1709,9 @@ export default function SalesLeadsPage() {
                             type="checkbox"
                             checked={campaignFilters.exclude_already_emailed}
                             onChange={(e) => setCampaignFilters({ ...campaignFilters, exclude_already_emailed: e.target.checked })}
-                            className="w-4 h-4 rounded border-gray-600 text-indigo-500 focus:ring-indigo-500 bg-[#0a0a1a]"
+                            className="w-4 h-4 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500 bg-slate-50"
                           />
-                          <span className="text-sm text-gray-300">Skip already emailed</span>
+                          <span className="text-sm text-slate-600">Skip already emailed</span>
                         </label>
                       </div>
                     </div>
@@ -1723,24 +1723,24 @@ export default function SalesLeadsPage() {
                   <div className="space-y-5">
                     {/* Recipient count */}
                     {campaignPreview && (
-                      <div className="bg-[#0a0a18] border border-gray-800 rounded-xl p-4">
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center">
                             <Users className="w-5 h-5 text-indigo-600" />
                           </div>
                           <div>
                             <p className="text-2xl font-bold text-slate-900 tracking-tight">{campaignPreview.total_recipients}</p>
-                            <p className="text-xs text-gray-500">agencies will receive this email</p>
+                            <p className="text-xs text-slate-400">agencies will receive this email</p>
                           </div>
                         </div>
                         {campaignPreview.sample.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-gray-800">
-                            <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Sample recipients</p>
+                          <div className="mt-3 pt-3 border-t border-slate-200">
+                            <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Sample recipients</p>
                             <div className="space-y-1.5">
                               {campaignPreview.sample.map((s, i) => (
                                 <div key={i} className="flex items-center justify-between">
-                                  <span className="text-xs text-gray-300 font-medium">{s.provider_name}</span>
-                                  <span className="text-[11px] text-gray-600 font-mono">{s.contact_email}</span>
+                                  <span className="text-xs text-slate-600 font-medium">{s.provider_name}</span>
+                                  <span className="text-[11px] text-slate-500 font-mono">{s.contact_email}</span>
                                 </div>
                               ))}
                             </div>
@@ -1751,7 +1751,7 @@ export default function SalesLeadsPage() {
 
                     {/* Email preview — realistic email client mockup */}
                     <div>
-                      <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Email Preview</p>
+                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Email Preview</p>
                       <div className="bg-white rounded-xl overflow-hidden border border-gray-300 shadow-lg">
                         {/* Email client toolbar */}
                         <div className="bg-[#f8f9fa] px-4 py-3 border-b border-gray-200">
@@ -1762,11 +1762,11 @@ export default function SalesLeadsPage() {
                           </div>
                           <div className="space-y-1">
                             <div className="flex items-baseline gap-2">
-                              <span className="text-[11px] text-gray-400 w-12 shrink-0">From</span>
-                              <span className="text-xs text-gray-700">Muse Ibrahim &lt;sales@palmtai.com&gt;</span>
+                              <span className="text-[11px] text-slate-500 w-12 shrink-0">From</span>
+                              <span className="text-xs text-slate-600">Muse Ibrahim &lt;sales@palmtai.com&gt;</span>
                             </div>
                             <div className="flex items-baseline gap-2">
-                              <span className="text-[11px] text-gray-400 w-12 shrink-0">Subject</span>
+                              <span className="text-[11px] text-slate-500 w-12 shrink-0">Subject</span>
                               <span className="text-xs text-gray-900 font-medium">{previewHtml.subject}</span>
                             </div>
                           </div>
@@ -1785,35 +1785,35 @@ export default function SalesLeadsPage() {
                 {campaignStep === 3 && campaignResult && (
                   <div className="space-y-5">
                     {campaignResult.error ? (
-                      <div className="bg-[#0a0a18] border border-red-500/20 rounded-xl p-8 text-center">
+                      <div className="bg-slate-50 border border-red-500/20 rounded-xl p-8 text-center">
                         <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
                           <AlertCircle className="w-7 h-7 text-red-600" />
                         </div>
                         <h3 className="text-lg font-semibold text-slate-900 mb-1">Campaign Failed</h3>
-                        <p className="text-sm text-gray-500">{campaignResult.error}</p>
+                        <p className="text-sm text-slate-400">{campaignResult.error}</p>
                       </div>
                     ) : (
-                      <div className="bg-[#0a0a18] border border-gray-800 rounded-xl p-8 text-center">
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center">
                         <div className="w-14 h-14 rounded-full bg-indigo-500/10 flex items-center justify-center mx-auto mb-4">
                           <Check className="w-7 h-7 text-indigo-600" />
                         </div>
                         <h3 className="text-lg font-semibold text-slate-900 mb-1">Campaign Sent</h3>
-                        <p className="text-sm text-gray-500 mb-6">{campaignResult.message}</p>
+                        <p className="text-sm text-slate-400 mb-6">{campaignResult.message}</p>
                         <div className="flex justify-center gap-10">
                           <div>
                             <p className="text-4xl font-bold text-slate-900 tracking-tight">{campaignResult.sent}</p>
-                            <p className="text-xs text-gray-600 mt-1 uppercase tracking-wider">Delivered</p>
+                            <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Delivered</p>
                           </div>
                           {(campaignResult.failed ?? 0) > 0 && (
                             <div>
                               <p className="text-4xl font-bold text-red-600 tracking-tight">{campaignResult.failed}</p>
-                              <p className="text-xs text-gray-600 mt-1 uppercase tracking-wider">Failed</p>
+                              <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">Failed</p>
                             </div>
                           )}
                         </div>
                         {(campaignResult.errors?.length ?? 0) > 0 && (
-                          <div className="mt-6 text-left bg-[#060612] rounded-lg p-4 border border-gray-800">
-                            <p className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">Errors</p>
+                          <div className="mt-6 text-left bg-slate-100 rounded-lg p-4 border border-slate-200">
+                            <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Errors</p>
                             {campaignResult.errors!.map((err, i) => (
                               <p key={i} className="text-xs text-red-600/80 py-0.5">{err.lead}: {err.error}</p>
                             ))}
@@ -1826,13 +1826,13 @@ export default function SalesLeadsPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="border-t border-gray-800 px-6 py-4 flex items-center justify-between bg-[#09091a]">
+              <div className="border-t border-slate-200 px-6 py-4 flex items-center justify-between bg-slate-50">
                 <button
                   onClick={() => {
                     if (campaignStep === 0) setShowCampaign(false);
                     else setCampaignStep(campaignStep - 1);
                   }}
-                  className="px-4 py-2.5 bg-transparent border border-gray-700 rounded-lg text-gray-400 hover:text-slate-900 hover:border-gray-600 text-sm transition-colors"
+                  className="px-4 py-2.5 bg-transparent border border-slate-200 rounded-lg text-slate-500 hover:text-slate-900 hover:border-slate-300 text-sm transition-colors"
                 >
                   {campaignStep === 0 ? 'Cancel' : 'Back'}
                 </button>

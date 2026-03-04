@@ -268,7 +268,7 @@ export default function AdminApprovalsPage() {
   // Only show loading during initial hydration
   if (!hydrated || authLoading) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -283,7 +283,7 @@ export default function AdminApprovalsPage() {
   }
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
@@ -292,7 +292,7 @@ export default function AdminApprovalsPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Platform Admin Access</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               This dashboard shows business registration data only. Client/patient data is not accessible 
               from this view in compliance with HIPAA regulations. Each business manages their own client data.
             </p>
@@ -370,7 +370,7 @@ export default function AdminApprovalsPage() {
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && fetchBusinesses()}
               placeholder="Search businesses..."
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500"
             />
           </div>
         </div>
@@ -379,7 +379,7 @@ export default function AdminApprovalsPage() {
           {/* Business List */}
           <div className="col-span-2 bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-200">
-              <h2 className="font-medium text-white">Applications ({businesses.length})</h2>
+              <h2 className="font-medium text-slate-900">Applications ({businesses.length})</h2>
             </div>
             
             {loading ? (
@@ -403,7 +403,7 @@ export default function AdminApprovalsPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-white">{business.name}</p>
+                        <p className="font-medium text-slate-900">{business.name}</p>
                         <p className="text-sm text-slate-500">{business.email}</p>
                       </div>
                       <div className="flex items-center gap-3">
@@ -434,7 +434,7 @@ export default function AdminApprovalsPage() {
               <div className="h-full flex flex-col">
                 <div className="p-4 border-b border-slate-200">
                   <div className="flex items-center justify-between">
-                    <h2 className="font-medium text-white">{selectedBusiness.name}</h2>
+                    <h2 className="font-medium text-slate-900">{selectedBusiness.name}</h2>
                     <span className={`px-2 py-1 rounded-lg text-xs font-medium ${STATUS_COLORS[selectedBusiness.verification_status]}`}>
                       {STATUS_LABELS[selectedBusiness.verification_status]}
                     </span>
@@ -451,26 +451,26 @@ export default function AdminApprovalsPage() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-slate-500">Type</span>
-                        <span className="text-white">{selectedBusiness.entity_type}</span>
+                        <span className="text-slate-900">{selectedBusiness.entity_type}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-500">State</span>
-                        <span className="text-white">{selectedBusiness.state_of_incorporation}</span>
+                        <span className="text-slate-900">{selectedBusiness.state_of_incorporation}</span>
                       </div>
                       {selectedBusiness.registration_number && (
                         <div className="flex justify-between">
                           <span className="text-slate-500">Reg #</span>
-                          <span className="text-white">{selectedBusiness.registration_number}</span>
+                          <span className="text-slate-900">{selectedBusiness.registration_number}</span>
                         </div>
                       )}
                       <div className="flex justify-between">
                         <span className="text-slate-500">Email</span>
-                        <span className="text-white">{selectedBusiness.email}</span>
+                        <span className="text-slate-900">{selectedBusiness.email}</span>
                       </div>
                       {selectedBusiness.phone && (
                         <div className="flex justify-between">
                           <span className="text-slate-500">Phone</span>
-                          <span className="text-white">{selectedBusiness.phone}</span>
+                          <span className="text-slate-900">{selectedBusiness.phone}</span>
                         </div>
                       )}
                     </div>
@@ -591,12 +591,12 @@ export default function AdminApprovalsPage() {
               value={rejectionReason}
               onChange={e => setRejectionReason(e.target.value)}
               placeholder="Enter rejection reason..."
-              className="w-full h-32 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-red-500 resize-none"
+              className="w-full h-32 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 resize-none"
             />
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => { setShowRejectModal(false); setRejectionReason(''); }}
-                className="flex-1 px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
+                className="flex-1 px-4 py-2 bg-slate-50 text-slate-900 rounded-lg hover:bg-slate-100 transition"
               >
                 Cancel
               </button>

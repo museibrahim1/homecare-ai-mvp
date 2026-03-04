@@ -101,7 +101,7 @@ export default function CompliancePage() {
 
   if (!isAuthorized) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -111,7 +111,7 @@ export default function CompliancePage() {
   }
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
@@ -120,7 +120,7 @@ export default function CompliancePage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Compliance Monitoring</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               Track document expirations and compliance status across all businesses.
             </p>
           </div>

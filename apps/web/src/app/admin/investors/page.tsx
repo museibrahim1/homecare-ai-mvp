@@ -60,7 +60,7 @@ const STATUS_OPTIONS = [
 ] as const;
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
-  new: { label: 'New', color: 'bg-slate-500/20 text-slate-300', icon: Circle },
+  new: { label: 'New', color: 'bg-slate-500/20 text-slate-600', icon: Circle },
   researched: { label: 'Researched', color: 'bg-blue-500/20 text-blue-400', icon: Eye },
   contacted: { label: 'Contacted', color: 'bg-indigo-500/20 text-indigo-400', icon: Mail },
   email_sent: { label: 'Email Sent', color: 'bg-violet-500/20 text-violet-400', icon: Send },
@@ -413,31 +413,31 @@ export default function InvestorsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#0a0a1a] landing-dark flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] landing-dark flex">
+    <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       <main className="flex-1 ml-64 p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <TrendingUp className="w-6 h-6 text-primary-500" />
               Investor CRM
             </h1>
-            <p className="text-sm text-dark-400 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               Manage investor pipeline — track outreach, meetings, and commitments
             </p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={loadData}
-              className="px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-dark-300 hover:text-white flex items-center gap-2 text-sm"
+              className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 flex items-center gap-2 text-sm"
             >
               <RefreshCw className="w-4 h-4" />
               Refresh
@@ -445,7 +445,7 @@ export default function InvestorsPage() {
             <button
               onClick={seedData}
               disabled={seeding}
-              className="px-4 py-2 bg-dark-800 border border-dark-700 rounded-lg text-dark-300 hover:text-white flex items-center gap-2 text-sm disabled:opacity-50"
+              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 flex items-center gap-2 text-sm disabled:opacity-50"
             >
               {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               Seed Data
@@ -464,17 +464,17 @@ export default function InvestorsPage() {
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
             {[
-              { label: 'Total', value: stats.total, color: 'text-white' },
+              { label: 'Total', value: stats.total, color: 'text-slate-900' },
               { label: 'Has Email', value: stats.has_email, color: 'text-emerald-400' },
               { label: 'VC Funds', value: stats.vc_funds, color: 'text-violet-400' },
               { label: 'Angels', value: stats.angels, color: 'text-amber-400' },
-              { label: 'New', value: stats.new, color: 'text-slate-300' },
+              { label: 'New', value: stats.new, color: 'text-slate-600' },
               { label: 'Email Sent', value: stats.email_sent, color: 'text-indigo-400' },
               { label: 'Responded', value: stats.responded, color: 'text-cyan-400' },
               { label: 'Interested', value: stats.interested, color: 'text-emerald-400' },
             ].map(({ label, value, color }) => (
-              <div key={label} className="bg-dark-800 border border-dark-700 rounded-lg p-3">
-                <p className="text-xs text-dark-400">{label}</p>
+              <div key={label} className="bg-white border border-slate-200 rounded-lg p-3">
+                <p className="text-xs text-slate-500">{label}</p>
                 <p className={`text-xl font-bold ${color}`}>{value}</p>
               </div>
             ))}
@@ -482,22 +482,22 @@ export default function InvestorsPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-dark-800 border border-dark-700 rounded-lg p-4 mb-4">
+        <div className="bg-white border border-slate-200 rounded-lg p-4 mb-4">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex-1 min-w-[200px] relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-dark-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search investors..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
               />
             </div>
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm focus:border-primary-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
             >
               <option value="">All Status</option>
               {STATUS_OPTIONS.map(s => (
@@ -507,7 +507,7 @@ export default function InvestorsPage() {
             <select
               value={filters.priority}
               onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              className="px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm focus:border-primary-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
             >
               <option value="">All Priority</option>
               <option value="high">High</option>
@@ -517,7 +517,7 @@ export default function InvestorsPage() {
             <select
               value={filters.investor_type}
               onChange={(e) => setFilters({ ...filters, investor_type: e.target.value })}
-              className="px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm focus:border-primary-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
             >
               <option value="">All Types</option>
               {TYPE_OPTIONS.map(t => (
@@ -529,12 +529,12 @@ export default function InvestorsPage() {
               placeholder="Sector filter..."
               value={filters.sector}
               onChange={(e) => setFilters({ ...filters, sector: e.target.value })}
-              className="px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none w-36"
+              className="px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none w-36"
             />
             <select
               value={filters.has_email}
               onChange={(e) => setFilters({ ...filters, has_email: e.target.value })}
-              className="px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm focus:border-primary-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
             >
               <option value="">All Contacts</option>
               <option value="true">Has Email</option>
@@ -542,7 +542,7 @@ export default function InvestorsPage() {
             </select>
             <button
               onClick={() => setFilters({ search: '', status: '', priority: '', investor_type: '', sector: '', has_email: '' })}
-              className="px-3 py-2 text-dark-400 hover:text-white text-sm"
+              className="px-3 py-2 text-slate-500 hover:text-slate-900 text-sm"
             >
               Clear
             </button>
@@ -558,7 +558,7 @@ export default function InvestorsPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setShowBulkStatus(true)}
-                className="px-3 py-1.5 bg-dark-800 border border-dark-600 rounded-lg text-white text-sm hover:bg-dark-700 flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-sm hover:bg-slate-100 flex items-center gap-1.5"
               >
                 <Tag className="w-3.5 h-3.5" /> Update Status
               </button>
@@ -570,7 +570,7 @@ export default function InvestorsPage() {
               </button>
               <button
                 onClick={() => setSelectedIds(new Set())}
-                className="px-3 py-1.5 text-dark-400 hover:text-white text-sm"
+                className="px-3 py-1.5 text-slate-500 hover:text-slate-900 text-sm"
               >
                 Clear
               </button>
@@ -586,7 +586,7 @@ export default function InvestorsPage() {
         )}
 
         {/* Investors Table */}
-        <div className="bg-dark-800 border border-dark-700 rounded-lg overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
@@ -596,13 +596,13 @@ export default function InvestorsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-dark-700">
+                    <tr className="border-b border-slate-200">
                       <th className="px-4 py-3 text-left">
                         <input
                           type="checkbox"
                           checked={allSelected}
                           onChange={toggleSelectAll}
-                          className="w-4 h-4 rounded border-dark-600 text-primary-500 bg-dark-700"
+                          className="w-4 h-4 rounded border-slate-300 text-primary-500 bg-slate-100"
                         />
                       </th>
                       {[
@@ -620,7 +620,7 @@ export default function InvestorsPage() {
                         <th
                           key={label}
                           onClick={() => key && handleSort(key)}
-                          className={`px-4 py-3 text-left text-xs font-medium text-dark-400 uppercase tracking-wider ${key ? 'cursor-pointer hover:text-white' : ''}`}
+                          className={`px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider ${key ? 'cursor-pointer hover:text-slate-900' : ''}`}
                         >
                           <div className="flex items-center gap-1">
                             {label}
@@ -639,7 +639,7 @@ export default function InvestorsPage() {
                       return (
                         <tr
                           key={inv.id}
-                          className="border-b border-dark-700/50 hover:bg-dark-800/80 cursor-pointer transition-colors"
+                          className="border-b border-slate-200 hover:bg-white/80 cursor-pointer transition-colors"
                           onClick={() => openDetail(inv.id)}
                         >
                           <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -647,13 +647,13 @@ export default function InvestorsPage() {
                               type="checkbox"
                               checked={selectedIds.has(inv.id)}
                               onChange={() => toggleSelect(inv.id)}
-                              className="w-4 h-4 rounded border-dark-600 text-primary-500 bg-dark-700"
+                              className="w-4 h-4 rounded border-slate-300 text-primary-500 bg-slate-100"
                             />
                           </td>
                           <td className="px-4 py-3">
-                            <p className="text-sm font-medium text-white">{inv.fund_name}</p>
+                            <p className="text-sm font-medium text-slate-900">{inv.fund_name}</p>
                             {inv.contact_name && (
-                              <p className="text-xs text-dark-400 mt-0.5">{inv.contact_name}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">{inv.contact_name}</p>
                             )}
                           </td>
                           <td className="px-4 py-3">
@@ -662,7 +662,7 @@ export default function InvestorsPage() {
                                 {TYPE_LABELS[inv.investor_type] || inv.investor_type}
                               </span>
                             ) : (
-                              <span className="text-dark-400 text-sm">—</span>
+                              <span className="text-slate-500 text-sm">—</span>
                             )}
                           </td>
                           <td className="px-4 py-3">
@@ -673,7 +673,7 @@ export default function InvestorsPage() {
                                 </span>
                               ))}
                               {(inv.focus_sectors || []).length > 3 && (
-                                <span className="text-[10px] text-dark-400">+{inv.focus_sectors.length - 3}</span>
+                                <span className="text-[10px] text-slate-500">+{inv.focus_sectors.length - 3}</span>
                               )}
                             </div>
                           </td>
@@ -685,28 +685,28 @@ export default function InvestorsPage() {
                                 </span>
                               ))}
                               {(inv.focus_stages || []).length > 2 && (
-                                <span className="text-[10px] text-dark-400">+{inv.focus_stages.length - 2}</span>
+                                <span className="text-[10px] text-slate-500">+{inv.focus_stages.length - 2}</span>
                               )}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-dark-300">
+                          <td className="px-4 py-3 text-sm text-slate-600">
                             {inv.check_size_display || '—'}
                           </td>
                           <td className="px-4 py-3">
                             {inv.location ? (
-                              <div className="flex items-center gap-1 text-sm text-dark-300">
-                                <MapPin className="w-3 h-3 text-dark-400" />
+                              <div className="flex items-center gap-1 text-sm text-slate-600">
+                                <MapPin className="w-3 h-3 text-slate-500" />
                                 {inv.location}
                               </div>
                             ) : (
-                              <span className="text-dark-400 text-sm">—</span>
+                              <span className="text-slate-500 text-sm">—</span>
                             )}
                           </td>
                           <td className="px-4 py-3">
                             {inv.contact_email ? (
                               <span className="text-xs text-emerald-400 font-mono">{inv.contact_email}</span>
                             ) : (
-                              <span className="text-xs text-dark-400 italic">No email</span>
+                              <span className="text-xs text-slate-500 italic">No email</span>
                             )}
                           </td>
                           <td className="px-4 py-3">
@@ -723,7 +723,7 @@ export default function InvestorsPage() {
                           <td className="px-4 py-3">
                             <button
                               onClick={(e) => { e.stopPropagation(); openDetail(inv.id); }}
-                              className="text-primary-400 hover:text-primary-300 text-xs"
+                              className="text-primary-400 hover:text-primary-600 text-xs"
                             >
                               View
                             </button>
@@ -734,9 +734,9 @@ export default function InvestorsPage() {
                     {investors.length === 0 && !loading && (
                       <tr>
                         <td colSpan={11} className="px-4 py-16 text-center">
-                          <Briefcase className="w-10 h-10 text-dark-400 mx-auto mb-3" />
-                          <p className="text-dark-300 font-medium">No investors found</p>
-                          <p className="text-dark-400 text-sm mt-1">Try adjusting your filters or seed some data</p>
+                          <Briefcase className="w-10 h-10 text-slate-500 mx-auto mb-3" />
+                          <p className="text-slate-600 font-medium">No investors found</p>
+                          <p className="text-slate-500 text-sm mt-1">Try adjusting your filters or seed some data</p>
                         </td>
                       </tr>
                     )}
@@ -745,8 +745,8 @@ export default function InvestorsPage() {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between px-4 py-3 border-t border-dark-700">
-                <p className="text-sm text-dark-400">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
+                <p className="text-sm text-slate-500">
                   Showing {investors.length > 0 ? page * pageSize + 1 : 0}–{page * pageSize + investors.length}
                   {stats ? ` of ${stats.total}` : ''}
                 </p>
@@ -754,14 +754,14 @@ export default function InvestorsPage() {
                   <button
                     onClick={() => setPage(Math.max(0, page - 1))}
                     disabled={page === 0}
-                    className="px-3 py-1 bg-dark-700 border border-dark-600 rounded text-dark-300 text-sm disabled:opacity-30"
+                    className="px-3 py-1 bg-slate-100 border border-slate-300 rounded text-slate-600 text-sm disabled:opacity-30"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setPage(page + 1)}
                     disabled={investors.length < pageSize}
-                    className="px-3 py-1 bg-dark-700 border border-dark-600 rounded text-dark-300 text-sm disabled:opacity-30"
+                    className="px-3 py-1 bg-slate-100 border border-slate-300 rounded text-slate-600 text-sm disabled:opacity-30"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -775,18 +775,18 @@ export default function InvestorsPage() {
         {showDetail && detailInvestor && (
           <div className="fixed inset-0 z-50 flex justify-end">
             <div className="absolute inset-0 bg-black/60" onClick={() => setShowDetail(false)} />
-            <div className="relative w-full max-w-xl bg-dark-900 border-l border-dark-700 overflow-y-auto">
-              <div className="sticky top-0 bg-dark-900 border-b border-dark-700 px-6 py-4 flex items-center justify-between z-10">
-                <h2 className="text-lg font-semibold text-white truncate">{detailInvestor.fund_name}</h2>
+            <div className="relative w-full max-w-xl bg-slate-50 border-l border-slate-200 overflow-y-auto">
+              <div className="sticky top-0 bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
+                <h2 className="text-lg font-semibold text-slate-900 truncate">{detailInvestor.fund_name}</h2>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => deleteInvestor(detailInvestor.id)}
-                    className="text-dark-400 hover:text-red-400 p-1"
+                    className="text-slate-500 hover:text-red-400 p-1"
                     title="Delete investor"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => setShowDetail(false)} className="text-dark-400 hover:text-white">
+                  <button onClick={() => setShowDetail(false)} className="text-slate-500 hover:text-slate-900">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -798,7 +798,7 @@ export default function InvestorsPage() {
                   <select
                     value={detailInvestor.status}
                     onChange={(e) => updateInvestor(detailInvestor.id, { status: e.target.value })}
-                    className="px-3 py-1.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm"
+                    className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm"
                   >
                     {STATUS_OPTIONS.map(s => (
                       <option key={s} value={s}>{STATUS_CONFIG[s]?.label || s}</option>
@@ -807,7 +807,7 @@ export default function InvestorsPage() {
                   <select
                     value={detailInvestor.priority}
                     onChange={(e) => updateInvestor(detailInvestor.id, { priority: e.target.value })}
-                    className="px-3 py-1.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm"
+                    className="px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm"
                   >
                     <option value="high">High Priority</option>
                     <option value="medium">Medium Priority</option>
@@ -816,103 +816,103 @@ export default function InvestorsPage() {
                 </div>
 
                 {/* Fund Info */}
-                <div className="bg-dark-800 rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-medium text-dark-400 mb-3">Fund Details</h3>
+                <div className="bg-white rounded-lg p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-slate-500 mb-3">Fund Details</h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <span className="text-dark-400">Type</span>
-                      <p className="text-white">{TYPE_LABELS[detailInvestor.investor_type || ''] || detailInvestor.investor_type || '—'}</p>
+                      <span className="text-slate-500">Type</span>
+                      <p className="text-slate-900">{TYPE_LABELS[detailInvestor.investor_type || ''] || detailInvestor.investor_type || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-dark-400">Check Size</span>
-                      <p className="text-white">{detailInvestor.check_size_display || '—'}</p>
+                      <span className="text-slate-500">Check Size</span>
+                      <p className="text-slate-900">{detailInvestor.check_size_display || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-dark-400">Location</span>
-                      <p className="text-white">{detailInvestor.location || '—'}</p>
+                      <span className="text-slate-500">Location</span>
+                      <p className="text-slate-900">{detailInvestor.location || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-dark-400">Source</span>
-                      <p className="text-white">{detailInvestor.source || '—'}</p>
+                      <span className="text-slate-500">Source</span>
+                      <p className="text-slate-900">{detailInvestor.source || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-dark-400">Website</span>
+                      <span className="text-slate-500">Website</span>
                       {detailInvestor.website ? (
                         <a href={detailInvestor.website} target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline flex items-center gap-1">
                           <Globe className="w-3 h-3" /> Visit
                         </a>
                       ) : (
-                        <p className="text-white">—</p>
+                        <p className="text-slate-900">—</p>
                       )}
                     </div>
                     <div>
-                      <span className="text-dark-400">Campaign</span>
-                      <p className="text-white">{detailInvestor.campaign_tag || '—'}</p>
+                      <span className="text-slate-500">Campaign</span>
+                      <p className="text-slate-900">{detailInvestor.campaign_tag || '—'}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Sectors & Stages */}
-                <div className="bg-dark-800 rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-medium text-dark-400">Focus Areas</h3>
+                <div className="bg-white rounded-lg p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-slate-500">Focus Areas</h3>
                   <div>
-                    <span className="text-dark-400 text-xs">Sectors</span>
+                    <span className="text-slate-500 text-xs">Sectors</span>
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {(detailInvestor.focus_sectors || []).length > 0 ? detailInvestor.focus_sectors.map((s, i) => (
                         <span key={i} className="text-xs px-2 py-0.5 bg-primary-500/10 text-primary-400 rounded border border-primary-500/20">{s}</span>
-                      )) : <span className="text-dark-400 text-xs italic">None specified</span>}
+                      )) : <span className="text-slate-500 text-xs italic">None specified</span>}
                     </div>
                   </div>
                   <div>
-                    <span className="text-dark-400 text-xs">Stages</span>
+                    <span className="text-slate-500 text-xs">Stages</span>
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {(detailInvestor.focus_stages || []).length > 0 ? detailInvestor.focus_stages.map((s, i) => (
                         <span key={i} className="text-xs px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded border border-amber-500/20">{s}</span>
-                      )) : <span className="text-dark-400 text-xs italic">None specified</span>}
+                      )) : <span className="text-slate-500 text-xs italic">None specified</span>}
                     </div>
                   </div>
                 </div>
 
                 {/* Contact Info */}
-                <div className="bg-dark-800 rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-medium text-dark-400">Contact</h3>
+                <div className="bg-white rounded-lg p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-slate-500">Contact</h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <span className="text-dark-400">Name</span>
-                      <p className="text-white flex items-center gap-1"><User className="w-3 h-3 text-dark-400" />{detailInvestor.contact_name || '—'}</p>
+                      <span className="text-slate-500">Name</span>
+                      <p className="text-slate-900 flex items-center gap-1"><User className="w-3 h-3 text-slate-500" />{detailInvestor.contact_name || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-dark-400">Email</span>
-                      <p className="text-white flex items-center gap-1"><Mail className="w-3 h-3 text-dark-400" />{detailInvestor.contact_email || '—'}</p>
+                      <span className="text-slate-500">Email</span>
+                      <p className="text-slate-900 flex items-center gap-1"><Mail className="w-3 h-3 text-slate-500" />{detailInvestor.contact_email || '—'}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Relevance */}
                 {detailInvestor.relevance_reason && (
-                  <div className="bg-dark-800 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-dark-400 mb-2">Relevance</h3>
-                    <p className="text-sm text-dark-300">{detailInvestor.relevance_reason}</p>
+                  <div className="bg-white rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-slate-500 mb-2">Relevance</h3>
+                    <p className="text-sm text-slate-600">{detailInvestor.relevance_reason}</p>
                   </div>
                 )}
 
                 {/* Email Actions */}
-                <div className="bg-dark-800 rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-medium text-dark-400">Email Activity</h3>
+                <div className="bg-white rounded-lg p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-slate-500">Email Activity</h3>
                   <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                    <div className="bg-dark-700 rounded p-2">
+                    <div className="bg-slate-100 rounded p-2">
                       <p className="text-indigo-400 font-bold">{detailInvestor.email_send_count}</p>
-                      <p className="text-dark-400 text-xs">Sent</p>
+                      <p className="text-slate-500 text-xs">Sent</p>
                     </div>
-                    <div className="bg-dark-700 rounded p-2">
+                    <div className="bg-slate-100 rounded p-2">
                       <p className="text-purple-400 font-bold">{detailInvestor.email_open_count}</p>
-                      <p className="text-dark-400 text-xs">Opened</p>
+                      <p className="text-slate-500 text-xs">Opened</p>
                     </div>
-                    <div className="bg-dark-700 rounded p-2">
-                      <p className="text-dark-300 font-bold text-xs">
+                    <div className="bg-slate-100 rounded p-2">
+                      <p className="text-slate-600 font-bold text-xs">
                         {detailInvestor.last_email_sent_at ? new Date(detailInvestor.last_email_sent_at).toLocaleDateString() : '—'}
                       </p>
-                      <p className="text-dark-400 text-xs">Last Sent</p>
+                      <p className="text-slate-500 text-xs">Last Sent</p>
                     </div>
                   </div>
                   <button
@@ -923,7 +923,7 @@ export default function InvestorsPage() {
                   </button>
 
                   {showEmailCompose && (
-                    <div className="bg-dark-700 rounded-lg p-3 space-y-2 border border-dark-600">
+                    <div className="bg-slate-100 rounded-lg p-3 space-y-2 border border-slate-300">
                       {emailTemplates.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 pb-1">
                           {emailTemplates.map((t) => (
@@ -941,20 +941,20 @@ export default function InvestorsPage() {
                         placeholder="To (leave empty to use contact email)"
                         value={emailForm.to_email}
                         onChange={(e) => setEmailForm({ ...emailForm, to_email: e.target.value })}
-                        className="w-full px-3 py-2 bg-dark-800 border border-dark-600 rounded text-white text-sm placeholder-dark-400"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 text-sm placeholder-slate-400"
                       />
                       <input
                         placeholder="Subject"
                         value={emailForm.subject}
                         onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
-                        className="w-full px-3 py-2 bg-dark-800 border border-dark-600 rounded text-white text-sm placeholder-dark-400"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 text-sm placeholder-slate-400"
                       />
                       <textarea
                         placeholder="Email body (HTML) — use {fund_name} and {contact_name} for personalization"
                         value={emailForm.html_body}
                         onChange={(e) => setEmailForm({ ...emailForm, html_body: e.target.value })}
                         rows={5}
-                        className="w-full px-3 py-2 bg-dark-800 border border-dark-600 rounded text-white text-sm placeholder-dark-400 resize-none"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 text-sm placeholder-slate-400 resize-none"
                       />
                       <button
                         onClick={sendIndividualEmail}
@@ -969,16 +969,16 @@ export default function InvestorsPage() {
                 </div>
 
                 {/* Dates */}
-                <div className="bg-dark-800 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-dark-400 mb-2">Timeline</h3>
+                <div className="bg-white rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-slate-500 mb-2">Timeline</h3>
                   <div className="text-sm space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-dark-400">Created</span>
-                      <span className="text-dark-300">{detailInvestor.created_at ? new Date(detailInvestor.created_at).toLocaleDateString() : '—'}</span>
+                      <span className="text-slate-500">Created</span>
+                      <span className="text-slate-600">{detailInvestor.created_at ? new Date(detailInvestor.created_at).toLocaleDateString() : '—'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-dark-400">Last Email</span>
-                      <span className="text-dark-300">{detailInvestor.last_email_sent_at ? new Date(detailInvestor.last_email_sent_at).toLocaleString() : '—'}</span>
+                      <span className="text-slate-500">Last Email</span>
+                      <span className="text-slate-600">{detailInvestor.last_email_sent_at ? new Date(detailInvestor.last_email_sent_at).toLocaleString() : '—'}</span>
                     </div>
                   </div>
                 </div>
@@ -991,18 +991,18 @@ export default function InvestorsPage() {
         {showBulkEmail && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowBulkEmail(false)} />
-            <div className="relative w-full max-w-lg bg-dark-900 border border-dark-700 rounded-2xl overflow-hidden shadow-lg">
-              <div className="border-b border-dark-700 px-6 py-5 flex items-center justify-between">
+            <div className="relative w-full max-w-lg bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-lg">
+              <div className="border-b border-slate-200 px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                    <Send className="w-5 h-5 text-white" />
+                    <Send className="w-5 h-5 text-slate-900" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Bulk Email</h2>
-                    <p className="text-xs text-dark-400">Send to {selectedIds.size} selected investor{selectedIds.size > 1 ? 's' : ''}</p>
+                    <h2 className="text-lg font-semibold text-slate-900">Bulk Email</h2>
+                    <p className="text-xs text-slate-500">Send to {selectedIds.size} selected investor{selectedIds.size > 1 ? 's' : ''}</p>
                   </div>
                 </div>
-                <button onClick={() => setShowBulkEmail(false)} className="text-dark-400 hover:text-white">
+                <button onClick={() => setShowBulkEmail(false)} className="text-slate-500 hover:text-slate-900">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -1021,37 +1021,37 @@ export default function InvestorsPage() {
                     ))}
                   </div>
                 )}
-                <div className="bg-dark-800 border border-dark-700 rounded-lg p-3">
-                  <p className="text-xs text-dark-400 flex items-center gap-1.5">
+                <div className="bg-white border border-slate-200 rounded-lg p-3">
+                  <p className="text-xs text-slate-500 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-primary-400" />
                     Personalization: <code className="text-primary-400">{'{fund_name}'}</code> and <code className="text-primary-400">{'{contact_name}'}</code> are auto-replaced per investor.
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Subject</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Subject</label>
                   <input
                     value={bulkEmailForm.subject}
                     onChange={(e) => setBulkEmailForm({ ...bulkEmailForm, subject: e.target.value })}
                     placeholder="e.g., Partnership Opportunity — {fund_name}"
-                    className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Email Body (HTML)</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Email Body (HTML)</label>
                   <textarea
                     value={bulkEmailForm.html_body}
                     onChange={(e) => setBulkEmailForm({ ...bulkEmailForm, html_body: e.target.value })}
                     placeholder="<p>Hi {contact_name},</p><p>...</p>"
                     rows={8}
-                    className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none resize-none font-mono"
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none font-mono"
                   />
                 </div>
               </div>
 
-              <div className="border-t border-dark-700 px-6 py-4 flex justify-between">
+              <div className="border-t border-slate-200 px-6 py-4 flex justify-between">
                 <button
                   onClick={() => setShowBulkEmail(false)}
-                  className="px-4 py-2.5 border border-dark-600 rounded-lg text-dark-400 hover:text-white text-sm"
+                  className="px-4 py-2.5 border border-slate-300 rounded-lg text-slate-500 hover:text-slate-900 text-sm"
                 >
                   Cancel
                 </button>
@@ -1072,16 +1072,16 @@ export default function InvestorsPage() {
         {showBulkStatus && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowBulkStatus(false)} />
-            <div className="relative w-full max-w-sm bg-dark-900 border border-dark-700 rounded-2xl overflow-hidden shadow-lg">
-              <div className="border-b border-dark-700 px-6 py-5">
-                <h2 className="text-lg font-semibold text-white">Update Status</h2>
-                <p className="text-xs text-dark-400 mt-1">Apply to {selectedIds.size} selected investor{selectedIds.size > 1 ? 's' : ''}</p>
+            <div className="relative w-full max-w-sm bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-lg">
+              <div className="border-b border-slate-200 px-6 py-5">
+                <h2 className="text-lg font-semibold text-slate-900">Update Status</h2>
+                <p className="text-xs text-slate-500 mt-1">Apply to {selectedIds.size} selected investor{selectedIds.size > 1 ? 's' : ''}</p>
               </div>
               <div className="p-6">
                 <select
                   value={bulkStatus}
                   onChange={(e) => setBulkStatus(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm focus:border-primary-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
                 >
                   <option value="">Select status...</option>
                   {STATUS_OPTIONS.map(s => (
@@ -1089,10 +1089,10 @@ export default function InvestorsPage() {
                   ))}
                 </select>
               </div>
-              <div className="border-t border-dark-700 px-6 py-4 flex justify-between">
+              <div className="border-t border-slate-200 px-6 py-4 flex justify-between">
                 <button
                   onClick={() => setShowBulkStatus(false)}
-                  className="px-4 py-2.5 border border-dark-600 rounded-lg text-dark-400 hover:text-white text-sm"
+                  className="px-4 py-2.5 border border-slate-300 rounded-lg text-slate-500 hover:text-slate-900 text-sm"
                 >
                   Cancel
                 </button>
@@ -1112,39 +1112,39 @@ export default function InvestorsPage() {
         {showCreate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowCreate(false)} />
-            <div className="relative w-full max-w-lg max-h-[90vh] bg-dark-900 border border-dark-700 rounded-2xl overflow-hidden flex flex-col shadow-lg">
-              <div className="border-b border-dark-700 px-6 py-5 flex items-center justify-between">
+            <div className="relative w-full max-w-lg max-h-[90vh] bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden flex flex-col shadow-lg">
+              <div className="border-b border-slate-200 px-6 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-violet-500 rounded-xl flex items-center justify-center">
-                    <Plus className="w-5 h-5 text-white" />
+                    <Plus className="w-5 h-5 text-slate-900" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Add Investor</h2>
-                    <p className="text-xs text-dark-400">Create a new investor record</p>
+                    <h2 className="text-lg font-semibold text-slate-900">Add Investor</h2>
+                    <p className="text-xs text-slate-500">Create a new investor record</p>
                   </div>
                 </div>
-                <button onClick={() => setShowCreate(false)} className="text-dark-400 hover:text-white">
+                <button onClick={() => setShowCreate(false)} className="text-slate-500 hover:text-slate-900">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Fund Name *</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Fund Name *</label>
                   <input
                     value={createForm.fund_name}
                     onChange={(e) => setCreateForm({ ...createForm, fund_name: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     placeholder="e.g., Sequoia Capital"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-dark-300 mb-1.5">Type</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Type</label>
                     <select
                       value={createForm.investor_type}
                       onChange={(e) => setCreateForm({ ...createForm, investor_type: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
                     >
                       {TYPE_OPTIONS.map(t => (
                         <option key={t} value={t}>{TYPE_LABELS[t]}</option>
@@ -1152,11 +1152,11 @@ export default function InvestorsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-dark-300 mb-1.5">Priority</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Priority</label>
                     <select
                       value={createForm.priority}
                       onChange={(e) => setCreateForm({ ...createForm, priority: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm focus:border-primary-500 focus:outline-none"
                     >
                       <option value="high">High</option>
                       <option value="medium">Medium</option>
@@ -1166,96 +1166,96 @@ export default function InvestorsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-dark-300 mb-1.5">Contact Name</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Contact Name</label>
                     <input
                       value={createForm.contact_name}
                       onChange={(e) => setCreateForm({ ...createForm, contact_name: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                       placeholder="John Doe"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-dark-300 mb-1.5">Contact Email</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Contact Email</label>
                     <input
                       value={createForm.contact_email}
                       onChange={(e) => setCreateForm({ ...createForm, contact_email: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                       placeholder="john@fund.com"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-dark-300 mb-1.5">Location</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Location</label>
                     <input
                       value={createForm.location}
                       onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                       placeholder="San Francisco, CA"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-dark-300 mb-1.5">Check Size</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Check Size</label>
                     <input
                       value={createForm.check_size_display}
                       onChange={(e) => setCreateForm({ ...createForm, check_size_display: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                       placeholder="$500K - $2M"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Website</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Website</label>
                   <input
                     value={createForm.website}
                     onChange={(e) => setCreateForm({ ...createForm, website: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     placeholder="https://fund.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Focus Sectors (comma-separated)</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Focus Sectors (comma-separated)</label>
                   <input
                     value={createForm.focus_sectors}
                     onChange={(e) => setCreateForm({ ...createForm, focus_sectors: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     placeholder="Healthcare, AI, SaaS"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Focus Stages (comma-separated)</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Focus Stages (comma-separated)</label>
                   <input
                     value={createForm.focus_stages}
                     onChange={(e) => setCreateForm({ ...createForm, focus_stages: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     placeholder="Seed, Series A, Series B"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Source</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Source</label>
                   <input
                     value={createForm.source}
                     onChange={(e) => setCreateForm({ ...createForm, source: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     placeholder="e.g., Crunchbase, referral, conference"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark-300 mb-1.5">Relevance Reason</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Relevance Reason</label>
                   <textarea
                     value={createForm.relevance_reason}
                     onChange={(e) => setCreateForm({ ...createForm, relevance_reason: e.target.value })}
                     rows={2}
-                    className="w-full px-4 py-2.5 bg-dark-700 border border-dark-600 rounded-lg text-white text-sm placeholder-dark-400 focus:border-primary-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 text-sm placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
                     placeholder="Why is this investor relevant?"
                   />
                 </div>
               </div>
 
-              <div className="border-t border-dark-700 px-6 py-4 flex justify-between">
+              <div className="border-t border-slate-200 px-6 py-4 flex justify-between">
                 <button
                   onClick={() => setShowCreate(false)}
-                  className="px-4 py-2.5 border border-dark-600 rounded-lg text-dark-400 hover:text-white text-sm"
+                  className="px-4 py-2.5 border border-slate-300 rounded-lg text-slate-500 hover:text-slate-900 text-sm"
                 >
                   Cancel
                 </button>

@@ -122,7 +122,7 @@ export default function AdminBusinessesPage() {
   const paginatedBusinesses = businesses.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
-    <div className="landing-dark min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       
       <main className="flex-1 p-8">
@@ -143,7 +143,7 @@ export default function AdminBusinessesPage() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-lg transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -154,7 +154,7 @@ export default function AdminBusinessesPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -233,7 +233,7 @@ export default function AdminBusinessesPage() {
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(0); }}
                 placeholder="Search businesses..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-primary-500"
               />
             </div>
             
@@ -242,7 +242,7 @@ export default function AdminBusinessesPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
-                className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-primary-500"
               >
                 <option value="">All Statuses</option>
                 <option value="pending">Pending</option>
@@ -288,10 +288,10 @@ export default function AdminBusinessesPage() {
                   const StatusIcon = statusConfig.icon;
                   
                   return (
-                    <tr key={business.id} className="hover:bg-slate-50/30 transition-colors">
+                    <tr key={business.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-medium text-white">{business.name}</p>
+                          <p className="font-medium text-slate-900">{business.name}</p>
                           <p className="text-sm text-slate-500">{business.email}</p>
                         </div>
                       </td>

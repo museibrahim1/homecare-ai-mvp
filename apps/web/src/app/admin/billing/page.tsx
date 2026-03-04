@@ -160,7 +160,7 @@ export default function BillingConfigPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -170,7 +170,7 @@ export default function BillingConfigPage() {
   }
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-6xl mx-auto">
@@ -179,7 +179,7 @@ export default function BillingConfigPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Stripe Billing Configuration</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               Configure Stripe Price IDs for subscription billing. Create products and prices in your 
               <a href="https://dashboard.stripe.com/products" target="_blank" rel="noopener" className="underline ml-1">
                 Stripe Dashboard
@@ -217,7 +217,7 @@ export default function BillingConfigPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -225,7 +225,7 @@ export default function BillingConfigPage() {
           {/* Plans List */}
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-200">
-              <h2 className="font-medium text-white">Plans</h2>
+              <h2 className="font-medium text-slate-900">Plans</h2>
             </div>
             <div className="divide-y divide-slate-200">
               {loading ? (
@@ -262,7 +262,7 @@ export default function BillingConfigPage() {
               <div>
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                   <div>
-                    <h2 className="font-medium text-white">{selectedPlan.plan_name}</h2>
+                    <h2 className="font-medium text-slate-900">{selectedPlan.plan_name}</h2>
                     <p className="text-slate-500 text-sm">
                       ${selectedPlan.monthly_price}/mo • ${selectedPlan.annual_price}/yr • ${selectedPlan.setup_fee} setup
                     </p>
@@ -298,7 +298,7 @@ export default function BillingConfigPage() {
                       value={formData.stripe_product_id}
                       onChange={e => setFormData({ ...formData, stripe_product_id: e.target.value })}
                       placeholder="prod_xxxxxxxxxxxxx"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white font-mono text-sm placeholder-dark-500 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-mono text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                     <p className="text-slate-400 text-xs mt-1">
                       Create a Product in Stripe for this plan
@@ -316,7 +316,7 @@ export default function BillingConfigPage() {
                       value={formData.stripe_price_id_monthly}
                       onChange={e => setFormData({ ...formData, stripe_price_id_monthly: e.target.value })}
                       placeholder="price_xxxxxxxxxxxxx"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white font-mono text-sm placeholder-dark-500 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-mono text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                     <p className="text-slate-400 text-xs mt-1">
                       Recurring monthly price: ${selectedPlan.monthly_price}/month
@@ -334,7 +334,7 @@ export default function BillingConfigPage() {
                       value={formData.stripe_price_id_annual}
                       onChange={e => setFormData({ ...formData, stripe_price_id_annual: e.target.value })}
                       placeholder="price_xxxxxxxxxxxxx"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white font-mono text-sm placeholder-dark-500 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-mono text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                     <p className="text-slate-400 text-xs mt-1">
                       Recurring annual price: ${selectedPlan.annual_price}/year (10% discount)
@@ -353,7 +353,7 @@ export default function BillingConfigPage() {
                         value={formData.stripe_price_id_setup}
                         onChange={e => setFormData({ ...formData, stripe_price_id_setup: e.target.value })}
                         placeholder="price_xxxxxxxxxxxxx"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white font-mono text-sm placeholder-dark-500 focus:outline-none focus:border-primary-500"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-mono text-sm placeholder-slate-400 focus:outline-none focus:border-primary-500"
                       />
                       <p className="text-slate-400 text-xs mt-1">
                         One-time setup fee: ${selectedPlan.setup_fee}
@@ -376,7 +376,7 @@ export default function BillingConfigPage() {
                 </div>
 
                 {/* Instructions */}
-                <div className="p-6 border-t border-slate-200 bg-slate-50/30">
+                <div className="p-6 border-t border-slate-200 bg-slate-50">
                   <h3 className="text-slate-900 font-medium mb-3">Setup Instructions</h3>
                   <ol className="space-y-2 text-slate-500 text-sm">
                     <li>1. Go to <a href="https://dashboard.stripe.com/products/create" target="_blank" className="text-primary-400 hover:underline">Stripe Products</a> and create a product for "{selectedPlan.plan_name}"</li>

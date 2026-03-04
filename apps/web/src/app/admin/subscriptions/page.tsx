@@ -149,7 +149,7 @@ export default function SubscriptionsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -159,7 +159,7 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
@@ -168,7 +168,7 @@ export default function SubscriptionsPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Subscription Management</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               Manage business subscriptions and billing. No client data is accessible from this view.
             </p>
           </div>
@@ -201,7 +201,7 @@ export default function SubscriptionsPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -259,7 +259,7 @@ export default function SubscriptionsPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search businesses..."
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500"
             />
           </div>
         </div>
@@ -292,13 +292,13 @@ export default function SubscriptionsPage() {
                 </tr>
               ) : (
                 paginatedSubscriptions.map(sub => (
-                    <tr key={sub.id} className="border-b border-slate-200 hover:bg-slate-50/30">
+                    <tr key={sub.id} className="border-b border-slate-200 hover:bg-slate-50">
                       <td className="p-4">
                         <p className="text-slate-900 font-medium">{sub.business_name}</p>
                         <p className="text-slate-500 text-xs">{new Date(sub.created_at).toLocaleDateString()}</p>
                       </td>
                       <td className="p-4">
-                        <span className={`font-medium ${TIER_COLORS[sub.plan_tier] || 'text-white'}`}>
+                        <span className={`font-medium ${TIER_COLORS[sub.plan_tier] || 'text-slate-900'}`}>
                           {sub.plan_name}
                         </span>
                       </td>

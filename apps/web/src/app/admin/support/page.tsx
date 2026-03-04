@@ -203,7 +203,7 @@ export default function SupportTicketsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -213,7 +213,7 @@ export default function SupportTicketsPage() {
   }
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
@@ -222,7 +222,7 @@ export default function SupportTicketsPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Support Ticket Management</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               Handle support requests from businesses. No client data is shared in tickets.
             </p>
           </div>
@@ -255,7 +255,7 @@ export default function SupportTicketsPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -264,7 +264,7 @@ export default function SupportTicketsPage() {
           <select
             value={filter.status}
             onChange={e => { setFilter({ ...filter, status: e.target.value }); setPage(0); }}
-            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-primary-500"
           >
             <option value="">All Status</option>
             <option value="open">Open</option>
@@ -276,7 +276,7 @@ export default function SupportTicketsPage() {
           <select
             value={filter.priority}
             onChange={e => { setFilter({ ...filter, priority: e.target.value }); setPage(0); }}
-            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-primary-500"
           >
             <option value="">All Priority</option>
             <option value="urgent">Urgent</option>
@@ -414,7 +414,7 @@ export default function SupportTicketsPage() {
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <User className={`w-4 h-4 ${response.is_admin ? 'text-primary-400' : 'text-slate-500'}`} />
-                        <span className={`text-sm font-medium ${response.is_admin ? 'text-primary-400' : 'text-white'}`}>
+                        <span className={`text-sm font-medium ${response.is_admin ? 'text-primary-400' : 'text-slate-900'}`}>
                           {response.responder_name || response.responder_email}
                           {response.is_admin && ' (Support)'}
                         </span>
@@ -435,7 +435,7 @@ export default function SupportTicketsPage() {
                       onChange={e => setResponseText(e.target.value)}
                       placeholder="Type your response..."
                       rows={3}
-                      className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
+                      className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
                     />
                     <button
                       onClick={sendResponse}

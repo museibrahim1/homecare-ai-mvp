@@ -135,7 +135,7 @@ export default function AdminDashboardPage() {
   // Only show loading during initial hydration, not on every navigation
   if (!hydrated || authLoading) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -184,7 +184,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
@@ -193,7 +193,7 @@ export default function AdminDashboardPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Platform Admin Dashboard</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               This dashboard shows platform-level metrics only. Individual client/patient data is not 
               accessible in compliance with HIPAA regulations.
             </p>
@@ -219,7 +219,7 @@ export default function AdminDashboardPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -285,7 +285,7 @@ export default function AdminDashboardPage() {
               {/* Compliance Alerts */}
               <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-                  <h2 className="font-medium text-white flex items-center gap-2">
+                  <h2 className="font-medium text-slate-900 flex items-center gap-2">
                     <AlertTriangle className="w-5 h-5 text-amber-600" />
                     Compliance Alerts
                   </h2>
@@ -319,7 +319,7 @@ export default function AdminDashboardPage() {
               {/* Support Tickets */}
               <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-                  <h2 className="font-medium text-white flex items-center gap-2">
+                  <h2 className="font-medium text-slate-900 flex items-center gap-2">
                     <Ticket className="w-5 h-5 text-purple-600" />
                     Support Tickets
                   </h2>
@@ -352,7 +352,7 @@ export default function AdminDashboardPage() {
               {/* System Health */}
               <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-                  <h2 className="font-medium text-white flex items-center gap-2">
+                  <h2 className="font-medium text-slate-900 flex items-center gap-2">
                     <Activity className="w-5 h-5 text-emerald-600" />
                     System Health
                   </h2>
@@ -377,35 +377,35 @@ export default function AdminDashboardPage() {
                 className="p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500 transition flex items-center gap-3"
               >
                 <Building2 className="w-5 h-5 text-primary-400" />
-                <span className="text-white">Review Approvals</span>
+                <span className="text-slate-900">Review Approvals</span>
               </Link>
               <Link
                 href="/admin/subscriptions"
                 className="p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500 transition flex items-center gap-3"
               >
                 <DollarSign className="w-5 h-5 text-primary-400" />
-                <span className="text-white">Manage Subscriptions</span>
+                <span className="text-slate-900">Manage Subscriptions</span>
               </Link>
               <Link
                 href="/admin/audit"
                 className="p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500 transition flex items-center gap-3"
               >
                 <FileText className="w-5 h-5 text-primary-400" />
-                <span className="text-white">Audit Logs</span>
+                <span className="text-slate-900">Audit Logs</span>
               </Link>
               <Link
                 href="/admin/users"
                 className="p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500 transition flex items-center gap-3"
               >
                 <Users className="w-5 h-5 text-primary-400" />
-                <span className="text-white">Platform Users</span>
+                <span className="text-slate-900">Platform Users</span>
               </Link>
               <Link
                 href="/admin/incidents"
                 className="p-4 bg-white rounded-xl border border-slate-200 hover:border-orange-500 transition flex items-center gap-3"
               >
                 <AlertTriangle className="w-5 h-5 text-orange-600" />
-                <span className="text-white">Status & Incidents</span>
+                <span className="text-slate-900">Status & Incidents</span>
               </Link>
             </div>
           </>

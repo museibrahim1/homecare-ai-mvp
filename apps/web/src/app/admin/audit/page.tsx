@@ -138,7 +138,7 @@ export default function AuditLogsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -148,7 +148,7 @@ export default function AuditLogsPage() {
   }
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
@@ -157,7 +157,7 @@ export default function AuditLogsPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Audit Log</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               Track all system activities for security and compliance purposes.
             </p>
           </div>
@@ -199,7 +199,7 @@ export default function AuditLogsPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -208,7 +208,7 @@ export default function AuditLogsPage() {
           <select
             value={filter.action}
             onChange={e => { setFilter({ ...filter, action: e.target.value }); setPage(0); }}
-            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-primary-500"
           >
             <option value="">All Actions</option>
             {actions.map(action => (
@@ -223,7 +223,7 @@ export default function AuditLogsPage() {
               onChange={e => setFilter({ ...filter, user_email: e.target.value })}
               onKeyDown={e => e.key === 'Enter' && fetchLogs()}
               placeholder="Filter by user email..."
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500"
             />
           </div>
         </div>
@@ -256,7 +256,7 @@ export default function AuditLogsPage() {
                 </tr>
               ) : (
                 logs.map(log => (
-                  <tr key={log.id} className="border-b border-slate-200 hover:bg-slate-50/30">
+                  <tr key={log.id} className="border-b border-slate-200 hover:bg-slate-50">
                     <td className="p-4">
                       <p className="text-slate-900 text-sm">
                         {new Date(log.created_at).toLocaleDateString()}

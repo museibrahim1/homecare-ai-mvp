@@ -199,7 +199,7 @@ export default function AdminIncidentsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -212,7 +212,7 @@ export default function AdminIncidentsPage() {
   const resolvedCount = incidents.filter(i => i.status === 'resolved').length;
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-5xl mx-auto">
@@ -221,9 +221,9 @@ export default function AdminIncidentsPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Incident Management</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               Create and manage incidents that appear on the public status page at{' '}
-              <Link href="/status" className="underline hover:text-blue-200" target="_blank">/status</Link>.
+              <Link href="/status" className="underline hover:text-blue-600" target="_blank">/status</Link>.
             </p>
           </div>
         </div>
@@ -268,11 +268,11 @@ export default function AdminIncidentsPage() {
           </div>
           <div className="bg-white rounded-xl border border-slate-200 p-4">
             <p className="text-slate-500 text-sm">Resolved (90d)</p>
-            <p className="text-2xl font-bold mt-1 text-white">{resolvedCount}</p>
+            <p className="text-2xl font-bold mt-1 text-slate-900">{resolvedCount}</p>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 p-4">
             <p className="text-slate-500 text-sm">Total Incidents</p>
-            <p className="text-2xl font-bold mt-1 text-white">{incidents.length}</p>
+            <p className="text-2xl font-bold mt-1 text-slate-900">{incidents.length}</p>
           </div>
         </div>
 
@@ -280,7 +280,7 @@ export default function AdminIncidentsPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <XCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -299,7 +299,7 @@ export default function AdminIncidentsPage() {
                   value={createForm.title}
                   onChange={e => setCreateForm({ ...createForm, title: e.target.value })}
                   placeholder="e.g. PalmCare AI service interruption"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                 />
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -308,7 +308,7 @@ export default function AdminIncidentsPage() {
                   <select
                     value={createForm.service_name}
                     onChange={e => setCreateForm({ ...createForm, service_name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-primary-500"
                   >
                     {SERVICES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -318,7 +318,7 @@ export default function AdminIncidentsPage() {
                   <select
                     value={createForm.impact}
                     onChange={e => setCreateForm({ ...createForm, impact: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-primary-500"
                   >
                     {IMPACTS.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
                   </select>
@@ -328,7 +328,7 @@ export default function AdminIncidentsPage() {
                   <select
                     value={createForm.status}
                     onChange={e => setCreateForm({ ...createForm, status: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-primary-500"
                   >
                     {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
@@ -341,7 +341,7 @@ export default function AdminIncidentsPage() {
                   value={createForm.message}
                   onChange={e => setCreateForm({ ...createForm, message: e.target.value })}
                   placeholder="We are aware of an issue impacting..."
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
                 />
               </div>
               <div className="flex items-center gap-3">
@@ -390,7 +390,7 @@ export default function AdminIncidentsPage() {
                 >
                   {/* Header row */}
                   <div
-                    className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-slate-50/30 transition"
+                    className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-slate-50 transition"
                     onClick={() => setExpandedIncident(isExpanded ? null : inc.id)}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -483,7 +483,7 @@ export default function AdminIncidentsPage() {
                                 [inc.id]: { ...prev[inc.id], status: prev[inc.id]?.status || 'monitoring', message: e.target.value },
                               }))}
                               placeholder="Describe what's happening..."
-                              className="flex-1 px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-white placeholder-slate-400 text-sm focus:outline-none focus:border-primary-500 resize-none"
+                              className="flex-1 px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-primary-500 resize-none"
                             />
                             <button
                               onClick={() => handleAddUpdate(inc.id)}

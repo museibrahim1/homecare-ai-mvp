@@ -118,7 +118,7 @@ export default function SystemHealthPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -134,7 +134,7 @@ export default function SystemHealthPage() {
     health.storage_status === 'healthy';
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-5xl mx-auto">
@@ -143,7 +143,7 @@ export default function SystemHealthPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">System Health Monitor</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               Monitor the health and performance of platform infrastructure.
             </p>
           </div>
@@ -187,7 +187,7 @@ export default function SystemHealthPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -216,7 +216,7 @@ export default function SystemHealthPage() {
             {metrics && (
               <div className="text-right">
                 <p className="text-slate-500 text-sm">API Version</p>
-                <p className="text-white font-mono">{metrics.api_version}</p>
+                <p className="text-slate-900 font-mono">{metrics.api_version}</p>
               </div>
             )}
           </div>

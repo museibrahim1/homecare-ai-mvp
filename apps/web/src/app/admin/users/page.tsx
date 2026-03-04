@@ -149,7 +149,7 @@ export default function PlatformUsersPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="landing-dark flex min-h-screen bg-slate-50">
+      <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -159,7 +159,7 @@ export default function PlatformUsersPage() {
   }
 
   return (
-    <div className="landing-dark flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-5xl mx-auto">
@@ -168,7 +168,7 @@ export default function PlatformUsersPage() {
           <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-blue-600 font-medium">Platform User Management</p>
-            <p className="text-blue-300/70 text-sm mt-1">
+            <p className="text-blue-500 text-sm mt-1">
               Manage platform administrator accounts. Only @palmtai.com emails can be platform admins.
             </p>
           </div>
@@ -210,7 +210,7 @@ export default function PlatformUsersPage() {
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-300 text-sm underline">Dismiss</button>
+            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-600 text-sm underline">Dismiss</button>
           </div>
         )}
 
@@ -228,7 +228,7 @@ export default function PlatformUsersPage() {
           ) : (
             <div className="divide-y divide-slate-200">
               {paginatedUsers.map(user => (
-                <div key={user.id} className="p-5 hover:bg-slate-50/30 transition">
+                <div key={user.id} className="p-5 hover:bg-slate-50 transition">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-xl flex items-center justify-center">
@@ -325,7 +325,7 @@ export default function PlatformUsersPage() {
                   value={inviteForm.full_name}
                   onChange={e => setInviteForm({ ...inviteForm, full_name: e.target.value })}
                   placeholder="John Smith"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                 />
               </div>
               <div>
@@ -335,7 +335,7 @@ export default function PlatformUsersPage() {
                   value={inviteForm.email}
                   onChange={e => setInviteForm({ ...inviteForm, email: e.target.value })}
                   placeholder="john@palmtai.com"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                 />
                 <p className="text-slate-400 text-xs mt-1">Must be @palmtai.com email</p>
               </div>
@@ -344,7 +344,7 @@ export default function PlatformUsersPage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => { setShowInviteModal(false); setInviteError(''); }}
-                className="flex-1 px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
+                className="flex-1 px-4 py-2 bg-slate-50 text-slate-900 rounded-lg hover:bg-slate-100 transition"
               >
                 Cancel
               </button>

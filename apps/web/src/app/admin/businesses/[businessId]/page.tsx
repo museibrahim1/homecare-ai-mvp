@@ -211,7 +211,7 @@ export default function BusinessDetailPage() {
 
   if (loading) {
     return (
-      <div className="landing-dark min-h-screen bg-slate-50 flex">
+      <div className="min-h-screen bg-slate-50 flex">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -222,7 +222,7 @@ export default function BusinessDetailPage() {
 
   if (!business) {
     return (
-      <div className="landing-dark min-h-screen bg-slate-50 flex">
+      <div className="min-h-screen bg-slate-50 flex">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -242,7 +242,7 @@ export default function BusinessDetailPage() {
   const canApprove = ['pending', 'sos_verified', 'documents_submitted'].includes(business.verification_status);
 
   return (
-    <div className="landing-dark min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       
       <main className="flex-1 p-8">
@@ -282,19 +282,19 @@ export default function BusinessDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-slate-500">Entity Type</p>
-                  <p className="text-white capitalize">{business.entity_type.replace('_', ' ')}</p>
+                  <p className="text-slate-900 capitalize">{business.entity_type.replace('_', ' ')}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">State of Incorporation</p>
-                  <p className="text-white">{business.state_of_incorporation}</p>
+                  <p className="text-slate-900">{business.state_of_incorporation}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Registration Number</p>
-                  <p className="text-white font-mono">{business.registration_number || 'Not provided'}</p>
+                  <p className="text-slate-900 font-mono">{business.registration_number || 'Not provided'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Registered</p>
-                  <p className="text-white">{formatDate(business.created_at)}</p>
+                  <p className="text-slate-900">{formatDate(business.created_at)}</p>
                 </div>
               </div>
             </div>
@@ -311,7 +311,7 @@ export default function BusinessDetailPage() {
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-slate-500 mt-0.5" />
                     <div>
-                      <p className="text-white">{business.address}</p>
+                      <p className="text-slate-900">{business.address}</p>
                       <p className="text-slate-500">
                         {business.city}, {business.state} {business.zip_code}
                       </p>
@@ -322,7 +322,7 @@ export default function BusinessDetailPage() {
                 {business.phone && (
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-slate-500" />
-                    <p className="text-white">{business.phone}</p>
+                    <p className="text-slate-900">{business.phone}</p>
                   </div>
                 )}
                 
@@ -373,7 +373,7 @@ export default function BusinessDetailPage() {
                           <FileText className={`w-5 h-5 ${doc.is_verified ? 'text-emerald-600' : 'text-slate-500'}`} />
                         </div>
                         <div>
-                          <p className="font-medium text-white">
+                          <p className="font-medium text-slate-900">
                             {DOCUMENT_LABELS[doc.document_type] || doc.document_type}
                           </p>
                           <p className="text-sm text-slate-500">
@@ -437,11 +437,11 @@ export default function BusinessDetailPage() {
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm text-slate-500">Name</p>
-                    <p className="text-white">{business.owner.full_name}</p>
+                    <p className="text-slate-900">{business.owner.full_name}</p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Email</p>
-                    <p className="text-white">{business.owner.email}</p>
+                    <p className="text-slate-900">{business.owner.email}</p>
                     {business.owner.email_verified && (
                       <span className="text-xs text-emerald-600">Verified</span>
                     )}
@@ -449,13 +449,13 @@ export default function BusinessDetailPage() {
                   {business.owner.phone && (
                     <div>
                       <p className="text-sm text-slate-500">Phone</p>
-                      <p className="text-white">{business.owner.phone}</p>
+                      <p className="text-slate-900">{business.owner.phone}</p>
                     </div>
                   )}
                   {business.owner.last_login && (
                     <div>
                       <p className="text-sm text-slate-500">Last Login</p>
-                      <p className="text-white">{formatDate(business.owner.last_login)}</p>
+                      <p className="text-slate-900">{formatDate(business.owner.last_login)}</p>
                     </div>
                   )}
                 </div>
@@ -555,13 +555,13 @@ export default function BusinessDetailPage() {
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Enter rejection reason..."
               rows={4}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-red-500 resize-none"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-red-500 resize-none"
             />
             
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => setShowRejectModal(false)}
-                className="flex-1 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-lg transition-colors"
               >
                 Cancel
               </button>
