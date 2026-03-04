@@ -147,8 +147,19 @@ class LeadStats(BaseModel):
     has_website: int
 
 
+ALL_US_STATES = [
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+    "DC", "PR", "GU", "VI", "AS", "MP",
+]
+
+
 class ImportRequest(BaseModel):
     states: List[str] = ["NE", "IA"]
+    all_states: bool = False
     exclude_government: bool = True
     limit_per_state: int = 1000
 
@@ -1181,16 +1192,19 @@ async def import_cms_data(
 ):
     """Pull home health agency data from CMS Provider Data API and import as leads.
     Uses pagination to pull ALL agencies (not just first 500).
-    Optionally excludes government-operated agencies."""
+    Optionally excludes government-operated agencies.
+    Set all_states=true to import from all 50+ US states/territories."""
     CMS_API = "https://data.cms.gov/provider-data/api/1/datastore/query/6jpm-sxkc/0"
     GOVERNMENT_KEYWORDS = ["government", "state", "county", "federal", "va ", "veterans"]
     PAGE_SIZE = 500
+
+    states_to_import = ALL_US_STATES if req.all_states else req.states
 
     imported = 0
     skipped = 0
     gov_skipped = 0
 
-    for state in req.states:
+    for state in states_to_import:
         offset = 0
         while True:
             payload = json.dumps({
@@ -1204,7 +1218,7 @@ async def import_cms_data(
                 request = urllib.request.Request(
                     CMS_API, data=payload, headers={"Content-Type": "application/json"}
                 )
-                with urllib.request.urlopen(request, timeout=30) as resp:
+                with urllib.request.urlopen(request, timeout=60) as resp:
                     data = json.loads(resp.read())
             except Exception as e:
                 logger.error(f"Failed to pull CMS data for {state} offset={offset}: {e}")
@@ -1290,7 +1304,8 @@ async def import_cms_data(
         "imported": imported,
         "skipped": skipped,
         "government_excluded": gov_skipped,
-        "states": req.states,
+        "states": states_to_import,
+        "total_states": len(states_to_import),
     }
 
 

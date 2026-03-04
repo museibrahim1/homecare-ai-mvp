@@ -329,14 +329,18 @@ export default function SalesLeadsPage() {
     if (isAuthorized) loadData();
   }, [filters, sortBy, sortOrder, page]);
 
-  const importCMS = async () => {
+  const importCMS = async (allStates = false) => {
+    if (allStates && !confirm('Import agencies from ALL 50+ US states? This may take a minute.')) return;
     setImporting(true);
     try {
       const result = await fetchWithAuth('/platform/sales/leads/import-cms', {
         method: 'POST',
-        body: JSON.stringify({ states: ['NE', 'IA'], exclude_government: true, limit_per_state: 1000 }),
+        body: JSON.stringify(allStates
+          ? { all_states: true, exclude_government: true, limit_per_state: 1000 }
+          : { states: ['NE', 'IA'], exclude_government: true, limit_per_state: 1000 }
+        ),
       });
-      alert(`Imported ${result.imported} new leads, ${result.skipped} duplicates skipped, ${result.government_excluded || 0} government agencies excluded`);
+      alert(`Imported ${result.imported} new leads from ${result.total_states || '?'} states.\n${result.skipped} duplicates skipped, ${result.government_excluded || 0} government agencies excluded.`);
       loadData();
     } catch (e) {
       alert(`Import failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
@@ -580,12 +584,12 @@ export default function SalesLeadsPage() {
               Refresh
             </button>
             <button
-              onClick={importCMS}
+              onClick={() => importCMS(true)}
               disabled={importing}
               className="px-3 py-2 bg-[#1a1a2e] border border-gray-700 rounded-lg text-gray-300 hover:text-slate-900 flex items-center gap-2 text-sm disabled:opacity-50"
             >
               {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
-              {importing ? 'Importing...' : 'Import CMS'}
+              {importing ? 'Importing...' : 'Import All States'}
             </button>
             <button
               onClick={() => { setShowSequenceLauncher(true); setSequenceResult(null); }}
