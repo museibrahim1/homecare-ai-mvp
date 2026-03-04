@@ -170,12 +170,12 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
   if (items.length === 0) {
     return (
       <div className="p-12 text-center">
-        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <DollarSign className="w-8 h-8 text-slate-500" />
+        <div className="w-16 h-16 bg-dark-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <DollarSign className="w-8 h-8 text-dark-400" />
         </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No Services Detected</h3>
-        <p className="text-slate-500 mb-2">Run the billing analysis to extract services from the transcript</p>
-        <p className="text-sm text-slate-400">AI will identify care services mentioned in the conversation</p>
+        <h3 className="text-lg font-semibold text-dark-50 mb-2">No Services Detected</h3>
+        <p className="text-dark-400 mb-2">Run the billing analysis to extract services from the transcript</p>
+        <p className="text-sm text-dark-400">AI will identify care services mentioned in the conversation</p>
       </div>
     );
   }
@@ -189,8 +189,8 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
             <Sparkles className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Identified Care Services</h3>
-            <p className="text-slate-500 text-sm">
+            <h3 className="text-lg font-semibold text-dark-50">Identified Care Services</h3>
+            <p className="text-dark-400 text-sm">
               {items.length} service{items.length !== 1 ? 's' : ''} extracted from transcript
             </p>
           </div>
@@ -226,10 +226,10 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
               {/* Service Type Header */}
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-1.5 h-1.5 bg-primary-400 rounded-full"></div>
-                <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">
+                <h4 className="text-sm font-semibold text-dark-50 uppercase tracking-wide">
                   {serviceType}
                 </h4>
-                <span className="text-slate-400 text-sm">
+                <span className="text-dark-400 text-sm">
                   ({typeItems.length})
                 </span>
               </div>
@@ -239,8 +239,8 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                 {typeItems.map((item) => {
                   const config = categoryConfig[item.category] || { 
                     label: item.category, 
-                    color: 'text-gray-400',
-                    bgColor: 'bg-gray-500/20',
+                    color: 'text-dark-400',
+                    bgColor: 'bg-dark-9000/20',
                     icon: DollarSign,
                     serviceType: 'Other'
                   };
@@ -255,7 +255,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                           ? 'bg-green-500/5 border-emerald-200' 
                           : item.is_flagged
                           ? 'bg-orange-500/5 border-orange-200'
-                          : 'bg-slate-50/30 border-slate-200 hover:bg-slate-100'
+                          : 'bg-dark-900/30 border-dark-700 hover:bg-dark-700/50'
                       }`}
                     >
                       {/* Main Row */}
@@ -276,7 +276,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                               <AlertTriangle className="w-4 h-4 text-orange-600" />
                             )}
                           </div>
-                          <p className="text-slate-500 text-sm truncate">{item.description}</p>
+                          <p className="text-dark-400 text-sm truncate">{item.description}</p>
                         </div>
 
                         {/* Evidence count & Actions */}
@@ -284,7 +284,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                           {item.evidence && item.evidence.length > 0 && (
                             <button
                               onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100/50 hover:bg-slate-100 rounded-lg text-slate-600 text-sm transition"
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-dark-700/50 hover:bg-dark-700/50 rounded-lg text-dark-300 text-sm transition"
                             >
                               <MessageSquareQuote className="w-4 h-4" />
                               {item.evidence.length} quote{item.evidence.length !== 1 ? 's' : ''}
@@ -304,8 +304,8 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                       
                       {/* Expanded Evidence Section */}
                       {isExpanded && item.evidence && item.evidence.length > 0 && (
-                        <div className="px-4 pb-4 border-t border-slate-200 mt-1 pt-3">
-                          <h5 className="text-xs font-medium text-slate-500 mb-3 flex items-center gap-2">
+                        <div className="px-4 pb-4 border-t border-dark-700 mt-1 pt-3">
+                          <h5 className="text-xs font-medium text-dark-400 mb-3 flex items-center gap-2">
                             <MessageSquareQuote className="w-3 h-3" />
                             Transcript Evidence
                           </h5>
@@ -313,11 +313,11 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                             {item.evidence?.map((ev: any, idx: number) => (
                               <div 
                                 key={idx} 
-                                className="bg-white/80 rounded-lg p-3 border border-slate-200/30"
+                                className="bg-dark-800/80 rounded-lg p-3 border border-dark-700/30"
                               >
-                                <div className="flex items-center gap-3 mb-2 text-xs text-slate-400">
+                                <div className="flex items-center gap-3 mb-2 text-xs text-dark-400">
                                   {ev.speaker && (
-                                    <span className="flex items-center gap-1 px-2 py-0.5 bg-slate-50 rounded">
+                                    <span className="flex items-center gap-1 px-2 py-0.5 bg-dark-900 rounded">
                                       <User className="w-3 h-3" />
                                       {ev.speaker}
                                     </span>
@@ -328,7 +328,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-slate-700 text-sm leading-relaxed">"{ev.text}"</p>
+                                <p className="text-dark-200 text-sm leading-relaxed">"{ev.text}"</p>
                               </div>
                             ))}
                           </div>
@@ -344,13 +344,13 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
       </div>
 
       {/* Summary */}
-      <div className="mt-6 p-4 bg-slate-100 border border-slate-200 rounded-xl">
-        <h4 className="text-slate-900 font-medium mb-3">Services Summary</h4>
+      <div className="mt-6 p-4 bg-dark-700 border border-dark-700 rounded-xl">
+        <h4 className="text-dark-50 font-medium mb-3">Services Summary</h4>
         <div className="flex flex-wrap gap-2">
           {Object.entries(groupedItems).map(([type, typeItems]) => (
             <span 
               key={type}
-              className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-sm"
+              className="px-3 py-1.5 bg-dark-700 text-dark-200 rounded-lg text-sm"
             >
               {type}: {typeItems.length}
             </span>

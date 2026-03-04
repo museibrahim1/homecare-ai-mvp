@@ -70,8 +70,8 @@ function StepIcon({ status, index }: { status: StepStatus; index: number }) {
     );
   }
   return (
-    <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center">
-      <span className="text-sm font-bold text-slate-400">{index + 1}</span>
+    <div className="w-10 h-10 rounded-xl bg-dark-700 border border-dark-700 flex items-center justify-center">
+      <span className="text-sm font-bold text-dark-400">{index + 1}</span>
     </div>
   );
 }
@@ -446,26 +446,26 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             <Mic className="w-5 h-5 text-primary-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Add Audio</h3>
-            <p className="text-slate-500 text-sm">Record or upload & auto-process with AI</p>
+            <h3 className="text-lg font-semibold text-dark-50">Add Audio</h3>
+            <p className="text-dark-400 text-sm">Record or upload & auto-process with AI</p>
           </div>
         </div>
         {onClose && state !== 'processing' && !isRecording && (
-          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-lg">
-            <X className="w-5 h-5 text-slate-500" />
+          <button onClick={onClose} className="p-2 hover:bg-dark-700/30 rounded-lg">
+            <X className="w-5 h-5 text-dark-400" />
           </button>
         )}
       </div>
 
       {/* Mode Toggle Tabs */}
       {state === 'idle' && !selectedFile && !audioBlob && (
-        <div className="flex border-b border-slate-200 mb-6">
+        <div className="flex border-b border-dark-700 mb-6">
           <button
             onClick={() => setInputMode('record')}
             className={`flex-1 py-3 px-4 font-medium transition-all flex items-center justify-center gap-2 border-b-2 ${
               inputMode === 'record'
                 ? 'text-primary-400 border-primary-400'
-                : 'text-slate-500 border-transparent hover:text-slate-900'
+                : 'text-dark-400 border-transparent hover:text-dark-50'
             }`}
           >
             <Mic className="w-4 h-4" />
@@ -476,7 +476,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             className={`flex-1 py-3 px-4 font-medium transition-all flex items-center justify-center gap-2 border-b-2 ${
               inputMode === 'upload'
                 ? 'text-primary-400 border-primary-400'
-                : 'text-slate-500 border-transparent hover:text-slate-900'
+                : 'text-dark-400 border-transparent hover:text-dark-50'
             }`}
           >
             <Upload className="w-4 h-4" />
@@ -500,8 +500,8 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                   <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary-400 rounded-full" />
                 </div>
                 <div>
-                  <p className="text-slate-900 font-semibold">AI Processing</p>
-                  <p className="text-slate-500 text-xs flex items-center gap-1.5">
+                  <p className="text-dark-50 font-semibold">AI Processing</p>
+                  <p className="text-dark-400 text-xs flex items-center gap-1.5">
                     Step {Math.min(completedCount + 1, totalSteps)} of {totalSteps}
                     {estimatedTimeRemaining > 0 && (
                       <>
@@ -521,7 +521,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             </div>
 
             {/* Overall progress bar */}
-            <div className="relative h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div className="relative h-2.5 bg-dark-700 rounded-full overflow-hidden">
               <div
                 className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-500 via-indigo-500 to-accent-cyan rounded-full transition-all duration-700 ease-out progress-stripe"
                 style={{ width: `${overallPercent}%` }}
@@ -532,7 +532,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
           {/* Step-by-step timeline */}
           <div className="relative">
             {/* Vertical connector line */}
-            <div className="absolute left-[19px] top-5 bottom-5 w-px bg-slate-50" />
+            <div className="absolute left-[19px] top-5 bottom-5 w-px bg-dark-900" />
             {/* Completed portion of connector */}
             <div
               className="absolute left-[19px] top-5 w-px bg-gradient-to-b from-emerald-500/60 to-primary-500/40 transition-all duration-700"
@@ -560,7 +560,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                         ? 'bg-primary-500/[0.07] border-primary-200 shadow-lg shadow-primary-500/5'
                         : isFailed
                         ? 'bg-red-50 border-red-200'
-                        : 'bg-white/40 border-slate-200/40'
+                        : 'bg-dark-800/40 border-dark-700/40'
                     }`}
                     style={{ animationDelay: `${index * 60}ms` }}
                   >
@@ -574,7 +574,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className={`font-medium text-sm transition-colors duration-300 ${
-                            isCompleted ? 'text-emerald-400' : isRunning ? 'text-white' : isFailed ? 'text-red-600' : 'text-slate-400'
+                            isCompleted ? 'text-emerald-400' : isRunning ? 'text-white' : isFailed ? 'text-red-600' : 'text-dark-400'
                           }`}>
                             {step.label}
                           </span>
@@ -586,14 +586,14 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                           )}
                         </div>
                         <p className={`text-xs mt-0.5 transition-colors duration-300 ${
-                          isCompleted ? 'text-emerald-400/60' : isRunning ? 'text-slate-600' : isFailed ? 'text-red-600/70' : 'text-slate-300'
+                          isCompleted ? 'text-emerald-400/60' : isRunning ? 'text-dark-300' : isFailed ? 'text-red-600/70' : 'text-slate-300'
                         }`}>
                           {isFailed ? (ss.error || 'Step failed') : step.description}
                         </p>
 
                         {/* Per-step progress bar (running only) */}
                         {isRunning && (
-                          <div className="mt-2 h-1 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="mt-2 h-1 bg-dark-700 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-gradient-to-r from-primary-500 to-indigo-400 rounded-full transition-all duration-1000 ease-linear progress-stripe"
                               style={{ width: `${stepPercent}%` }}
@@ -612,7 +612,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                         {isRunning && (
                           <div className="text-right">
                             <span className="text-xs text-primary-300 font-mono block">{formatElapsed(elapsed)}</span>
-                            <span className="text-[10px] text-slate-400">{step.timeRange}</span>
+                            <span className="text-[10px] text-dark-400">{step.timeRange}</span>
                           </div>
                         )}
                         {isPending && (
@@ -636,9 +636,9 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
           </div>
 
           {/* Footer */}
-          <div className="pt-3 border-t border-slate-200 space-y-3">
+          <div className="pt-3 border-t border-dark-700 space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-slate-400 text-xs flex items-center gap-1.5">
+              <p className="text-dark-400 text-xs flex items-center gap-1.5">
                 <Clock className="w-3 h-3" />
                 Processing time varies with audio length
               </p>
@@ -655,14 +655,14 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                 Continue to Results
               </button>
             </div>
-            <p className="text-slate-400 text-xs text-center">Processing will continue in the background</p>
+            <p className="text-dark-400 text-xs text-center">Processing will continue in the background</p>
           </div>
         </div>
       )}
 
       {/* ==================== RECORDING INTERFACE ==================== */}
       {inputMode === 'record' && state !== 'success' && state !== 'processing' && state !== 'uploading' && !selectedFile && (
-        <div className="border-2 border-dashed rounded-2xl p-8 text-center bg-slate-50/30 border-slate-200">
+        <div className="border-2 border-dashed rounded-2xl p-8 text-center bg-dark-900/30 border-dark-700">
           {!audioBlob ? (
             <div className="space-y-6">
               <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center transition-all ${
@@ -696,7 +696,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                   </button>
                 )}
               </div>
-              {!isRecording && <p className="text-slate-500 text-sm">Click to start recording your assessment</p>}
+              {!isRecording && <p className="text-dark-400 text-sm">Click to start recording your assessment</p>}
             </div>
           ) : (
             <div className="space-y-6">
@@ -704,15 +704,15 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                 <FileAudio className="w-8 h-8 text-accent-green" />
               </div>
               <div>
-                <p className="text-slate-900 font-medium">Recording Complete</p>
-                <p className="text-slate-500 text-sm">Duration: {formatTime(recordingTime)}</p>
+                <p className="text-dark-50 font-medium">Recording Complete</p>
+                <p className="text-dark-400 text-sm">Duration: {formatTime(recordingTime)}</p>
               </div>
               <div className="flex items-center justify-center gap-3">
                 <button onClick={isPlaying ? pauseRecording : playRecording} className="btn-secondary px-4 py-2 flex items-center gap-2">
                   {isPlaying ? (<><Pause className="w-4 h-4" />Pause</>) : (<><Play className="w-4 h-4" />Play</>)}
                 </button>
               </div>
-              <div className="flex items-center justify-center gap-3 pt-4 border-t border-slate-200">
+              <div className="flex items-center justify-center gap-3 pt-4 border-t border-dark-700">
                 <button onClick={clearRecording} className="btn-secondary px-4 py-2">Record Again</button>
                 <button onClick={uploadRecording} className="btn-primary px-6 py-2 flex items-center gap-2">
                   <Sparkles className="w-4 h-4" />Upload & Process
@@ -738,8 +738,8 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
               : state === 'error'
               ? 'border-red-400/50 bg-red-500/5'
               : selectedFile
-              ? 'border-slate-200 bg-slate-50/30'
-              : 'border-slate-200 hover:border-primary-500/40 hover:bg-slate-50/20 bg-slate-50/30 group'
+              ? 'border-dark-700 bg-dark-900/30'
+              : 'border-dark-700 hover:border-primary-500/40 hover:bg-dark-700/30/20 bg-dark-900/30 group'
           }`}
         >
           <input
@@ -758,29 +758,29 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                   <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center">
                     <Upload className="w-7 h-7 text-primary-400" />
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center border-2 border-slate-200">
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-dark-800 rounded-full flex items-center justify-center border-2 border-dark-700">
                     <Loader2 className="w-3.5 h-3.5 text-primary-400 animate-spin" />
                   </div>
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-slate-900 font-medium mb-1">Uploading audio...</p>
-                <p className="text-slate-500 text-xs truncate max-w-[280px] mx-auto">{selectedFile?.name}</p>
+                <p className="text-dark-50 font-medium mb-1">Uploading audio...</p>
+                <p className="text-dark-400 text-xs truncate max-w-[280px] mx-auto">{selectedFile?.name}</p>
               </div>
               <div className="relative">
-                <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-dark-700 rounded-full h-3 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-primary-500 via-indigo-500 to-accent-cyan rounded-full transition-all duration-500 ease-out progress-stripe"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
                 <div className="flex justify-between mt-2">
-                  <span className="text-xs text-slate-500">{formatFileSize(selectedFile?.size || 0)}</span>
+                  <span className="text-xs text-dark-400">{formatFileSize(selectedFile?.size || 0)}</span>
                   <span className="text-xs text-primary-400 font-bold">{uploadProgress}%</span>
                 </div>
               </div>
               {uploadProgress < 100 && (
-                <p className="text-slate-400 text-xs text-center">
+                <p className="text-dark-400 text-xs text-center">
                   {uploadProgress < 50 ? 'Preparing file...' : uploadProgress < 90 ? 'Transferring...' : 'Almost done...'}
                 </p>
               )}
@@ -793,17 +793,17 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                   <FileAudio className="w-7 h-7 text-emerald-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-slate-900 font-medium truncate">{selectedFile.name}</p>
+                  <p className="text-dark-50 font-medium truncate">{selectedFile.name}</p>
                   <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                    <span className="text-slate-500 text-xs flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-md">
+                    <span className="text-dark-400 text-xs flex items-center gap-1.5 bg-dark-700 px-2 py-0.5 rounded-md">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                       {formatFileSize(selectedFile.size)}
                     </span>
-                    <span className="text-slate-500 text-xs flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-md">
+                    <span className="text-dark-400 text-xs flex items-center gap-1.5 bg-dark-700 px-2 py-0.5 rounded-md">
                       <Clock className="w-3 h-3" />
                       Est. {estimateDuration(selectedFile.size)}
                     </span>
-                    <span className="text-slate-400 text-xs bg-slate-100 px-2 py-0.5 rounded-md uppercase">
+                    <span className="text-dark-400 text-xs bg-dark-700 px-2 py-0.5 rounded-md uppercase">
                       {selectedFile.type?.split('/')[1] || selectedFile.name.split('.').pop()}
                     </span>
                   </div>
@@ -829,21 +829,21 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
             /* Empty state - drag drop zone */
             <div className="p-10">
               <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-all duration-300 ${
-                state === 'dragging' ? 'bg-primary-500/30 scale-110 shadow-lg shadow-primary-500/20' : 'bg-slate-100 group-hover:bg-primary-50'
+                state === 'dragging' ? 'bg-primary-500/30 scale-110 shadow-lg shadow-primary-500/20' : 'bg-dark-700 group-hover:bg-primary-50'
               }`}>
                 <Upload className={`w-8 h-8 transition-all duration-300 ${
-                  state === 'dragging' ? 'text-primary-400 -translate-y-1' : 'text-slate-500 group-hover:text-primary-400'
+                  state === 'dragging' ? 'text-primary-400 -translate-y-1' : 'text-dark-400 group-hover:text-primary-400'
                 }`} />
               </div>
-              <p className="text-slate-900 font-medium mb-1 text-center">
+              <p className="text-dark-50 font-medium mb-1 text-center">
                 {state === 'dragging' ? 'Drop your audio file here' : 'Drag and drop audio file'}
               </p>
-              <p className="text-slate-500 text-sm mb-5 text-center">or click to browse files</p>
+              <p className="text-dark-400 text-sm mb-5 text-center">or click to browse files</p>
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 {['MP3', 'WAV', 'M4A', 'OGG', 'WebM'].map(fmt => (
-                  <span key={fmt} className="px-2.5 py-0.5 bg-slate-50 rounded-md text-[10px] text-slate-500 font-medium border border-slate-200">{fmt}</span>
+                  <span key={fmt} className="px-2.5 py-0.5 bg-dark-900 rounded-md text-[10px] text-dark-400 font-medium border border-dark-700">{fmt}</span>
                 ))}
-                <span className="text-slate-400 text-[10px]">· Max 100MB</span>
+                <span className="text-dark-400 text-[10px]">· Max 100MB</span>
               </div>
             </div>
           )}
@@ -859,8 +859,8 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
               <CheckCircle className="w-8 h-8 text-emerald-400 animate-check-bounce" />
             </div>
           </div>
-          <p className="text-slate-900 font-medium text-lg">Processing Complete!</p>
-          <p className="text-slate-500 text-sm mt-2 mb-6">Transcript, notes, and contract are ready</p>
+          <p className="text-dark-50 font-medium text-lg">Processing Complete!</p>
+          <p className="text-dark-400 text-sm mt-2 mb-6">Transcript, notes, and contract are ready</p>
           <div className="flex items-center justify-center gap-3">
             <button onClick={() => { reset(); onClose?.(); }} className="btn-secondary px-4 py-2">Upload Another</button>
             <button onClick={() => onUploadComplete?.({})} className="btn-primary px-6 py-2 flex items-center gap-2">
@@ -885,7 +885,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
       {state === 'idle' && !selectedFile && !audioBlob && (
         <div className="mt-6 p-3 bg-primary-50 border border-primary-500/20 rounded-xl flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-primary-400 flex-shrink-0" />
-          <p className="text-slate-600 text-sm">
+          <p className="text-dark-300 text-sm">
             AI will transcribe, identify speakers, and generate notes & contract
           </p>
         </div>

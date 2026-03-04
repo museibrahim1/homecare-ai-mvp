@@ -67,7 +67,7 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
 
   if (!note) {
     return (
-      <div className="p-8 text-center text-slate-500">
+      <div className="p-8 text-center text-dark-400">
         <p>No visit note available.</p>
         <p className="text-sm mt-2">Run the note generation pipeline to create a note.</p>
       </div>
@@ -85,8 +85,8 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">Visit Note</h3>
-          <p className="text-sm text-slate-500">Version {note.version}</p>
+          <h3 className="text-lg font-semibold text-dark-50">Visit Note</h3>
+          <p className="text-sm text-dark-400">Version {note.version}</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -113,58 +113,58 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
       </div>
 
       {/* Visit Info */}
-      <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-slate-100 rounded-lg">
+      <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-dark-700 rounded-lg">
         <div>
-          <p className="text-xs text-slate-500 uppercase">Client</p>
+          <p className="text-xs text-dark-400 uppercase">Client</p>
           <p className="font-medium text-white">{visitInfo.client_name || 'N/A'}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-500 uppercase">Caregiver</p>
+          <p className="text-xs text-dark-400 uppercase">Caregiver</p>
           <p className="font-medium text-white">{visitInfo.caregiver_name || 'N/A'}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-500 uppercase">Date</p>
+          <p className="text-xs text-dark-400 uppercase">Date</p>
           <p className="font-medium text-white">{visitInfo.date || 'N/A'}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-500 uppercase">Duration</p>
+          <p className="text-xs text-dark-400 uppercase">Duration</p>
           <p className="font-medium text-white">{visitInfo.duration_minutes || 0} minutes</p>
         </div>
       </div>
 
       {/* Tasks Performed */}
       <div className="mb-6">
-        <h4 className="text-sm font-semibold text-slate-600 mb-2">Tasks Performed</h4>
+        <h4 className="text-sm font-semibold text-dark-300 mb-2">Tasks Performed</h4>
         {Array.isArray(tasks) && tasks.length > 0 ? (
           <ul className="space-y-2">
             {tasks.map((task: any, index: number) => (
-              <li key={index} className="flex items-center justify-between p-2 bg-slate-100 rounded">
-                <span className="text-sm text-slate-500">{task.description}</span>
-                <span className="text-xs text-slate-500">{task.duration_minutes}m</span>
+              <li key={index} className="flex items-center justify-between p-2 bg-dark-700 rounded">
+                <span className="text-sm text-dark-400">{task.description}</span>
+                <span className="text-xs text-dark-400">{task.duration_minutes}m</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-slate-500">No specific tasks recorded.</p>
+          <p className="text-sm text-dark-400">No specific tasks recorded.</p>
         )}
       </div>
 
       {/* Observations */}
       <div className="mb-6">
-        <h4 className="text-sm font-semibold text-slate-600 mb-2">Observations</h4>
-        <p className="text-sm text-slate-700 bg-slate-100 p-3 rounded whitespace-pre-wrap">{stripSeparators(observations)}</p>
+        <h4 className="text-sm font-semibold text-dark-300 mb-2">Observations</h4>
+        <p className="text-sm text-dark-200 bg-dark-700 p-3 rounded whitespace-pre-wrap">{stripSeparators(observations)}</p>
       </div>
 
       {/* Concerns */}
       <div className="mb-6">
-        <h4 className="text-sm font-semibold text-slate-600 mb-2">Risks/Concerns</h4>
-        <p className="text-sm text-slate-700 bg-slate-100 p-3 rounded whitespace-pre-wrap">{stripSeparators(concerns)}</p>
+        <h4 className="text-sm font-semibold text-dark-300 mb-2">Risks/Concerns</h4>
+        <p className="text-sm text-dark-200 bg-dark-700 p-3 rounded whitespace-pre-wrap">{stripSeparators(concerns)}</p>
       </div>
 
       {/* Narrative */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-semibold text-slate-600">Narrative Note</h4>
+          <h4 className="text-sm font-semibold text-dark-300">Narrative Note</h4>
           {!isEditing && (
             <button
               onClick={() => {
@@ -185,12 +185,12 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
               value={narrative}
               onChange={(e) => setNarrative(e.target.value)}
               rows={8}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-50 rounded"
+                className="px-3 py-1 text-sm text-dark-300 hover:bg-dark-700/30 rounded"
               >
                 Cancel
               </button>
@@ -203,8 +203,8 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
             </div>
           </div>
         ) : (
-          <div className="bg-slate-100 p-4 rounded-lg">
-            <p className="text-sm text-slate-700 whitespace-pre-wrap">
+          <div className="bg-dark-700 p-4 rounded-lg">
+            <p className="text-sm text-dark-200 whitespace-pre-wrap">
               {note.narrative ? stripSeparators(note.narrative) : 'No narrative note available.'}
             </p>
           </div>

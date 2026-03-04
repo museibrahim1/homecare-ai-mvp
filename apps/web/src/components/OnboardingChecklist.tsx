@@ -152,10 +152,10 @@ export default function OnboardingChecklist() {
             )}
           </div>
           <div>
-            <h3 className={`font-semibold ${allComplete ? 'text-emerald-700' : 'text-slate-800'}`}>
+            <h3 className={`font-semibold ${allComplete ? 'text-emerald-700' : 'text-dark-100'}`}>
               {allComplete ? 'Setup Complete!' : 'Getting Started'}
             </h3>
-            <p className="text-slate-500 text-sm">
+            <p className="text-dark-400 text-sm">
               {allComplete 
                 ? 'You\'re all set to use PalmCare AI' 
                 : `${completedCount} of ${CHECKLIST_ITEMS.length} tasks completed`
@@ -165,15 +165,15 @@ export default function OnboardingChecklist() {
         </div>
         <button
           onClick={handleDismiss}
-          className="p-1.5 hover:bg-slate-100 rounded-lg transition"
+          className="p-1.5 hover:bg-dark-700/50 rounded-lg transition"
           title="Dismiss"
         >
-          <X className="w-4 h-4 text-slate-400" />
+          <X className="w-4 h-4 text-dark-400" />
         </button>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden mb-4">
+      <div className="h-1.5 bg-dark-700 rounded-full overflow-hidden mb-4">
         <div 
           className={`h-full transition-all duration-500 ${
             allComplete ? 'bg-emerald-500' : 'bg-primary-500'
@@ -194,27 +194,27 @@ export default function OnboardingChecklist() {
               href={item.href}
               className={`flex items-center gap-3 p-3 rounded-lg transition ${
                 isCompleted 
-                  ? 'bg-white/60' 
-                  : 'bg-white hover:bg-slate-50 border border-slate-100'
+                  ? 'bg-dark-800/60' 
+                  : 'bg-dark-800 hover:bg-dark-700/30 border border-dark-700'
               }`}
             >
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                isCompleted ? 'bg-emerald-50' : 'bg-slate-50'
+                isCompleted ? 'bg-emerald-50' : 'bg-dark-900'
               }`}>
                 {isCompleted ? (
                   <CheckCircle className="w-4 h-4 text-emerald-500" />
                 ) : (
-                  <ItemIcon className="w-4 h-4 text-slate-400" />
+                  <ItemIcon className="w-4 h-4 text-dark-400" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium ${
-                  isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'
+                  isCompleted ? 'text-dark-400 line-through' : 'text-dark-100'
                 }`}>
                   {item.title}
                 </p>
                 {!isCompleted && (
-                  <p className="text-xs text-slate-400">{item.description}</p>
+                  <p className="text-xs text-dark-400">{item.description}</p>
                 )}
               </div>
               {!isCompleted && (

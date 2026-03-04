@@ -246,8 +246,8 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
         className="w-5 h-5 rounded border-slate-500 mt-0.5"
       />
       <div>
-        <span className="text-slate-900 font-medium">{label}</span>
-        {description && <p className="text-sm text-slate-400 mt-0.5">{description}</p>}
+        <span className="text-dark-50 font-medium">{label}</span>
+        {description && <p className="text-sm text-dark-400 mt-0.5">{description}</p>}
       </div>
     </label>
   );
@@ -261,10 +261,10 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
       <div className="relative bg-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-xl font-bold text-dark-50">
             {caregiver?.id ? 'Edit Caregiver' : 'Add New Caregiver'}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-900">
+          <button onClick={onClose} className="text-dark-400 hover:text-dark-50">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -278,7 +278,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
               className={`flex items-center gap-2 px-3 py-3 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-slate-400 hover:text-slate-900'
+                  : 'border-transparent text-dark-400 hover:text-dark-50'
               }`}
             >
               {tab.icon}
@@ -318,7 +318,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <Phone className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Phone Numbers</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Phone Numbers</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <InputField label="Primary Phone" field="phone" placeholder="(555) 123-4567" />
@@ -327,13 +327,13 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
 
               <div className="flex items-center gap-2 mt-6 mb-2">
                 <Mail className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Email</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Email</h3>
               </div>
               <InputField label="Email Address" field="email" type="email" placeholder="sarah.johnson@email.com" />
 
               <div className="flex items-center gap-2 mt-6 mb-2">
                 <Home className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Address</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Address</h3>
               </div>
               <div className="space-y-4">
                 <InputField label="Street Address" field="address" placeholder="456 Oak Avenue" />
@@ -350,7 +350,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <Award className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Certifications</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Certifications</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <SelectField label="Certification Level" field="certification_level" options={[
@@ -369,7 +369,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
 
               <div className="flex items-center gap-2 mt-6 mb-2">
                 <Languages className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Languages Spoken</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Languages Spoken</h3>
               </div>
               <div className="flex gap-2 mb-2">
                 <input
@@ -378,7 +378,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
                   value={newLanguage}
                   onChange={e => setNewLanguage(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addLanguage()}
-                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="flex-1 px-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
                 <button onClick={addLanguage} className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg">
                   Add
@@ -401,7 +401,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <Heart className="w-5 h-5 text-red-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Care Level Capabilities</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Care Level Capabilities</h3>
               </div>
               <div className="space-y-3">
                 <CheckboxField 
@@ -423,7 +423,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
 
               <div className="flex items-center gap-2 mt-6 mb-2">
                 <Shield className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Specializations</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Specializations</h3>
               </div>
               <div className="flex gap-2 mb-2">
                 <input
@@ -432,7 +432,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
                   value={newSpecialization}
                   onChange={e => setNewSpecialization(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addSpecialization()}
-                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="flex-1 px-3 py-2 bg-dark-900 border border-dark-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
                 <button onClick={addSpecialization} className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg">
                   Add
@@ -442,7 +442,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
                 {(formData.specializations || []).map((spec, i) => (
                   <span key={i} className="px-3 py-1 bg-slate-700 rounded-lg text-sm text-slate-300 flex items-center gap-2">
                     {spec}
-                    <button onClick={() => removeSpecialization(spec)} className="text-slate-400 hover:text-red-600">
+                    <button onClick={() => removeSpecialization(spec)} className="text-dark-400 hover:text-red-600">
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -451,7 +451,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
 
               <div className="flex items-center gap-2 mt-6 mb-2">
                 <Briefcase className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Client Capacity</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Client Capacity</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <InputField label="Maximum Clients" field="max_clients" type="number" placeholder="5" />
@@ -464,7 +464,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Weekly Availability</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Weekly Availability</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -476,7 +476,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
                     placeholder="Mon, Tue, Wed, Thu, Fri"
                     className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Comma-separated days</p>
+                  <p className="text-xs text-dark-400 mt-1">Comma-separated days</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">Available Hours</label>
@@ -492,7 +492,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
 
               <div className="flex items-center gap-2 mt-6 mb-2">
                 <MapPin className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Service Area</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Service Area</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <InputField label="Maximum Travel Distance (miles)" field="max_travel_miles" type="number" placeholder="25" />
@@ -507,7 +507,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <FileCheck className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Background Check</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Background Check</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <InputField label="Background Check Date" field="background_check_date" type="date" />
@@ -520,14 +520,14 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
               </div>
 
               <div className="p-4 bg-slate-700/50 rounded-lg mt-4">
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-dark-400">
                   <strong className="text-white">Compliance Note:</strong> Background checks should be renewed annually. Caregivers with expired or failed checks should not be assigned to clients.
                 </p>
               </div>
 
               <div className="flex items-center gap-2 mt-6 mb-2">
                 <Briefcase className="w-5 h-5 text-purple-600" />
-                <h3 className="text-lg font-semibold text-slate-900">External System Integration</h3>
+                <h3 className="text-lg font-semibold text-dark-50">External System Integration</h3>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <InputField label="External ID" field="external_id" placeholder="WRK-12345" />
@@ -546,7 +546,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <Star className="w-5 h-5 text-amber-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Performance Metrics</h3>
+                <h3 className="text-lg font-semibold text-dark-50">Performance Metrics</h3>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -569,23 +569,23 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
                 <div className="p-4 bg-slate-700/50 rounded-lg text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Star className="w-5 h-5 text-amber-600" />
-                    <span className="text-2xl font-bold text-slate-900">{formData.rating ? Number(formData.rating).toFixed(1) : '5.0'}</span>
+                    <span className="text-2xl font-bold text-dark-50">{formData.rating ? Number(formData.rating).toFixed(1) : '5.0'}</span>
                   </div>
-                  <p className="text-sm text-slate-400">Average Rating</p>
+                  <p className="text-sm text-dark-400">Average Rating</p>
                 </div>
                 <div className="p-4 bg-slate-700/50 rounded-lg text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Clock className="w-5 h-5 text-purple-600" />
-                    <span className="text-2xl font-bold text-slate-900">{formData.years_experience || 0}</span>
+                    <span className="text-2xl font-bold text-dark-50">{formData.years_experience || 0}</span>
                   </div>
-                  <p className="text-sm text-slate-400">Years Experience</p>
+                  <p className="text-sm text-dark-400">Years Experience</p>
                 </div>
                 <div className="p-4 bg-slate-700/50 rounded-lg text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <CheckCircle className="w-5 h-5 text-emerald-600" />
-                    <span className="text-2xl font-bold text-slate-900">{formData.total_assignments || 0}</span>
+                    <span className="text-2xl font-bold text-dark-50">{formData.total_assignments || 0}</span>
                   </div>
-                  <p className="text-sm text-slate-400">Completed Assignments</p>
+                  <p className="text-sm text-dark-400">Completed Assignments</p>
                 </div>
               </div>
             </div>
@@ -609,7 +609,7 @@ export default function CaregiverModal({ caregiver, isOpen, onClose, onSave, onD
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-slate-400 hover:text-slate-900 transition-colors"
+              className="px-4 py-2 text-dark-400 hover:text-dark-50 transition-colors"
             >
               Cancel
             </button>

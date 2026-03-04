@@ -111,7 +111,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
     return (
       <div className="flex flex-col items-center justify-center py-8">
         <Loader2 className="w-8 h-8 text-primary-400 animate-spin mb-4" />
-        <p className="text-slate-600 text-center">Loading audio...</p>
+        <p className="text-dark-300 text-center">Loading audio...</p>
       </div>
     );
   }
@@ -119,11 +119,11 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
   if (!audioUrl) {
     return (
       <div className="flex flex-col items-center justify-center py-8">
-        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-          <Mic className="w-8 h-8 text-slate-500" />
+        <div className="w-16 h-16 bg-dark-900 rounded-2xl flex items-center justify-center mb-4">
+          <Mic className="w-8 h-8 text-dark-400" />
         </div>
-        <p className="text-slate-600 text-center mb-1">No audio available</p>
-        <p className="text-slate-400 text-sm text-center">
+        <p className="text-dark-300 text-center mb-1">No audio available</p>
+        <p className="text-dark-400 text-sm text-center">
           Upload an audio file to enable playback
         </p>
       </div>
@@ -148,7 +148,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
             className={`w-1.5 rounded-full transition-all duration-150 ${
               bar.isActive 
                 ? 'bg-gradient-to-t from-primary-500 to-accent-cyan' 
-                : 'bg-slate-100'
+                : 'bg-dark-700'
             } ${isPlaying && bar.isActive ? 'waveform-bar' : ''}`}
             style={{ height: `${bar.height}%` }}
           />
@@ -157,7 +157,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
 
       {/* Progress bar */}
       <div className="flex items-center gap-4">
-        <span className="text-sm text-slate-500 w-12 text-right font-mono">
+        <span className="text-sm text-dark-400 w-12 text-right font-mono">
           {formatTime(currentTime)}
         </span>
         <div className="flex-1 relative">
@@ -170,7 +170,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
             className="w-full"
           />
         </div>
-        <span className="text-sm text-slate-500 w-12 font-mono">
+        <span className="text-sm text-dark-400 w-12 font-mono">
           {formatTime(duration)}
         </span>
       </div>
@@ -179,7 +179,7 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
       <div className="flex items-center justify-center gap-4">
         <button
           onClick={() => skip(-10)}
-          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-slate-900"
+          className="p-3 hover:bg-dark-700/30 rounded-xl transition-colors text-dark-300 hover:text-dark-50"
           title="Back 10 seconds"
         >
           <SkipBack className="w-5 h-5" />
@@ -198,17 +198,17 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
 
         <button
           onClick={() => skip(10)}
-          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-slate-900"
+          className="p-3 hover:bg-dark-700/30 rounded-xl transition-colors text-dark-300 hover:text-dark-50"
           title="Forward 10 seconds"
         >
           <SkipForward className="w-5 h-5" />
         </button>
 
-        <div className="w-px h-8 bg-slate-100 mx-2" />
+        <div className="w-px h-8 bg-dark-700 mx-2" />
 
         <button 
           onClick={toggleMute}
-          className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-600 hover:text-slate-900"
+          className="p-3 hover:bg-dark-700/30 rounded-xl transition-colors text-dark-300 hover:text-dark-50"
         >
           {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
         </button>
