@@ -67,7 +67,9 @@ class LiveTranscriptionService: ObservableObject {
             self.segments = newSegments
             self.fullTranscript = response.transcript
             self.lastChunkEnd = response.duration
-        } catch { }
+        } catch {
+            // Transient network errors are expected during live recording; skip this chunk
+        }
     }
 
     private func buildSegments(from words: [TranscriptWord]) -> [TranscriptSegment] {

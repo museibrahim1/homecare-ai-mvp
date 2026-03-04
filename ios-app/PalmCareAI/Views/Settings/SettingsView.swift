@@ -6,7 +6,7 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var user: User?
-    @State private var subscription: UserSubscription?
+    @State private var subscription: SubscriptionResponse?
     @State private var showSubscription = false
     @State private var showLogoutConfirm = false
     @State private var showGoogleCalAuth = false
@@ -210,7 +210,7 @@ struct SettingsView: View {
                         Text("Billing plan")
                             .font(.system(size: 11))
                             .foregroundColor(.palmSecondary)
-                        Text(subscription?.plan_name ?? "Free")
+                        Text(subscription?.plan?.name ?? "Free")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.palmText)
                     }
@@ -239,7 +239,7 @@ struct SettingsView: View {
                         Text("Usage this period")
                             .font(.system(size: 11))
                             .foregroundColor(.palmSecondary)
-                        Text("\(sub.runs_used ?? 0) / \(sub.runs_limit ?? 0) runs")
+                        Text("\(sub.subscription?.visits_this_month ?? 0) / \(sub.plan?.max_visits_per_month ?? 0) runs")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.palmText)
                     }

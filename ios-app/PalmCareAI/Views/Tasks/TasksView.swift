@@ -56,7 +56,9 @@ struct TasksView: View {
                     do {
                         let created = try await api.createTask(task)
                         await MainActor.run { tasks.insert(created, at: 0) }
-                    } catch {}
+                    } catch {
+                        // Task creation failed silently; user can retry
+                    }
                 }
             })
         }
@@ -187,7 +189,9 @@ struct TasksView: View {
                     tasks[idx] = updated
                 }
             }
-        } catch {}
+        } catch {
+            // Complete failed; task remains in current state
+        }
     }
 
     private func deleteTask(_ task: TaskItem) async {
@@ -196,7 +200,9 @@ struct TasksView: View {
             await MainActor.run {
                 tasks.removeAll { $0.id == task.id }
             }
-        } catch {}
+        } catch {
+            // Delete failed; task remains in list
+        }
     }
 }
 

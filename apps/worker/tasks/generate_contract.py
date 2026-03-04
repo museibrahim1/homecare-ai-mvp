@@ -68,7 +68,7 @@ def generate_service_contract(self, visit_id: str):
         agency_business = None
         try:
             from models import User, Business, BusinessUser, AgencySettings
-            agency_user = db.query(User).filter(User.id == visit.user_id).first()
+            agency_user = db.query(User).filter(User.id == client.created_by).first() if client.created_by else None
             if agency_user:
                 agency_settings = db.query(AgencySettings).filter(AgencySettings.user_id == agency_user.id).first()
                 if agency_settings and agency_settings.state:

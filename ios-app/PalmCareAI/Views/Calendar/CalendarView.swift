@@ -84,7 +84,9 @@ struct CalendarView: View {
             if googleCalConnected {
                 do {
                     apiEvents = try await api.fetchCalendarEvents()
-                } catch {}
+                } catch {
+                    // Google Calendar fetch failed; show local events only
+                }
             }
         }
         .overlay(alignment: .bottomTrailing) {

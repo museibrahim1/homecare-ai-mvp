@@ -141,9 +141,9 @@ struct SubscriptionView: View {
                     (
                         id: plan.id,
                         name: plan.name,
-                        runs: plan.runs_per_month.map { "\($0)" } ?? "∞",
-                        price: "$\(Int(plan.price_monthly))",
-                        isPopular: plan.is_popular ?? false
+                        runs: plan.max_users.map { "\($0)" } ?? "∞",
+                        price: plan.displayPrice,
+                        isPopular: plan.tier?.lowercased() == "growth"
                     )
                 }
             }

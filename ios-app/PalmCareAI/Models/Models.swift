@@ -123,15 +123,51 @@ struct VisitListResponse: Codable {
 struct SubscriptionPlan: Codable, Identifiable {
     let id: String
     let name: String
-    let runs_per_month: Int?
-    let price_monthly: Double
-    let price_per_run: Double?
-    let old_price: Double?
-    let stripe_price_id: String?
-    let is_popular: Bool?
+    let tier: String?
+    let description: String?
+    let monthly_price: Double?
+    let annual_price: Double?
+    let setup_fee: Double?
+    let max_users: Int?
+    let is_contact_sales: Bool?
     let features: [String]?
 
-    var isEnterprise: Bool { runs_per_month == nil }
+    var isEnterprise: Bool { is_contact_sales ?? false }
+    var displayPrice: String {
+        guard let price = monthly_price, price > 0 else { return "Contact Sales" }
+        return String(format: "$%.0f", price)
+    }
+}
+
+struct SubscriptionDetail: Codable {
+    let id: String?
+    let status: String?
+    let billing_cycle: String?
+    let current_period_start: String?
+    let current_period_end: String?
+    let trial_ends_at: String?
+    let cancelled_at: String?
+    let visits_this_month: Int?
+    let storage_used_mb: Int?
+    let business_id: String?
+}
+
+struct SubscriptionPlanDetail: Codable {
+    let id: String?
+    let name: String?
+    let tier: String?
+    let monthly_price: Double?
+    let annual_price: Double?
+    let max_users: Int?
+    let max_clients: Int?
+    let max_visits_per_month: Int?
+    let max_storage_gb: Int?
+    let features: [String]?
+}
+
+struct SubscriptionResponse: Codable {
+    let subscription: SubscriptionDetail?
+    let plan: SubscriptionPlanDetail?
 }
 
 struct UserSubscription: Codable {
@@ -144,7 +180,6 @@ struct UserSubscription: Codable {
     let can_create: Bool?
     let upgrade_required: Bool?
 
-    // Legacy aliases for Settings display
     var runs_used: Int? { total_assessments }
     var runs_limit: Int? { max_allowed }
 
@@ -263,14 +298,35 @@ struct VisitContract: Codable, Identifiable {
     let client_id: String?
     let visit_id: String?
     let title: String?
-    let services: String?
-    let schedule: String?
+    let services: [AnyCodable]?
+    let schedule: [String: AnyCodable]?
     let hourly_rate: Double?
     let weekly_hours: Double?
     let content: String?
     let status: String?
+    let start_date: String?
+    let end_date: String?
+    let cancellation_policy: String?
+    let terms_and_conditions: String?
     let created_at: String?
     let updated_at: String?
+
+    var servicesDescription: String {
+        guard let services = services else { return "No services listed" }
+        return services.compactMap { item -> String? in
+            guard let dict = item.value as? [String: Any] else { return nil }
+            let name = dict["name"] as? String ?? dict["service"] as? String ?? "Service"
+            let desc = dict["description"] as? String
+            return desc != nil ? "\(name): \(desc!)" : name
+        }.joined(separator: "\n")
+    }
+
+    var scheduleDescription: String {
+        guard let schedule = schedule else { return "No schedule set" }
+        return schedule.compactMap { key, val -> String? in
+            "\(key.capitalized): \(val.value)"
+        }.joined(separator: "\n")
+    }
 }
 
 struct PipelineStatusResponse: Codable {
@@ -519,6 +575,10 @@ struct AnyCodable: Codable {
             try container.encode(double)
         } else if let string = value as? String {
             try container.encode(string)
+        } else if let array = value as? [Any] {
+            try container.encode(array.map { AnyCodable($0) })
+        } else if let dict = value as? [String: Any] {
+            try container.encode(dict.mapValues { AnyCodable($0) })
         } else {
             try container.encodeNil()
         }

@@ -180,13 +180,22 @@ def run_full_pipeline(self, visit_id: str):
     # =========================================================================
     update_pipeline_state(visit_id, "full_pipeline", "completed")
     
-    # Update visit status
+    # Check if any critical steps failed before marking as pending_review
+    has_failures = False
     with get_db_session() as db:
         visit = db.query(Visit).filter(Visit.id == visit_id).first()
-        if visit:
-            visit.status = "pending_review"
+        if visit and visit.pipeline_state:
+            for step_key in ["transcription", "billing", "note", "contract"]:
+                step_state = visit.pipeline_state.get(step_key, {})
+                if isinstance(step_state, dict) and step_state.get("status") == "failed":
+                    has_failures = True
+                    break
+            visit.status = "pipeline_failed" if has_failures else "pending_review"
             db.commit()
     
-    logger.info(f"Full pipeline completed for visit {visit_id}")
+    if has_failures:
+        logger.warning(f"Pipeline completed with failures for visit {visit_id}")
+    else:
+        logger.info(f"Full pipeline completed for visit {visit_id}")
     
-    return {"status": "completed", "visit_id": visit_id}
+    return {"status": "completed" if not has_failures else "completed_with_failures", "visit_id": visit_id}

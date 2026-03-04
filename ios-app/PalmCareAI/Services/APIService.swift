@@ -507,7 +507,7 @@ class APIService: ObservableObject {
 
     // MARK: - Billing & Subscription
 
-    func fetchSubscription() async throws -> UserSubscription {
+    func fetchSubscription() async throws -> SubscriptionResponse {
         try await request("GET", path: "/billing/subscription")
     }
 

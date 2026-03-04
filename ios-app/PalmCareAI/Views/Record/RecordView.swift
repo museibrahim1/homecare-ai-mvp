@@ -746,7 +746,12 @@ struct RecordView: View {
         do {
             let fetched = try await api.fetchClients()
             await MainActor.run { clients = fetched }
-        } catch { }
+        } catch {
+            await MainActor.run {
+                errorMessage = "Could not load clients. Pull down to retry."
+                showError = true
+            }
+        }
     }
 
     private func timeString(_ interval: TimeInterval) -> String {
@@ -837,7 +842,9 @@ struct ClientPickerSheet: View {
                 if clients.isEmpty {
                     do {
                         localClients = try await api.fetchClients()
-                    } catch { }
+                    } catch {
+                        // Clients already passed in; fallback silently
+                    }
                 }
             }
         }

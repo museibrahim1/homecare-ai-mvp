@@ -618,11 +618,11 @@ struct VisitDetailView: View {
                     }
                 }
 
-                if let services = c.services, !services.isEmpty {
-                    contractDetailCard(icon: "list.bullet", label: "Services", value: services, color: .palmPrimary)
+                if c.services != nil && !(c.services?.isEmpty ?? true) {
+                    contractDetailCard(icon: "list.bullet", label: "Services", value: c.servicesDescription, color: .palmPrimary)
                 }
-                if let schedule = c.schedule, !schedule.isEmpty {
-                    contractDetailCard(icon: "calendar", label: "Schedule", value: schedule, color: .palmBlue)
+                if c.schedule != nil && !(c.schedule?.isEmpty ?? true) {
+                    contractDetailCard(icon: "calendar", label: "Schedule", value: c.scheduleDescription, color: .palmBlue)
                 }
 
                 HStack(spacing: 12) {
