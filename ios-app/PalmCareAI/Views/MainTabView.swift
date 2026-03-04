@@ -69,6 +69,7 @@ struct CustomTabBar: View {
                                     .foregroundColor(.white)
                             }
                         }
+                        .accessibilityLabel("Record assessment")
                         .offset(y: -20)
 
                         Text(tabs[index].label)

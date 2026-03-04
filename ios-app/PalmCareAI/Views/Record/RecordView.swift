@@ -321,6 +321,7 @@ struct RecordView: View {
                 .cornerRadius(20)
                 .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
+            .accessibilityLabel("Select client")
 
             Spacer()
 
@@ -356,7 +357,10 @@ struct RecordView: View {
 
             VoiceOrb(isActive: false, audioLevel: 0)
                 .frame(width: 240, height: 240)
+                .contentShape(Rectangle())
                 .onTapGesture { handleRecordTap() }
+                .accessibilityLabel(recorder.isRecording ? "Stop recording" : "Start recording")
+                .accessibilityAddTraits(.isButton)
 
             Text("Tap to start recording")
                 .font(.system(size: 14, weight: .semibold))
@@ -401,7 +405,10 @@ struct RecordView: View {
         VStack(spacing: 0) {
             VoiceOrb(isActive: true, audioLevel: recorder.audioLevel)
                 .frame(width: 120, height: 120)
+                .contentShape(Rectangle())
                 .onTapGesture { handleRecordTap() }
+                .accessibilityLabel(recorder.isRecording ? "Stop recording" : "Start recording")
+                .accessibilityAddTraits(.isButton)
                 .padding(.top, 4)
                 .padding(.bottom, 12)
 

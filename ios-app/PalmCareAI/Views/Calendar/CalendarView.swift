@@ -100,6 +100,7 @@ struct CalendarView: View {
                     .cornerRadius(14)
                     .shadow(color: Color.palmPrimary.opacity(0.4), radius: 8, y: 4)
             }
+            .accessibilityLabel("Add new event")
             .padding(.trailing, 18)
             .padding(.bottom, 100)
         }
@@ -122,6 +123,7 @@ struct CalendarView: View {
                     .background(Color.palmPrimary.opacity(0.08))
                     .cornerRadius(10)
             }
+            .accessibilityLabel("Previous month")
 
             Spacer()
 
@@ -154,6 +156,7 @@ struct CalendarView: View {
                     .background(Color.palmPrimary.opacity(0.08))
                     .cornerRadius(10)
             }
+            .accessibilityLabel("Next month")
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
@@ -247,6 +250,7 @@ struct CalendarView: View {
         }
         let dayEvents = localEvents + apiDayEvents.map { apiEvt in
             CalendarEvent(
+                id: apiEvt.id,
                 title: apiEvt.title,
                 description: apiEvt.description,
                 startDate: ISO8601DateFormatter().date(from: apiEvt.start_time) ?? Date(),
@@ -296,7 +300,17 @@ struct CalendarView: View {
                             EventRow(event: event, timeFmt: timeFmt)
                                 .contextMenu {
                                     Button(role: .destructive) {
-                                        withAnimation { store.delete(id: event.id) }
+                                        let isApiEvent = apiEvents.contains { $0.id == event.id }
+                                        if isApiEvent {
+                                            Task {
+                                                try? await api.deleteCalendarEvent(eventId: event.id)
+                                                await MainActor.run {
+                                                    withAnimation { apiEvents.removeAll { $0.id == event.id } }
+                                                }
+                                            }
+                                        } else {
+                                            withAnimation { store.delete(id: event.id) }
+                                        }
                                     } label: {
                                         Label("Delete", systemImage: "trash")
                                     }

@@ -1,5 +1,4 @@
 import SwiftUI
-import AuthenticationServices
 
 struct LoginView: View {
     @EnvironmentObject var api: APIService
@@ -100,6 +99,7 @@ struct LoginView: View {
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
+                                .accessibilityLabel("Email address")
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 10)
@@ -127,10 +127,12 @@ struct LoginView: View {
                                     .foregroundColor(.palmText)
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
+                                    .accessibilityLabel("Password")
                             } else {
                                 SecureField("Enter your password", text: $password)
                                     .font(.system(size: 13))
                                     .foregroundColor(.palmText)
+                                    .accessibilityLabel("Password")
                             }
 
                             Button { showPassword.toggle() } label: {
@@ -138,6 +140,7 @@ struct LoginView: View {
                                     .font(.system(size: 15))
                                     .foregroundColor(.palmSecondary)
                             }
+                            .accessibilityLabel(showPassword ? "Hide password" : "Show password")
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 10)
@@ -153,7 +156,7 @@ struct LoginView: View {
                             HStack(spacing: 7) {
                                 RoundedRectangle(cornerRadius: 4)
                                     .stroke(rememberMe ? Color.palmPrimary : Color.palmBorder, lineWidth: 1.5)
-                                    .frame(width: 16, height: 16)
+                                    .frame(width: 20, height: 20)
                                     .overlay(
                                         rememberMe ?
                                         Image(systemName: "checkmark")
@@ -167,6 +170,7 @@ struct LoginView: View {
                                     .foregroundColor(.palmSecondary)
                             }
                         }
+                        .accessibilityLabel("Keep me signed in")
 
                         Spacer()
 
@@ -193,29 +197,10 @@ struct LoginView: View {
                         .cornerRadius(12)
                         .shadow(color: Color.palmPrimary.opacity(0.35), radius: 7, y: 3)
                     }
+                    .accessibilityLabel("Sign in")
                     .disabled(isLoading || email.isEmpty || password.isEmpty)
                     .opacity((email.isEmpty || password.isEmpty) ? 0.5 : 1)
                     .padding(.bottom, 14)
-
-                    HStack(spacing: 10) {
-                        Rectangle().fill(Color.palmBorder).frame(height: 1)
-                        Text("or sign in with")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.palmSecondary)
-                            .fixedSize()
-                        Rectangle().fill(Color.palmBorder).frame(height: 1)
-                    }
-                    .padding(.bottom, 14)
-
-                    SignInWithAppleButton(.signIn) { request in
-                        request.requestedScopes = [.fullName, .email]
-                    } onCompletion: { result in
-                        handleAppleSignIn(result)
-                    }
-                    .signInWithAppleButtonStyle(.black)
-                    .frame(height: 44)
-                    .cornerRadius(8)
-                    .padding(.bottom, 8)
 
                     HStack(spacing: 4) {
                         Text("New to PalmCare?")
@@ -279,56 +264,6 @@ struct LoginView: View {
                     showError = true
                     isLoading = false
                 }
-            }
-        }
-    }
-
-    private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
-        switch result {
-        case .success(let auth):
-            guard let credential = auth.credential as? ASAuthorizationAppleIDCredential,
-                  let tokenData = credential.identityToken,
-                  let idToken = String(data: tokenData, encoding: .utf8) else {
-                errorMessage = "Could not process Apple Sign In credentials."
-                showError = true
-                return
-            }
-
-            let appleEmail = credential.email
-            let fullName = [credential.fullName?.givenName, credential.fullName?.familyName]
-                .compactMap { $0 }
-                .joined(separator: " ")
-
-            isLoading = true
-            Task {
-                do {
-                    var body: [String: Any] = ["id_token": idToken]
-                    if let email = appleEmail { body["email"] = email }
-                    if !fullName.isEmpty { body["full_name"] = fullName }
-                    let response: LoginResponse = try await api.request(
-                        "POST", path: "/auth/apple-signin",
-                        body: body,
-                        noAuth: true
-                    )
-                    await MainActor.run {
-                        if let token = response.access_token {
-                            api.token = token
-                        }
-                        isLoading = false
-                    }
-                } catch {
-                    await MainActor.run {
-                        errorMessage = "Apple Sign In is not yet configured on the server. Please use email/password."
-                        showError = true
-                        isLoading = false
-                    }
-                }
-            }
-
-        case .failure(let error):
-            if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
-                errorMessage = error.localizedDescription
-                showError = true
             }
         }
     }
