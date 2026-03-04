@@ -135,7 +135,7 @@ export default function QuickSetupPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a1a]">
+    <div className="landing-dark flex min-h-screen bg-[#0a0a1a]">
       <Sidebar />
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
         <div className="max-w-2xl mx-auto">

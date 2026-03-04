@@ -148,14 +148,14 @@ export default function AnalyticsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
+      <div className="landing-dark min-h-screen bg-[#0a0a1a] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] flex">
+    <div className="landing-dark min-h-screen bg-[#0a0a1a] flex">
       <Sidebar />
       <main className="flex-1 ml-64 p-6">
         {/* Header */}

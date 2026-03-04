@@ -597,7 +597,7 @@ export default function SalesLeadsPage() {
               Sales Leads CRM
             </h1>
             <p className="text-sm text-slate-500 mt-1">
-              Private outbound campaign tracker — NE & IA home care agencies
+              Private outbound campaign tracker — home care agencies across all US states
             </p>
           </div>
           <div className="flex gap-3">
@@ -615,6 +615,14 @@ export default function SalesLeadsPage() {
             >
               {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               {importing ? 'Importing...' : 'Import All States'}
+            </button>
+            <button
+              onClick={seedAgencies}
+              disabled={importing}
+              className="px-3 py-2 bg-[#1a1a2e] border border-emerald-800/50 rounded-lg text-emerald-400 hover:text-emerald-300 hover:border-emerald-700 flex items-center gap-2 text-sm disabled:opacity-50"
+            >
+              {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              Seed 163 Agencies
             </button>
             <button
               onClick={cleanupNoEmail}

@@ -199,7 +199,7 @@ export default function AdminIncidentsPage() {
 
   if (!isAuthorized) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="landing-dark flex min-h-screen bg-slate-50">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -212,7 +212,7 @@ export default function AdminIncidentsPage() {
   const resolvedCount = incidents.filter(i => i.status === 'resolved').length;
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="landing-dark flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 p-8 overflow-y-auto">
       <div className="max-w-5xl mx-auto">

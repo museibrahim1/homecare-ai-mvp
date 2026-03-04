@@ -122,7 +122,7 @@ export default function AdminBusinessesPage() {
   const paginatedBusinesses = businesses.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="landing-dark min-h-screen bg-slate-50 flex">
       <Sidebar />
       
       <main className="flex-1 p-8">

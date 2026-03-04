@@ -211,7 +211,7 @@ export default function BusinessDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex">
+      <div className="landing-dark min-h-screen bg-slate-50 flex">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-primary-400 animate-spin" />
@@ -222,7 +222,7 @@ export default function BusinessDetailPage() {
 
   if (!business) {
     return (
-      <div className="min-h-screen bg-slate-50 flex">
+      <div className="landing-dark min-h-screen bg-slate-50 flex">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -242,7 +242,7 @@ export default function BusinessDetailPage() {
   const canApprove = ['pending', 'sos_verified', 'documents_submitted'].includes(business.verification_status);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="landing-dark min-h-screen bg-slate-50 flex">
       <Sidebar />
       
       <main className="flex-1 p-8">
