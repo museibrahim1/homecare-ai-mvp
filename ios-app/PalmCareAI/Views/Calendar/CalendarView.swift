@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Local Event Store
 
+@MainActor
 class EventStore: ObservableObject {
     @Published var events: [CalendarEvent] = []
 
@@ -69,6 +70,9 @@ struct CalendarView: View {
     }()
     private let dateLabelFmt: DateFormatter = {
         let f = DateFormatter(); f.dateFormat = "EEEE, MMM d"; return f
+    }()
+    private let dayCellLabelFmt: DateFormatter = {
+        let f = DateFormatter(); f.dateFormat = "d MMM"; return f
     }()
 
     var body: some View {
@@ -213,6 +217,13 @@ struct CalendarView: View {
         }
         let hasEvt = hasLocalEvt || hasApiEvt
 
+        let dateStr = dayCellLabelFmt.string(from: date)
+        var hintParts: [String] = []
+        if isSelected { hintParts.append("selected") }
+        if isToday { hintParts.append("today") }
+        if hasEvt { hintParts.append("has events") }
+        let a11yLabel = hintParts.isEmpty ? dateStr : "\(dateStr), \(hintParts.joined(separator: ", "))"
+
         return Button {
             withAnimation(.easeInOut(duration: 0.15)) { selectedDate = date }
         } label: {
@@ -238,6 +249,7 @@ struct CalendarView: View {
             }
             .frame(height: 42)
         }
+        .accessibilityLabel(a11yLabel)
     }
 
     // MARK: - Events List
@@ -406,6 +418,16 @@ struct EventRow: View {
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityHint("Long press for options")
+    }
+
+    private var accessibilityLabel: String {
+        let timeRange = "\(timeFmt.string(from: event.startDate)) to \(timeFmt.string(from: event.endDate))"
+        if let loc = event.location, !loc.isEmpty {
+            return "\(event.title), \(timeRange), \(loc)"
+        }
+        return "\(event.title), \(timeRange)"
     }
 }
 
