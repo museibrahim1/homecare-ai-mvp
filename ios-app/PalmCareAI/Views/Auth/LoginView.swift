@@ -324,13 +324,12 @@ struct LoginView: View {
             isLoading = true
             Task {
                 do {
+                    var body: [String: Any] = ["id_token": idToken]
+                    if let email = appleEmail { body["email"] = email }
+                    if !fullName.isEmpty { body["full_name"] = fullName }
                     let response: LoginResponse = try await api.request(
                         "POST", path: "/auth/apple-signin",
-                        body: [
-                            "id_token": idToken,
-                            "email": appleEmail as Any,
-                            "full_name": fullName.isEmpty ? nil as Any : fullName as Any
-                        ],
+                        body: body,
                         noAuth: true
                     )
                     await MainActor.run {

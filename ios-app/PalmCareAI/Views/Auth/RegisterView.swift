@@ -106,7 +106,7 @@ struct RegisterView: View {
 
                     HStack(spacing: 12) {
                         FormField(label: "State", icon: "map", placeholder: "CA", text: $stateCode, isRequired: false)
-                        FormField(label: "Zip Code", icon: "mappin", placeholder: "90210", text: $zipCode, keyboardType: .numberPad, isRequired: false)
+                        FormField(label: "Zip Code", icon: "mappin", placeholder: "90210", text: $zipCode, isRequired: false, keyboardType: .numberPad)
                     }
 
                     // Password
