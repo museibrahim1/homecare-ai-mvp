@@ -47,8 +47,8 @@ ALLOWED_SENDERS = {
 }
 
 TARGET_RECIPIENT = "ai@palmcareai.com"
-REPLY_TO = "support@palmtai.com"
-FROM_ADDRESS = "PalmCare AI Agent <onboarding@palmtai.com>"
+REPLY_TO = "museibrahim@palmtai.com"
+FROM_ADDRESS = "PalmCare AI Agent <onboarding@resend.dev>"
 
 # ---------------------------------------------------------------------------
 # Logging

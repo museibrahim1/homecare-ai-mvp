@@ -20,8 +20,8 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+DAEMON_DIR="$HOME/.palmcare"
 PLIST_NAME="com.palmcare.ai-tasks"
-PLIST_SRC="$SCRIPT_DIR/$PLIST_NAME.plist"
 PLIST_DST="$HOME/Library/LaunchAgents/$PLIST_NAME.plist"
 LOG_FILE="$HOME/Library/Logs/palmcare-ai-tasks.log"
 
@@ -91,13 +91,31 @@ pip3 install --quiet anthropic requests python-dotenv 2>/dev/null || {
 echo -e "  ${GREEN}✓${NC} Python packages installed"
 
 # ------------------------------------------------------------------
+# Copy daemon files to ~/.palmcare/ (avoids macOS Desktop sandbox)
+# ------------------------------------------------------------------
+echo ""
+echo "Setting up daemon directory..."
+
+mkdir -p "$DAEMON_DIR"
+mkdir -p "$HOME/Library/LaunchAgents"
+mkdir -p "$HOME/Library/Logs"
+
+cp "$SCRIPT_DIR/ai_task_daemon.py" "$DAEMON_DIR/"
+cp "$SCRIPT_DIR/ai_task_executor.py" "$DAEMON_DIR/"
+cp "$PROJECT_ROOT/.env" "$DAEMON_DIR/.env"
+
+# Update PROJECT_ROOT in copied files to point to actual project
+sed -i '' "s|PROJECT_ROOT = Path(__file__).resolve().parent.parent|PROJECT_ROOT = Path(\"$PROJECT_ROOT\")|" "$DAEMON_DIR/ai_task_executor.py"
+sed -i '' "s|PROJECT_ROOT = Path(__file__).resolve().parent.parent|PROJECT_ROOT = Path(\"$PROJECT_ROOT\")|" "$DAEMON_DIR/ai_task_daemon.py"
+sed -i '' "s|load_dotenv(PROJECT_ROOT / \".env\")|load_dotenv(Path.home() / \".palmcare\" / \".env\")|" "$DAEMON_DIR/ai_task_daemon.py"
+
+echo -e "  ${GREEN}✓${NC} Daemon files copied to $DAEMON_DIR"
+
+# ------------------------------------------------------------------
 # Configure and install plist
 # ------------------------------------------------------------------
 echo ""
 echo "Configuring LaunchAgent..."
-
-mkdir -p "$HOME/Library/LaunchAgents"
-mkdir -p "$HOME/Library/Logs"
 
 # Stop existing daemon if running
 if launchctl list | grep -q "$PLIST_NAME" 2>/dev/null; then
@@ -105,10 +123,43 @@ if launchctl list | grep -q "$PLIST_NAME" 2>/dev/null; then
     launchctl unload "$PLIST_DST" 2>/dev/null || true
 fi
 
-# Replace placeholders in plist
-sed -e "s|__PROJECT_ROOT__|$PROJECT_ROOT|g" \
-    -e "s|__HOME__|$HOME|g" \
-    "$PLIST_SRC" > "$PLIST_DST"
+cat > "$PLIST_DST" << PLIST_EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>$PLIST_NAME</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>$DAEMON_DIR/ai_task_daemon.py</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>$DAEMON_DIR</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+        <key>PYTHONPATH</key>
+        <string>$DAEMON_DIR</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+    <key>StandardOutPath</key>
+    <string>$HOME/Library/Logs/palmcare-ai-tasks.log</string>
+    <key>StandardErrorPath</key>
+    <string>$HOME/Library/Logs/palmcare-ai-tasks-error.log</string>
+</dict>
+</plist>
+PLIST_EOF
 
 echo -e "  ${GREEN}✓${NC} Plist installed to $PLIST_DST"
 
