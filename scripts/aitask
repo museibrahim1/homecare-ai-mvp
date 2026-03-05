@@ -8,9 +8,22 @@
 #   aitask --status
 #   echo "Fix the bug in login" | aitask
 #
+# Email Agent:
+#   aitask --draft-investor-emails    Draft outreach for new investors
+#   aitask --draft-agency-emails      Draft outreach for new agencies
+#   aitask --list-drafts              View pending email drafts
+#   aitask --approve-emails           Approve and send all pending drafts
+#
+# Social Media:
+#   aitask --social-status            Check which platforms are configured
+#   aitask --social-drafts            List scheduled social posts
+#   aitask "[SOCIAL] Post about X"    Generate and post social content
+#
 # Tasks are picked up by the daemon within 30 seconds.
 # Results are emailed to museibrahim@palmtai.com.
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 TASKS_DIR="$HOME/.palmcare/tasks"
 COMPLETED_DIR="$HOME/.palmcare/completed"
 
@@ -44,12 +57,44 @@ print(f'  [{d.get(\"status\",\"?\").upper()}] {d.get(\"title\",\"?\")} ({d.get(\
     
     echo ""
     echo "=== Pending Tasks ==="
-    for f in "$TASKS_DIR"/*.task 2>/dev/null; do
-        [ -f "$f" ] && echo "  $(basename "$f"): $(head -1 "$f")"
+    for f in "$TASKS_DIR"/*.task; do
+        [ -f "$f" ] 2>/dev/null && echo "  $(basename "$f"): $(head -1 "$f")"
     done
     [ "$pending" = "0" ] && echo "  (none)"
     
     exit 0
+fi
+
+# Email Agent shortcuts
+if [ "$1" = "--draft-investor-emails" ]; then
+    cd "$PROJECT_ROOT" && python3 scripts/ai_task_daemon.py --draft-investor-emails
+    exit $?
+fi
+
+if [ "$1" = "--draft-agency-emails" ]; then
+    cd "$PROJECT_ROOT" && python3 scripts/ai_task_daemon.py --draft-agency-emails
+    exit $?
+fi
+
+if [ "$1" = "--list-drafts" ]; then
+    cd "$PROJECT_ROOT" && python3 scripts/ai_task_daemon.py --list-drafts
+    exit $?
+fi
+
+if [ "$1" = "--approve-emails" ]; then
+    cd "$PROJECT_ROOT" && python3 scripts/ai_task_daemon.py --approve-emails
+    exit $?
+fi
+
+# Social Media shortcuts
+if [ "$1" = "--social-status" ]; then
+    cd "$PROJECT_ROOT" && python3 scripts/ai_task_daemon.py --social-status
+    exit $?
+fi
+
+if [ "$1" = "--social-drafts" ]; then
+    cd "$PROJECT_ROOT" && python3 scripts/ai_task_daemon.py --social-drafts
+    exit $?
 fi
 
 # Handle --question flag
@@ -73,6 +118,17 @@ else
     echo "       aitask --question \"Your question\""
     echo "       aitask --status"
     echo "       echo \"Task description\" | aitask"
+    echo ""
+    echo "Email Agent:"
+    echo "       aitask --draft-investor-emails"
+    echo "       aitask --draft-agency-emails"
+    echo "       aitask --list-drafts"
+    echo "       aitask --approve-emails"
+    echo ""
+    echo "Social Media:"
+    echo "       aitask --social-status"
+    echo "       aitask --social-drafts"
+    echo "       aitask \"[SOCIAL] Post about our mobile app launch\""
     exit 1
 fi
 

@@ -5,13 +5,15 @@ Each subagent has its own system prompt, relevant file context, and capabilities
 The daemon routes tasks to the appropriate subagent based on email subject tags.
 
 Email subject tags:
-  [MARKETING] — Marketing campaigns, content, branding
-  [SALES]     — Sales outreach, lead management, follow-ups
-  [REPORT]    — Analytics, dashboards, status reports
-  [OUTREACH]  — Email outreach campaigns (send emails to leads/investors)
-  [CODE]      — General code changes (default)
-  [QUESTION]  — Answer questions without changing code
-  [STATUS]    — Project status report
+  [MARKETING]    — Marketing campaigns, content, branding
+  [SALES]        — Sales outreach, lead management, follow-ups
+  [REPORT]       — Analytics, dashboards, status reports
+  [OUTREACH]     — Email outreach campaigns (send emails to leads/investors)
+  [SOCIAL]       — Social media posting and management
+  [EMAIL-AGENT]  — Lead-based email drafting and approval workflow
+  [CODE]         — General code changes (default)
+  [QUESTION]     — Answer questions without changing code
+  [STATUS]       — Project status report
 """
 
 import os
@@ -310,6 +312,133 @@ REPORT FORMAT: Generate clean HTML tables and summaries suitable for email deliv
 When creating visual reports, generate images via the Nano Banana 2 API and embed the URLs in the HTML report.
 """,
     },
+    "social_media": {
+        "name": "Social Media Agent",
+        "tags": ["[SOCIAL]", "[POST]", "[SOCIALS]"],
+        "description": "Manages social media content creation and posting across Twitter/X, LinkedIn, Instagram, and Facebook.",
+        "context_files": [
+            "marketing/social-media-copy.md",
+            "marketing/social-media-graphics.md",
+            "docs/marketing-research.md",
+            "scripts/social_media_manager.py",
+        ],
+        "system_prompt_extra": """You are the SOCIAL MEDIA MANAGER for PalmCare AI.
+
+BRAND GUIDELINES:
+- Company: Palm Technologies, INC. / PalmCare AI
+- Tagline: "Where care meets intelligence" / "PALM IT"
+- Brand color: Teal (#0d9488)
+- Founder: Muse Ibrahim, President & CEO
+- Voice: Professional but warm, confident, innovative
+- Hashtags: #PalmCareAI #HomeCareTech #PalmIt #CareIntelligence #HealthTech
+
+PLATFORMS & SPECS:
+- Twitter/X: 280 chars, 16:9 images (1200x675), 2-3 hashtags max
+- LinkedIn: 3000 chars, 1200x627 images, professional tone, 3-5 hashtags
+- Instagram: 2200 chars, 1080x1080 (feed) / 1080x1920 (story) / 1080x1350 (portrait), heavy hashtags (15-25)
+- Facebook: 63,206 chars, 1200x630 images, community-focused tone
+
+CONTENT PILLARS:
+1. Product features & demos (AI transcription, contract generation, voice recording)
+2. Industry insights (home care trends, compliance updates, technology adoption)
+3. Customer success stories & testimonials
+4. Behind-the-scenes / company culture
+5. Educational content (how to streamline assessments, billing tips)
+
+YOUR CAPABILITIES:
+- Generate platform-specific post copy (auto-adapts length, tone, hashtags per platform)
+- Generate accompanying graphics via WaveSpeed Nano Banana 2 API (see SHARED SKILLS)
+- Post to all four platforms via the social_media_manager.py module
+- Schedule content calendars (generate a week/month of posts)
+- Save all generated content to marketing/scheduled-posts/ for tracking
+
+SOCIAL MEDIA MANAGER MODULE:
+Use the SocialMediaManager class from scripts/social_media_manager.py:
+  from social_media_manager import SocialMediaManager
+  sm = SocialMediaManager()
+  sm.post_to_twitter(text, image_path=None)
+  sm.post_to_linkedin(text, image_path=None)
+  sm.post_to_instagram(caption, image_path)  # image required
+  sm.post_to_facebook(message, image_path=None)
+  sm.post_to_all(text, image_path=None)  # cross-post with platform adaptations
+
+WHEN GENERATING CONTENT:
+1. Create a Python script that generates the post copy per platform
+2. Optionally generate a graphic via WaveSpeed API
+3. Use the SocialMediaManager to post or save as draft
+4. Save post content to marketing/scheduled-posts/{date}_{platform}.json
+
+CONTENT CALENDAR FORMAT (marketing/scheduled-posts/*.json):
+{
+  "date": "2026-03-05",
+  "platforms": ["twitter", "linkedin", "instagram", "facebook"],
+  "copy": {"twitter": "...", "linkedin": "...", "instagram": "...", "facebook": "..."},
+  "image_prompt": "...",
+  "image_path": "marketing/generated/...",
+  "status": "draft|posted",
+  "posted_at": null
+}
+""",
+    },
+    "email_agent": {
+        "name": "Email Agent",
+        "tags": ["[EMAIL-AGENT]", "[DRAFT-EMAILS]", "[LEAD-EMAIL]"],
+        "description": "Drafts personalized outreach emails from investor and agency lead lists for review before sending.",
+        "context_files": [
+            "apps/api/app/routers/sales_leads.py",
+            "apps/api/app/routers/investors.py",
+            "apps/api/app/models/sales_lead.py",
+            "apps/api/app/models/investor.py",
+            "apps/api/app/services/email.py",
+            "scripts/email_agent.py",
+        ],
+        "system_prompt_extra": """You are the EMAIL AGENT for PalmCare AI.
+
+YOUR JOB: Pull leads from the investor and agency lists, draft personalized outreach
+emails, and save them for review before sending. You NEVER auto-send — all emails
+are drafted for human approval first.
+
+LEAD SOURCES:
+1. Investors: GET /platform/investors/?has_email=true&status=new
+   - Fields: fund_name, investor_type, contact_name, contact_email, focus_sectors, location, relevance_reason
+2. Agencies: GET /platform/sales/leads?has_email=true&status=new
+   - Fields: provider_name, contact_name, contact_email, city, state, ownership_type, services offered
+
+EMAIL AGENT MODULE:
+Use the EmailAgent class from scripts/email_agent.py:
+  from email_agent import EmailAgent
+  agent = EmailAgent()
+  agent.fetch_investor_leads()      # Pull new investors
+  agent.fetch_agency_leads()        # Pull new agencies
+  agent.draft_investor_emails()     # Draft emails for investors
+  agent.draft_agency_emails()       # Draft emails for agencies
+  agent.list_drafts()               # Show pending drafts
+  agent.approve_and_send(draft_id)  # Send a single approved draft
+  agent.approve_all()               # Send all pending drafts
+
+DRAFT WORKFLOW:
+1. Fetch leads with contact emails that haven't been contacted
+2. For each lead, use Claude to draft a personalized email based on their data
+3. Save draft to ~/.palmcare/email-drafts/{lead_type}_{lead_id}.json
+4. Email a summary of all drafts to support@palmtai.com for review
+5. User reviews and approves via CLI: aitask --approve-emails
+
+PERSONALIZATION STRATEGY:
+- Investors: Reference their fund focus, portfolio companies, check size, and why PalmCare is relevant
+- Agencies: Reference their location, services offered, and pain points PalmCare solves
+
+EMAIL TEMPLATES:
+- Investor outreach: Subject "{fund_name} x PalmCare AI — AI for Home Care Assessments"
+- Agency warm open: Subject "{provider_name} — quick question about your assessments"
+- Follow-up sequences use the existing 5-email templates (warm_open, pattern_interrupt, etc.)
+
+SENDER: Muse Ibrahim <sales@palmtai.com> (use onboarding@resend.dev until domain is re-verified)
+SIGNATURE:
+  Muse Ibrahim
+  President & CEO, Palm Technologies, INC.
+  palmcareai.com | (402) 500-8028
+""",
+    },
 }
 
 
@@ -323,7 +452,9 @@ def detect_subagent(subject: str, body: str = "") -> str:
                 return agent_id
 
     keywords = {
-        "marketing": ["marketing", "brand", "content", "landing page", "website copy", "social media", "campaign design", "graphic", "image", "video", "voiceover"],
+        "social_media": ["post to twitter", "post to linkedin", "post to instagram", "post to facebook", "social post", "schedule post", "content calendar", "social content"],
+        "email_agent": ["draft email", "draft outreach", "investor email", "agency email", "lead email", "email draft", "approve email"],
+        "marketing": ["marketing", "brand", "content", "landing page", "website copy", "campaign design", "graphic", "image", "video", "voiceover"],
         "sales": ["lead", "crm", "pipeline", "prospect", "agency", "investor", "follow up", "follow-up", "pitch deck"],
         "outreach": ["send email", "outreach", "cold email", "email blast", "bulk email", "campaign send"],
         "report": ["report", "analytics", "dashboard", "metrics", "stats", "performance", "funnel"],

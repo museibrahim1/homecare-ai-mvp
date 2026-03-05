@@ -645,5 +645,54 @@ if __name__ == "__main__":
         state = load_state()
         count = poll_cycle(state)
         logger.info(f"Processed {count} task(s)")
+
+    elif "--draft-investor-emails" in sys.argv:
+        from email_agent import EmailAgent
+        agent = EmailAgent()
+        drafts = agent.draft_investor_emails()
+        print(f"Drafted {len(drafts)} investor email(s).")
+        agent.print_drafts(status="pending_review")
+
+    elif "--draft-agency-emails" in sys.argv:
+        from email_agent import EmailAgent
+        agent = EmailAgent()
+        drafts = agent.draft_agency_emails()
+        print(f"Drafted {len(drafts)} agency email(s).")
+        agent.print_drafts(status="pending_review")
+
+    elif "--list-drafts" in sys.argv:
+        from email_agent import EmailAgent
+        agent = EmailAgent()
+        agent.print_drafts()
+
+    elif "--approve-emails" in sys.argv:
+        from email_agent import EmailAgent
+        agent = EmailAgent()
+        results = agent.approve_all()
+        for r in results:
+            status_str = r.get("status", "unknown")
+            print(f"  [{status_str.upper()}] {r.get('draft_id')} -> {r.get('to')}")
+        print(f"Processed {len(results)} draft(s).")
+
+    elif "--social-status" in sys.argv:
+        from social_media_manager import SocialMediaManager
+        sm = SocialMediaManager()
+        print("Social Media Platform Status:")
+        for platform, enabled in sm.get_platform_status().items():
+            status_str = "CONFIGURED" if enabled else "NOT CONFIGURED"
+            print(f"  {platform}: {status_str}")
+
+    elif "--social-drafts" in sys.argv:
+        from social_media_manager import SocialMediaManager
+        sm = SocialMediaManager()
+        drafts = sm.list_drafts()
+        if not drafts:
+            print("No social media drafts found.")
+        else:
+            for d in drafts:
+                status_str = d.get("status", "?")
+                platforms = ", ".join(d.get("platforms", []))
+                print(f"  [{status_str.upper()}] {d['date']} | {platforms} | {d.get('copy', {}).get('twitter', '')[:60]}...")
+
     else:
         run_daemon()
