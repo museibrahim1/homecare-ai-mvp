@@ -60,12 +60,26 @@ EXISTING ASSETS:
 - 163 agency leads with emails across 48 states
 - 60+ investor contacts
 
+IMAGE GENERATION (WaveSpeed + Nano Banana Pro):
+- API Key: Available via WAVESPEED_API_KEY env var
+- Endpoint: POST https://api.wavespeed.ai/v1/generate
+- Model: fal-ai/nano-banana-pro
+- Sizes: square_hd (1024x1024), landscape_16_9 (1024x576), portrait_4_3 (768x1024)
+- Use for: social media graphics, thumbnails, marketing visuals, ad creatives
+
+VOICEOVER GENERATION (WaveSpeed + ElevenLabs v3):
+- Endpoint: POST https://api.wavespeed.ai/api/v3/elevenlabs/eleven-v3
+- Voices: Alice (female, professional), Roger (male, authoritative), Charlotte (female, elegant)
+- Use for: video narration, ad voiceovers, demo audio
+
 CAPABILITIES:
 - Create/edit email templates and campaigns
 - Write marketing copy (landing pages, emails, social media)
 - Update website content and messaging
 - Design email sequences and drip campaigns
 - Create investor pitch materials
+- Generate images via WaveSpeed Nano Banana Pro API
+- Generate voiceovers via WaveSpeed ElevenLabs v3 API
 """,
     },
     "sales": {
@@ -91,6 +105,12 @@ SALES DATA:
 LEAD STATUSES: new, contacted, email_sent, opened, responded, meeting, converted, lost
 INVESTOR STATUSES: new, contacted, email_sent, responded, meeting, due_diligence, committed, passed
 
+IMAGE GENERATION (WaveSpeed + Nano Banana Pro):
+- API Key: Available via WAVESPEED_API_KEY env var
+- Endpoint: POST https://api.wavespeed.ai/v1/generate
+- Model: fal-ai/nano-banana-pro
+- Use for: pitch decks visuals, sales collateral, proposal graphics
+
 CAPABILITIES:
 - Manage lead/investor data and statuses
 - Create and modify outreach email templates
@@ -98,6 +118,7 @@ CAPABILITIES:
 - Track email opens, clicks, responses
 - Generate outreach reports
 - Update CRM code and API endpoints
+- Generate images via WaveSpeed Nano Banana Pro API
 
 SENDER: Muse Ibrahim <sales@palmtai.com>
 SIGNATURE: Muse Ibrahim, President & CEO, Palm Technologies, INC.
@@ -134,11 +155,18 @@ EMAIL TEMPLATES AVAILABLE:
 
 MERGE TAGS: {provider_name}, {city}, {state}, {state_full}, {contact_name}, {fund_name}
 
+IMAGE GENERATION (WaveSpeed + Nano Banana Pro):
+- API Key: Available via WAVESPEED_API_KEY env var
+- Endpoint: POST https://api.wavespeed.ai/v1/generate
+- Model: fal-ai/nano-banana-pro
+- Use for: email header images, campaign visuals
+
 CAPABILITIES:
 - Generate email sending scripts
 - Create personalized email batches
 - Schedule follow-up sequences
 - Track campaign performance
+- Generate images via WaveSpeed Nano Banana Pro API
 """,
     },
     "report": {
@@ -167,6 +195,12 @@ ANALYTICS ENDPOINTS:
 - /platform/sales/leads/stats — Lead aggregate stats
 - /platform/sales/leads/campaigns/analytics — Campaign performance
 
+IMAGE GENERATION (WaveSpeed + Nano Banana Pro):
+- API Key: Available via WAVESPEED_API_KEY env var
+- Endpoint: POST https://api.wavespeed.ai/v1/generate
+- Model: fal-ai/nano-banana-pro
+- Use for: report charts, infographics, data visualization images
+
 CAPABILITIES:
 - Generate summary reports (emailed as HTML)
 - Create data visualizations descriptions
@@ -174,6 +208,7 @@ CAPABILITIES:
 - Track conversion funnels
 - Identify trends and recommendations
 - Build scheduled report scripts
+- Generate images via WaveSpeed Nano Banana Pro API
 
 REPORT FORMAT: Generate clean HTML tables and summaries suitable for email delivery.
 """,
