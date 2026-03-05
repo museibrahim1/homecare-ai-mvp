@@ -101,11 +101,14 @@ class LinkedInClient:
             }
 
             if not self.person_id:
-                me_resp = requests.get("https://api.linkedin.com/v2/userinfo", headers=headers)
-                if me_resp.status_code == 200:
-                    self.person_id = me_resp.json().get("sub")
-                else:
-                    return {"status": "failed", "platform": "linkedin", "reason": "Could not fetch profile ID"}
+                for endpoint in ["https://api.linkedin.com/v2/userinfo", "https://api.linkedin.com/v2/me"]:
+                    me_resp = requests.get(endpoint, headers=headers)
+                    if me_resp.status_code == 200:
+                        data = me_resp.json()
+                        self.person_id = data.get("sub") or data.get("id")
+                        break
+                if not self.person_id:
+                    return {"status": "failed", "platform": "linkedin", "reason": "Could not fetch profile ID. Set LINKEDIN_PERSON_ID in .env manually. Find it at: linkedin.com/in/YOUR-PROFILE → view page source → search for 'publicIdentifier'"}
 
             author = f"urn:li:person:{self.person_id}"
             media_content = None
