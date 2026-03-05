@@ -95,7 +95,36 @@ def get_completed_tasks() -> list:
     tasks = []
     if not COMPLETED_DIR.exists():
         return tasks
-    for f in sorted(COMPLETED_DIR.glob("*.done"), reverse=True)[:50]:
+
+    result_files = sorted(COMPLETED_DIR.glob("*.result.json"), reverse=True)[:50]
+    for rf in result_files:
+        try:
+            result_data = json.loads(rf.read_text())
+            ts_match = re.match(r"(\d{8}_\d{6})", rf.stem)
+            timestamp = result_data.get("timestamp")
+            if not timestamp and ts_match:
+                timestamp = datetime.strptime(ts_match.group(1), "%Y%m%d_%H%M%S").isoformat()
+
+            tasks.append({
+                "file": rf.name,
+                "title": result_data.get("title", rf.stem),
+                "body": result_data.get("body", "")[:300],
+                "timestamp": timestamp,
+                "agent": result_data.get("agent", detect_agent_from_title(result_data.get("title", ""))),
+                "status": result_data.get("status", "completed"),
+                "summary": result_data.get("summary", ""),
+                "notes": result_data.get("notes", ""),
+                "questions": result_data.get("questions", []),
+                "files_changed": result_data.get("files_changed", []),
+                "commit": result_data.get("commit"),
+                "duration": result_data.get("duration"),
+            })
+        except Exception:
+            pass
+
+    done_files = sorted(COMPLETED_DIR.glob("*.done"), reverse=True)[:50]
+    seen_timestamps = {t.get("timestamp", "") for t in tasks}
+    for f in done_files:
         try:
             content = f.read_text(encoding="utf-8", errors="replace").strip()
             lines = content.split("\n", 1)
@@ -107,27 +136,28 @@ def get_completed_tasks() -> list:
             if ts_match:
                 timestamp = datetime.strptime(ts_match.group(1), "%Y%m%d_%H%M%S").isoformat()
 
-            agent = detect_agent_from_title(title)
-
-            result_file = f.with_suffix(".result.json")
-            result_data = None
-            if result_file.exists():
-                try:
-                    result_data = json.loads(result_file.read_text())
-                except Exception:
-                    pass
+            if timestamp in seen_timestamps:
+                continue
 
             tasks.append({
                 "file": f.name,
                 "title": title,
-                "body": body[:200],
+                "body": body[:300],
                 "timestamp": timestamp,
-                "agent": agent,
-                "result": result_data,
+                "agent": detect_agent_from_title(title),
+                "status": "completed",
+                "summary": "",
+                "notes": "",
+                "questions": [],
+                "files_changed": [],
+                "commit": None,
+                "duration": None,
             })
         except Exception:
             pass
-    return tasks
+
+    tasks.sort(key=lambda t: t.get("timestamp") or "", reverse=True)
+    return tasks[:50]
 
 
 def detect_agent_from_title(title: str) -> str:
@@ -285,6 +315,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .log-box .log-route{color:#a78bfa}
 .log-box .log-task{color:#34d399}
 .empty{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+.task-summary{font-size:12px;color:var(--muted);max-height:0;overflow:hidden;transition:max-height .3s;line-height:1.6;padding:0 16px}
+.task-summary.open{max-height:300px;padding:8px 16px 12px}
+.task-summary .sum-text{color:var(--text);font-size:13px}
+.task-summary .sum-label{color:var(--teal);font-size:10px;text-transform:uppercase;font-weight:600;margin-top:6px;display:block}
+.task-summary .sum-files{font-family:'SF Mono',Monaco,monospace;font-size:11px;color:#60a5fa}
+.task-row{cursor:pointer}
+.task-row:hover td{background:rgba(13,148,136,.08)}
+.task-detail-row td{padding:0!important;border-top:none!important}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
 @media(max-width:600px){.stats-row{grid-template-columns:1fr}.grid{padding:16px}}
@@ -421,18 +459,36 @@ async function fetchTasks() {
       $('#tasksTable').innerHTML = '<div class="empty">No tasks yet. Send an email to ai@palmcareai.com</div>';
       return;
     }
-    let rows = all.slice(0, 20).map(t => {
-      const status = t.result?.status || t.status || 'completed';
+    let rows = all.slice(0, 25).map((t, i) => {
+      const status = t.status || 'completed';
       const agent = t.agent || '—';
-      return `<tr>
-        <td>${t.title?.substring(0,40) || t.file}</td>
+      const dur = t.duration ? t.duration + 's' : '—';
+      const hasSummary = t.summary || t.notes || (t.files_changed && t.files_changed.length);
+      let detail = '';
+      if (hasSummary) {
+        let inner = '';
+        if (t.summary) inner += `<span class="sum-label">Summary</span><span class="sum-text">${esc(t.summary)}</span>`;
+        if (t.notes) inner += `<span class="sum-label">Notes</span><span class="sum-text">${esc(t.notes).substring(0,500)}</span>`;
+        if (t.files_changed && t.files_changed.length) inner += `<span class="sum-label">Files Changed</span><span class="sum-files">${t.files_changed.map(esc).join('<br>')}</span>`;
+        if (t.commit) inner += `<span class="sum-label">Commit</span><span class="sum-files">${esc(t.commit)}</span>`;
+        if (t.questions && t.questions.length) inner += `<span class="sum-label">Questions</span><span class="sum-text">${t.questions.map(esc).join('<br>')}</span>`;
+        detail = `<tr class="task-detail-row"><td colspan="5"><div class="task-summary" id="detail-${i}">${inner}</div></td></tr>`;
+      }
+      return `<tr class="task-row" onclick="toggleDetail(${i})">
+        <td>${esc(t.title?.substring(0,50) || t.file)}</td>
         <td><span class="status-pill ${status}">${status}</span></td>
-        <td>${agent}</td>
+        <td>${esc(agent)}</td>
+        <td>${dur}</td>
         <td>${timeAgo(t.timestamp)}</td>
-      </tr>`;
+      </tr>${detail}`;
     }).join('');
-    $('#tasksTable').innerHTML = `<table><thead><tr><th>Task</th><th>Status</th><th>Agent</th><th>Time</th></tr></thead><tbody>${rows}</tbody></table>`;
+    $('#tasksTable').innerHTML = `<table><thead><tr><th>Task</th><th>Status</th><th>Agent</th><th>Duration</th><th>Time</th></tr></thead><tbody>${rows}</tbody></table>`;
   } catch(e) { console.error(e); }
+}
+
+function toggleDetail(i) {
+  const el = document.getElementById('detail-' + i);
+  if (el) el.classList.toggle('open');
 }
 
 function colorLog(line) {

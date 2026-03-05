@@ -393,6 +393,26 @@ def run_task(task_title: str, task_body: str, task_type: str, state: dict) -> di
         state["tasks_failed"] = state.get("tasks_failed", 0) + 1
     save_state(state)
 
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    result_record = {
+        "title": task_title,
+        "body": task_body[:500],
+        "agent": agent_id,
+        "status": result.get("status", "unknown"),
+        "summary": result.get("summary", ""),
+        "notes": result.get("notes", ""),
+        "questions": result.get("questions", []),
+        "files_changed": [f.get("path", "") for f in result.get("files_changed", [])] if isinstance(result.get("files_changed"), list) else [],
+        "commit": commit_hash,
+        "duration": round(duration, 1),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        result_file = COMPLETED_DIR / f"{timestamp}_{task_title[:40].replace(' ', '_').replace('/', '_')}.result.json"
+        result_file.write_text(json.dumps(result_record, indent=2, default=str))
+    except Exception as e:
+        logger.warning(f"Could not save result file: {e}")
+
     logger.info(f"Task complete: {result.get('status')} in {duration:.1f}s")
     return {"result": result, "apply_result": apply_result, "commit_hash": commit_hash, "duration": duration}
 
