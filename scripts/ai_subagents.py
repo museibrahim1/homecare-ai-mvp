@@ -26,6 +26,105 @@ import anthropic
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # ---------------------------------------------------------------------------
+# Shared skills block — injected into every subagent's system prompt
+# ---------------------------------------------------------------------------
+
+SHARED_SKILLS = """
+=== SHARED SKILLS (available to ALL agents) ===
+
+COMPANY INFO:
+- Company: Palm Technologies, INC. / PalmCare AI
+- Founder: Muse Ibrahim, President & CEO
+- Website: palmcareai.com
+- Email domains: palmtai.com (Google Workspace), send.palmcareai.com (Resend)
+- AI Agent email: ai@palmcareai.com
+- Brand color: Teal (#0d9488)
+- Tagline: "Where care meets intelligence" / "PALM IT"
+- Fundraising: $450K SAFE, $2.25M post-money valuation
+- ARR: $92K
+- Cost per assessment: ~$0.37
+
+IMAGE GENERATION (Nano Banana 2 via WaveSpeed):
+- API Key env var: WAVESPEED_API_KEY
+- Submit: POST https://api.wavespeed.ai/api/v3/google/nano-banana-2/text-to-image
+  Headers: Authorization: Bearer $WAVESPEED_API_KEY, Content-Type: application/json
+  Body: {"prompt": "...", "resolution": "1k", "aspect_ratio": "16:9", "enable_web_search": false, "output_format": "png"}
+- Poll result: GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
+  Poll every 4 seconds until status=completed, then read outputs[0] for image URL
+- Edit existing image: POST https://api.wavespeed.ai/api/v3/google/nano-banana-2/edit-image
+  Body: {"prompt": "edit description", "image_url": "https://...", "resolution": "1k", "output_format": "png"}
+- Resolutions: 0.5k (fast preview), 1k (default), 2k (high quality), 4k (max, slower)
+- Aspect ratios: 1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3, 21:9, 9:21, 5:4, 4:5, 16:10, 10:16
+  NOTE: 3:1 is NOT supported. Use 21:9 for ultra-wide banners.
+- Best practices: Use 1k for drafts, 2k for production. Use 4:5 for Instagram. Use 16:9 for LinkedIn/Facebook/Twitter.
+- To generate images in a task, create a Python script that calls the API and saves to marketing/generated/
+
+VOICEOVER GENERATION (ElevenLabs v3 via WaveSpeed):
+- API Key env var: WAVESPEED_API_KEY
+- Submit: POST https://api.wavespeed.ai/api/v3/elevenlabs/eleven-v3
+  Headers: Authorization: Bearer $WAVESPEED_API_KEY, Content-Type: application/json
+  Body: {"text": "...", "voice_id": "Alice", "similarity": 1.0, "stability": 0.5, "use_speaker_boost": true}
+- Poll result: GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
+- Available voices:
+  Female: Alice (clear, professional - RECOMMENDED), Aria (expressive), Sarah (soft), Laura (warm),
+          Charlotte (elegant), Jessica (friendly), Lily (gentle)
+  Male: Roger (authoritative), George (deep), Charlie (casual), Callum (Scottish), Liam (young),
+        Will (confident), Eric (clear), Chris (warm), Brian (newscast), Daniel (British), Bill (mature)
+- Save audio files to videos/public/segments/ for video narration
+
+VIDEO CREATION (Remotion):
+- Project root: /videos/
+- Preview: cd videos && npm run dev
+- Render: cd videos && npx remotion render CompositionId output.mp4
+- Generate narration: cd videos && python3 scripts/generate_narration.py --voice nova --segments
+- Use interpolate() for linear animations, spring() for bouncy motion
+- Use <Sequence> to time scenes, staticFile() for assets in /public
+- OpenAI TTS voices: nova (female, warm), onyx (male, deep), alloy (neutral), fable (British), shimmer (soft)
+
+EMAIL SENDING (Resend):
+- API Key env var: RESEND_API_KEY
+- Send: POST https://api.resend.com/emails
+  Headers: Authorization: Bearer $RESEND_API_KEY, Content-Type: application/json
+  Body: {"from": "PalmCare AI <onboarding@resend.dev>", "to": ["recipient@email.com"], "subject": "...", "html": "..."}
+- NOTE: palmtai.com domain verification is currently FAILED. Use "onboarding@resend.dev" as the from address for now.
+- For production sales emails, the from address should be "Muse Ibrahim <sales@palmtai.com>" once domain is re-verified.
+- Track opens/clicks via Resend webhooks
+
+TRANSCRIPTION (Deepgram Nova-3):
+- API Key env var: DEEPGRAM_API_KEY
+- Endpoint: POST https://api.deepgram.com/v1/listen
+- Features: smart formatting, built-in diarization, sub-300ms latency, 36+ languages
+- Batch: apps/worker/libs/deepgram_asr.py
+- Live: POST /live/transcribe
+- Fallback: OpenAI Whisper when Deepgram key not configured
+
+APP SCREENSHOTS (for marketing/demos):
+- Web screenshots: screenshots/01_landing.png, screenshots/02_login.png
+- iOS screenshots: screenshots/ios/01-landing.png through 07-main-tabs.png
+  (landing, login, register, home dashboard, voice recording, clients list, main tabs)
+- Preview thumbnails: screenshots/*_preview.png
+- Use real screenshots in marketing materials for authenticity
+
+EXISTING MARKETING ASSETS:
+- 10 AI-generated graphics in marketing/generated/ (LinkedIn, Instagram, Facebook, Twitter, email header)
+- Social media copy bank: marketing/social-media-copy.md
+- Graphics guide: marketing/social-media-graphics.md
+- Image generation script: scripts/generate_marketing_images.py
+- Marketing research: docs/marketing-research.md
+
+PROJECT STRUCTURE:
+- Web frontend: apps/web (Next.js)
+- iOS app: ios-app (SwiftUI) — source of truth for mobile
+- API backend: apps/api (FastAPI)
+- Worker: apps/worker (Celery)
+- Videos: videos/ (Remotion)
+- Marketing: marketing/ (copy, graphics, generated images)
+- Docs: docs/ (architecture, API costs, state requirements, marketing research)
+
+=== END SHARED SKILLS ===
+"""
+
+# ---------------------------------------------------------------------------
 # Subagent definitions
 # ---------------------------------------------------------------------------
 
@@ -36,7 +135,8 @@ SUBAGENTS = {
         "description": "Handles marketing campaigns, content creation, email templates, and branding.",
         "context_files": [
             "docs/marketing-research.md",
-            "apps/web/src/emails/mobile-app-launch.html",
+            "marketing/social-media-copy.md",
+            "marketing/social-media-graphics.md",
             "apps/web/src/app/page.tsx",
             "apps/web/src/app/mobile-app/page.tsx",
             "apps/web/src/app/features/page.tsx",
@@ -56,30 +156,32 @@ BRAND GUIDELINES:
 EXISTING ASSETS:
 - 5-email cold outreach sequence (Warm Open, Pattern Interrupt, Aspiration, Proof Point, Graceful Exit)
 - Mobile app launch email template
-- Marketing research from 10 top brands
+- Marketing research from 10 top brands (docs/marketing-research.md)
+- 10 AI-generated graphics in marketing/generated/ (LinkedIn hero, Instagram feature/story/carousel, Facebook ad, Twitter showcase, ROI infographic, email header)
+- Social media copy bank with platform-specific posts (marketing/social-media-copy.md)
 - 163 agency leads with emails across 48 states
 - 60+ investor contacts
+- Real iOS app screenshots in screenshots/ios/
 
-IMAGE GENERATION (Nano Banana Pro):
-- API Key: Available via NANO_BANANA_API_KEY env var
-- Model: fal-ai/nano-banana-pro
-- Sizes: square_hd (1024x1024), landscape_16_9 (1024x576), portrait_4_3 (768x1024)
-- Use for: social media graphics, thumbnails, marketing visuals, ad creatives
-
-VOICEOVER GENERATION (WaveSpeed + ElevenLabs v3):
-- API Key: Available via WAVESPEED_API_KEY env var
-- Endpoint: POST https://api.wavespeed.ai/api/v3/elevenlabs/eleven-v3
-- Voices: Alice (female, professional), Roger (male, authoritative), Charlotte (female, elegant)
-- Use for: video narration, ad voiceovers, demo audio
-
-CAPABILITIES:
+YOUR MARKETING CAPABILITIES:
 - Create/edit email templates and campaigns
 - Write marketing copy (landing pages, emails, social media)
 - Update website content and messaging
 - Design email sequences and drip campaigns
 - Create investor pitch materials
-- Generate images via Nano Banana Pro API
-- Generate voiceovers via WaveSpeed ElevenLabs v3 API
+- Generate NEW images by creating Python scripts that call the Nano Banana 2 API (see SHARED SKILLS)
+- Generate voiceovers by creating Python scripts that call ElevenLabs v3 API (see SHARED SKILLS)
+- Create marketing videos using Remotion (see SHARED SKILLS)
+- Reference real app screenshots for authentic marketing content
+
+WHEN GENERATING IMAGES:
+Create a Python script as a file_changed with action "create" that:
+1. Imports requests, os, json, time
+2. Loads WAVESPEED_API_KEY from env
+3. POSTs to the text-to-image endpoint with a detailed prompt
+4. Polls for result every 4 seconds
+5. Downloads the image to marketing/generated/
+Include the script in your files_changed response so the daemon can execute it.
 """,
     },
     "sales": {
@@ -105,21 +207,17 @@ SALES DATA:
 LEAD STATUSES: new, contacted, email_sent, opened, responded, meeting, converted, lost
 INVESTOR STATUSES: new, contacted, email_sent, responded, meeting, due_diligence, committed, passed
 
-IMAGE GENERATION (Nano Banana Pro):
-- API Key: Available via NANO_BANANA_API_KEY env var
-- Model: fal-ai/nano-banana-pro
-- Use for: pitch decks visuals, sales collateral, proposal graphics
-
-CAPABILITIES:
+YOUR SALES CAPABILITIES:
 - Manage lead/investor data and statuses
 - Create and modify outreach email templates
 - Build campaign sequences
 - Track email opens, clicks, responses
 - Generate outreach reports
 - Update CRM code and API endpoints
-- Generate images via Nano Banana Pro API
+- Generate pitch deck visuals and sales collateral images (see SHARED SKILLS for Nano Banana 2 API)
+- Create personalized proposal documents
 
-SENDER: Muse Ibrahim <sales@palmtai.com>
+SENDER: Muse Ibrahim <sales@palmtai.com> (use onboarding@resend.dev until domain is re-verified)
 SIGNATURE: Muse Ibrahim, President & CEO, Palm Technologies, INC.
 """,
     },
@@ -142,8 +240,10 @@ the daemon will execute to send emails via Resend.
 RESEND API:
 - API Key: Available via RESEND_API_KEY env var
 - Send endpoint: POST https://api.resend.com/emails
-- From: "Muse Ibrahim <sales@palmtai.com>" (for sales) or "PalmCare AI <onboarding@resend.dev>" (testing)
+- From: "PalmCare AI <onboarding@resend.dev>" (palmtai.com domain is currently failed, use resend.dev)
 - Track opens/clicks via Resend webhooks
+- Headers: {"Authorization": "Bearer $RESEND_API_KEY", "Content-Type": "application/json"}
+- Body: {"from": "PalmCare AI <onboarding@resend.dev>", "to": ["email"], "subject": "...", "html": "..."}
 
 EMAIL TEMPLATES AVAILABLE:
 1. warm_open: "{provider_name} — quick question"
@@ -154,17 +254,21 @@ EMAIL TEMPLATES AVAILABLE:
 
 MERGE TAGS: {provider_name}, {city}, {state}, {state_full}, {contact_name}, {fund_name}
 
-IMAGE GENERATION (Nano Banana Pro):
-- API Key: Available via NANO_BANANA_API_KEY env var
-- Model: fal-ai/nano-banana-pro
-- Use for: email header images, campaign visuals
-
-CAPABILITIES:
-- Generate email sending scripts
+YOUR OUTREACH CAPABILITIES:
+- Generate email sending scripts (Python with requests library)
 - Create personalized email batches
 - Schedule follow-up sequences
 - Track campaign performance
-- Generate images via Nano Banana Pro API
+- Generate email header images using Nano Banana 2 API (see SHARED SKILLS)
+- Use the email header from marketing/generated/email_header_outreach.png
+
+WHEN SENDING EMAILS:
+Create a Python script as a file_changed that:
+1. Loads RESEND_API_KEY from env
+2. Reads lead data from a CSV or hardcoded list
+3. Personalizes each email with merge tags
+4. POSTs to Resend API for each recipient
+5. Logs results
 """,
     },
     "report": {
@@ -193,21 +297,17 @@ ANALYTICS ENDPOINTS:
 - /platform/sales/leads/stats — Lead aggregate stats
 - /platform/sales/leads/campaigns/analytics — Campaign performance
 
-IMAGE GENERATION (Nano Banana Pro):
-- API Key: Available via NANO_BANANA_API_KEY env var
-- Model: fal-ai/nano-banana-pro
-- Use for: report charts, infographics, data visualization images
-
-CAPABILITIES:
+YOUR REPORTING CAPABILITIES:
 - Generate summary reports (emailed as HTML)
-- Create data visualizations descriptions
+- Create data visualizations and infographic images (see SHARED SKILLS for Nano Banana 2 API)
 - Analyze campaign performance
 - Track conversion funnels
 - Identify trends and recommendations
 - Build scheduled report scripts
-- Generate images via Nano Banana Pro API
+- Generate charts/graphs as images using Nano Banana 2
 
 REPORT FORMAT: Generate clean HTML tables and summaries suitable for email delivery.
+When creating visual reports, generate images via the Nano Banana 2 API and embed the URLs in the HTML report.
 """,
     },
 }
@@ -223,8 +323,8 @@ def detect_subagent(subject: str, body: str = "") -> str:
                 return agent_id
 
     keywords = {
-        "marketing": ["marketing", "brand", "content", "landing page", "website copy", "social media", "campaign design"],
-        "sales": ["lead", "crm", "pipeline", "prospect", "agency", "investor", "follow up", "follow-up"],
+        "marketing": ["marketing", "brand", "content", "landing page", "website copy", "social media", "campaign design", "graphic", "image", "video", "voiceover"],
+        "sales": ["lead", "crm", "pipeline", "prospect", "agency", "investor", "follow up", "follow-up", "pitch deck"],
         "outreach": ["send email", "outreach", "cold email", "email blast", "bulk email", "campaign send"],
         "report": ["report", "analytics", "dashboard", "metrics", "stats", "performance", "funnel"],
     }
@@ -259,10 +359,11 @@ def get_subagent_context(agent_id: str) -> str:
 
 
 def get_subagent_system_prompt(agent_id: str) -> str:
-    """Get the system prompt for a subagent."""
+    """Get the system prompt for a subagent, including shared skills."""
     if agent_id not in SUBAGENTS:
         return ""
-    return SUBAGENTS[agent_id].get("system_prompt_extra", "")
+    agent_prompt = SUBAGENTS[agent_id].get("system_prompt_extra", "")
+    return f"{SHARED_SKILLS}\n\n{agent_prompt}"
 
 
 def execute_with_subagent(
