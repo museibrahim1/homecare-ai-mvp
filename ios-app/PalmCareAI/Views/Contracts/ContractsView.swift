@@ -515,3 +515,8 @@ private struct CompactDocRow: View {
         .opacity(isDownloading ? 0.6 : 1)
     }
 }
+
+#Preview {
+    ContractsView()
+        .environmentObject(APIService())
+}

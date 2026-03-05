@@ -679,3 +679,8 @@ struct AddEventSheet: View {
         }
     }
 }
+
+#Preview {
+    CalendarView()
+        .environmentObject(APIService())
+}

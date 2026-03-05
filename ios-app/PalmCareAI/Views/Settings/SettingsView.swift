@@ -960,3 +960,8 @@ struct LanguagePickerSheet: View {
         }
     }
 }
+
+#Preview {
+    SettingsView()
+        .environmentObject(APIService())
+}
