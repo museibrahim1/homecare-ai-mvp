@@ -73,15 +73,16 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 TASKS_DIR.mkdir(parents=True, exist_ok=True)
 COMPLETED_DIR.mkdir(parents=True, exist_ok=True)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(LOG_FILE),
-        logging.StreamHandler(sys.stdout),
-    ],
-)
 logger = logging.getLogger("ai_task_daemon")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    _fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+    _fh = logging.FileHandler(LOG_FILE)
+    _fh.setFormatter(_fmt)
+    logger.addHandler(_fh)
+    # NOTE: No StreamHandler — launchd already redirects stdout to the same log file,
+    # adding a StreamHandler would cause duplicate lines.
+logger.propagate = False
 
 # ---------------------------------------------------------------------------
 # State management
@@ -422,116 +423,186 @@ def run_task(task_title: str, task_body: str, task_type: str, state: dict) -> di
 # ---------------------------------------------------------------------------
 
 
-def _read_file_content_for_email(file_path: str, max_chars: int = 8000) -> str:
-    """Read file content for inclusion in email report. Returns HTML-escaped content."""
-    import html as html_mod
-    try:
-        full_path = PROJECT_ROOT / file_path
-        if not full_path.exists():
-            return ""
-        text = full_path.read_text(encoding="utf-8", errors="replace")
-        if len(text) > max_chars:
-            text = text[:max_chars] + "\n\n... (truncated — full file saved in repo)"
-        return html_mod.escape(text)
-    except Exception:
-        return ""
-
-
 def build_report_html(task_title, result, apply_result, commit_hash, duration_seconds):
+    """Build a fully visualized, professional HTML email report.
+
+    Every email should be self-contained and readable without the IDE —
+    summaries are rendered as rich formatted text, file changes as collapsible
+    cards, and questions/errors as highlighted callouts.
+    """
     import html as html_mod
+
     status = result.get("status", "unknown")
-    summary = result.get("summary", "No summary")
+    summary = result.get("summary", "No summary provided.")
     notes = result.get("notes", "")
     questions = result.get("questions", [])
 
-    status_colors = {
-        "completed": ("#059669", "#ecfdf5", "#d1fae5"),
-        "failed": ("#dc2626", "#fef2f2", "#fecaca"),
-        "needs_clarification": ("#d97706", "#fffbeb", "#fde68a"),
+    status_map = {
+        "completed": ("Completed", "#059669", "#ecfdf5", "#d1fae5", "&#10003;"),
+        "failed": ("Failed", "#dc2626", "#fef2f2", "#fecaca", "&#10007;"),
+        "needs_clarification": ("Needs Your Input", "#d97706", "#fffbeb", "#fde68a", "&#63;"),
     }
-    color, bg, border = status_colors.get(status, ("#6b7280", "#f9fafb", "#e5e7eb"))
-    status_label = status.replace("_", " ").title()
+    status_label, color, bg, border, icon = status_map.get(status, ("Update", "#6b7280", "#f9fafb", "#e5e7eb", "&#8226;"))
 
     agent_id = detect_subagent(task_title, "")
-    agent_name = SUBAGENTS.get(agent_id, {}).get("name", "General Agent")
-    agent_color = SUBAGENTS.get(agent_id, {}).get("color", "#6b7280")
+    agent_info = SUBAGENTS.get(agent_id, {})
+    agent_name = agent_info.get("name", "General Agent")
+    agent_color = agent_info.get("color", "#6b7280")
+    agent_icon = agent_info.get("icon", "G") if hasattr(SUBAGENTS.get(agent_id, {}), "get") else "G"
+
+    def esc(s):
+        return html_mod.escape(str(s)) if s else ""
+
+    def render_summary(text):
+        """Render summary as formatted paragraphs with line breaks."""
+        escaped = esc(text)
+        paragraphs = escaped.split("\n\n")
+        rendered = []
+        for p in paragraphs:
+            p = p.strip()
+            if not p:
+                continue
+            if p.startswith("- ") or p.startswith("* "):
+                items = [line.lstrip("- *").strip() for line in p.split("\n") if line.strip()]
+                rendered.append("<ul style='margin:8px 0;padding-left:20px;'>" + "".join(f"<li style='padding:3px 0;color:#374151;font-size:14px;line-height:1.6;'>{i}</li>" for i in items) + "</ul>")
+            else:
+                rendered.append(f"<p style='color:#374151;font-size:14px;margin:8px 0;line-height:1.7;'>{p.replace(chr(10), '<br>')}</p>")
+        return "\n".join(rendered) if rendered else f"<p style='color:#374151;font-size:14px;line-height:1.7;'>{escaped}</p>"
 
     sections = []
 
-    if apply_result and apply_result.get("applied_files"):
-        items = "".join(f'<li style="padding:4px 0;color:#374151;">{html_mod.escape(f)}</li>' for f in apply_result["applied_files"])
-        sections.append(f'<div style="margin:20px 0;"><h3 style="color:#1f2937;font-size:16px;margin:0 0 8px 0;">Files Changed</h3><ul style="margin:0;padding-left:20px;font-family:monospace;font-size:13px;">{items}</ul></div>')
+    # Files changed — show as clean list, NOT raw code dumps
+    files_changed = result.get("files_changed", [])
+    applied_files = (apply_result or {}).get("applied_files", [])
+    if files_changed or applied_files:
+        file_items = []
+        for fc in files_changed:
+            fpath = fc.get("path", "") if isinstance(fc, dict) else str(fc)
+            action = fc.get("action", "modify") if isinstance(fc, dict) else "modify"
+            desc = fc.get("description", "") if isinstance(fc, dict) else ""
+            action_colors = {"create": "#059669", "modify": "#2563eb", "delete": "#dc2626"}
+            action_bg = {"create": "#ecfdf5", "modify": "#eff6ff", "delete": "#fef2f2"}
+            ac = action_colors.get(action, "#6b7280")
+            ab = action_bg.get(action, "#f9fafb")
+            file_items.append(
+                f'<div style="padding:10px 14px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px;">'
+                f'<span style="background:{ab};color:{ac};padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;min-width:55px;text-align:center;">{esc(action)}</span>'
+                f'<div><span style="font-family:monospace;font-size:13px;color:#1f2937;">{esc(fpath)}</span>'
+                f'{"<br><span style=&quot;font-size:12px;color:#6b7280;&quot;>" + esc(desc) + "</span>" if desc else ""}'
+                f'</div></div>'
+            )
+        if file_items:
+            sections.append(
+                f'<div style="margin:20px 0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+                f'<div style="background:#f9fafb;padding:12px 16px;border-bottom:1px solid #e5e7eb;">'
+                f'<h3 style="color:#1f2937;font-size:15px;margin:0;font-weight:600;">Files Changed ({len(file_items)})</h3></div>'
+                f'{"".join(file_items)}</div>'
+            )
 
-    file_contents_for_email = result.get("files_changed", [])
-    if file_contents_for_email:
-        for fc in file_contents_for_email:
-            fpath = fc.get("path", "")
-            action = fc.get("action", "modify")
-            content = fc.get("content", "")
-            if not content:
-                content = _read_file_content_for_email(fpath)
-            else:
-                import html as html_mod2
-                content = html_mod2.escape(content)
-                if len(content) > 8000:
-                    content = content[:8000] + "\n\n... (truncated)"
+    # Commands run
+    ran_commands = (apply_result or {}).get("ran_commands", [])
+    if ran_commands:
+        cmd_items = []
+        for c in ran_commands:
+            exit_code = c.get("exit_code", -1)
+            ec_color = "#059669" if exit_code == 0 else "#dc2626"
+            cmd_items.append(
+                f'<div style="padding:8px 14px;border-bottom:1px solid #f3f4f6;font-family:monospace;font-size:12px;">'
+                f'<code style="color:#1f2937;">$ {esc(c.get("command", ""))}</code>'
+                f'<span style="float:right;color:{ec_color};font-weight:600;">exit {exit_code}</span></div>'
+            )
+        sections.append(
+            f'<div style="margin:20px 0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+            f'<div style="background:#f9fafb;padding:12px 16px;border-bottom:1px solid #e5e7eb;">'
+            f'<h3 style="color:#1f2937;font-size:15px;margin:0;font-weight:600;">Commands Run</h3></div>'
+            f'{"".join(cmd_items)}</div>'
+        )
 
-            if content:
-                ext = Path(fpath).suffix.lower()
-                is_code = ext in (".py", ".ts", ".tsx", ".js", ".jsx", ".json", ".toml", ".yaml", ".yml", ".sh", ".css", ".html", ".sql", ".swift")
-                font = "font-family:'SF Mono',Monaco,'Courier New',monospace;font-size:12px;" if is_code else "font-family:'Segoe UI',Arial,sans-serif;font-size:13px;"
-                sections.append(
-                    f'<div style="margin:20px 0;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">'
-                    f'<div style="background:#1f2937;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;">'
-                    f'<span style="color:#e5e7eb;font-family:monospace;font-size:13px;font-weight:600;">{html_mod.escape(fpath)}</span>'
-                    f'<span style="color:#9ca3af;font-size:11px;">{action}</span></div>'
-                    f'<div style="background:#f9fafb;padding:16px;max-height:600px;overflow-y:auto;{font}line-height:1.6;white-space:pre-wrap;word-wrap:break-word;color:#374151;">{content}</div>'
-                    f'</div>'
-                )
-
-    if apply_result and apply_result.get("ran_commands"):
-        items = "".join(f'<li style="padding:4px 0;"><code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">{html_mod.escape(c["command"])}</code> (exit {c["exit_code"]})</li>' for c in apply_result["ran_commands"])
-        sections.append(f'<div style="margin:20px 0;"><h3 style="color:#1f2937;font-size:16px;margin:0 0 8px 0;">Commands Run</h3><ul style="margin:0;padding-left:20px;font-size:13px;">{items}</ul></div>')
-
+    # Commit
     if commit_hash:
-        sections.append(f'<div style="margin:16px 0;padding:12px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;"><span style="color:#166534;font-size:14px;">Committed: <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-weight:bold;">{html_mod.escape(commit_hash)}</code></span></div>')
+        sections.append(
+            f'<div style="margin:16px 0;padding:14px 16px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;display:flex;align-items:center;gap:10px;">'
+            f'<span style="font-size:18px;">&#9989;</span>'
+            f'<span style="color:#166534;font-size:14px;">Changes committed: <code style="background:#dcfce7;padding:3px 8px;border-radius:4px;font-weight:700;font-family:monospace;">{esc(commit_hash)}</code></span></div>'
+        )
 
+    # Questions
     if questions:
-        items = "".join(f'<li style="padding:4px 0;color:#92400e;">{html_mod.escape(q)}</li>' for q in questions)
-        sections.append(f'<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:16px;margin:20px 0;"><h3 style="color:#92400e;font-size:16px;margin:0 0 8px 0;">Questions for You</h3><ul style="margin:0;padding-left:20px;font-size:14px;">{items}</ul><p style="color:#92400e;font-size:13px;margin:12px 0 0 0;">Reply to ai@palmcareai.com to answer.</p></div>')
+        q_items = "".join(f'<li style="padding:6px 0;color:#92400e;font-size:14px;line-height:1.5;">{esc(q)}</li>' for q in questions)
+        sections.append(
+            f'<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:18px;margin:20px 0;">'
+            f'<h3 style="color:#92400e;font-size:16px;margin:0 0 10px 0;">&#128172; Questions for You</h3>'
+            f'<ul style="margin:0;padding-left:20px;">{q_items}</ul>'
+            f'<p style="color:#b45309;font-size:13px;margin:14px 0 0 0;font-style:italic;">Reply to <strong>ai@palmcareai.com</strong> to answer these questions.</p></div>'
+        )
 
-    if apply_result and apply_result.get("errors"):
-        items = "".join(f'<li style="padding:4px 0;color:#dc2626;">{html_mod.escape(e)}</li>' for e in apply_result["errors"])
-        sections.append(f'<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin:20px 0;"><h3 style="color:#991b1b;font-size:16px;margin:0 0 8px 0;">Errors</h3><ul style="margin:0;padding-left:20px;font-size:13px;">{items}</ul></div>')
+    # Errors
+    all_errors = (apply_result or {}).get("errors", [])
+    if all_errors:
+        e_items = "".join(f'<li style="padding:4px 0;color:#dc2626;font-size:13px;">{esc(e)}</li>' for e in all_errors)
+        sections.append(
+            f'<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:18px;margin:20px 0;">'
+            f'<h3 style="color:#991b1b;font-size:16px;margin:0 0 10px 0;">&#9888; Errors</h3>'
+            f'<ul style="margin:0;padding-left:20px;">{e_items}</ul></div>'
+        )
 
+    # Notes
     if notes:
-        sections.append(f'<div style="margin:20px 0;padding:12px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;"><h3 style="color:#6b7280;font-size:14px;margin:0 0 6px 0;">Notes</h3><p style="color:#4b5563;font-size:14px;margin:0;line-height:1.5;">{html_mod.escape(notes)}</p></div>')
+        sections.append(
+            f'<div style="margin:20px 0;padding:14px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">'
+            f'<h3 style="color:#64748b;font-size:13px;margin:0 0 6px 0;text-transform:uppercase;letter-spacing:0.5px;">Agent Notes</h3>'
+            f'<p style="color:#475569;font-size:14px;margin:0;line-height:1.6;">{esc(notes)}</p></div>'
+        )
 
     sections_html = "\n".join(sections)
+    now_str = datetime.now().strftime("%b %d, %Y at %I:%M %p")
 
-    return f"""
-    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:700px;margin:0 auto;background:#ffffff;">
-        <div style="background:linear-gradient(135deg,#0d9488 0%,#14b8a6 100%);padding:30px 24px;text-align:center;">
-            <h1 style="color:white;margin:0;font-size:22px;font-weight:700;">PalmCare AI Agent</h1>
-            <p style="color:rgba(255,255,255,0.85);margin:6px 0 0 0;font-size:13px;">Task Execution Report</p>
-        </div>
-        <div style="padding:24px;">
-            <div style="display:flex;align-items:center;margin-bottom:20px;gap:10px;flex-wrap:wrap;">
-                <span style="background:{bg};color:{color};border:1px solid {border};padding:6px 14px;border-radius:20px;font-weight:600;font-size:13px;text-transform:uppercase;">{status_label}</span>
-                <span style="background:{agent_color}22;color:{agent_color};padding:6px 14px;border-radius:20px;font-weight:600;font-size:12px;">{html_mod.escape(agent_name)}</span>
-                <span style="color:#9ca3af;font-size:13px;">{duration_seconds:.1f}s</span>
-            </div>
-            <h2 style="color:#1f2937;font-size:18px;margin:0 0 12px 0;">{html_mod.escape(task_title)}</h2>
-            <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:16px 0;border-left:4px solid #0d9488;">
-                <p style="color:#374151;font-size:14px;margin:0;line-height:1.6;">{html_mod.escape(summary)}</p>
-            </div>
-            {sections_html}
-        </div>
-        <div style="background:#f9fafb;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="color:#0d9488;font-weight:600;margin:0 0 4px 0;font-size:13px;">PalmCare AI Agent</p>
-            <p style="color:#9ca3af;font-size:11px;margin:0;">Reply to ai@palmcareai.com to send more tasks</p>
-        </div>
-    </div>"""
+    return f"""<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<div style="max-width:640px;margin:0 auto;padding:20px;">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);padding:28px 24px;border-radius:14px 14px 0 0;">
+    <table style="width:100%;"><tr>
+      <td><h1 style="color:white;margin:0;font-size:20px;font-weight:700;">PalmCare AI</h1>
+        <p style="color:rgba(255,255,255,0.75);margin:4px 0 0;font-size:12px;">Task Report &bull; {now_str}</p></td>
+      <td style="text-align:right;">
+        <div style="display:inline-block;background:{agent_color};color:white;width:38px;height:38px;border-radius:10px;text-align:center;line-height:38px;font-weight:700;font-size:14px;">{esc(agent_icon)}</div>
+      </td>
+    </tr></table>
+  </div>
+
+  <!-- Body -->
+  <div style="background:white;padding:24px;border-radius:0 0 14px 14px;border:1px solid #e2e8f0;border-top:none;">
+
+    <!-- Status + Agent badges -->
+    <div style="margin-bottom:20px;">
+      <span style="display:inline-block;background:{bg};color:{color};border:1px solid {border};padding:6px 14px;border-radius:20px;font-weight:600;font-size:12px;text-transform:uppercase;margin-right:8px;">{icon} {status_label}</span>
+      <span style="display:inline-block;background:{agent_color}18;color:{agent_color};padding:6px 14px;border-radius:20px;font-weight:600;font-size:12px;">{esc(agent_name)}</span>
+      <span style="display:inline-block;color:#94a3b8;font-size:12px;margin-left:8px;">{duration_seconds:.1f}s</span>
+    </div>
+
+    <!-- Task title -->
+    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px 0;font-weight:700;">{esc(task_title)}</h2>
+
+    <!-- Summary -->
+    <div style="background:#f8fafc;border-radius:10px;padding:18px;margin:0 0 20px 0;border-left:4px solid #0d9488;">
+      <h3 style="color:#0d9488;font-size:12px;margin:0 0 8px 0;text-transform:uppercase;letter-spacing:0.5px;">Summary</h3>
+      {render_summary(summary)}
+    </div>
+
+    {sections_html}
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;padding:20px 0;">
+    <p style="color:#0d9488;font-weight:600;margin:0 0 4px;font-size:13px;">PalmCare AI Agent</p>
+    <p style="color:#94a3b8;font-size:11px;margin:0;">Reply to <strong>ai@palmcareai.com</strong> &bull; Dashboard: localhost:5050</p>
+  </div>
+
+</div>
+</body></html>"""
 
 
 # ---------------------------------------------------------------------------
@@ -638,7 +709,11 @@ def run_daemon():
 
 if __name__ == "__main__":
     from dotenv import load_dotenv
-    load_dotenv(PROJECT_ROOT / ".env")
+    _env_path = Path.home() / ".palmcare" / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path)
+    else:
+        load_dotenv(PROJECT_ROOT / ".env")
 
     if "--once" in sys.argv:
         logger.info("Running single poll cycle...")
