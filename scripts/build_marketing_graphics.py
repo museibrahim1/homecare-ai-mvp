@@ -12,8 +12,14 @@ import sys
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SCREENSHOTS = PROJECT_ROOT / "screenshots"
-IOS = SCREENSHOTS / "ios"
 OUTPUT = PROJECT_ROOT / "marketing" / "generated"
+
+SCR_LOGIN = SCREENSHOTS / "01_login.png"
+SCR_HOME = SCREENSHOTS / "02_home.png"
+SCR_CLIENTS = SCREENSHOTS / "03_clients.png"
+SCR_RECORD = SCREENSHOTS / "04_record.png"
+SCR_WORKSPACE = SCREENSHOTS / "05_workspace.png"
+SCR_SETTINGS = SCREENSHOTS / "06_settings.png"
 OUTPUT.mkdir(parents=True, exist_ok=True)
 
 TEAL = (13, 148, 136)
@@ -80,9 +86,9 @@ def build_linkedin_hero():
         draw.line([(0, y), (W, y)], fill=(r, g, b))
 
     phones = [
-        add_phone_frame(IOS / "01-landing.png", 650),
-        add_phone_frame(SCREENSHOTS / "01_landing.png", 720),
-        add_phone_frame(IOS / "05-record.png", 650),
+        add_phone_frame(SCR_LOGIN, 650),
+        add_phone_frame(SCR_HOME, 720),
+        add_phone_frame(SCR_RECORD, 650),
     ]
 
     total_w = sum(p.width for p in phones) + 80
@@ -120,7 +126,7 @@ def build_instagram_square():
         b = int(DARK_BG[2] * (1 - alpha * 0.3) + TEAL_DARK[2] * alpha * 0.3)
         draw.line([(0, y), (W, y)], fill=(r, g, b))
 
-    phone = add_phone_frame(SCREENSHOTS / "01_landing.png", 750)
+    phone = add_phone_frame(SCR_RECORD, 750)
     px = (W - phone.width) // 2
     img.paste(phone, (px, 200), phone)
 
@@ -149,7 +155,7 @@ def build_instagram_story():
         b = int(DARK_BG[2] + (TEAL_DARK[2] - DARK_BG[2]) * alpha * 0.5)
         draw.line([(0, y), (W, y)], fill=(r, g, b))
 
-    phone = add_phone_frame(IOS / "07-main-tabs.png", 900)
+    phone = add_phone_frame(SCR_HOME, 900)
     px = (W - phone.width) // 2
     img.paste(phone, (px, 350), phone)
 
@@ -206,8 +212,8 @@ def build_facebook_ad():
 
     draw.line([(W // 2, 0), (W // 2, H)], fill=TEAL, width=4)
 
-    phone_left = add_phone_frame(IOS / "05-record.png", 420)
-    phone_right = add_phone_frame(IOS / "07-main-tabs.png", 420)
+    phone_left = add_phone_frame(SCR_RECORD, 420)
+    phone_right = add_phone_frame(SCR_CLIENTS, 420)
 
     img.paste(phone_left, (W // 4 - phone_left.width // 2, 130), phone_left)
     img.paste(phone_right, (3 * W // 4 - phone_right.width // 2, 130), phone_right)
@@ -233,9 +239,9 @@ def build_carousel_slides():
     """3-slide Instagram carousel with real screenshots."""
     W, H = 1080, 1350
     slides = [
-        (SCREENSHOTS / "01_landing.png", "Step 1", "Open PalmCare AI", "Your AI-powered care assistant"),
-        (IOS / "05-record.png", "Step 2", "Record Assessment", "Just talk. The AI listens."),
-        (IOS / "07-main-tabs.png", "Step 3", "Manage Everything", "Clients. Calendar. Contracts."),
+        (SCR_LOGIN, "Step 1", "Open PalmCare AI", "Your AI-powered care assistant"),
+        (SCR_RECORD, "Step 2", "Record Assessment", "Just talk. The AI listens."),
+        (SCR_WORKSPACE, "Step 3", "Manage Everything", "Clients. Calendar. Contracts."),
     ]
 
     for i, (screenshot, step, title, subtitle) in enumerate(slides, 1):
@@ -289,9 +295,9 @@ def build_twitter_banner():
         draw.line([(0, y), (W, y)], fill=(r, g, b))
 
     phones = [
-        add_phone_frame(IOS / "01-landing.png", 350),
-        add_phone_frame(SCREENSHOTS / "01_landing.png", 380),
-        add_phone_frame(IOS / "05-record.png", 350),
+        add_phone_frame(SCR_LOGIN, 350),
+        add_phone_frame(SCR_HOME, 380),
+        add_phone_frame(SCR_RECORD, 350),
     ]
 
     total_w = sum(p.width for p in phones) + 60
@@ -327,7 +333,7 @@ def build_email_header():
         b = int(TEAL_DARK[2] + (TEAL[2] - TEAL_DARK[2]) * progress)
         draw.line([(x, 0), (x, H)], fill=(r, g, b))
 
-    mini_phone = add_phone_frame(SCREENSHOTS / "01_landing.png", 160)
+    mini_phone = add_phone_frame(SCR_LOGIN, 160)
     img.paste(mini_phone, (W - mini_phone.width - 20, 20), mini_phone)
 
     font_title = get_font(32, bold=True)
