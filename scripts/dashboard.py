@@ -47,6 +47,20 @@ SUBAGENTS = {
         "tags": ["[OUTREACH]", "[EMAIL]", "[CAMPAIGN]"],
         "desc": "Cold emails, sequences, bulk sends",
     },
+    "social_media": {
+        "name": "Social Media Manager",
+        "icon": "SM",
+        "color": "#8b5cf6",
+        "tags": ["[SOCIAL]", "[POST]", "[SOCIALS]"],
+        "desc": "Posts, schedules & manages Twitter, LinkedIn, Instagram, Facebook",
+    },
+    "email_agent": {
+        "name": "Email Agent",
+        "icon": "E",
+        "color": "#3b82f6",
+        "tags": ["[EMAIL-AGENT]", "[DRAFT-EMAILS]", "[LEAD-EMAIL]"],
+        "desc": "Drafts personalized outreach emails from lead lists for review",
+    },
     "report": {
         "name": "Reporting Agent",
         "icon": "R",
@@ -167,9 +181,11 @@ def detect_agent_from_title(title: str) -> str:
             if tag in upper:
                 return agent_id
     keywords = {
-        "marketing": ["marketing", "brand", "content", "campaign design"],
+        "social_media": ["social media", "twitter", "linkedin", "instagram", "facebook", "social post", "content calendar"],
+        "email_agent": ["draft email", "draft outreach", "investor email", "agency email", "lead email", "approve email"],
+        "marketing": ["marketing", "brand", "content", "campaign design", "graphic", "image", "video"],
         "sales": ["lead", "crm", "pipeline", "agency", "investor"],
-        "outreach": ["send email", "outreach", "cold email", "email blast"],
+        "outreach": ["send email", "outreach", "cold email", "email blast", "bulk email"],
         "report": ["report", "analytics", "dashboard", "metrics", "stats"],
     }
     lower = title.lower()
@@ -297,6 +313,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .agent-stat .lbl{font-size:10px;color:var(--muted);text-transform:uppercase}
 .agent-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .tag{font-size:10px;padding:3px 8px;border-radius:6px;background:var(--teal-dim);color:var(--teal);font-weight:600}
+.agent-status{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px}
+.agent-status .dot{width:6px;height:6px;border-radius:50%}
+.agent-status .dot.active{background:#34d399;animation:pulse 2s infinite}
+.agent-status .dot.idle{background:#f59e0b}
+.agent-status .dot.ready{background:#60a5fa}
+.agent-status .label{color:var(--muted)}
 .section-title{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .section-title .dot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
 .tasks-table{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
@@ -428,8 +450,10 @@ async function fetchAgents() {
     let html = '';
     for (const [id, a] of Object.entries(agents)) {
       const tags = a.tags.map(t => `<span class="tag">${t}</span>`).join('');
-      const lastTitle = a.last_task ? a.last_task.title.substring(0, 50) : 'No tasks yet';
+      const lastTitle = a.last_task ? a.last_task.title.substring(0, 50) : 'Awaiting first task';
       const lastTime = a.last_task ? timeAgo(a.last_task.timestamp) : '';
+      const statusClass = a.tasks_handled > 0 ? 'active' : 'ready';
+      const statusLabel = a.tasks_handled > 0 ? 'Active' : 'Ready';
       html += `
         <div class="agent-card">
           <div class="agent-header">
@@ -438,6 +462,10 @@ async function fetchAgents() {
               <div class="agent-name">${a.name}</div>
               <div class="agent-desc">${a.desc}</div>
             </div>
+          </div>
+          <div class="agent-status">
+            <div class="dot ${statusClass}"></div>
+            <span class="label">${statusLabel}</span>
           </div>
           <div class="agent-stats">
             <div class="agent-stat"><div class="num">${a.tasks_handled}</div><div class="lbl">Tasks</div></div>

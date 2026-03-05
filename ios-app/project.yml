@@ -52,3 +52,13 @@ targets:
               NSIncludesSubdomains: true
               NSExceptionAllowsInsecureHTTPLoads: false
         ITSAppUsesNonExemptEncryption: false
+
+schemes:
+  PalmCareAI:
+    build:
+      targets:
+        PalmCareAI: all
+    run:
+      config: Debug
+    archive:
+      config: Release
