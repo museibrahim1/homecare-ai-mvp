@@ -25,7 +25,12 @@ from typing import Optional
 
 import anthropic
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_script_parent = Path(__file__).resolve().parent.parent
+_candidate_roots = [
+    Path.home() / "Desktop" / "AI Voice Contracter",
+    _script_parent,
+]
+PROJECT_ROOT = next((p for p in _candidate_roots if (p / ".git").is_dir()), _script_parent)
 
 # ---------------------------------------------------------------------------
 # Shared skills block — injected into every subagent's system prompt
@@ -551,16 +556,8 @@ def execute_with_subagent(
         )
 
         response_text = response.content[0].text
-        json_match = re.search(r'\{[\s\S]*\}', response_text)
-        if json_match:
-            result = json.loads(json_match.group())
-        else:
-            result = {
-                "summary": response_text[:500],
-                "status": "completed",
-                "files_changed": [], "commands": [], "questions": [],
-                "notes": f"Handled by {agent_name}. Response was not JSON.",
-            }
+        from ai_task_executor import _parse_json_response
+        result = _parse_json_response(response_text)
 
         for key in ["summary", "status", "files_changed", "commands", "questions", "notes"]:
             if key not in result:

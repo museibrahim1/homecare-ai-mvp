@@ -35,7 +35,12 @@ from ai_subagents import detect_subagent, execute_with_subagent, SUBAGENTS
 # Configuration
 # ---------------------------------------------------------------------------
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_script_parent = Path(__file__).resolve().parent.parent
+_candidate_roots = [
+    Path.home() / "Desktop" / "AI Voice Contracter",
+    _script_parent,
+]
+PROJECT_ROOT = next((p for p in _candidate_roots if (p / ".git").is_dir()), _script_parent)
 DAEMON_HOME = Path.home() / ".palmcare"
 TASKS_DIR = DAEMON_HOME / "tasks"
 COMPLETED_DIR = DAEMON_HOME / "completed"
@@ -618,12 +623,21 @@ def poll_cycle(state: dict) -> int:
         try:
             title = clean_subject(task["title"])
             run_task(title, task["body"], task["task_type"], state)
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            task["file"].rename(COMPLETED_DIR / f"{timestamp}_{task['file'].stem}.done")
             processed += 1
-            time.sleep(2)
         except Exception as e:
             logger.exception(f"Error processing file task: {e}")
+        finally:
+            try:
+                task_file = task.get("file")
+                if task_file and task_file.exists():
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    task_file.rename(COMPLETED_DIR / f"{timestamp}_{task_file.stem}.done")
+            except Exception:
+                try:
+                    task_file.unlink(missing_ok=True)
+                except Exception:
+                    pass
+            time.sleep(2)
 
     # 2. Cloudflare Worker (primary email method — emails to ai@palmcareai.com)
     for cf_task in poll_cf_worker(state):
