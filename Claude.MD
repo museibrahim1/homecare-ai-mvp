@@ -430,21 +430,82 @@ This section tracks what has been done across sessions so Claude can pick up con
 
 ---
 
+### Session: March 4, 2026 — AI Email Agent + Subagent Dashboard + API Keys
+
+**What was done:**
+- **AI Email Task System**: Built end-to-end asynchronous AI agent that receives tasks via email and executes them autonomously
+  - Cloudflare Email Worker (`workers/email-receiver/`) intercepts emails to `ai@palmcareai.com`, stores in KV
+  - Local daemon (`scripts/ai_task_daemon.py`) polls CF Worker for tasks, executes via Claude API, emails results back
+  - File-based task queue (`~/.palmcare/tasks/`) as local fallback + `aitask` CLI helper
+  - macOS LaunchAgent (`com.palmcare.ai-tasks.plist`) keeps daemon running 24/7
+- **4 Specialized Subagents** (`scripts/ai_subagents.py`):
+  - Marketing Agent — campaigns, content, branding, image/voiceover generation
+  - Sales Agent — lead management, CRM, outreach, pitch visuals
+  - Outreach Agent — email sending scripts, bulk campaigns, personalization
+  - Reporting Agent — analytics, dashboards, status reports, infographics
+  - Auto-routing based on email subject tags (`[MARKETING]`, `[SALES]`, etc.) or keyword detection
+- **Subagent Dashboard** (`scripts/dashboard.py`): Flask app on `http://localhost:5050`
+  - Real-time daemon status, task counts, subagent cards with task history
+  - Clickable task rows expand to show full summary, notes, files changed, commit hash
+  - Live color-coded log viewer, auto-refresh every 5s
+  - macOS LaunchAgent (`com.palmcare.dashboard.plist`) keeps it running
+- **Email Reports Enhanced**: Task results now include full file contents in email (not just filenames)
+  - Styled code blocks with dark headers, syntax-appropriate fonts
+  - Agent name badge with color, HTML escaping, duration display
+  - Results also saved as `.result.json` in `~/.palmcare/completed/` for dashboard
+- **Marketing Agent Output**: Created `marketing/social-media-copy.md` (full copy bank: LinkedIn, Instagram, Twitter, Facebook, Stories, hashtag strategy, content calendar, CTAs) and `marketing/social-media-graphics.md` (5 graphic specs with brand guidelines)
+- **API Keys Configured**:
+  - `WAVESPEED_API_KEY` — ElevenLabs v3 voiceovers (was missing, now set)
+  - `NANO_BANANA_API_KEY` — Nano Banana Pro image generation (separate from WaveSpeed)
+  - All subagent prompts updated with correct key references
+
+**Key files created/modified:**
+- `scripts/ai_task_daemon.py` — Main daemon with CF Worker polling, result saving, enhanced email reports
+- `scripts/ai_task_executor.py` — Claude-powered task executor
+- `scripts/ai_subagents.py` — 4 subagent definitions with WaveSpeed/Nano Banana capabilities
+- `scripts/dashboard.py` — Flask dashboard UI
+- `workers/email-receiver/src/index.ts` — Cloudflare Email Worker
+- `workers/email-receiver/wrangler.toml` — Worker config with KV binding
+- `marketing/social-media-copy.md` — Social media copy bank (marketing agent output)
+- `marketing/social-media-graphics.md` — Graphics spec sheet (marketing agent output)
+
+**Key decisions:**
+- Cloudflare Email Worker + KV for email intake (Gmail IMAP blocked by Google Workspace, Resend receiving unreliable)
+- All daemon files deployed to `~/.palmcare/` to avoid macOS Desktop sandbox restrictions
+- `WAVESPEED_API_KEY` and `NANO_BANANA_API_KEY` are separate keys (user clarified)
+- Email reports include full file contents so user can see results without opening repo
+- Dashboard runs on localhost:5050 via launchd
+
+**Architecture:**
+```
+Email to ai@palmcareai.com
+  → Cloudflare Email Routing
+  → CF Worker (stores in KV)
+  → Local daemon polls /tasks endpoint every 30s
+  → Routes to appropriate subagent
+  → Claude API executes task
+  → Results emailed to support@palmtai.com
+  → Results saved to ~/.palmcare/completed/*.result.json
+  → Dashboard at localhost:5050 shows everything
+```
+
+---
+
 ## Upcoming Tasks & Priorities
 
-### IMMEDIATE (March 3-4, 2026)
+### IMMEDIATE (March 5, 2026)
 1. **Investor Outreach** — Start reaching out to investors from the seeded investor list (60+ investors with emails)
-2. **Marketing Emails** — Launch the 5-email cold outreach sequence to 163+ agencies starting March 4
+2. **Marketing Emails** — Launch the 5-email cold outreach sequence to 163+ agencies
 3. **Gust Executive Summary** — May still need to be completed
+4. **Test subagent tasks via email** — Send real marketing/sales tasks to ai@palmcareai.com
 
 ### IN PROGRESS
 - Dark mode refinement — checking dashboard and app pages for hardcoded light colors
-- Sidebar dark-mode updates
+- AI email agent system is live and running
 
 ### BACKLOG
 - `POST /clients` performance optimization (identified as bottleneck in k6 tests)
 - BAAs and Resend replacement for full HIPAA compliance
-- WaveSpeed API key setup for production voiceovers (currently using OpenAI TTS fallback)
 - Mobile companion app development (in `/mobile/`)
 
 ---
@@ -458,6 +519,8 @@ This section tracks what has been done across sessions so Claude can pick up con
 | Company | Palm Technologies, INC. |
 | Website | palmcareai.com |
 | Email domain | palmtai.com (Google Workspace), send.palmcareai.com (Resend) |
+| AI Agent email | ai@palmcareai.com (Cloudflare Worker → local daemon) |
+| Dashboard | http://localhost:5050 (Flask, launchd) |
 | Fundraising | $450K SAFE, $2.25M post-money valuation |
 | ARR | $92K |
 | Brand color | Teal (#0d9488) |
@@ -466,7 +529,8 @@ This section tracks what has been done across sessions so Claude can pick up con
 | Investors | 60+ seeded with emails |
 | Tech stack | Next.js (web), SwiftUI (iOS), FastAPI (API), Celery (worker), Deepgram (ASR), Claude (AI) |
 | Cost per assessment | ~$0.37 |
+| API Keys | Anthropic, OpenAI, Deepgram, Resend, WaveSpeed, Nano Banana Pro, Google Calendar |
 
 ---
 
-*Last updated: March 3, 2026*
+*Last updated: March 4, 2026*
