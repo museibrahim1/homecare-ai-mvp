@@ -1,0 +1,50 @@
+[
+  {
+    "name": "linkedin_hero",
+    "file": "marketing/generated/linkedin_hero.png",
+    "url": "https://d1q70pf5vjeyhc.cloudfront.net/predictions/cc0ba7ae33eb4a41b717ff0c0957251c/1.png",
+    "aspect_ratio": "16:9"
+  },
+  {
+    "name": "instagram_square_feature",
+    "file": "marketing/generated/instagram_square_feature.png",
+    "url": "https://d1q70pf5vjeyhc.cloudfront.net/predictions/466cd61cf0ed4d188b2b42fdf87aa184/1.png",
+    "aspect_ratio": "1:1"
+  },
+  {
+    "name": "instagram_story_stats",
+    "file": "marketing/generated/instagram_story_stats.png",
+    "url": "https://d1q70pf5vjeyhc.cloudfront.net/predictions/7051a2014edb4ba3bb86858e84e8768d/1.png",
+    "aspect_ratio": "9:16"
+  },
+  {
+    "name": "facebook_ad_problem_solution",
+    "file": "marketing/generated/facebook_ad_problem_solution.png",
+    "url": "https://d1q70pf5vjeyhc.cloudfront.net/predictions/e476d81d98564059bcf7010eedca281e/1.png",
+    "aspect_ratio": "16:9"
+  },
+  {
+    "name": "linkedin_post_roi",
+    "file": "marketing/generated/linkedin_post_roi.png",
+    "url": "https://d1q70pf5vjeyhc.cloudfront.net/predictions/c63506b57fce47e5913b842bfcbbc99c/1.png",
+    "aspect_ratio": "1:1"
+  },
+  {
+    "name": "instagram_carousel_1_record",
+    "file": "marketing/generated/instagram_carousel_1_record.png",
+    "url": "https://d1q70pf5vjeyhc.cloudfront.net/predictions/e4e7600855f04f808a4e367d08ceb21f/1.png",
+    "aspect_ratio": "4:5"
+  },
+  {
+    "name": "instagram_carousel_2_analyze",
+    "file": "marketing/generated/instagram_carousel_2_analyze.png",
+    "url": "https://d1q70pf5vjeyhc.cloudfront.net/predictions/819b0594ac0f4e09bb7f65c4871b7829/1.png",
+    "aspect_ratio": "4:5"
+  },
+  {
+    "name": "instagram_carousel_3_contract",
+    "file": "marketing/generated/instagram_carousel_3_contract.png",
+    "url": "https://d1q70pf5vjeyhc.cloudfront.net/predictions/cdc3f3ceb11c494aa297ac8eb6056a84/1.png",
+    "aspect_ratio": "4:5"
+  }
+]
