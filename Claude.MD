@@ -533,4 +533,36 @@ Email to ai@palmcareai.com
 
 ---
 
-*Last updated: March 4, 2026*
+### Session: March 5, 2026 — Agent Stability Fixes + New Agents + iOS Screenshots
+
+**What was done:**
+- **Agent error diagnosis**: Read full daemon logs, identified 6 root causes of 17 failed tasks
+- **JSON parsing fix**: Replaced greedy regex `\{[\s\S]*\}` with balanced-brace parser + field extraction fallback. Fixes 6+ "Unterminated string" failures from Marketing Agent
+- **PROJECT_ROOT fix**: Deployed scripts at `~/.palmcare/` resolved to home dir instead of project dir, causing `find_relevant_files` to walk entire filesystem and crash on broken symlinks. Now detects project by `.git` directory
+- **Duplicate logging fix**: Removed StreamHandler (launchd already redirects stdout to same log file)
+- **Broken symlink handling**: Added OSError/PermissionError catches in `find_relevant_files` and `get_project_tree`
+- **File task processing fix**: Moved file rename to `finally` block to prevent stale task files from blocking pipeline
+- **Email format rewrite**: Complete rewrite of `build_report_html` — fully visualized professional HTML emails with status badges, formatted summaries, file change cards, question callouts, error alerts. User never needs IDE to read results
+- **Git operations**: Added timeouts, graceful failure on sandbox permission errors
+- **New agents**: Social Media Manager (`[SOCIAL]`) and Email Agent (`[EMAIL-AGENT]`) added to dashboard and subagents
+- **Dashboard update**: 7 agents now show with active/ready status indicators
+- **iOS screenshots**: 6 fresh screenshots from iPhone 17 Pro simulator (login, home, clients, record, workspace, settings) using demo@agency.com
+- **Marketing graphics**: 9 graphics rebuilt using real iOS app screenshots (LinkedIn hero, Instagram square/story/carousel, Facebook ad, Twitter banner, email header)
+
+**Key decisions:**
+- Balanced-brace JSON parser preferred over regex for reliability
+- PROJECT_ROOT detection uses `.git` directory presence
+- No StreamHandler in daemon logging (launchd handles stdout)
+- Email format is always fully visualized HTML — no raw code dumps
+- File task errors are non-fatal (finally block handles cleanup)
+
+**Error summary (before fixes):**
+- 17 failed tasks total
+- 6 from JSON parsing (greedy regex)
+- 14 git errors (sandbox/permissions)
+- 2 from broken symlinks (Google Updater path)
+- 1 from stale task file rename
+
+---
+
+*Last updated: March 5, 2026*
