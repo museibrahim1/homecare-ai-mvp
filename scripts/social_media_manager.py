@@ -110,14 +110,14 @@ class LinkedInClient:
                 if not self.person_id:
                     return {"status": "failed", "platform": "linkedin", "reason": "Could not fetch profile ID. Set LINKEDIN_PERSON_ID in .env manually. Find it at: linkedin.com/in/YOUR-PROFILE → view page source → search for 'publicIdentifier'"}
 
-            author = f"urn:li:person:{self.person_id}"
+            author_urn = f"urn:li:person:{self.person_id}"
             media_content = None
 
             if image_path and Path(image_path).exists():
                 register_payload = {
                     "registerUploadRequest": {
                         "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-                        "owner": author,
+                        "owner": author_urn,
                         "serviceRelationships": [{"relationshipType": "OWNER", "identifier": "urn:li:userGeneratedContent"}],
                     }
                 }
@@ -138,7 +138,7 @@ class LinkedInClient:
                     }
 
             payload = {
-                "author": author,
+                "author": author_urn,
                 "lifecycleState": "PUBLISHED",
                 "specificContent": {
                     "com.linkedin.ugc.ShareContent": {
@@ -152,6 +152,14 @@ class LinkedInClient:
                 payload["specificContent"]["com.linkedin.ugc.ShareContent"]["media"] = media_content["media"]
 
             resp = requests.post("https://api.linkedin.com/v2/ugcPosts", headers=headers, json=payload)
+
+            if resp.status_code == 403 or resp.status_code == 422:
+                alt_urn = f"urn:li:member:{self.person_id}"
+                payload["author"] = alt_urn
+                if media_content:
+                    payload["specificContent"]["com.linkedin.ugc.ShareContent"]["media"][0]["media"] = payload["specificContent"]["com.linkedin.ugc.ShareContent"]["media"][0].get("media", "")
+                resp = requests.post("https://api.linkedin.com/v2/ugcPosts", headers=headers, json=payload)
+
             post_id = resp.headers.get("x-restli-id", "")
             return {
                 "status": "posted" if resp.status_code in (200, 201) else "failed",
