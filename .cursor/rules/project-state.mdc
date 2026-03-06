@@ -1,0 +1,32 @@
+---
+description: Overall project state - social media agents, backend, and pending tasks
+alwaysApply: true
+---
+
+# PalmCare AI — Project State (March 2026)
+
+## Social Media & Email Agents
+- **Scripts**: `scripts/social_media_manager.py`, `scripts/email_agent.py`, `scripts/ai_subagents.py`
+- **CLI**: `scripts/aitask` with commands: `--draft-investor-emails`, `--draft-agency-emails`, `--list-drafts`, `--approve-emails`, `--social-status`, `--social-drafts`
+- **LinkedIn**: Access token configured, Person ID `1034844126`, "Share on LinkedIn" product enabled. Posting needs re-auth with correct scopes.
+- **Facebook**: "Palm Technologies" page exists. Need Meta Developer App + Page Access Token.
+- **Instagram**: `@palmcareai` — needs conversion to Business account, link to Facebook Page.
+- **Twitter/X**: API key/secret in `.env`, access token/secret still needed.
+
+## Backend API
+- FastAPI on Railway: `https://api-production-a0a2.up.railway.app`
+- Deepgram Nova-3 for transcription, Claude Sonnet 4 for LLM
+- Contract generation uses 50-state rules from `apps/worker/libs/state_rules.py`
+- Pipeline: transcribe → speakers → billables → notes → contract
+
+## Pending Tasks
+1. LinkedIn: Re-authorize with `openid profile w_member_social` scopes (Share on LinkedIn product now enabled)
+2. Facebook: Create Meta Developer App, get Page Access Token with `pages_manage_posts`
+3. Instagram: Convert `@palmcareai` to Business account, link to Facebook Page
+4. Verify `palmtai.com` domain DNS on Resend for email sending to external addresses
+5. Apple Developer Program enrollment (business account `museibrahim@palmtai.com`)
+
+## Environment
+- `.env` has all API keys — NEVER commit secrets or show them in responses
+- Email: Resend API (`re_fYB7LY6X_...`), domain `palmtai.com` status: failed verification
+- User emails: `musajama89@gmail.com` (personal), `museibrahim@palmtai.com` (business)

@@ -1,0 +1,44 @@
+---
+description: Current state of the iOS PalmCare AI app - architecture, components, and session context
+globs: ios-app/**/*.swift
+alwaysApply: false
+---
+
+# PalmCare AI iOS App — Current State
+
+## Architecture
+- **SwiftUI** app targeting iOS 16+, built with **XcodeGen** (`project.yml`)
+- Bundle ID: `com.palmtechnologies.palmcare`, Team: `QFS97GTYJH`
+- API base: configurable via `Info.plist` → `API_BASE_URL`, fallback `https://api-production-a0a2.up.railway.app`
+- Auth tokens stored in **Keychain** via `KeychainHelper`
+
+## Key Files
+| File | Purpose |
+|------|---------|
+| `Theme/PalmCareTheme.swift` | Brand colors (palmPrimary = teal #0D9488), adaptive dark/light |
+| `Services/APIService.swift` | API client with Keychain token storage, `requestVoid` for 204s |
+| `Models/Models.swift` | Codable models with `AnyCodable` for flexible JSON |
+| `Views/Components/PalmAlert.swift` | Custom branded alert replacing native `.alert()` |
+| `Views/Clients/AddClientSheet.swift` | 7-tab client form matching web app |
+| `Views/Record/RecordView.swift` | Voice recording orb with mic.fill icon |
+
+## Custom Components
+- **PalmAlert**: Use `.palmErrorAlert()` or `.palmConfirmAlert()` — NEVER use native `.alert()`
+- **AddClientSheet**: 7-tab form (Personal, Contact, Emergency, Medical, Care Plan, Insurance, Scheduling)
+- Tab bar uses `ScrollView(.horizontal)` with `palmPrimary` active state
+
+## Demo Account
+- Email: `demo@agency.com`, Password: `demo1234`
+- Has 3 clients (michel, John, Moscow's) and 11 visits
+
+## Build Commands
+```bash
+cd ios-app && xcodegen generate && xcodebuild -project PalmCareAI.xcodeproj -scheme PalmCareAI -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath build build
+```
+
+## Important Rules
+- Always use `Color.palmPrimary`, `Color.palmText` etc. from theme — never hardcode colors
+- Use `Color(UIColor.secondarySystemGroupedBackground)` for adaptive backgrounds
+- Always add `.accessibilityLabel()` to interactive elements
+- Use `@MainActor` for classes with `@Published` properties
+- Replace force unwraps with safe optional handling
