@@ -108,11 +108,13 @@ export default function ReportsPage() {
       const endpoints: Record<string, string> = {
         timesheet: '/reports/timesheet/csv',
         billing: '/reports/billing/csv',
+        monthly: '/reports/monthly/csv',
+        activity: '/reports/activity/csv',
       };
       
       const endpoint = endpoints[type];
       if (!endpoint) {
-        alert('CSV export coming soon for this report type');
+        alert('CSV export not available for this report type');
         setDownloading(false);
         return;
       }

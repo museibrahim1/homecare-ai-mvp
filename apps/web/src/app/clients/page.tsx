@@ -12,7 +12,6 @@ import {
   LayoutGrid,
   List,
   BarChart3,
-  Zap,
   Link2,
   X,
   Loader2,
@@ -24,7 +23,7 @@ import {
   Shield,
   FileSpreadsheet,
   UserPlus,
-  FolderUp
+  Check
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -537,20 +536,20 @@ export default function ClientsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [showAutomationsModal, setShowAutomationsModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [showPlusMenu, setShowPlusMenu] = useState(false);
+  const [csvImporting, setCsvImporting] = useState(false);
+  const [csvImportResult, setCsvImportResult] = useState<{ success: number; failed: number } | null>(null);
   const plusMenuRef = useRef<HTMLDivElement>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
   const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Cleanup delete timeout on unmount
   useEffect(() => {
     return () => {
       if (deleteTimeoutRef.current) clearTimeout(deleteTimeoutRef.current);
     };
   }, []);
 
-  // Close plus menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (plusMenuRef.current && !plusMenuRef.current.contains(e.target as Node)) {
@@ -560,21 +559,6 @@ export default function ClientsPage() {
     if (showPlusMenu) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showPlusMenu]);
-  
-  // Client automations
-  const [automations, setAutomations] = useState([
-    { id: 1, name: 'Auto-assign caregiver by specialty', description: 'Automatically match caregivers based on client care needs', enabled: true, trigger: 'New client added' },
-    { id: 2, name: 'Follow-up reminder', description: 'Send reminder when client needs follow-up assessment', enabled: true, trigger: 'Status changes to follow-up' },
-    { id: 3, name: 'Care plan review alert', description: 'Alert team when care plan needs review (every 90 days)', enabled: false, trigger: '90 days since last review' },
-    { id: 4, name: 'Birthday notification', description: 'Send birthday wishes to clients', enabled: false, trigger: 'Client birthday' },
-    { id: 5, name: 'Status change notification', description: 'Notify team when client status changes', enabled: false, trigger: 'Status change' },
-  ]);
-
-  const toggleAutomation = (id: number) => {
-    setAutomations(automations.map(a => 
-      a.id === id ? { ...a, enabled: !a.enabled } : a
-    ));
-  };
 
   useEffect(() => {
     if (token) {
@@ -641,6 +625,67 @@ export default function ClientsPage() {
     }
 
     await loadClients();
+  };
+
+  const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+    setCsvImporting(true);
+    setCsvImportResult(null);
+
+    try {
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) { setCsvImporting(false); return; }
+
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
+      let success = 0;
+      let failed = 0;
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].match(/(".*?"|[^,]+)/g)?.map(v => v.replace(/^"|"$/g, '').trim()) || [];
+        const row: Record<string, string> = {};
+        headers.forEach((h, idx) => { if (values[idx]) row[h] = values[idx]; });
+
+        if (!row.full_name && !row.name) { failed++; continue; }
+
+        const clientData: Record<string, string> = {
+          full_name: row.full_name || row.name || '',
+        };
+        const fieldMap: Record<string, string> = {
+          phone: 'phone', email: 'email', address: 'address',
+          city: 'city', state: 'state', zip_code: 'zip_code', zip: 'zip_code',
+          date_of_birth: 'date_of_birth', dob: 'date_of_birth',
+          gender: 'gender', insurance_provider: 'insurance_provider',
+          insurance_id: 'insurance_id', medicaid_id: 'medicaid_id',
+          medicare_id: 'medicare_id', care_level: 'care_level',
+          emergency_contact_name: 'emergency_contact_name',
+          emergency_contact_phone: 'emergency_contact_phone',
+          primary_diagnosis: 'primary_diagnosis', notes: 'notes',
+        };
+        Object.entries(row).forEach(([k, v]) => {
+          const mapped = fieldMap[k];
+          if (mapped && v) clientData[mapped] = v;
+        });
+
+        try {
+          const res = await fetch(`${API_BASE}/clients`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(clientData),
+          });
+          if (res.ok) success++; else failed++;
+        } catch { failed++; }
+      }
+
+      setCsvImportResult({ success, failed });
+      if (success > 0) await loadClients();
+    } catch {
+      setCsvImportResult({ success: 0, failed: -1 });
+    } finally {
+      setCsvImporting(false);
+      if (csvInputRef.current) csvInputRef.current.value = '';
+    }
   };
 
   // Filter by search and insurance type
@@ -777,13 +822,6 @@ export default function ClientsPage() {
                 <Link2 className="w-4 h-4" />
                 Integrate
               </button>
-              <button 
-                onClick={() => setShowAutomationsModal(true)}
-                className="btn-secondary flex items-center gap-2 text-sm"
-              >
-                <Zap className="w-4 h-4" />
-                Automate / {automations.filter(a => a.enabled).length}
-              </button>
               <div className="relative" ref={plusMenuRef}>
                 <button 
                   onClick={() => setShowPlusMenu(!showPlusMenu)}
@@ -801,18 +839,11 @@ export default function ClientsPage() {
                       Add New Client
                     </button>
                     <button
-                      onClick={() => { setShowPlusMenu(false); }}
+                      onClick={() => { setShowPlusMenu(false); csvInputRef.current?.click(); }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                     >
                       <FileSpreadsheet className="w-4 h-4 text-green-500" />
-                      Import from CSV
-                    </button>
-                    <button
-                      onClick={() => { setShowPlusMenu(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                    >
-                      <FolderUp className="w-4 h-4 text-orange-500" />
-                      Bulk Import
+                      {csvImporting ? 'Importing...' : 'Import from CSV'}
                     </button>
                   </div>
                 )}
@@ -1379,72 +1410,33 @@ export default function ClientsPage() {
         onSave={handleSaveClient}
       />
 
-      {/* Automations Modal */}
-      {showAutomationsModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white border border-slate-200 rounded-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">Client Automations</h2>
-                <p className="text-slate-500 text-sm mt-1">Manage workflow automations for client management</p>
-              </div>
-              <button 
-                onClick={() => setShowAutomationsModal(false)} 
-                className="p-2 hover:bg-slate-50 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
+      <input
+        ref={csvInputRef}
+        type="file"
+        accept=".csv"
+        onChange={handleCsvImport}
+        className="hidden"
+      />
+
+      {csvImportResult && (
+        <div className="fixed bottom-6 right-6 z-50 bg-white border border-slate-200 rounded-xl shadow-lg p-4 max-w-sm animate-in slide-in-from-bottom-4">
+          <div className="flex items-start gap-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${csvImportResult.success > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+              {csvImportResult.success > 0 ? (
+                <Check className="w-4 h-4 text-green-600" />
+              ) : (
+                <X className="w-4 h-4 text-red-600" />
+              )}
             </div>
-            
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {automations.map((automation) => (
-                <div 
-                  key={automation.id}
-                  className={`p-4 rounded-xl border transition-colors ${
-                    automation.enabled 
-                      ? 'bg-primary-50 border-primary-200' 
-                      : 'bg-slate-50 border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Zap className={`w-4 h-4 ${automation.enabled ? 'text-primary-500' : 'text-slate-400'}`} />
-                        <h3 className="font-medium text-slate-900">{automation.name}</h3>
-                      </div>
-                      <p className="text-slate-500 text-sm mt-1">{automation.description}</p>
-                      <p className="text-slate-400 text-xs mt-2">Trigger: {automation.trigger}</p>
-                    </div>
-                    <button
-                      onClick={() => toggleAutomation(automation.id)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        automation.enabled ? 'bg-primary-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          automation.enabled ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className="flex-1">
+              <p className="font-medium text-slate-900">CSV Import Complete</p>
+              <p className="text-sm text-slate-500">
+                {csvImportResult.success} imported{csvImportResult.failed > 0 ? `, ${csvImportResult.failed} failed` : ''}
+              </p>
             </div>
-            
-            <div className="p-6 border-t border-slate-200 bg-slate-50">
-              <div className="flex items-center justify-between">
-                <p className="text-slate-500 text-sm">
-                  {automations.filter(a => a.enabled).length} of {automations.length} automations active
-                </p>
-                <button
-                  onClick={() => setShowAutomationsModal(false)}
-                  className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
+            <button onClick={() => setCsvImportResult(null)} className="text-slate-400 hover:text-slate-600">
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

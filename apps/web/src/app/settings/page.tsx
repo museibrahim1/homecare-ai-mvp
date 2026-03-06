@@ -140,18 +140,38 @@ export default function SettingsPage() {
   // Document upload state
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('contract_template');
+
+  // MFA state
+  const [mfaStep, setMfaStep] = useState<'idle' | 'setup' | 'verify'>('idle');
+  const [mfaSecret, setMfaSecret] = useState('');
+  const [mfaUri, setMfaUri] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaError, setMfaError] = useState<string | null>(null);
   
-  // Notification preferences state
-  const [notifications, setNotifications] = useState({
+  const defaultNotifications = {
     email_notifications: true,
     visit_reminders: true,
     weekly_summary: false,
     new_client_alerts: true,
     contract_expiration_alerts: true,
-  });
+  };
+  const [notifications, setNotifications] = useState(defaultNotifications);
   
   const logoInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('palmcare_notification_prefs');
+      if (saved) setNotifications(JSON.parse(saved));
+    } catch { /* use defaults */ }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('palmcare_notification_prefs', JSON.stringify(notifications));
+  }, [notifications]);
 
   useEffect(() => {
     if (token) {
@@ -214,6 +234,87 @@ export default function SettingsPage() {
         }
       }
     } catch (err) {
+    }
+  };
+
+  const handleMfaSetup = async () => {
+    if (!token) return;
+    setMfaLoading(true);
+    setMfaError(null);
+    try {
+      const res = await fetch(`${API_BASE}/auth/mfa/setup`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || 'Failed to set up 2FA');
+      }
+      const data = await res.json();
+      setMfaSecret(data.secret);
+      setMfaUri(data.otpauth_uri);
+      setMfaStep('setup');
+    } catch (err: any) {
+      setMfaError(err.message);
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
+  const handleMfaEnable = async () => {
+    if (!token || mfaCode.length < 6) return;
+    setMfaLoading(true);
+    setMfaError(null);
+    try {
+      const verifyRes = await fetch(`${API_BASE}/auth/mfa/verify`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: mfaCode }),
+      });
+      if (!verifyRes.ok) {
+        const data = await verifyRes.json();
+        throw new Error(data.detail || 'Invalid code');
+      }
+      const enableRes = await fetch(`${API_BASE}/auth/mfa/enable`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: mfaCode }),
+      });
+      if (!enableRes.ok) {
+        const data = await enableRes.json();
+        throw new Error(data.detail || 'Failed to enable 2FA');
+      }
+      setMfaEnabled(true);
+      setMfaStep('idle');
+      setMfaCode('');
+    } catch (err: any) {
+      setMfaError(err.message);
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
+  const handleMfaDisable = async () => {
+    if (!token || mfaCode.length < 6) return;
+    setMfaLoading(true);
+    setMfaError(null);
+    try {
+      const res = await fetch(`${API_BASE}/auth/mfa/disable`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: mfaCode }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || 'Failed to disable 2FA');
+      }
+      setMfaEnabled(false);
+      setMfaStep('idle');
+      setMfaCode('');
+    } catch (err: any) {
+      setMfaError(err.message);
+    } finally {
+      setMfaLoading(false);
     }
   };
 
@@ -1378,12 +1479,94 @@ export default function SettingsPage() {
                   Security Settings
                 </h2>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b border-slate-200">
-                    <div>
-                      <p className="text-slate-700">Two-Factor Authentication</p>
-                      <p className="text-slate-400 text-sm">Add an extra layer of security</p>
+                  <div className="py-3 border-b border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-slate-700">Two-Factor Authentication</p>
+                        <p className="text-slate-400 text-sm">
+                          {mfaEnabled ? 'Enabled — your account is protected with TOTP' : 'Add an extra layer of security'}
+                        </p>
+                      </div>
+                      {mfaStep === 'idle' && (
+                        <button
+                          onClick={mfaEnabled ? () => setMfaStep('verify') : handleMfaSetup}
+                          disabled={mfaLoading}
+                          className={`text-sm ${mfaEnabled ? 'btn-secondary text-red-600 border-red-200 hover:bg-red-50' : 'btn-secondary'}`}
+                        >
+                          {mfaLoading ? 'Loading...' : mfaEnabled ? 'Disable' : 'Enable'}
+                        </button>
+                      )}
                     </div>
-                    <button onClick={() => setError('Two-factor authentication setup is coming soon.')} className="btn-secondary text-sm">Enable</button>
+
+                    {mfaError && (
+                      <p className="text-red-500 text-sm mt-2">{mfaError}</p>
+                    )}
+
+                    {mfaStep === 'setup' && (
+                      <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                        <p className="text-sm text-slate-700 font-medium">Scan this QR code with your authenticator app:</p>
+                        <div className="flex justify-center">
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mfaUri)}`}
+                            alt="MFA QR Code"
+                            className="w-48 h-48 rounded-lg border border-slate-200"
+                          />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-slate-400 mb-1">Or enter this key manually:</p>
+                          <code className="text-sm bg-white px-3 py-1 rounded border border-slate-200 select-all font-mono">{mfaSecret}</code>
+                        </div>
+                        <div>
+                          <label className="text-sm text-slate-600 mb-1 block">Enter the 6-digit code from your app:</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              maxLength={6}
+                              value={mfaCode}
+                              onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                              placeholder="000000"
+                              className="flex-1 input-primary text-center text-lg tracking-widest font-mono"
+                            />
+                            <button
+                              onClick={handleMfaEnable}
+                              disabled={mfaCode.length < 6 || mfaLoading}
+                              className="btn-primary text-sm px-4"
+                            >
+                              {mfaLoading ? 'Verifying...' : 'Verify & Enable'}
+                            </button>
+                          </div>
+                        </div>
+                        <button onClick={() => { setMfaStep('idle'); setMfaCode(''); setMfaError(null); }} className="text-sm text-slate-400 hover:text-slate-600">
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+
+                    {mfaStep === 'verify' && mfaEnabled && (
+                      <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-200 space-y-3">
+                        <p className="text-sm text-red-700 font-medium">Enter your authenticator code to disable 2FA:</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            maxLength={6}
+                            value={mfaCode}
+                            onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                            placeholder="000000"
+                            className="flex-1 input-primary text-center text-lg tracking-widest font-mono"
+                          />
+                          <button
+                            onClick={handleMfaDisable}
+                            disabled={mfaCode.length < 6 || mfaLoading}
+                            className="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg"
+                          >
+                            {mfaLoading ? 'Disabling...' : 'Disable 2FA'}
+                          </button>
+                        </div>
+                        <button onClick={() => { setMfaStep('idle'); setMfaCode(''); setMfaError(null); }} className="text-sm text-slate-400 hover:text-slate-600">
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center justify-between py-3">
                     <div>

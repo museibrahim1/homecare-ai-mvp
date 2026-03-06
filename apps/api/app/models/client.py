@@ -85,4 +85,5 @@ class Client(Base, TimestampMixin):
         Index('ix_clients_external', 'external_source', 'external_id'),
         Index('ix_clients_email', 'email'),
         Index('ix_clients_status', 'status'),
+        Index('ix_clients_created_by', 'created_by'),
     )

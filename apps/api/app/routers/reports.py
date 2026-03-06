@@ -674,3 +674,89 @@ async def export_billing_csv(
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@router.get("/monthly/csv")
+async def export_monthly_csv(
+    month: int = Query(default=None),
+    year: int = Query(default=None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Export monthly summary as CSV."""
+    report = await get_monthly_summary(month, year, db, current_user)
+
+    buf = io.StringIO()
+    w = csv.writer(buf)
+
+    w.writerow(["Monthly Summary Report"])
+    w.writerow([f"{report.month} {report.year}"])
+    w.writerow([])
+    w.writerow(["Metric", "Value"])
+    w.writerow(["Total Assessments", report.total_assessments])
+    w.writerow(["Completed", report.completed_assessments])
+    w.writerow(["Pending", report.pending_assessments])
+    w.writerow(["Contracts Generated", report.total_contracts_generated])
+    w.writerow(["Clients Served", report.total_clients_served])
+    w.writerow(["New Clients", report.new_clients])
+    w.writerow([])
+
+    if report.services_breakdown:
+        w.writerow(["Service Type", "Count", "Categories"])
+        for svc in report.services_breakdown:
+            w.writerow([svc["type"], svc["count"], ", ".join(svc.get("services", []))])
+        w.writerow([])
+
+    if report.weekly_trend:
+        w.writerow(["Week", "Assessments", "Start Date"])
+        for wk in report.weekly_trend:
+            w.writerow([wk["week"], wk["assessments"], wk.get("start_date", "")])
+
+    buf.seek(0)
+    fn = f"monthly_report_{report.month}_{report.year}.csv"
+    return StreamingResponse(
+        iter([buf.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={fn}"},
+    )
+
+
+@router.get("/activity/csv")
+async def export_activity_csv(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Export client activity report as CSV."""
+    report = await get_client_activity(db, current_user)
+
+    buf = io.StringIO()
+    w = csv.writer(buf)
+
+    w.writerow(["Client Activity Report"])
+    w.writerow([f"Generated: {report.generated_at}"])
+    w.writerow([])
+    w.writerow(["Summary"])
+    w.writerow(["Total Clients", report.total_clients])
+    w.writerow(["Active Clients", report.active_clients])
+    w.writerow(["With Contracts", report.clients_with_contracts])
+    w.writerow(["Pending Contracts", report.clients_pending])
+    w.writerow([])
+    w.writerow(["Client", "Assessments", "Last Assessment", "Care Level", "Services", "Contract Status", "Status"])
+    for c in report.clients:
+        w.writerow([
+            c.client_name,
+            c.total_assessments,
+            c.last_assessment_date or "-",
+            c.care_level or "-",
+            ", ".join(c.services_identified) if c.services_identified else "-",
+            c.contract_status,
+            c.status,
+        ])
+
+    buf.seek(0)
+    fn = f"client_activity_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv"
+    return StreamingResponse(
+        iter([buf.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={fn}"},
+    )

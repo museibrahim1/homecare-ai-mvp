@@ -46,12 +46,12 @@ async def create_client(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new client (associated with the current user)."""
-    client_data = client_in.model_dump()
-    client_data['created_by'] = current_user.id  # Set owner for data isolation
+    client_data = client_in.model_dump(exclude_unset=True)
+    client_data['created_by'] = current_user.id
     client = Client(**client_data)
     db.add(client)
+    db.flush()
     db.commit()
-    db.refresh(client)
     return client
 
 
