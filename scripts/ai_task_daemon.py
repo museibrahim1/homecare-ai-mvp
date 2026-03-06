@@ -390,34 +390,36 @@ def _build_marketing_material_email() -> tuple:
     GITHUB_RAW = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main"
     MARKETING_URL = f"{GITHUB_RAW}/apps/web/public/marketing"
     IPHONE_URL = f"{GITHUB_RAW}/apps/web/public/screenshots/iphone"
+    CRM_URL = f"{GITHUB_RAW}/apps/web/public/screenshots/crm"
 
     marketing_dir = PROJECT_ROOT / "marketing" / "generated"
     web_marketing_dir = PROJECT_ROOT / "apps" / "web" / "public" / "marketing"
     iphone_dir = PROJECT_ROOT / "apps" / "web" / "public" / "screenshots" / "iphone"
+    crm_dir = PROJECT_ROOT / "apps" / "web" / "public" / "screenshots" / "crm"
     copy_file = PROJECT_ROOT / "marketing" / "social-media-copy.md"
 
     attachments = []
     image_urls = {}
 
     image_files = {
-        "hero_iphone_crm": ("hero_iphone_crm.png", "Hero — iPhone + CRM Dashboard (1920x1080)"),
-        "ig_square": ("ig_square_iphone_crm.png", "Instagram Square — iPhone + CRM (1080x1080)"),
-        "ig_story": ("ig_story_pipeline.png", "Instagram Story — Pipeline Flow (1080x1920)"),
-        "fb_ad": ("fb_ad_before_after.png", "Facebook Ad — Before/After (1200x628)"),
-        "twitter_banner": ("twitter_3phones_crm.png", "Twitter Banner — 3 iPhones + CRM (1500x500)"),
-        "linkedin_crm": ("linkedin_crm_feature.png", "LinkedIn — CRM Feature (1920x1080)"),
-        "email_header": ("email_header_new.png", "Email Header (600x200)"),
-        "carousel_1": ("carousel_record.png", "Carousel 1 — Record (1080x1350)"),
-        "carousel_2": ("carousel_crm.png", "Carousel 2 — CRM Dashboard (1080x1350)"),
-        "carousel_3": ("carousel_contract.png", "Carousel 3 — Contract (1080x1350)"),
+        "hero_banner": ("hero_banner.png", "Hero — iPhone + CRM Dashboard (1920x1080)"),
+        "ig_square": ("ig_square.png", "Instagram Square — iPhone + CRM (1080x1080)"),
+        "ig_story": ("ig_story.png", "Instagram Story — Pipeline Flow (1080x1920)"),
+        "fb_ad": ("fb_ad.png", "Facebook Ad — Before/After (1200x628)"),
+        "twitter_banner": ("twitter_banner.png", "Twitter Banner — 3 iPhones + CRM (1500x500)"),
+        "linkedin_crm": ("linkedin_crm.png", "LinkedIn — CRM Feature (1920x1080)"),
+        "email_header": ("email_header.png", "Email Header (600x200)"),
+        "carousel_1": ("carousel_1.png", "Carousel 1 — Record (1080x1350)"),
+        "carousel_2": ("carousel_2.png", "Carousel 2 — CRM Dashboard (1080x1350)"),
+        "carousel_3": ("carousel_3.png", "Carousel 3 — Contract (1080x1350)"),
     }
 
     iphone_files = {
-        "app_login": ("iphone_01_login.png", "Login"),
-        "app_home": ("iphone_02_home.png", "Dashboard"),
-        "app_clients": ("iphone_03_clients.png", "Clients"),
-        "app_record": ("iphone_04_record.png", "Palm It"),
-        "app_workspace": ("iphone_05_workspace.png", "Workspace"),
+        "app_home": ("iphone_01_home.png", "Home"),
+        "app_clients": ("iphone_02_clients.png", "Clients"),
+        "app_record": ("iphone_03_record.png", "Palm It"),
+        "app_calendar": ("iphone_04_calendar.png", "Calendar"),
+        "app_documents": ("iphone_05_documents.png", "Documents"),
         "app_settings": ("iphone_06_settings.png", "Settings"),
     }
 
@@ -489,7 +491,7 @@ def _build_marketing_material_email() -> tuple:
     <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Built from real iOS app screenshots (in iPhone frames) + CRM web dashboard screenshots. All images attached — save directly.</p>
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Hero Banner — iPhone + CRM</h3>
-    {img_tag("hero_iphone_crm", "Hero — iPhone recording + CRM dashboard side by side (1920x1080)", max_width="600px")}
+    {img_tag("hero_banner", "Hero — iPhone recording + CRM dashboard side by side (1920x1080)", max_width="600px")}
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">LinkedIn — CRM Feature</h3>
     {img_tag("linkedin_crm", "LinkedIn — Dashboard + Pipeline + iPhone overlay (1920x1080)", max_width="600px")}

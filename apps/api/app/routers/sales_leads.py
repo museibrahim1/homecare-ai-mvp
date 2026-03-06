@@ -222,7 +222,7 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         # Product showcase — iPhone + CRM
         '<div style="padding: 0 40px 32px; text-align: center;">'
         f'<a href="{_SITE}" style="text-decoration: none;">'
-        f'<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/hero_iphone_crm.png" '
+        f'<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/hero_banner.png" '
         'alt="PalmCare AI — iPhone App + CRM Dashboard" '
         'style="max-width: 520px; width: 100%; border-radius: 12px; '
         f'border: 1px solid {_SLATE_200};" />'
@@ -370,7 +370,7 @@ EMAIL_TEMPLATES = {
                 "<strong>4.</strong> Contract sent to client &mdash; ready to sign"
             )
             + '<div style="text-align: center; margin: 24px 0;">'
-            '<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/fb_ad_before_after.png" '
+            '<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/fb_ad.png" '
             'alt="Before and After PalmCare AI" '
             f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
             '</div>'
@@ -413,7 +413,7 @@ EMAIL_TEMPLATES = {
                 "and voice-to-contract &mdash; we&rsquo;re the first."
             )
             + '<div style="text-align: center; margin: 24px 0;">'
-            '<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/linkedin_crm_feature.png" '
+            '<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/linkedin_crm.png" '
             'alt="PalmCare AI CRM — Dashboard, Pipeline, Mobile App" '
             f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
             '</div>'
