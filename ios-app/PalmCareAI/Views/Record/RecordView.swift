@@ -545,6 +545,8 @@ struct RecordView: View {
                 await MainActor.run { uploadProgress = "Pipeline running..." }
                 await pollPipeline(visitId: visit.id, clientName: clientName)
             } catch {
+                // Minimize PHI retention on device when upload/processing fails.
+                try? FileManager.default.removeItem(at: audioURL)
                 await MainActor.run {
                     withAnimation { isProcessing = false }
                     uploadProgress = nil

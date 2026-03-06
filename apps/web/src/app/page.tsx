@@ -807,12 +807,17 @@ const TRANSCRIPT_SEGMENTS: TranscriptSegment[] = [
 /* ───────────────────── HERO ORB + TRANSCRIPTION ───────────────────── */
 
 function HeroOrb() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isRecordingRef = useRef(false);
   const [isRecording, setIsRecording] = useState(false);
   const [visibleWords, setVisibleWords] = useState(0);
   const [visibleSegments, setVisibleSegments] = useState(0);
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<number>(0);
 
   const totalWords = TRANSCRIPT_SEGMENTS.reduce((sum, seg) => sum + seg.words.length, 0);
+
+  useEffect(() => { isRecordingRef.current = isRecording; }, [isRecording]);
 
   useEffect(() => {
     const t = setTimeout(() => setIsRecording(true), 1500);
@@ -834,103 +839,154 @@ function HeroOrb() {
   }, [isRecording, totalWords]);
 
   useEffect(() => {
-    let wordCount = 0;
+    let wc = 0;
     for (let i = 0; i < TRANSCRIPT_SEGMENTS.length; i++) {
-      if (visibleWords > wordCount) {
-        setVisibleSegments(i + 1);
-      }
-      wordCount += TRANSCRIPT_SEGMENTS[i].words.length;
+      if (visibleWords > wc) setVisibleSegments(i + 1);
+      wc += TRANSCRIPT_SEGMENTS[i].words.length;
     }
   }, [visibleWords]);
 
   useEffect(() => {
-    if (transcriptRef.current) {
-      transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
-    }
+    if (transcriptRef.current) transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
   }, [visibleWords]);
 
-  let globalWordIndex = 0;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+    const SIZE = 320;
+    canvas.width = SIZE * dpr;
+    canvas.height = SIZE * dpr;
+    ctx.scale(dpr, dpr);
+
+    const t0 = performance.now();
+
+    function orbPath(cx: number, cy: number, radius: number, phase: number, audio: number, n = 120) {
+      ctx!.beginPath();
+      for (let i = 0; i <= n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        const r = radius
+          + Math.sin(a * 3 + phase * Math.PI * 2) * (4 + audio * 8)
+          + Math.cos(a * 2 - phase * Math.PI * 1.5) * (3 + audio * 6)
+          + Math.sin(a * 5 + phase * Math.PI * 3) * (2 + audio * 4);
+        const px = cx + r * Math.cos(a);
+        const py = cy + r * Math.sin(a);
+        i === 0 ? ctx!.moveTo(px, py) : ctx!.lineTo(px, py);
+      }
+      ctx!.closePath();
+    }
+
+    function draw() {
+      const t = (performance.now() - t0) / 1000;
+      const phase = (Math.sin(t * Math.PI / 2) + 1) / 2;
+      const rot = t * (Math.PI * 2 / 20);
+      const glow = (Math.sin(t * Math.PI * 2 / 3) + 1) / 2;
+      const active = isRecordingRef.current;
+      const audio = active ? 0.4 + glow * 0.3 : 0;
+      const cx = SIZE / 2, cy = SIZE / 2;
+
+      ctx!.clearRect(0, 0, SIZE, SIZE);
+
+      const rings = [
+        { r: 130, rot: rot, po: 1.4, op: active ? 0.3 : 0.12, lw: 1.5 },
+        { r: 115, rot: -rot * 0.8, po: 0.7, op: active ? 0.22 : 0.09, lw: 1.5 },
+        { r: 100, rot: rot * 1.2, po: 0, op: active ? 0.18 : 0.07, lw: 1 },
+      ];
+
+      for (const ring of rings) {
+        ctx!.save();
+        ctx!.translate(cx, cy);
+        ctx!.rotate(ring.rot);
+        ctx!.translate(-cx, -cy);
+        ctx!.globalAlpha = ring.op;
+        orbPath(cx, cy, ring.r, phase + ring.po, audio * 0.3, 100);
+        try {
+          const g = ctx!.createConicGradient(0, cx, cy);
+          g.addColorStop(0, '#0d9488');
+          g.addColorStop(0.33, '#0891b2');
+          g.addColorStop(0.66, '#2dd4bf');
+          g.addColorStop(1, '#0d9488');
+          ctx!.strokeStyle = g;
+        } catch {
+          ctx!.strokeStyle = '#0d9488';
+        }
+        ctx!.lineWidth = ring.lw;
+        ctx!.stroke();
+        ctx!.restore();
+      }
+
+      ctx!.save();
+      orbPath(cx, cy, 70, phase, audio);
+      try {
+        const og = ctx!.createConicGradient(0, cx, cy);
+        og.addColorStop(0, '#0d9488');
+        og.addColorStop(0.33, '#0891b2');
+        og.addColorStop(0.66, '#2dd4bf');
+        og.addColorStop(1, '#0d9488');
+        ctx!.fillStyle = og;
+      } catch {
+        ctx!.fillStyle = '#0d9488';
+      }
+      ctx!.fill();
+
+      ctx!.save();
+      orbPath(cx, cy, 70, phase, audio);
+      ctx!.clip();
+      const hl = ctx!.createRadialGradient(cx - 20, cy - 20, 0, cx, cy, 80);
+      hl.addColorStop(0, 'rgba(255,255,255,0.2)');
+      hl.addColorStop(1, 'transparent');
+      ctx!.fillStyle = hl;
+      ctx!.fillRect(0, 0, SIZE, SIZE);
+      ctx!.restore();
+
+      ctx!.restore();
+      frameRef.current = requestAnimationFrame(draw);
+    }
+
+    frameRef.current = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, []);
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center relative px-6 pt-24 pb-8 overflow-hidden">
-      {/* Background radial glow */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-primary-500/10 via-accent-cyan/5 to-transparent rounded-full blur-3xl" />
-      </div>
+    <section className="min-h-screen flex flex-col items-center justify-center relative px-6 pt-24 pb-8 overflow-hidden" style={{ background: '#000' }}>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(13,148,136,0.06) 0%, transparent 70%)' }} />
 
-      {/* Headline */}
       <div className="text-center mb-8 relative z-10 animate-fade-in-up">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
           Record It. Transcribe It.
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan">Contract It.</span>
         </h1>
-        <p className="text-lg md:text-xl text-dark-300 mt-4 max-w-xl mx-auto">
+        <p className="text-lg md:text-xl text-white/50 mt-4 max-w-xl mx-auto">
           Watch a live assessment become a signed contract — automatically.
         </p>
       </div>
 
-      {/* Orb */}
-      <div className="relative flex items-center justify-center mb-6 animate-orb-scale-in" style={{ animationDelay: '0.3s' }}>
-        {/* Outer ring 3 */}
-        <div className="absolute w-[260px] h-[260px] md:w-[300px] md:h-[300px] animate-orb-rotate" style={{ animationDuration: '25s' }}>
-          <div className="w-full h-full rounded-full" style={{
-            background: 'conic-gradient(from 0deg, #0d9488, #0891b2, #2dd4bf, #0d9488)',
-            mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px))',
-            WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px))',
-            opacity: isRecording ? 0.6 : 0.25,
-            transition: 'opacity 1s ease',
-          }} />
-        </div>
-        {/* Outer ring 2 */}
-        <div className="absolute w-[220px] h-[220px] md:w-[260px] md:h-[260px] animate-orb-rotate" style={{ animationDuration: '18s', animationDirection: 'reverse' }}>
-          <div className="w-full h-full rounded-full" style={{
-            background: 'conic-gradient(from 120deg, #2dd4bf, #0d9488, #0891b2, #2dd4bf)',
-            mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px))',
-            WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px))',
-            opacity: isRecording ? 0.5 : 0.2,
-            transition: 'opacity 1s ease',
-          }} />
-        </div>
-        {/* Inner ring */}
-        <div className="absolute w-[185px] h-[185px] md:w-[220px] md:h-[220px] animate-orb-rotate" style={{ animationDuration: '12s' }}>
-          <div className="w-full h-full rounded-full" style={{
-            background: 'conic-gradient(from 240deg, #0891b2, #2dd4bf, #0d9488, #0891b2)',
-            mask: 'radial-gradient(farthest-side, transparent calc(100% - 1.5px), black calc(100% - 1.5px))',
-            WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 1.5px), black calc(100% - 1.5px))',
-            opacity: isRecording ? 0.4 : 0.15,
-            transition: 'opacity 1s ease',
-          }} />
-        </div>
-
-        {/* Main orb body */}
-        <div
-          className={`w-[150px] h-[150px] md:w-[180px] md:h-[180px] flex items-center justify-center animate-orb-morph ${isRecording ? 'animate-orb-glow' : 'animate-orb-glow-idle'}`}
+      <div className="relative flex items-center justify-center mb-4">
+        <canvas
+          ref={canvasRef}
           style={{
-            background: 'conic-gradient(from 0deg, #0d9488, #0891b2, #2dd4bf, #0d9488)',
-            transition: 'all 1s ease',
+            width: 320,
+            height: 320,
+            filter: isRecording
+              ? 'drop-shadow(0 0 40px rgba(13,148,136,0.5)) drop-shadow(0 0 80px rgba(8,145,178,0.2))'
+              : 'drop-shadow(0 0 20px rgba(13,148,136,0.25))',
+            transition: 'filter 1s ease',
           }}
-        >
-          {/* Highlight overlay */}
-          <div className="absolute inset-0 animate-orb-morph" style={{
-            background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 60%)',
-            borderRadius: 'inherit',
-          }} />
-
-          {/* Mic icon or waveform bars */}
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
           {!isRecording ? (
-            <Mic className="w-12 h-12 md:w-14 md:h-14 text-white/90 relative z-10" />
+            <Mic className="w-12 h-12 text-white/80" />
           ) : (
-            <div className="flex items-center gap-1 relative z-10">
-              {Array.from({ length: 5 }).map((_, i) => (
+            <div className="flex items-center gap-1">
+              {[0, 1, 2, 3, 4].map(i => (
                 <div
                   key={i}
-                  className="w-1.5 md:w-2 bg-white/90 rounded-full animate-orb-bar"
-                  style={{
-                    height: '32px',
-                    animationDelay: `${i * 150}ms`,
-                    animationDuration: `${0.6 + Math.random() * 0.4}s`,
-                  }}
+                  className="w-1.5 bg-white/80 rounded-full animate-orb-bar"
+                  style={{ height: '28px', animationDelay: `${i * 150}ms`, animationDuration: `${0.6 + i * 0.1}s` }}
                 />
               ))}
             </div>
@@ -938,26 +994,24 @@ function HeroOrb() {
         </div>
       </div>
 
-      {/* Status label */}
-      <div className="flex items-center gap-2 mb-6 relative z-10 animate-fade-in" style={{ animationDelay: '1s' }}>
+      <div className="flex items-center gap-2 mb-6 relative z-10">
         {isRecording ? (
           <>
-            <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-sm text-dark-300 font-medium">Recording Assessment...</span>
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="text-sm text-white/40 font-medium">Recording Assessment...</span>
           </>
         ) : (
           <>
-            <div className="w-2.5 h-2.5 bg-primary-500 rounded-full" />
-            <span className="text-sm text-dark-400 font-medium">Tap to start assessment</span>
+            <div className="w-2 h-2 bg-primary-500 rounded-full" />
+            <span className="text-sm text-white/30 font-medium">Tap to start assessment</span>
           </>
         )}
       </div>
 
-      {/* Transcription window */}
-      <div className="w-full max-w-lg relative z-10 animate-fade-in-up" style={{ animationDelay: '1.5s' }}>
-        <div className="bg-dark-800/80 backdrop-blur-sm border border-dark-600/50 rounded-2xl p-5 md:p-6 max-h-[220px] overflow-y-auto scrollbar-hide" ref={transcriptRef}>
+      <div className="w-full max-w-lg relative z-10">
+        <div className="max-h-[200px] overflow-y-auto scrollbar-hide px-2" ref={transcriptRef}>
           {visibleSegments === 0 && isRecording && (
-            <div className="flex items-center gap-2 text-dark-400 text-sm">
+            <div className="flex items-center gap-2 text-white/30 text-sm justify-center">
               <div className="flex gap-1">
                 <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -970,20 +1024,18 @@ function HeroOrb() {
             {TRANSCRIPT_SEGMENTS.slice(0, visibleSegments).map((seg, segIdx) => {
               const segStartIdx = TRANSCRIPT_SEGMENTS.slice(0, segIdx).reduce((s, x) => s + x.words.length, 0);
               const wordsToShow = Math.max(0, visibleWords - segStartIdx);
-              globalWordIndex = segStartIdx;
-
               return (
                 <div key={segIdx} className="animate-transcript-fade">
-                  <div className="flex items-center gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 mb-1">
                     <div className={`w-2 h-2 rounded-full ${seg.speaker === 'nurse' ? 'bg-primary-500' : 'bg-cyan-500'}`} />
-                    <span className="text-xs font-semibold text-dark-400">{seg.label}</span>
+                    <span className="text-xs font-semibold text-white/40">{seg.label}</span>
                   </div>
                   <p className="text-sm md:text-base leading-relaxed pl-4">
                     {seg.words.slice(0, wordsToShow).map((word, wIdx) => {
                       const clean = word.replace(/[.,!?'"]/g, '').toLowerCase();
                       const isMedical = MEDICAL_KEYWORDS.has(clean);
                       return (
-                        <span key={wIdx} className={isMedical ? 'text-primary-400 font-medium' : 'text-dark-200'}>
+                        <span key={wIdx} className={isMedical ? 'text-primary-400 font-medium' : 'text-white/70'}>
                           {word}{' '}
                         </span>
                       );
@@ -999,31 +1051,28 @@ function HeroOrb() {
         </div>
       </div>
 
-      {/* CTAs */}
-      <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10 animate-fade-in-up" style={{ animationDelay: '2s' }}>
+      <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10">
         <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
           Palm It — Get Started <ArrowRight className="w-5 h-5" />
         </a>
-        <a href="#features" className="btn-secondary flex items-center gap-2 py-4 px-8 text-lg">
+        <a href="#features" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
           See How It Works <ChevronDown className="w-5 h-5" />
         </a>
       </div>
 
-      {/* Trust badges */}
-      <div className="flex items-center gap-4 mt-6 relative z-10 animate-fade-in" style={{ animationDelay: '2.5s' }}>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
-          <Shield className="w-3.5 h-3.5 text-green-400" />
-          <span className="text-xs text-green-400 font-medium">HIPAA Compliant</span>
+      <div className="flex items-center gap-4 mt-6 relative z-10">
+        <div className="flex items-center gap-2 px-3 py-1.5 border border-green-500/20 rounded-full">
+          <Shield className="w-3.5 h-3.5 text-green-500" />
+          <span className="text-xs text-green-500/80 font-medium">HIPAA Compliant</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
-          <Lock className="w-3.5 h-3.5 text-blue-400" />
-          <span className="text-xs text-blue-400 font-medium">256-bit Encrypted</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 border border-blue-500/20 rounded-full">
+          <Lock className="w-3.5 h-3.5 text-blue-500" />
+          <span className="text-xs text-blue-500/80 font-medium">256-bit Encrypted</span>
         </div>
       </div>
 
-      {/* Scroll indicator */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-scroll-bounce">
-        <ChevronDown className="w-6 h-6 text-dark-500" />
+        <ChevronDown className="w-6 h-6 text-white/20" />
       </div>
     </section>
   );
@@ -1038,7 +1087,7 @@ export default function LandingPage() {
   const [navDropdown, setNavDropdown] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-dark-900 landing-dark">
+    <div className="min-h-screen landing-dark" style={{ background: '#000' }}>
       {/* ── NAVIGATION ── */}
       <nav aria-label="Main navigation" className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">

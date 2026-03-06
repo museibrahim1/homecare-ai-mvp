@@ -33,10 +33,15 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
             throw RecordingError.failedToStart
         }
         let recordingsDir = documentsDir.appendingPathComponent("Recordings", isDirectory: true)
-        try FileManager.default.createDirectory(at: recordingsDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: recordingsDir,
+            withIntermediateDirectories: true,
+            attributes: [.protectionKey: FileProtectionType.complete]
+        )
 
         let timestamp = Int(Date().timeIntervalSince1970)
         let url = recordingsDir.appendingPathComponent("recording_\(timestamp).m4a")
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: recordingsDir.path)
 
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -53,6 +58,7 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         guard audioRecorder?.record() == true else {
             throw RecordingError.failedToStart
         }
+        try? FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: url.path)
 
         recordingURL = url
         isRecording = true
