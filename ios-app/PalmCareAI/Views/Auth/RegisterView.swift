@@ -238,11 +238,7 @@ struct RegisterView: View {
                 .accessibilityLabel("Go back")
             }
         }
-        .alert("Registration Failed", isPresented: $showError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(errorMessage ?? "An unknown error occurred.")
-        }
+        .palmErrorAlert("Registration Failed", message: $errorMessage, isPresented: $showError)
     }
 
     private func performRegister() {

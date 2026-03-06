@@ -253,21 +253,21 @@ struct RecordView: View {
                 })
                 .environmentObject(api)
             }
-            .alert("Microphone Access", isPresented: $showPermissionAlert) {
-                Button("Open Settings") {
+            .palmConfirmAlert(
+                "Microphone Access",
+                message: "PalmCareAI needs microphone access to record visits. Please enable it in Settings.",
+                icon: "mic.slash.fill",
+                iconColor: .palmOrange,
+                isPresented: $showPermissionAlert,
+                confirmTitle: "Open Settings",
+                confirmStyle: .primary,
+                onConfirm: {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
                         UIApplication.shared.open(url)
                     }
                 }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("PalmCareAI needs microphone access to record visits. Please enable it in Settings.")
-            }
-            .alert("Error", isPresented: $showError) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(errorMessage ?? "An error occurred.")
-            }
+            )
+            .palmErrorAlert(message: $errorMessage, isPresented: $showError)
             .sheet(isPresented: $showUpgrade) {
                 SubscriptionView()
                     .environmentObject(api)

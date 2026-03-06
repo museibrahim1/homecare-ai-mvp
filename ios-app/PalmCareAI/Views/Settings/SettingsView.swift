@@ -338,12 +338,16 @@ struct SettingsView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.red.opacity(0.15), lineWidth: 1))
         }
         .accessibilityLabel("Log out")
-        .alert("Log Out", isPresented: $showLogoutConfirm) {
-            Button("Log Out", role: .destructive) { api.logout() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Are you sure you want to log out?")
-        }
+        .palmConfirmAlert(
+            "Log Out",
+            message: "Are you sure you want to log out?",
+            icon: "arrow.right.square.fill",
+            iconColor: .red,
+            isPresented: $showLogoutConfirm,
+            confirmTitle: "Log Out",
+            confirmStyle: .destructive,
+            onConfirm: { api.logout() }
+        )
     }
 
     // MARK: - Actions

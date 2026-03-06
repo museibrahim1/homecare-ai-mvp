@@ -231,11 +231,7 @@ struct LoginView: View {
             .navigationDestination(isPresented: $showRegister) {
                 RegisterView().environmentObject(api)
             }
-            .alert("Login Failed", isPresented: $showError) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(errorMessage ?? "An unknown error occurred.")
-            }
+            .palmErrorAlert("Login Failed", message: $errorMessage, isPresented: $showError)
             .sheet(isPresented: $showForgotPassword) {
                 ForgotPasswordSheet().environmentObject(api)
             }

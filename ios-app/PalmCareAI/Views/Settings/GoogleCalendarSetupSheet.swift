@@ -37,12 +37,16 @@ struct GoogleCalendarSetupSheet: View {
                         .foregroundColor(.palmPrimary)
                 }
             }
-            .alert("Disconnect Calendar", isPresented: $showDisconnectConfirm) {
-                Button("Disconnect", role: .destructive) { disconnectCalendar() }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Your synced events will remain on the device but new events won't sync.")
-            }
+            .palmConfirmAlert(
+                "Disconnect Calendar",
+                message: "Your synced events will remain on the device but new events won't sync.",
+                icon: "calendar.badge.minus",
+                iconColor: .palmOrange,
+                isPresented: $showDisconnectConfirm,
+                confirmTitle: "Disconnect",
+                confirmStyle: .destructive,
+                onConfirm: { disconnectCalendar() }
+            )
             .onAppear {
                 if !isConnected && !didStartAuth {
                     didStartAuth = true
