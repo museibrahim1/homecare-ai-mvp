@@ -400,15 +400,16 @@ def _build_marketing_material_email() -> tuple:
     image_urls = {}
 
     image_files = {
-        "linkedin_hero": ("linkedin_hero_real.png", "LinkedIn Hero Banner (1920x1080)"),
-        "instagram_square": ("instagram_square_real.png", "Instagram Square Post (1080x1080)"),
-        "instagram_story": ("instagram_story_real.png", "Instagram Story (1080x1920)"),
-        "facebook_ad": ("facebook_ad_real.png", "Facebook Ad (1200x628)"),
-        "twitter_banner": ("twitter_banner_real.png", "Twitter Banner (1500x500)"),
-        "carousel_1": ("carousel_1_real.png", "Instagram Carousel 1 (1080x1350)"),
-        "carousel_2": ("carousel_2_real.png", "Instagram Carousel 2 (1080x1350)"),
-        "carousel_3": ("carousel_3_real.png", "Instagram Carousel 3 (1080x1350)"),
-        "email_header": ("email_header_real.png", "Email Header (600x200)"),
+        "hero_iphone_crm": ("hero_iphone_crm.png", "Hero — iPhone + CRM Dashboard (1920x1080)"),
+        "ig_square": ("ig_square_iphone_crm.png", "Instagram Square — iPhone + CRM (1080x1080)"),
+        "ig_story": ("ig_story_pipeline.png", "Instagram Story — Pipeline Flow (1080x1920)"),
+        "fb_ad": ("fb_ad_before_after.png", "Facebook Ad — Before/After (1200x628)"),
+        "twitter_banner": ("twitter_3phones_crm.png", "Twitter Banner — 3 iPhones + CRM (1500x500)"),
+        "linkedin_crm": ("linkedin_crm_feature.png", "LinkedIn — CRM Feature (1920x1080)"),
+        "email_header": ("email_header_new.png", "Email Header (600x200)"),
+        "carousel_1": ("carousel_record.png", "Carousel 1 — Record (1080x1350)"),
+        "carousel_2": ("carousel_crm.png", "Carousel 2 — CRM Dashboard (1080x1350)"),
+        "carousel_3": ("carousel_contract.png", "Carousel 3 — Contract (1080x1350)"),
     }
 
     iphone_files = {
@@ -484,27 +485,34 @@ def _build_marketing_material_email() -> tuple:
 
   <div style="background:white;padding:24px;border-radius:0 0 14px 14px;border:1px solid #e2e8f0;border-top:none;">
 
-    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Marketing Graphics</h2>
-    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Built from real iOS app screenshots. All images are attached to this email — save them directly.</p>
+    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Marketing Graphics (v2)</h2>
+    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Built from real iOS app screenshots (in iPhone frames) + CRM web dashboard screenshots. All images attached — save directly.</p>
 
-    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">LinkedIn</h3>
-    {img_tag("linkedin_hero", "LinkedIn Hero — 3 phones showing login, dashboard, recording", max_width="600px")}
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Hero Banner — iPhone + CRM</h3>
+    {img_tag("hero_iphone_crm", "Hero — iPhone recording + CRM dashboard side by side (1920x1080)", max_width="600px")}
+
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">LinkedIn — CRM Feature</h3>
+    {img_tag("linkedin_crm", "LinkedIn — Dashboard + Pipeline + iPhone overlay (1920x1080)", max_width="600px")}
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Instagram</h3>
-    {img_tag("instagram_square", "Instagram Square — Palm It recording screen")}
-    {img_tag("instagram_story", "Instagram Story — Home dashboard with stats", max_width="300px")}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      {img_tag("carousel_1", "Carousel 1 — Login", width="30%", max_width="180px")}
-      {img_tag("carousel_2", "Carousel 2 — Record", width="30%", max_width="180px")}
-      {img_tag("carousel_3", "Carousel 3 — Workspace", width="30%", max_width="180px")}
+    {img_tag("ig_square", "Instagram Square — iPhone + CRM background (1080x1080)")}
+    {img_tag("ig_story", "Instagram Story — Pipeline flow + iPhone (1080x1920)", max_width="300px")}
+
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Instagram Carousel — Record → CRM → Contract</h3>
+    <div style="text-align:center;">
+      {img_tag("carousel_1", "Step 1: Record (iPhone)", width="30%", max_width="180px")}
+      {img_tag("carousel_2", "Step 2: CRM Dashboard", width="30%", max_width="180px")}
+      {img_tag("carousel_3", "Step 3: Contract (iPhone)", width="30%", max_width="180px")}
     </div>
 
-    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Facebook & Twitter</h3>
-    {img_tag("facebook_ad", "Facebook Ad — Before/after: record + clients", max_width="600px")}
-    {img_tag("twitter_banner", "Twitter Banner — 3 phones", max_width="600px")}
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Facebook — Before/After</h3>
+    {img_tag("fb_ad", "Facebook Ad — Before (paper) vs After (iPhone + CRM) (1200x628)", max_width="600px")}
+
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Twitter Banner</h3>
+    {img_tag("twitter_banner", "Twitter — 3 iPhones + CRM backdrop (1500x500)", max_width="600px")}
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Email Header</h3>
-    {img_tag("email_header", "Email Header for outreach campaigns", max_width="600px")}
+    {img_tag("email_header", "Email header with iPhone + teal gradient (600x200)", max_width="600px")}
 
     <hr style="border:none;border-top:2px solid #e2e8f0;margin:28px 0;">
 

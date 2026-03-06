@@ -1,64 +1,75 @@
-# PalmCare AI — Social Media Copy Bank
+# PalmCare AI — Social Media Copy Bank (v2)
 
 Ready-to-post copy for all platforms. Each post references a generated graphic from `marketing/generated/`.
+
+All graphics feature real iOS app screenshots in iPhone device frames + CRM web dashboard screenshots.
 
 ---
 
 ## LinkedIn Posts
 
-### Post 1: Feature Introduction
-**Image:** `generated/linkedin_hero.png`
+### Post 1: CRM + Mobile Feature Launch
+**Image:** `generated/hero_iphone_crm.png`
 
-"Healthcare agencies are struggling with outdated assessment tools and fragmented patient management systems.
+"We built the CRM that home care agencies actually need.
 
-PalmCare AI changes that.
+Most healthcare CRMs are glorified spreadsheets. Ours starts with your voice.
 
-Our AI-powered platform combines:
-→ Voice-to-contract assessments
-→ Intelligent CRM dashboard
-→ Real-time progress tracking
-→ Automated compliance reporting
+PalmCare AI combines:
+→ Voice-to-contract assessments (just tap and talk)
+→ Full CRM dashboard with pipeline tracking
+→ Client management across your entire agency
+→ Automated compliance and HIPAA reporting
 
-The result? 90% faster assessments and 50% less paperwork.
+The mobile app and web dashboard work together — record assessments on your phone, manage everything from your desk.
 
-Built for home care agencies and in-home care providers who want to scale.
+163 agencies across 48 states. $0.37 per assessment. 90% faster than paper.
 
 Where care meets intelligence.
 
-#PalmCareAI #HealthcareTech #HomeCare #AI #HealthcareInnovation"
+#PalmCareAI #HealthcareTech #HomeCare #CRM #AI #HealthcareInnovation"
 
 ---
 
-### Post 2: Problem/Solution
-**Image:** `generated/facebook_ad_problem_solution.png`
+### Post 2: CRM Deep Dive
+**Image:** `generated/linkedin_crm_feature.png`
 
-"Home care providers spend 40% of their time on paperwork instead of patient care.
+"Your agency's data shouldn't live in 5 different places.
 
-That's a problem we're solving.
+We watched home care coordinators juggle paper forms, Excel sheets, separate billing software, and a filing cabinet full of contracts. It's 2026.
 
-I tap record. I talk. A contract appears. That's it.
+PalmCare AI puts it all in one place:
+📊 Dashboard — real-time agency overview
+📋 Pipeline — track every client from intake to signed contract
+👥 Client CRM — full history, assessments, documents
+📱 Mobile app — record assessments anywhere
 
-PalmCare AI captures patient data from a conversation — no forms, no typing, no duplicate entry. Our CRM manages the entire care workflow from first contact to signed contract.
+The result? 12 hours back every week. Zero lost paperwork. 100% HIPAA compliant.
 
-More time caring. Less time on admin.
+Built by someone who watched this problem firsthand.
 
-#Healthcare #Efficiency #PatientFirst #PalmCareAI"
+— Muse Ibrahim, Founder
+
+#HealthcareInnovation #HomeCare #PalmCareAI #DigitalHealth"
 
 ---
 
-### Post 3: ROI Focus
-**Image:** `generated/linkedin_post_roi.png`
+### Post 3: ROI + Traction
+**Image:** `generated/fb_ad_before_after.png`
 
-"What if your cost per assessment was $0.37?
+"Before PalmCare AI: 15+ hours/week on documentation.
+After PalmCare AI: 3 hours.
 
-That's not a typo. Here's what PalmCare AI delivers:
+That's 12 hours back. Every single week.
 
+The numbers:
 → $0.37 per 30-minute assessment
 → 5,400x ROI per client
 → 163 agencies already using it
+→ 48 states covered
 → 100% HIPAA compliant
 
-We built this because home care agencies deserve tools that pay for themselves on day one.
+We're not selling software. We're giving you time back.
 
 Where care meets intelligence.
 
@@ -68,49 +79,49 @@ Ready to see the numbers for your agency?"
 
 ## Instagram Posts
 
-### Post 1: Product Feature
-**Image:** `generated/instagram_square_feature.png`
+### Post 1: iPhone + CRM
+**Image:** `generated/ig_square_iphone_crm.png`
 
-"Smart assessments that work as hard as you do 📊
+"Your CRM. Your phone. One platform. 📱💻
 
-PalmCare AI transforms how healthcare agencies capture and manage patient data. From voice-powered assessments to intelligent dashboards — your entire workflow, one app.
+PalmCare AI brings your entire agency workflow to one place — from the assessment on your phone to the dashboard on your desk.
 
-✨ Built for home care providers
-✨ AI-powered efficiency
-✨ Where care meets intelligence
+✨ Voice-powered assessments
+✨ Full CRM dashboard
+✨ Client pipeline tracking
+✨ Automated contracts
 
-#PalmCareAI #HealthcareInnovation #HomeCare #AITechnology #PatientCare #HealthTech"
+Where care meets intelligence 🌿
+
+#PalmCareAI #HealthcareInnovation #HomeCare #AITechnology #PatientCare #HealthTech #CRM"
 
 ---
 
-### Post 2: Behind the Scenes (use real screenshots)
-**Image:** iOS screenshots carousel (`screenshots/ios/05-record.png`, `screenshots/ios/04-home.png`, `screenshots/ios/06-clients.png`)
+### Post 2: Behind the Scenes (Real App)
+**Image:** `generated/carousel_record.png`
 
-"Every great care plan starts with a conversation 📋✨
+"This is the real app. No mockups. No renders. 📱
 
-Here's the real PalmCare AI app in action. No mockups. No renders. This is what our providers use every day:
+What you're looking at: the PalmCare AI recording screen on an actual iPhone.
 
-📱 Record an assessment with one tap
-📊 AI extracts patient data instantly
-📋 Contract generated automatically
+One tap. Start talking. The AI captures everything — patient data, assessment details, care plan requirements.
 
-Because better tools = better care outcomes.
+By the time you're done talking, the contract is ready.
 
-🏥 Perfect for healthcare agencies
-🏠 Ideal for in-home care providers
+That's it. Palm It. 🌿
 
-#DataDrivenCare #HealthcareEfficiency #PalmCareAI"
+#DataDrivenCare #HealthcareEfficiency #PalmCareAI #RealProduct"
 
 ---
 
 ### Post 3: Founder Story
-**Image:** `generated/linkedin_hero.png` (cropped to square)
+**Image:** `generated/hero_iphone_crm.png` (cropped to square)
 
 "To all the healthcare heroes using outdated systems — this one's for you 👩‍⚕️👨‍⚕️
 
 I started PalmCare AI because I watched home care agencies drown in paperwork while trying to deliver care. The forms. The duplicate entry. The lost contracts.
 
-There had to be a better way. So we built one.
+There had to be a better way. So we built one — a mobile app AND a full CRM dashboard.
 
 You deserve tools that make your job easier, not harder.
 
@@ -122,18 +133,18 @@ Where care meets intelligence 🌿
 
 ---
 
-### Instagram Carousel: 3-Step Flow
-**Images:** `generated/instagram_carousel_1_record.png` → `generated/instagram_carousel_2_analyze.png` → `generated/instagram_carousel_3_contract.png`
+### Instagram Carousel: 3-Step Flow (NEW)
+**Images:** `generated/carousel_record.png` → `generated/carousel_crm.png` → `generated/carousel_contract.png`
 
 "From voice to contract in 3 steps. That's it.
 
-1️⃣ Record — Just talk. The AI listens.
-2️⃣ Analyze — Transcription. Assessment. Contract.
-3️⃣ Done — Signed. Sealed. Palm It.
+1️⃣ Record — Just tap and talk. The AI listens. (iPhone screenshot)
+2️⃣ Manage — Your CRM handles clients, pipeline, and data. (Web dashboard)
+3️⃣ Contract — Signed. Sealed. Palm It. (iPhone screenshot)
 
 No forms. No typing. No duplicate entry.
 
-Built for home care agencies who value their time.
+Mobile app + Web CRM = complete agency management.
 
 Try it: palmcareai.com
 
@@ -143,8 +154,22 @@ Try it: palmcareai.com
 
 ## Instagram Stories
 
-### Story 1: Poll
-**Image:** `generated/instagram_story_stats.png`
+### Story 1: Pipeline
+**Image:** `generated/ig_story_pipeline.png`
+
+"From Voice to Contract 🎙️→📋
+
+Watch the whole flow:
+Record → AI Analyzes → Contract Ready
+
+No forms. No typing. Just Palm It.
+
+Swipe up → palmcareai.com"
+
+---
+
+### Story 2: Poll
+**Background:** Teal gradient
 
 "Healthcare agencies: What's your biggest daily challenge?"
 - Paperwork overload 📋
@@ -152,48 +177,38 @@ Try it: palmcareai.com
 - Data management 💾
 - Compliance tracking ✅
 
-"PalmCare AI solves all of these! Swipe up →"
+"PalmCare AI solves all of these! Link in bio →"
 
 ---
 
-### Story 2: Quick Tips
-**Background:** Teal gradient (brand color)
+### Story 3: CRM Feature
+**Image:** `generated/ig_square_iphone_crm.png` (reformat to 9:16)
 
-"3 signs your agency needs better tech:
-1. Still using paper assessments
-2. Patient data in multiple systems
-3. Spending more time on admin than care
-
-Sound familiar? Link in bio 🌿"
-
----
-
-### Story 3: Feature Highlight
-**Image:** `generated/instagram_square_feature.png` (reformat to 9:16)
-
-"Voice Assessment + CRM = 💪
+"Your CRM + Your Phone = 💪
 
 Record patient data ✅
 AI transcription ✅
 Auto-generate contracts ✅
-Track everything ✅
+Full dashboard ✅
+Pipeline tracking ✅
 
-All in one app. Palm It."
+All in one platform. Palm It."
 
 ---
 
 ## Twitter/X Posts
 
-### Tweet 1
-**Image:** `generated/twitter_product_showcase.png`
+### Tweet 1: Product Showcase
+**Image:** `generated/twitter_3phones_crm.png`
 
 "Home care agencies: Stop wrestling with spreadsheets and paper forms.
 
-PalmCare AI = Voice assessments + Powerful CRM
+PalmCare AI = Voice assessments + Full CRM + Mobile app
 
 → 90% faster patient evaluations
 → 50% less paperwork
 → 100% HIPAA compliant
+→ Dashboard + Pipeline + Contracts
 
 Where care meets intelligence 🌿
 
@@ -201,12 +216,13 @@ Where care meets intelligence 🌿
 
 ---
 
-### Tweet 2
-**Image:** `generated/linkedin_post_roi.png`
+### Tweet 2: Numbers
+**Image:** `generated/fb_ad_before_after.png`
 
 "$0.37 per assessment.
 5,400x ROI per client.
-163 agencies and counting.
+163 agencies across 48 states.
+12 hours saved per week.
 
 PalmCare AI. The numbers speak for themselves.
 
@@ -214,17 +230,18 @@ PalmCare AI. The numbers speak for themselves.
 
 ---
 
-### Tweet 3
-**Image:** Real iOS screenshot (`screenshots/ios/05-record.png`)
+### Tweet 3: Real Product
+**Image:** `generated/carousel_record.png`
 
 "I tap record. I talk. A contract appears.
 
-That's PalmCare AI.
+That's PalmCare AI — mobile app + web CRM.
 
-Built for healthcare agencies and in-home care providers who want to:
+Built for healthcare agencies who want to:
 → Scale operations efficiently
 → Improve patient outcomes
 → Eliminate paperwork
+→ Manage everything in one place
 
 Where care meets intelligence."
 
@@ -232,36 +249,43 @@ Where care meets intelligence."
 
 ## Facebook Posts
 
-### Post 1: Story-Driven
-**Image:** `generated/facebook_ad_problem_solution.png`
+### Post 1: Before/After
+**Image:** `generated/fb_ad_before_after.png`
 
-"Meet Sarah, a home care coordinator managing 50+ patients across multiple locations.
+"Meet Sarah, a home care coordinator managing 50+ patients.
 
-Before PalmCare AI: Hours of paperwork, missed follow-ups, scattered patient data across three different systems.
+BEFORE PalmCare AI:
+❌ Hours of paperwork
+❌ Missed follow-ups
+❌ Patient data in 3 different systems
+❌ Lost contracts
 
-After PalmCare AI: She records a conversation, the AI generates the assessment and contract, and her CRM updates automatically.
+AFTER PalmCare AI:
+✅ Records assessment on her phone
+✅ AI generates care plan + contract
+✅ CRM dashboard updates automatically
+✅ Pipeline tracks every client
 
 Sarah now spends 60% more time on actual patient care.
 
-That's the power of combining voice AI with healthcare expertise.
-
-Perfect for healthcare agencies and in-home care providers ready to modernize.
+That's the power of combining voice AI with a real CRM.
 
 Where care meets intelligence."
 
 ---
 
-### Post 2: Educational
-**Image:** `generated/linkedin_post_roi.png`
+### Post 2: CRM Feature
+**Image:** `generated/linkedin_crm_feature.png`
 
-"Did you know that healthcare providers using AI-powered assessment tools see:
+"Did you know that healthcare providers using AI-powered tools see:
 
 📊 90% faster assessment completion
-⏰ 50% reduction in paperwork time
+⏰ 12 hours saved per week on documentation
 📈 $0.37 cost per 30-minute assessment
 ✅ 100% HIPAA compliance built in
+📱 Mobile app + web dashboard
 
-PalmCare AI brings these benefits to healthcare agencies and in-home care providers through our voice-powered assessment tool and CRM platform.
+PalmCare AI brings these benefits through our voice-powered assessment tool AND full CRM platform.
 
 163 agencies across 48 states already made the switch.
 
@@ -272,7 +296,7 @@ Ready to join them?"
 ## Email Outreach
 
 ### Email Header
-**Image:** `generated/email_header_outreach.png`
+**Image:** `generated/email_header_new.png`
 
 Use this banner at the top of all 5 cold outreach emails:
 1. Warm Open: "{provider_name} — quick question"
@@ -291,7 +315,7 @@ Use this banner at the top of all 5 cold outreach emails:
 - #WhereCareMeetsIntelligence
 
 ### Platform Mix
-**LinkedIn:** #AI #HealthcareInnovation #PatientCare #HomeCare #DigitalHealth
+**LinkedIn:** #AI #HealthcareInnovation #PatientCare #HomeCare #DigitalHealth #CRM
 **Instagram:** #HealthTech #CareManagement #AITechnology #HealthcareHeroes #StartupLife
 **Twitter:** Keep to 2–3 tags max
 **Facebook:** #HealthcareAgency #InHomeCare #PatientFirst
@@ -303,14 +327,31 @@ Use this banner at the top of all 5 cold outreach emails:
 | Day | Theme | Suggested Post |
 |-----|-------|---------------|
 | Monday | Motivation | Founder story or healthcare hero spotlight |
-| Tuesday | Tech Tuesday | Feature deep-dive with app screenshots |
-| Wednesday | Wisdom | ROI infographic or industry insight |
-| Thursday | Throwback | Before/after (paper → digital) with problem/solution graphic |
-| Friday | Feature Friday | Instagram carousel or new feature announcement |
-| Weekend | Behind the Scenes | Real app screenshots, team highlights |
+| Tuesday | Tech Tuesday | CRM feature deep-dive with dashboard screenshots |
+| Wednesday | Wisdom | ROI infographic or before/after comparison |
+| Thursday | Throwback | Paper → digital transformation with iPhone mockups |
+| Friday | Feature Friday | Instagram carousel (Record → CRM → Contract) |
+| Weekend | Behind the Scenes | Real iPhone app screenshots, team highlights |
 
 ---
 
 ## CTA Variations
 - **Primary:** "Palm It"
 - **Alternatives:** "Get Started Today" · "See It In Action" · "Book a Demo" · "Try It Free" · "Transform Your Care"
+
+---
+
+## Asset Inventory (v2)
+
+| Graphic | Dimensions | Description |
+|---------|-----------|-------------|
+| hero_iphone_crm.png | 1920x1080 | Hero banner — iPhone + CRM dashboard side by side |
+| ig_square_iphone_crm.png | 1080x1080 | Instagram square — iPhone foreground, CRM background |
+| ig_story_pipeline.png | 1080x1920 | Instagram story — iPhone + pipeline flow |
+| fb_ad_before_after.png | 1200x628 | Facebook ad — before/after with iPhone + CRM |
+| twitter_3phones_crm.png | 1500x500 | Twitter banner — 3 iPhones + CRM backdrop |
+| linkedin_crm_feature.png | 1920x1080 | LinkedIn — CRM dashboard + pipeline + iPhone overlay |
+| email_header_new.png | 600x200 | Email header with iPhone + teal gradient |
+| carousel_record.png | 1080x1350 | Carousel step 1 — Record (iPhone) |
+| carousel_crm.png | 1080x1350 | Carousel step 2 — CRM dashboard (browser frame) |
+| carousel_contract.png | 1080x1350 | Carousel step 3 — Contract (iPhone) |

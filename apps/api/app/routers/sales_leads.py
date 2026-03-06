@@ -219,11 +219,11 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         f'style="color: {_TEAL}; text-decoration: none; font-size: 13px; font-weight: 500;">'
         f'palmcareai.com</a></p>'
         '</div>'
-        # Product showcase
+        # Product showcase — iPhone + CRM
         '<div style="padding: 0 40px 32px; text-align: center;">'
         f'<a href="{_SITE}" style="text-decoration: none;">'
-        f'<img src="{_SITE}/product-showcase.png" '
-        'alt="PalmCare AI — Record. Transcribe. Contract." '
+        f'<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/hero_iphone_crm.png" '
+        'alt="PalmCare AI — iPhone App + CRM Dashboard" '
         'style="max-width: 520px; width: 100%; border-radius: 12px; '
         f'border: 1px solid {_SLATE_200};" />'
         '</a></div>'
@@ -369,6 +369,11 @@ EMAIL_TEMPLATES = {
                 "<strong>3.</strong> AI generates the care plan + service agreement<br>"
                 "<strong>4.</strong> Contract sent to client &mdash; ready to sign"
             )
+            + '<div style="text-align: center; margin: 24px 0;">'
+            '<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/fb_ad_before_after.png" '
+            'alt="Before and After PalmCare AI" '
+            f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
+            '</div>'
             + f'<p style="{_P}">No training manuals. No data entry. No delays.<br>'
             '<strong>Just tap, talk, and Palm It.</strong></p>'
             + '<p style="' + _P_MUTED + '">Want to see it work with {provider_name}&rsquo;s actual workflow?</p>'
@@ -407,6 +412,11 @@ EMAIL_TEMPLATES = {
                 "No other platform does AI assessment generation, AI contract creation, "
                 "and voice-to-contract &mdash; we&rsquo;re the first."
             )
+            + '<div style="text-align: center; margin: 24px 0;">'
+            '<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/linkedin_crm_feature.png" '
+            'alt="PalmCare AI CRM — Dashboard, Pipeline, Mobile App" '
+            f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
+            '</div>'
             + '<p style="' + _P + '">For {provider_name}, that could mean 12 hours back. Every single week.</p>'
             + f'<div style="text-align: center; margin: 24px 0;">'
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
