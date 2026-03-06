@@ -32,9 +32,15 @@ from typing import Optional
 
 logger = logging.getLogger("email_agent")
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_script_parent = Path(__file__).resolve().parent.parent
+_candidate_roots = [
+    Path.home() / "Desktop" / "AI Voice Contracter",
+    _script_parent,
+]
+PROJECT_ROOT = next((p for p in _candidate_roots if (p / ".git").is_dir()), _script_parent)
 DRAFTS_DIR = Path.home() / ".palmcare" / "email-drafts"
 
+PITCH_DECK_PATH = PROJECT_ROOT / "docs" / "PalmCare_Deck_v4.pdf"
 SENDER_EMAIL = "PalmCare AI <onboarding@resend.dev>"
 SIGNATURE = """
 Muse Ibrahim
@@ -167,16 +173,21 @@ INVESTOR DATA:
 - Relevance: {lead_data.get('relevance_reason', 'N/A')}
 
 ABOUT PALMCARE AI:
-- AI-powered home care assessment platform
+- AI-powered home care assessment platform — replaces 3-7 tools with one
 - Record assessments via voice, auto-generates contracts and clinical notes
+- Full CRM dashboard with pipeline, client management, scheduling
+- Mobile app (iOS) for field use + web CRM for the office
 - $450K SAFE round, $2.25M post-money valuation
-- $92K ARR, cost per assessment ~$0.37
-- 50-state compliance knowledge base
-- Founder: Muse Ibrahim
+- $92K ARR, cost per assessment ~$0.37, 82% gross margin
+- 163 agencies across 48 states, 700 target by EOY 2027 = $3.35M ARR
+- Pricing: $299/mo Mobile, $499/mo Full Platform, Enterprise custom
+- 50-state compliance knowledge base, HIPAA compliant
+- Founder: Muse Ibrahim — built the entire platform full-stack
 
 INSTRUCTIONS:
 - Subject line should reference their fund name
 - Opening should reference why they're relevant (their focus/portfolio)
+- Mention that the pitch deck is attached for their review
 - Keep it under 150 words
 - Professional but warm tone
 - End with a clear CTA (15-min call)
@@ -249,11 +260,11 @@ Respond in JSON format:
             subject = f"{name} x PalmCare AI — AI for Home Care Assessments"
             body = f"""{greeting}
 
-I'm Muse Ibrahim, founder of PalmCare AI. We're building AI-powered assessment tools for home care agencies — voice-recorded assessments that auto-generate contracts and clinical notes in seconds.
+I'm Muse Ibrahim, founder of PalmCare AI. We're building the operating system for home care agencies — voice-powered assessments that auto-generate contracts and clinical notes, plus a full CRM dashboard for the entire agency workflow.
 
-We're raising a $450K SAFE at a $2.25M post-money valuation, with $92K ARR and growing. Given {name}'s focus in healthcare and technology, I'd love to share more.
+We're raising a $450K SAFE at a $2.25M post-money valuation. $92K ARR, 163 agencies across 48 states, targeting $3.35M ARR by EOY 2027. I've attached our pitch deck for your review.
 
-Would you have 15 minutes this week for a quick call?"""
+Given {name}'s focus in healthcare and technology, I'd love to share more. Would you have 15 minutes this week for a quick call?"""
         else:
             name = lead_data.get("provider_name", "there")
             contact = lead_data.get("contact_name", "")
@@ -404,7 +415,9 @@ Would you be open to a quick 15-minute demo?"""
         return results
 
     def _send_via_resend(self, draft: dict) -> dict:
-        """Send an email via Resend API."""
+        """Send an email via Resend API. Attaches pitch deck for investor emails."""
+        import base64
+
         if not self.resend_key:
             return {"status": "failed", "error": "RESEND_API_KEY not set"}
 
@@ -413,6 +426,25 @@ Would you be open to a quick 15-minute demo?"""
             sig_html = SIGNATURE.replace("\n", "<br>")
             body_html += f"<br><br>—<br>{sig_html}"
 
+        payload = {
+            "from": SENDER_EMAIL,
+            "to": [draft["to_email"]],
+            "subject": draft["subject"],
+            "html": body_html,
+        }
+
+        if draft.get("lead_type") == "investor" and PITCH_DECK_PATH.exists():
+            try:
+                deck_b64 = base64.b64encode(PITCH_DECK_PATH.read_bytes()).decode()
+                payload["attachments"] = [{
+                    "filename": "PalmCare_AI_Pitch_Deck.pdf",
+                    "content": deck_b64,
+                    "content_type": "application/pdf",
+                }]
+                logger.info("Attaching pitch deck to investor email")
+            except Exception as e:
+                logger.warning(f"Could not attach pitch deck: {e}")
+
         try:
             resp = requests.post(
                 "https://api.resend.com/emails",
@@ -420,13 +452,8 @@ Would you be open to a quick 15-minute demo?"""
                     "Authorization": f"Bearer {self.resend_key}",
                     "Content-Type": "application/json",
                 },
-                json={
-                    "from": SENDER_EMAIL,
-                    "to": [draft["to_email"]],
-                    "subject": draft["subject"],
-                    "html": body_html,
-                },
-                timeout=15,
+                json=payload,
+                timeout=30,
             )
             if resp.status_code in (200, 201):
                 return {"status": "sent", "id": resp.json().get("id")}
