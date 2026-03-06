@@ -649,7 +649,7 @@ export default function NotesPage() {
                             className={INPUT}
                           />
                           <div className="flex items-center gap-2">
-                            <input type="datetime-local" value={newReminderAt} onChange={e => setNewReminderAt(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-white flex-1" />
+                            <input type="datetime-local" value={newReminderAt} onChange={e => setNewReminderAt(e.target.value)} className="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs text-slate-800 flex-1" />
                             <button onClick={() => setShowAddReminder(false)} className="px-2 py-1 text-xs text-slate-500 hover:text-slate-900">Cancel</button>
                             <button onClick={handleAddReminder} disabled={!newReminderTitle.trim() || !newReminderAt} className="px-3 py-1 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded disabled:opacity-50">Set</button>
                           </div>

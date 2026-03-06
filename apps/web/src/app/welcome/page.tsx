@@ -285,7 +285,7 @@ export default function WelcomePage() {
                 </Link>
                 <Link
                   href="/visits"
-                  className="inline-flex items-center gap-2 bg-slate-50 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
+                  className="inline-flex items-center gap-2 bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
                 >
                   Go to Dashboard
                 </Link>
@@ -361,14 +361,14 @@ export default function WelcomePage() {
           <div className="flex flex-wrap justify-center gap-4">
             <a
               href="mailto:support@palmtai.com"
-              className="inline-flex items-center gap-2 bg-slate-50 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
+              className="inline-flex items-center gap-2 bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
             >
               <Mail className="w-5 h-5" />
               Email Support
             </a>
             <Link
               href="/settings"
-              className="inline-flex items-center gap-2 bg-slate-50 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
+              className="inline-flex items-center gap-2 bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-medium hover:bg-slate-100 transition"
             >
               <Settings className="w-5 h-5" />
               Account Settings
