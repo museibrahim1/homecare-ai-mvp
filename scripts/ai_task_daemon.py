@@ -378,7 +378,7 @@ def _is_marketing_material_request(title: str, body: str) -> bool:
 
 
 def _build_marketing_material_email() -> tuple:
-    """Build a rich visual email with all marketing material embedded.
+    """Build a rich visual email with all marketing material using public GitHub URLs.
     Returns (subject, html, attachments).
     """
     import base64
@@ -387,12 +387,18 @@ def _build_marketing_material_email() -> tuple:
     def esc(s):
         return html_mod.escape(str(s)) if s else ""
 
+    GITHUB_RAW = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main"
+    MARKETING_URL = f"{GITHUB_RAW}/apps/web/public/marketing"
+    SCREENSHOTS_URL = f"{GITHUB_RAW}/apps/web/public/screenshots/app"
+
     marketing_dir = PROJECT_ROOT / "marketing" / "generated"
     screenshots_dir = PROJECT_ROOT / "screenshots"
+    web_marketing_dir = PROJECT_ROOT / "apps" / "web" / "public" / "marketing"
+    web_screenshots_dir = PROJECT_ROOT / "apps" / "web" / "public" / "screenshots" / "app"
     copy_file = PROJECT_ROOT / "marketing" / "social-media-copy.md"
 
     attachments = []
-    data_uris = {}
+    image_urls = {}
 
     image_files = {
         "linkedin_hero": ("linkedin_hero_real.png", "LinkedIn Hero Banner (1920x1080)"),
@@ -416,21 +422,25 @@ def _build_marketing_material_email() -> tuple:
     }
 
     for key, (filename, _label) in image_files.items():
-        fpath = marketing_dir / filename
-        if fpath.exists():
+        image_urls[key] = f"{MARKETING_URL}/{filename}"
+        local = marketing_dir / filename
+        if not local.exists():
+            local = web_marketing_dir / filename
+        if local.exists():
             try:
-                b64 = base64.b64encode(fpath.read_bytes()).decode()
-                data_uris[key] = f"data:image/png;base64,{b64}"
+                b64 = base64.b64encode(local.read_bytes()).decode()
                 attachments.append({"filename": filename, "content": b64, "content_type": "image/png"})
             except Exception:
                 pass
 
     for key, (filename, _label) in screenshot_files.items():
-        fpath = screenshots_dir / filename
-        if fpath.exists():
+        image_urls[key] = f"{SCREENSHOTS_URL}/{filename}"
+        local = web_screenshots_dir / filename
+        if not local.exists():
+            local = screenshots_dir / filename
+        if local.exists():
             try:
-                b64 = base64.b64encode(fpath.read_bytes()).decode()
-                data_uris[key] = f"data:image/png;base64,{b64}"
+                b64 = base64.b64encode(local.read_bytes()).decode()
                 attachments.append({"filename": filename, "content": b64, "content_type": "image/png"})
             except Exception:
                 pass
@@ -453,9 +463,22 @@ def _build_marketing_material_email() -> tuple:
             pass
 
     def img_tag(key, label, width="100%", max_width="500px"):
-        if key in data_uris:
-            return f'<div style="margin:12px 0;"><img src="{data_uris[key]}" alt="{esc(label)}" style="width:{width};max-width:{max_width};border-radius:8px;border:1px solid #e2e8f0;display:block;"><p style="color:#94a3b8;font-size:11px;margin:4px 0 0;text-align:center;">{esc(label)}</p></div>'
+        if key in image_urls:
+            return f'<div style="margin:12px 0;"><img src="{image_urls[key]}" alt="{esc(label)}" style="width:{width};max-width:{max_width};border-radius:8px;border:1px solid #e2e8f0;display:block;"><p style="color:#94a3b8;font-size:11px;margin:4px 0 0;text-align:center;">{esc(label)}</p></div>'
         return ""
+
+    def iphone_frame(key, label, width="140px"):
+        """Wrap a screenshot in a CSS iPhone device frame."""
+        if key not in image_urls:
+            return ""
+        return f'''<div style="display:inline-block;text-align:center;margin:8px;">
+  <div style="width:{width};background:#1a1a1a;border-radius:22px;padding:8px 6px 10px;box-shadow:0 8px 30px rgba(0,0,0,0.25),inset 0 0 0 1px rgba(255,255,255,0.1);">
+    <div style="width:40%;height:5px;background:#2a2a2a;border-radius:3px;margin:0 auto 6px;"></div>
+    <img src="{image_urls[key]}" alt="{esc(label)}" style="width:100%;border-radius:14px;display:block;">
+    <div style="width:28%;height:4px;background:#2a2a2a;border-radius:2px;margin:6px auto 0;"></div>
+  </div>
+  <p style="color:#64748b;font-size:11px;margin:6px 0 0;font-weight:500;">{esc(label)}</p>
+</div>'''
 
     now_str = datetime.now().strftime("%b %d, %Y at %I:%M %p")
 
@@ -495,18 +518,18 @@ def _build_marketing_material_email() -> tuple:
 
     <hr style="border:none;border-top:2px solid #e2e8f0;margin:28px 0;">
 
-    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px;">iOS App Screenshots</h2>
-    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Fresh screenshots from iPhone 17 Pro simulator with demo data.</p>
+    <h2 style="color:#0f172a;font-size:18px;margin:0 0 8px;">iOS App — iPhone Preview</h2>
+    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Live screenshots from iPhone 17 Pro simulator with demo data.</p>
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      {img_tag("app_login", "Login", width="30%", max_width="180px")}
-      {img_tag("app_home", "Dashboard", width="30%", max_width="180px")}
-      {img_tag("app_clients", "Clients", width="30%", max_width="180px")}
+    <div style="text-align:center;background:#f8fafc;border-radius:12px;padding:20px 8px;">
+      {iphone_frame("app_login", "Login", "120px")}
+      {iphone_frame("app_home", "Dashboard", "120px")}
+      {iphone_frame("app_clients", "Clients", "120px")}
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-      {img_tag("app_record", "Palm It", width="30%", max_width="180px")}
-      {img_tag("app_workspace", "Workspace", width="30%", max_width="180px")}
-      {img_tag("app_settings", "Settings", width="30%", max_width="180px")}
+    <div style="text-align:center;background:#f8fafc;border-radius:12px;padding:20px 8px;margin-top:8px;">
+      {iphone_frame("app_record", "Palm It", "120px")}
+      {iphone_frame("app_workspace", "Workspace", "120px")}
+      {iphone_frame("app_settings", "Settings", "120px")}
     </div>
 
     <hr style="border:none;border-top:2px solid #e2e8f0;margin:28px 0;">
