@@ -191,6 +191,7 @@ _SLATE_900 = "#0f172a"
 _SLATE_600 = "#475569"
 _SLATE_200 = "#e2e8f0"
 _SLATE_100 = "#f1f5f9"
+_GH_MARKETING = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing"
 
 
 def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> str:
@@ -222,11 +223,20 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         # Product showcase — iPhone + CRM
         '<div style="padding: 0 40px 32px; text-align: center;">'
         f'<a href="{_SITE}" style="text-decoration: none;">'
-        f'<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/hero_banner.png" '
+        f'<img src="{_GH_MARKETING}/hero_banner.png" '
         'alt="PalmCare AI — iPhone App + CRM Dashboard" '
         'style="max-width: 520px; width: 100%; border-radius: 12px; '
         f'border: 1px solid {_SLATE_200};" />'
         '</a></div>'
+        # iPhone app previews
+        '<div style="padding: 0 40px 24px; text-align: center;">'
+        f'<img src="{_GH_MARKETING}/iphone_home.png" alt="Home" '
+        'style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
+        f'<img src="{_GH_MARKETING}/iphone_record.png" alt="Palm It" '
+        'style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
+        f'<img src="{_GH_MARKETING}/iphone_clients.png" alt="Clients" '
+        'style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
+        '</div>'
         # CTA banner
         '<div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); '
         'border-radius: 12px; padding: 28px 32px; text-align: center;">'
@@ -370,7 +380,7 @@ EMAIL_TEMPLATES = {
                 "<strong>4.</strong> Contract sent to client &mdash; ready to sign"
             )
             + '<div style="text-align: center; margin: 24px 0;">'
-            '<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/fb_ad.png" '
+            f'<img src="{_GH_MARKETING}/fb_ad.png" '
             'alt="Before and After PalmCare AI" '
             f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
             '</div>'
@@ -413,7 +423,7 @@ EMAIL_TEMPLATES = {
                 "and voice-to-contract &mdash; we&rsquo;re the first."
             )
             + '<div style="text-align: center; margin: 24px 0;">'
-            '<img src="https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing/linkedin_crm.png" '
+            f'<img src="{_GH_MARKETING}/linkedin_crm.png" '
             'alt="PalmCare AI CRM — Dashboard, Pipeline, Mobile App" '
             f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
             '</div>'
