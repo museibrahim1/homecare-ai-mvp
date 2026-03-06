@@ -168,7 +168,7 @@ export default function MessagesPage() {
               <input
                 type="text"
                 placeholder="Search conversations..."
-                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
               />
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function MessagesPage() {
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-white truncate">{conv.name}</span>
+                      <span className="font-medium text-slate-800 truncate">{conv.name}</span>
                       <span className="text-xs text-slate-400">{conv.time}</span>
                     </div>
                     <p className="text-sm text-slate-500 truncate">{conv.lastMessage || 'No messages yet'}</p>
@@ -225,7 +225,7 @@ export default function MessagesPage() {
                     <span className="text-primary-400 font-medium">{selectedConversation.avatar}</span>
                   </div>
                   <div>
-                    <h2 className="font-medium text-white">{selectedConversation.name}</h2>
+                    <h2 className="font-medium text-slate-800">{selectedConversation.name}</h2>
                     <span className="text-xs text-emerald-600">Online</span>
                   </div>
                 </div>
@@ -256,7 +256,7 @@ export default function MessagesPage() {
                         className={`max-w-md px-4 py-3 rounded-2xl ${
                           msg.sender === 'me'
                             ? 'bg-primary-500 text-white rounded-br-md'
-                            : 'bg-white text-white rounded-bl-md'
+                            : 'bg-white text-slate-800 rounded-bl-md'
                         }`}
                       >
                         <p className="text-sm">{msg.text}</p>
@@ -281,7 +281,7 @@ export default function MessagesPage() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Type a message..."
-                    className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                    className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                   <button 
                     onClick={handleSendMessage}
@@ -339,7 +339,7 @@ export default function MessagesPage() {
                         </span>
                       </div>
                       <div className="text-left">
-                        <p className="font-medium text-white">{client.full_name}</p>
+                        <p className="font-medium text-slate-800">{client.full_name}</p>
                         <p className="text-sm text-slate-500">{client.email || 'No email'}</p>
                       </div>
                     </button>

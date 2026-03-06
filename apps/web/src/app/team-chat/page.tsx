@@ -880,7 +880,7 @@ export default function TeamChatPage() {
                     value={composeData.to}
                     onChange={(e) => setComposeData({ ...composeData, to: e.target.value })}
                     placeholder="To"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -889,7 +889,7 @@ export default function TeamChatPage() {
                     value={composeData.subject}
                     onChange={(e) => setComposeData({ ...composeData, subject: e.target.value })}
                     placeholder="Subject"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -898,7 +898,7 @@ export default function TeamChatPage() {
                     onChange={(e) => setComposeData({ ...composeData, body: e.target.value })}
                     placeholder="Write your message..."
                     rows={10}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
                   />
                 </div>
               </div>
@@ -1003,7 +1003,7 @@ export default function TeamChatPage() {
                     value={newChannelName}
                     onChange={(e) => setNewChannelName(e.target.value)}
                     placeholder="e.g. general"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
               </div>

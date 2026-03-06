@@ -201,7 +201,7 @@ export default function NewVisitPage() {
                       <s.icon className={`w-5 h-5 ${isActive ? 'text-primary-400' : 'text-slate-400'}`} />
                     )}
                   </div>
-                  <span className={`font-medium ${isActive ? 'text-white' : 'text-slate-500'}`}>
+                  <span className={`font-medium ${isActive ? 'text-slate-800' : 'text-slate-500'}`}>
                     {s.label}
                   </span>
                   {index < 2 && (

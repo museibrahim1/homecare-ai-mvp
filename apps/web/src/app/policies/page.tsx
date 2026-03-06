@@ -212,7 +212,7 @@ export default function PoliciesPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search policies..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
           <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
@@ -261,7 +261,7 @@ export default function PoliciesPage() {
                           <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                             <span className="text-primary-400 font-medium">{policy.client.charAt(0)}</span>
                           </div>
-                          <span className="font-medium text-white">{policy.client}</span>
+                          <span className="font-medium text-slate-800">{policy.client}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-slate-600">{policy.type}</td>
@@ -322,7 +322,7 @@ export default function PoliciesPage() {
                       value={newPolicy.client}
                       onChange={(e) => setNewPolicy({ ...newPolicy, client: e.target.value })}
                       placeholder="Enter client name"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export default function PoliciesPage() {
                     <select
                       value={newPolicy.type}
                       onChange={(e) => setNewPolicy({ ...newPolicy, type: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none appearance-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none appearance-none"
                     >
                       {policyTypes.map(t => (
                         <option key={t} value={t}>{t}</option>
@@ -348,7 +348,7 @@ export default function PoliciesPage() {
                       type="date"
                       value={newPolicy.startDate}
                       onChange={(e) => setNewPolicy({ ...newPolicy, startDate: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -357,7 +357,7 @@ export default function PoliciesPage() {
                       type="date"
                       value={newPolicy.endDate}
                       onChange={(e) => setNewPolicy({ ...newPolicy, endDate: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -368,7 +368,7 @@ export default function PoliciesPage() {
                     value={newPolicy.monthlyValue}
                     onChange={(e) => setNewPolicy({ ...newPolicy, monthlyValue: e.target.value })}
                     placeholder="3000"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -378,14 +378,14 @@ export default function PoliciesPage() {
                     onChange={(e) => setNewPolicy({ ...newPolicy, notes: e.target.value })}
                     placeholder="Additional notes..."
                     rows={3}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
                   />
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -416,7 +416,7 @@ export default function PoliciesPage() {
                 <div className="mt-3 pt-3 border-t border-slate-200">
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-slate-500">Current End Date</span>
-                    <span className="text-white">{selectedPolicy.endDate}</span>
+                    <span className="text-slate-800">{selectedPolicy.endDate}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">New End Date</span>
@@ -432,7 +432,7 @@ export default function PoliciesPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowRenewModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>

@@ -345,7 +345,7 @@ function WeekView({
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] text-slate-500 uppercase">{format(day, 'EEE')}</span>
                 <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium ${
-                  today ? 'bg-primary-500 text-white' : isSelected ? 'text-primary-400' : 'text-white'
+                  today ? 'bg-primary-500 text-white' : isSelected ? 'text-primary-400' : 'text-slate-800'
                 }`}>
                   {format(day, 'd')}
                 </span>
@@ -656,7 +656,7 @@ function ScheduleContent() {
                 key={v.key}
                 onClick={() => setView(v.key)}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                  view === v.key ? 'bg-slate-50 text-white' : 'text-slate-500 hover:text-slate-900'
+                  view === v.key ? 'bg-slate-50 text-slate-800' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <v.icon className="w-3.5 h-3.5" />
@@ -768,7 +768,7 @@ function ScheduleContent() {
                 >
                   {day && (
                     <>
-                      <span className={`text-xs font-medium ${today ? 'text-primary-400' : 'text-white'}`}>{day}</span>
+                      <span className={`text-xs font-medium ${today ? 'text-primary-400' : 'text-slate-800'}`}>{day}</span>
                       <div className="mt-1 space-y-0.5">
                         {dayApts.slice(0, 2).map(a => (
                           <div key={a.id} className={`text-[9px] px-1 py-0.5 rounded truncate ${TYPE_CONFIG[a.type].bg} ${TYPE_CONFIG[a.type].color}`}>

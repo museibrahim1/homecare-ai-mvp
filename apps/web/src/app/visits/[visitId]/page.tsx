@@ -881,7 +881,7 @@ export default function VisitDetailPage() {
                 }}
                 className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg cursor-pointer select-none whitespace-nowrap flex-shrink-0 ${
                   isActive
-                    ? 'bg-primary-50 text-white border border-primary-200'
+                    ? 'bg-primary-50 text-slate-800 border border-primary-200'
                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-transparent'
                 }`}
               >
@@ -978,7 +978,7 @@ export default function VisitDetailPage() {
                             ) : (
                               <div>
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="font-medium text-white">{task.task || 'Task'}</span>
+                                  <span className="font-medium text-slate-800">{task.task || 'Task'}</span>
                                   {task.duration_minutes && (
                                     <span className="text-xs text-amber-600 bg-amber-400/10 px-2 py-0.5 rounded">
                                       {task.duration_minutes} min
@@ -1071,7 +1071,7 @@ export default function VisitDetailPage() {
                       onClick={() => setPopoutPanel(tab.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
                         isActive
-                          ? 'bg-primary-50 text-white border border-primary-200'
+                          ? 'bg-primary-50 text-slate-800 border border-primary-200'
                           : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
                       }`}
                     >
@@ -1155,7 +1155,7 @@ export default function VisitDetailPage() {
                                 ) : (
                                   <div>
                                     <div className="flex items-center justify-between mb-1">
-                                      <span className="font-medium text-white">{task.task || 'Task'}</span>
+                                      <span className="font-medium text-slate-800">{task.task || 'Task'}</span>
                                       {task.duration_minutes && (
                                         <span className="text-xs text-amber-600 bg-amber-400/10 px-2 py-0.5 rounded">
                                           {task.duration_minutes} min
@@ -1224,7 +1224,7 @@ export default function VisitDetailPage() {
               <button
                 onClick={() => setShowRestartModal(false)}
                 disabled={restarting}
-                className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>

@@ -503,7 +503,7 @@ export default function NotesPage() {
                       type="text"
                       value={editTitle}
                       onChange={e => handleTitleChange(e.target.value)}
-                      className="w-full text-2xl font-bold text-slate-900 bg-transparent border-none outline-none placeholder-dark-500"
+                      className="w-full text-2xl font-bold text-slate-900 bg-transparent border-none outline-none placeholder-slate-400"
                       placeholder="Note title..."
                     />
 
@@ -530,7 +530,7 @@ export default function NotesPage() {
                     <textarea
                       value={editContent}
                       onChange={e => handleContentChange(e.target.value)}
-                      className="w-full min-h-[200px] text-sm text-slate-700 bg-transparent border-none outline-none resize-none placeholder-dark-500 leading-relaxed"
+                      className="w-full min-h-[200px] text-sm text-slate-700 bg-transparent border-none outline-none resize-none placeholder-slate-400 leading-relaxed"
                       placeholder="Start writing your note..."
                     />
 

@@ -318,7 +318,7 @@ export default function NewContractPage() {
                           setTimeout(autoGenerateTitle, 0);
                         }
                       }}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                     >
                       <option value="">Select a client...</option>
                       {clients.map((client) => (
@@ -351,7 +351,7 @@ export default function NewContractPage() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Personal Care Service Agreement — Jane Doe"
-                      className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                     {selectedClient && (
                       <button
@@ -380,7 +380,7 @@ export default function NewContractPage() {
                 <select
                   value={selectedTemplate}
                   onChange={(e) => setSelectedTemplate(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                 >
                   <option value="">No template (manual entry)</option>
                   {templates.map((tmpl) => (
@@ -438,7 +438,7 @@ export default function NewContractPage() {
                       value={service.name}
                       onChange={(e) => updateServiceLine(index, 'name', e.target.value)}
                       placeholder="Service name"
-                      className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none text-sm"
+                      className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none text-sm"
                     />
                     <div className="flex items-center gap-1">
                       <span className="text-slate-400 text-sm">$</span>
@@ -449,7 +449,7 @@ export default function NewContractPage() {
                           updateServiceLine(index, 'rate', parseFloat(e.target.value) || 0)
                         }
                         placeholder="0"
-                        className="w-20 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none text-sm"
+                        className="w-20 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none text-sm"
                       />
                     </div>
                     <select
@@ -523,7 +523,7 @@ export default function NewContractPage() {
                       type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                   <div>
@@ -534,7 +534,7 @@ export default function NewContractPage() {
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -559,7 +559,7 @@ export default function NewContractPage() {
                     onChange={(e) => setHourlyRate(parseFloat(e.target.value) || 0)}
                     placeholder="25.00"
                     step="0.01"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -571,7 +571,7 @@ export default function NewContractPage() {
                     value={weeklyHours || ''}
                     onChange={(e) => setWeeklyHours(parseFloat(e.target.value) || 0)}
                     placeholder="20"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -582,7 +582,7 @@ export default function NewContractPage() {
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -593,7 +593,7 @@ export default function NewContractPage() {
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -641,7 +641,7 @@ export default function NewContractPage() {
                       value={cancellationPolicy}
                       onChange={(e) => setCancellationPolicy(e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
                     />
                   </div>
                   <div>
@@ -652,7 +652,7 @@ export default function NewContractPage() {
                       value={termsAndConditions}
                       onChange={(e) => setTermsAndConditions(e.target.value)}
                       rows={5}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
                     />
                   </div>
                 </div>

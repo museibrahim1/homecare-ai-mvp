@@ -1299,7 +1299,7 @@ export default function SettingsPage() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <h4 className={`font-semibold ${index === 0 ? 'text-primary-400' : 'text-white'}`}>
+                          <h4 className={`font-semibold ${index === 0 ? 'text-primary-400' : 'text-slate-800'}`}>
                             {plan.name}
                           </h4>
                           {index === 0 && (

@@ -343,7 +343,7 @@ export default function TemplatesPage() {
                       value={uploadName}
                       onChange={(e) => setUploadName(e.target.value)}
                       placeholder="e.g. My Agency Service Agreement"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
 
@@ -354,7 +354,7 @@ export default function TemplatesPage() {
                       value={uploadDesc}
                       onChange={(e) => setUploadDesc(e.target.value)}
                       placeholder="Optional description..."
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
 

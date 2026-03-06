@@ -362,7 +362,7 @@ export default function CareTrackerPage() {
                   { key: 'timeline' as const, label: 'Timeline', icon: Activity },
                   { key: 'board' as const, label: 'Board', icon: CalendarDays },
                 ].map(v => (
-                  <button key={v.key} onClick={() => setView(v.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === v.key ? 'bg-slate-50 text-white' : 'text-slate-500 hover:text-slate-900'}`}>
+                  <button key={v.key} onClick={() => setView(v.key)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === v.key ? 'bg-slate-50 text-slate-800' : 'text-slate-500 hover:text-slate-900'}`}>
                     <v.icon className="w-3.5 h-3.5" />{v.label}
                   </button>
                 ))}

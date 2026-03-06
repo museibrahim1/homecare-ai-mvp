@@ -283,7 +283,7 @@ export default function HelpPage() {
                   </p>
                   <button
                     onClick={() => setSubmitted(false)}
-                    className="px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
+                    className="px-4 py-2 bg-slate-50 text-slate-800 rounded-lg hover:bg-slate-100 transition"
                   >
                     Submit Another Ticket
                   </button>
@@ -324,7 +324,7 @@ export default function HelpPage() {
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       placeholder="Brief description of your issue"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
@@ -337,7 +337,7 @@ export default function HelpPage() {
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Please provide as much detail as possible..."
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary-500 resize-none"
                     />
                   </div>
 
@@ -347,7 +347,7 @@ export default function HelpPage() {
                     <select
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-white focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-primary-500"
                     >
                       <option value="low">Low - General question</option>
                       <option value="medium">Medium - Need help soon</option>

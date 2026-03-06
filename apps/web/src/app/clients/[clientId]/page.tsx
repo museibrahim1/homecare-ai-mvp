@@ -181,7 +181,7 @@ function EditableField({
         {href ? (
           <a href={href} className="text-sm text-primary-400 hover:underline truncate block">{value}</a>
         ) : (
-          <p className="text-sm text-white truncate">{value}</p>
+          <p className="text-sm text-slate-800 truncate">{value}</p>
         )}
       </div>
     </div>
@@ -808,7 +808,7 @@ export default function ClientDetailPage() {
                       {client.emergency_contact_name ? (
                         <div className="bg-slate-100 rounded-lg p-4">
                           <p className="text-xs text-slate-500 mb-1">Primary Contact</p>
-                          <p className="font-medium text-white">{client.emergency_contact_name}</p>
+                          <p className="font-medium text-slate-800">{client.emergency_contact_name}</p>
                           <p className="text-sm text-slate-600">{client.emergency_contact_relationship || 'Relationship N/A'}</p>
                           {client.emergency_contact_phone && <a href={`tel:${client.emergency_contact_phone}`} className="text-sm text-primary-400 hover:underline mt-1 block">{client.emergency_contact_phone}</a>}
                         </div>
@@ -818,7 +818,7 @@ export default function ClientDetailPage() {
                       {client.emergency_contact_2_name ? (
                         <div className="bg-slate-100 rounded-lg p-4">
                           <p className="text-xs text-slate-500 mb-1">Secondary Contact</p>
-                          <p className="font-medium text-white">{client.emergency_contact_2_name}</p>
+                          <p className="font-medium text-slate-800">{client.emergency_contact_2_name}</p>
                           <p className="text-sm text-slate-600">{client.emergency_contact_2_relationship || 'Relationship N/A'}</p>
                           {client.emergency_contact_2_phone && <a href={`tel:${client.emergency_contact_2_phone}`} className="text-sm text-primary-400 hover:underline mt-1 block">{client.emergency_contact_2_phone}</a>}
                         </div>
@@ -1190,9 +1190,9 @@ export default function ClientDetailPage() {
             <div className="text-center">
               <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 className="w-6 h-6 text-red-600" /></div>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Client</h3>
-              <p className="text-slate-500 mb-6">Are you sure you want to delete <strong className="text-white">{client.full_name}</strong>? This action cannot be undone.</p>
+              <p className="text-slate-500 mb-6">Are you sure you want to delete <strong className="text-slate-800">{client.full_name}</strong>? This action cannot be undone.</p>
               <div className="flex items-center gap-3">
-                <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors">Cancel</button>
+                <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors">Cancel</button>
                 <button onClick={handleDelete} disabled={deleting} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors">
                   {deleting ? <><Loader2 className="w-4 h-4 animate-spin" />Deleting...</> : <><Trash2 className="w-4 h-4" />Delete</>}
                 </button>

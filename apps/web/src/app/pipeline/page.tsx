@@ -245,7 +245,7 @@ export default function PipelinePage() {
           <div className="flex gap-3">
             <button 
               onClick={loadPipelineData}
-              className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
             >
               <RefreshCw className="w-5 h-5" />
               Refresh
@@ -330,7 +330,7 @@ export default function PipelinePage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${stage.color}`} />
-                    <span className="font-medium text-white">{stage.name}</span>
+                    <span className="font-medium text-slate-800">{stage.name}</span>
                     <span className="text-xs bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full">
                       {getDealsForStage(stage.id).length}
                     </span>
@@ -434,7 +434,7 @@ export default function PipelinePage() {
                       value={newDeal.name}
                       onChange={(e) => setNewDeal({ ...newDeal, name: e.target.value })}
                       placeholder="Full name"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -447,7 +447,7 @@ export default function PipelinePage() {
                       value={newDeal.email}
                       onChange={(e) => setNewDeal({ ...newDeal, email: e.target.value })}
                       placeholder="email@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -460,7 +460,7 @@ export default function PipelinePage() {
                       value={newDeal.phone}
                       onChange={(e) => setNewDeal({ ...newDeal, phone: e.target.value })}
                       placeholder="(555) 123-4567"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -469,7 +469,7 @@ export default function PipelinePage() {
                   <select
                     value={newDeal.stage}
                     onChange={(e) => setNewDeal({ ...newDeal, stage: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
                   >
                     {stages.map(s => (
                       <option key={s.id} value={s.id}>{s.name}</option>
@@ -483,14 +483,14 @@ export default function PipelinePage() {
                     onChange={(e) => setNewDeal({ ...newDeal, notes: e.target.value })}
                     placeholder="Additional notes..."
                     rows={3}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none resize-none"
                   />
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
