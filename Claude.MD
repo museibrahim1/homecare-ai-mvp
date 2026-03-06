@@ -557,4 +557,25 @@ Email to ai@palmcareai.com
 
 ---
 
-*Last updated: March 5, 2026*
+### Session: March 6, 2026 (Early AM) — Nano Banana AI Marketing Upgrade
+
+**What was done:**
+- **Nano Banana 2 integration**: Replaced all Pillow-rendered iPhone frames with Nano Banana text-to-image AI renders — photorealistic iPhone 15 Pro mockups
+- **13 new marketing graphics**: 3 iPhone mockups (home, record, clients), hero banner, LinkedIn CRM, Instagram square/story, Facebook before/after, Twitter banner, email header, 3 carousel slides — all AI-generated via WaveSpeed Nano Banana 2
+- **Marketing agent updated**: Nano Banana is now the DEFAULT for all visual content; SHARED_SKILLS updated with iPhone mockup prompt templates; Pillow/PIL explicitly banned
+- **Agency outreach updated**: All 5 email templates now include iPhone 15 Pro mockups + updated AI graphics; `_GH_MARKETING` constant added for clean URL management
+- **Investor email updated**: v4 pitch deck auto-attached; email template includes hero banner, CRM dashboard, iPhone mockups, stat blocks
+- **Old pitch decks deleted**: Removed `Palmcare AI Pitch deck.pdf` (Feb 25), `Pitch Deck-3 compressed .pdf` (Jan 21), `Palm Care.pptx` (Feb 22) from Desktop/Downloads
+- **Previews sent**: Marketing package (13 attachments), investor email preview (with v4 deck), agency outreach preview (all 5 templates)
+- **Daemon redeployed**: Updated daemon, subagents, and email agent on local system
+
+**Key decisions:**
+- Nano Banana text-to-image for all visual content (edit-image endpoint not available for this model)
+- `3:1` aspect ratio not supported; use `21:9` for ultra-wide
+- Pillow/PIL iPhone frames explicitly banned — quality too low
+- Only v4 pitch deck kept; all older versions deleted
+- All marketing graphics served via GitHub raw URLs for reliable email rendering
+
+---
+
+*Last updated: March 6, 2026*
