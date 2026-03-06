@@ -117,12 +117,14 @@ def get_resend_headers() -> dict:
     return {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
 
-def send_reply_email(to: str, subject: str, html: str) -> bool:
+def send_reply_email(to: str, subject: str, html: str, attachments: list = None) -> bool:
     headers = get_resend_headers()
     payload = {"from": FROM_ADDRESS, "to": [to], "subject": subject, "html": html}
+    if attachments:
+        payload["attachments"] = attachments
     for attempt in range(3):
         try:
-            resp = requests.post(f"{RESEND_BASE}/emails", headers=headers, json=payload, timeout=15)
+            resp = requests.post(f"{RESEND_BASE}/emails", headers=headers, json=payload, timeout=30)
             if resp.status_code in (200, 201):
                 logger.info(f"Reply sent: {subject}")
                 return True
@@ -365,9 +367,202 @@ def check_file_tasks() -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
+def _is_marketing_material_request(title: str, body: str) -> bool:
+    """Detect if the user is asking for marketing material to be sent visually."""
+    text = (title + " " + body).lower()
+    send_keywords = ["send me", "show me", "email me", "give me", "send the", "send it", "send back"]
+    material_keywords = ["marketing", "material", "graphics", "images", "content", "copy", "social media", "posts", "campaign"]
+    has_send = any(kw in text for kw in send_keywords)
+    has_material = any(kw in text for kw in material_keywords)
+    return has_send and has_material
+
+
+def _build_marketing_material_email() -> tuple:
+    """Build a rich visual email with all marketing material embedded.
+    Returns (subject, html, attachments).
+    """
+    import base64
+    import html as html_mod
+
+    def esc(s):
+        return html_mod.escape(str(s)) if s else ""
+
+    marketing_dir = PROJECT_ROOT / "marketing" / "generated"
+    screenshots_dir = PROJECT_ROOT / "screenshots"
+    copy_file = PROJECT_ROOT / "marketing" / "social-media-copy.md"
+
+    attachments = []
+    cid_map = {}
+
+    image_files = {
+        "linkedin_hero": ("linkedin_hero_real.png", "LinkedIn Hero Banner (1920x1080)"),
+        "instagram_square": ("instagram_square_real.png", "Instagram Square Post (1080x1080)"),
+        "instagram_story": ("instagram_story_real.png", "Instagram Story (1080x1920)"),
+        "facebook_ad": ("facebook_ad_real.png", "Facebook Ad (1200x628)"),
+        "twitter_banner": ("twitter_banner_real.png", "Twitter Banner (1500x500)"),
+        "carousel_1": ("carousel_1_real.png", "Instagram Carousel 1 (1080x1350)"),
+        "carousel_2": ("carousel_2_real.png", "Instagram Carousel 2 (1080x1350)"),
+        "carousel_3": ("carousel_3_real.png", "Instagram Carousel 3 (1080x1350)"),
+        "email_header": ("email_header_real.png", "Email Header (600x200)"),
+    }
+
+    screenshot_files = {
+        "app_login": ("01_login.png", "Login Screen"),
+        "app_home": ("02_home.png", "Home Dashboard"),
+        "app_clients": ("03_clients.png", "Client List"),
+        "app_record": ("04_record.png", "Palm It Recording"),
+        "app_workspace": ("05_workspace.png", "Workspace / Calendar"),
+        "app_settings": ("06_settings.png", "Settings"),
+    }
+
+    for cid_name, (filename, _label) in image_files.items():
+        fpath = marketing_dir / filename
+        if fpath.exists():
+            try:
+                data = base64.b64encode(fpath.read_bytes()).decode()
+                attachments.append({"filename": filename, "content": data, "content_type": "image/png"})
+                cid_map[cid_name] = f"cid:{filename}"
+            except Exception:
+                pass
+
+    for cid_name, (filename, _label) in screenshot_files.items():
+        fpath = screenshots_dir / filename
+        if fpath.exists():
+            try:
+                data = base64.b64encode(fpath.read_bytes()).decode()
+                attachments.append({"filename": filename, "content": data, "content_type": "image/png"})
+                cid_map[cid_name] = f"cid:{filename}"
+            except Exception:
+                pass
+
+    copy_text = ""
+    if copy_file.exists():
+        try:
+            raw = copy_file.read_text(encoding="utf-8", errors="replace")
+            sections = raw.split("\n## ")
+            for section in sections[1:6]:
+                lines = section.strip().split("\n")
+                title = lines[0].strip()
+                body_lines = [l for l in lines[1:] if l.strip() and not l.startswith("---")]
+                copy_text += f"<h3 style='color:#0d9488;font-size:15px;margin:16px 0 8px;'>{esc(title)}</h3>"
+                for line in body_lines[:8]:
+                    line = line.strip().lstrip("- *")
+                    if line:
+                        copy_text += f"<p style='color:#374151;font-size:13px;margin:4px 0;line-height:1.5;'>{esc(line)}</p>"
+        except Exception:
+            pass
+
+    def img_tag(cid_name, label, width="100%", max_width="500px"):
+        if cid_name in cid_map:
+            return f'<div style="margin:12px 0;"><img src="{cid_map[cid_name]}" alt="{esc(label)}" style="width:{width};max-width:{max_width};border-radius:8px;border:1px solid #e2e8f0;display:block;"><p style="color:#94a3b8;font-size:11px;margin:4px 0 0;text-align:center;">{esc(label)}</p></div>'
+        return ""
+
+    now_str = datetime.now().strftime("%b %d, %Y at %I:%M %p")
+
+    html = f"""<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<div style="max-width:640px;margin:0 auto;padding:20px;">
+
+  <div style="background:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);padding:28px 24px;border-radius:14px 14px 0 0;">
+    <h1 style="color:white;margin:0;font-size:22px;font-weight:700;">PalmCare AI Marketing Package</h1>
+    <p style="color:rgba(255,255,255,0.75);margin:4px 0 0;font-size:12px;">{now_str} &bull; All assets attached</p>
+  </div>
+
+  <div style="background:white;padding:24px;border-radius:0 0 14px 14px;border:1px solid #e2e8f0;border-top:none;">
+
+    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Marketing Graphics</h2>
+    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Built from real iOS app screenshots. All images are attached to this email — save them directly.</p>
+
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">LinkedIn</h3>
+    {img_tag("linkedin_hero", "LinkedIn Hero — 3 phones showing login, dashboard, recording", max_width="600px")}
+
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Instagram</h3>
+    {img_tag("instagram_square", "Instagram Square — Palm It recording screen")}
+    {img_tag("instagram_story", "Instagram Story — Home dashboard with stats", max_width="300px")}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      {img_tag("carousel_1", "Carousel 1 — Login", width="30%", max_width="180px")}
+      {img_tag("carousel_2", "Carousel 2 — Record", width="30%", max_width="180px")}
+      {img_tag("carousel_3", "Carousel 3 — Workspace", width="30%", max_width="180px")}
+    </div>
+
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Facebook & Twitter</h3>
+    {img_tag("facebook_ad", "Facebook Ad — Before/after: record + clients", max_width="600px")}
+    {img_tag("twitter_banner", "Twitter Banner — 3 phones", max_width="600px")}
+
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Email Header</h3>
+    {img_tag("email_header", "Email Header for outreach campaigns", max_width="600px")}
+
+    <hr style="border:none;border-top:2px solid #e2e8f0;margin:28px 0;">
+
+    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px;">iOS App Screenshots</h2>
+    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Fresh screenshots from iPhone 17 Pro simulator with demo data.</p>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      {img_tag("app_login", "Login", width="30%", max_width="180px")}
+      {img_tag("app_home", "Dashboard", width="30%", max_width="180px")}
+      {img_tag("app_clients", "Clients", width="30%", max_width="180px")}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      {img_tag("app_record", "Palm It", width="30%", max_width="180px")}
+      {img_tag("app_workspace", "Workspace", width="30%", max_width="180px")}
+      {img_tag("app_settings", "Settings", width="30%", max_width="180px")}
+    </div>
+
+    <hr style="border:none;border-top:2px solid #e2e8f0;margin:28px 0;">
+
+    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Social Media Copy</h2>
+    <p style="color:#64748b;font-size:13px;margin:0 0 12px;">Ready-to-post captions for each platform.</p>
+    {copy_text if copy_text else '<p style="color:#94a3b8;font-size:13px;">Copy bank file not found.</p>'}
+
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-top:24px;">
+      <p style="color:#166534;font-size:13px;margin:0;"><strong>All images are attached to this email.</strong> Save them directly from the attachments. Reply to ai@palmcareai.com for any changes.</p>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;padding:20px 0;">
+    <p style="color:#94a3b8;font-size:11px;margin:0;">PalmCare AI Marketing Agent &bull; Palm Technologies, INC.</p>
+  </div>
+
+</div>
+</body></html>"""
+
+    return "Your Marketing Package — Graphics, Screenshots & Copy", html, attachments
+
+
 def run_task(task_title: str, task_body: str, task_type: str, state: dict) -> dict:
     """Execute a task, routing to the appropriate subagent."""
     start_time = time.time()
+
+    # Check if this is a request to send existing marketing material
+    if _is_marketing_material_request(task_title, task_body):
+        logger.info("Detected marketing material request — sending visual package")
+        subject, html, attachments = _build_marketing_material_email()
+        send_reply_email(REPLY_TO, subject, html, attachments)
+        duration = time.time() - start_time
+        result = {
+            "summary": "Sent marketing package with all graphics, screenshots, and copy embedded in the email.",
+            "status": "completed",
+            "files_changed": [], "commands": [], "questions": [],
+            "notes": "[Marketing Agent] Visual marketing package sent with inline images and attachments.",
+        }
+        state["tasks_completed"] = state.get("tasks_completed", 0) + 1
+        save_state(state)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        result_record = {
+            "title": task_title, "body": task_body[:500], "agent": "marketing",
+            "status": "completed", "summary": result["summary"], "notes": result["notes"],
+            "questions": [], "files_changed": [], "commit": None,
+            "duration": round(duration, 1), "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        try:
+            result_file = COMPLETED_DIR / f"{timestamp}_{task_title[:40].replace(' ', '_').replace('/', '_')}.result.json"
+            result_file.write_text(json.dumps(result_record, indent=2, default=str))
+        except Exception:
+            pass
+        logger.info(f"Marketing package sent in {duration:.1f}s")
+        return {"result": result, "apply_result": None, "commit_hash": None, "duration": duration}
 
     agent_id = detect_subagent(task_title, task_body)
     if agent_id in SUBAGENTS:
