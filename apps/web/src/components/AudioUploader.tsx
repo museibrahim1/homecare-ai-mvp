@@ -574,7 +574,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className={`font-medium text-sm transition-colors duration-300 ${
-                            isCompleted ? 'text-emerald-400' : isRunning ? 'text-white' : isFailed ? 'text-red-600' : 'text-slate-400'
+                            isCompleted ? 'text-emerald-400' : isRunning ? 'text-slate-800' : isFailed ? 'text-red-600' : 'text-slate-400'
                           }`}>
                             {step.label}
                           </span>
@@ -679,7 +679,7 @@ export default function AudioUploader({ visitId, token, onUploadComplete, onClos
               </div>
               {isRecording && (
                 <div className="space-y-2">
-                  <div className="text-3xl font-mono text-white">{formatTime(recordingTime)}</div>
+                  <div className="text-3xl font-mono text-slate-800">{formatTime(recordingTime)}</div>
                   <p className="text-red-600 text-sm animate-pulse">● Recording...</p>
                 </div>
               )}

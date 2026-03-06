@@ -387,7 +387,7 @@ export default function WalkthroughGuide() {
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 isLast ? 'bg-green-500 hover:bg-green-600 text-white'
                 : isFirst ? 'bg-primary-500 hover:bg-primary-600 text-white'
-                : 'bg-slate-50 hover:bg-slate-100 text-white'
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-800'
               }`}
             >
               {isLast ? <>Get Started <ArrowRight className="w-3.5 h-3.5" /></>
