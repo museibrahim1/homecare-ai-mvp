@@ -4,8 +4,8 @@ struct WorkspaceView: View {
     @EnvironmentObject var api: APIService
     @State private var selectedSection = 0
 
-    private let sections = ["Calendar", "Documents", "Tasks"]
-    private let sectionIcons = ["calendar", "doc.text.fill", "checklist"]
+    private let sections = ["Calendar", "Documents"]
+    private let sectionIcons = ["calendar", "doc.text.fill"]
 
     var body: some View {
         NavigationStack {
@@ -19,9 +19,6 @@ struct WorkspaceView: View {
 
                     ContractsView()
                         .tag(1)
-
-                    TasksView()
-                        .tag(2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.2), value: selectedSection)
