@@ -389,12 +389,11 @@ def _build_marketing_material_email() -> tuple:
 
     GITHUB_RAW = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main"
     MARKETING_URL = f"{GITHUB_RAW}/apps/web/public/marketing"
-    SCREENSHOTS_URL = f"{GITHUB_RAW}/apps/web/public/screenshots/app"
+    IPHONE_URL = f"{GITHUB_RAW}/apps/web/public/screenshots/iphone"
 
     marketing_dir = PROJECT_ROOT / "marketing" / "generated"
-    screenshots_dir = PROJECT_ROOT / "screenshots"
     web_marketing_dir = PROJECT_ROOT / "apps" / "web" / "public" / "marketing"
-    web_screenshots_dir = PROJECT_ROOT / "apps" / "web" / "public" / "screenshots" / "app"
+    iphone_dir = PROJECT_ROOT / "apps" / "web" / "public" / "screenshots" / "iphone"
     copy_file = PROJECT_ROOT / "marketing" / "social-media-copy.md"
 
     attachments = []
@@ -412,13 +411,13 @@ def _build_marketing_material_email() -> tuple:
         "email_header": ("email_header_real.png", "Email Header (600x200)"),
     }
 
-    screenshot_files = {
-        "app_login": ("01_login.png", "Login Screen"),
-        "app_home": ("02_home.png", "Home Dashboard"),
-        "app_clients": ("03_clients.png", "Client List"),
-        "app_record": ("04_record.png", "Palm It Recording"),
-        "app_workspace": ("05_workspace.png", "Workspace / Calendar"),
-        "app_settings": ("06_settings.png", "Settings"),
+    iphone_files = {
+        "app_login": ("iphone_01_login.png", "Login"),
+        "app_home": ("iphone_02_home.png", "Dashboard"),
+        "app_clients": ("iphone_03_clients.png", "Clients"),
+        "app_record": ("iphone_04_record.png", "Palm It"),
+        "app_workspace": ("iphone_05_workspace.png", "Workspace"),
+        "app_settings": ("iphone_06_settings.png", "Settings"),
     }
 
     for key, (filename, _label) in image_files.items():
@@ -433,11 +432,9 @@ def _build_marketing_material_email() -> tuple:
             except Exception:
                 pass
 
-    for key, (filename, _label) in screenshot_files.items():
-        image_urls[key] = f"{SCREENSHOTS_URL}/{filename}"
-        local = web_screenshots_dir / filename
-        if not local.exists():
-            local = screenshots_dir / filename
+    for key, (filename, _label) in iphone_files.items():
+        image_urls[key] = f"{IPHONE_URL}/{filename}"
+        local = iphone_dir / filename
         if local.exists():
             try:
                 b64 = base64.b64encode(local.read_bytes()).decode()
@@ -467,18 +464,11 @@ def _build_marketing_material_email() -> tuple:
             return f'<div style="margin:12px 0;"><img src="{image_urls[key]}" alt="{esc(label)}" style="width:{width};max-width:{max_width};border-radius:8px;border:1px solid #e2e8f0;display:block;"><p style="color:#94a3b8;font-size:11px;margin:4px 0 0;text-align:center;">{esc(label)}</p></div>'
         return ""
 
-    def iphone_frame(key, label, width="140px"):
-        """Wrap a screenshot in a CSS iPhone device frame."""
+    def iphone_img(key, label, width="150px"):
+        """Show a pre-rendered iPhone-framed screenshot image."""
         if key not in image_urls:
             return ""
-        return f'''<div style="display:inline-block;text-align:center;margin:8px;">
-  <div style="width:{width};background:#1a1a1a;border-radius:22px;padding:8px 6px 10px;box-shadow:0 8px 30px rgba(0,0,0,0.25),inset 0 0 0 1px rgba(255,255,255,0.1);">
-    <div style="width:40%;height:5px;background:#2a2a2a;border-radius:3px;margin:0 auto 6px;"></div>
-    <img src="{image_urls[key]}" alt="{esc(label)}" style="width:100%;border-radius:14px;display:block;">
-    <div style="width:28%;height:4px;background:#2a2a2a;border-radius:2px;margin:6px auto 0;"></div>
-  </div>
-  <p style="color:#64748b;font-size:11px;margin:6px 0 0;font-weight:500;">{esc(label)}</p>
-</div>'''
+        return f'<div style="display:inline-block;text-align:center;margin:8px;vertical-align:top;"><img src="{image_urls[key]}" alt="{esc(label)}" style="width:{width};display:block;"><p style="color:#64748b;font-size:11px;margin:6px 0 0;font-weight:500;">{esc(label)}</p></div>'
 
     now_str = datetime.now().strftime("%b %d, %Y at %I:%M %p")
 
@@ -522,14 +512,14 @@ def _build_marketing_material_email() -> tuple:
     <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Live screenshots from iPhone 17 Pro simulator with demo data.</p>
 
     <div style="text-align:center;background:#f8fafc;border-radius:12px;padding:20px 8px;">
-      {iphone_frame("app_login", "Login", "120px")}
-      {iphone_frame("app_home", "Dashboard", "120px")}
-      {iphone_frame("app_clients", "Clients", "120px")}
+      {iphone_img("app_login", "Login", "150px")}
+      {iphone_img("app_home", "Dashboard", "150px")}
+      {iphone_img("app_clients", "Clients", "150px")}
     </div>
     <div style="text-align:center;background:#f8fafc;border-radius:12px;padding:20px 8px;margin-top:8px;">
-      {iphone_frame("app_record", "Palm It", "120px")}
-      {iphone_frame("app_workspace", "Workspace", "120px")}
-      {iphone_frame("app_settings", "Settings", "120px")}
+      {iphone_img("app_record", "Palm It", "150px")}
+      {iphone_img("app_workspace", "Workspace", "150px")}
+      {iphone_img("app_settings", "Settings", "150px")}
     </div>
 
     <hr style="border:none;border-top:2px solid #e2e8f0;margin:28px 0;">

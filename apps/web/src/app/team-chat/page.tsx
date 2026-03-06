@@ -494,7 +494,7 @@ export default function TeamChatPage() {
                       onClick={() => setSelectedChannel(channel)}
                       className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
                         selectedChannel?.id === channel.id
-                          ? 'bg-primary-50 text-white'
+                          ? 'bg-primary-50 text-primary-700'
                           : 'text-slate-500 hover:bg-white hover:text-slate-900'
                       }`}
                     >
@@ -535,7 +535,7 @@ export default function TeamChatPage() {
                           }`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white truncate">{member.name}</p>
+                          <p className="text-sm text-slate-800 truncate">{member.name}</p>
                           <p className="text-xs text-slate-400 truncate">{member.role}</p>
                         </div>
                       </div>
@@ -579,7 +579,7 @@ export default function TeamChatPage() {
                   <button 
                     onClick={() => setEmailFolder('INBOX')}
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                      emailFolder === 'INBOX' ? 'bg-primary-50 text-white' : 'text-slate-500 hover:bg-white hover:text-slate-900'
+                      emailFolder === 'INBOX' ? 'bg-primary-50 text-primary-700' : 'text-slate-500 hover:bg-white hover:text-slate-900'
                     }`}
                   >
                     <Inbox className="w-4 h-4" />
@@ -593,7 +593,7 @@ export default function TeamChatPage() {
                   <button 
                     onClick={() => setEmailFolder('STARRED')}
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                      emailFolder === 'STARRED' ? 'bg-primary-50 text-white' : 'text-slate-500 hover:bg-white hover:text-slate-900'
+                      emailFolder === 'STARRED' ? 'bg-primary-50 text-primary-700' : 'text-slate-500 hover:bg-white hover:text-slate-900'
                     }`}
                   >
                     <Star className="w-4 h-4" />
@@ -602,7 +602,7 @@ export default function TeamChatPage() {
                   <button 
                     onClick={() => setEmailFolder('SENT')}
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                      emailFolder === 'SENT' ? 'bg-primary-50 text-white' : 'text-slate-500 hover:bg-white hover:text-slate-900'
+                      emailFolder === 'SENT' ? 'bg-primary-50 text-primary-700' : 'text-slate-500 hover:bg-white hover:text-slate-900'
                     }`}
                   >
                     <Send className="w-4 h-4" />
@@ -633,7 +633,7 @@ export default function TeamChatPage() {
                 {/* Chat Header */}
                 <div className="p-4 border-b border-slate-200 flex items-center gap-3">
                   <Hash className="w-5 h-5 text-slate-500" />
-                  <h2 className="font-medium text-white">{selectedChannel.name}</h2>
+                  <h2 className="font-medium text-slate-900">{selectedChannel.name}</h2>
                 </div>
 
                 {/* Messages */}
@@ -652,7 +652,7 @@ export default function TeamChatPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-white">{msg.user}</span>
+                            <span className="font-medium text-slate-900">{msg.user}</span>
                             <span className="text-xs text-slate-400">{msg.time}</span>
                           </div>
                           <p className="text-slate-600">{msg.text}</p>
@@ -674,7 +674,7 @@ export default function TeamChatPage() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
                       placeholder={`Message #${selectedChannel.name}`}
-                      className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                      className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
                     />
                     <button 
                       onClick={handleSendChatMessage}
@@ -704,7 +704,7 @@ export default function TeamChatPage() {
               <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Inbox className="w-5 h-5 text-slate-500" />
-                  <h2 className="font-medium text-white">
+                  <h2 className="font-medium text-slate-900">
                     {emailFolder === 'INBOX' ? 'Inbox' : emailFolder === 'SENT' ? 'Sent' : 'Starred'}
                   </h2>
                   <span className="text-sm text-slate-400">{displayEmails.length} messages</span>
@@ -720,7 +720,7 @@ export default function TeamChatPage() {
                   <div className="relative">
                     <button
                       onClick={() => setShowContactPicker(!showContactPicker)}
-                      className="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors text-sm"
+                      className="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors text-sm"
                     >
                       <UserCircle className="w-4 h-4" />
                       Quick Email
@@ -748,7 +748,7 @@ export default function TeamChatPage() {
                                 </span>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm text-white truncate">{contact.name}</p>
+                                <p className="text-sm text-slate-800 truncate">{contact.name}</p>
                                 <p className="text-xs text-slate-400 truncate">{contact.email}</p>
                               </div>
                             </button>
@@ -769,7 +769,7 @@ export default function TeamChatPage() {
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-white truncate">{contact.name}</p>
+                              <p className="text-sm text-slate-800 truncate">{contact.name}</p>
                               <p className="text-xs text-slate-400 truncate">{contact.email}</p>
                             </div>
                           </button>
@@ -838,7 +838,7 @@ export default function TeamChatPage() {
                         className="flex-1 min-w-0 text-left"
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`font-medium ${email.unread ? 'text-white' : 'text-slate-600'}`}>
+                          <span className={`font-medium ${email.unread ? 'text-slate-900' : 'text-slate-600'}`}>
                             {email.from}
                           </span>
                           {email.hasAttachment && <Paperclip className="w-3 h-3 text-slate-400" />}
@@ -880,7 +880,7 @@ export default function TeamChatPage() {
                     value={composeData.to}
                     onChange={(e) => setComposeData({ ...composeData, to: e.target.value })}
                     placeholder="To"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -889,7 +889,7 @@ export default function TeamChatPage() {
                     value={composeData.subject}
                     onChange={(e) => setComposeData({ ...composeData, subject: e.target.value })}
                     placeholder="Subject"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -898,7 +898,7 @@ export default function TeamChatPage() {
                     onChange={(e) => setComposeData({ ...composeData, body: e.target.value })}
                     placeholder="Write your message..."
                     rows={10}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-dark-500 focus:border-primary-500 focus:outline-none resize-none"
                   />
                 </div>
               </div>
@@ -909,7 +909,7 @@ export default function TeamChatPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowComposeModal(false)}
-                    className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                    className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
                   >
                     Cancel
                   </button>
@@ -945,7 +945,7 @@ export default function TeamChatPage() {
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-white">{selectedEmail.from || 'Unknown Sender'}</p>
+                    <p className="font-medium text-slate-900">{selectedEmail.from || 'Unknown Sender'}</p>
                     <p className="text-sm text-slate-500">{selectedEmail.fromEmail || ''}</p>
                   </div>
                   <span className="text-sm text-slate-400">{selectedEmail.date || ''}</span>
@@ -964,7 +964,7 @@ export default function TeamChatPage() {
                 </button>
                 <button 
                   onClick={() => handleForward(selectedEmail)}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
                 >
                   <Forward className="w-4 h-4" />
                   Forward
@@ -1003,14 +1003,14 @@ export default function TeamChatPage() {
                     value={newChannelName}
                     onChange={(e) => setNewChannelName(e.target.value)}
                     placeholder="e.g. general"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-dark-500 focus:border-primary-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-dark-500 focus:border-primary-500 focus:outline-none"
                   />
                 </div>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowAddChannelModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>

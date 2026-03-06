@@ -277,7 +277,7 @@ export default function VerificationStatusPage() {
             <div className="mt-6 p-4 bg-slate-50 rounded-lg flex items-center gap-3">
               <Clock className="w-5 h-5 text-slate-500" />
               <span className="text-slate-600">
-                Estimated review time: <strong className="text-white">{status.estimated_review_time}</strong>
+                Estimated review time: <strong className="text-slate-900">{status.estimated_review_time}</strong>
               </span>
             </div>
           )}
@@ -317,7 +317,7 @@ export default function VerificationStatusPage() {
                           <DocIcon className={`w-5 h-5 ${uploadedDoc ? 'text-emerald-600' : 'text-slate-500'}`} />
                         </div>
                         <div>
-                          <p className="font-medium text-white flex items-center gap-2">
+                          <p className="font-medium text-slate-900 flex items-center gap-2">
                             {docType.label}
                             {isRequired && !uploadedDoc && (
                               <span className="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">
@@ -343,7 +343,7 @@ export default function VerificationStatusPage() {
                         disabled={uploading === docType.value}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                           uploadedDoc
-                            ? 'bg-slate-100 hover:bg-slate-200 text-white'
+                            ? 'bg-slate-100 hover:bg-slate-200 text-slate-800'
                             : 'bg-primary-500 hover:bg-primary-600 text-white'
                         }`}
                       >
@@ -372,9 +372,9 @@ export default function VerificationStatusPage() {
 
             <div className="mt-6 p-4 bg-slate-50 rounded-lg">
               <p className="text-sm text-slate-500">
-                <strong className="text-white">Accepted formats:</strong> PDF, JPG, PNG, DOC, DOCX
+                <strong className="text-slate-900">Accepted formats:</strong> PDF, JPG, PNG, DOC, DOCX
                 <br />
-                <strong className="text-white">Max file size:</strong> 10MB per document
+                <strong className="text-slate-900">Max file size:</strong> 10MB per document
               </p>
             </div>
           </div>

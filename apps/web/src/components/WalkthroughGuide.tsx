@@ -349,7 +349,7 @@ export default function WalkthroughGuide() {
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cur.iconBg}`}>
                 <Icon className={`w-5 h-5 ${cur.iconColor}`} />
               </div>
-              <h2 className={`text-base font-bold ${isLast ? 'text-emerald-600' : 'text-white'}`}>{cur.title}</h2>
+              <h2 className={`text-base font-bold ${isLast ? 'text-emerald-600' : 'text-slate-900'}`}>{cur.title}</h2>
             </div>
 
             <p className="text-slate-600 text-sm leading-relaxed mb-2.5">

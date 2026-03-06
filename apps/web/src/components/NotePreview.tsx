@@ -116,19 +116,19 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
       <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-slate-100 rounded-lg">
         <div>
           <p className="text-xs text-slate-500 uppercase">Client</p>
-          <p className="font-medium text-white">{visitInfo.client_name || 'N/A'}</p>
+          <p className="font-medium text-slate-800">{visitInfo.client_name || 'N/A'}</p>
         </div>
         <div>
           <p className="text-xs text-slate-500 uppercase">Caregiver</p>
-          <p className="font-medium text-white">{visitInfo.caregiver_name || 'N/A'}</p>
+          <p className="font-medium text-slate-800">{visitInfo.caregiver_name || 'N/A'}</p>
         </div>
         <div>
           <p className="text-xs text-slate-500 uppercase">Date</p>
-          <p className="font-medium text-white">{visitInfo.date || 'N/A'}</p>
+          <p className="font-medium text-slate-800">{visitInfo.date || 'N/A'}</p>
         </div>
         <div>
           <p className="text-xs text-slate-500 uppercase">Duration</p>
-          <p className="font-medium text-white">{visitInfo.duration_minutes || 0} minutes</p>
+          <p className="font-medium text-slate-800">{visitInfo.duration_minutes || 0} minutes</p>
         </div>
       </div>
 
@@ -185,7 +185,7 @@ export default function NotePreview({ note, visitId, onUpdate }: NotePreviewProp
               value={narrative}
               onChange={(e) => setNarrative(e.target.value)}
               rows={8}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             <div className="flex justify-end gap-2">
               <button

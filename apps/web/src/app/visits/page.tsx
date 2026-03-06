@@ -484,7 +484,7 @@ export default function VisitsPage() {
                   <Sparkles className={`w-5 h-5 ${usage.upgrade_required ? 'text-amber-600' : 'text-primary-400'}`} />
                 </div>
                 <div>
-                  <p className={`font-medium ${usage.upgrade_required ? 'text-amber-600' : 'text-white'}`}>
+                  <p className={`font-medium ${usage.upgrade_required ? 'text-amber-600' : 'text-slate-800'}`}>
                     {usage.upgrade_required 
                       ? 'Free Plan Limit Reached' 
                       : `Free Plan — ${usage.total_assessments}/${usage.max_allowed} assessments used`

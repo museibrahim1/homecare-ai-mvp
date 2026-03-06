@@ -284,7 +284,7 @@ export default function IntegrationsPage() {
                     value={mondayApiKey}
                     onChange={(e) => setMondayApiKey(e.target.value)}
                     placeholder="Enter your Monday.com API key"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-primary-500"
                   />
                   <p className="text-slate-400 text-xs mt-1">
                     Find your API key in Monday.com → Profile → Developer → API
@@ -298,7 +298,7 @@ export default function IntegrationsPage() {
                     value={mondayBoardId}
                     onChange={(e) => setMondayBoardId(e.target.value)}
                     placeholder="Enter the board ID (e.g., 1234567890)"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-primary-500"
                   />
                   <p className="text-slate-400 text-xs mt-1">
                     Find the board ID in the URL when viewing your board

@@ -86,7 +86,7 @@ export default function ActivityPage() {
             <input
               type="text"
               placeholder="Search activity..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
           <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
@@ -112,7 +112,7 @@ export default function ActivityPage() {
                       </span>
                     </div>
                     <div className="flex-1">
-                      <p className="text-white">
+                      <p className="text-slate-800">
                         <span className="font-medium">{activity.user}</span>
                         <span className="text-slate-500"> {activity.action} </span>
                         <span className="font-medium text-primary-400">{activity.target}</span>

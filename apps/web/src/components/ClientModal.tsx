@@ -366,7 +366,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
 
               <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <p className="text-sm text-slate-400">
-                  <strong className="text-white">Note:</strong> Emergency contacts will be notified in case of medical emergencies or if the client cannot be reached for scheduled visits.
+                  <strong className="text-slate-900">Note:</strong> Emergency contacts will be notified in case of medical emergencies or if the client cannot be reached for scheduled visits.
                 </p>
               </div>
             </div>
@@ -641,7 +641,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                         <p className="text-sm text-slate-400 mb-2">Services</p>
                         <div className="space-y-2">
                           {selectedContract.services.map((service: any, idx: number) => (
-                            <div key={idx} className="flex items-center gap-2 text-white">
+                            <div key={idx} className="flex items-center gap-2 text-slate-800">
                               <span className="w-6 h-6 bg-primary-50 rounded-full flex items-center justify-center text-xs text-primary-600">
                                 {idx + 1}
                               </span>
@@ -671,7 +671,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                           {selectedContract.schedule.frequency && (
                             <div>
                               <span className="text-slate-500">Frequency:</span>{' '}
-                              <span className="text-white">{selectedContract.schedule.frequency}</span>
+                              <span className="text-slate-800">{selectedContract.schedule.frequency}</span>
                             </div>
                           )}
                         </div>
@@ -701,7 +701,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-1">
-                            <h4 className="font-medium text-white">
+                            <h4 className="font-medium text-slate-900">
                               {contract.title || `Contract #${contract.contract_number || contract.id.slice(0, 8)}`}
                             </h4>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${

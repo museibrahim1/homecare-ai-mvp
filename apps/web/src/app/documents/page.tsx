@@ -479,19 +479,19 @@ export default function DocumentsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search documents or clients..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
           <div className="flex bg-white border border-slate-200 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2.5 ${viewMode === 'grid' ? 'bg-slate-50 text-white' : 'text-slate-500'}`}
+              className={`p-2.5 ${viewMode === 'grid' ? 'bg-slate-50 text-slate-800' : 'text-slate-500'}`}
             >
               <Grid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2.5 ${viewMode === 'list' ? 'bg-slate-50 text-white' : 'text-slate-500'}`}
+              className={`p-2.5 ${viewMode === 'list' ? 'bg-slate-50 text-slate-800' : 'text-slate-500'}`}
             >
               <List className="w-5 h-5" />
             </button>
@@ -586,7 +586,7 @@ export default function DocumentsPage() {
                                 'text-slate-500'
                               }`} />
                             </div>
-                            <span className="font-medium text-white">{file.name}</span>
+                            <span className="font-medium text-slate-900">{file.name}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -761,16 +761,16 @@ export default function DocumentsPage() {
                 {selectedFile.client_name && (
                   <div className="flex justify-between py-2 border-b border-slate-200">
                     <span className="text-slate-500">Client</span>
-                    <span className="text-white">{selectedFile.client_name}</span>
+                    <span className="text-slate-800">{selectedFile.client_name}</span>
                   </div>
                 )}
                 <div className="flex justify-between py-2 border-b border-slate-200">
                   <span className="text-slate-500">Folder</span>
-                  <span className="text-white">{selectedFile.folder}</span>
+                  <span className="text-slate-800">{selectedFile.folder}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-slate-200">
                   <span className="text-slate-500">Created</span>
-                  <span className="text-white">{formatDate(selectedFile.created_at)}</span>
+                  <span className="text-slate-800">{formatDate(selectedFile.created_at)}</span>
                 </div>
                 {selectedFile.visit_id && (
                   <div className="flex justify-between py-2 border-b border-slate-200">
@@ -797,7 +797,7 @@ export default function DocumentsPage() {
                 {selectedFile.visit_id && (
                   <a 
                     href={`/visits/${selectedFile.visit_id}`}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors"
                   >
                     <Eye className="w-5 h-5" />
                     View Visit

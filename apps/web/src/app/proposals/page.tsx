@@ -240,7 +240,7 @@ export default function ProposalsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by client name, title, or contract number..."
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:border-primary-500 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
               />
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function ProposalsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-white focus:border-primary-500 focus:outline-none"
+              className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:border-primary-500 focus:outline-none"
             >
               <option value="all">All Status</option>
               <option value="draft">Draft</option>
@@ -324,7 +324,7 @@ export default function ProposalsPage() {
               </Link>
               <Link
                 href="/visits/new"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors border border-slate-200"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors border border-slate-200"
               >
                 <FileText className="w-5 h-5" />
                 New from Pipeline
@@ -382,7 +382,7 @@ export default function ProposalsPage() {
                   <div className="flex items-center gap-3 text-sm">
                     <Calendar className="w-4 h-4 text-purple-600" />
                     <span className="text-slate-500">Updated:</span>
-                    <span className="text-white">
+                    <span className="text-slate-900">
                       {formatDate(proposal.updated_at)}
                     </span>
                   </div>
@@ -390,7 +390,7 @@ export default function ProposalsPage() {
                     <div className="flex items-start gap-3 text-sm">
                       <FileText className="w-4 h-4 text-orange-600 mt-0.5" />
                       <span className="text-slate-500">Services:</span>
-                      <span className="text-white flex-1 line-clamp-2">
+                      <span className="text-slate-900 flex-1 line-clamp-2">
                         {proposal.services.map(s => s.name || s).join(', ')}
                       </span>
                     </div>
@@ -401,7 +401,7 @@ export default function ProposalsPage() {
                 <div className="p-4 bg-slate-50/50 border-t border-slate-200 flex gap-2">
                   <button
                     onClick={() => handleViewProposal(proposal)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-white rounded-lg transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 rounded-lg transition-colors text-sm"
                   >
                     <Eye className="w-4 h-4" />
                     View

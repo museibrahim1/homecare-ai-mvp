@@ -756,7 +756,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
     return (
       <div className="p-8 text-center text-slate-500">
         <RefreshCw className="w-12 h-12 mx-auto mb-4 animate-spin text-primary-400" />
-        <p className="text-white">Regenerating contract...</p>
+        <p className="text-slate-800">Regenerating contract...</p>
         <p className="text-sm mt-2">This may take a moment</p>
       </div>
     );
@@ -1722,7 +1722,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                       value={emailForm.recipient_email}
                       onChange={(e) => setEmailForm({ ...emailForm, recipient_email: e.target.value })}
                       placeholder="client@email.com"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
@@ -1733,7 +1733,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                       value={emailForm.recipient_name}
                       onChange={(e) => setEmailForm({ ...emailForm, recipient_name: e.target.value })}
                       placeholder="John Smith"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
@@ -1744,7 +1744,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                       value={emailForm.cc_email}
                       onChange={(e) => setEmailForm({ ...emailForm, cc_email: e.target.value })}
                       placeholder="copy@email.com"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 
@@ -1755,7 +1755,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
                       value={emailForm.subject}
                       onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
                       placeholder="Service Agreement"
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                     />
                   </div>
 

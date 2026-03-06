@@ -129,7 +129,7 @@ function StatusContent() {
                 <p className="text-slate-600">{error}</p>
                 <button
                   onClick={fetchStatus}
-                  className="mt-4 px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
+                  className="mt-4 px-4 py-2 bg-slate-50 text-slate-800 rounded-lg hover:bg-slate-100 transition"
                 >
                   Try Again
                 </button>
@@ -178,7 +178,7 @@ function StatusContent() {
                     ) : (
                       <Clock className="w-5 h-5 text-slate-500" />
                     )}
-                    <span className={status.sos_verified ? 'text-white' : 'text-slate-500'}>
+                    <span className={status.sos_verified ? 'text-slate-900' : 'text-slate-500'}>
                       State Registration Verified
                     </span>
                   </div>
@@ -189,7 +189,7 @@ function StatusContent() {
                     ) : (
                       <Clock className="w-5 h-5 text-slate-500" />
                     )}
-                    <span className={status.documents_submitted > 0 ? 'text-white' : 'text-slate-500'}>
+                    <span className={status.documents_submitted > 0 ? 'text-slate-900' : 'text-slate-500'}>
                       Documents Uploaded ({status.documents_submitted} / 3)
                     </span>
                   </div>
@@ -200,7 +200,7 @@ function StatusContent() {
                     ) : (
                       <Clock className="w-5 h-5 text-slate-500" />
                     )}
-                    <span className={status.verification_status === 'approved' ? 'text-white' : 'text-slate-500'}>
+                    <span className={status.verification_status === 'approved' ? 'text-slate-900' : 'text-slate-500'}>
                       Admin Review Complete
                     </span>
                   </div>
@@ -233,7 +233,7 @@ function StatusContent() {
                 <div className="flex gap-4 pt-4">
                   <button
                     onClick={fetchStatus}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-white rounded-lg hover:bg-slate-100 transition"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-800 rounded-lg hover:bg-slate-100 transition"
                   >
                     <RefreshCw className="w-4 h-4" />
                     Refresh Status

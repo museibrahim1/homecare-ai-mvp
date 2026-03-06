@@ -268,7 +268,7 @@ export default function BillablesEditor({ items, visitId, onUpdate }: BillablesE
                         {/* Service Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <span className="font-medium text-white">{config.label}</span>
+                            <span className="font-medium text-slate-900">{config.label}</span>
                             {item.is_approved && (
                               <Check className="w-4 h-4 text-emerald-600" />
                             )}
