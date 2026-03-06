@@ -544,6 +544,76 @@ html {
   50% { box-shadow: 0 0 16px rgba(13, 148, 136, 0.3); }
 }
 
+/* ── Landing Orb Animations ── */
+@keyframes orbMorph {
+  0%   { border-radius: 42% 58% 56% 44% / 48% 44% 56% 52%; }
+  20%  { border-radius: 54% 46% 38% 62% / 56% 62% 38% 44%; }
+  40%  { border-radius: 46% 54% 62% 38% / 38% 52% 48% 62%; }
+  60%  { border-radius: 58% 42% 44% 56% / 62% 38% 62% 38%; }
+  80%  { border-radius: 38% 62% 56% 44% / 44% 56% 44% 56%; }
+  100% { border-radius: 42% 58% 56% 44% / 48% 44% 56% 52%; }
+}
+
+@keyframes orbRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes orbGlow {
+  0%, 100% {
+    box-shadow: 0 0 40px rgba(13, 148, 136, 0.3),
+                0 0 80px rgba(8, 145, 178, 0.15),
+                inset 0 0 30px rgba(45, 212, 191, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(13, 148, 136, 0.5),
+                0 0 120px rgba(8, 145, 178, 0.25),
+                inset 0 0 50px rgba(45, 212, 191, 0.2);
+  }
+}
+
+@keyframes orbGlowIdle {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(13, 148, 136, 0.2),
+                0 0 60px rgba(8, 145, 178, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(13, 148, 136, 0.35),
+                0 0 90px rgba(8, 145, 178, 0.15);
+  }
+}
+
+@keyframes orbBar {
+  0%, 100% { transform: scaleY(0.3); }
+  25%      { transform: scaleY(0.8); }
+  50%      { transform: scaleY(1); }
+  75%      { transform: scaleY(0.6); }
+}
+
+@keyframes orbScaleIn {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes transcriptFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(6px); }
+}
+
+.animate-orb-morph    { animation: orbMorph 8s ease-in-out infinite; }
+.animate-orb-rotate   { animation: orbRotate 20s linear infinite; }
+.animate-orb-glow     { animation: orbGlow 3s ease-in-out infinite; }
+.animate-orb-glow-idle { animation: orbGlowIdle 4s ease-in-out infinite; }
+.animate-orb-bar      { animation: orbBar 0.8s ease-in-out infinite; }
+.animate-orb-scale-in { animation: orbScaleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-transcript-fade { animation: transcriptFade 0.4s ease-out both; }
+.animate-scroll-bounce { animation: scrollBounce 2s ease-in-out infinite; }
+
 .animate-fade-in { animation: fade-in 0.3s ease-out both; }
 .animate-fade-in-up { animation: fade-in-up 0.4s ease-out both; }
 .animate-fade-in-down { animation: fade-in-down 0.3s ease-out both; }

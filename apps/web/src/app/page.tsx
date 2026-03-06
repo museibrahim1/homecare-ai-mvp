@@ -64,7 +64,7 @@ const FEATURES_TABS = [
         icon: Brain,
         title: 'Smart Contract Generation',
         description: 'AI generates a complete assessment, care plan, and service agreement — in seconds, not hours. Every client gets a proposal-ready contract before you leave the chair.',
-        color: 'from-purple-500 to-pink-500',
+        color: 'from-teal-500 to-cyan-500',
       },
       {
         icon: Zap,
@@ -100,7 +100,7 @@ const FEATURES_TABS = [
         icon: Calendar,
         title: 'Scheduling & Visits',
         description: 'Schedule caregiver visits, track clock-in/out, and manage care plans. Caregivers get a mobile companion app for real-time updates.',
-        color: 'from-purple-500 to-violet-500',
+        color: 'from-cyan-500 to-blue-500',
       },
       {
         icon: Settings,
@@ -124,7 +124,7 @@ const FEATURES_TABS = [
         icon: PieChart,
         title: 'Revenue Analytics',
         description: 'Real-time dashboards showing revenue, client hours, caregiver utilization, and pipeline value. Make data-driven decisions with confidence.',
-        color: 'from-orange-500 to-red-500',
+        color: 'from-orange-500 to-amber-500',
       },
       {
         icon: TrendingUp,
@@ -136,7 +136,7 @@ const FEATURES_TABS = [
         icon: Shield,
         title: 'HIPAA-Compliant Security',
         description: '256-bit encryption, role-based access, audit trails, and secure document storage. Your data is protected to the highest healthcare standards.',
-        color: 'from-red-500 to-pink-500',
+        color: 'from-amber-500 to-orange-500',
       },
     ],
   },
@@ -148,13 +148,13 @@ const FEATURES_TABS = [
         icon: Smartphone,
         title: 'Caregiver Mobile App',
         description: 'Caregivers clock in/out via GPS, log ADLs, view schedules, and receive real-time updates — all from their phone. No training required.',
-        color: 'from-violet-500 to-purple-500',
+        color: 'from-teal-500 to-emerald-500',
       },
       {
         icon: HeartPulse,
         title: 'ADL & Care Logging',
         description: 'Simple tap-to-log interface for Activities of Daily Living. Track bathing, dressing, medication reminders, meals, and more per visit.',
-        color: 'from-pink-500 to-rose-500',
+        color: 'from-emerald-500 to-teal-500',
       },
       {
         icon: Globe,
@@ -240,7 +240,7 @@ const SOLUTIONS = [
     description: 'Scale your team without scaling your admin work. Improve caregiver coordination, enhance client satisfaction, and close more clients — faster.',
     features: ['Everything in Small', 'Custom templates & forms', 'Advanced reporting', 'Multi-user access', 'Priority support'],
     icon: TrendingUp,
-    gradient: 'from-purple-500 to-pink-500',
+    gradient: 'from-teal-500 to-cyan-500',
   },
   {
     size: 'Enterprise',
@@ -248,7 +248,7 @@ const SOLUTIONS = [
     description: 'Manage multiple locations, complex billing, and large caregiver teams — all from one AI-native platform built specifically for home care.',
     features: ['Everything in Medium', 'Multi-location management', 'Custom integrations', 'Dedicated account manager', 'SLA guarantee'],
     icon: Globe,
-    gradient: 'from-orange-500 to-red-500',
+    gradient: 'from-orange-500 to-amber-500',
   },
 ];
 
@@ -409,9 +409,9 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                 </div>
                 <div className="space-y-3">
                   {[
-                    { initial: 'C', color: 'purple', speaker: 'Caregiver (00:00)', text: 'Good morning Mrs. Johnson, I\'m here to do your care assessment today.' },
+                    { initial: 'C', color: 'teal', speaker: 'Caregiver (00:00)', text: 'Good morning Mrs. Johnson, I\'m here to do your care assessment today.' },
                     { initial: 'M', color: 'green', speaker: 'Mrs. Johnson (00:05)', text: 'Hello dear, thank you for coming. I\'ve been having trouble with my daily activities.' },
-                    { initial: 'C', color: 'purple', speaker: 'Caregiver (00:12)', text: 'I understand. Let\'s go through what kind of help you need...' },
+                    { initial: 'C', color: 'teal', speaker: 'Caregiver (00:12)', text: 'I understand. Let\'s go through what kind of help you need...' },
                   ].map((msg, i) => (
                     <div key={i} className="flex gap-3 animate-slideIn" style={{ animationDelay: `${i * 200}ms` }}>
                       <div className={`w-8 h-8 bg-${msg.color}-500 rounded-full flex items-center justify-center text-white text-sm font-bold`}>{msg.initial}</div>
@@ -755,6 +755,280 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+/* ───────────────────── TRANSCRIPT SIMULATION DATA ───────────────────── */
+
+const MEDICAL_KEYWORDS = new Set([
+  'diabetes', 'medication', 'insulin', 'bathing', 'dressing', 'meals',
+  'blood', 'pressure', 'mobility', 'walker', 'wheelchair', 'physical',
+  'therapy', 'ADLs', 'careplan', 'assessment', 'vitals', 'dosage',
+  'morning', 'evening', 'twice', 'daily', 'prescription', 'metformin',
+  'hypertension', 'arthritis', 'fall', 'risk', 'glucose', 'monitoring',
+]);
+
+interface TranscriptSegment {
+  speaker: 'nurse' | 'client';
+  label: string;
+  words: string[];
+}
+
+const TRANSCRIPT_SEGMENTS: TranscriptSegment[] = [
+  {
+    speaker: 'nurse',
+    label: 'Nurse Sarah',
+    words: 'Good morning Mrs. Johnson, I\'m here to complete your care assessment today. Can you tell me about your daily routine?'.split(' '),
+  },
+  {
+    speaker: 'client',
+    label: 'Mrs. Johnson',
+    words: 'Well, I need help with bathing and dressing most mornings. My arthritis makes it difficult to manage on my own.'.split(' '),
+  },
+  {
+    speaker: 'nurse',
+    label: 'Nurse Sarah',
+    words: 'I understand. And how about your medication — are you currently taking anything for the diabetes and hypertension?'.split(' '),
+  },
+  {
+    speaker: 'client',
+    label: 'Mrs. Johnson',
+    words: 'Yes, I take metformin twice daily and my blood pressure medication each morning. I sometimes forget the evening dosage.'.split(' '),
+  },
+  {
+    speaker: 'nurse',
+    label: 'Nurse Sarah',
+    words: 'We\'ll set up medication reminders for you. Do you use a walker or any mobility aids around the house?'.split(' '),
+  },
+  {
+    speaker: 'client',
+    label: 'Mrs. Johnson',
+    words: 'I use a walker when moving between rooms. My physical therapy sessions have been helping with my mobility though.'.split(' '),
+  },
+];
+
+/* ───────────────────── HERO ORB + TRANSCRIPTION ───────────────────── */
+
+function HeroOrb() {
+  const [isRecording, setIsRecording] = useState(false);
+  const [visibleWords, setVisibleWords] = useState(0);
+  const [visibleSegments, setVisibleSegments] = useState(0);
+  const transcriptRef = useRef<HTMLDivElement>(null);
+
+  const totalWords = TRANSCRIPT_SEGMENTS.reduce((sum, seg) => sum + seg.words.length, 0);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsRecording(true), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!isRecording) return;
+    const t = setTimeout(() => {
+      const interval = setInterval(() => {
+        setVisibleWords(prev => {
+          if (prev >= totalWords) { clearInterval(interval); return prev; }
+          return prev + 1;
+        });
+      }, 120);
+      return () => clearInterval(interval);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [isRecording, totalWords]);
+
+  useEffect(() => {
+    let wordCount = 0;
+    for (let i = 0; i < TRANSCRIPT_SEGMENTS.length; i++) {
+      if (visibleWords > wordCount) {
+        setVisibleSegments(i + 1);
+      }
+      wordCount += TRANSCRIPT_SEGMENTS[i].words.length;
+    }
+  }, [visibleWords]);
+
+  useEffect(() => {
+    if (transcriptRef.current) {
+      transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
+    }
+  }, [visibleWords]);
+
+  let globalWordIndex = 0;
+
+  return (
+    <section className="min-h-screen flex flex-col items-center justify-center relative px-6 pt-24 pb-8 overflow-hidden">
+      {/* Background radial glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-primary-500/10 via-accent-cyan/5 to-transparent rounded-full blur-3xl" />
+      </div>
+
+      {/* Headline */}
+      <div className="text-center mb-8 relative z-10 animate-fade-in-up">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+          Record It. Transcribe It.
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan">Contract It.</span>
+        </h1>
+        <p className="text-lg md:text-xl text-dark-300 mt-4 max-w-xl mx-auto">
+          Watch a live assessment become a signed contract — automatically.
+        </p>
+      </div>
+
+      {/* Orb */}
+      <div className="relative flex items-center justify-center mb-6 animate-orb-scale-in" style={{ animationDelay: '0.3s' }}>
+        {/* Outer ring 3 */}
+        <div className="absolute w-[260px] h-[260px] md:w-[300px] md:h-[300px] animate-orb-rotate" style={{ animationDuration: '25s' }}>
+          <div className="w-full h-full rounded-full" style={{
+            background: 'conic-gradient(from 0deg, #0d9488, #0891b2, #2dd4bf, #0d9488)',
+            mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px))',
+            WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px))',
+            opacity: isRecording ? 0.6 : 0.25,
+            transition: 'opacity 1s ease',
+          }} />
+        </div>
+        {/* Outer ring 2 */}
+        <div className="absolute w-[220px] h-[220px] md:w-[260px] md:h-[260px] animate-orb-rotate" style={{ animationDuration: '18s', animationDirection: 'reverse' }}>
+          <div className="w-full h-full rounded-full" style={{
+            background: 'conic-gradient(from 120deg, #2dd4bf, #0d9488, #0891b2, #2dd4bf)',
+            mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px))',
+            WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 2px))',
+            opacity: isRecording ? 0.5 : 0.2,
+            transition: 'opacity 1s ease',
+          }} />
+        </div>
+        {/* Inner ring */}
+        <div className="absolute w-[185px] h-[185px] md:w-[220px] md:h-[220px] animate-orb-rotate" style={{ animationDuration: '12s' }}>
+          <div className="w-full h-full rounded-full" style={{
+            background: 'conic-gradient(from 240deg, #0891b2, #2dd4bf, #0d9488, #0891b2)',
+            mask: 'radial-gradient(farthest-side, transparent calc(100% - 1.5px), black calc(100% - 1.5px))',
+            WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 1.5px), black calc(100% - 1.5px))',
+            opacity: isRecording ? 0.4 : 0.15,
+            transition: 'opacity 1s ease',
+          }} />
+        </div>
+
+        {/* Main orb body */}
+        <div
+          className={`w-[150px] h-[150px] md:w-[180px] md:h-[180px] flex items-center justify-center animate-orb-morph ${isRecording ? 'animate-orb-glow' : 'animate-orb-glow-idle'}`}
+          style={{
+            background: 'conic-gradient(from 0deg, #0d9488, #0891b2, #2dd4bf, #0d9488)',
+            transition: 'all 1s ease',
+          }}
+        >
+          {/* Highlight overlay */}
+          <div className="absolute inset-0 animate-orb-morph" style={{
+            background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 60%)',
+            borderRadius: 'inherit',
+          }} />
+
+          {/* Mic icon or waveform bars */}
+          {!isRecording ? (
+            <Mic className="w-12 h-12 md:w-14 md:h-14 text-white/90 relative z-10" />
+          ) : (
+            <div className="flex items-center gap-1 relative z-10">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-1.5 md:w-2 bg-white/90 rounded-full animate-orb-bar"
+                  style={{
+                    height: '32px',
+                    animationDelay: `${i * 150}ms`,
+                    animationDuration: `${0.6 + Math.random() * 0.4}s`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Status label */}
+      <div className="flex items-center gap-2 mb-6 relative z-10 animate-fade-in" style={{ animationDelay: '1s' }}>
+        {isRecording ? (
+          <>
+            <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+            <span className="text-sm text-dark-300 font-medium">Recording Assessment...</span>
+          </>
+        ) : (
+          <>
+            <div className="w-2.5 h-2.5 bg-primary-500 rounded-full" />
+            <span className="text-sm text-dark-400 font-medium">Tap to start assessment</span>
+          </>
+        )}
+      </div>
+
+      {/* Transcription window */}
+      <div className="w-full max-w-lg relative z-10 animate-fade-in-up" style={{ animationDelay: '1.5s' }}>
+        <div className="bg-dark-800/80 backdrop-blur-sm border border-dark-600/50 rounded-2xl p-5 md:p-6 max-h-[220px] overflow-y-auto scrollbar-hide" ref={transcriptRef}>
+          {visibleSegments === 0 && isRecording && (
+            <div className="flex items-center gap-2 text-dark-400 text-sm">
+              <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              <span>Listening...</span>
+            </div>
+          )}
+          <div className="space-y-4">
+            {TRANSCRIPT_SEGMENTS.slice(0, visibleSegments).map((seg, segIdx) => {
+              const segStartIdx = TRANSCRIPT_SEGMENTS.slice(0, segIdx).reduce((s, x) => s + x.words.length, 0);
+              const wordsToShow = Math.max(0, visibleWords - segStartIdx);
+              globalWordIndex = segStartIdx;
+
+              return (
+                <div key={segIdx} className="animate-transcript-fade">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={`w-2 h-2 rounded-full ${seg.speaker === 'nurse' ? 'bg-primary-500' : 'bg-cyan-500'}`} />
+                    <span className="text-xs font-semibold text-dark-400">{seg.label}</span>
+                  </div>
+                  <p className="text-sm md:text-base leading-relaxed pl-4">
+                    {seg.words.slice(0, wordsToShow).map((word, wIdx) => {
+                      const clean = word.replace(/[.,!?'"]/g, '').toLowerCase();
+                      const isMedical = MEDICAL_KEYWORDS.has(clean);
+                      return (
+                        <span key={wIdx} className={isMedical ? 'text-primary-400 font-medium' : 'text-dark-200'}>
+                          {word}{' '}
+                        </span>
+                      );
+                    })}
+                    {wordsToShow < seg.words.length && wordsToShow > 0 && (
+                      <span className="inline-block w-0.5 h-4 bg-primary-400 animate-pulse align-middle ml-0.5" />
+                    )}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* CTAs */}
+      <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10 animate-fade-in-up" style={{ animationDelay: '2s' }}>
+        <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
+          Palm It — Get Started <ArrowRight className="w-5 h-5" />
+        </a>
+        <a href="#features" className="btn-secondary flex items-center gap-2 py-4 px-8 text-lg">
+          See How It Works <ChevronDown className="w-5 h-5" />
+        </a>
+      </div>
+
+      {/* Trust badges */}
+      <div className="flex items-center gap-4 mt-6 relative z-10 animate-fade-in" style={{ animationDelay: '2.5s' }}>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
+          <Shield className="w-3.5 h-3.5 text-green-400" />
+          <span className="text-xs text-green-400 font-medium">HIPAA Compliant</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
+          <Lock className="w-3.5 h-3.5 text-blue-400" />
+          <span className="text-xs text-blue-400 font-medium">256-bit Encrypted</span>
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-scroll-bounce">
+        <ChevronDown className="w-6 h-6 text-dark-500" />
+      </div>
+    </section>
+  );
+}
+
 /* ───────────────────── LANDING PAGE ───────────────────── */
 
 export default function LandingPage() {
@@ -879,72 +1153,8 @@ export default function LandingPage() {
       </nav>
 
       <main>
-      {/* ── HERO ── */}
-      <section className="pt-32 pb-16 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full mb-6">
-                <Zap className="w-4 h-4 text-primary-400" />
-                <span className="text-sm text-primary-400">Where Care Meets Intelligence</span>
-              </div>
-              
-              <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-                Record It. Transcribe It.
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan"> Contract It.</span>
-              </h1>
-              
-              <p className="text-xl text-dark-300 mb-8 leading-relaxed">
-                PalmCare AI turns care assessments into signed contracts — automatically. 
-                One tap. AI handles the rest. Never lose a client to paperwork again.
-              </p>
-              
-              <div className="flex flex-wrap gap-4">
-                <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Palm It — Get Started<ArrowRight className="w-5 h-5" /></a>
-                <button onClick={() => setDemoOpen(true)} className="btn-secondary flex items-center gap-2 py-4 px-8 text-lg"><Play className="w-5 h-5" />Watch Demo</button>
-              </div>
-
-              <div className="flex items-center gap-4 mt-10">
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full">
-                  <Shield className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-green-400 font-medium">HIPAA Compliant</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full">
-                  <Lock className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm text-blue-400 font-medium">256-bit Encrypted</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-accent-cyan/20 blur-3xl" />
-              <div className="relative bg-dark-800 border border-dark-600 rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-3 h-3 rounded-full bg-red-500" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                  <div className="w-3 h-3 rounded-full bg-green-500" />
-                </div>
-                <div className="space-y-4">
-                  <div className="bg-dark-700 rounded-xl p-4">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-full flex items-center justify-center"><Mic className="w-5 h-5 text-white" /></div>
-                      <div><p className="text-white font-medium">Recording Assessment...</p><p className="text-sm text-dark-400">Client: Margaret Johnson</p></div>
-                    </div>
-                    <div className="flex items-center gap-1 h-8">
-                      {Array.from({ length: 30 }).map((_, i) => <div key={i} className="w-1 bg-primary-500 rounded-full animate-pulse" style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 50}ms` }} />)}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-dark-700 rounded-xl p-3"><p className="text-2xl font-bold text-white">24</p><p className="text-xs text-dark-400">Clients</p></div>
-                    <div className="bg-dark-700 rounded-xl p-3"><p className="text-2xl font-bold text-green-400">12</p><p className="text-xs text-dark-400">Contracts</p></div>
-                    <div className="bg-dark-700 rounded-xl p-3"><p className="text-2xl font-bold text-cyan-400">$8.2k</p><p className="text-xs text-dark-400">This Month</p></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── HERO: Immersive Orb + Live Transcription ── */}
+      <HeroOrb />
 
       {/* ── BOOK DEMO ── */}
       <BookDemoSection />
