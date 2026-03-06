@@ -13,14 +13,12 @@ struct SettingsView: View {
     @State private var showPasswordChange = false
     @State private var showTerms = false
     @State private var showEditProfile = false
-    @State private var showLanguagePicker = false
     @AppStorage("googleCalendarConnected") private var googleCalConnected = false
 
     @AppStorage("useFaceID") private var useFaceID = false
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
     @AppStorage("backgroundRecording") private var backgroundRecording = false
     @AppStorage("isDarkMode") private var isDarkMode = false
-    @AppStorage("appLanguage") private var appLanguage = "English"
 
     var body: some View {
         NavigationStack {
@@ -56,9 +54,6 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showEditProfile) {
                 EditProfileSheet(user: user).environmentObject(api)
-            }
-            .sheet(isPresented: $showLanguagePicker) {
-                LanguagePickerSheet(selectedLanguage: $appLanguage)
             }
             .task { await loadData() }
             .preferredColorScheme(isDarkMode ? .dark : .light)
@@ -150,13 +145,6 @@ struct SettingsView: View {
                 title: "Dark mode",
                 isOn: $isDarkMode
             )
-
-            SettingsDivider()
-
-            Button { showLanguagePicker = true } label: {
-                SettingsNavRow(icon: "globe", iconColor: .palmBlue, title: "Language", detail: appLanguage)
-            }
-            .accessibilityLabel("Language, \(appLanguage)")
         }
     }
 
@@ -899,66 +887,6 @@ struct EditProfileSheet: View {
                 await MainActor.run {
                     isLoading = false
                     errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Language Picker Sheet
-
-struct LanguagePickerSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @Binding var selectedLanguage: String
-
-    private let languages: [(code: String, name: String, flag: String)] = [
-        ("en", "English", "🇺🇸"),
-        ("es", "Español", "🇪🇸"),
-        ("fr", "Français", "🇫🇷"),
-        ("pt", "Português", "🇧🇷"),
-        ("zh", "中文", "🇨🇳"),
-        ("ko", "한국어", "🇰🇷"),
-        ("vi", "Tiếng Việt", "🇻🇳"),
-        ("tl", "Tagalog", "🇵🇭"),
-        ("ht", "Kreyòl Ayisyen", "🇭🇹"),
-        ("ar", "العربية", "🇸🇦"),
-        ("ru", "Русский", "🇷🇺"),
-        ("hi", "हिन्दी", "🇮🇳"),
-    ]
-
-    var body: some View {
-        NavigationStack {
-            List {
-                ForEach(languages, id: \.code) { lang in
-                    Button {
-                        selectedLanguage = lang.name
-                        dismiss()
-                    } label: {
-                        HStack(spacing: 14) {
-                            Text(lang.flag)
-                                .font(.system(size: 24))
-
-                            Text(lang.name)
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.palmText)
-
-                            Spacer()
-
-                            if selectedLanguage == lang.name {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 18))
-                                    .foregroundColor(.palmPrimary)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-            }
-            .navigationTitle("Language")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") { dismiss() }
                 }
             }
         }

@@ -113,6 +113,25 @@ struct CalendarView: View {
         .sheet(isPresented: $showAddEvent) {
             AddEventSheet { event in
                 store.add(event)
+                if googleCalConnected {
+                    Task {
+                        do {
+                            let isoFmt = ISO8601DateFormatter()
+                            isoFmt.formatOptions = [.withInternetDateTime]
+                            var body: [String: Any] = [
+                                "title": event.title,
+                                "start_time": isoFmt.string(from: event.startDate),
+                                "end_time": isoFmt.string(from: event.endDate),
+                            ]
+                            if let desc = event.description { body["description"] = desc }
+                            if let loc = event.location { body["location"] = loc }
+                            let apiEvent = try await api.createCalendarEvent(body: body)
+                            await MainActor.run { apiEvents.append(apiEvent) }
+                        } catch {
+                            // API sync failed; event saved locally
+                        }
+                    }
+                }
             }
         }
     }
