@@ -392,7 +392,7 @@ def _build_marketing_material_email() -> tuple:
     copy_file = PROJECT_ROOT / "marketing" / "social-media-copy.md"
 
     attachments = []
-    cid_map = {}
+    data_uris = {}
 
     image_files = {
         "linkedin_hero": ("linkedin_hero_real.png", "LinkedIn Hero Banner (1920x1080)"),
@@ -415,23 +415,23 @@ def _build_marketing_material_email() -> tuple:
         "app_settings": ("06_settings.png", "Settings"),
     }
 
-    for cid_name, (filename, _label) in image_files.items():
+    for key, (filename, _label) in image_files.items():
         fpath = marketing_dir / filename
         if fpath.exists():
             try:
-                data = base64.b64encode(fpath.read_bytes()).decode()
-                attachments.append({"filename": filename, "content": data, "content_type": "image/png"})
-                cid_map[cid_name] = f"cid:{filename}"
+                b64 = base64.b64encode(fpath.read_bytes()).decode()
+                data_uris[key] = f"data:image/png;base64,{b64}"
+                attachments.append({"filename": filename, "content": b64, "content_type": "image/png"})
             except Exception:
                 pass
 
-    for cid_name, (filename, _label) in screenshot_files.items():
+    for key, (filename, _label) in screenshot_files.items():
         fpath = screenshots_dir / filename
         if fpath.exists():
             try:
-                data = base64.b64encode(fpath.read_bytes()).decode()
-                attachments.append({"filename": filename, "content": data, "content_type": "image/png"})
-                cid_map[cid_name] = f"cid:{filename}"
+                b64 = base64.b64encode(fpath.read_bytes()).decode()
+                data_uris[key] = f"data:image/png;base64,{b64}"
+                attachments.append({"filename": filename, "content": b64, "content_type": "image/png"})
             except Exception:
                 pass
 
@@ -452,9 +452,9 @@ def _build_marketing_material_email() -> tuple:
         except Exception:
             pass
 
-    def img_tag(cid_name, label, width="100%", max_width="500px"):
-        if cid_name in cid_map:
-            return f'<div style="margin:12px 0;"><img src="{cid_map[cid_name]}" alt="{esc(label)}" style="width:{width};max-width:{max_width};border-radius:8px;border:1px solid #e2e8f0;display:block;"><p style="color:#94a3b8;font-size:11px;margin:4px 0 0;text-align:center;">{esc(label)}</p></div>'
+    def img_tag(key, label, width="100%", max_width="500px"):
+        if key in data_uris:
+            return f'<div style="margin:12px 0;"><img src="{data_uris[key]}" alt="{esc(label)}" style="width:{width};max-width:{max_width};border-radius:8px;border:1px solid #e2e8f0;display:block;"><p style="color:#94a3b8;font-size:11px;margin:4px 0 0;text-align:center;">{esc(label)}</p></div>'
         return ""
 
     now_str = datetime.now().strftime("%b %d, %Y at %I:%M %p")
