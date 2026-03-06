@@ -389,55 +389,35 @@ def _build_marketing_material_email() -> tuple:
 
     GITHUB_RAW = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main"
     MARKETING_URL = f"{GITHUB_RAW}/apps/web/public/marketing"
-    IPHONE_URL = f"{GITHUB_RAW}/apps/web/public/screenshots/iphone"
-    CRM_URL = f"{GITHUB_RAW}/apps/web/public/screenshots/crm"
 
     marketing_dir = PROJECT_ROOT / "marketing" / "generated"
     web_marketing_dir = PROJECT_ROOT / "apps" / "web" / "public" / "marketing"
-    iphone_dir = PROJECT_ROOT / "apps" / "web" / "public" / "screenshots" / "iphone"
-    crm_dir = PROJECT_ROOT / "apps" / "web" / "public" / "screenshots" / "crm"
     copy_file = PROJECT_ROOT / "marketing" / "social-media-copy.md"
 
     attachments = []
     image_urls = {}
 
-    image_files = {
+    all_graphics = {
+        "iphone_home": ("iphone_home.png", "iPhone — Home Dashboard"),
+        "iphone_record": ("iphone_record.png", "iPhone — Palm It Recording"),
+        "iphone_clients": ("iphone_clients.png", "iPhone — Clients"),
         "hero_banner": ("hero_banner.png", "Hero — iPhone + CRM Dashboard (1920x1080)"),
         "ig_square": ("ig_square.png", "Instagram Square — iPhone + CRM (1080x1080)"),
         "ig_story": ("ig_story.png", "Instagram Story — Pipeline Flow (1080x1920)"),
         "fb_ad": ("fb_ad.png", "Facebook Ad — Before/After (1200x628)"),
-        "twitter_banner": ("twitter_banner.png", "Twitter Banner — 3 iPhones + CRM (1500x500)"),
+        "twitter_banner": ("twitter_banner.png", "Twitter Banner — 3 iPhones + CRM"),
         "linkedin_crm": ("linkedin_crm.png", "LinkedIn — CRM Feature (1920x1080)"),
-        "email_header": ("email_header.png", "Email Header (600x200)"),
-        "carousel_1": ("carousel_1.png", "Carousel 1 — Record (1080x1350)"),
-        "carousel_2": ("carousel_2.png", "Carousel 2 — CRM Dashboard (1080x1350)"),
-        "carousel_3": ("carousel_3.png", "Carousel 3 — Contract (1080x1350)"),
+        "email_header": ("email_header.png", "Email Header — Teal Gradient"),
+        "carousel_1": ("carousel_1.png", "Carousel 1 — Record"),
+        "carousel_2": ("carousel_2.png", "Carousel 2 — Contract"),
+        "carousel_3": ("carousel_3.png", "Carousel 3 — Manage"),
     }
 
-    iphone_files = {
-        "app_home": ("iphone_01_home.png", "Home"),
-        "app_clients": ("iphone_02_clients.png", "Clients"),
-        "app_record": ("iphone_03_record.png", "Palm It"),
-        "app_calendar": ("iphone_04_calendar.png", "Calendar"),
-        "app_documents": ("iphone_05_documents.png", "Documents"),
-        "app_settings": ("iphone_06_settings.png", "Settings"),
-    }
-
-    for key, (filename, _label) in image_files.items():
+    for key, (filename, _label) in all_graphics.items():
         image_urls[key] = f"{MARKETING_URL}/{filename}"
         local = marketing_dir / filename
         if not local.exists():
             local = web_marketing_dir / filename
-        if local.exists():
-            try:
-                b64 = base64.b64encode(local.read_bytes()).decode()
-                attachments.append({"filename": filename, "content": b64, "content_type": "image/png"})
-            except Exception:
-                pass
-
-    for key, (filename, _label) in iphone_files.items():
-        image_urls[key] = f"{IPHONE_URL}/{filename}"
-        local = iphone_dir / filename
         if local.exists():
             try:
                 b64 = base64.b64encode(local.read_bytes()).decode()
@@ -467,12 +447,6 @@ def _build_marketing_material_email() -> tuple:
             return f'<div style="margin:12px 0;"><img src="{image_urls[key]}" alt="{esc(label)}" style="width:{width};max-width:{max_width};border-radius:8px;border:1px solid #e2e8f0;display:block;"><p style="color:#94a3b8;font-size:11px;margin:4px 0 0;text-align:center;">{esc(label)}</p></div>'
         return ""
 
-    def iphone_img(key, label, width="150px"):
-        """Show a pre-rendered iPhone-framed screenshot image."""
-        if key not in image_urls:
-            return ""
-        return f'<div style="display:inline-block;text-align:center;margin:8px;vertical-align:top;"><img src="{image_urls[key]}" alt="{esc(label)}" style="width:{width};display:block;"><p style="color:#64748b;font-size:11px;margin:6px 0 0;font-weight:500;">{esc(label)}</p></div>'
-
     now_str = datetime.now().strftime("%b %d, %Y at %I:%M %p")
 
     html = f"""<!DOCTYPE html>
@@ -482,54 +456,49 @@ def _build_marketing_material_email() -> tuple:
 
   <div style="background:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);padding:28px 24px;border-radius:14px 14px 0 0;">
     <h1 style="color:white;margin:0;font-size:22px;font-weight:700;">PalmCare AI Marketing Package</h1>
-    <p style="color:rgba(255,255,255,0.75);margin:4px 0 0;font-size:12px;">{now_str} &bull; All assets attached</p>
+    <p style="color:rgba(255,255,255,0.75);margin:4px 0 0;font-size:12px;">{now_str} &bull; All assets attached &bull; Generated via Nano Banana AI</p>
   </div>
 
   <div style="background:white;padding:24px;border-radius:0 0 14px 14px;border:1px solid #e2e8f0;border-top:none;">
 
-    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Marketing Graphics (v2)</h2>
-    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Built from real iOS app screenshots (in iPhone frames) + CRM web dashboard screenshots. All images attached — save directly.</p>
+    <h2 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Marketing Graphics (v3 — AI-Generated)</h2>
+    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">All graphics generated by Nano Banana 2 AI with photorealistic iPhone 15 Pro renders and CRM dashboard views. All images attached — save directly.</p>
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Hero Banner — iPhone + CRM</h3>
-    {img_tag("hero_banner", "Hero — iPhone recording + CRM dashboard side by side (1920x1080)", max_width="600px")}
+    {img_tag("hero_banner", "Hero — iPhone recording + CRM dashboard side by side", max_width="600px")}
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">LinkedIn — CRM Feature</h3>
-    {img_tag("linkedin_crm", "LinkedIn — Dashboard + Pipeline + iPhone overlay (1920x1080)", max_width="600px")}
+    {img_tag("linkedin_crm", "LinkedIn — Dashboard + Pipeline + iPhone overlay", max_width="600px")}
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Instagram</h3>
-    {img_tag("ig_square", "Instagram Square — iPhone + CRM background (1080x1080)")}
-    {img_tag("ig_story", "Instagram Story — Pipeline flow + iPhone (1080x1920)", max_width="300px")}
+    {img_tag("ig_square", "Instagram Square — Your CRM. Your phone.")}
+    {img_tag("ig_story", "Instagram Story — From Voice to Contract", max_width="300px")}
 
-    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Instagram Carousel — Record → CRM → Contract</h3>
+    <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Instagram Carousel — Record → Contract → Manage</h3>
     <div style="text-align:center;">
-      {img_tag("carousel_1", "Step 1: Record (iPhone)", width="30%", max_width="180px")}
-      {img_tag("carousel_2", "Step 2: CRM Dashboard", width="30%", max_width="180px")}
-      {img_tag("carousel_3", "Step 3: Contract (iPhone)", width="30%", max_width="180px")}
+      {img_tag("carousel_1", "Step 1: Record Your Assessment", width="30%", max_width="180px")}
+      {img_tag("carousel_2", "Step 2: AI Builds the Contract", width="30%", max_width="180px")}
+      {img_tag("carousel_3", "Step 3: Manage Everything", width="30%", max_width="180px")}
     </div>
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Facebook — Before/After</h3>
-    {img_tag("fb_ad", "Facebook Ad — Before (paper) vs After (iPhone + CRM) (1200x628)", max_width="600px")}
+    {img_tag("fb_ad", "Facebook Ad — Before (paper) vs After (PalmCare AI)", max_width="600px")}
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Twitter Banner</h3>
-    {img_tag("twitter_banner", "Twitter — 3 iPhones + CRM backdrop (1500x500)", max_width="600px")}
+    {img_tag("twitter_banner", "Twitter — 3 iPhones + CRM backdrop", max_width="600px")}
 
     <h3 style="color:#0d9488;font-size:14px;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">Email Header</h3>
-    {img_tag("email_header", "Email header with iPhone + teal gradient (600x200)", max_width="600px")}
+    {img_tag("email_header", "Email header — teal gradient with iPhone", max_width="600px")}
 
     <hr style="border:none;border-top:2px solid #e2e8f0;margin:28px 0;">
 
-    <h2 style="color:#0f172a;font-size:18px;margin:0 0 8px;">iOS App — iPhone Preview</h2>
-    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Live screenshots from iPhone 17 Pro simulator with demo data.</p>
+    <h2 style="color:#0f172a;font-size:18px;margin:0 0 8px;">iPhone 15 Pro Mockups</h2>
+    <p style="color:#64748b;font-size:13px;margin:0 0 16px;">Photorealistic renders generated by Nano Banana AI.</p>
 
     <div style="text-align:center;background:#f8fafc;border-radius:12px;padding:20px 8px;">
-      {iphone_img("app_login", "Login", "150px")}
-      {iphone_img("app_home", "Dashboard", "150px")}
-      {iphone_img("app_clients", "Clients", "150px")}
-    </div>
-    <div style="text-align:center;background:#f8fafc;border-radius:12px;padding:20px 8px;margin-top:8px;">
-      {iphone_img("app_record", "Palm It", "150px")}
-      {iphone_img("app_workspace", "Workspace", "150px")}
-      {iphone_img("app_settings", "Settings", "150px")}
+      {img_tag("iphone_home", "Home Dashboard", width="30%", max_width="200px")}
+      {img_tag("iphone_record", "Palm It Recording", width="30%", max_width="200px")}
+      {img_tag("iphone_clients", "Clients", width="30%", max_width="200px")}
     </div>
 
     <hr style="border:none;border-top:2px solid #e2e8f0;margin:28px 0;">

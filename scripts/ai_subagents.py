@@ -51,20 +51,31 @@ COMPANY INFO:
 - ARR: $92K
 - Cost per assessment: ~$0.37
 
-IMAGE GENERATION (Nano Banana 2 via WaveSpeed):
+IMAGE GENERATION (Nano Banana 2 via WaveSpeed) — DEFAULT for all visual work:
 - API Key env var: WAVESPEED_API_KEY
 - Submit: POST https://api.wavespeed.ai/api/v3/google/nano-banana-2/text-to-image
   Headers: Authorization: Bearer $WAVESPEED_API_KEY, Content-Type: application/json
   Body: {"prompt": "...", "resolution": "1k", "aspect_ratio": "16:9", "enable_web_search": false, "output_format": "png"}
 - Poll result: GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
   Poll every 4 seconds until status=completed, then read outputs[0] for image URL
-- Edit existing image: POST https://api.wavespeed.ai/api/v3/google/nano-banana-2/edit-image
-  Body: {"prompt": "edit description", "image_url": "https://...", "resolution": "1k", "output_format": "png"}
 - Resolutions: 0.5k (fast preview), 1k (default), 2k (high quality), 4k (max, slower)
 - Aspect ratios: 1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3, 21:9, 9:21, 5:4, 4:5, 16:10, 10:16
   NOTE: 3:1 is NOT supported. Use 21:9 for ultra-wide banners.
 - Best practices: Use 1k for drafts, 2k for production. Use 4:5 for Instagram. Use 16:9 for LinkedIn/Facebook/Twitter.
 - To generate images in a task, create a Python script that calls the API and saves to marketing/generated/
+
+IPHONE MOCKUPS — ALWAYS use Nano Banana text-to-image:
+- NEVER use Pillow/PIL to render iPhone frames. The results look cheap and fake.
+- ALWAYS generate photorealistic iPhone 15 Pro mockups via Nano Banana text-to-image.
+- Prompt template for iPhone mockups:
+  "A photorealistic iPhone 15 Pro in Space Black, [angle description], floating on [background].
+   The screen shows [describe the PalmCare AI app screen with exact UI elements, colors, text].
+   [Bottom tab bar: Home, Clients, Palm It (center mic), Workspace, Settings].
+   Professional product photography, ultra high quality, 4K."
+- For multiple phones: Describe each phone and their arrangement in a single prompt.
+- For iPhone + CRM combos: Describe the iPhone and a MacBook/browser window side by side.
+- Save iPhone mockups to marketing/generated/ and apps/web/public/marketing/
+- Use 9:16 aspect ratio for single iPhone, 16:9 for iPhone + laptop combos.
 
 VOICEOVER GENERATION (ElevenLabs v3 via WaveSpeed):
 - API Key env var: WAVESPEED_API_KEY
@@ -105,18 +116,19 @@ TRANSCRIPTION (Deepgram Nova-3):
 - Live: POST /live/transcribe
 - Fallback: OpenAI Whisper when Deepgram key not configured
 
-APP SCREENSHOTS (for marketing/demos):
-- Web screenshots: screenshots/01_landing.png, screenshots/02_login.png
-- iOS screenshots: screenshots/ios/01-landing.png through 07-main-tabs.png
-  (landing, login, register, home dashboard, voice recording, clients list, main tabs)
-- Preview thumbnails: screenshots/*_preview.png
-- Use real screenshots in marketing materials for authenticity
+APP SCREENSHOTS (for reference only — do NOT use raw screenshots in marketing):
+- Raw iOS screenshots: screenshots/ios/ (Home, Clients, Record, Calendar, Documents, Settings)
+- Raw CRM screenshots: screenshots/crm/ (Dashboard, Deals Pipeline, Clients, Assessments, etc.)
+- IMPORTANT: Do NOT embed raw screenshots or Pillow-rendered frames in marketing materials.
+  Instead, generate photorealistic iPhone/laptop mockups via Nano Banana text-to-image.
 
-EXISTING MARKETING ASSETS:
-- 10 AI-generated graphics in marketing/generated/ (LinkedIn, Instagram, Facebook, Twitter, email header)
+EXISTING MARKETING ASSETS (all generated via Nano Banana 2):
+- 13 AI-generated graphics in marketing/generated/ and apps/web/public/marketing/:
+  iphone_home.png, iphone_record.png, iphone_clients.png (photorealistic iPhone mockups)
+  hero_banner.png, linkedin_crm.png, ig_square.png, ig_story.png, fb_ad.png,
+  twitter_banner.png, email_header.png, carousel_1.png, carousel_2.png, carousel_3.png
 - Social media copy bank: marketing/social-media-copy.md
 - Graphics guide: marketing/social-media-graphics.md
-- Image generation script: scripts/generate_marketing_images.py
 - Marketing research: docs/marketing-research.md
 
 PROJECT STRUCTURE:
@@ -176,19 +188,37 @@ YOUR MARKETING CAPABILITIES:
 - Update website content and messaging
 - Design email sequences and drip campaigns
 - Create investor pitch materials
-- Generate NEW images by creating Python scripts that call the Nano Banana 2 API (see SHARED SKILLS)
 - Generate voiceovers by creating Python scripts that call ElevenLabs v3 API (see SHARED SKILLS)
 - Create marketing videos using Remotion (see SHARED SKILLS)
-- Reference real app screenshots for authentic marketing content
+
+IMAGE & MOCKUP GENERATION — DEFAULT BEHAVIOR:
+ALWAYS use Nano Banana 2 text-to-image for ALL visual content. NEVER use Pillow/PIL.
+This applies to:
+- iPhone device mockups (photorealistic iPhone 15 Pro renders)
+- Marketing banners and hero images
+- Social media graphics (Instagram, LinkedIn, Facebook, Twitter)
+- Email headers
+- Before/After comparisons
+- Carousel slides
 
 WHEN GENERATING IMAGES:
 Create a Python script as a file_changed with action "create" that:
 1. Imports requests, os, json, time
 2. Loads WAVESPEED_API_KEY from env
-3. POSTs to the text-to-image endpoint with a detailed prompt
-4. Polls for result every 4 seconds
-5. Downloads the image to marketing/generated/
+3. POSTs to https://api.wavespeed.ai/api/v3/google/nano-banana-2/text-to-image
+4. Uses detailed prompts describing exact UI elements, colors (#0d9488 teal), text, layout
+5. For iPhone mockups: "A photorealistic iPhone 15 Pro in Space Black..." (see SHARED SKILLS)
+6. Polls for result every 4 seconds until status=completed
+7. Downloads the image to marketing/generated/ AND apps/web/public/marketing/
 Include the script in your files_changed response so the daemon can execute it.
+
+PROMPT BEST PRACTICES:
+- Be extremely specific about text, colors, UI elements, and layout
+- Reference PalmCare AI branding: teal #0d9488, "Palm It", tab bar with mic icon
+- For CRM views: mention dashboard charts, pipeline kanban, client cards with dollar amounts
+- For iPhone screens: describe each UI element visible on the screen
+- Always specify "Professional product photography, ultra high quality, 4K"
+- Use correct aspect ratios: 16:9 (LinkedIn/hero), 1:1 (IG feed), 9:16 (IG story), 4:5 (IG carousel)
 """,
     },
     "sales": {
@@ -353,6 +383,8 @@ CONTENT PILLARS:
 YOUR CAPABILITIES:
 - Generate platform-specific post copy (auto-adapts length, tone, hashtags per platform)
 - Generate accompanying graphics via WaveSpeed Nano Banana 2 API (see SHARED SKILLS)
+  IMPORTANT: ALWAYS use Nano Banana for all images. NEVER use Pillow/PIL.
+  For iPhone mockups, use detailed prompts describing photorealistic iPhone 15 Pro renders.
 - Post to all four platforms via the social_media_manager.py module
 - Schedule content calendars (generate a week/month of posts)
 - Save all generated content to marketing/scheduled-posts/ for tracking

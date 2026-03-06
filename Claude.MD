@@ -158,26 +158,6 @@ GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
 }
 ```
 
-### Image Editing Endpoint
-```
-# Submit edit task
-POST https://api.wavespeed.ai/api/v3/google/nano-banana-2/edit-image
-Authorization: Bearer $WAVESPEED_API_KEY
-
-# Get result (poll until status=completed)
-GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
-```
-
-### Image Editing Request Format
-```json
-{
-  "prompt": "Describe the edit you want",
-  "image_url": "https://example.com/source-image.png",
-  "resolution": "1k",
-  "output_format": "png"
-}
-```
-
 ### Resolution Options
 - `0.5k` — Fast, low-res previews
 - `1k` — Standard quality (recommended default)
@@ -198,7 +178,7 @@ GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
 - `4:5` — Slight portrait (Instagram)
 - `16:10` — Wide display
 - `10:16` — Tall display
-- `3:1` — Panoramic banner
+**NOTE: `3:1` is NOT supported. Use `21:9` for ultra-wide banners.**
 
 ### Key Upgrades over Nano Banana Pro
 - Up to 4K resolution
@@ -206,7 +186,19 @@ GET https://api.wavespeed.ai/api/v3/predictions/{task_id}/result
 - Better text rendering in images
 - Web search grounding for real-time accuracy (`enable_web_search: true`)
 - 14 flexible aspect ratios
-- Image editing support (modify existing images with text prompts)
+
+### iPhone Mockups — ALWAYS use Nano Banana
+NEVER use Pillow/PIL to create iPhone device frames. Results look cheap and fake.
+Instead, use text-to-image with detailed prompts:
+
+```
+Prompt template:
+"A photorealistic iPhone 15 Pro in Space Black, [angle], floating on [background].
+The screen shows [describe exact PalmCare AI UI: teal #0d9488, stat cards, tab bar with Home/Clients/Palm It mic/Workspace/Settings].
+Professional product photography, ultra high quality, 4K."
+```
+
+Use `9:16` for single iPhone, `16:9` for iPhone + laptop combos.
 
 ### Usage Instructions
 1. Use Nano Banana 2 for high-quality image generation with flexible sizing
