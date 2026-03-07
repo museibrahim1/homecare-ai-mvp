@@ -148,17 +148,6 @@ function ContactForm() {
                   </a>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
-                  <Phone className="w-5 h-5 text-primary-400" />
-                </div>
-                <div>
-                  <p className="text-dark-400 text-sm">Call us at</p>
-                  <a href="tel:+18005551234" className="text-white hover:text-primary-400 transition">
-                    (800) 555-1234
-                  </a>
-                </div>
-              </div>
             </div>
           </div>
 

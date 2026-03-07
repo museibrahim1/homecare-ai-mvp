@@ -220,10 +220,9 @@ export default function FeaturesPage() {
                   <div className="absolute top-full left-0 pt-2 w-64">
                     <div className="bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
                       {[
-                        { label: 'Help Center', href: '/help' },
+                        { label: 'Contact Us', href: '/contact' },
                         { label: 'System Status', href: '/status' },
                         { label: 'Privacy Policy', href: '/privacy' },
-                        { label: 'Contact Us', href: '/contact' },
                       ].map(item => (
                         <Link key={item.label} href={item.href} className="block p-3 rounded-lg hover:bg-dark-700 transition text-white text-sm font-medium">{item.label}</Link>
                       ))}
