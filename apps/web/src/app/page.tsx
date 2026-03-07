@@ -59,7 +59,7 @@ const FEATURES_TABS = [
         title: 'Voice-Powered Assessments',
         description: 'Record any client assessment on your phone. AI transcribes the conversation, identifies speakers, and captures care-specific terminology automatically.',
         color: 'from-blue-500 to-cyan-500',
-        image: '/screenshots/voice-assessment.png',
+        image: '/screenshots/care-tracker.png',
       },
       {
         icon: Brain,

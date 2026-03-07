@@ -21,7 +21,7 @@ const FEATURE_SECTIONS = [
         title: 'Voice-Powered Assessments',
         description: 'Record any client assessment on your phone — in person or over the phone. AI transcribes the conversation with 98%+ accuracy, identifies speakers, and captures care-specific terminology. One tap to start. AI handles the rest.',
         highlights: ['98%+ transcription accuracy', 'Multi-speaker identification', 'Care-specific vocabulary'],
-        image: '/screenshots/voice-assessment.png',
+        image: '/screenshots/care-tracker.png',
       },
       {
         icon: Brain,
