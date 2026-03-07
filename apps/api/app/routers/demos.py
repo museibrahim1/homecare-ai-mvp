@@ -273,72 +273,125 @@ async def book_demo(
 
     # Confirmation email to prospect
     if has_schedule and formatted_date:
-        meet_section = ""
-        if meeting_link:
-            meet_section = f"""
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
-                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #166534; font-weight: 600;">Your Google Meet Link</p>
-                    <a href="{meeting_link}" style="background: #22c55e; color: white; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">Join Meeting</a>
-                </div>
-            """
-        subject = f"Your PalmCare AI Demo — {formatted_date} at {formatted_time}"
+        subject = f"{booking.name} has joined your demo - PalmCare AI Demo"
     else:
-        meet_section = ""
         subject = f"We Received Your Demo Request — {booking.company_name}"
+
+    if has_schedule and formatted_date:
+        prospect_html = f"""
+        <div style="font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif; background-color: #f6f6f6; padding: 40px 20px;">
+            <div style="max-width: 520px; margin: 0 auto;">
+                <div style="text-align: center; padding-bottom: 30px;">
+                    <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #0d9488; letter-spacing: -0.5px;">PalmCare AI</h1>
+                </div>
+                <div style="background: #ffffff; border-radius: 8px; padding: 40px 40px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #333333; line-height: 1.5;">Hi {booking.name},</p>
+                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #333333; line-height: 1.5;">Your demo with PalmCare AI has been confirmed:</p>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 28px;">
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0; width: 140px;">Topic</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">PalmCare AI Demo — {booking.company_name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{formatted_date}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Time</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{formatted_time} Eastern Time (US and Canada)</td>
+                        </tr>
+                        {f'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Meeting Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="{meeting_link}" style="color: #0d9488; text-decoration: none;">{meeting_link}</a></td></tr>' if meeting_link else ''}
+                    </table>
+                    <div style="text-align: center; margin: 30px 0 20px;">
+                        <a href="{meeting_link or 'https://palmcareai.com'}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">Join Demo</a>
+                    </div>
+                    <p style="margin: 24px 0 0 0; font-size: 14px; color: #747487; line-height: 1.5;">Thank you for choosing PalmCare AI.<br>-The PalmCare Team</p>
+                </div>
+                <div style="text-align: center; padding-top: 24px;">
+                    <p style="margin: 0; font-size: 12px; color: #aaaaaa;">Copyright &copy; 2026 Palm Technologies, INC. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+        """
+    else:
+        prospect_html = f"""
+        <div style="font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif; background-color: #f6f6f6; padding: 40px 20px;">
+            <div style="max-width: 520px; margin: 0 auto;">
+                <div style="text-align: center; padding-bottom: 30px;">
+                    <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #0d9488; letter-spacing: -0.5px;">PalmCare AI</h1>
+                </div>
+                <div style="background: #ffffff; border-radius: 8px; padding: 40px 40px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #333333; line-height: 1.5;">Hi {booking.name},</p>
+                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #333333; line-height: 1.5;">We&rsquo;ve received your demo request for <strong>{booking.company_name}</strong>. Our team will reach out within 1 business day to schedule your personalized demo.</p>
+                    <p style="margin: 0 0 0 0; font-size: 14px; color: #747487; line-height: 1.5;">Thank you for choosing PalmCare AI.<br>-The PalmCare Team</p>
+                </div>
+                <div style="text-align: center; padding-top: 24px;">
+                    <p style="margin: 0; font-size: 12px; color: #aaaaaa;">Copyright &copy; 2026 Palm Technologies, INC. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+        """
 
     email_svc.send_email(
         to=booking.email,
         subject=subject,
         sender=verified_sender,
         reply_to="sales@palmtai.com",
-        html=f"""
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-            <div style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 50%, #115e59 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
-                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">PalmCare AI</h1>
-                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">{'Your Demo is Confirmed' if has_schedule else 'Demo Request Received'}</p>
-            </div>
-            <div style="padding: 40px 30px;">
-                <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 22px; text-align: center;">{'See you soon' if has_schedule else 'Thanks for your interest'}, {booking.name}!</h2>
-                {'<div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 20px;"><table style="width: 100%; border-collapse: collapse;"><tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Date</td><td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">' + (formatted_date or '') + '</td></tr><tr><td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Time</td><td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">' + (formatted_time or '') + ' ET</td></tr></table></div>' if has_schedule else '<div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin-bottom: 20px;"><p style="margin: 0; color: #1e40af; font-size: 14px;">Our team will reach out within 1 business day to schedule your personalized demo.</p></div>'}
-                {meet_section}
-                <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">
-                    We&rsquo;ll show you how PalmCare AI can help {booking.company_name}
-                    turn care assessments into contracts in minutes, manage clients, and streamline your operations.
-                </p>
-                <p style="color: #9ca3af; font-size: 13px; margin-top: 24px;">
-                    Questions? Just reply to this email.
-                </p>
-            </div>
-            <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #0d9488; font-weight: 600; margin: 0 0 4px 0; font-size: 14px;">PalmCare AI</p>
-                <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; 2026 PalmCare AI. All rights reserved.</p>
-            </div>
-        </div>
-        """,
+        html=prospect_html,
     )
 
-    # Admin notification
+    # Admin notification (same clean style)
     admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com")
     email_svc.send_email(
         to=admin_email,
-        subject=f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name}",
+        subject=f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name} — {booking.name}",
         sender=verified_sender,
         html=f"""
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #0d9488;">{'Demo Booked' if has_schedule else 'New Demo Request'}</h2>
-            <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
-                <p><strong>Name:</strong> {booking.name}</p>
-                <p><strong>Email:</strong> {booking.email}</p>
-                <p><strong>Company:</strong> {booking.company_name}</p>
-                <p><strong>Phone:</strong> {booking.phone or 'N/A'}</p>
-                <p><strong>State:</strong> {booking.state or 'N/A'}</p>
-                <p><strong>Role:</strong> {booking.role or 'N/A'}</p>
-                <p><strong>Services:</strong> {services_list}</p>
-                <p><strong>Estimated Clients:</strong> {booking.estimated_clients or 'N/A'}</p>
-                <p><strong>Current Software:</strong> {booking.current_software or 'N/A'}</p>
-                {'<p><strong>Date:</strong> ' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' ET</p>' if has_schedule else '<p><strong>Status:</strong> Needs scheduling — reach out to prospect</p>'}
-                <p><strong>Calendar Event:</strong> {'Created with Meet link' if calendar_created else 'Not created'}</p>
-                {f'<p><strong>Meet Link:</strong> <a href="{meeting_link}">{meeting_link}</a></p>' if meeting_link else ''}
+        <div style="font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif; background-color: #f6f6f6; padding: 40px 20px;">
+            <div style="max-width: 520px; margin: 0 auto;">
+                <div style="text-align: center; padding-bottom: 30px;">
+                    <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #0d9488; letter-spacing: -0.5px;">PalmCare AI</h1>
+                </div>
+                <div style="background: #ffffff; border-radius: 8px; padding: 40px 40px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #333333; line-height: 1.5;">Hi Muse,</p>
+                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #333333; line-height: 1.5;">{booking.name} from <strong>{booking.company_name}</strong> has {'booked a demo' if has_schedule else 'requested a demo'}:</p>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 28px;">
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0; width: 140px;">Name</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Email</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;"><a href="mailto:{booking.email}" style="color: #0d9488; text-decoration: none;">{booking.email}</a></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Company</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.company_name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Phone</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.phone or 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">State</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.state or 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Services</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{services_list}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Clients</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.estimated_clients or 'N/A'}</td>
+                        </tr>
+                        {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' ET</td></tr>' if has_schedule else ''}
+                        {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Meet Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="' + (meeting_link or '') + '" style="color: #0d9488; text-decoration: none;">' + (meeting_link or '') + '</a></td></tr>' if meeting_link else ''}
+                    </table>
+                    {f'<div style="text-align: center; margin: 20px 0;"><a href="{meeting_link}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">Start Meeting</a></div>' if meeting_link else '<p style="font-size: 14px; color: #e65100; font-weight: 600;">Action needed: Reach out to schedule this demo.</p>'}
+                </div>
+                <div style="text-align: center; padding-top: 24px;">
+                    <p style="margin: 0; font-size: 12px; color: #aaaaaa;">Copyright &copy; 2026 Palm Technologies, INC. All rights reserved.</p>
+                </div>
             </div>
         </div>
         """,
