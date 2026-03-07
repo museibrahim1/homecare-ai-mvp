@@ -19,6 +19,8 @@ struct VisitDetailView: View {
     @State private var errorMessage: String?
     @State private var isRefreshing = false
     @State private var showFullContract = false
+    @State private var selectedContractStyle = "modern"
+    @State private var showStylePicker = false
 
     private let tabs = ["Overview", "Transcript", "Billables", "Notes", "Contract"]
 
@@ -734,11 +736,19 @@ struct VisitDetailView: View {
 
     // MARK: - Contract Tab
 
+    private var currentStyle: ContractStyle {
+        builtInContractStyles.first { $0.id == selectedContractStyle } ?? builtInContractStyles[1]
+    }
+
     private var contractTab: some View {
         VStack(spacing: 0) {
             if let c = contract {
                 contractHeader(c)
                     .padding(.bottom, 14)
+
+                currentStyleBadge
+                    .padding(.bottom, 10)
+
                 contractRateCards(c)
                     .padding(.bottom, 14)
                 contractServicesSection(c)
@@ -771,6 +781,21 @@ struct VisitDetailView: View {
                     }
                 }
                 Spacer()
+
+                Button { showStylePicker = true } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "paintbrush.fill")
+                            .font(.system(size: 12))
+                        Text("Style")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundColor(.palmPrimary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(Color.palmPrimary.opacity(0.08))
+                    .cornerRadius(8)
+                }
+
                 Menu {
                     Button { Task { await exportFile(type: "contract.pdf") } } label: {
                         Label("Download PDF", systemImage: "arrow.down.doc.fill")
@@ -788,6 +813,33 @@ struct VisitDetailView: View {
                 }
             }
         }
+        .sheet(isPresented: $showStylePicker) {
+            ContractStylesView(selectedStyleId: $selectedContractStyle, contractTitle: c.title)
+        }
+    }
+
+    private var currentStyleBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: currentStyle.icon)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(currentStyle.accentColor)
+            Text("Using \(currentStyle.name) style")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.palmSecondary)
+            Spacer()
+            Button {
+                showStylePicker = true
+            } label: {
+                Text("Change")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(currentStyle.accentColor)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(currentStyle.accentColor.opacity(0.04))
+        .cornerRadius(8)
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(currentStyle.accentColor.opacity(0.1), lineWidth: 1))
     }
 
     private func contractRateCards(_ c: VisitContract) -> some View {

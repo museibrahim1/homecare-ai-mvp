@@ -28,17 +28,7 @@ struct WorkspaceView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if selectedSection == 1 {
-                        NavigationLink {
-                            TemplatesView()
-                                .environmentObject(api)
-                        } label: {
-                            Image(systemName: "doc.badge.gearshape")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.palmPrimary)
-                        }
-                        .accessibilityLabel("Manage templates")
-                    }
+                    EmptyView()
                 }
             }
         }
