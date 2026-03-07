@@ -301,12 +301,23 @@ struct RecordView: View {
                 guard ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") else { return }
                 guard !didRunAutomationDemo else { return }
                 didRunAutomationDemo = true
-                // Use demo mode to avoid mic permission and network coupling in stress runs.
                 isDemoMode = true
                 demoTranscription.startTranscribing()
                 try? await Task.sleep(nanoseconds: 4_000_000_000)
                 demoTranscription.stopTranscribing()
                 isDemoMode = false
+            }
+            .task {
+                guard ProcessInfo.processInfo.arguments.contains("MARKETING_DEMO_FLOW") else { return }
+                guard !didRunAutomationDemo else { return }
+                didRunAutomationDemo = true
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                if let john = clients.first(where: { $0.full_name.lowercased().contains("john") }) {
+                    selectedClient = john
+                }
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                isDemoMode = true
+                demoTranscription.startTranscribing()
             }
             #endif
             .onAppear {
