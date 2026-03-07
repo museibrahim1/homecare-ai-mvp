@@ -10,7 +10,9 @@ class LiveTranscriptionService: ObservableObject {
     private let api: APIService
     private var chunkTimer: Timer?
     private var lastChunkEnd: TimeInterval = 0
+    private var lastByteOffset: UInt64 = 0
     private let chunkInterval: TimeInterval = 8
+    private let maxChunkBytes: Int = 2 * 1024 * 1024 // 2 MB cap per request
 
     private static let medicalKeywords: Set<String> = [
         "fever", "fatigue", "headache", "headaches", "diabetes", "hypertension",
@@ -35,6 +37,7 @@ class LiveTranscriptionService: ObservableObject {
     func startTranscribing(recordingURL: URL) {
         isTranscribing = true
         lastChunkEnd = 0
+        lastByteOffset = 0
         segments = []
         fullTranscript = ""
 
@@ -56,10 +59,25 @@ class LiveTranscriptionService: ObservableObject {
         guard FileManager.default.fileExists(atPath: recordingURL.path) else { return }
 
         do {
-            let audioData = try Data(contentsOf: recordingURL)
-            guard audioData.count > 1000 else { return }
+            let attrs = try FileManager.default.attributesOfItem(atPath: recordingURL.path)
+            let fileSize = (attrs[.size] as? UInt64) ?? 0
 
-            let response = try await api.liveTranscribe(audioData: audioData, diarize: true)
+            guard fileSize > lastByteOffset + 1000 else { return }
+
+            let handle = try FileHandle(forReadingFrom: recordingURL)
+            defer { try? handle.close() }
+
+            handle.seek(toFileOffset: lastByteOffset)
+            let bytesToRead = min(Int(fileSize - lastByteOffset), maxChunkBytes)
+            let chunkData = handle.readData(ofLength: bytesToRead)
+
+            guard chunkData.count > 1000 else { return }
+
+            let newOffset = lastByteOffset + UInt64(chunkData.count)
+
+            let response = try await api.liveTranscribe(audioData: chunkData, diarize: true)
+
+            lastByteOffset = newOffset
 
             guard !response.transcript.isEmpty else { return }
 

@@ -23,6 +23,8 @@ struct SubscriptionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
+    var showLimitBanner: Bool = true
+
     @State private var remotePlans: [SubscriptionPlan] = []
     @State private var selectedPlanIndex: Int = 1
     @State private var isLoading = false
@@ -37,7 +39,7 @@ struct SubscriptionView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     header
-                    usageBanner
+                    if showLimitBanner { usageBanner }
                     planCards
                     enterpriseCard
                     footerNote

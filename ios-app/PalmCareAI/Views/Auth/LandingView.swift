@@ -129,7 +129,6 @@ struct LandingOrbRing: View {
 
 struct LandingView: View {
     @EnvironmentObject var api: APIService
-    @State private var currentPage = 0
     @State private var navigateToLogin = false
     @State private var navigateToRegister = false
 
@@ -254,20 +253,6 @@ struct LandingView: View {
                                 .lineSpacing(4)
                         }
                         .padding(.bottom, 20)
-
-                        HStack(spacing: 5) {
-                            Capsule()
-                                .fill(Color.palmPrimaryLight)
-                                .frame(width: currentPage == 0 ? 18 : 5, height: 5)
-                            Capsule()
-                                .fill(currentPage == 1 ? Color.palmPrimaryLight : Color.white.opacity(0.22))
-                                .frame(width: currentPage == 1 ? 18 : 5, height: 5)
-                            Capsule()
-                                .fill(currentPage == 2 ? Color.palmPrimaryLight : Color.white.opacity(0.22))
-                                .frame(width: currentPage == 2 ? 18 : 5, height: 5)
-                        }
-                        .padding(.bottom, 16)
-                        .animation(.easeInOut(duration: 0.25), value: currentPage)
 
                         Button {
                             navigateToRegister = true

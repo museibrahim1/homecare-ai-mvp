@@ -92,13 +92,11 @@ const defaultData: AgencyData = {
 
 export default function WelcomePage() {
   const router = useRouter();
-  // @ts-ignore — auth temporarily relaxed for preview
-  const authData = typeof useRequireAuth === 'function' ? useRequireAuth() : { token: null, user: null, isReady: true };
-  const { token, user, isReady } = authData;
+  const { token, user, isReady } = useRequireAuth();
 
   const [step, setStep] = useState(0);
   const [agency, setAgency] = useState<AgencyData>(defaultData);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [onboardingDone, setOnboardingDone] = useState(false);

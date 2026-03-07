@@ -40,7 +40,7 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showSubscription) {
-                SubscriptionView().environmentObject(api)
+                SubscriptionView(showLimitBanner: false).environmentObject(api)
             }
             .sheet(isPresented: $showGoogleCalAuth) {
                 GoogleCalendarSetupSheet(isConnected: $googleCalConnected)

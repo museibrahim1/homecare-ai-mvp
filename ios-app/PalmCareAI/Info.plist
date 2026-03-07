@@ -39,6 +39,8 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSFaceIDUsageDescription</key>
+	<string>PalmCareAI uses Face ID to protect your account and client data.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>PalmCareAI needs microphone access to record client visits and assessments.</string>
 	<key>UILaunchScreen</key>

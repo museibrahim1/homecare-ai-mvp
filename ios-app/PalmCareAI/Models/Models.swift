@@ -317,7 +317,8 @@ struct VisitContract: Codable, Identifiable {
             guard let dict = item.value as? [String: Any] else { return nil }
             let name = dict["name"] as? String ?? dict["service"] as? String ?? "Service"
             let desc = dict["description"] as? String
-            return desc != nil ? "\(name): \(desc!)" : name
+            if let desc { return "\(name): \(desc)" }
+            return name
         }.joined(separator: "\n")
     }
 

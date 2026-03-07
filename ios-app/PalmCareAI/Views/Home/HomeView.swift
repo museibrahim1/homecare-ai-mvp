@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var clients: [Client] = []
     @State private var visits: [Visit] = []
     @State private var isLoading = true
+    @State private var loadError: String?
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -159,6 +160,8 @@ struct HomeView: View {
                             ProgressView().padding(40)
                             Spacer()
                         }
+                    } else if loadError != nil {
+                        errorView
                     } else if visits.isEmpty {
                         EmptyStateCard(
                             icon: "waveform.path",
@@ -234,8 +237,44 @@ struct HomeView: View {
                 isLoading = false
             }
         } catch {
-            await MainActor.run { isLoading = false }
+            await MainActor.run {
+                loadError = error.localizedDescription
+                isLoading = false
+            }
         }
+    }
+
+    private var errorView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 36))
+                .foregroundColor(.palmOrange)
+            Text("Something went wrong")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.palmText)
+            Text(loadError ?? "")
+                .font(.system(size: 13))
+                .foregroundColor(.palmSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            Button {
+                loadError = nil
+                Task { await loadData() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 12, weight: .bold))
+                    Text("Try Again")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(Color.palmPrimary)
+                .cornerRadius(10)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
