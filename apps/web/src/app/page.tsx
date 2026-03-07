@@ -57,26 +57,30 @@ const FEATURES_TABS = [
       {
         icon: Mic,
         title: 'Voice-Powered Assessments',
-        description: 'Staff records a client assessment interview on their phone. AI transcribes the audio, identifies speakers, and extracts care needs — automatically. Just tap, talk, and Palm It.',
+        description: 'Record any client assessment on your phone. AI transcribes the conversation, identifies speakers, and captures care-specific terminology automatically.',
         color: 'from-blue-500 to-cyan-500',
+        image: '/screenshots/voice-assessment.png',
       },
       {
         icon: Brain,
         title: 'Smart Contract Generation',
-        description: 'AI generates a complete assessment, care plan, and service agreement — in seconds, not hours. Every client gets a proposal-ready contract before you leave the chair.',
+        description: 'AI generates a complete care plan and service agreement from a single recording with auto-populated fields and proposal-ready formatting.',
         color: 'from-teal-500 to-cyan-500',
+        image: '/screenshots/contract-preview.png',
       },
       {
         icon: Zap,
         title: 'Intelligent Data Extraction',
-        description: 'AI captures every detail from the assessment interview — billable items, care needs, medications, and special requirements. No manual data entry. No missed details.',
+        description: 'Every assessment is analyzed for billable items, care needs, medications, and safety concerns, then synced into your workflow automatically.',
         color: 'from-yellow-500 to-orange-500',
+        image: '/screenshots/transcript.png',
       },
       {
         icon: FileText,
-        title: 'OCR Template Engine',
-        description: 'Upload your existing contract templates and our OCR engine maps every field to your database. New templates are automatically reconciled with previous versions.',
+        title: 'Contract Workflow',
+        description: 'Move from assessment to finalized contract with guided review, template support, and one-click export for signatures.',
         color: 'from-green-500 to-emerald-500',
+        image: '/screenshots/contract-form.png',
       },
     ],
   },
@@ -87,26 +91,30 @@ const FEATURES_TABS = [
       {
         icon: Users,
         title: 'Client Management (CRM)',
-        description: 'Full pipeline from intake to active care. Track prospects, assessments, and active clients in one unified dashboard with custom stages and notes.',
+        description: 'Track every client from first contact through active care with a visual pipeline, custom stages, and full activity history.',
         color: 'from-blue-500 to-indigo-500',
+        image: '/screenshots/client-crm.png',
       },
       {
         icon: ClipboardList,
-        title: 'Contract Management',
-        description: 'Create, manage, and track all service agreements from a central hub. Upload templates, preview with live data, export to DOCX, and send for signature.',
+        title: 'Document Management',
+        description: 'Manage contracts, assessments, recordings, and notes in one place with smart search, filters, and export-ready organization.',
         color: 'from-teal-500 to-cyan-500',
+        image: '/screenshots/contract-form.png',
       },
       {
         icon: Calendar,
-        title: 'Scheduling & Visits',
-        description: 'Schedule caregiver visits, track clock-in/out, and manage care plans. Caregivers get a mobile companion app for real-time updates.',
+        title: 'Assessments & Visits',
+        description: 'Monitor every assessment from recording through contract generation and track visit status, history, and care progression in real time.',
         color: 'from-cyan-500 to-blue-500',
+        image: '/screenshots/scheduling.png',
       },
       {
         icon: Settings,
-        title: 'Custom Forms & Templates',
-        description: 'Build customized intake forms, assessments, and contracts. Upload your own templates or choose from our professional gallery.',
+        title: 'Operations Dashboard',
+        description: 'Get a real-time view of agency workload, pipeline stage movement, and team execution from one centralized dashboard.',
         color: 'from-slate-500 to-gray-500',
+        image: '/screenshots/pipeline.png',
       },
     ],
   },
@@ -117,56 +125,64 @@ const FEATURES_TABS = [
       {
         icon: BarChart3,
         title: 'Automatic Billing Extraction',
-        description: 'Our AI extracts billable items directly from care assessments — hours, rates, services, and special charges are calculated automatically.',
+        description: 'AI extracts hours, rates, services, and special charges directly from assessments so billing is faster and significantly more accurate.',
         color: 'from-green-500 to-emerald-500',
+        image: '/screenshots/billing-extraction.png',
       },
       {
         icon: PieChart,
-        title: 'Revenue Analytics',
-        description: 'Real-time dashboards showing revenue, client hours, caregiver utilization, and pipeline value. Make data-driven decisions with confidence.',
+        title: 'Revenue Dashboard',
+        description: 'See real-time KPIs for client volume, assessment throughput, pipeline value, and revenue trends to guide daily decisions.',
         color: 'from-orange-500 to-amber-500',
+        image: '/screenshots/dashboard.png',
       },
       {
         icon: TrendingUp,
         title: 'Custom Reporting',
-        description: 'Generate detailed reports on any metric: billing, payroll, hours, referrals, and more. Export to PDF or Excel for stakeholders.',
+        description: 'Generate detailed billing, performance, and activity reports with export-ready outputs for leadership and compliance review.',
         color: 'from-cyan-500 to-blue-500',
+        image: '/screenshots/reports.png',
       },
       {
         icon: Shield,
         title: 'HIPAA-Compliant Security',
-        description: '256-bit encryption, role-based access, audit trails, and secure document storage. Your data is protected to the highest healthcare standards.',
+        description: 'Protect PHI with encryption, secure storage, and role-based controls designed for healthcare-grade compliance requirements.',
         color: 'from-amber-500 to-orange-500',
+        image: '/screenshots/hipaa-compliance.png',
       },
     ],
   },
   {
     id: 'caregiver',
-    label: 'Caregiver Tools',
+    label: 'Mobile App',
     features: [
       {
         icon: Smartphone,
-        title: 'Caregiver Mobile App',
-        description: 'Caregivers clock in/out via GPS, log ADLs, view schedules, and receive real-time updates — all from their phone. No training required.',
+        title: 'iOS Mobile App',
+        description: 'A native iOS app for care teams to record assessments, review transcriptions, manage clients, and generate contracts on the go.',
         color: 'from-teal-500 to-emerald-500',
+        image: '/screenshots/care-tracker.png',
       },
       {
         icon: HeartPulse,
-        title: 'ADL & Care Logging',
-        description: 'Simple tap-to-log interface for Activities of Daily Living. Track bathing, dressing, medication reminders, meals, and more per visit.',
+        title: 'Client Care Profiles',
+        description: 'Access medical history, emergency contacts, medications, and visit notes from one complete client profile during every shift.',
         color: 'from-emerald-500 to-teal-500',
+        image: '/screenshots/client-detail.png',
       },
       {
         icon: Globe,
         title: 'Agency Dashboard',
-        description: 'Agencies get real-time visibility into every caregiver shift, client status, and care delivery metric across all locations.',
+        description: 'Give agency leaders real-time visibility into assessment progress, client status, and team performance across the organization.',
         color: 'from-blue-500 to-sky-500',
+        image: '/screenshots/pipeline.png',
       },
       {
         icon: Headphones,
-        title: 'Priority Support',
-        description: 'Dedicated account manager, live chat, and phone support. Average response time under 15 minutes during business hours.',
+        title: 'Visit Workflow',
+        description: 'Coordinate visit schedules, track execution, and keep care documentation updated from the field without returning to the office.',
         color: 'from-amber-500 to-yellow-500',
+        image: '/screenshots/scheduling.png',
       },
     ],
   },
@@ -1389,6 +1405,15 @@ export default function LandingPage() {
               <div key={i} className="card p-6 group hover:border-primary-500/30 transition-all">
                 <div className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
                   <feature.icon className="w-7 h-7 text-white" />
+                </div>
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-dark-700 mb-5">
+                  <Image
+                    src={feature.image}
+                    alt={`${feature.title} screenshot`}
+                    fill
+                    className="object-cover object-top"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  />
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
                 <p className="text-dark-400 text-sm leading-relaxed">{feature.description}</p>
