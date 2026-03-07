@@ -522,10 +522,16 @@ function BookDemoSection() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [bookedDate, setBookedDate] = useState('');
+  const [bookedTime, setBookedTime] = useState('');
+  const [meetLink, setMeetLink] = useState('');
+  const [availableSlots, setAvailableSlots] = useState<Record<string, string[]>>({});
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [form, setForm] = useState({
     email: '', first_name: '', last_name: '', phone: '',
     company_name: '', state: '', role: '', services: [] as string[],
     estimated_clients: '', current_software: '',
+    date: '', time_slot: '',
   });
 
   const toggleService = (svc: string) => {
@@ -535,9 +541,34 @@ function BookDemoSection() {
     }));
   };
 
+  const loadSlots = async () => {
+    setLoadingSlots(true);
+    try {
+      const res = await fetch(`${API}/demos/slots`);
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableSlots(data.slots || {});
+      }
+    } catch { /* slots will be empty, user can still submit */ }
+    finally { setLoadingSlots(false); }
+  };
+
   const canProceed1 = form.email && form.first_name && form.last_name && form.phone;
   const canProceed2 = form.company_name && form.state && form.role && form.services.length > 0;
-  const canSubmit = form.estimated_clients && form.current_software;
+  const canProceed3 = form.estimated_clients && form.current_software;
+  const canSubmit = canProceed3 && form.date && form.time_slot;
+
+  const formatDateLabel = (iso: string) => {
+    const d = new Date(iso + 'T12:00:00');
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+
+  const formatTimeLabel = (slot: string) => {
+    const [h, m] = slot.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+  };
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -555,20 +586,31 @@ function BookDemoSection() {
           services: form.services,
           estimated_clients: form.estimated_clients,
           current_software: form.current_software,
+          date: form.date,
+          time_slot: form.time_slot,
         }),
       });
-      if (res.ok) { setSubmitted(true); }
-      else { const data = await res.json().catch(() => ({})); alert(data.detail || 'Something went wrong. Please try again.'); }
+      if (res.ok) {
+        const data = await res.json();
+        setBookedDate(data.date || formatDateLabel(form.date));
+        setBookedTime(data.time || formatTimeLabel(form.time_slot));
+        setMeetLink(data.meeting_link || '');
+        setSubmitted(true);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.detail || 'Something went wrong. Please try again.');
+      }
     } catch { alert('Network error. Please try again.'); }
     finally { setSubmitting(false); }
   };
 
+  const totalSteps = 4;
   const stepIndicator = (
     <div className="flex items-center justify-center gap-2 mb-10">
-      {[1, 2, 3].map(s => (
+      {[1, 2, 3, 4].map(s => (
         <div key={s} className="flex items-center gap-2">
           <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${step >= s ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'bg-dark-700 text-dark-400 border border-dark-600'}`}>{s}</div>
-          {s < 3 && <div className={`w-12 h-0.5 rounded ${step > s ? 'bg-primary-500' : 'bg-dark-600'}`} />}
+          {s < totalSteps && <div className={`w-8 h-0.5 rounded ${step > s ? 'bg-primary-500' : 'bg-dark-600'}`} />}
         </div>
       ))}
     </div>
@@ -579,15 +621,26 @@ function BookDemoSection() {
       <section id="book-demo" className="py-20 px-6 bg-dark-800/30">
         <div className="max-w-xl mx-auto text-center animate-fadeIn">
           <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle className="w-10 h-10 text-green-400" /></div>
-          <h2 className="text-3xl font-bold text-white mb-4">Thank You!</h2>
-          <p className="text-dark-300 text-lg mb-6">We&apos;ve received your demo request. Our team will reach out within 1 business day to schedule your personalized demo.</p>
+          <h2 className="text-3xl font-bold text-white mb-4">You&apos;re Scheduled!</h2>
+          <p className="text-dark-300 text-lg mb-6">Your demo has been confirmed. Check your email for the calendar invite and meeting details.</p>
           <div className="card p-6 text-left space-y-3 border-primary-500/20">
             <div className="flex justify-between"><span className="text-dark-400">Company</span><span className="text-white font-medium">{form.company_name}</span></div>
             <div className="flex justify-between"><span className="text-dark-400">Contact</span><span className="text-white font-medium">{form.first_name} {form.last_name}</span></div>
             <div className="flex justify-between"><span className="text-dark-400">Email</span><span className="text-white font-medium">{form.email}</span></div>
+            <div className="flex justify-between"><span className="text-dark-400">Date</span><span className="text-white font-medium">{bookedDate}</span></div>
+            <div className="flex justify-between"><span className="text-dark-400">Time</span><span className="text-white font-medium">{bookedTime} ET</span></div>
+            {meetLink && (
+              <div className="pt-3 border-t border-dark-600">
+                <a href={meetLink} target="_blank" rel="noopener noreferrer"
+                  className="w-full btn-primary py-3 text-center flex items-center justify-center gap-2 rounded-xl">
+                  <Video className="w-5 h-5" /> Join Google Meet
+                </a>
+              </div>
+            )}
           </div>
-          <button onClick={() => { setSubmitted(false); setStep(1); setForm({ email: '', first_name: '', last_name: '', phone: '', company_name: '', state: '', role: '', services: [], estimated_clients: '', current_software: '' }); }}
-            className="text-primary-400 hover:text-primary-300 text-sm font-medium transition mt-6 inline-block">Submit another request</button>
+          <p className="text-dark-500 text-sm mt-4">A confirmation email with the meeting link has been sent to {form.email}</p>
+          <button onClick={() => { setSubmitted(false); setStep(1); setForm({ email: '', first_name: '', last_name: '', phone: '', company_name: '', state: '', role: '', services: [], estimated_clients: '', current_software: '', date: '', time_slot: '' }); }}
+            className="text-primary-400 hover:text-primary-300 text-sm font-medium transition mt-4 inline-block">Submit another request</button>
         </div>
         <style jsx>{`
           @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -702,10 +755,9 @@ function BookDemoSection() {
 
           {step === 3 && (
             <div className="space-y-5 animate-fadeIn">
-              <h3 className="text-xl font-semibold text-white mb-2">Let&apos;s Get You Scheduled</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">A Few More Details</h3>
               <div>
-                <label className="block text-sm font-medium text-dark-300 mb-1.5">Estimate Current Number of Clients<span className="text-red-400">*</span></label>
-                <p className="text-xs text-dark-500 mb-2">How many clients are you currently serving?</p>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">Current Number of Clients<span className="text-red-400">*</span></label>
                 <select value={form.estimated_clients} onChange={e => setForm({ ...form, estimated_clients: e.target.value })}
                   className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition appearance-none cursor-pointer">
                   <option value="" className="bg-dark-800">Select range</option>
@@ -713,7 +765,7 @@ function BookDemoSection() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-dark-300 mb-1.5">What is your current software?<span className="text-red-400">*</span></label>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">Current Software<span className="text-red-400">*</span></label>
                 <select value={form.current_software} onChange={e => setForm({ ...form, current_software: e.target.value })}
                   className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition appearance-none cursor-pointer">
                   <option value="" className="bg-dark-800">Select software</option>
@@ -722,9 +774,81 @@ function BookDemoSection() {
               </div>
               <div className="flex gap-3 mt-2">
                 <button onClick={() => setStep(2)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
+                <button disabled={!canProceed3} onClick={() => { setStep(4); loadSlots(); }}
+                  className="flex-1 btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                  Pick a Time <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="space-y-5 animate-fadeIn">
+              <h3 className="text-xl font-semibold text-white mb-1">Pick Your Demo Time</h3>
+              <p className="text-dark-400 text-sm">30-minute live demo — all times are Eastern (ET)</p>
+
+              {loadingSlots ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 text-primary-400 animate-spin" />
+                  <span className="ml-3 text-dark-300">Loading available times...</span>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-dark-300 mb-2 flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary-400" /> Select a Date
+                    </label>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
+                      {Object.keys(availableSlots).sort().map(dateStr => (
+                        <button key={dateStr} onClick={() => setForm({ ...form, date: dateStr, time_slot: '' })}
+                          className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                            form.date === dateStr
+                              ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                              : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-primary-500/50 hover:text-white'
+                          }`}>
+                          {formatDateLabel(dateStr)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {form.date && (
+                    <div>
+                      <label className="block text-sm font-medium text-dark-300 mb-2 flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-primary-400" /> Select a Time
+                      </label>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {(availableSlots[form.date] || []).map(slot => (
+                          <button key={slot} onClick={() => setForm({ ...form, time_slot: slot })}
+                            className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                              form.time_slot === slot
+                                ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                                : 'bg-dark-700 text-dark-300 border border-dark-600 hover:border-primary-500/50 hover:text-white'
+                            }`}>
+                            {formatTimeLabel(slot)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {form.date && form.time_slot && (
+                    <div className="bg-primary-500/10 border border-primary-500/30 rounded-xl p-4 flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary-400 shrink-0" />
+                      <p className="text-white text-sm">
+                        <span className="font-semibold">{formatDateLabel(form.date)}</span> at{' '}
+                        <span className="font-semibold">{formatTimeLabel(form.time_slot)} ET</span> — 30 min demo
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="flex gap-3 mt-2">
+                <button onClick={() => setStep(3)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
                 <button disabled={!canSubmit || submitting} onClick={handleSubmit}
                   className="flex-1 btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-                  {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />Submitting...</> : <>Submit</>}
+                  {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />Booking...</> : <>Confirm Booking</>}
                 </button>
               </div>
             </div>

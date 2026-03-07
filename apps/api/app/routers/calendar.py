@@ -46,6 +46,19 @@ class CalendarEventUpdate(BaseModel):
     location: Optional[str] = None
 
 
+@router.get("/oauth-configured")
+async def check_oauth_configured():
+    """Public check: is Google OAuth configured on this server?"""
+    has_id = bool(settings.google_client_id)
+    has_secret = bool(settings.google_client_secret)
+    return {
+        "configured": has_id and has_secret,
+        "client_id_set": has_id,
+        "client_secret_set": has_secret,
+        "client_id_prefix": settings.google_client_id[:12] + "..." if has_id else None,
+    }
+
+
 @router.get("/status", response_model=GoogleCalendarStatus)
 async def get_calendar_status(
     current_user: User = Depends(get_current_user),
@@ -102,8 +115,16 @@ async def connect_google_calendar(
     current_user: User = Depends(get_current_user),
 ):
     """Exchange OAuth code for tokens and save to user."""
+    import logging
+    logger = logging.getLogger(__name__)
+
+    if not settings.google_client_id or not settings.google_client_secret:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google OAuth not configured on server. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.",
+        )
+
     try:
-        # Exchange code for tokens
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 "https://oauth2.googleapis.com/token",
@@ -117,6 +138,19 @@ async def connect_google_calendar(
             )
             
             if response.status_code != 200:
+                error_data = response.json() if response.headers.get("content-type", "").startswith("application/json") else {}
+                error_type = error_data.get("error", "unknown")
+                logger.error(
+                    f"Google token exchange failed: {error_type} | "
+                    f"client_id_set={bool(settings.google_client_id)} | "
+                    f"client_secret_set={bool(settings.google_client_secret)} | "
+                    f"redirect_uri={token_request.redirect_uri}"
+                )
+                if error_type == "invalid_client":
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Google OAuth credentials are invalid. Verify GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET match your Google Cloud Console project, and that the redirect URI is authorized.",
+                    )
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Failed to exchange code: {response.text}",

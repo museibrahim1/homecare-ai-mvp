@@ -290,7 +290,7 @@ async def book_demo(
         reply_to="sales@palmtai.com",
         html=f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
+            <div style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 50%, #115e59 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
                 <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">PalmCare AI</h1>
                 <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">{'Your Demo is Confirmed' if has_schedule else 'Demo Request Received'}</p>
             </div>
@@ -307,7 +307,7 @@ async def book_demo(
                 </p>
             </div>
             <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6366f1; font-weight: 600; margin: 0 0 4px 0; font-size: 14px;">PalmCare AI</p>
+                <p style="color: #0d9488; font-weight: 600; margin: 0 0 4px 0; font-size: 14px;">PalmCare AI</p>
                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; 2026 PalmCare AI. All rights reserved.</p>
             </div>
         </div>
@@ -322,7 +322,7 @@ async def book_demo(
         sender=email_svc.from_sales,
         html=f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #6366f1;">{'Demo Booked' if has_schedule else 'New Demo Request'}</h2>
+            <h2 style="color: #0d9488;">{'Demo Booked' if has_schedule else 'New Demo Request'}</h2>
             <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
                 <p><strong>Name:</strong> {booking.name}</p>
                 <p><strong>Email:</strong> {booking.email}</p>
