@@ -97,6 +97,7 @@ struct AddClientSheet: View {
                             .background(Color.palmFieldBg)
                             .clipShape(Circle())
                     }
+                    .accessibilityLabel("Close")
                 }
             }
             .onAppear { populateFromClient() }
@@ -115,6 +116,7 @@ struct AddClientSheet: View {
                 Image(systemName: "person.fill")
                     .font(.system(size: 14))
                     .foregroundColor(.palmSecondary)
+                    .accessibilityHidden(true)
 
                 TextField("John Smith", text: $fullName)
                     .font(.system(size: 15))
@@ -147,6 +149,7 @@ struct AddClientSheet: View {
                 Image(systemName: icon)
                     .font(.system(size: 14))
                     .foregroundColor(.palmSecondary)
+                    .accessibilityHidden(true)
 
                 TextField(placeholder, text: text)
                     .font(.system(size: 15))
@@ -195,6 +198,7 @@ struct AddClientSheet: View {
                                 .stroke(careLevel == value ? color.opacity(0.4) : Color.palmBorder, lineWidth: 1)
                         )
                     }
+                    .accessibilityLabel("\(label) priority\(careLevel == value ? ", selected" : "")")
                 }
             }
         }
@@ -227,6 +231,7 @@ struct AddClientSheet: View {
                                     .stroke(insuranceType == value ? Color.palmPrimary.opacity(0.4) : Color.palmBorder, lineWidth: 1)
                             )
                     }
+                    .accessibilityLabel("\(label) insurance\(insuranceType == value ? ", selected" : "")")
                 }
                 Spacer()
             }
@@ -265,6 +270,7 @@ struct AddClientSheet: View {
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.palmSecondary)
+                        .accessibilityHidden(true)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 13)
@@ -272,6 +278,7 @@ struct AddClientSheet: View {
                 .cornerRadius(12)
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
             }
+            .accessibilityLabel("Care specialty, \(specialtyOptions.first(where: { $0.0 == primaryDiagnosis })?.1 ?? "none selected")")
         }
     }
 

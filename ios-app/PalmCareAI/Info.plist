@@ -20,8 +20,6 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>API_BASE_URL</key>
-	<string>https://api-production-a0a2.up.railway.app</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSAppTransportSecurity</key>
@@ -39,8 +37,6 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSFaceIDUsageDescription</key>
-	<string>PalmCareAI uses Face ID to protect your account and client data.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>PalmCareAI needs microphone access to record client visits and assessments.</string>
 	<key>UILaunchScreen</key>

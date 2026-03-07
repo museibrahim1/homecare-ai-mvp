@@ -27,6 +27,8 @@ struct PalmAlert: View {
                 .onTapGesture {
                     withAnimation(.spring(response: 0.3)) { isPresented = false }
                 }
+                .accessibilityLabel("Dismiss")
+                .accessibilityAddTraits(.isButton)
 
             VStack(spacing: 0) {
                 VStack(spacing: 16) {
@@ -37,6 +39,7 @@ struct PalmAlert: View {
                         Image(systemName: icon)
                             .font(.system(size: 24, weight: .semibold))
                             .foregroundColor(iconColor)
+                            .accessibilityHidden(true)
                     }
                     .padding(.top, 8)
 
@@ -92,6 +95,8 @@ struct PalmAlert: View {
             .shadow(color: .black.opacity(0.15), radius: 20, y: 10)
             .padding(.horizontal, 44)
             .transition(.scale(scale: 0.85).combined(with: .opacity))
+            .accessibilityAddTraits(.isModal)
+            .accessibilityLabel("Alert: \(title)")
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isPresented)
     }

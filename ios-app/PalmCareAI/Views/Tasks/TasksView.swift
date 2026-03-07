@@ -150,6 +150,7 @@ struct TasksView: View {
             Image(systemName: "checklist")
                 .font(.system(size: 44))
                 .foregroundColor(.palmSecondary.opacity(0.4))
+                .accessibilityHidden(true)
             Text("No Tasks")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.palmText)
@@ -172,6 +173,7 @@ struct TasksView: View {
                 )
                 .cornerRadius(12)
             }
+            .accessibilityLabel("Add new task")
             .padding(.top, 8)
 
             Spacer()
@@ -230,6 +232,7 @@ struct TasksView: View {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 36))
                 .foregroundColor(.palmOrange)
+                .accessibilityHidden(true)
             Text("Something went wrong")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.palmText)
@@ -254,6 +257,7 @@ struct TasksView: View {
                 .background(Color.palmPrimary)
                 .cornerRadius(10)
             }
+            .accessibilityLabel("Retry loading tasks")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -301,6 +305,7 @@ struct TaskCard: View {
                     .font(.system(size: 22))
                     .foregroundColor(isCompleted ? .palmGreen : .palmBorder)
             }
+            .accessibilityLabel(task.status.lowercased() == "completed" || task.status.lowercased() == "done" ? "Completed" : "Mark as complete")
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(task.title)
@@ -323,6 +328,7 @@ struct TaskCard: View {
                         HStack(spacing: 3) {
                             Image(systemName: "calendar")
                                 .font(.system(size: 9))
+                                .accessibilityHidden(true)
                             Text(due)
                                 .font(.system(size: 10, weight: .medium))
                         }
@@ -346,6 +352,7 @@ struct TaskCard: View {
                     .font(.system(size: 14))
                     .foregroundColor(.palmSecondary.opacity(0.5))
             }
+            .accessibilityLabel("Delete task")
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)

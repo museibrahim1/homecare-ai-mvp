@@ -186,6 +186,7 @@ struct LandingView: View {
 
                     LandingOrb()
                         .frame(width: 220, height: 220)
+                        .accessibilityHidden(true)
 
                     Spacer()
                 }
@@ -267,6 +268,7 @@ struct LandingView: View {
                                 .cornerRadius(12)
                                 .shadow(color: Color.palmPrimary.opacity(0.35), radius: 7, y: 3)
                         }
+                        .accessibilityLabel("Get started, create an account")
                         .padding(.bottom, 9)
 
                         Button {
@@ -284,6 +286,7 @@ struct LandingView: View {
                                 )
                                 .cornerRadius(12)
                         }
+                        .accessibilityLabel("Sign in to existing account")
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 30)

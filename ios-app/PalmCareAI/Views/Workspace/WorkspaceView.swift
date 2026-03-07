@@ -37,6 +37,7 @@ struct WorkspaceView: View {
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.palmPrimary)
                         }
+                        .accessibilityLabel("Manage templates")
                     }
                 }
             }
@@ -53,6 +54,7 @@ struct WorkspaceView: View {
                         HStack(spacing: 5) {
                             Image(systemName: sectionIcons[index])
                                 .font(.system(size: 11, weight: .semibold))
+                                .accessibilityHidden(true)
 
                             Text(title)
                                 .font(.system(size: 12, weight: .semibold))
@@ -73,6 +75,7 @@ struct WorkspaceView: View {
                                 .stroke(selectedSection == index ? Color.clear : Color.palmBorder, lineWidth: 1)
                         )
                     }
+                    .accessibilityLabel("\(title), \(selectedSection == index ? "selected" : "")")
                 }
             }
             .padding(.horizontal, 18)
