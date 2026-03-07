@@ -1053,7 +1053,7 @@ function HeroOrb() {
 
       <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10">
         <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
-          Palm It — Get Started <ArrowRight className="w-5 h-5" />
+          Book Your Free Demo <ArrowRight className="w-5 h-5" />
         </a>
         <a href="#features" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
           See How It Works <ChevronDown className="w-5 h-5" />
@@ -1174,12 +1174,12 @@ export default function LandingPage() {
               </div>
 
               <Link href="/mobile-app" className="px-3 py-2 text-dark-300 hover:text-white transition">Mobile App</Link>
-              <a href="#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Schedule Demo</a>
+              <a href="#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Book Demo</a>
             </div>
 
             <div className="hidden lg:flex items-center gap-3">
               <Link href="/login" className="text-dark-300 hover:text-white transition px-3 py-2">Sign In</Link>
-              <a href="#book-demo" className="btn-primary py-2 px-5 text-sm">Schedule Demo</a>
+              <a href="#book-demo" className="btn-primary py-2 px-5 text-sm">Book Your Free Demo</a>
             </div>
 
             <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-dark-300 hover:text-white">
@@ -1192,23 +1192,56 @@ export default function LandingPage() {
               <Link href="/features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Features</Link>
               <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Solutions</a>
               <Link href="/mobile-app" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Mobile App</Link>
-              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Schedule Demo</a>
+              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Book Demo</a>
               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Contact</Link>
               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
-              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Schedule Demo</a>
+              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Book Your Free Demo</a>
             </div>
           )}
         </div>
       </nav>
 
       <main>
-      {/* ── HERO: Immersive Orb + Live Transcription ── */}
+      {/* ═══ 1. HERO — The Hook ═══ */}
       <HeroOrb />
 
-      {/* ── BOOK DEMO ── */}
+      {/* ═══ 2. HOW IT WORKS — Instant clarity ═══ */}
+      <section className="py-20 px-6 bg-dark-800/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">Three Steps. Zero Paperwork.</h2>
+            <p className="text-xl text-dark-400">From assessment to signed contract — AI handles the rest.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { step: '1', title: 'Record It', description: 'Staff records a client assessment interview on their phone — in person or over the phone. One tap to start.', icon: Mic },
+              { step: '2', title: 'Transcribe It', description: 'AI transcribes the conversation, identifies speakers, and extracts every care need and billable item automatically.', icon: Zap },
+              { step: '3', title: 'Contract It', description: 'A complete assessment, care plan, and service agreement is generated — ready to send and sign.', icon: FileText },
+            ].map((item, i) => (
+              <div key={i} className="relative">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30">{item.step}</div>
+                <div className="card p-8 pt-10">
+                  <item.icon className="w-10 h-10 text-primary-400 mb-4" />
+                  <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
+                  <p className="text-dark-400">{item.description}</p>
+                </div>
+                {i < 2 && <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2"><ChevronRight className="w-8 h-8 text-dark-600" /></div>}
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <a href="#book-demo" className="btn-primary inline-flex items-center gap-2 py-4 px-8 text-lg">
+              Book Your Free Demo <ArrowRight className="w-5 h-5" />
+            </a>
+            <p className="text-dark-500 text-sm mt-4">5 minutes is all it takes to see the difference</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 3. BOOK DEMO — Primary conversion point ═══ */}
       <BookDemoSection />
 
-      {/* ── FEATURES (TABBED) ── */}
+      {/* ═══ 4. FEATURES — Detail for deeper researchers ═══ */}
       <section id="features" className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -1219,7 +1252,6 @@ export default function LandingPage() {
             <p className="text-xl text-dark-400 max-w-2xl mx-auto">Built for care professionals. Not retrofitted from generic software.</p>
           </div>
 
-          {/* Tabs */}
           <div className="flex flex-wrap justify-center gap-2 mb-12">
             {FEATURES_TABS.map(tab => (
               <button key={tab.id} onClick={() => setActiveFeatureTab(tab.id)}
@@ -1229,7 +1261,6 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Feature cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES_TABS.find(t => t.id === activeFeatureTab)?.features.map((feature, i) => (
               <div key={i} className="card p-6 group hover:border-primary-500/30 transition-all">
@@ -1250,35 +1281,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <section className="py-20 px-6 bg-dark-800/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Record. Transcribe. Contract.</h2>
-            <p className="text-xl text-dark-400">From assessment to signed contract in three steps. AI handles the rest.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { step: '1', title: 'Record It', description: 'Staff records a client assessment interview on their phone — in person or over the phone. One tap to start.', icon: Mic },
-              { step: '2', title: 'Transcribe It', description: 'AI transcribes the conversation, identifies speakers, and extracts every care need and billable item automatically.', icon: Zap },
-              { step: '3', title: 'Contract It', description: 'A complete assessment, care plan, and service agreement is generated — ready to send and sign.', icon: FileText },
-            ].map((item, i) => (
-              <div key={i} className="relative">
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30">{item.step}</div>
-                <div className="card p-8 pt-10">
-                  <item.icon className="w-10 h-10 text-primary-400 mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
-                  <p className="text-dark-400">{item.description}</p>
-                </div>
-                {i < 2 && <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2"><ChevronRight className="w-8 h-8 text-dark-600" /></div>}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SOLUTIONS BY SIZE ── */}
-      <section id="solutions" className="py-20 px-6">
+      {/* ═══ 5. SOLUTIONS BY SIZE — Self-identification ═══ */}
+      <section id="solutions" className="py-20 px-6 bg-dark-800/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full mb-6">
@@ -1301,19 +1305,19 @@ export default function LandingPage() {
                     <li key={j} className="flex items-center gap-2 text-dark-300 text-sm"><CheckCircle className="w-4 h-4 text-green-400 shrink-0" />{f}</li>
                   ))}
                 </ul>
-                <a href="#book-demo" className="mt-6 block text-center py-3 rounded-xl font-medium bg-dark-700 text-white hover:bg-dark-600 transition">Schedule a Demo</a>
+                <a href="#book-demo" className="mt-6 block text-center py-3 rounded-xl font-medium bg-primary-500 text-white hover:bg-primary-600 transition">Book Your Free Demo</a>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section id="testimonials" className="py-20 px-6 bg-dark-800/30">
+      {/* ═══ 6. TESTIMONIALS — Social proof ═══ */}
+      <section id="testimonials" className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">Loved by Care Professionals</h2>
-            <p className="text-xl text-dark-400">See why agencies are choosing to Palm It</p>
+            <p className="text-xl text-dark-400">See why agencies are switching to PalmCare AI</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t, i) => (
@@ -1339,27 +1343,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FAQ ── */}
+      {/* ═══ 7. GETTING STARTED — Ease of entry ═══ */}
       <section className="py-20 px-6 bg-dark-800/30">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-            <p className="text-xl text-dark-400">Everything you need to know about PalmCare AI</p>
-          </div>
-          <div className="space-y-3">
-            {FAQ_ITEMS.map((item, i) => <FaqItem key={i} q={item.q} a={item.a} />)}
-          </div>
-          <div className="text-center mt-8">
-            <p className="text-dark-400 mb-3">Still have questions?</p>
-            <Link href="/contact" className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-medium transition">
-              Contact our team <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── GETTING STARTED ── */}
-      <section className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">Getting Started is Easy</h2>
@@ -1381,24 +1366,38 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="text-center mt-12">
-            <a href="#book-demo" className="btn-primary inline-flex items-center gap-2 py-4 px-8 text-lg">
-              Schedule Your Free Demo <ArrowRight className="w-5 h-5" />
-            </a>
+        </div>
+      </section>
+
+      {/* ═══ 8. FINAL CTA — Last conversion push ═══ */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-500/30">
+            <h2 className="text-4xl font-bold text-white mb-4">Your Next Client is Waiting</h2>
+            <p className="text-xl text-dark-300 mb-8">Close faster. Document smarter. Never lose a client to paperwork again.</p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Book Your Free Demo <ArrowRight className="w-5 h-5" /></a>
+            </div>
+            <p className="text-dark-400 text-sm mt-6">Free personalized demo &bull; No credit card &bull; No commitment</p>
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="card p-12 text-center bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 border-primary-500/30">
-            <h2 className="text-4xl font-bold text-white mb-4">Ready to Palm It?</h2>
-            <p className="text-xl text-dark-300 mb-8">Close faster. Document smarter. Never lose a client to paperwork again.</p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Palm It — Get Started<ArrowRight className="w-5 h-5" /></a>
-            </div>
-            <p className="text-dark-400 text-sm mt-6">Free personalized demo &bull; No commitment required</p>
+      {/* ═══ 9. FAQ — Bottom, for hesitant visitors ═══ */}
+      <section className="py-20 px-6 bg-dark-800/30">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+            <p className="text-xl text-dark-400">Everything you need to know about PalmCare AI</p>
+          </div>
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((item, i) => <FaqItem key={i} q={item.q} a={item.a} />)}
+          </div>
+          <div className="text-center mt-8">
+            <p className="text-dark-400 mb-3">Still have questions?</p>
+            <Link href="/contact" className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-medium transition">
+              Contact our team <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
@@ -1428,7 +1427,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/features" className="hover:text-white transition">Features</Link></li>
                 <li><Link href="/mobile-app" className="hover:text-white transition">Mobile App</Link></li>
-                <li><a href="#book-demo" className="hover:text-white transition">Schedule Demo</a></li>
+                <li><a href="#book-demo" className="hover:text-white transition">Book a Demo</a></li>
                 <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
                 <li><Link href="/status" className="hover:text-white transition">System Status</Link></li>
               </ul>
@@ -1471,7 +1470,7 @@ export default function LandingPage() {
         <div className="flex items-center justify-between gap-3">
           <p className="text-white text-sm font-medium hidden sm:block">Your next client is waiting</p>
           <div className="flex items-center gap-2 flex-1 sm:flex-none">
-            <a href="#book-demo" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Palm It — Book a Demo</a>
+            <a href="#book-demo" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Book Your Free Demo</a>
           </div>
         </div>
       </div>

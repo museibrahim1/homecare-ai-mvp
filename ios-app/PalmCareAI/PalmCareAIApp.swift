@@ -6,7 +6,10 @@ struct PalmCareAIApp: App {
     @StateObject private var api = APIService.shared
     @AppStorage("useFaceID") private var useFaceID = false
     @AppStorage("isDarkMode") private var isDarkMode = false
+    @Environment(\.scenePhase) private var scenePhase
     @State private var isBiometricUnlocked = false
+    @State private var enteredBackgroundAt: Date?
+    private let sessionReauthTimeout: TimeInterval = 300
 
     init() {
         let navAppearance = UINavigationBarAppearance()
@@ -44,6 +47,30 @@ struct PalmCareAIApp: App {
             }
             .onChange(of: api.isAuthenticated) { newValue in
                 if !newValue { isBiometricUnlocked = false }
+            }
+            .onChange(of: scenePhase) { newPhase in
+                guard api.isAuthenticated else {
+                    enteredBackgroundAt = nil
+                    return
+                }
+
+                switch newPhase {
+                case .background:
+                    enteredBackgroundAt = Date()
+                case .active:
+                    guard let enteredBackgroundAt else { return }
+                    let elapsed = Date().timeIntervalSince(enteredBackgroundAt)
+                    if elapsed >= sessionReauthTimeout {
+                        if useFaceID {
+                            isBiometricUnlocked = false
+                        } else {
+                            api.logout()
+                        }
+                    }
+                    self.enteredBackgroundAt = nil
+                default:
+                    break
+                }
             }
             .preferredColorScheme(isDarkMode ? .dark : .light)
         }
@@ -90,7 +117,7 @@ struct FaceIDLockScreen: View {
                 HStack(spacing: 8) {
                     Image(systemName: "faceid")
                         .font(.system(size: 16, weight: .semibold))
-                    Text(isAuthenticating ? "Authenticating..." : "Unlock with Face ID")
+                    Text(isAuthenticating ? "Authenticating..." : "Unlock")
                         .font(.system(size: 15, weight: .bold))
                 }
                 .foregroundColor(.white)
@@ -119,15 +146,15 @@ struct FaceIDLockScreen: View {
     private func authenticate() {
         let context = LAContext()
         var error: NSError?
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            onUnlock()
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
+            authFailed = true
             return
         }
 
         isAuthenticating = true
         authFailed = false
 
-        context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "Unlock PalmCare AI") { success, _ in
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Unlock PalmCare AI") { success, _ in
             DispatchQueue.main.async {
                 isAuthenticating = false
                 if success {

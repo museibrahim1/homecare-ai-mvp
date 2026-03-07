@@ -37,6 +37,15 @@ class APIService: ObservableObject {
     private var cachedVisits: CacheEntry<[Visit]>?
     private var cachedUser: CacheEntry<User>?
     private let cacheTTL: TimeInterval = 30 // 30 seconds
+    private lazy var session: URLSession = {
+        let config = URLSessionConfiguration.ephemeral
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.urlCache = nil
+        config.httpCookieStorage = nil
+        config.httpShouldSetCookies = false
+        config.waitsForConnectivity = false
+        return URLSession(configuration: config)
+    }()
 
     func clearCache() {
         cachedClients = nil
@@ -64,15 +73,38 @@ class APIService: ObservableObject {
 
     private var jsonDecoder: JSONDecoder { sharedDecoder }
 
-    func request<T: Decodable>(_ method: String, path: String, body: [String: Any]? = nil, noAuth: Bool = false, allowSoftUnauthorized: Bool = false) async throws -> T {
+    private func isAllowedURL(_ url: URL) -> Bool {
+        if url.scheme?.lowercased() == "https" {
+            return true
+        }
+#if DEBUG
+        if url.scheme?.lowercased() == "http",
+           let host = url.host?.lowercased(),
+           host == "localhost" || host == "127.0.0.1" {
+            return true
+        }
+#endif
+        return false
+    }
+
+    private func validatedURL(path: String) throws -> URL {
         guard let url = URL(string: "\(baseURL)\(path)") else {
             throw APIError.invalidURL
         }
+        guard isAllowedURL(url) else {
+            throw APIError.serverError("Insecure connection blocked.")
+        }
+        return url
+    }
+
+    func request<T: Decodable>(_ method: String, path: String, body: [String: Any]? = nil, noAuth: Bool = false, allowSoftUnauthorized: Bool = false) async throws -> T {
+        let url = try validatedURL(path: path)
 
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30
+        request.cachePolicy = .reloadIgnoringLocalCacheData
 
         if !noAuth, let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -82,7 +114,7 @@ class APIService: ObservableObject {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
         }
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
@@ -110,20 +142,19 @@ class APIService: ObservableObject {
     }
 
     func requestVoid(_ method: String, path: String, body: [String: Any]? = nil) async throws {
-        guard let url = URL(string: "\(baseURL)\(path)") else {
-            throw APIError.invalidURL
-        }
+        let url = try validatedURL(path: path)
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         if let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         if let body = body {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
         }
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
@@ -224,15 +255,14 @@ class APIService: ObservableObject {
     // MARK: - Audio Upload
 
     func uploadAudio(visitId: String, audioData: Data, filename: String, autoProcess: Bool = true) async throws -> UploadResponse {
-        guard let url = URL(string: "\(baseURL)/uploads/audio") else {
-            throw APIError.invalidURL
-        }
+        let url = try validatedURL(path: "/uploads/audio")
 
         let boundary = UUID().uuidString
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 120
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         if let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
@@ -265,7 +295,7 @@ class APIService: ObservableObject {
 
         request.httpBody = body
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
@@ -321,15 +351,14 @@ class APIService: ObservableObject {
     // MARK: - Live Transcription
 
     func liveTranscribe(audioData: Data, diarize: Bool = true) async throws -> LiveTranscriptResponse {
-        guard let url = URL(string: "\(baseURL)/live/transcribe?language=en&diarize=\(diarize)") else {
-            throw APIError.invalidURL
-        }
+        let url = try validatedURL(path: "/live/transcribe?language=en&diarize=\(diarize)")
 
         let boundary = UUID().uuidString
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         if let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
@@ -343,7 +372,7 @@ class APIService: ObservableObject {
 
         request.httpBody = body
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
@@ -384,15 +413,17 @@ class APIService: ObservableObject {
     func downloadFile(path: String, suggestedFilename: String) async throws -> URL {
         let fullPath = path.hasPrefix("http") ? path : "\(baseURL)\(path)"
         guard let url = URL(string: fullPath) else { throw APIError.invalidURL }
+        guard isAllowedURL(url) else { throw APIError.serverError("Insecure connection blocked.") }
 
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
         req.timeoutInterval = 60
+        req.cachePolicy = .reloadIgnoringLocalCacheData
         if let token = token {
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
-        let (data, response) = try await URLSession.shared.data(for: req)
+        let (data, response) = try await session.data(for: req)
         guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
 
         if http.statusCode == 401 {
@@ -429,15 +460,14 @@ class APIService: ObservableObject {
 
     /// Upload a contract template (PDF or DOCX) for OCR scanning and field detection.
     func uploadTemplate(fileData: Data, filename: String, name: String, description: String?) async throws -> TemplateUploadResponse {
-        guard let url = URL(string: "\(baseURL)/contract-templates/upload") else {
-            throw APIError.invalidURL
-        }
+        let url = try validatedURL(path: "/contract-templates/upload")
 
         let boundary = UUID().uuidString
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 120
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         if let token = token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
@@ -465,7 +495,7 @@ class APIService: ObservableObject {
 
         request.httpBody = body
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
 
         if http.statusCode == 401 {
