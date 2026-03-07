@@ -164,6 +164,10 @@ struct RecordView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var recorder = AudioRecorderService()
     @State private var liveTranscription: LiveTranscriptionService?
+    #if DEBUG
+    @StateObject private var demoTranscription = DemoTranscriptionService()
+    @State private var isDemoMode = false
+    #endif
 
     @State private var clients: [Client] = []
     @State private var selectedClient: Client?
@@ -193,11 +197,19 @@ struct RecordView: View {
                 VStack(spacing: 0) {
                     topBar
                     
+                    #if DEBUG
+                    if isDemoMode || recorder.isRecording {
+                        recordingLayout
+                    } else {
+                        idleLayout
+                    }
+                    #else
                     if recorder.isRecording {
                         recordingLayout
                     } else {
                         idleLayout
                     }
+                    #endif
                 }
 
                 // Processing overlay with pipeline progress
@@ -303,7 +315,10 @@ struct RecordView: View {
     }
 
     private var transcriptSegments: [TranscriptSegment] {
-        liveTranscription?.segments ?? []
+        #if DEBUG
+        if isDemoMode { return demoTranscription.segments }
+        #endif
+        return liveTranscription?.segments ?? []
     }
 
     // MARK: - Top Bar
@@ -401,6 +416,27 @@ struct RecordView: View {
             }
             .padding(.top, 20)
 
+            #if DEBUG
+            Button {
+                isDemoMode = true
+                demoTranscription.startTranscribing()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("Demo Assessment")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .foregroundColor(.palmOrange)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
+                .background(Color.palmOrange.opacity(0.1))
+                .cornerRadius(20)
+                .overlay(Capsule().stroke(Color.palmOrange.opacity(0.3), lineWidth: 1))
+            }
+            .padding(.top, 10)
+            #endif
+
             Spacer()
 
             HStack(spacing: 16) {
@@ -416,10 +452,24 @@ struct RecordView: View {
 
     private var recordingLayout: some View {
         VStack(spacing: 0) {
-            VoiceOrb(isActive: true, audioLevel: recorder.audioLevel)
+            VoiceOrb(isActive: true, audioLevel: {
+                #if DEBUG
+                if isDemoMode { return 0.4 }
+                #endif
+                return recorder.audioLevel
+            }())
                 .frame(width: 120, height: 120)
                 .contentShape(Rectangle())
-                .onTapGesture { handleRecordTap() }
+                .onTapGesture {
+                    #if DEBUG
+                    if isDemoMode {
+                        demoTranscription.stopTranscribing()
+                        isDemoMode = false
+                        return
+                    }
+                    #endif
+                    handleRecordTap()
+                }
                 .accessibilityLabel(recorder.isRecording ? "Stop recording" : "Start recording")
                 .accessibilityAddTraits(.isButton)
                 .padding(.top, 4)
