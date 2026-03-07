@@ -11,6 +11,8 @@ struct VisitDetailView: View {
     @State private var note: VisitNote?
     @State private var contract: VisitContract?
 
+    @State private var tabFetchFailed: Set<Int> = []
+
     @State private var isLoading = true
     @State private var activeTab = 0
     @State private var errorMessage: String?
@@ -330,6 +332,8 @@ struct VisitDetailView: View {
                 ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
                     transcriptBubble(segment)
                 }
+            } else if tabFetchFailed.contains(1) {
+                tabErrorState(tab: 1)
             } else {
                 emptyState(icon: "text.quote", title: "No Transcript", message: "The transcript will appear here once the audio has been processed.")
             }
@@ -415,6 +419,8 @@ struct VisitDetailView: View {
                 ForEach(items) { item in
                     billableRow(item)
                 }
+            } else if tabFetchFailed.contains(2) {
+                tabErrorState(tab: 2)
             } else {
                 emptyState(icon: "dollarsign.circle", title: "No Billables", message: "Billable items will appear here once the assessment has been processed.")
             }
@@ -555,6 +561,8 @@ struct VisitDetailView: View {
                     .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
                 }
+            } else if tabFetchFailed.contains(3) {
+                tabErrorState(tab: 3)
             } else {
                 emptyState(icon: "note.text", title: "No Notes", message: "Clinical notes will appear here once the assessment has been processed.")
             }
@@ -662,6 +670,8 @@ struct VisitDetailView: View {
                     .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
                 }
+            } else if tabFetchFailed.contains(4) {
+                tabErrorState(tab: 4)
             } else {
                 emptyState(icon: "doc.text.fill", title: "No Contract", message: "The contract will appear here once the assessment has been fully processed.")
             }
@@ -765,6 +775,38 @@ struct VisitDetailView: View {
         .padding(.horizontal, 20)
     }
 
+    private func tabErrorState(tab: Int) -> some View {
+        VStack(spacing: 12) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 32))
+                .foregroundColor(.palmOrange)
+            Text("Failed to Load")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.palmText)
+            Text("Check your connection and try again.")
+                .font(.system(size: 13))
+                .foregroundColor(.palmSecondary)
+            Button {
+                tabFetchFailed.remove(tab)
+                Task { await loadTabDataIfNeeded() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 12, weight: .bold))
+                    Text("Retry")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(Color.palmPrimary)
+                .cornerRadius(10)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+    }
+
     private func statusBadge(_ status: String) -> some View {
         let color: Color = {
             switch status.lowercased() {
@@ -839,23 +881,35 @@ struct VisitDetailView: View {
         switch activeTab {
         case 1:
             guard transcript == nil else { return }
-            if let t = try? await api.fetchVisitTranscript(visitId: visitId) {
-                await MainActor.run { transcript = t }
+            do {
+                let t = try await api.fetchVisitTranscript(visitId: visitId)
+                await MainActor.run { transcript = t; tabFetchFailed.remove(1) }
+            } catch {
+                await MainActor.run { tabFetchFailed.insert(1) }
             }
         case 2:
             guard billables == nil else { return }
-            if let b = try? await api.fetchVisitBillables(visitId: visitId) {
-                await MainActor.run { billables = b }
+            do {
+                let b = try await api.fetchVisitBillables(visitId: visitId)
+                await MainActor.run { billables = b; tabFetchFailed.remove(2) }
+            } catch {
+                await MainActor.run { tabFetchFailed.insert(2) }
             }
         case 3:
             guard note == nil else { return }
-            if let n = try? await api.fetchVisitNote(visitId: visitId) {
-                await MainActor.run { note = n }
+            do {
+                let n = try await api.fetchVisitNote(visitId: visitId)
+                await MainActor.run { note = n; tabFetchFailed.remove(3) }
+            } catch {
+                await MainActor.run { tabFetchFailed.insert(3) }
             }
         case 4:
             guard contract == nil else { return }
-            if let c = try? await api.fetchVisitContract(visitId: visitId) {
-                await MainActor.run { contract = c }
+            do {
+                let c = try await api.fetchVisitContract(visitId: visitId)
+                await MainActor.run { contract = c; tabFetchFailed.remove(4) }
+            } catch {
+                await MainActor.run { tabFetchFailed.insert(4) }
             }
         default:
             break
