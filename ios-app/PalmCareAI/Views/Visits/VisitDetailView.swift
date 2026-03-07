@@ -18,6 +18,7 @@ struct VisitDetailView: View {
     @State private var activeTab = 0
     @State private var errorMessage: String?
     @State private var isRefreshing = false
+    @State private var showFullContract = false
 
     private let tabs = ["Overview", "Transcript", "Billables", "Notes", "Contract"]
 
@@ -388,38 +389,39 @@ struct VisitDetailView: View {
     private var billablesTab: some View {
         VStack(spacing: 14) {
             if let items = billables?.items, !items.isEmpty {
+                let unapprovedCount = items.filter { $0.is_approved != true && $0.is_flagged != true }.count
+
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Billable Items")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.palmText)
-                        if let total = billables?.total_minutes {
-                            Text("\(items.count) items · \(String(format: "%.0f", total)) minutes total")
-                                .font(.system(size: 12))
-                                .foregroundColor(.palmSecondary)
-                        }
+                        Text("\(items.count) items identified")
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmSecondary)
                     }
                     Spacer()
-                }
-
-                if let categories = billables?.categories, !categories.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(Array(categories.keys).sorted(), id: \.self) { cat in
-                                Text(cat)
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(.palmPrimary)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 5)
-                                    .background(Color.palmPrimary.opacity(0.08))
-                                    .cornerRadius(8)
+                    if unapprovedCount > 0 {
+                        Button {
+                            Task { await approveAllBillables() }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 12))
+                                Text("Approve All")
+                                    .font(.system(size: 12, weight: .semibold))
                             }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 7)
+                            .background(Color.palmGreen)
+                            .cornerRadius(8)
                         }
                     }
                 }
 
-                ForEach(items) { item in
-                    billableRow(item)
+                ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
+                    billableRow(item, index: idx)
                 }
             } else if tabFetchFailed.contains(2) {
                 tabErrorState(tab: 2)
@@ -429,59 +431,119 @@ struct VisitDetailView: View {
         }
     }
 
-    private func billableRow(_ item: BillableItem) -> some View {
-        HStack(spacing: 12) {
-            VStack {
-                Image(systemName: item.is_approved == true ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 18))
-                    .foregroundColor(item.is_approved == true ? .palmGreen : .palmSecondary)
-            }
+    private func billableRow(_ item: BillableItem, index: Int) -> some View {
+        let isApproved = item.is_approved == true
+        let isDenied = item.is_flagged == true
+        let borderColor: Color = isApproved ? .palmGreen : (isDenied ? .red : Color.palmBorder)
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    if let code = item.code, !code.isEmpty {
-                        Text(code)
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.palmPrimary)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.palmPrimary.opacity(0.08))
-                            .cornerRadius(4)
-                    }
-                    if let cat = item.category {
-                        Text(cat)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.palmSecondary)
-                    }
-                    Spacer()
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                if let code = item.code, !code.isEmpty {
+                    Text(code)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.palmPrimary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.palmPrimary.opacity(0.08))
+                        .cornerRadius(4)
                 }
-
-                if let desc = item.description, !desc.isEmpty {
-                    Text(desc)
-                        .font(.system(size: 13))
-                        .foregroundColor(.palmText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                if let evidence = item.evidence, let evidenceStr = evidence.value as? String, !evidenceStr.isEmpty {
-                    Text(evidenceStr)
-                        .font(.system(size: 11))
+                if let cat = item.category {
+                    Text(cat.replacingOccurrences(of: "_", with: " ").capitalized)
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.palmSecondary)
-                        .lineLimit(2)
+                }
+                Spacer()
+                if isApproved {
+                    Label("Approved", systemImage: "checkmark.circle.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.palmGreen)
+                } else if isDenied {
+                    Label("Denied", systemImage: "xmark.circle.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.red)
                 }
             }
 
-            if let mins = item.adjusted_minutes ?? item.minutes {
-                Text("\(String(format: "%.0f", mins))m")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.palmPrimary)
+            if let desc = item.description, !desc.isEmpty {
+                Text(desc)
+                    .font(.system(size: 13))
+                    .foregroundColor(.palmText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !isApproved && !isDenied {
+                HStack(spacing: 10) {
+                    Button {
+                        Task { await approveBillable(item, index: index) }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 11, weight: .bold))
+                            Text("Approve")
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.palmGreen)
+                        .cornerRadius(8)
+                    }
+
+                    Button {
+                        Task { await denyBillable(item, index: index) }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 11, weight: .bold))
+                            Text("Deny")
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.red.opacity(0.08))
+                        .cornerRadius(8)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.red.opacity(0.3), lineWidth: 1))
+                    }
+                }
             }
         }
         .padding(14)
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(borderColor.opacity(isApproved || isDenied ? 0.4 : 0.15), lineWidth: isApproved || isDenied ? 1.5 : 1))
+    }
+
+    private func approveBillable(_ item: BillableItem, index: Int) async {
+        do {
+            let _ = try await api.approveBillableItem(visitId: visitId, itemId: item.id)
+            await MainActor.run {
+                if var items = billables?.items {
+                    items[index] = BillableItem(id: item.id, visit_id: item.visit_id, code: item.code, category: item.category, description: item.description, start_ms: item.start_ms, end_ms: item.end_ms, minutes: item.minutes, evidence: item.evidence, is_approved: true, is_flagged: false, adjusted_minutes: item.adjusted_minutes)
+                    billables = VisitBillablesResponse(items: items, total_minutes: billables?.total_minutes, total_adjusted_minutes: billables?.total_adjusted_minutes, categories: billables?.categories)
+                }
+            }
+        } catch {}
+    }
+
+    private func denyBillable(_ item: BillableItem, index: Int) async {
+        do {
+            let _ = try await api.denyBillableItem(visitId: visitId, itemId: item.id)
+            await MainActor.run {
+                if var items = billables?.items {
+                    items[index] = BillableItem(id: item.id, visit_id: item.visit_id, code: item.code, category: item.category, description: item.description, start_ms: item.start_ms, end_ms: item.end_ms, minutes: item.minutes, evidence: item.evidence, is_approved: false, is_flagged: true, adjusted_minutes: item.adjusted_minutes)
+                    billables = VisitBillablesResponse(items: items, total_minutes: billables?.total_minutes, total_adjusted_minutes: billables?.total_adjusted_minutes, categories: billables?.categories)
+                }
+            }
+        } catch {}
+    }
+
+    private func approveAllBillables() async {
+        guard let items = billables?.items else { return }
+        for (idx, item) in items.enumerated() where item.is_approved != true && item.is_flagged != true {
+            await approveBillable(item, index: idx)
+        }
     }
 
     // MARK: - Notes Tab (SOAP)
@@ -494,9 +556,36 @@ struct VisitDetailView: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.palmText)
                     Spacer()
+
+                    Button { Task { await exportFile(type: "note.pdf") } } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.down.doc.fill").font(.system(size: 12))
+                            Text("PDF").font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(.palmPrimary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.palmPrimary.opacity(0.08))
+                        .cornerRadius(8)
+                    }
                 }
 
                 if let sd = n.structured_data {
+                    if let mood = sd.client_mood, !mood.isEmpty {
+                        HStack(spacing: 8) {
+                            Image(systemName: "face.smiling")
+                                .font(.system(size: 14))
+                                .foregroundColor(.palmOrange)
+                            Text("Mood: \(mood)")
+                                .font(.system(size: 13))
+                                .foregroundColor(.palmText)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.palmOrange.opacity(0.06))
+                        .cornerRadius(10)
+                    }
+
                     if let subjective = sd.subjective, !subjective.isEmpty {
                         soapSection(letter: "S", title: "Subjective", content: subjective, color: .palmBlue)
                     }
@@ -510,7 +599,8 @@ struct VisitDetailView: View {
                         soapSection(letter: "P", title: "Plan", content: plan, color: .palmPurple)
                     }
 
-                    if let tasks = sd.tasks_performed, !tasks.isEmpty {
+                    let taskStrings = sd.tasksAsStrings
+                    if !taskStrings.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 6) {
                                 Image(systemName: "checklist")
@@ -520,8 +610,7 @@ struct VisitDetailView: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.palmText)
                             }
-
-                            ForEach(tasks, id: \.self) { task in
+                            ForEach(taskStrings, id: \.self) { task in
                                 HStack(alignment: .top, spacing: 8) {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 12))
@@ -539,6 +628,48 @@ struct VisitDetailView: View {
                         .cornerRadius(12)
                         .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                    }
+
+                    if let safety = sd.safety_observations, !safety.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "exclamationmark.shield.fill")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.red)
+                                Text("Safety Observations")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.palmText)
+                            }
+                            Text(safety)
+                                .font(.system(size: 13))
+                                .foregroundColor(.palmText)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(14)
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.red.opacity(0.15), lineWidth: 1))
+                    }
+
+                    if let next = sd.next_visit_plan, !next.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "calendar.badge.clock")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.palmBlue)
+                                Text("Next Visit Plan")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.palmText)
+                            }
+                            Text(next)
+                                .font(.system(size: 13))
+                                .foregroundColor(.palmText)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(14)
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBlue.opacity(0.15), lineWidth: 1))
                     }
                 }
 
@@ -604,74 +735,15 @@ struct VisitDetailView: View {
     // MARK: - Contract Tab
 
     private var contractTab: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 0) {
             if let c = contract {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(c.title ?? "Contract")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.palmText)
-                        if let status = c.status {
-                            Text(status.capitalized)
-                                .font(.system(size: 12))
-                                .foregroundColor(.palmSecondary)
-                        }
-                    }
-                    Spacer()
-
-                    Button { Task { await exportFile(type: "contract.pdf") } } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.down.doc.fill")
-                                .font(.system(size: 12))
-                            Text("PDF")
-                                .font(.system(size: 12, weight: .semibold))
-                        }
-                        .foregroundColor(.palmPrimary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.palmPrimary.opacity(0.08))
-                        .cornerRadius(8)
-                    }
-                    .accessibilityLabel("Download contract as PDF")
-                }
-
-                if c.services != nil && !(c.services?.isEmpty ?? true) {
-                    contractDetailCard(icon: "list.bullet", label: "Services", value: c.servicesDescription, color: .palmPrimary)
-                }
-                if c.schedule != nil && !(c.schedule?.isEmpty ?? true) {
-                    contractDetailCard(icon: "calendar", label: "Schedule", value: c.scheduleDescription, color: .palmBlue)
-                }
-
-                HStack(spacing: 12) {
-                    if let rate = c.hourly_rate {
-                        miniStat(label: "Hourly Rate", value: "$\(String(format: "%.2f", rate))", color: .palmGreen)
-                    }
-                    if let hours = c.weekly_hours {
-                        miniStat(label: "Weekly Hours", value: "\(String(format: "%.1f", hours))h", color: .palmBlue)
-                    }
-                }
-
-                if let content = c.content, !content.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "doc.text")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.palmSecondary)
-                            Text("Contract Content")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.palmText)
-                        }
-                        Text(content)
-                            .font(.system(size: 13))
-                            .foregroundColor(.palmText)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(14)
-                    .background(Color(UIColor.secondarySystemGroupedBackground))
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
-                }
+                contractHeader(c)
+                    .padding(.bottom, 14)
+                contractRateCards(c)
+                    .padding(.bottom, 14)
+                contractServicesSection(c)
+                contractScheduleSection(c)
+                contractDocumentSection(c)
             } else if tabFetchFailed.contains(4) {
                 tabErrorState(tab: 4)
             } else {
@@ -680,27 +752,359 @@ struct VisitDetailView: View {
         }
     }
 
-    private func contractDetailCard(icon: String, label: String, value: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(color)
-                Text(label)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.palmText)
+    private func contractHeader(_ c: VisitContract) -> some View {
+        VStack(spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(c.title ?? "Service Agreement")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.palmText)
+                    if let status = c.status {
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(status == "active" ? Color.palmGreen : Color.palmOrange)
+                                .frame(width: 6, height: 6)
+                            Text(status.capitalized)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(status == "active" ? .palmGreen : .palmOrange)
+                        }
+                    }
+                }
+                Spacer()
+                Menu {
+                    Button { Task { await exportFile(type: "contract.pdf") } } label: {
+                        Label("Download PDF", systemImage: "arrow.down.doc.fill")
+                    }
+                    Button { Task { await exportFile(type: "contract.docx") } } label: {
+                        Label("Download DOCX", systemImage: "doc.fill")
+                    }
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.palmPrimary)
+                        .frame(width: 36, height: 36)
+                        .background(Color.palmPrimary.opacity(0.08))
+                        .cornerRadius(10)
+                }
             }
-            Text(value)
-                .font(.system(size: 13))
-                .foregroundColor(.palmText)
-                .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+    }
+
+    private func contractRateCards(_ c: VisitContract) -> some View {
+        HStack(spacing: 10) {
+            if let rate = c.hourly_rate {
+                VStack(spacing: 4) {
+                    Text("$\(String(format: "%.2f", rate))")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.palmGreen)
+                    Text("per hour")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.palmSecondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color.palmGreen.opacity(0.06))
+                .cornerRadius(12)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGreen.opacity(0.15), lineWidth: 1))
+            }
+            if let hours = c.weekly_hours {
+                VStack(spacing: 4) {
+                    Text("\(String(format: "%.0f", hours))h")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.palmBlue)
+                    Text("per week")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.palmSecondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color.palmBlue.opacity(0.06))
+                .cornerRadius(12)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBlue.opacity(0.15), lineWidth: 1))
+            }
+            if let rate = c.hourly_rate, let hours = c.weekly_hours {
+                VStack(spacing: 4) {
+                    Text("$\(String(format: "%.0f", rate * hours))")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.palmPrimary)
+                    Text("per week")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.palmSecondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color.palmPrimary.opacity(0.06))
+                .cornerRadius(12)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmPrimary.opacity(0.15), lineWidth: 1))
+            }
+        }
+    }
+
+    private func contractServicesSection(_ c: VisitContract) -> some View {
+        Group {
+            if let services = c.services, !services.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "list.clipboard.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.palmPrimary)
+                        Text("Services")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.palmText)
+                        Spacer()
+                        Text("\(services.count) services")
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmSecondary)
+                    }
+
+                    ForEach(Array(services.enumerated()), id: \.offset) { _, svc in
+                        if let dict = svc.value as? [String: Any] {
+                            let name = dict["name"] as? String ?? "Service"
+                            let desc = dict["description"] as? String ?? ""
+                            let freq = dict["frequency"] as? String
+                            let priority = dict["priority"] as? String
+
+                            HStack(alignment: .top, spacing: 10) {
+                                Image(systemName: serviceIcon(for: name))
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.palmPrimary)
+                                    .frame(width: 28, height: 28)
+                                    .background(Color.palmPrimary.opacity(0.08))
+                                    .cornerRadius(7)
+
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(name)
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundColor(.palmText)
+                                        Spacer()
+                                        if let p = priority {
+                                            Text(p)
+                                                .font(.system(size: 10, weight: .bold))
+                                                .foregroundColor(p == "High" ? .red : (p == "Medium" ? .palmOrange : .palmSecondary))
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background((p == "High" ? Color.red : (p == "Medium" ? Color.palmOrange : Color.palmSecondary)).opacity(0.08))
+                                                .cornerRadius(4)
+                                        }
+                                    }
+                                    if !desc.isEmpty {
+                                        Text(desc)
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.palmSecondary)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                    if let f = freq {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "clock").font(.system(size: 10))
+                                            Text(f).font(.system(size: 11, weight: .medium))
+                                        }
+                                        .foregroundColor(.palmBlue)
+                                    }
+                                }
+                            }
+                            .padding(12)
+                            .background(Color(UIColor.tertiarySystemGroupedBackground))
+                            .cornerRadius(10)
+                        }
+                    }
+                }
+                .padding(14)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                .padding(.bottom, 14)
+            }
+        }
+    }
+
+    private func contractScheduleSection(_ c: VisitContract) -> some View {
+        Group {
+            if let sched = c.schedule, !sched.isEmpty {
+                let freq = (sched["frequency"]?.value as? String) ?? ""
+                let serviceHours = sched["service_hours"]?.value as? [[String: Any]]
+                let rationale = sched["rationale"]?.value as? String
+
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "calendar.badge.clock")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.palmBlue)
+                        Text("Schedule")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.palmText)
+                    }
+
+                    if !freq.isEmpty {
+                        HStack(spacing: 8) {
+                            Image(systemName: "repeat").font(.system(size: 12)).foregroundColor(.palmBlue)
+                            Text("Frequency: \(freq)")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.palmText)
+                        }
+                    }
+
+                    if let hours = serviceHours, !hours.isEmpty {
+                        ForEach(Array(hours.enumerated()), id: \.offset) { _, sh in
+                            let svc = sh["service"] as? String ?? "Service"
+                            let hrs = sh["hours_per_week"] as? Int ?? (sh["hours_per_week"] as? Double).map { Int($0) } ?? 0
+                            let level = sh["need_level"] as? String ?? ""
+
+                            HStack {
+                                Text(svc)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.palmText)
+                                Spacer()
+                                if !level.isEmpty {
+                                    Text(level.capitalized)
+                                        .font(.system(size: 10, weight: .semibold))
+                                        .foregroundColor(.palmSecondary)
+                                }
+                                Text("\(hrs) hrs/wk")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.palmPrimary)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(UIColor.tertiarySystemGroupedBackground))
+                            .cornerRadius(8)
+                        }
+                    }
+
+                    if let r = rationale, !r.isEmpty {
+                        Text(r)
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, 4)
+                    }
+                }
+                .padding(14)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                .padding(.bottom, 14)
+            }
+        }
+    }
+
+    private func contractDocumentSection(_ c: VisitContract) -> some View {
+        Group {
+            if let content = c.content, !content.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "doc.text.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.palmSecondary)
+                        Text("Full Agreement")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.palmText)
+                        Spacer()
+                        Button { showFullContract.toggle() } label: {
+                            HStack(spacing: 4) {
+                                Text(showFullContract ? "Collapse" : "View")
+                                    .font(.system(size: 12, weight: .medium))
+                                Image(systemName: showFullContract ? "chevron.up" : "chevron.down")
+                                    .font(.system(size: 10, weight: .bold))
+                            }
+                            .foregroundColor(.palmPrimary)
+                        }
+                    }
+
+                    if showFullContract {
+                        contractFormattedContent(content)
+                    } else {
+                        let preview = String(content.prefix(200)).trimmingCharacters(in: .whitespacesAndNewlines)
+                        Text(preview + "...")
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmSecondary)
+                            .lineLimit(4)
+                    }
+                }
+                .padding(14)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+            }
+        }
+    }
+
+    private func contractFormattedContent(_ content: String) -> some View {
+        let sections = parseContractSections(content)
+        return VStack(alignment: .leading, spacing: 16) {
+            ForEach(Array(sections.enumerated()), id: \.offset) { _, section in
+                VStack(alignment: .leading, spacing: 6) {
+                    if !section.heading.isEmpty {
+                        Text(section.heading)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.palmPrimary)
+                            .padding(.bottom, 2)
+                        Divider()
+                    }
+                    Text(section.body)
+                        .font(.system(size: 12))
+                        .foregroundColor(.palmText)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineSpacing(3)
+                }
+            }
+        }
+    }
+
+    private func serviceIcon(for name: String) -> String {
+        let lower = name.lowercased()
+        if lower.contains("personal") || lower.contains("adl") { return "figure.stand" }
+        if lower.contains("meal") || lower.contains("nutrition") { return "fork.knife" }
+        if lower.contains("house") || lower.contains("cleaning") { return "house.fill" }
+        if lower.contains("companion") { return "person.2.fill" }
+        if lower.contains("respite") { return "heart.fill" }
+        if lower.contains("transport") { return "car.fill" }
+        if lower.contains("medic") { return "pills.fill" }
+        if lower.contains("safety") { return "shield.checkered" }
+        if lower.contains("mobility") { return "figure.walk" }
+        return "cross.case.fill"
+    }
+
+    private struct ContractSection {
+        let heading: String
+        let body: String
+    }
+
+    private func parseContractSections(_ content: String) -> [ContractSection] {
+        let lines = content.components(separatedBy: "\n")
+        var sections: [ContractSection] = []
+        var currentHeading = ""
+        var currentBody: [String] = []
+
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("====") || trimmed.hasPrefix("----") { continue }
+            let isSectionHeader = !trimmed.isEmpty &&
+                (trimmed == trimmed.uppercased() && trimmed.count > 3 && trimmed.rangeOfCharacter(from: .letters) != nil) ||
+                trimmed.range(of: #"^\d+\.\s+[A-Z]"#, options: .regularExpression) != nil
+
+            if isSectionHeader {
+                if !currentHeading.isEmpty || !currentBody.isEmpty {
+                    let bodyText = currentBody.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !bodyText.isEmpty || !currentHeading.isEmpty {
+                        sections.append(ContractSection(heading: currentHeading, body: bodyText))
+                    }
+                }
+                currentHeading = trimmed.replacingOccurrences(of: #"^\d+\.\s+"#, with: "", options: .regularExpression)
+                    .capitalized
+                currentBody = []
+            } else {
+                currentBody.append(line)
+            }
+        }
+        if !currentHeading.isEmpty || !currentBody.isEmpty {
+            let bodyText = currentBody.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            if !bodyText.isEmpty { sections.append(ContractSection(heading: currentHeading, body: bodyText)) }
+        }
+        return sections
     }
 
     private func miniStat(label: String, value: String, color: Color) -> some View {

@@ -351,6 +351,18 @@ class APIService: ObservableObject {
         try await request("GET", path: "/visits/\(visitId)/contract")
     }
 
+    func approveBillableItem(visitId: String, itemId: String) async throws -> BillableItem {
+        try await request("PUT", path: "/visits/\(visitId)/billables/\(itemId)", body: ["is_approved": true])
+    }
+
+    func denyBillableItem(visitId: String, itemId: String) async throws -> BillableItem {
+        try await request("PUT", path: "/visits/\(visitId)/billables/\(itemId)", body: ["is_flagged": true, "flag_reason": "Denied by user"])
+    }
+
+    func listContractTemplates() async throws -> [ContractTemplate] {
+        try await request("GET", path: "/contract-templates/")
+    }
+
     func runPipelineStep(visitId: String, step: String) async throws {
         let _: [String: AnyCodable] = try await request("POST", path: "/pipeline/visits/\(visitId)/\(step)")
     }

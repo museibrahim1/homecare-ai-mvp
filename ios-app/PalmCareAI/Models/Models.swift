@@ -272,7 +272,8 @@ struct BillableItem: Codable, Identifiable {
     let end_ms: Int?
     let minutes: Double?
     let evidence: AnyCodable?
-    let is_approved: Bool?
+    var is_approved: Bool?
+    var is_flagged: Bool?
     let adjusted_minutes: Double?
 }
 
@@ -290,7 +291,25 @@ struct NoteStructuredData: Codable {
     let objective: String?
     let assessment: String?
     let plan: String?
-    let tasks_performed: [String]?
+    let tasks_performed: [AnyCodable]?
+    let visit_info: [String: AnyCodable]?
+    let client_mood: String?
+    let cognitive_status: String?
+    let safety_observations: String?
+    let next_visit_plan: String?
+
+    var tasksAsStrings: [String] {
+        guard let tasks = tasks_performed else { return [] }
+        return tasks.compactMap { item -> String? in
+            if let str = item.value as? String { return str }
+            if let dict = item.value as? [String: Any] {
+                let task = dict["task"] as? String ?? ""
+                let details = dict["details"] as? String ?? ""
+                return details.isEmpty ? task : "\(task): \(details)"
+            }
+            return nil
+        }
+    }
 }
 
 struct VisitContract: Codable, Identifiable {
@@ -367,6 +386,21 @@ struct VisitContract: Codable, Identifiable {
             "\(key.capitalized): \(val.value)"
         }.joined(separator: "\n")
     }
+}
+
+// MARK: - Contract Templates
+
+struct ContractTemplate: Codable, Identifiable {
+    let id: String
+    let name: String
+    let description: String?
+    let file_type: String?
+    let version: Int?
+    let field_count: Int?
+    let unmapped_count: Int?
+    let is_active: Bool?
+    let created_at: String?
+    let updated_at: String?
 }
 
 struct PipelineStatusResponse: Codable {
