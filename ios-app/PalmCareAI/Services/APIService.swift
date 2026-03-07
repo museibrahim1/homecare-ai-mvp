@@ -66,6 +66,23 @@ class APIService: ObservableObject {
         }
     }
 
+    #if DEBUG
+    func autoLoginDemoIfNeeded() {
+        guard token == nil else { return }
+        Task {
+            let url = URL(string: "\(baseURL)/auth/login")!
+            var req = URLRequest(url: url)
+            req.httpMethod = "POST"
+            req.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.httpBody = try? JSONSerialization.data(withJSONObject: ["email": "demo@agency.com", "password": "demo1234"])
+            guard let (data, _) = try? await URLSession.shared.data(for: req),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let t = json["access_token"] as? String else { return }
+            await MainActor.run { self.token = t }
+        }
+    }
+    #endif
+
     private let sharedDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
         return decoder

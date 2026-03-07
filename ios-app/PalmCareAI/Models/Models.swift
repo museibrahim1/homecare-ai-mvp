@@ -311,6 +311,45 @@ struct VisitContract: Codable, Identifiable {
     let created_at: String?
     let updated_at: String?
 
+    enum CodingKeys: String, CodingKey {
+        case id, client_id, visit_id, title, services, schedule
+        case hourly_rate, weekly_hours, content, status
+        case start_date, end_date, cancellation_policy
+        case terms_and_conditions, created_at, updated_at
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        client_id = try c.decodeIfPresent(String.self, forKey: .client_id)
+        visit_id = try c.decodeIfPresent(String.self, forKey: .visit_id)
+        title = try c.decodeIfPresent(String.self, forKey: .title)
+        services = try c.decodeIfPresent([AnyCodable].self, forKey: .services)
+        schedule = try c.decodeIfPresent([String: AnyCodable].self, forKey: .schedule)
+        status = try c.decodeIfPresent(String.self, forKey: .status)
+        start_date = try c.decodeIfPresent(String.self, forKey: .start_date)
+        end_date = try c.decodeIfPresent(String.self, forKey: .end_date)
+        cancellation_policy = try c.decodeIfPresent(String.self, forKey: .cancellation_policy)
+        terms_and_conditions = try c.decodeIfPresent(String.self, forKey: .terms_and_conditions)
+        created_at = try c.decodeIfPresent(String.self, forKey: .created_at)
+        updated_at = try c.decodeIfPresent(String.self, forKey: .updated_at)
+
+        if let d = try? c.decodeIfPresent(Double.self, forKey: .hourly_rate) {
+            hourly_rate = d
+        } else if let s = try? c.decodeIfPresent(String.self, forKey: .hourly_rate), let d = Double(s) {
+            hourly_rate = d
+        } else { hourly_rate = nil }
+
+        if let d = try? c.decodeIfPresent(Double.self, forKey: .weekly_hours) {
+            weekly_hours = d
+        } else if let s = try? c.decodeIfPresent(String.self, forKey: .weekly_hours), let d = Double(s) {
+            weekly_hours = d
+        } else { weekly_hours = nil }
+
+        let raw = try c.decodeIfPresent(String.self, forKey: .content)
+        content = raw ?? terms_and_conditions
+    }
+
     var servicesDescription: String {
         guard let services = services else { return "No services listed" }
         return services.compactMap { item -> String? in

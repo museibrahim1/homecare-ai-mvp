@@ -4,6 +4,7 @@ struct VisitDetailView: View {
     @EnvironmentObject var api: APIService
     let visitId: String
     var clientName: String?
+    var initialTab: Int = 0
 
     @State private var visit: Visit?
     @State private var transcript: VisitTranscriptResponse?
@@ -56,7 +57,10 @@ struct VisitDetailView: View {
                 .accessibilityLabel("Assessment actions")
             }
         }
-        .task { await loadVisit() }
+        .task {
+            if initialTab != 0 { activeTab = initialTab }
+            await loadVisit()
+        }
         .onChange(of: activeTab) { _ in
             Task { await loadTabDataIfNeeded() }
         }
@@ -65,33 +69,31 @@ struct VisitDetailView: View {
     // MARK: - Tab Bar
 
     private var tabBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 2) {
-                ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) { activeTab = index }
-                    } label: {
-                        VStack(spacing: 6) {
-                            HStack(spacing: 5) {
-                                Image(systemName: tabIcon(index))
-                                    .font(.system(size: 11, weight: .semibold))
-                                Text(tab)
-                                    .font(.system(size: 12, weight: .medium))
-                            }
-                            .foregroundColor(activeTab == index ? .palmPrimary : .palmSecondary)
-
-                            Rectangle()
-                                .fill(activeTab == index ? Color.palmPrimary : Color.clear)
-                                .frame(height: 2)
+        HStack(spacing: 0) {
+            ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { activeTab = index }
+                } label: {
+                    VStack(spacing: 6) {
+                        HStack(spacing: 4) {
+                            Image(systemName: tabIcon(index))
+                                .font(.system(size: 10, weight: .semibold))
+                            Text(tab)
+                                .font(.system(size: 11, weight: .medium))
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.top, 10)
+                        .foregroundColor(activeTab == index ? .palmPrimary : .palmSecondary)
+
+                        Rectangle()
+                            .fill(activeTab == index ? Color.palmPrimary : Color.clear)
+                            .frame(height: 2)
                     }
-                    .accessibilityLabel("\(tab) tab")
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 10)
                 }
+                .accessibilityLabel("\(tab) tab")
             }
-            .padding(.horizontal, 12)
         }
+        .padding(.horizontal, 4)
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .overlay(Divider(), alignment: .bottom)
     }

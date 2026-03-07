@@ -89,6 +89,11 @@ struct PalmCareAIApp: App {
                 enforceForegroundInactivityPolicy()
             }
             .preferredColorScheme(isDarkMode ? .dark : .light)
+            .task {
+                #if DEBUG
+                api.autoLoginDemoIfNeeded()
+                #endif
+            }
         }
     }
 
