@@ -167,11 +167,11 @@ export const RemotionRoot: React.FC = () => {
       />
 
       {/* ===== KLING PRODUCT AD ===== */}
-      {/* Full cinematic product commercial — 44s */}
+      {/* Full cinematic product commercial — 37s */}
       <Composition
         id="ProductAd"
         component={ProductAd}
-        durationInFrames={1320}
+        durationInFrames={1120}
         fps={30}
         width={1920}
         height={1080}
@@ -184,7 +184,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="ProductAdWithAudio"
         component={ProductAd}
-        durationInFrames={1320}
+        durationInFrames={1120}
         fps={30}
         width={1920}
         height={1080}
