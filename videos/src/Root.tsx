@@ -5,6 +5,7 @@ import { DemoVideoV2 } from "./compositions/DemoVideoV2";
 import { DemoVideoV3 } from "./compositions/DemoVideoV3";
 import { AdVideo } from "./compositions/AdVideo";
 import { PalmCareAd } from "./compositions/PalmCareAd";
+import { AppFlowAd } from "./compositions/AppFlowAd";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -136,6 +137,32 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      {/* ===== APP FLOW AD ===== */}
+      {/* Real app recording + cinematic footage — 40s */}
+      <Composition
+        id="AppFlowAd"
+        component={AppFlowAd}
+        durationInFrames={1200}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{
+          showAudio: false,
+        }}
+      />
+
+      {/* App Flow Ad with Audio */}
+      <Composition
+        id="AppFlowAdWithAudio"
+        component={AppFlowAd}
+        durationInFrames={1200}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{
+          showAudio: true,
+        }}
       />
     </>
   );
