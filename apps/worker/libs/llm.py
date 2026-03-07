@@ -1161,16 +1161,24 @@ class LLMService:
             "safety_observations": "Home environment safe, no hazards noted"
         })
     
-    def analyze_transcript_for_contract(self, transcript_text: str, client_info: Dict[str, Any], agency_state: str = None) -> Dict[str, Any]:
+    def analyze_transcript_for_contract(
+        self,
+        transcript_text: str,
+        client_info: Dict[str, Any],
+        agency_state: str = None,
+        agency_billing_context: str = "",
+    ) -> Dict[str, Any]:
         """
         Analyze a care assessment transcript to extract contract-relevant information.
         Dynamically loads the correct state's assessment requirements, billing codes,
         and regulatory rules based on the agency's location.
         Uses temperature=0 for consistent, deterministic results.
+
+        agency_billing_context: optional block describing the agency's configured rates
+        and accepted pay sources so the LLM uses the correct numbers.
         """
-        # Save original temperature and use 0 for consistent extraction
         original_temp = self.temperature
-        self.temperature = 0.0  # Deterministic - same input = same output
+        self.temperature = 0.0
 
         # Load state-specific rules
         state_context = ""
@@ -1180,9 +1188,18 @@ class LLMService:
                 state_context = get_state_rules_for_prompt(agency_state)
         except ImportError:
             pass
+
+        # Build billing context block the LLM can reference
+        billing_block = ""
+        if agency_billing_context:
+            billing_block = f"""
+## AGENCY BILLING CONFIGURATION (from onboarding — use these rates)
+{agency_billing_context}
+"""
         
         system_prompt = f"""You are a HOME CARE assessment specialist with expertise in all 50 US states' Medicaid billing requirements, HCBS waiver programs, and home care assessment standards.
 {state_context}
+{billing_block}
 
 ## YOUR MISSION: EXTRACT COMPREHENSIVE CARE ASSESSMENT DATA
 

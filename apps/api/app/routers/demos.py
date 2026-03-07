@@ -33,6 +33,7 @@ DEMO_SLOTS = [
 ]
 
 DEMO_TIMEZONE = os.getenv("DEMO_TIMEZONE", "America/New_York")
+SALES_EMAIL = os.getenv("SALES_CALENDAR_EMAIL", "sales@palmtai.com")
 
 
 class DemoBookingRequest(BaseModel):
@@ -108,12 +109,16 @@ async def _create_calendar_event(
     attendee_email: str,
 ) -> dict:
     """Create a Google Calendar event with Google Meet conferencing."""
+    attendees = [
+        {"email": attendee_email},
+        {"email": SALES_EMAIL},
+    ]
     event_body = {
         "summary": summary,
         "description": description,
         "start": {"dateTime": start_iso, "timeZone": DEMO_TIMEZONE},
         "end": {"dateTime": end_iso, "timeZone": DEMO_TIMEZONE},
-        "attendees": [{"email": attendee_email}],
+        "attendees": attendees,
         "conferenceData": {
             "createRequest": {
                 "requestId": str(uuid4()),
@@ -168,13 +173,15 @@ async def book_demo(
     booking: DemoBookingRequest,
     db: Session = Depends(get_db),
 ):
-    """Book a product demo — supports both calendar-pick and request-only flows."""
+    """Book a product demo — auto-schedules via Google Calendar when connected."""
 
     has_schedule = booking.date and booking.time_slot
     meeting_link = None
     calendar_created = False
     formatted_date = None
     formatted_time = None
+
+    admin_user = _find_calendar_admin(db)
 
     if has_schedule:
         if booking.time_slot not in DEMO_SLOTS:
@@ -194,32 +201,49 @@ async def book_demo(
         formatted_date = selected_date.strftime("%B %d, %Y")
         formatted_time = start_dt.strftime("%I:%M %p")
 
-        admin_user = _find_calendar_admin(db)
-        if admin_user:
-            try:
-                token = await _refresh_token_if_needed(admin_user, db)
-                summary = f"PalmCare AI Demo — {booking.company_name}"
-                description = (
-                    f"Product demo for {booking.name} from {booking.company_name}\n"
-                    f"Email: {booking.email}\n"
-                    f"Phone: {booking.phone or 'N/A'}\n"
-                    f"State: {booking.state or 'N/A'}\n"
-                    f"Services: {', '.join(booking.services or []) or 'N/A'}\n"
-                )
-                event = await _create_calendar_event(
-                    access_token=token, summary=summary, description=description,
-                    start_iso=start_dt.isoformat(), end_iso=end_dt.isoformat(),
-                    attendee_email=booking.email,
-                )
-                conf = event.get("conferenceData", {})
-                for ep in conf.get("entryPoints", []):
-                    if ep.get("entryPointType") == "video":
-                        meeting_link = ep.get("uri")
-                        break
-                calendar_created = True
-                logger.info(f"Demo booked on {formatted_date} at {formatted_time}")
-            except Exception as e:
-                logger.error(f"Failed to create calendar event: {e}")
+    elif admin_user:
+        # Auto-pick the next available weekday at 10:00 AM
+        today = datetime.now(timezone.utc).date()
+        candidate = today + timedelta(days=1)
+        while candidate.weekday() >= 5:
+            candidate += timedelta(days=1)
+        auto_slot = "10:00"
+        hour, minute = 10, 0
+        start_dt = datetime(candidate.year, candidate.month, candidate.day, hour, minute)
+        end_dt = start_dt + timedelta(minutes=DEMO_DURATION_MINUTES)
+        formatted_date = candidate.strftime("%B %d, %Y")
+        formatted_time = start_dt.strftime("%I:%M %p")
+        has_schedule = True
+
+    if has_schedule and admin_user:
+        try:
+            token = await _refresh_token_if_needed(admin_user, db)
+            summary = f"PalmCare AI Demo — {booking.company_name}"
+            description = (
+                f"Product demo for {booking.name} from {booking.company_name}\n"
+                f"Email: {booking.email}\n"
+                f"Phone: {booking.phone or 'N/A'}\n"
+                f"State: {booking.state or 'N/A'}\n"
+                f"Services: {', '.join(booking.services or []) or 'N/A'}\n"
+                f"Estimated Clients: {booking.estimated_clients or 'N/A'}\n"
+                f"Current Software: {booking.current_software or 'N/A'}\n"
+            )
+            event = await _create_calendar_event(
+                access_token=token, summary=summary, description=description,
+                start_iso=start_dt.isoformat(), end_iso=end_dt.isoformat(),
+                attendee_email=booking.email,
+            )
+            conf = event.get("conferenceData", {})
+            for ep in conf.get("entryPoints", []):
+                if ep.get("entryPointType") == "video":
+                    meeting_link = ep.get("uri")
+                    break
+            calendar_created = True
+            logger.info(f"Demo booked on {formatted_date} at {formatted_time} for {booking.email}")
+        except Exception as e:
+            logger.error(f"Failed to create calendar event: {e}")
+            if not booking.date:
+                has_schedule = False
 
     # Also store as a sales lead for CRM tracking
     try:

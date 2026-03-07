@@ -15,6 +15,8 @@ struct RegisterView: View {
     @State private var showError = false
     @State private var stateCode = ""
     @State private var zipCode = ""
+    @State private var streetAddress = ""
+    @State private var city = ""
 
     var passwordsMatch: Bool {
         !password.isEmpty && password == confirmPassword
@@ -23,6 +25,7 @@ struct RegisterView: View {
     var formIsValid: Bool {
         !fullName.isEmpty && !email.isEmpty && !phone.isEmpty
             && !password.isEmpty && passwordsMatch
+            && !stateCode.isEmpty && !zipCode.isEmpty
     }
 
     var body: some View {
@@ -104,10 +107,18 @@ struct RegisterView: View {
                     FormField(label: "Email address", icon: "envelope", placeholder: "john@example.com", text: $email, keyboardType: .emailAddress, contentType: .emailAddress)
                     FormField(label: "Phone Number", icon: "phone", placeholder: "(555) 123-4567", text: $phone, keyboardType: .phonePad, contentType: .telephoneNumber)
 
+                    FormField(label: "Street Address", icon: "location", placeholder: "123 Main St", text: $streetAddress, isRequired: false, contentType: .streetAddressLine1)
+                    FormField(label: "City", icon: "building", placeholder: "Omaha", text: $city, isRequired: false, contentType: .addressCity)
+
                     HStack(spacing: 12) {
-                        FormField(label: "State", icon: "map", placeholder: "CA", text: $stateCode, isRequired: false)
-                        FormField(label: "Zip Code", icon: "mappin", placeholder: "90210", text: $zipCode, isRequired: false, keyboardType: .numberPad)
+                        FormField(label: "State", icon: "map", placeholder: "NE", text: $stateCode)
+                        FormField(label: "Zip Code", icon: "mappin", placeholder: "68102", text: $zipCode, keyboardType: .numberPad)
                     }
+
+                    Text("Your state & zip help the AI apply the correct regulations and rates to every contract.")
+                        .font(.system(size: 11))
+                        .foregroundColor(.palmSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     // Password
                     VStack(alignment: .leading, spacing: 5) {
@@ -248,11 +259,11 @@ struct RegisterView: View {
         let body: [String: Any] = [
             "name": businessName.isEmpty ? fullName : businessName,
             "entity_type": "llc",
-            "state_of_incorporation": stateCode.isEmpty ? "N/A" : stateCode,
-            "address": "",
-            "city": "",
-            "state": stateCode.isEmpty ? "N/A" : stateCode,
-            "zip_code": zipCode.isEmpty ? "00000" : zipCode,
+            "state_of_incorporation": stateCode,
+            "address": streetAddress,
+            "city": city,
+            "state": stateCode,
+            "zip_code": zipCode,
             "phone": phone,
             "email": email,
             "owner_name": fullName,

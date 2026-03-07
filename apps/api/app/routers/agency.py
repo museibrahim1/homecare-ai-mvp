@@ -579,34 +579,4 @@ async def get_public_agency_settings(
     settings = db.query(AgencySettings).first()
     if not settings:
         raise HTTPException(status_code=404, detail="No agency settings found")
-    
-    documents = []
-    if hasattr(settings, 'documents') and settings.documents:
-        try:
-            documents = json.loads(settings.documents) if isinstance(settings.documents, str) else settings.documents
-        except (json.JSONDecodeError, TypeError, ValueError):
-            logger.warning("Failed to parse agency documents JSON")
-            documents = []
-    
-    return AgencySettingsResponse(
-        id=str(settings.id),
-        name=settings.name,
-        address=settings.address,
-        city=settings.city,
-        state=settings.state,
-        zip_code=settings.zip_code,
-        phone=settings.phone,
-        email=settings.email,
-        website=settings.website,
-        logo=settings.logo,
-        primary_color=settings.primary_color,
-        secondary_color=settings.secondary_color,
-        documents=documents,
-        cancellation_policy=settings.cancellation_policy,
-        terms_and_conditions=settings.terms_and_conditions,
-        tax_id=getattr(settings, 'tax_id', None),
-        license_number=getattr(settings, 'license_number', None),
-        npi_number=getattr(settings, 'npi_number', None),
-        contact_person=getattr(settings, 'contact_person', None),
-        contact_title=getattr(settings, 'contact_title', None),
-    )
+    return _settings_to_response(settings)

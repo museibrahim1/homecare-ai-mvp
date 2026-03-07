@@ -120,10 +120,41 @@ def generate_service_contract(self, visit_id: str):
         logger.info(f"Extracting care data from transcript using Claude...")
         llm_service = get_llm_service()
         
+        # Build billing context from agency onboarding so the LLM has real numbers
+        billing_context_parts = []
+        if agency_settings:
+            if getattr(agency_settings, 'state', None):
+                billing_context_parts.append(f"Agency location: {getattr(agency_settings, 'city', '')} {agency_settings.state} {getattr(agency_settings, 'zip_code', '')}")
+            pay_src = getattr(agency_settings, 'pay_sources', None) or []
+            if pay_src:
+                billing_context_parts.append(f"Accepted pay sources: {', '.join(pay_src)}")
+            svc_types = getattr(agency_settings, 'service_types', None) or []
+            if svc_types:
+                billing_context_parts.append(f"Services offered: {', '.join(s.replace('_', ' ') for s in svc_types)}")
+            rate_lines = []
+            for field, label in [
+                ('default_hourly_rate', 'Default hourly'),
+                ('medicaid_companion_rate', 'Medicaid companion'),
+                ('medicaid_personal_care_rate', 'Medicaid personal care'),
+                ('medicaid_respite_rate', 'Medicaid respite'),
+                ('medicare_skilled_rate', 'Medicare skilled nursing'),
+                ('medicare_aide_rate', 'Medicare home health aide'),
+                ('private_pay_rate', 'Private pay'),
+            ]:
+                val = getattr(agency_settings, field, None)
+                if val is not None:
+                    rate_lines.append(f"- {label}: ${float(val):.2f}/hr")
+            if rate_lines:
+                billing_context_parts.append("Configured rates:\n" + "\n".join(rate_lines))
+        billing_context = "\n".join(billing_context_parts)
+        if billing_context:
+            logger.info(f"Agency billing context provided to LLM:\n{billing_context}")
+        
         assessment_data = llm_service.analyze_transcript_for_contract(
             transcript_text=transcript_text,
             client_info=client_info,
             agency_state=agency_state,
+            agency_billing_context=billing_context,
         )
         
         # Get care need level and client profile early - needed for rate calculation
@@ -239,132 +270,125 @@ def generate_service_contract(self, visit_id: str):
             logger.info(f"Total from services: {weekly_hours} hrs/week")
         
         # =====================================================================
-        # RATE DETERMINATION (based on insurance type and care needs)
+        # RATE DETERMINATION
+        # Priority: agency-specific rates from onboarding > hardcoded defaults
         # =====================================================================
         from libs.llm_rules import (
             MEDICAID_RATES, MEDICAID_SERVICE_RATE_MAP, 
             MEDICARE_RATES, HOURLY_RATES
         )
         
-        # Check services for categorization
+        # Pull agency billing config (set during onboarding)
+        ag_default_rate = float(agency_settings.default_hourly_rate) if agency_settings and getattr(agency_settings, 'default_hourly_rate', None) else None
+        ag_medicaid_companion = float(agency_settings.medicaid_companion_rate) if agency_settings and getattr(agency_settings, 'medicaid_companion_rate', None) else None
+        ag_medicaid_pc = float(agency_settings.medicaid_personal_care_rate) if agency_settings and getattr(agency_settings, 'medicaid_personal_care_rate', None) else None
+        ag_medicaid_respite = float(agency_settings.medicaid_respite_rate) if agency_settings and getattr(agency_settings, 'medicaid_respite_rate', None) else None
+        ag_medicare_skilled = float(agency_settings.medicare_skilled_rate) if agency_settings and getattr(agency_settings, 'medicare_skilled_rate', None) else None
+        ag_medicare_aide = float(agency_settings.medicare_aide_rate) if agency_settings and getattr(agency_settings, 'medicare_aide_rate', None) else None
+        ag_private_pay = float(agency_settings.private_pay_rate) if agency_settings and getattr(agency_settings, 'private_pay_rate', None) else None
+        
+        has_agency_rates = any(r is not None for r in [ag_default_rate, ag_medicaid_companion, ag_medicaid_pc, ag_private_pay])
+        if has_agency_rates:
+            logger.info("Using agency-specific rates from onboarding config")
+        else:
+            logger.info("No agency rates configured — using system defaults")
+        
         service_names = [s.get('name', '').lower() if isinstance(s, dict) else str(s).lower() for s in services]
         service_text = ' '.join(service_names)
         
         if is_medicaid:
-            # ============================================================
-            # MEDICAID RATES - Fixed rates based on service type
-            # Companion Care: $25/hr | Personal Care (incl hospice/respite): $28/hr
-            # ============================================================
             logger.info(f"Applying MEDICAID rates for client_id={client.id}")
             
-            # Determine if this is personal care or companion care
-            # Personal care = any ADL assistance, medication, health monitoring, hospice, respite
             has_personal_care = any(x in service_text for x in [
                 'personal care', 'bathing', 'dressing', 'grooming', 'toileting',
                 'feeding', 'medication', 'mobility', 'transfer', 'wound',
                 'vital', 'health monitor', 'nursing', 'dementia', 'alzheimer',
                 'hospice', 'respite', 'meal prep', 'meal preparation',
             ])
+            has_respite = any(x in service_text for x in ['respite'])
             
-            if has_personal_care:
-                hourly_rate = MEDICAID_RATES["PERSONAL_CARE"]  # $28/hr
-                rate_type = "Medicaid Personal Care"
+            if has_respite and ag_medicaid_respite:
+                hourly_rate = ag_medicaid_respite
+                rate_type = "Agency Medicaid Respite"
+            elif has_personal_care:
+                hourly_rate = ag_medicaid_pc or MEDICAID_RATES["PERSONAL_CARE"]
+                rate_type = f"{'Agency ' if ag_medicaid_pc else ''}Medicaid Personal Care"
             else:
-                hourly_rate = MEDICAID_RATES["COMPANION"]  # $25/hr
-                rate_type = "Medicaid Companion Care"
+                hourly_rate = ag_medicaid_companion or MEDICAID_RATES["COMPANION"]
+                rate_type = f"{'Agency ' if ag_medicaid_companion else ''}Medicaid Companion Care"
             
             logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type})")
             logger.info(f"  Services: {', '.join(service_names[:5])}")
             
         elif is_medicare:
-            # ============================================================
-            # MEDICARE RATES
-            # ============================================================
             logger.info(f"Applying MEDICARE rates for client_id={client.id}")
             
             has_skilled = any(x in service_text for x in ['nursing', 'wound', 'catheter', 'skilled'])
             
             if has_skilled:
-                hourly_rate = MEDICARE_RATES.get("SKILLED_NURSING", 45.00)
-                rate_type = "Medicare Skilled Nursing"
+                hourly_rate = ag_medicare_skilled or MEDICARE_RATES.get("SKILLED_NURSING", 45.00)
+                rate_type = f"{'Agency ' if ag_medicare_skilled else ''}Medicare Skilled Nursing"
             else:
-                hourly_rate = MEDICARE_RATES.get("HOME_HEALTH_AIDE", 28.00)
-                rate_type = "Medicare Home Health Aide"
+                hourly_rate = ag_medicare_aide or MEDICARE_RATES.get("HOME_HEALTH_AIDE", 28.00)
+                rate_type = f"{'Agency ' if ag_medicare_aide else ''}Medicare Home Health Aide"
             
             logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type})")
             
         else:
-            # ============================================================
-            # PRIVATE PAY RATES - Dynamic based on care needs
-            # ============================================================
             logger.info(f"Applying PRIVATE PAY rates for client_id={client.id}")
             
-            # Base rate by care level
-            base_rate_map = {
-                "HIGH": 28.00,
-                "MODERATE": 24.00,
-                "LOW": 20.00,
-            }
-            base_rate = base_rate_map.get(care_need_level, 24.00)
-            
-            # Rate adjustments based on specific needs
-            rate_adjustments = []
-            
-            # Skilled nursing or medical care (+$8-10/hr)
-            if any(x in service_text for x in ['nursing', 'wound', 'catheter', 'injection', 'skilled']):
-                rate_adjustments.append(("Skilled nursing care", 10.00))
-            
-            # Dementia/Alzheimer's care (+$5/hr)
-            if any(x in service_text for x in ['dementia', 'alzheimer', 'memory', 'cognitive']):
-                rate_adjustments.append(("Dementia care specialist", 5.00))
-            
-            # Safety supervision/wandering (+$3/hr)
-            if any(x in service_text for x in ['supervision', 'wandering', 'safety monitor']):
-                rate_adjustments.append(("Safety supervision", 3.00))
-            
-            # Check client profile for additional needs
-            if client_profile:
-                cognitive = client_profile.get('cognitive_status', '').lower()
-                if any(x in cognitive for x in ['dementia', 'impair', 'confusion', 'alzheimer']):
-                    if ("Dementia care specialist", 5.00) not in rate_adjustments:
-                        rate_adjustments.append(("Cognitive impairment care", 4.00))
+            if ag_private_pay:
+                hourly_rate = ag_private_pay
+                rate_type = "Agency Private Pay"
+                logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type}) — from agency config")
+            elif ag_default_rate:
+                hourly_rate = ag_default_rate
+                rate_type = "Agency Default"
+                logger.info(f"Rate: ${hourly_rate:.2f}/hr ({rate_type}) — from agency config")
+            else:
+                base_rate_map = {
+                    "HIGH": 28.00,
+                    "MODERATE": 24.00,
+                    "LOW": 20.00,
+                }
+                base_rate = base_rate_map.get(care_need_level, 24.00)
                 
-                # Mobility challenges (+$2/hr)
-                mobility = client_profile.get('mobility_status', '').lower()
-                if any(x in mobility for x in ['wheelchair', 'bedbound', 'hoyer', 'lift', 'transfer']):
-                    rate_adjustments.append(("Mobility/transfer assistance", 2.00))
-            
-            # Check special requirements
-            special_reqs = assessment_data.get('special_requirements', [])
-            for req in special_reqs:
-                req_text = str(req).lower() if isinstance(req, str) else str(req.get('requirement', '')).lower()
+                rate_adjustments = []
+                if any(x in service_text for x in ['nursing', 'wound', 'catheter', 'injection', 'skilled']):
+                    rate_adjustments.append(("Skilled nursing care", 10.00))
+                if any(x in service_text for x in ['dementia', 'alzheimer', 'memory', 'cognitive']):
+                    rate_adjustments.append(("Dementia care specialist", 5.00))
+                if any(x in service_text for x in ['supervision', 'wandering', 'safety monitor']):
+                    rate_adjustments.append(("Safety supervision", 3.00))
+                if client_profile:
+                    cognitive = client_profile.get('cognitive_status', '').lower()
+                    if any(x in cognitive for x in ['dementia', 'impair', 'confusion', 'alzheimer']):
+                        if ("Dementia care specialist", 5.00) not in rate_adjustments:
+                            rate_adjustments.append(("Cognitive impairment care", 4.00))
+                    mobility = client_profile.get('mobility_status', '').lower()
+                    if any(x in mobility for x in ['wheelchair', 'bedbound', 'hoyer', 'lift', 'transfer']):
+                        rate_adjustments.append(("Mobility/transfer assistance", 2.00))
+                special_reqs = assessment_data.get('special_requirements', [])
+                for req in special_reqs:
+                    req_text = str(req).lower() if isinstance(req, str) else str(req.get('requirement', '')).lower()
+                    if any(x in req_text for x in ['diabetic', 'tube feed', 'g-tube', 'pureed', 'thickened']):
+                        if not any('diet' in adj[0].lower() for adj in rate_adjustments):
+                            rate_adjustments.append(("Specialized diet management", 1.00))
+                    if any(x in req_text for x in ['spanish', 'bilingual', 'interpreter', 'non-english']):
+                        rate_adjustments.append(("Bilingual caregiver", 2.00))
+                safety_concerns = assessment_data.get('safety_concerns', [])
+                high_severity_count = sum(1 for s in safety_concerns 
+                                           if isinstance(s, dict) and s.get('severity', '').lower() == 'high')
+                if high_severity_count >= 2:
+                    rate_adjustments.append(("Multiple high-risk factors", 2.00))
                 
-                if any(x in req_text for x in ['diabetic', 'tube feed', 'g-tube', 'pureed', 'thickened']):
-                    if not any('diet' in adj[0].lower() for adj in rate_adjustments):
-                        rate_adjustments.append(("Specialized diet management", 1.00))
+                total_adjustment = sum(adj[1] for adj in rate_adjustments)
+                hourly_rate = min(base_rate + total_adjustment, 55.00)
                 
-                if any(x in req_text for x in ['spanish', 'bilingual', 'interpreter', 'non-english']):
-                    rate_adjustments.append(("Bilingual caregiver", 2.00))
-            
-            # Check safety concerns
-            safety_concerns = assessment_data.get('safety_concerns', [])
-            high_severity_count = sum(1 for s in safety_concerns 
-                                       if isinstance(s, dict) and s.get('severity', '').lower() == 'high')
-            if high_severity_count >= 2:
-                rate_adjustments.append(("Multiple high-risk factors", 2.00))
-            
-            # Calculate final rate
-            total_adjustment = sum(adj[1] for adj in rate_adjustments)
-            hourly_rate = base_rate + total_adjustment
-            
-            # Cap at reasonable maximum
-            hourly_rate = min(hourly_rate, 55.00)
-            
-            # Log rate breakdown
-            logger.info(f"Rate calculation: Base ${base_rate:.2f} ({care_need_level})")
-            for adj_name, adj_amount in rate_adjustments:
-                logger.info(f"  + ${adj_amount:.2f} for {adj_name}")
-            logger.info(f"  = ${hourly_rate:.2f}/hr final rate")
+                logger.info(f"Rate calculation: Base ${base_rate:.2f} ({care_need_level})")
+                for adj_name, adj_amount in rate_adjustments:
+                    logger.info(f"  + ${adj_amount:.2f} for {adj_name}")
+                logger.info(f"  = ${hourly_rate:.2f}/hr final rate (system defaults)")
         
         # Ensure we have at least some hours if services were identified
         if weekly_hours == 0 and len(services) > 0:
