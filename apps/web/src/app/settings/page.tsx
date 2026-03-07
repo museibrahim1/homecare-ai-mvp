@@ -10,6 +10,8 @@ import {
   Shield,
   Database,
   Building2,
+  DollarSign,
+  CheckCircle2,
   Save,
   Check,
   Upload,
@@ -64,6 +66,22 @@ interface AgencySettings {
   npi_number: string;
   contact_person: string;
   contact_title: string;
+  // Billing & rate config
+  pay_sources: string[];
+  service_types: string[];
+  billing_type: string;
+  default_hourly_rate: number | null;
+  medicaid_companion_rate: number | null;
+  medicaid_personal_care_rate: number | null;
+  medicaid_respite_rate: number | null;
+  medicare_skilled_rate: number | null;
+  medicare_aide_rate: number | null;
+  private_pay_rate: number | null;
+  accepts_medicaid: boolean;
+  accepts_medicare: boolean;
+  accepts_private_pay: boolean;
+  accepts_insurance: boolean;
+  accepts_va: boolean;
 }
 
 const defaultAgency: AgencySettings = {
@@ -85,6 +103,21 @@ const defaultAgency: AgencySettings = {
   npi_number: '',
   contact_person: '',
   contact_title: '',
+  pay_sources: [],
+  service_types: [],
+  billing_type: 'hourly',
+  default_hourly_rate: null,
+  medicaid_companion_rate: null,
+  medicaid_personal_care_rate: null,
+  medicaid_respite_rate: null,
+  medicare_skilled_rate: null,
+  medicare_aide_rate: null,
+  private_pay_rate: null,
+  accepts_medicaid: false,
+  accepts_medicare: false,
+  accepts_private_pay: true,
+  accepts_insurance: false,
+  accepts_va: false,
 };
 
 const documentCategories = [
@@ -102,7 +135,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loggingOutAll, setLoggingOutAll] = useState(false);
-  const [activeTab, setActiveTab] = useState<'agency' | 'documents' | 'profile' | 'team' | 'notifications' | 'security'>('agency');
+  const [activeTab, setActiveTab] = useState<'agency' | 'billing' | 'documents' | 'profile' | 'team' | 'notifications' | 'security'>('agency');
   
   // Team state
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -534,6 +567,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'agency', label: 'Company Info', icon: Building2 },
+    { id: 'billing', label: 'Billing & Rates', icon: DollarSign },
     { id: 'documents', label: 'Documents', icon: FileText },
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'team', label: 'Team', icon: Users },
@@ -945,6 +979,178 @@ export default function SettingsPage() {
                       />
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Billing & Rates Tab */}
+          {activeTab === 'billing' && (
+            <div className="space-y-6">
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-slate-900 mb-1 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-primary-500" />
+                  Pay Sources
+                </h2>
+                <p className="text-sm text-slate-500 mb-4">Which payment types does your agency accept?</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    { id: 'medicaid', label: 'Medicaid', flag: 'accepts_medicaid' },
+                    { id: 'medicare', label: 'Medicare', flag: 'accepts_medicare' },
+                    { id: 'private_pay', label: 'Private Pay', flag: 'accepts_private_pay' },
+                    { id: 'insurance', label: 'Private Insurance', flag: 'accepts_insurance' },
+                    { id: 'va', label: 'VA Benefits', flag: 'accepts_va' },
+                  ].map(ps => {
+                    const isActive = agency.pay_sources?.includes(ps.id);
+                    return (
+                      <button
+                        key={ps.id}
+                        type="button"
+                        onClick={() => {
+                          const arr = agency.pay_sources || [];
+                          const next = arr.includes(ps.id) ? arr.filter((x: string) => x !== ps.id) : [...arr, ps.id];
+                          setAgency({ ...agency, pay_sources: next, [ps.flag]: next.includes(ps.id) } as any);
+                        }}
+                        className={`flex items-center gap-2 p-3 rounded-lg border text-sm transition ${
+                          isActive ? 'border-primary-500 bg-primary-50 text-primary-700 font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {isActive && <CheckCircle2 className="w-4 h-4" />}
+                        {ps.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-slate-900 mb-1">Service Types</h2>
+                <p className="text-sm text-slate-500 mb-4">What services does your agency provide?</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 'personal_care', label: 'Personal Care' },
+                    { id: 'companion', label: 'Companion Care' },
+                    { id: 'skilled_nursing', label: 'Skilled Nursing' },
+                    { id: 'homemaker', label: 'Homemaker' },
+                    { id: 'respite', label: 'Respite Care' },
+                    { id: 'hospice', label: 'Hospice Support' },
+                    { id: 'medication_mgmt', label: 'Medication Mgmt' },
+                    { id: 'meal_prep', label: 'Meal Preparation' },
+                    { id: 'transportation', label: 'Transportation' },
+                  ].map(svc => {
+                    const isActive = agency.service_types?.includes(svc.id);
+                    return (
+                      <button
+                        key={svc.id}
+                        type="button"
+                        onClick={() => {
+                          const arr = agency.service_types || [];
+                          const next = arr.includes(svc.id) ? arr.filter((x: string) => x !== svc.id) : [...arr, svc.id];
+                          setAgency({ ...agency, service_types: next });
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-sm border transition ${
+                          isActive ? 'border-primary-500 bg-primary-50 text-primary-700 font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {svc.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="card p-6">
+                <h2 className="text-lg font-semibold text-slate-900 mb-1">Hourly Rates</h2>
+                <p className="text-sm text-slate-500 mb-4">The AI uses these rates when generating contracts. Leave blank for system defaults.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[
+                    { key: 'default_hourly_rate', label: 'Default Hourly Rate' },
+                    { key: 'private_pay_rate', label: 'Private Pay Rate' },
+                  ].map(r => (
+                    <div key={r.key}>
+                      <label className="block text-xs font-medium text-slate-500 mb-1">{r.label}</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                        <input
+                          type="number"
+                          step="0.50"
+                          min="0"
+                          value={(agency as any)[r.key] ?? ''}
+                          onChange={e => setAgency({ ...agency, [r.key]: e.target.value === '' ? null : parseFloat(e.target.value) } as any)}
+                          placeholder="—"
+                          className="w-full pl-7 pr-4 py-2 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-300 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {agency.accepts_medicaid && (
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <p className="text-xs font-medium text-slate-500 mb-3">Medicaid Rates</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {[
+                        { key: 'medicaid_companion_rate', label: 'Companion' },
+                        { key: 'medicaid_personal_care_rate', label: 'Personal Care' },
+                        { key: 'medicaid_respite_rate', label: 'Respite' },
+                      ].map(r => (
+                        <div key={r.key}>
+                          <label className="block text-xs font-medium text-slate-500 mb-1">{r.label}</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                            <input
+                              type="number"
+                              step="0.50"
+                              min="0"
+                              value={(agency as any)[r.key] ?? ''}
+                              onChange={e => setAgency({ ...agency, [r.key]: e.target.value === '' ? null : parseFloat(e.target.value) } as any)}
+                              placeholder="—"
+                              className="w-full pl-7 pr-4 py-2 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-300 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {agency.accepts_medicare && (
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <p className="text-xs font-medium text-slate-500 mb-3">Medicare Rates</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {[
+                        { key: 'medicare_skilled_rate', label: 'Skilled Nursing' },
+                        { key: 'medicare_aide_rate', label: 'Home Health Aide' },
+                      ].map(r => (
+                        <div key={r.key}>
+                          <label className="block text-xs font-medium text-slate-500 mb-1">{r.label}</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                            <input
+                              type="number"
+                              step="0.50"
+                              min="0"
+                              value={(agency as any)[r.key] ?? ''}
+                              onChange={e => setAgency({ ...agency, [r.key]: e.target.value === '' ? null : parseFloat(e.target.value) } as any)}
+                              placeholder="—"
+                              className="w-full pl-7 pr-4 py-2 border border-slate-200 rounded-lg text-slate-900 text-sm placeholder:text-slate-300 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+                <Sparkles className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-blue-800 text-sm font-medium">How the AI uses your rates</p>
+                  <p className="text-blue-600 text-xs mt-0.5">
+                    When the AI generates a contract, it checks the client's insurance type and uses your configured rate.
+                    If a rate isn't set, it falls back to industry-standard defaults for your state.
+                  </p>
                 </div>
               </div>
             </div>

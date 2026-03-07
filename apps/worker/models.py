@@ -41,6 +41,7 @@ class Client(Base):
     __tablename__ = "clients"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     full_name = Column(String(255), nullable=False)
     preferred_name = Column(String(100))
     date_of_birth = Column(Date)
@@ -240,5 +241,65 @@ class Contract(Base):
     status = Column(String(50), default="draft")
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+
+class AgencySettings(Base):
+    __tablename__ = "agency_settings"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    name = Column(String(255), nullable=False, default="Home Care Services Agency")
+    address = Column(Text)
+    city = Column(String(100))
+    state = Column(String(50))
+    zip_code = Column(String(20))
+    phone = Column(String(20))
+    email = Column(String(255))
+
+    # Billing & rate config
+    pay_sources = Column(JSONB, default=list)
+    service_types = Column(JSONB, default=list)
+    billing_type = Column(String(50), default="hourly")
+    default_hourly_rate = Column(Numeric(10, 2))
+    medicaid_companion_rate = Column(Numeric(10, 2))
+    medicaid_personal_care_rate = Column(Numeric(10, 2))
+    medicaid_respite_rate = Column(Numeric(10, 2))
+    medicare_skilled_rate = Column(Numeric(10, 2))
+    medicare_aide_rate = Column(Numeric(10, 2))
+    private_pay_rate = Column(Numeric(10, 2))
+    overtime_multiplier = Column(Numeric(4, 2), default=1.5)
+    accepts_medicaid = Column(Boolean, default=False)
+    accepts_medicare = Column(Boolean, default=False)
+    accepts_private_pay = Column(Boolean, default=True)
+    onboarding_completed = Column(Boolean, default=False)
+
+    # Template / branding
+    contract_template = Column(Text)
+    contract_template_name = Column(String(255))
+    contract_template_type = Column(String(100))
+    cancellation_policy = Column(Text)
+    terms_and_conditions = Column(Text)
+
+
+class Business(Base):
+    __tablename__ = "businesses"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False)
+    state_of_incorporation = Column(String(2))
+    address = Column(Text)
+    city = Column(String(100))
+    state = Column(String(2))
+    zip_code = Column(String(20))
+    verification_status = Column(String(50), default='pending')
+
+
+class BusinessUser(Base):
+    __tablename__ = "business_users"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    role = Column(String(50), default="owner")
 
 

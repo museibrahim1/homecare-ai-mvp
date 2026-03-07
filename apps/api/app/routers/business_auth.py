@@ -219,6 +219,25 @@ async def register_business(
             "This typically takes 1-2 business days.",
         ]
     
+    # Pre-populate AgencySettings with registration address so the AI has
+    # location context from the very first contract.
+    try:
+        from app.models.agency_settings import AgencySettings
+        agency_settings = AgencySettings(
+            user_id=regular_user.id,
+            settings_key=f"user_{regular_user.id}",
+            name=registration.name,
+            address=registration.address or "",
+            city=registration.city or "",
+            state=(registration.state or registration.state_of_incorporation or "").upper(),
+            zip_code=registration.zip_code or "",
+            phone=registration.phone or "",
+            email=registration.email,
+        )
+        db.add(agency_settings)
+    except Exception as e:
+        logger.warning(f"Could not auto-create AgencySettings on registration: {e}")
+    
     db.commit()
     
     # Send registration confirmation email to the new user
