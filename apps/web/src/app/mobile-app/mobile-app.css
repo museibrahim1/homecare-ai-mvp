@@ -783,6 +783,54 @@
   z-index: 200;
 }
 
+/* Phone frame with real screenshot images */
+.phone-img-frame {
+  width: 300px; height: 648px;
+  border-radius: 50px;
+  overflow: hidden;
+  position: relative;
+  background: #000;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.09),
+    0 0 0 8px rgba(0,0,0,.04),
+    0 32px 80px rgba(0,0,0,.2),
+    0 8px 24px rgba(0,0,0,.08);
+  flex-shrink: 0;
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s;
+}
+
+.phone-img-frame:hover {
+  transform: translateY(-7px);
+  box-shadow:
+    0 0 0 1px rgba(13,148,136,.25),
+    0 0 0 8px rgba(13,148,136,.05),
+    0 40px 96px rgba(0,0,0,.24);
+}
+
+.phone-img-notch {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 88px; height: 25px;
+  background: #000;
+  border-radius: 13px;
+  z-index: 200;
+}
+
+.phone-img-screenshot {
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 50px;
+}
+
+.ma-showcase-hero .phone-img-frame {
+  box-shadow:
+    0 0 0 1px rgba(13,148,136,.15),
+    0 0 0 8px rgba(13,148,136,.06),
+    0 40px 96px rgba(0,0,0,.22),
+    0 12px 32px rgba(0,0,0,.1);
+}
+
 .sc-lbl {
   font-size: 10px;
   font-weight: 700;
@@ -1217,6 +1265,9 @@
   .ma-hero { padding-top: 60px; }
   .ma-hero-h1 { font-size: 30px; }
   .phone { width: 260px; height: 562px; border-radius: 42px; }
+  .phone-img-frame { width: 260px; height: 562px; border-radius: 42px; }
+  .phone-img-notch { width: 76px; height: 22px; }
+  .phone-img-screenshot { border-radius: 42px; }
   .pill { width: 76px; height: 22px; }
   .land-slogan { font-size: 34px; }
   .ma-download-title { font-size: 28px; }

@@ -4,23 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   Mic,
-  Mail,
-  Lock,
-  Eye,
-  User,
-  Briefcase,
-  Phone,
-  ShieldCheck,
-  Users,
-  CalendarCheck,
-  Clock,
-  Home,
-  Calendar,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  Search,
-  Plus,
   FileText,
   Zap,
   Shield,
@@ -28,210 +11,16 @@ import {
   ArrowRight,
   Star,
   Download,
-  Smartphone,
+  Users,
+  Clock,
 } from 'lucide-react';
 import './mobile-app.css';
 
-/* ── Phone screen components (kept from original) ── */
-
-const VISITS = [
-  { initials: 'MJ', name: 'Margaret Johnson', meta: 'Dementia · 2h ago', pip: 'pip-g', status: 'Complete', av: 'av1' },
-  { initials: 'RD', name: 'Robert Davis', meta: "Parkinson's · Yesterday", pip: 'pip-a', status: 'Pending', av: 'av2' },
-  { initials: 'LA', name: 'Linda Anderson', meta: 'Post-surgery · 2d ago', pip: 'pip-g', status: 'Complete', av: 'av3' },
-  { initials: 'TW', name: 'Thomas Williams', meta: "Alzheimer's · 3d ago", pip: 'pip-b', status: 'Processing', av: 'av4' },
-];
-
-function BottomNav({ active }: { active: 'home' | 'clients' | 'record' | 'calendar' | 'more' }) {
+function PhoneFrame({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="bnav">
-      <div className="nv">
-        <Home size={20} className={active === 'home' ? 'on' : ''} />
-        <span className={active === 'home' ? 'on' : ''}>Home</span>
-      </div>
-      <div className="nv">
-        <Users size={20} className={active === 'clients' ? 'on' : ''} />
-        <span className={active === 'clients' ? 'on' : ''}>Clients</span>
-      </div>
-      <div className="nv-ctr">
-        <div className="nv-mic-btn" style={active === 'record' ? { background: '#dc2626', boxShadow: '0 4px 14px rgba(220,38,38,.4)' } : undefined}>
-          <Mic size={22} color="white" />
-        </div>
-        <span className="nv-mic-lbl">Palm It</span>
-      </div>
-      <div className="nv">
-        <Calendar size={20} className={active === 'calendar' ? 'on' : ''} />
-        <span className={active === 'calendar' ? 'on' : ''}>Calendar</span>
-      </div>
-      <div className="nv">
-        <MoreHorizontal size={20} className={active === 'more' ? 'on' : ''} />
-        <span className={active === 'more' ? 'on' : ''}>More</span>
-      </div>
-    </div>
-  );
-}
-
-function LandingScreen() {
-  return (
-    <div className="s-land">
-      <div className="land-bg" />
-      <div className="land-grad" />
-      <div className="land-tint" />
-      <div className="live-badge">
-        <div className="live-dot" />
-        <span className="live-txt">LIVE</span>
-      </div>
-      <div className="land-wave">
-        {Array.from({ length: 17 }).map((_, i) => (
-          <div key={i} className="wvb" />
-        ))}
-      </div>
-      <div className="land-body">
-        <div className="land-brand-row">
-          <div className="land-ico"><Mic size={19} color="white" /></div>
-          <span className="land-name">PalmCare AI</span>
-          <div className="land-pill-badge">AI-Powered</div>
-        </div>
-        <div className="land-slogan">PALM<em>IT.</em></div>
-        <div className="land-sub">
-          <strong>Record. Transcribe. Contract.</strong><br />
-          Every care assessment — handled in seconds. Your clients get proposals. You get your time back.
-        </div>
-        <div className="land-dots">
-          <div className="ldot ldot-on" />
-          <div className="ldot ldot-off" />
-          <div className="ldot ldot-off" />
-        </div>
-        <button className="land-cta">Palm It — Get Started</button>
-        <button className="land-ghost">Already have an account? Sign in →</button>
-      </div>
-    </div>
-  );
-}
-
-function HomeScreen() {
-  return (
-    <div className="s-home">
-      <div className="home-bar">
-        <div className="home-bar-inner">
-          <div>
-            <div className="home-greet">Palm It, Sarah 🌴</div>
-            <div className="home-name">Good morning</div>
-          </div>
-          <div className="home-av">S</div>
-        </div>
-      </div>
-      <div className="home-scroll">
-        <div style={{ height: 2 }} />
-        <div className="stats-row">
-          <div className="stat-card">
-            <div className="stat-ico si-t"><Users size={15} /></div>
-            <div className="stat-val">12</div>
-            <div className="stat-lbl">Clients</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-ico si-b"><CalendarCheck size={15} /></div>
-            <div className="stat-val">4</div>
-            <div className="stat-lbl">This Week</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-ico si-o"><Clock size={15} /></div>
-            <div className="stat-val">3</div>
-            <div className="stat-lbl">Pending</div>
-          </div>
-        </div>
-        <div className="cta-bar">
-          <div>
-            <div className="cta-eyebrow">Start recording</div>
-            <div className="cta-title">Palm It Now</div>
-            <div className="cta-sub">Tap to record a new assessment</div>
-          </div>
-          <div className="cta-mic"><Mic size={20} color="white" /></div>
-        </div>
-        <div className="sec-row">
-          <span className="sec-title">Recent Visits</span>
-          <span className="sec-link">See all</span>
-        </div>
-        {VISITS.map((v) => (
-          <div key={v.initials} className="v-card">
-            <div className={`v-av ${v.av}`}>{v.initials}</div>
-            <div className="v-info">
-              <div className="v-name">{v.name}</div>
-              <div className="v-meta">{v.meta}</div>
-            </div>
-            <div className={`pip ${v.pip}`}>{v.status}</div>
-          </div>
-        ))}
-      </div>
-      <BottomNav active="home" />
-    </div>
-  );
-}
-
-function RecordScreen() {
-  return (
-    <div className="s-rec">
-      <div className="rec-bar">
-        <div className="rec-bar-title">New Assessment</div>
-        <div className="rec-brand-nudge">Palm It — AI is listening</div>
-      </div>
-      <div className="rec-content">
-        <div className="cl-sel">
-          <div className="cl-l">
-            <div className="cl-empty"><User size={14} /></div>
-            <span className="cl-txt">Select a client</span>
-          </div>
-          <div className="cl-r"><ChevronDown size={16} /></div>
-        </div>
-        <div className="rec-timer">00:00</div>
-        <div className="rec-status">Ready to Palm It</div>
-        <div className="mic-zone">
-          <div className="mic-ring">
-            <div className="mic-btn"><Mic size={32} color="white" /></div>
-          </div>
-          <div className="mic-hint">Tap to start · AI handles the rest</div>
-        </div>
-      </div>
-      <BottomNav active="record" />
-    </div>
-  );
-}
-
-const CLIENTS_LIST = [
-  { initials: 'MJ', name: 'Margaret Johnson', diag: 'Dementia, Hypertension', phone: '(555) 201-4432', av: 'av1' },
-  { initials: 'RD', name: 'Robert Davis', diag: "Parkinson's Disease", phone: '(555) 339-8821', av: 'av2' },
-  { initials: 'LA', name: 'Linda Anderson', diag: 'Post-surgery Recovery', phone: '(555) 478-2210', av: 'av3' },
-  { initials: 'TW', name: 'Thomas Williams', diag: "Alzheimer's Disease", phone: '(555) 123-6600', av: 'av4' },
-  { initials: 'NM', name: 'Nancy Martinez', diag: 'Diabetes, Mobility Issues', phone: '(555) 892-3341', av: 'av5' },
-  { initials: 'BP', name: 'Barbara Peters', diag: 'Stroke Recovery', phone: '(555) 564-0918', av: 'av6' },
-];
-
-function ClientsScreen() {
-  return (
-    <div className="s-clients">
-      <div className="cl-bar">
-        <div className="cl-bar-top">
-          <div className="cl-bar-title">Clients</div>
-          <button className="add-btn"><Plus size={12} color="white" />Add Client</button>
-        </div>
-        <div className="search-bar">
-          <Search size={14} />
-          <span>Search name, phone, diagnosis…</span>
-        </div>
-      </div>
-      <div className="cl-list">
-        {CLIENTS_LIST.map((c) => (
-          <div key={c.initials} className="c-card">
-            <div className={`c-av ${c.av}`}>{c.initials}</div>
-            <div className="c-info">
-              <div className="c-name">{c.name}</div>
-              <div className="c-diag">{c.diag}</div>
-              <div className="c-phone">{c.phone}</div>
-            </div>
-            <div className="c-chev"><ChevronRight size={15} /></div>
-          </div>
-        ))}
-      </div>
-      <BottomNav active="clients" />
+    <div className="phone-img-frame">
+      <div className="phone-img-notch" />
+      <Image src={src} alt={alt} fill className="phone-img-screenshot" sizes="(max-width: 768px) 280px, 320px" priority />
     </div>
   );
 }
@@ -303,7 +92,7 @@ export default function MobileAppPage() {
             </div>
           </div>
           <div className="ma-hero-phone-wrap">
-            <div className="phone ma-hero-phone"><div className="pill" /><LandingScreen /></div>
+            <PhoneFrame src="/screenshots/ios/00_landing.png" alt="PalmCare AI landing screen" />
           </div>
         </div>
       </section>
@@ -353,15 +142,15 @@ export default function MobileAppPage() {
           </p>
           <div className="ma-showcase-phones">
             <div className="ma-showcase-col">
-              <div className="phone" style={{ position: 'relative' }}><div className="pill" /><HomeScreen /></div>
+              <PhoneFrame src="/screenshots/ios/01_home.png" alt="PalmCare AI home dashboard" />
               <div className="sc-lbl">Dashboard</div>
             </div>
             <div className="ma-showcase-col ma-showcase-hero">
-              <div className="phone" style={{ position: 'relative' }}><div className="pill" /><RecordScreen /></div>
-              <div className="sc-lbl">Record</div>
+              <PhoneFrame src="/screenshots/ios/03_record.png" alt="PalmCare AI recording screen" />
+              <div className="sc-lbl">Palm It</div>
             </div>
             <div className="ma-showcase-col">
-              <div className="phone" style={{ position: 'relative' }}><div className="pill" /><ClientsScreen /></div>
+              <PhoneFrame src="/screenshots/ios/02_clients.png" alt="PalmCare AI clients list" />
               <div className="sc-lbl">Clients</div>
             </div>
           </div>
@@ -400,7 +189,7 @@ export default function MobileAppPage() {
             </div>
           </div>
           <div className="ma-why-phone-wrap">
-            <div className="phone" style={{ position: 'relative' }}><div className="pill" /><HomeScreen /></div>
+            <PhoneFrame src="/screenshots/ios/07_contract.png" alt="PalmCare AI contract view" />
           </div>
         </div>
       </section>

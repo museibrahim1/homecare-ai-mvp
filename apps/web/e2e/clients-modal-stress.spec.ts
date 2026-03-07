@@ -1,8 +1,12 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
 const EMAIL = process.env.E2E_EMAIL ?? 'demo@agency.com';
 const PASSWORD = process.env.E2E_PASSWORD ?? 'demo1234';
 const CYCLES = Number(process.env.E2E_MODAL_CYCLES ?? 120);
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  'https://api-production-a0a2.up.railway.app';
 
 const MAX_AVG_OPEN_MS = Number(process.env.E2E_MAX_AVG_OPEN_MS ?? 800);
 const MAX_AVG_CLOSE_MS = Number(process.env.E2E_MAX_AVG_CLOSE_MS ?? 800);
@@ -25,49 +29,54 @@ async function readHeapUsageMB(page: Page): Promise<number | null> {
   });
 }
 
-async function loginAndOpenClients(page: Page): Promise<void> {
+async function loginAndOpenClients(page: Page, request: APIRequestContext): Promise<void> {
+  const loginResp = await request.post(`${API_BASE}/auth/login`, {
+    data: { email: EMAIL, password: PASSWORD },
+  });
+
+  let accessToken: string | null = null;
+  if (loginResp.ok()) {
+    const payload = (await loginResp.json()) as { access_token?: string };
+    accessToken = payload.access_token ?? null;
+  } else {
+    const businessResp = await request.post(`${API_BASE}/auth/business/login`, {
+      data: { email: EMAIL, password: PASSWORD },
+    });
+    expect(businessResp.ok(), 'Business login failed in test setup').toBe(true);
+    const payload = (await businessResp.json()) as { access_token?: string };
+    accessToken = payload.access_token ?? null;
+  }
+  expect(accessToken, 'No access token returned in test setup').toBeTruthy();
+
+  const persistValue = JSON.stringify({
+    state: {
+      token: accessToken,
+      user: null,
+      lastActivity: Date.now(),
+    },
+    version: 0,
+  });
+
   await page.goto('/login');
-  await page.waitForLoadState('domcontentloaded');
-
-  let authenticated = false;
-  for (let attempt = 0; attempt < 3 && !authenticated; attempt += 1) {
-    await page.getByLabel('Email address').fill(EMAIL);
-    await page.getByLabel('Password').fill(PASSWORD);
-
-    await page.getByRole('button', { name: 'Sign in' }).click();
-
-    try {
-      await page.waitForURL(/\/(welcome|dashboard|clients)/, { timeout: 12_000 });
-      authenticated = true;
-      break;
-    } catch {
-      // On very early clicks, the form can submit as plain HTML GET before hydration.
-      // Retry once hydrated to keep the stress test deterministic.
-      if (page.url().includes('/login?')) {
-        await page.goto('/login');
-        await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(250);
-      }
-    }
-  }
-
-  expect(authenticated, 'Unable to authenticate in test setup').toBe(true);
-
-  if (page.url().includes('/welcome')) {
-    await page.goto('/clients');
-  }
-
-  if (!page.url().includes('/clients')) {
-    await page.goto('/clients');
-  }
-
-  await expect(page).toHaveURL(/\/clients/);
-  await expect(page.getByRole('heading', { name: 'Clients', exact: true })).toBeVisible();
+  await page.evaluate((value) => {
+    localStorage.setItem('palmcare-auth', value);
+    localStorage.setItem('palmcare-walkthrough-seen', 'true');
+  }, persistValue);
+  await page.goto('/clients', { waitUntil: 'domcontentloaded' });
+  expect(page.url().includes('/login'), 'Token seeding failed, redirected to login').toBe(false);
+  await page.waitForFunction(
+    () =>
+      !!document.querySelector('[data-testid="open-quick-add-client"]') ||
+      window.location.pathname.startsWith('/login'),
+    { timeout: 60_000 },
+  );
+  expect(page.url().includes('/login'), 'Auth session expired before clients loaded').toBe(false);
 }
 
 test.describe('Clients quick-add modal stress checks', () => {
-  test('handles 120 open/close cycles without degradation', async ({ page }, testInfo) => {
+  test('handles 120 open/close cycles without degradation', async ({ page, request }, testInfo) => {
     test.setTimeout(Math.max(10 * 60 * 1000, CYCLES * 8_000));
+    page.setDefaultTimeout(8_000);
 
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];
@@ -80,7 +89,7 @@ test.describe('Clients quick-add modal stress checks', () => {
     });
     page.on('pageerror', (err) => pageErrors.push(err.message));
 
-    await loginAndOpenClients(page);
+    await loginAndOpenClients(page, request);
 
     const openQuickAdd = page.getByTestId('open-quick-add-client');
     const modal = page.getByTestId('quick-add-modal');
@@ -90,10 +99,10 @@ test.describe('Clients quick-add modal stress checks', () => {
 
     // Verify mobile layout quickly before stress loop.
     await page.setViewportSize({ width: 390, height: 844 });
-    await openQuickAdd.click();
+    await openQuickAdd.click({ timeout: 3_000 });
     await expect(modal).toBeVisible();
     await expect(page.getByText('Add New Client')).toBeVisible();
-    await closeModal.click();
+    await closeModal.click({ timeout: 3_000 });
     await expect(modal).toBeHidden();
 
     // Stress loop on desktop viewport for consistent timing.
@@ -109,12 +118,12 @@ test.describe('Clients quick-add modal stress checks', () => {
 
     for (let i = 0; i < CYCLES; i += 1) {
       const openStart = Date.now();
-      await openQuickAdd.click();
+      await openQuickAdd.click({ timeout: 3_000 });
       await modal.waitFor({ state: 'visible', timeout: 5_000 });
       openTimes.push(Date.now() - openStart);
 
       const closeStart = Date.now();
-      await closeModal.click();
+      await closeModal.click({ timeout: 3_000 });
       await modal.waitFor({ state: 'hidden', timeout: 5_000 });
       closeTimes.push(Date.now() - closeStart);
 
