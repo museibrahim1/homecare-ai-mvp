@@ -56,51 +56,66 @@ struct AddClientSheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 20) {
-                    nameField
-                    inputField("Email", text: $email, placeholder: "john@email.com", icon: "envelope.fill", keyboard: .emailAddress, contentType: .emailAddress)
-                    inputField("Phone", text: $phone, placeholder: "+1 555 123 4567", icon: "phone.fill", keyboard: .phonePad, contentType: .telephoneNumber)
-                    inputField("Address", text: $address, placeholder: "123 Main St, City, State", icon: "mappin.circle.fill", contentType: .fullStreetAddress)
-                    prioritySection
-                    insuranceSection
-                    specialtySection
-                    notesField
+            VStack(spacing: 0) {
+                sheetHeader
 
-                    if let error = errorMessage {
-                        HStack(spacing: 6) {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .font(.system(size: 12))
-                            Text(error)
-                                .font(.system(size: 12))
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        nameField
+                        inputField("Email", text: $email, placeholder: "john@email.com", icon: "envelope.fill", keyboard: .emailAddress, contentType: .emailAddress)
+                        inputField("Phone", text: $phone, placeholder: "+1 555 123 4567", icon: "phone.fill", keyboard: .phonePad, contentType: .telephoneNumber)
+                        inputField("Address", text: $address, placeholder: "123 Main St, City, State", icon: "mappin.circle.fill", contentType: .fullStreetAddress)
+                        prioritySection
+                        insuranceSection
+                        specialtySection
+                        notesField
+
+                        if let error = errorMessage {
+                            HStack(spacing: 6) {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .font(.system(size: 12))
+                                Text(error)
+                                    .font(.system(size: 12))
+                            }
+                            .foregroundColor(.red)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
 
-                    submitButton
+                        submitButton
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 40)
             }
             .background(Color(UIColor.systemBackground))
-            .navigationTitle(isEditing ? "Edit Client" : "Add New Client")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.palmSecondary)
-                            .frame(width: 30, height: 30)
-                            .background(Color.palmFieldBg)
-                            .clipShape(Circle())
-                    }
-                    .accessibilityLabel("Close")
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
             .onAppear { populateFromClient() }
+        }
+    }
+
+    private var sheetHeader: some View {
+        HStack {
+            Text(isEditing ? "Edit Client" : "Add New Client")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.palmText)
+            Spacer()
+            Button { dismiss() } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.palmSecondary)
+                    .frame(width: 30, height: 30)
+                    .background(Color.palmFieldBg)
+                    .clipShape(Circle())
+            }
+            .accessibilityLabel("Close")
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 8)
+        .background(Color(UIColor.systemBackground))
+        .overlay(alignment: .bottom) {
+            Divider().background(Color.palmBorder.opacity(0.7))
         }
     }
 

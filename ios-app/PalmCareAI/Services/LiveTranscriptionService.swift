@@ -35,6 +35,9 @@ class LiveTranscriptionService: ObservableObject {
     }
 
     func startTranscribing(recordingURL: URL) {
+        // Prevent duplicate timers when start is triggered repeatedly.
+        chunkTimer?.invalidate()
+        chunkTimer = nil
         isTranscribing = true
         lastChunkEnd = 0
         lastByteOffset = 0

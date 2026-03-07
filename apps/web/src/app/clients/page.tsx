@@ -181,14 +181,22 @@ function QuickAddModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-center sm:justify-end p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
-      <div className="relative bg-white rounded-2xl w-full max-w-md shadow-lg border border-slate-200 mt-20 mr-4 max-h-[85vh] overflow-y-auto">
+      <div
+        className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-lg border border-slate-200 mt-0 sm:mt-20 mr-0 sm:mr-4 h-[92vh] sm:h-auto sm:max-h-[85vh] overflow-y-auto"
+        data-testid="quick-add-modal"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-200 sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 sticky top-0 bg-white z-10">
           <h3 className="text-lg font-semibold text-slate-900">Add New Client</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600"
+            aria-label="Close add client modal"
+            data-testid="quick-add-close"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -242,7 +250,7 @@ function QuickAddModal({
           {/* Priority / Care Level */}
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-2">Priority</label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {PRIORITY_OPTIONS.map(opt => (
                 <button
                   key={opt.value}
@@ -266,7 +274,7 @@ function QuickAddModal({
           {/* Insurance Type Selection */}
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-2">Insurance Type</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, insurance_type: 'medicaid' }))}
@@ -371,6 +379,7 @@ function QuickAddModal({
               type="submit"
               disabled={loading || !formData.full_name.trim()}
               className="w-full btn-primary flex items-center justify-center gap-2"
+              data-testid="quick-add-submit"
             >
               {loading ? (
                 <>
@@ -965,6 +974,7 @@ export default function ClientsPage() {
               <button 
                 onClick={() => setQuickAddOpen(true)}
                 className="btn-primary flex items-center gap-2 py-2"
+                data-testid="open-quick-add-client"
               >
                 <Plus className="w-4 h-4" />
                 Add Client

@@ -37,6 +37,9 @@ class DemoTranscriptionService: ObservableObject {
     ]
 
     func startTranscribing() {
+        // Prevent duplicate timers when restarting demo transcription.
+        wordTimer?.invalidate()
+        wordTimer = nil
         isTranscribing = true
         segments = []
         fullTranscript = ""

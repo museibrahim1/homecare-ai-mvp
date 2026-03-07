@@ -187,6 +187,9 @@ struct RecordView: View {
     @State private var completedClientName: String?
     @State private var navigateToVisit = false
     @State private var pipelineSteps: [(String, String)] = []
+    #if DEBUG
+    @State private var didRunAutomationDemo = false
+    #endif
 
     var body: some View {
             ZStack {
@@ -293,6 +296,19 @@ struct RecordView: View {
                 await loadClients()
                 permissionGranted = await recorder.requestPermission()
             }
+            #if DEBUG
+            .task {
+                guard ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") else { return }
+                guard !didRunAutomationDemo else { return }
+                didRunAutomationDemo = true
+                // Use demo mode to avoid mic permission and network coupling in stress runs.
+                isDemoMode = true
+                demoTranscription.startTranscribing()
+                try? await Task.sleep(nanoseconds: 4_000_000_000)
+                demoTranscription.stopTranscribing()
+                isDemoMode = false
+            }
+            #endif
             .onAppear {
                 if liveTranscription == nil {
                     liveTranscription = LiveTranscriptionService(api: api)

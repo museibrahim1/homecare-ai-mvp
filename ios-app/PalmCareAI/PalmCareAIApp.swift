@@ -44,8 +44,18 @@ struct PalmCareAIApp: App {
                         })
                             .environmentObject(api)
                     } else {
+                        #if DEBUG
+                        if ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") {
+                            AutomationStressHarnessView()
+                                .environmentObject(api)
+                        } else {
+                            MainTabView()
+                                .environmentObject(api)
+                        }
+                        #else
                         MainTabView()
                             .environmentObject(api)
+                        #endif
                     }
                 } else {
                     LandingView()
@@ -81,8 +91,14 @@ struct PalmCareAIApp: App {
                     break
                 }
             }
+            // Track user activity without aggressively intercepting touches.
+            // A zero-distance drag recognizer can compete with nav/button taps.
             .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
+                TapGesture()
+                    .onEnded { registerInteraction() }
+            )
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 12)
                     .onChanged { _ in registerInteraction() }
             )
             .onReceive(activityTick) { _ in
@@ -210,3 +226,44 @@ struct FaceIDLockScreen: View {
         }
     }
 }
+
+#if DEBUG
+struct AutomationStressHarnessView: View {
+    @EnvironmentObject var api: APIService
+    @State private var visitId: String?
+    @State private var clientName: String?
+    @State private var showVisitDetail = false
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if showVisitDetail, let visitId {
+                    VisitDetailView(visitId: visitId, clientName: clientName, initialTab: 0)
+                        .environmentObject(api)
+                } else {
+                    RecordView()
+                        .environmentObject(api)
+                }
+            }
+        }
+        .task {
+            // Drive deterministic runtime path:
+            // login -> record screen (auto demo start/stop in RecordView) -> visit detail tabs.
+            do {
+                let visits = try await api.fetchVisits(forceRefresh: true)
+                if let first = visits.first {
+                    visitId = first.id
+                    clientName = first.client?.full_name
+                }
+            } catch {
+                // Keep RecordView active if visits cannot be fetched.
+            }
+
+            try? await Task.sleep(nanoseconds: 10_000_000_000)
+            if visitId != nil {
+                showVisitDetail = true
+            }
+        }
+    }
+}
+#endif

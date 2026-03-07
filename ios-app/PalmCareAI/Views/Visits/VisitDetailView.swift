@@ -21,6 +21,9 @@ struct VisitDetailView: View {
     @State private var showFullContract = false
     @State private var selectedContractStyle = "modern"
     @State private var showStylePicker = false
+    #if DEBUG
+    @State private var didRunAutomationTabCycle = false
+    #endif
 
     private let tabs = ["Overview", "Transcript", "Billables", "Notes", "Contract"]
 
@@ -67,6 +70,17 @@ struct VisitDetailView: View {
         .onChange(of: activeTab) { _ in
             Task { await loadTabDataIfNeeded() }
         }
+        #if DEBUG
+        .task {
+            guard ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") else { return }
+            guard !didRunAutomationTabCycle else { return }
+            didRunAutomationTabCycle = true
+            for tabIndex in [1, 2, 3, 4, 0] {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                await MainActor.run { activeTab = tabIndex }
+            }
+        }
+        #endif
     }
 
     // MARK: - Tab Bar
@@ -1464,7 +1478,7 @@ struct VisitDetailView: View {
                 let t = try await api.fetchVisitTranscript(visitId: visitId)
                 await MainActor.run { transcript = t; tabFetchFailed.remove(1) }
             } catch {
-                await MainActor.run { tabFetchFailed.insert(1) }
+                await MainActor.run { _ = tabFetchFailed.insert(1) }
             }
         case 2:
             guard billables == nil else { return }
@@ -1472,7 +1486,7 @@ struct VisitDetailView: View {
                 let b = try await api.fetchVisitBillables(visitId: visitId)
                 await MainActor.run { billables = b; tabFetchFailed.remove(2) }
             } catch {
-                await MainActor.run { tabFetchFailed.insert(2) }
+                await MainActor.run { _ = tabFetchFailed.insert(2) }
             }
         case 3:
             guard note == nil else { return }
@@ -1480,7 +1494,7 @@ struct VisitDetailView: View {
                 let n = try await api.fetchVisitNote(visitId: visitId)
                 await MainActor.run { note = n; tabFetchFailed.remove(3) }
             } catch {
-                await MainActor.run { tabFetchFailed.insert(3) }
+                await MainActor.run { _ = tabFetchFailed.insert(3) }
             }
         case 4:
             guard contract == nil else { return }
@@ -1488,7 +1502,7 @@ struct VisitDetailView: View {
                 let c = try await api.fetchVisitContract(visitId: visitId)
                 await MainActor.run { contract = c; tabFetchFailed.remove(4) }
             } catch {
-                await MainActor.run { tabFetchFailed.insert(4) }
+                await MainActor.run { _ = tabFetchFailed.insert(4) }
             }
         default:
             break

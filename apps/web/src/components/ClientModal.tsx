@@ -244,14 +244,14 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-xl border border-slate-200">
+      <div className="relative bg-white w-full max-w-4xl h-[95vh] sm:h-auto sm:max-h-[90vh] rounded-t-2xl sm:rounded-xl overflow-hidden flex flex-col shadow-xl border border-slate-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200">
           <h2 className="text-lg font-bold text-slate-900">
             {client?.id ? 'Edit Client' : 'Add New Client'}
           </h2>
@@ -261,7 +261,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 px-4 overflow-x-auto bg-slate-50">
+        <div className="flex border-b border-slate-200 px-2 sm:px-4 overflow-x-auto bg-slate-50">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -279,10 +279,10 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {activeTab === 'personal' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Full Name" field="full_name" required placeholder="John Smith" />
                 <InputField label="Preferred Name" field="preferred_name" placeholder="Johnny" />
                 <InputField label="Date of Birth" field="date_of_birth" type="date" />
@@ -293,7 +293,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                   { value: 'prefer_not_to_say', label: 'Prefer not to say' },
                 ]} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SelectField label="Status" field="status" options={[
                   { value: 'active', label: 'Active' },
                   { value: 'inactive', label: 'Inactive' },
@@ -312,7 +312,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <Phone className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Phone Numbers</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Primary Phone" field="phone" placeholder="(555) 123-4567" />
                 <InputField label="Secondary Phone" field="phone_secondary" placeholder="(555) 987-6543" />
               </div>
@@ -329,7 +329,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
               </div>
               <div className="space-y-4">
                 <InputField label="Street Address" field="address" placeholder="123 Main Street, Apt 4B" />
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <InputField label="City" field="city" placeholder="Lincoln" />
                   <InputField label="State" field="state" placeholder="NE" />
                   <InputField label="ZIP Code" field="zip_code" placeholder="68501" />
@@ -345,7 +345,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                   <AlertCircle className="w-5 h-5 text-red-600" />
                   <h3 className="text-lg font-semibold text-slate-900">Primary Emergency Contact</h3>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <InputField label="Full Name" field="emergency_contact_name" placeholder="Jane Smith" />
                   <InputField label="Phone Number" field="emergency_contact_phone" placeholder="(555) 999-8888" />
                   <InputField label="Relationship" field="emergency_contact_relationship" placeholder="Daughter" />
@@ -357,7 +357,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                   <AlertCircle className="w-5 h-5 text-orange-600" />
                   <h3 className="text-lg font-semibold text-slate-900">Secondary Emergency Contact</h3>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <InputField label="Full Name" field="emergency_contact_2_name" placeholder="Bob Smith" />
                   <InputField label="Phone Number" field="emergency_contact_2_phone" placeholder="(555) 888-7777" />
                   <InputField label="Relationship" field="emergency_contact_2_relationship" placeholder="Son" />
@@ -378,14 +378,14 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <Heart className="w-5 h-5 text-red-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Diagnoses</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Primary Diagnosis" field="primary_diagnosis" placeholder="Type 2 Diabetes" />
                 <InputField label="Secondary Diagnoses" field="secondary_diagnoses" placeholder="Hypertension, Arthritis, COPD" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Allergies</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Allergies</label>
                   <textarea
                     value={formData.allergies || ''}
                     onChange={(e) => handleChange('allergies', e.target.value)}
@@ -395,7 +395,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Current Medications</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Current Medications</label>
                   <textarea
                     value={formData.medications || ''}
                     onChange={(e) => handleChange('medications', e.target.value)}
@@ -410,7 +410,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <Building className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Primary Care Physician</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Physician Name" field="physician_name" placeholder="Dr. Sarah Johnson" />
                 <InputField label="Physician Phone" field="physician_phone" placeholder="(555) 000-1111" />
               </div>
@@ -419,7 +419,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <History className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Physical & Cognitive Status</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SelectField label="Mobility Status" field="mobility_status" options={[
                   { value: 'independent', label: 'Independent' },
                   { value: 'uses_cane', label: 'Uses Cane' },
@@ -445,7 +445,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <FileText className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Care Requirements</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SelectField label="Care Level" field="care_level" options={[
                   { value: 'LOW', label: 'Low - Companionship/Light Assistance' },
                   { value: 'MODERATE', label: 'Moderate - Daily Living Assistance' },
@@ -472,7 +472,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <Shield className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Primary Insurance</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Insurance Provider" field="insurance_provider" placeholder="Blue Cross Blue Shield" />
                 <InputField label="Insurance ID / Policy Number" field="insurance_id" placeholder="XYZ123456789" />
               </div>
@@ -481,7 +481,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <CreditCard className="w-5 h-5 text-emerald-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Government Programs</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Medicaid ID" field="medicaid_id" placeholder="MCD987654321" />
                 <InputField label="Medicare ID" field="medicare_id" placeholder="MCR123456789" />
               </div>
@@ -500,9 +500,9 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <Calendar className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Scheduling Preferences</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Preferred Days</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Preferred Days</label>
                   <input
                     type="text"
                     value={formData.preferred_days || ''}
@@ -513,7 +513,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                   <p className="text-xs text-slate-500 mt-1">Days when care visits are preferred</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Preferred Times</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Preferred Times</label>
                   <input
                     type="text"
                     value={formData.preferred_times || ''}
@@ -529,7 +529,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <Clock className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">Important Dates</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Intake Date" field="intake_date" type="date" />
                 <InputField label="Discharge Date" field="discharge_date" type="date" />
               </div>
@@ -538,7 +538,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                 <Building className="w-5 h-5 text-primary-600" />
                 <h3 className="text-lg font-semibold text-slate-900">External System Integration</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="External ID" field="external_id" placeholder="CRM-12345" />
                 <SelectField label="External Source" field="external_source" options={[
                   { value: 'monday', label: 'Monday.com' },
@@ -609,7 +609,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-600">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-600">
                       <div>
                         <p className="text-sm text-slate-400">Hourly Rate</p>
                         <p className="text-xl font-bold text-emerald-600">
@@ -655,7 +655,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
                     {selectedContract.schedule && (
                       <div className="pt-4 border-t border-slate-600">
                         <p className="text-sm text-slate-400 mb-2">Schedule</p>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                           {selectedContract.schedule.care_need_level && (
                             <div>
                               <span className="text-slate-500">Care Level:</span>{' '}
@@ -729,7 +729,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-slate-200 bg-slate-50">
           <div>
             {client?.id && onDelete && (
               <button
@@ -742,7 +742,7 @@ export default function ClientModal({ client, isOpen, onClose, onSave, onDelete 
               </button>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end gap-3">
             <button
               onClick={onClose}
               className="px-4 py-2 text-slate-500 hover:text-slate-700 transition-colors text-sm"
