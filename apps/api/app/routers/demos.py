@@ -266,6 +266,9 @@ async def book_demo(
 
     email_svc = get_email_service()
 
+    # Use a verified sender; palmtai.com is not yet verified in Resend
+    verified_sender = "PalmCare AI <onboarding@resend.dev>"
+
     services_list = ', '.join(booking.services or []) or 'Not specified'
 
     # Confirmation email to prospect
@@ -286,7 +289,7 @@ async def book_demo(
     email_svc.send_email(
         to=booking.email,
         subject=subject,
-        sender=email_svc.from_sales,
+        sender=verified_sender,
         reply_to="sales@palmtai.com",
         html=f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
@@ -319,7 +322,7 @@ async def book_demo(
     email_svc.send_email(
         to=admin_email,
         subject=f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name}",
-        sender=email_svc.from_sales,
+        sender=verified_sender,
         html=f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #0d9488;">{'Demo Booked' if has_schedule else 'New Demo Request'}</h2>
