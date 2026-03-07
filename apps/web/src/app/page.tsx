@@ -518,7 +518,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 /* ───────────────────── SCHEDULE DEMO (Multi-Step) ───────────────────── */
 
 function BookDemoSection() {
-  const API = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+  const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-production-a0a2.up.railway.app';
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);

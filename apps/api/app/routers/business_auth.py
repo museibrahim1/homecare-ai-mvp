@@ -234,7 +234,7 @@ async def register_business(
         )
     
     # Notify platform admin of new registration
-    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "admin@palmtai.com")
+    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com")
     admin_result = email_service.send_admin_new_registration(
         admin_email=admin_email,
         business_name=registration.name,

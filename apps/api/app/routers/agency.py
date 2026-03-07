@@ -50,6 +50,27 @@ class AgencySettingsUpdate(BaseModel):
     npi_number: Optional[str] = None
     contact_person: Optional[str] = None
     contact_title: Optional[str] = None
+    # Billing & rate config
+    pay_sources: Optional[List[str]] = None
+    service_types: Optional[List[str]] = None
+    billing_type: Optional[str] = None
+    default_hourly_rate: Optional[float] = None
+    medicaid_companion_rate: Optional[float] = None
+    medicaid_personal_care_rate: Optional[float] = None
+    medicaid_respite_rate: Optional[float] = None
+    medicare_skilled_rate: Optional[float] = None
+    medicare_aide_rate: Optional[float] = None
+    private_pay_rate: Optional[float] = None
+    overtime_multiplier: Optional[float] = None
+    min_hours_per_visit: Optional[float] = None
+    min_hours_per_week: Optional[float] = None
+    max_hours_per_week: Optional[float] = None
+    accepts_medicaid: Optional[bool] = None
+    accepts_medicare: Optional[bool] = None
+    accepts_private_pay: Optional[bool] = None
+    accepts_insurance: Optional[bool] = None
+    accepts_va: Optional[bool] = None
+    onboarding_completed: Optional[bool] = None
 
 
 class AgencySettingsResponse(BaseModel):
@@ -73,6 +94,27 @@ class AgencySettingsResponse(BaseModel):
     npi_number: Optional[str] = None
     contact_person: Optional[str] = None
     contact_title: Optional[str] = None
+    # Billing & rate config
+    pay_sources: Optional[List[str]] = None
+    service_types: Optional[List[str]] = None
+    billing_type: Optional[str] = None
+    default_hourly_rate: Optional[float] = None
+    medicaid_companion_rate: Optional[float] = None
+    medicaid_personal_care_rate: Optional[float] = None
+    medicaid_respite_rate: Optional[float] = None
+    medicare_skilled_rate: Optional[float] = None
+    medicare_aide_rate: Optional[float] = None
+    private_pay_rate: Optional[float] = None
+    overtime_multiplier: Optional[float] = None
+    min_hours_per_visit: Optional[float] = None
+    min_hours_per_week: Optional[float] = None
+    max_hours_per_week: Optional[float] = None
+    accepts_medicaid: Optional[bool] = None
+    accepts_medicare: Optional[bool] = None
+    accepts_private_pay: Optional[bool] = None
+    accepts_insurance: Optional[bool] = None
+    accepts_va: Optional[bool] = None
+    onboarding_completed: Optional[bool] = None
 
 
 class ExtractInfoRequest(BaseModel):
@@ -113,23 +155,15 @@ def get_or_create_settings(db: Session, user_id) -> AgencySettings:
     return settings
 
 
-@router.get("", response_model=AgencySettingsResponse)
-async def get_agency_settings(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Get agency settings (data isolation enforced)."""
-    settings = get_or_create_settings(db, current_user.id)
-    
-    # Parse documents JSON if it exists
+def _settings_to_response(settings: AgencySettings) -> AgencySettingsResponse:
+    """Build a response dict from an AgencySettings row."""
     documents = []
     if hasattr(settings, 'documents') and settings.documents:
         try:
             documents = json.loads(settings.documents) if isinstance(settings.documents, str) else settings.documents
         except (json.JSONDecodeError, TypeError, ValueError):
-            logger.warning("Failed to parse agency documents JSON")
             documents = []
-    
+
     return AgencySettingsResponse(
         id=str(settings.id),
         name=settings.name,
@@ -151,7 +185,37 @@ async def get_agency_settings(
         npi_number=getattr(settings, 'npi_number', None),
         contact_person=getattr(settings, 'contact_person', None),
         contact_title=getattr(settings, 'contact_title', None),
+        pay_sources=getattr(settings, 'pay_sources', None),
+        service_types=getattr(settings, 'service_types', None),
+        billing_type=getattr(settings, 'billing_type', None),
+        default_hourly_rate=float(settings.default_hourly_rate) if getattr(settings, 'default_hourly_rate', None) else None,
+        medicaid_companion_rate=float(settings.medicaid_companion_rate) if getattr(settings, 'medicaid_companion_rate', None) else None,
+        medicaid_personal_care_rate=float(settings.medicaid_personal_care_rate) if getattr(settings, 'medicaid_personal_care_rate', None) else None,
+        medicaid_respite_rate=float(settings.medicaid_respite_rate) if getattr(settings, 'medicaid_respite_rate', None) else None,
+        medicare_skilled_rate=float(settings.medicare_skilled_rate) if getattr(settings, 'medicare_skilled_rate', None) else None,
+        medicare_aide_rate=float(settings.medicare_aide_rate) if getattr(settings, 'medicare_aide_rate', None) else None,
+        private_pay_rate=float(settings.private_pay_rate) if getattr(settings, 'private_pay_rate', None) else None,
+        overtime_multiplier=float(settings.overtime_multiplier) if getattr(settings, 'overtime_multiplier', None) else None,
+        min_hours_per_visit=float(settings.min_hours_per_visit) if getattr(settings, 'min_hours_per_visit', None) else None,
+        min_hours_per_week=float(settings.min_hours_per_week) if getattr(settings, 'min_hours_per_week', None) else None,
+        max_hours_per_week=float(settings.max_hours_per_week) if getattr(settings, 'max_hours_per_week', None) else None,
+        accepts_medicaid=getattr(settings, 'accepts_medicaid', None),
+        accepts_medicare=getattr(settings, 'accepts_medicare', None),
+        accepts_private_pay=getattr(settings, 'accepts_private_pay', None),
+        accepts_insurance=getattr(settings, 'accepts_insurance', None),
+        accepts_va=getattr(settings, 'accepts_va', None),
+        onboarding_completed=getattr(settings, 'onboarding_completed', None),
     )
+
+
+@router.get("", response_model=AgencySettingsResponse)
+async def get_agency_settings(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get agency settings (data isolation enforced)."""
+    settings = get_or_create_settings(db, current_user.id)
+    return _settings_to_response(settings)
 
 
 @router.put("", response_model=AgencySettingsResponse)
@@ -198,38 +262,7 @@ async def update_agency_settings(
     
     db.commit()
     db.refresh(settings)
-    
-    # Parse documents for response
-    documents = []
-    if settings.documents:
-        try:
-            documents = json.loads(settings.documents) if isinstance(settings.documents, str) else settings.documents
-        except (json.JSONDecodeError, TypeError, ValueError):
-            logger.warning("Failed to parse agency documents JSON")
-            documents = []
-    
-    return AgencySettingsResponse(
-        id=str(settings.id),
-        name=settings.name,
-        address=settings.address,
-        city=settings.city,
-        state=settings.state,
-        zip_code=settings.zip_code,
-        phone=settings.phone,
-        email=settings.email,
-        website=settings.website,
-        logo=settings.logo,
-        primary_color=settings.primary_color,
-        secondary_color=settings.secondary_color,
-        documents=documents,
-        cancellation_policy=settings.cancellation_policy,
-        terms_and_conditions=settings.terms_and_conditions,
-        tax_id=getattr(settings, 'tax_id', None),
-        license_number=getattr(settings, 'license_number', None),
-        npi_number=getattr(settings, 'npi_number', None),
-        contact_person=getattr(settings, 'contact_person', None),
-        contact_title=getattr(settings, 'contact_title', None),
-    )
+    return _settings_to_response(settings)
 
 
 @router.post("/extract-info", response_model=ExtractedInfo)

@@ -177,6 +177,7 @@ struct RecordView: View {
     @State private var showFilePicker = false
     @State private var uploadProgress: String?
     @AppStorage("backgroundRecording") private var backgroundRecording = false
+    @AppStorage("assessmentInProgress") private var assessmentInProgress = false
 
     @State private var completedVisitId: String?
     @State private var completedClientName: String?
@@ -285,6 +286,18 @@ struct RecordView: View {
                 if liveTranscription == nil {
                     liveTranscription = LiveTranscriptionService(api: api)
                 }
+                assessmentInProgress = recorder.isRecording || isProcessing
+            }
+            .onDisappear {
+                if !recorder.isRecording && !isProcessing {
+                    assessmentInProgress = false
+                }
+            }
+            .onChange(of: recorder.isRecording) { isRecording in
+                assessmentInProgress = isRecording || isProcessing
+            }
+            .onChange(of: isProcessing) { processing in
+                assessmentInProgress = recorder.isRecording || processing
             }
         }
     }

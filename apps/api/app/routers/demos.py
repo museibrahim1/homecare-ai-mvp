@@ -263,6 +263,7 @@ async def book_demo(
         to=booking.email,
         subject=subject,
         sender=email_svc.from_sales,
+        reply_to="sales@palmtai.com",
         html=f"""
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
             <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
@@ -290,7 +291,7 @@ async def book_demo(
     )
 
     # Admin notification
-    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "admin@palmtai.com")
+    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com")
     email_svc.send_email(
         to=admin_email,
         subject=f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name}",

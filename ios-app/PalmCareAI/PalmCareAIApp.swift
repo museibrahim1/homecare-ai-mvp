@@ -6,10 +6,14 @@ struct PalmCareAIApp: App {
     @StateObject private var api = APIService.shared
     @AppStorage("useFaceID") private var useFaceID = false
     @AppStorage("isDarkMode") private var isDarkMode = false
+    @AppStorage("assessmentInProgress") private var assessmentInProgress = false
     @Environment(\.scenePhase) private var scenePhase
     @State private var isBiometricUnlocked = false
     @State private var enteredBackgroundAt: Date?
+    @State private var lastInteractionAt = Date()
     private let sessionReauthTimeout: TimeInterval = 300
+    private let foregroundInactivityTimeout: TimeInterval = 600
+    private let activityTick = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 
     init() {
         let navAppearance = UINavigationBarAppearance()
@@ -34,7 +38,10 @@ struct PalmCareAIApp: App {
             Group {
                 if api.isAuthenticated {
                     if useFaceID && !isBiometricUnlocked {
-                        FaceIDLockScreen(onUnlock: { isBiometricUnlocked = true })
+                        FaceIDLockScreen(onUnlock: {
+                            isBiometricUnlocked = true
+                            registerInteraction()
+                        })
                             .environmentObject(api)
                     } else {
                         MainTabView()
@@ -47,6 +54,7 @@ struct PalmCareAIApp: App {
             }
             .onChange(of: api.isAuthenticated) { newValue in
                 if !newValue { isBiometricUnlocked = false }
+                registerInteraction()
             }
             .onChange(of: scenePhase) { newPhase in
                 guard api.isAuthenticated else {
@@ -60,20 +68,51 @@ struct PalmCareAIApp: App {
                 case .active:
                     guard let enteredBackgroundAt else { return }
                     let elapsed = Date().timeIntervalSince(enteredBackgroundAt)
-                    if elapsed >= sessionReauthTimeout {
+                    if elapsed >= sessionReauthTimeout, !assessmentInProgress {
                         if useFaceID {
                             isBiometricUnlocked = false
                         } else {
                             api.logout()
                         }
                     }
+                    registerInteraction()
                     self.enteredBackgroundAt = nil
                 default:
                     break
                 }
             }
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in registerInteraction() }
+            )
+            .onReceive(activityTick) { _ in
+                enforceForegroundInactivityPolicy()
+            }
             .preferredColorScheme(isDarkMode ? .dark : .light)
         }
+    }
+
+    private func registerInteraction() {
+        lastInteractionAt = Date()
+    }
+
+    private func enforceForegroundInactivityPolicy() {
+        guard scenePhase == .active, api.isAuthenticated else { return }
+        guard !assessmentInProgress else {
+            registerInteraction()
+            return
+        }
+        guard !(useFaceID && !isBiometricUnlocked) else { return }
+
+        let elapsed = Date().timeIntervalSince(lastInteractionAt)
+        guard elapsed >= foregroundInactivityTimeout else { return }
+
+        if useFaceID {
+            isBiometricUnlocked = false
+        } else {
+            api.logout()
+        }
+        registerInteraction()
     }
 }
 
