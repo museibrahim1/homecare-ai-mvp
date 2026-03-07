@@ -169,7 +169,6 @@ async def extract_with_llm(text_content: str, filename: str) -> ExtractedAgencyI
     
     # Try Anthropic first
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-    openai_key = os.getenv("OPENAI_API_KEY")
     
     system_prompt = """You are an expert at extracting business/agency information from documents.
     
@@ -262,54 +261,7 @@ Extract the agency/company information and return as JSON."""
                             )
                     except json.JSONDecodeError:
                         logger.warning("Failed to parse LLM JSON response")
-        
-        # Fallback to OpenAI
-        if openai_key:
-            import httpx
-            
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    "https://api.openai.com/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {openai_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": "gpt-3.5-turbo",
-                        "temperature": 0,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt}
-                        ]
-                    },
-                    timeout=30.0
-                )
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "{}")
-                    
-                    try:
-                        if "{" in content and "}" in content:
-                            json_start = content.index("{")
-                            json_end = content.rindex("}") + 1
-                            json_str = content[json_start:json_end]
-                            data = json.loads(json_str)
-                            
-                            return ExtractedAgencyInfo(
-                                name=data.get("name") if data.get("name") != "null" else None,
-                                address=data.get("address") if data.get("address") != "null" else None,
-                                city=data.get("city") if data.get("city") != "null" else None,
-                                state=data.get("state") if data.get("state") != "null" else None,
-                                zip_code=data.get("zip_code") if data.get("zip_code") != "null" else None,
-                                phone=data.get("phone") if data.get("phone") != "null" else None,
-                                email=data.get("email") if data.get("email") != "null" else None,
-                                website=data.get("website") if data.get("website") != "null" else None,
-                                logo_found=data.get("logo_found", False),
-                            )
-                    except json.JSONDecodeError:
-                        logger.warning("Failed to parse OpenAI JSON response")
-                        
+
     except Exception as e:
         logger.error(f"LLM extraction failed: {e}")
     

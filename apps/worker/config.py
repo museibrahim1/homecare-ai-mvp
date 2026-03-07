@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # LLM Configuration
     openai_api_key: str = ""
     anthropic_api_key: str = ""
-    llm_model: str = "claude-sonnet-4-20250514"
+    llm_model: str = "claude-3-haiku-20240307"
     llm_temperature: float = 0.7
     
     # Pipeline Configuration

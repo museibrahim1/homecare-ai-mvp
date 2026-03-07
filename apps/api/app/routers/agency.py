@@ -243,23 +243,12 @@ async def extract_company_info(
     Supports letterheads, policy documents, contracts, etc.
     """
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-    openai_key = os.getenv("OPENAI_API_KEY")
     
-    # Try Claude first (preferred), then fall back to OpenAI
-    if anthropic_key:
-        result = await _extract_with_claude(request.content, request.document_type, anthropic_key)
-        if result.name or result.address or result.phone or result.email:
-            return result
+    if not anthropic_key:
+        logger.warning("No ANTHROPIC_API_KEY found for document extraction")
+        return ExtractedInfo()
     
-    if openai_key:
-        result = await _extract_with_openai(request.content, request.document_type, openai_key)
-        if result.name or result.address or result.phone or result.email:
-            return result
-    
-    if not anthropic_key and not openai_key:
-        logger.warning("No LLM API key found for document extraction")
-    
-    return ExtractedInfo()
+    return await _extract_with_claude(request.content, request.document_type, anthropic_key)
 
 
 async def _extract_with_claude(content: str, doc_type: str, api_key: str) -> ExtractedInfo:
@@ -321,7 +310,7 @@ Document content (first 5000 chars of base64): {content[:5000]}
 Extract and return the JSON object with company information."""
 
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-3-haiku-20240307",
             max_tokens=2000,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}],

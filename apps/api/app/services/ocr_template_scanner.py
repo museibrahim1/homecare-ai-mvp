@@ -2,7 +2,7 @@
 OCR Template Scanner Service
 
 Uses Stirling-PDF for OCR text extraction from contract PDFs,
-then uses AI (Claude/GPT) to identify form fields and build a JSON schema
+then uses Claude to identify form fields and build a JSON schema
 mapping template fields to database columns.
 """
 
@@ -258,11 +258,10 @@ async def extract_text(file_bytes: bytes, filename: str, content_type: str) -> s
 
 async def detect_fields_with_ai(ocr_text: str, filename: str) -> list[dict[str, Any]]:
     """
-    Use Claude or GPT to analyze OCR'd text and identify all form fields,
+    Use Claude to analyze OCR'd text and identify all form fields,
     including their labels, types, and positions in the document.
     """
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-    openai_key = os.getenv("OPENAI_API_KEY")
 
     known_fields_json = json.dumps(list(DB_FIELD_REGISTRY.keys()), indent=2)
 
@@ -319,27 +318,6 @@ Identify all form fields and return as a JSON array."""
                 )
                 if resp.status_code == 200:
                     content = resp.json()["content"][0]["text"]
-                    return _parse_json_array(content)
-
-        if openai_key:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                resp = await client.post(
-                    "https://api.openai.com/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {openai_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": "gpt-4o-mini",
-                        "temperature": 0,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt},
-                        ],
-                    },
-                )
-                if resp.status_code == 200:
-                    content = resp.json()["choices"][0]["message"]["content"]
                     return _parse_json_array(content)
 
     except Exception as e:
@@ -467,37 +445,27 @@ Return JSON array: [{{"field_id": "...", "mapped_to": "registry_field_id_or_null
 Only return matches you are confident about (>80% sure)."""
 
     try:
-        import httpx
-        api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            return {}, unmapped_fields
 
-        if os.environ.get("ANTHROPIC_API_KEY"):
-            async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.post(
-                    "https://api.anthropic.com/v1/messages",
-                    headers={
-                        "x-api-key": api_key,
-                        "anthropic-version": "2023-06-01",
-                        "content-type": "application/json",
-                    },
-                    json={
-                        "model": "claude-3-haiku-20240307",
-                        "max_tokens": 1024,
-                        "messages": [{"role": "user", "content": prompt}],
-                    },
-                )
-                text = resp.json()["content"][0]["text"]
-        else:
-            async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.post(
-                    "https://api.openai.com/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-                    json={
-                        "model": "gpt-4o-mini",
-                        "messages": [{"role": "user", "content": prompt}],
-                        "temperature": 0,
-                    },
-                )
-                text = resp.json()["choices"][0]["message"]["content"]
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "claude-3-haiku-20240307",
+                    "max_tokens": 1024,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+            )
+            if resp.status_code != 200:
+                return {}, unmapped_fields
+            text = resp.json()["content"][0]["text"]
 
         json_match = re.search(r'\[.*\]', text, re.DOTALL)
         if not json_match:
