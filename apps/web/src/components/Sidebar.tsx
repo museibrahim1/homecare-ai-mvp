@@ -299,7 +299,7 @@ export default function Sidebar() {
                 {user?.full_name || 'Admin User'}
               </p>
               <p className="text-slate-400 text-[10px] truncate leading-tight">
-                {user?.email || 'admin@palmtai.com'}
+                {user?.email || 'User'}
               </p>
             </div>
             <button

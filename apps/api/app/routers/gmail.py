@@ -69,8 +69,7 @@ async def connect_gmail(
     logger = logging.getLogger(__name__)
     
     logger.info(f"Gmail connect attempt for user {current_user.id}")
-    logger.info(f"Using client_id: {settings.google_client_id[:20] if settings.google_client_id else 'None'}...")
-    logger.info(f"Client secret set: {bool(settings.google_client_secret)}, length: {len(settings.google_client_secret) if settings.google_client_secret else 0}")
+    logger.info(f"OAuth configured: client_id={bool(settings.google_client_id)}, client_secret={bool(settings.google_client_secret)}")
     
     try:
         async with httpx.AsyncClient() as client:
@@ -88,10 +87,10 @@ async def connect_gmail(
             logger.info(f"Token exchange response status: {response.status_code}")
             
             if response.status_code != 200:
-                logger.error(f"Token exchange failed: {response.text}")
+                logger.error(f"Token exchange failed with status {response.status_code}")
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Failed to exchange code: {response.text}",
+                    detail="Failed to exchange authorization code",
                 )
             
             tokens = response.json()

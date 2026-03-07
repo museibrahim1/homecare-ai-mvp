@@ -492,9 +492,7 @@ async def openai_health_check():
             test_result = f"error: {str(e)[:100]}"
     
     return {
-        "openai_api_key_set": bool(openai_key) and len(openai_key) > 10,
-        "openai_api_key_length": len(openai_key) if openai_key else 0,
-        "openai_api_key_prefix": openai_key[:7] + "..." if openai_key and len(openai_key) > 10 else "NOT SET",
+        "openai_configured": bool(openai_key) and len(openai_key) > 10,
         "test_result": test_result,
     }
 
@@ -503,8 +501,6 @@ async def openai_health_check():
 async def google_health_check():
     """Check if Google OAuth credentials are configured."""
     return {
-        "google_client_id_set": bool(settings.google_client_id),
-        "google_client_id_preview": settings.google_client_id[:20] + "..." if settings.google_client_id else None,
-        "google_client_secret_set": bool(settings.google_client_secret),
-        "google_client_secret_length": len(settings.google_client_secret) if settings.google_client_secret else 0,
+        "google_client_id_configured": bool(settings.google_client_id),
+        "google_client_secret_configured": bool(settings.google_client_secret),
     }

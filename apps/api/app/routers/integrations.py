@@ -431,10 +431,11 @@ async def monday_webhook(
     if "challenge" in payload:
         return {"challenge": payload["challenge"]}
     
-    # Verify webhook secret
     import os
     expected_secret = os.getenv("WEBHOOK_SECRET", "")
-    if expected_secret and x_webhook_secret != expected_secret:
+    if not expected_secret:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Webhook not configured")
+    if x_webhook_secret != expected_secret:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid webhook secret")
     
     event = payload.get("event", {})

@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const tokens = await tokenResponse.json();
 
     if (tokens.error) {
-      console.error('Token exchange error:', tokens);
+      console.error('Token exchange error:', tokens.error, tokens.error_description);
       return NextResponse.redirect(new URL('/schedule?error=token_exchange_failed', request.url));
     }
 

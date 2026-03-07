@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+import secrets
 from datetime import datetime, timezone
 
 from app.core.security import get_password_hash
@@ -34,7 +35,7 @@ def seed() -> None:
         if not admin:
             admin = User(
                 email="admin@palmtai.com",
-                hashed_password=get_password_hash(os.environ.get("ADMIN_PASSWORD", "admin123")),
+                hashed_password=get_password_hash(os.environ.get("ADMIN_PASSWORD") or secrets.token_urlsafe(16)),
                 full_name="Admin User",
                 role=UserRole.admin,
                 is_active=True,

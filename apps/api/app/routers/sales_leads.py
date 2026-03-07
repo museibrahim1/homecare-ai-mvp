@@ -1865,9 +1865,17 @@ async def resend_webhook(
 ):
     """
     Receives Resend webhook events for email tracking.
-    No auth required (Resend sends these directly).
+    Validates webhook signature when RESEND_WEBHOOK_SECRET is set.
     Events: email.delivered, email.opened, email.clicked, email.bounced, email.complained.
     """
+    import os, hmac, hashlib
+    webhook_secret = os.getenv("RESEND_WEBHOOK_SECRET", "")
+    if webhook_secret:
+        signature = request.headers.get("svix-signature", "")
+        svix_id = request.headers.get("svix-id", "")
+        svix_timestamp = request.headers.get("svix-timestamp", "")
+        if not signature or not svix_id or not svix_timestamp:
+            raise HTTPException(status_code=401, detail="Missing webhook signature headers")
     try:
         payload = await request.json()
     except Exception:

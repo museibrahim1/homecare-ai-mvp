@@ -55,14 +55,18 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     s = Settings()
-    # Auto-generate JWT secret if not provided (warns in production)
     if not s.jwt_secret:
+        if not s.debug:
+            _config_logger.critical(
+                "JWT_SECRET not set in production! Set JWT_SECRET env var. "
+                "Using auto-generated secret — sessions will NOT survive restarts."
+            )
         generated = secrets.token_urlsafe(64)
-        _config_logger.warning(
-            "JWT_SECRET not set — using auto-generated secret. "
-            "Sessions will NOT survive restarts. Set JWT_SECRET env var for production."
-        )
         s.jwt_secret = generated
+    if "palmcare:palmcare@localhost" in s.database_url and not s.debug:
+        _config_logger.warning(
+            "Using default local database credentials. Set DATABASE_URL env var for production."
+        )
     return s
 
 

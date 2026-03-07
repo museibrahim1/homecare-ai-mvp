@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 // Formspree form ID - get yours at https://formspree.io
-const FORMSPREE_CONTACT_ID = process.env.NEXT_PUBLIC_FORMSPREE_CONTACT_ID || 'xaqbwpzy';
+const FORMSPREE_CONTACT_ID = process.env.NEXT_PUBLIC_FORMSPREE_CONTACT_ID || '';
 
 function ContactForm() {
   const searchParams = useSearchParams();

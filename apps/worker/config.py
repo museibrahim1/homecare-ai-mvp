@@ -11,10 +11,10 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str = "redis://localhost:6379/0"
     
-    # S3/MinIO
+    # S3/MinIO — set S3_ACCESS_KEY and S3_SECRET_KEY env vars
     s3_endpoint_url: str = "http://localhost:9000"
-    s3_access_key: str = "minio"
-    s3_secret_key: str = "minio12345"
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
     s3_bucket: str = "palmcare-audio"
     
     # ASR Configuration
