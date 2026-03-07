@@ -148,7 +148,7 @@ const FEATURES_TABS = [
         title: 'HIPAA-Compliant Security',
         description: 'Protect PHI with encryption, secure storage, and role-based controls designed for healthcare-grade compliance requirements.',
         color: 'from-amber-500 to-orange-500',
-        image: '/screenshots/settings.png',
+        image: '/screenshots/hipaa-compliance.png',
       },
     ],
   },
