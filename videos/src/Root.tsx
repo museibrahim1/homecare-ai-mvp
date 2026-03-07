@@ -6,6 +6,7 @@ import { DemoVideoV3 } from "./compositions/DemoVideoV3";
 import { AdVideo } from "./compositions/AdVideo";
 import { PalmCareAd } from "./compositions/PalmCareAd";
 import { AppFlowAd } from "./compositions/AppFlowAd";
+import { ProductAd } from "./compositions/ProductAd";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -157,6 +158,33 @@ export const RemotionRoot: React.FC = () => {
         id="AppFlowAdWithAudio"
         component={AppFlowAd}
         durationInFrames={1200}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{
+          showAudio: true,
+        }}
+      />
+
+      {/* ===== KLING PRODUCT AD ===== */}
+      {/* Full cinematic product commercial — 44s */}
+      <Composition
+        id="ProductAd"
+        component={ProductAd}
+        durationInFrames={1320}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{
+          showAudio: false,
+        }}
+      />
+
+      {/* Product Ad with Audio */}
+      <Composition
+        id="ProductAdWithAudio"
+        component={ProductAd}
+        durationInFrames={1320}
         fps={30}
         width={1920}
         height={1080}
