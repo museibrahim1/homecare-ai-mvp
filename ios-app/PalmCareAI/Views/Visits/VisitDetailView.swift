@@ -1471,41 +1471,70 @@ struct VisitDetailView: View {
     }
 
     private func loadTabDataIfNeeded() async {
+        if activeTab == 0 {
+            await loadAllTabData()
+            return
+        }
+
         switch activeTab {
         case 1:
-            guard transcript == nil else { return }
-            do {
-                let t = try await api.fetchVisitTranscript(visitId: visitId)
-                await MainActor.run { transcript = t; tabFetchFailed.remove(1) }
-            } catch {
-                await MainActor.run { _ = tabFetchFailed.insert(1) }
-            }
+            await loadTranscript()
         case 2:
-            guard billables == nil else { return }
-            do {
-                let b = try await api.fetchVisitBillables(visitId: visitId)
-                await MainActor.run { billables = b; tabFetchFailed.remove(2) }
-            } catch {
-                await MainActor.run { _ = tabFetchFailed.insert(2) }
-            }
+            await loadBillables()
         case 3:
-            guard note == nil else { return }
-            do {
-                let n = try await api.fetchVisitNote(visitId: visitId)
-                await MainActor.run { note = n; tabFetchFailed.remove(3) }
-            } catch {
-                await MainActor.run { _ = tabFetchFailed.insert(3) }
-            }
+            await loadNote()
         case 4:
-            guard contract == nil else { return }
-            do {
-                let c = try await api.fetchVisitContract(visitId: visitId)
-                await MainActor.run { contract = c; tabFetchFailed.remove(4) }
-            } catch {
-                await MainActor.run { _ = tabFetchFailed.insert(4) }
-            }
+            await loadContract()
         default:
             break
+        }
+    }
+
+    private func loadAllTabData() async {
+        async let t: () = loadTranscript()
+        async let b: () = loadBillables()
+        async let n: () = loadNote()
+        async let c: () = loadContract()
+        _ = await (t, b, n, c)
+    }
+
+    private func loadTranscript() async {
+        guard transcript == nil else { return }
+        do {
+            let t = try await api.fetchVisitTranscript(visitId: visitId)
+            await MainActor.run { transcript = t; tabFetchFailed.remove(1) }
+        } catch {
+            await MainActor.run { _ = tabFetchFailed.insert(1) }
+        }
+    }
+
+    private func loadBillables() async {
+        guard billables == nil else { return }
+        do {
+            let b = try await api.fetchVisitBillables(visitId: visitId)
+            await MainActor.run { billables = b; tabFetchFailed.remove(2) }
+        } catch {
+            await MainActor.run { _ = tabFetchFailed.insert(2) }
+        }
+    }
+
+    private func loadNote() async {
+        guard note == nil else { return }
+        do {
+            let n = try await api.fetchVisitNote(visitId: visitId)
+            await MainActor.run { note = n; tabFetchFailed.remove(3) }
+        } catch {
+            await MainActor.run { _ = tabFetchFailed.insert(3) }
+        }
+    }
+
+    private func loadContract() async {
+        guard contract == nil else { return }
+        do {
+            let c = try await api.fetchVisitContract(visitId: visitId)
+            await MainActor.run { contract = c; tabFetchFailed.remove(4) }
+        } catch {
+            await MainActor.run { _ = tabFetchFailed.insert(4) }
         }
     }
 

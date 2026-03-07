@@ -275,22 +275,74 @@ struct ClientDetailView: View {
         DetailSection(title: "Emergency Contacts", icon: "exclamationmark.shield.fill", iconColor: .red) {
             VStack(spacing: 0) {
                 if let ecName = client.emergency_contact_name, !ecName.isEmpty {
-                    let ecDetail = [ecName, client.emergency_contact_phone, client.emergency_contact_relationship]
-                        .compactMap { $0 }
-                        .filter { !$0.isEmpty }
-                        .joined(separator: " · ")
-                    detailRow(icon: "1.circle.fill", label: "Primary Contact", value: ecDetail, color: .red)
+                    emergencyContactCard(
+                        label: "Primary Contact",
+                        name: ecName,
+                        phone: client.emergency_contact_phone,
+                        relationship: client.emergency_contact_relationship,
+                        color: .red
+                    )
                 }
                 if let ec2Name = client.emergency_contact_2_name, !ec2Name.isEmpty {
                     detailDivider
-                    let ec2Detail = [ec2Name, client.emergency_contact_2_phone, client.emergency_contact_2_relationship]
-                        .compactMap { $0 }
-                        .filter { !$0.isEmpty }
-                        .joined(separator: " · ")
-                    detailRow(icon: "2.circle.fill", label: "Secondary Contact", value: ec2Detail, color: .palmOrange)
+                    emergencyContactCard(
+                        label: "Secondary Contact",
+                        name: ec2Name,
+                        phone: client.emergency_contact_2_phone,
+                        relationship: client.emergency_contact_2_relationship,
+                        color: .palmOrange
+                    )
                 }
             }
         }
+    }
+
+    private func emergencyContactCard(label: String, name: String, phone: String?, relationship: String?, color: Color) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "person.crop.circle.badge.exclamationmark.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(color)
+                .frame(width: 30, height: 30)
+                .background(color.opacity(0.1))
+                .cornerRadius(8)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(label)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.palmSecondary)
+
+                Text(name)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.palmText)
+
+                HStack(spacing: 12) {
+                    if let phone = phone, !phone.isEmpty {
+                        HStack(spacing: 4) {
+                            Image(systemName: "phone.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(.palmPrimary)
+                            Text(phone)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.palmText.opacity(0.8))
+                        }
+                    }
+                    if let rel = relationship, !rel.isEmpty {
+                        HStack(spacing: 4) {
+                            Image(systemName: "person.2.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(.palmPurple)
+                            Text(rel)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.palmText.opacity(0.8))
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
     }
 
     // MARK: - Medical Section
