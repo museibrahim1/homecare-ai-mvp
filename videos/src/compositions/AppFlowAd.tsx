@@ -847,7 +847,7 @@ const SceneContract: React.FC = () => {
           )}
         </div>
 
-        {/* Right — phone with contract view (~37s into clip4) */}
+        {/* Right — phone with contract view (~33s into clip4) */}
         <div
           style={{
             flex: 0.55,
@@ -857,7 +857,7 @@ const SceneContract: React.FC = () => {
             transform: `translateX(${phoneX}px)`,
           }}
         >
-          <PhoneVideo videoStartSec={36} height={640} glow={0.2} />
+          <PhoneVideo videoStartSec={33} height={640} glow={0.2} />
         </div>
       </div>
 
