@@ -52,6 +52,7 @@ struct TasksView: View {
                     .cornerRadius(14)
                     .shadow(color: Color.palmPrimary.opacity(0.4), radius: 8, y: 4)
             }
+            .accessibilityLabel("Add new task")
             .padding(.trailing, 18)
             .padding(.bottom, 100)
         }
@@ -113,6 +114,7 @@ struct TasksView: View {
                                 .stroke(selectedFilter == filter ? Color.clear : Color.palmBorder, lineWidth: 1)
                         )
                     }
+                    .accessibilityLabel("\(filter) filter, \(selectedFilter == filter ? "selected" : "")")
                 }
             }
             .padding(.horizontal, 18)

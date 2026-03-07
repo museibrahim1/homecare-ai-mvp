@@ -71,6 +71,7 @@ struct ClientDetailView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.palmPrimary)
                 }
+                .accessibilityLabel("Edit client")
             }
         }
         .sheet(isPresented: $showEditSheet) {
@@ -237,6 +238,7 @@ struct ClientDetailView: View {
                     .foregroundColor(color)
             }
         }
+        .accessibilityLabel(label)
     }
 
     // MARK: - Contact Section
@@ -475,6 +477,7 @@ struct ClientDetailView: View {
                         ) {
                             visitRow(visit)
                         }
+                        .accessibilityLabel("\(client.full_name), Assessment \(formattedDate(visit.created_at))")
                         .buttonStyle(.plain)
                         if index < clientVisits.count - 1 {
                             Divider().padding(.leading, 54)
@@ -499,6 +502,7 @@ struct ClientDetailView: View {
                 .frame(width: 30, height: 30)
                 .background(color.opacity(0.1))
                 .cornerRadius(8)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
@@ -684,6 +688,7 @@ struct ClientDetailView: View {
                     Image(systemName: visit.status.lowercased() == "completed" ? "checkmark" : "clock")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(visitStatusColor)
+                        .accessibilityHidden(true)
                 )
 
             VStack(alignment: .leading, spacing: 2) {
@@ -744,6 +749,7 @@ struct ClientDetailView: View {
             Image(systemName: "wifi.exclamationmark")
                 .font(.system(size: 36))
                 .foregroundColor(.palmOrange)
+                .accessibilityHidden(true)
             Text("Something went wrong")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.palmText)
@@ -789,6 +795,7 @@ private struct DetailSection<Content: View>: View {
                     Image(systemName: icon)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(iconColor)
+                        .accessibilityHidden(true)
                 }
                 Text(title)
                     .font(.system(size: 13, weight: .semibold))

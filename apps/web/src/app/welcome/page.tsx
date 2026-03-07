@@ -224,7 +224,7 @@ export default function WelcomePage() {
   const progress = ((step + 1) / stepLabels.length) * 100;
 
   const locationValid = agency.name.trim() && agency.address.trim() && agency.city.trim() && agency.state && agency.zip_code.trim();
-  const billingValid = agency.pay_sources.length > 0 && agency.service_types.length > 0;
+  const billingValid = agency.pay_sources.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -421,29 +421,6 @@ export default function WelcomePage() {
               </div>
             </div>
 
-            {/* Service Types */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">What services do you provide?</h3>
-              <div className="flex flex-wrap gap-2">
-                {SERVICE_OPTIONS.map(svc => {
-                  const selected = agency.service_types.includes(svc.id);
-                  return (
-                    <button
-                      key={svc.id}
-                      onClick={() => toggleArrayItem('service_types', svc.id)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition ${
-                        selected
-                          ? 'border-primary-500 bg-primary-50 text-primary-700 font-medium'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                      }`}
-                    >
-                      {svc.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Rates */}
             <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
               <h3 className="text-sm font-semibold text-slate-900 mb-1">Your rates ($/hour)</h3>
@@ -476,16 +453,6 @@ export default function WelcomePage() {
               )}
             </div>
 
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex gap-3">
-              <DollarSign className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-emerald-800 text-sm font-medium">No more guessing</p>
-                <p className="text-emerald-600 text-xs mt-0.5">
-                  Every contract the AI generates will use your exact rates.
-                  If a client is Medicaid, the AI applies your Medicaid rate — automatically.
-                </p>
-              </div>
-            </div>
           </div>
         )}
 
@@ -518,13 +485,6 @@ export default function WelcomePage() {
                 {agency.default_hourly_rate && (
                   <span className="text-slate-400">| ${agency.default_hourly_rate}/hr default</span>
                 )}
-              </div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {agency.service_types.map(s => (
-                  <span key={s} className="px-2 py-0.5 bg-primary-50 text-primary-600 rounded-full text-xs">
-                    {s.replace(/_/g, ' ')}
-                  </span>
-                ))}
               </div>
             </div>
 
