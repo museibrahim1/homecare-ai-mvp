@@ -26,6 +26,7 @@
 		985BF5A55F478AD20D82C0CC /* WorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41812B9582222AD7FD8C0F01 /* WorkspaceView.swift */; };
 		9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965C098053DF16C330D69A47 /* RegisterView.swift */; };
 		A00F019F5C3997BF6F3B5A0E /* ClientsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE6E6ABEA65540D82DF2FF30 /* ClientsView.swift */; };
+		BEAD7B577F3F8A399991E9D1 /* DemoTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */; };
 		C14C3133F283022BF06C01B1 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7229E0471D9D4E3D984E2C /* MainTabView.swift */; };
 		C37109ADE391ED8B9F1A9A57 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62F08AE1496C16DBFA9D619 /* LoginView.swift */; };
 		CB8BFB4C0847725F56BE3B88 /* AssessmentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748C6E60A4F45E08581497C8 /* AssessmentsListView.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoTranscriptionService.swift; sourceTree = "<group>"; };
 		0870197ADB4B30C40D45C13D /* TasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksView.swift; sourceTree = "<group>"; };
 		25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorderService.swift; sourceTree = "<group>"; };
 		2DEA75021BD113DD86530A11 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
@@ -231,6 +233,7 @@
 			children = (
 				4DC7E34D4B0393336B0CBB48 /* APIService.swift */,
 				25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */,
+				07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */,
 				B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */,
 			);
 			path = Services;
@@ -331,6 +334,7 @@
 				F23E5D61BCFB2A1E18F6762C /* ClientDetailView.swift in Sources */,
 				A00F019F5C3997BF6F3B5A0E /* ClientsView.swift in Sources */,
 				8F8596F06F1792DE50BFF41B /* ContractsView.swift in Sources */,
+				BEAD7B577F3F8A399991E9D1 /* DemoTranscriptionService.swift in Sources */,
 				2801AB657853429D4D52D3C9 /* GoogleCalendarSetupSheet.swift in Sources */,
 				441ED8E4CA766509026656D4 /* HomeView.swift in Sources */,
 				3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */,
