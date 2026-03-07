@@ -295,8 +295,8 @@ export default function FeaturesPage() {
               </div>
               <div className="space-y-12">
                 {section.features.map((feature, fIdx) => (
-                  <div key={fIdx} className={`grid md:grid-cols-2 gap-8 items-center ${fIdx % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
-                    <div className={fIdx % 2 === 1 ? 'md:order-2' : ''}>
+                  <div key={fIdx} className="grid gap-8 items-start md:grid-cols-2">
+                    <div className={`min-w-0 ${fIdx % 2 === 1 ? 'md:order-2' : ''}`}>
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-12 h-12 bg-primary-500/10 rounded-xl flex items-center justify-center">
                           <feature.icon className="w-6 h-6 text-primary-400" />
@@ -312,14 +312,14 @@ export default function FeaturesPage() {
                         ))}
                       </div>
                     </div>
-                    <div className={`card p-3 ${fIdx % 2 === 1 ? 'md:order-1' : ''}`}>
-                      <div className="aspect-video bg-dark-700 rounded-xl overflow-hidden relative">
+                    <div className={`card p-3 md:p-4 min-w-0 ${fIdx % 2 === 1 ? 'md:order-1' : ''}`}>
+                      <div className="relative aspect-[4/3] sm:aspect-video bg-dark-900/60 rounded-xl overflow-hidden flex items-center justify-center">
                         <Image
                           src={feature.image}
                           alt={`${feature.title} screenshot`}
                           fill
-                          className="object-cover object-top"
-                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-contain p-2 sm:p-3"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 45vw"
                         />
                       </div>
                     </div>

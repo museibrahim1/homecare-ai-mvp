@@ -1402,16 +1402,16 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES_TABS.find(t => t.id === activeFeatureTab)?.features.map((feature, i) => (
-              <div key={i} className="card p-6 group hover:border-primary-500/30 transition-all">
+              <div key={i} className="card p-6 group hover:border-primary-500/30 transition-all h-full flex flex-col">
                 <div className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-dark-700 mb-5">
+                <div className="relative w-full aspect-[4/3] sm:aspect-video rounded-xl overflow-hidden border border-dark-700 mb-5 bg-dark-900/60 flex items-center justify-center shrink-0">
                   <Image
                     src={feature.image}
                     alt={`${feature.title} screenshot`}
                     fill
-                    className="object-cover object-top"
+                    className="object-contain p-2"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                   />
                 </div>

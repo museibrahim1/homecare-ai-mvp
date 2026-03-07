@@ -2,6 +2,10 @@ import { expect, test, type APIRequestContext, type Page } from '@playwright/tes
 
 const EMAIL = process.env.E2E_EMAIL ?? 'demo@agency.com';
 const PASSWORD = process.env.E2E_PASSWORD ?? 'demo1234';
+const CREDENTIALS_SOURCE =
+  process.env.E2E_EMAIL && process.env.E2E_PASSWORD
+    ? 'E2E_EMAIL/E2E_PASSWORD environment variables'
+    : 'fallback demo credentials (demo@agency.com/demo1234)';
 const CYCLES = Number(process.env.E2E_MODAL_CYCLES ?? 120);
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -29,22 +33,54 @@ async function readHeapUsageMB(page: Page): Promise<number | null> {
   });
 }
 
-async function loginAndOpenClients(page: Page, request: APIRequestContext): Promise<void> {
-  const loginResp = await request.post(`${API_BASE}/auth/login`, {
+async function loginViaEndpoint(
+  request: APIRequestContext,
+  endpoint: string,
+): Promise<{ ok: boolean; status: number; bodyText: string; accessToken: string | null }> {
+  const response = await request.post(`${API_BASE}${endpoint}`, {
     data: { email: EMAIL, password: PASSWORD },
   });
 
+  const status = response.status();
+  const bodyText = await response.text();
   let accessToken: string | null = null;
-  if (loginResp.ok()) {
-    const payload = (await loginResp.json()) as { access_token?: string };
-    accessToken = payload.access_token ?? null;
+
+  if (response.ok()) {
+    try {
+      const payload = JSON.parse(bodyText) as { access_token?: string };
+      accessToken = payload.access_token ?? null;
+    } catch {
+      // Keep token null and surface response body in the caller error message.
+    }
+  }
+
+  return { ok: response.ok(), status, bodyText, accessToken };
+}
+
+async function loginAndOpenClients(page: Page, request: APIRequestContext): Promise<void> {
+  let accessToken: string | null = null;
+  const loginResp = await loginViaEndpoint(request, '/auth/login');
+  if (loginResp.ok && loginResp.accessToken) {
+    accessToken = loginResp.accessToken;
   } else {
-    const businessResp = await request.post(`${API_BASE}/auth/business/login`, {
-      data: { email: EMAIL, password: PASSWORD },
-    });
-    expect(businessResp.ok(), 'Business login failed in test setup').toBe(true);
-    const payload = (await businessResp.json()) as { access_token?: string };
-    accessToken = payload.access_token ?? null;
+    const businessResp = await loginViaEndpoint(request, '/auth/business/login');
+    if (!businessResp.ok) {
+      throw new Error(
+        [
+          'Business login failed in test setup.',
+          `Credentials source: ${CREDENTIALS_SOURCE}`,
+          `Email used: ${EMAIL}`,
+          `API base: ${API_BASE}`,
+          '',
+          `/auth/login -> ${loginResp.status}`,
+          `/auth/login body: ${loginResp.bodyText}`,
+          '',
+          `/auth/business/login -> ${businessResp.status}`,
+          `/auth/business/login body: ${businessResp.bodyText}`,
+        ].join('\n'),
+      );
+    }
+    accessToken = businessResp.accessToken;
   }
   expect(accessToken, 'No access token returned in test setup').toBeTruthy();
 
