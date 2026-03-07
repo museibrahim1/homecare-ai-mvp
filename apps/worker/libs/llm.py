@@ -1201,7 +1201,7 @@ class LLMService:
 {state_context}
 {billing_block}
 
-## YOUR MISSION: EXTRACT COMPREHENSIVE CARE ASSESSMENT DATA
+## YOUR MISSION: EXTRACT COMPREHENSIVE CARE ASSESSMENT DATA""" + """
 
 You must extract EVERY piece of relevant information mentioned in the transcript. DO NOT leave fields as "N/A" if there is ANY indication in the conversation. Make reasonable clinical inferences when direct statements aren't available.
 
