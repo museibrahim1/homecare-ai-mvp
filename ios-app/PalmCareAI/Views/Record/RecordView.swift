@@ -451,57 +451,71 @@ struct RecordView: View {
     // MARK: - Recording Layout (orb + raw dialogue)
 
     private var recordingLayout: some View {
-        VStack(spacing: 0) {
-            VoiceOrb(isActive: true, audioLevel: {
-                #if DEBUG
-                if isDemoMode { return 0.4 }
-                #endif
-                return recorder.audioLevel
-            }())
-                .frame(width: 120, height: 120)
-                .contentShape(Rectangle())
-                .onTapGesture {
+        GeometryReader { geo in
+            VStack(spacing: 0) {
+                VoiceOrb(isActive: true, audioLevel: {
                     #if DEBUG
-                    if isDemoMode {
-                        demoTranscription.stopTranscribing()
-                        isDemoMode = false
-                        return
-                    }
+                    if isDemoMode { return 0.4 }
                     #endif
-                    handleRecordTap()
-                }
-                .accessibilityLabel(recorder.isRecording ? "Stop recording" : "Start recording")
-                .accessibilityAddTraits(.isButton)
-                .padding(.top, 4)
-                .padding(.bottom, 12)
-
-            // Live dialogue — just text, no box, no chrome
-            ScrollViewReader { proxy in
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(transcriptSegments) { segment in
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 6) {
-                                    Circle()
-                                        .fill(speakerColor(for: segment.speaker))
-                                        .frame(width: 8, height: 8)
-                                    Text(segment.speakerLabel)
-                                        .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(speakerColor(for: segment.speaker))
-                                }
-
-                                WrappingHStack(words: segment.text.split(separator: " ").map(String.init))
-                            }
-                            .id(segment.id)
+                    return recorder.audioLevel
+                }())
+                    .frame(width: 120, height: 120)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        #if DEBUG
+                        if isDemoMode {
+                            demoTranscription.stopTranscribing()
+                            isDemoMode = false
+                            return
                         }
+                        #endif
+                        handleRecordTap()
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 100)
+                    .accessibilityLabel(recorder.isRecording ? "Stop recording" : "Start recording")
+                    .accessibilityAddTraits(.isButton)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: geo.size.height * 0.30)
+                    .background(Color.clear)
+
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Color.green.opacity(0.8))
+                        .frame(width: 6, height: 6)
+                    Text("LIVE TRANSCRIPT")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white.opacity(0.4))
+                        .tracking(1.5)
                 }
-                .onChange(of: transcriptSegments.count) { _ in
-                    if let last = transcriptSegments.last {
-                        withAnimation(.easeOut(duration: 0.3)) {
-                            proxy.scrollTo(last.id, anchor: .bottom)
+                .padding(.bottom, 8)
+
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            ForEach(transcriptSegments) { segment in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack(spacing: 6) {
+                                        Circle()
+                                            .fill(speakerColor(for: segment.speaker))
+                                            .frame(width: 8, height: 8)
+                                        Text(segment.speakerLabel)
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(speakerColor(for: segment.speaker))
+                                    }
+
+                                    WrappingHStack(words: segment.text.split(separator: " ").map(String.init))
+                                }
+                                .id(segment.id)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                        .padding(.bottom, 100)
+                    }
+                    .onChange(of: transcriptSegments.count) { _ in
+                        if let last = transcriptSegments.last {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                proxy.scrollTo(last.id, anchor: .bottom)
+                            }
                         }
                     }
                 }
