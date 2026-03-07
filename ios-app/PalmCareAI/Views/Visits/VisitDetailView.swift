@@ -763,12 +763,34 @@ struct VisitDetailView: View {
     }
 
     private func contractHeader(_ c: VisitContract) -> some View {
-        VStack(spacing: 12) {
+        let accent = currentStyle.accentColor
+        let layout = currentStyle.layoutType
+        let isClassic = layout == .classic
+        let isElegant = layout == .elegant
+        let isProfessional = layout == .professional
+        let titleFont: Font = isClassic ? .system(size: 18, weight: .bold, design: .serif) : (isElegant ? .system(size: 18, weight: .heavy) : .system(size: 17, weight: .bold))
+
+        return VStack(spacing: 0) {
+            if isProfessional || layout == .clinical {
+                Rectangle()
+                    .fill(LinearGradient(colors: currentStyle.previewColors, startPoint: .leading, endPoint: .trailing))
+                    .frame(height: 4)
+                    .cornerRadius(2)
+                    .padding(.bottom, 12)
+            }
+
+            if isElegant {
+                Rectangle()
+                    .fill(LinearGradient(colors: currentStyle.previewColors, startPoint: .leading, endPoint: .trailing))
+                    .frame(width: 50, height: 2)
+                    .padding(.bottom, 8)
+            }
+
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(c.title ?? "Service Agreement")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.palmText)
+                        .font(titleFont)
+                        .foregroundColor(isElegant || isProfessional ? accent : .palmText)
                     if let status = c.status {
                         HStack(spacing: 4) {
                             Circle()
@@ -789,10 +811,10 @@ struct VisitDetailView: View {
                         Text("Style")
                             .font(.system(size: 12, weight: .semibold))
                     }
-                    .foregroundColor(.palmPrimary)
+                    .foregroundColor(accent)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 7)
-                    .background(Color.palmPrimary.opacity(0.08))
+                    .background(accent.opacity(0.08))
                     .cornerRadius(8)
                 }
 
@@ -806,11 +828,15 @@ struct VisitDetailView: View {
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.palmPrimary)
+                        .foregroundColor(accent)
                         .frame(width: 36, height: 36)
-                        .background(Color.palmPrimary.opacity(0.08))
-                        .cornerRadius(10)
+                        .background(accent.opacity(0.08))
+                        .cornerRadius(isClassic ? 4 : 10)
                 }
+            }
+
+            if isClassic {
+                Rectangle().fill(accent).frame(height: 1).padding(.top, 10)
             }
         }
         .sheet(isPresented: $showStylePicker) {
@@ -843,70 +869,106 @@ struct VisitDetailView: View {
     }
 
     private func contractRateCards(_ c: VisitContract) -> some View {
-        HStack(spacing: 10) {
+        let accent = currentStyle.accentColor
+        let layout = currentStyle.layoutType
+        let isClassic = layout == .classic
+        let isMinimal = layout == .minimal
+        let isElegant = layout == .elegant
+        let radius: CGFloat = isClassic ? 4 : (isMinimal ? 0 : 12)
+        let valueFont: Font = isClassic ? .system(size: 20, weight: .bold, design: .serif) : (isElegant ? .system(size: 22, weight: .heavy) : .system(size: 20, weight: .bold))
+
+        return HStack(spacing: isMinimal ? 1 : 10) {
             if let rate = c.hourly_rate {
                 VStack(spacing: 4) {
                     Text("$\(String(format: "%.2f", rate))")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.palmGreen)
+                        .font(valueFont)
+                        .foregroundColor(accent)
                     Text("per hour")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 11, weight: isClassic ? .regular : .medium, design: isClassic ? .serif : .default))
                         .foregroundColor(.palmSecondary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.palmGreen.opacity(0.06))
-                .cornerRadius(12)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmGreen.opacity(0.15), lineWidth: 1))
+                .background(isMinimal ? Color.clear : accent.opacity(0.06))
+                .cornerRadius(radius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: radius)
+                        .stroke(isMinimal ? accent.opacity(0.08) : accent.opacity(0.15), lineWidth: isMinimal ? 0.5 : 1)
+                )
             }
             if let hours = c.weekly_hours {
                 VStack(spacing: 4) {
                     Text("\(String(format: "%.0f", hours))h")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.palmBlue)
+                        .font(valueFont)
+                        .foregroundColor(accent.opacity(0.75))
                     Text("per week")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 11, weight: isClassic ? .regular : .medium, design: isClassic ? .serif : .default))
                         .foregroundColor(.palmSecondary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.palmBlue.opacity(0.06))
-                .cornerRadius(12)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBlue.opacity(0.15), lineWidth: 1))
+                .background(isMinimal ? Color.clear : accent.opacity(0.04))
+                .cornerRadius(radius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: radius)
+                        .stroke(isMinimal ? accent.opacity(0.08) : accent.opacity(0.12), lineWidth: isMinimal ? 0.5 : 1)
+                )
             }
             if let rate = c.hourly_rate, let hours = c.weekly_hours {
                 VStack(spacing: 4) {
                     Text("$\(String(format: "%.0f", rate * hours))")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.palmPrimary)
+                        .font(valueFont)
+                        .foregroundColor(accent)
                     Text("per week")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 11, weight: isClassic ? .regular : .medium, design: isClassic ? .serif : .default))
                         .foregroundColor(.palmSecondary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.palmPrimary.opacity(0.06))
-                .cornerRadius(12)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmPrimary.opacity(0.15), lineWidth: 1))
+                .background(isMinimal ? Color.clear : accent.opacity(0.06))
+                .cornerRadius(radius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: radius)
+                        .stroke(isMinimal ? accent.opacity(0.08) : accent.opacity(0.15), lineWidth: isMinimal ? 0.5 : 1)
+                )
             }
         }
     }
 
     private func contractServicesSection(_ c: VisitContract) -> some View {
-        Group {
+        let accent = currentStyle.accentColor
+        let layout = currentStyle.layoutType
+        let isClassic = layout == .classic
+        let isMinimal = layout == .minimal
+        let isElegant = layout == .elegant
+        let isProfessional = layout == .professional
+        let sectionRadius: CGFloat = isClassic ? 4 : (isMinimal ? 0 : 12)
+        let headingFont: Font = isClassic ? .system(size: 15, weight: .bold, design: .serif) : (isElegant ? .system(size: 16, weight: .heavy) : .system(size: 15, weight: .bold))
+
+        return Group {
             if let services = c.services, !services.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
+                    if isProfessional || layout == .clinical {
+                        Rectangle().fill(accent).frame(height: 3).cornerRadius(1.5)
+                    }
+
                     HStack(spacing: 6) {
-                        Image(systemName: "list.clipboard.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.palmPrimary)
+                        if !isMinimal {
+                            Image(systemName: layout == .clinical ? "cross.case.fill" : "list.clipboard.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(accent)
+                        }
                         Text("Services")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.palmText)
+                            .font(headingFont)
+                            .foregroundColor(isMinimal ? .palmText.opacity(0.7) : .palmText)
                         Spacer()
                         Text("\(services.count) services")
-                            .font(.system(size: 12))
+                            .font(.system(size: 12, design: isClassic ? .serif : .default))
                             .foregroundColor(.palmSecondary)
+                    }
+
+                    if isMinimal {
+                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 0.5)
                     }
 
                     ForEach(Array(services.enumerated()), id: \.offset) { _, svc in
@@ -917,17 +979,19 @@ struct VisitDetailView: View {
                             let priority = dict["priority"] as? String
 
                             HStack(alignment: .top, spacing: 10) {
-                                Image(systemName: serviceIcon(for: name))
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.palmPrimary)
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.palmPrimary.opacity(0.08))
-                                    .cornerRadius(7)
+                                if !isMinimal {
+                                    Image(systemName: serviceIcon(for: name))
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(accent)
+                                        .frame(width: 28, height: 28)
+                                        .background(accent.opacity(0.08))
+                                        .cornerRadius(isClassic ? 4 : 7)
+                                }
 
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack {
                                         Text(name)
-                                            .font(.system(size: 13, weight: .semibold))
+                                            .font(.system(size: 13, weight: .semibold, design: isClassic ? .serif : .default))
                                             .foregroundColor(.palmText)
                                         Spacer()
                                         if let p = priority {
@@ -937,12 +1001,12 @@ struct VisitDetailView: View {
                                                 .padding(.horizontal, 6)
                                                 .padding(.vertical, 2)
                                                 .background((p == "High" ? Color.red : (p == "Medium" ? Color.palmOrange : Color.palmSecondary)).opacity(0.08))
-                                                .cornerRadius(4)
+                                                .cornerRadius(isClassic ? 2 : 4)
                                         }
                                     }
                                     if !desc.isEmpty {
                                         Text(desc)
-                                            .font(.system(size: 12))
+                                            .font(.system(size: 12, design: isClassic ? .serif : .default))
                                             .foregroundColor(.palmSecondary)
                                             .fixedSize(horizontal: false, vertical: true)
                                     }
@@ -951,28 +1015,43 @@ struct VisitDetailView: View {
                                             Image(systemName: "clock").font(.system(size: 10))
                                             Text(f).font(.system(size: 11, weight: .medium))
                                         }
-                                        .foregroundColor(.palmBlue)
+                                        .foregroundColor(accent.opacity(0.8))
                                     }
                                 }
                             }
-                            .padding(12)
-                            .background(Color(UIColor.tertiarySystemGroupedBackground))
-                            .cornerRadius(10)
+                            .padding(isMinimal ? 8 : 12)
+                            .background(isMinimal ? Color.clear : Color(UIColor.tertiarySystemGroupedBackground))
+                            .cornerRadius(isClassic ? 4 : 10)
+
+                            if isMinimal {
+                                Rectangle().fill(Color.gray.opacity(0.08)).frame(height: 0.5)
+                            }
                         }
                     }
                 }
                 .padding(14)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
-                .cornerRadius(12)
-                .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                .background(isMinimal ? Color.clear : Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(sectionRadius)
+                .shadow(color: isMinimal ? .clear : .black.opacity(0.03), radius: 3, y: 1)
+                .overlay(
+                    RoundedRectangle(cornerRadius: sectionRadius)
+                        .stroke(isMinimal ? Color.clear : Color.palmBorder, lineWidth: isMinimal ? 0 : 1)
+                )
                 .padding(.bottom, 14)
             }
         }
     }
 
     private func contractScheduleSection(_ c: VisitContract) -> some View {
-        Group {
+        let accent = currentStyle.accentColor
+        let layout = currentStyle.layoutType
+        let isClassic = layout == .classic
+        let isMinimal = layout == .minimal
+        let isElegant = layout == .elegant
+        let sectionRadius: CGFloat = isClassic ? 4 : (isMinimal ? 0 : 12)
+        let headingFont: Font = isClassic ? .system(size: 15, weight: .bold, design: .serif) : (isElegant ? .system(size: 16, weight: .heavy) : .system(size: 15, weight: .bold))
+
+        return Group {
             if let sched = c.schedule, !sched.isEmpty {
                 let freq = (sched["frequency"]?.value as? String) ?? ""
                 let serviceHours = sched["service_hours"]?.value as? [[String: Any]]
@@ -980,19 +1059,25 @@ struct VisitDetailView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 6) {
-                        Image(systemName: "calendar.badge.clock")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.palmBlue)
+                        if !isMinimal {
+                            Image(systemName: "calendar.badge.clock")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(accent)
+                        }
                         Text("Schedule")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.palmText)
+                            .font(headingFont)
+                            .foregroundColor(isMinimal ? .palmText.opacity(0.7) : .palmText)
+                    }
+
+                    if isMinimal {
+                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 0.5)
                     }
 
                     if !freq.isEmpty {
                         HStack(spacing: 8) {
-                            Image(systemName: "repeat").font(.system(size: 12)).foregroundColor(.palmBlue)
+                            Image(systemName: "repeat").font(.system(size: 12)).foregroundColor(accent)
                             Text("Frequency: \(freq)")
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.system(size: 13, weight: .medium, design: isClassic ? .serif : .default))
                                 .foregroundColor(.palmText)
                         }
                     }
@@ -1005,7 +1090,7 @@ struct VisitDetailView: View {
 
                             HStack {
                                 Text(svc)
-                                    .font(.system(size: 12, weight: .medium))
+                                    .font(.system(size: 12, weight: .medium, design: isClassic ? .serif : .default))
                                     .foregroundColor(.palmText)
                                 Spacer()
                                 if !level.isEmpty {
@@ -1015,44 +1100,57 @@ struct VisitDetailView: View {
                                 }
                                 Text("\(hrs) hrs/wk")
                                     .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.palmPrimary)
+                                    .foregroundColor(accent)
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(Color(UIColor.tertiarySystemGroupedBackground))
-                            .cornerRadius(8)
+                            .background(isMinimal ? Color.clear : Color(UIColor.tertiarySystemGroupedBackground))
+                            .cornerRadius(isClassic ? 4 : 8)
                         }
                     }
 
                     if let r = rationale, !r.isEmpty {
                         Text(r)
-                            .font(.system(size: 12))
+                            .font(.system(size: 12, design: isClassic ? .serif : .default))
                             .foregroundColor(.palmSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.top, 4)
                     }
                 }
                 .padding(14)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
-                .cornerRadius(12)
-                .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                .background(isMinimal ? Color.clear : Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(sectionRadius)
+                .shadow(color: isMinimal ? .clear : .black.opacity(0.03), radius: 3, y: 1)
+                .overlay(
+                    RoundedRectangle(cornerRadius: sectionRadius)
+                        .stroke(isMinimal ? Color.clear : Color.palmBorder, lineWidth: isMinimal ? 0 : 1)
+                )
                 .padding(.bottom, 14)
             }
         }
     }
 
     private func contractDocumentSection(_ c: VisitContract) -> some View {
-        Group {
+        let accent = currentStyle.accentColor
+        let layout = currentStyle.layoutType
+        let isClassic = layout == .classic
+        let isMinimal = layout == .minimal
+        let isElegant = layout == .elegant
+        let sectionRadius: CGFloat = isClassic ? 4 : (isMinimal ? 0 : 12)
+        let headingFont: Font = isClassic ? .system(size: 15, weight: .bold, design: .serif) : (isElegant ? .system(size: 16, weight: .heavy) : .system(size: 15, weight: .bold))
+
+        return Group {
             if let content = c.content, !content.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 6) {
-                        Image(systemName: "doc.text.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.palmSecondary)
+                        if !isMinimal {
+                            Image(systemName: "doc.text.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(accent.opacity(0.6))
+                        }
                         Text("Full Agreement")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.palmText)
+                            .font(headingFont)
+                            .foregroundColor(isMinimal ? .palmText.opacity(0.7) : .palmText)
                         Spacer()
                         Button { showFullContract.toggle() } label: {
                             HStack(spacing: 4) {
@@ -1061,8 +1159,12 @@ struct VisitDetailView: View {
                                 Image(systemName: showFullContract ? "chevron.up" : "chevron.down")
                                     .font(.system(size: 10, weight: .bold))
                             }
-                            .foregroundColor(.palmPrimary)
+                            .foregroundColor(accent)
                         }
+                    }
+
+                    if isMinimal {
+                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 0.5)
                     }
 
                     if showFullContract {
@@ -1070,37 +1172,56 @@ struct VisitDetailView: View {
                     } else {
                         let preview = String(content.prefix(200)).trimmingCharacters(in: .whitespacesAndNewlines)
                         Text(preview + "...")
-                            .font(.system(size: 12))
+                            .font(.system(size: 12, design: isClassic ? .serif : .default))
                             .foregroundColor(.palmSecondary)
                             .lineLimit(4)
                     }
                 }
                 .padding(14)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
-                .cornerRadius(12)
-                .shadow(color: .black.opacity(0.03), radius: 3, y: 1)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
+                .background(isMinimal ? Color.clear : Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(sectionRadius)
+                .shadow(color: isMinimal ? .clear : .black.opacity(0.03), radius: 3, y: 1)
+                .overlay(
+                    RoundedRectangle(cornerRadius: sectionRadius)
+                        .stroke(isMinimal ? Color.clear : Color.palmBorder, lineWidth: isMinimal ? 0 : 1)
+                )
             }
         }
     }
 
     private func contractFormattedContent(_ content: String) -> some View {
+        let accent = currentStyle.accentColor
+        let layout = currentStyle.layoutType
+        let isClassic = layout == .classic
+        let isElegant = layout == .elegant
         let sections = parseContractSections(content)
+
         return VStack(alignment: .leading, spacing: 16) {
             ForEach(Array(sections.enumerated()), id: \.offset) { _, section in
                 VStack(alignment: .leading, spacing: 6) {
                     if !section.heading.isEmpty {
-                        Text(section.heading)
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.palmPrimary)
-                            .padding(.bottom, 2)
-                        Divider()
+                        if isElegant {
+                            Text(section.heading)
+                                .font(.system(size: 14, weight: .heavy))
+                                .foregroundColor(accent)
+                                .padding(.bottom, 2)
+                            Rectangle()
+                                .fill(LinearGradient(colors: currentStyle.previewColors, startPoint: .leading, endPoint: .trailing))
+                                .frame(height: 1.5)
+                                .frame(maxWidth: 80)
+                        } else {
+                            Text(section.heading)
+                                .font(.system(size: 14, weight: .bold, design: isClassic ? .serif : .default))
+                                .foregroundColor(accent)
+                                .padding(.bottom, 2)
+                            Divider()
+                        }
                     }
                     Text(section.body)
-                        .font(.system(size: 12))
+                        .font(.system(size: 12, design: isClassic ? .serif : .default))
                         .foregroundColor(.palmText)
                         .fixedSize(horizontal: false, vertical: true)
-                        .lineSpacing(3)
+                        .lineSpacing(isClassic ? 4 : 3)
                 }
             }
         }
