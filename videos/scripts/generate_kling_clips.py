@@ -1,27 +1,24 @@
 #!/usr/bin/env python3
 """
-Generate cinematic lifestyle clips via Kling O3 Pro (fal.ai)
+Generate cinematic lifestyle clips via Kling V3 Pro (fal.ai)
 for the PalmCare AI AppFlow ad.
 
+Uses direct REST API calls instead of fal_client library.
 Requires: FAL_KEY environment variable
-Install:  pip install fal-client
 """
 
 import os
 import sys
 import json
 import time
+import urllib.request
 from pathlib import Path
-
-try:
-    import fal_client
-except ImportError:
-    print("Install fal-client: pip install fal-client")
-    sys.exit(1)
 
 SCRIPT_DIR = Path(__file__).parent
 PUBLIC_DIR = SCRIPT_DIR.parent / "public"
 KLING_DIR = PUBLIC_DIR / "kling-clips"
+
+QUEUE_URL = "https://queue.fal.run/fal-ai/kling-video/v3/pro/text-to-video"
 
 CLIPS = [
     {
@@ -34,7 +31,7 @@ CLIPS = [
             "realistic professional medical uniform with subtle teal accents, "
             "welcoming atmosphere, 4K cinematic quality, no blur or artifacts."
         ),
-        "duration": 5,
+        "duration": "5",
         "aspect_ratio": "16:9",
     },
     {
@@ -47,7 +44,7 @@ CLIPS = [
             "a cozy home interior, slow gentle camera tilt, cinematic realistic "
             "style, clean details, no distortion."
         ),
-        "duration": 5,
+        "duration": "5",
         "aspect_ratio": "16:9",
     },
     {
@@ -61,7 +58,7 @@ CLIPS = [
             "in the aide's lanyard, slow push-in camera, cinematic realistic "
             "style, gentle and compassionate mood, no artifacts."
         ),
-        "duration": 6,
+        "duration": "6",
         "aspect_ratio": "16:9",
     },
     {
@@ -75,7 +72,7 @@ CLIPS = [
             "cinematic realistic style, teal accent on the coordinator's "
             "badge, clean details, no blur."
         ),
-        "duration": 5,
+        "duration": "5",
         "aspect_ratio": "16:9",
     },
 ]
@@ -93,34 +90,65 @@ def load_fal_key():
     return None
 
 
-def generate_clip(clip_def):
+def api_request(url, fal_key, method="GET", data=None):
+    headers = {
+        "Authorization": f"Key {fal_key}",
+        "Content-Type": "application/json",
+    }
+    body = json.dumps(data).encode() if data else None
+    req = urllib.request.Request(url, data=body, headers=headers, method=method)
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read().decode())
+
+
+def submit_clip(clip_def, fal_key):
     print(f"\n{'='*60}")
-    print(f"Generating: {clip_def['id']} -> {clip_def['file']}")
+    print(f"Submitting: {clip_def['id']} -> {clip_def['file']}")
     print(f"Prompt: {clip_def['prompt'][:80]}...")
     print(f"Duration: {clip_def['duration']}s | Aspect: {clip_def['aspect_ratio']}")
 
-    result = fal_client.subscribe(
-        "fal-ai/kling-video/o3/pro/text-to-video",
-        arguments={
-            "prompt": clip_def["prompt"],
-            "duration": clip_def["duration"],
-            "aspect_ratio": clip_def["aspect_ratio"],
-        },
-        with_logs=True,
-    )
+    payload = {
+        "prompt": clip_def["prompt"],
+        "duration": clip_def["duration"],
+        "aspect_ratio": clip_def["aspect_ratio"],
+    }
+    result = api_request(QUEUE_URL, fal_key, method="POST", data=payload)
+    request_id = result.get("request_id")
+    status_url = result.get("status_url")
+    print(f"  Queued: {request_id}")
+    return request_id, status_url, result.get("response_url")
 
-    video_url = result.get("video", {}).get("url")
-    if not video_url:
-        print(f"  ERROR: No video URL in response: {json.dumps(result, indent=2)}")
-        return None
 
-    print(f"  Video URL: {video_url}")
-    return video_url
+def poll_until_done(status_url, response_url, fal_key, timeout=600):
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            status = api_request(status_url, fal_key)
+        except Exception as e:
+            print(f"  Poll error: {e}, retrying...")
+            time.sleep(5)
+            continue
+
+        state = status.get("status", "UNKNOWN")
+        if state == "COMPLETED":
+            print(f"  Completed! Fetching result...")
+            result = api_request(response_url, fal_key)
+            return result
+        elif state in ("FAILED", "CANCELLED"):
+            print(f"  {state}: {status}")
+            return None
+        else:
+            queue_pos = status.get("queue_position", "?")
+            elapsed = int(time.time() - start)
+            print(f"  [{elapsed}s] Status: {state} | Queue position: {queue_pos}")
+            time.sleep(10)
+
+    print(f"  TIMEOUT after {timeout}s")
+    return None
 
 
 def download_video(url, dest):
-    import urllib.request
-    print(f"  Downloading to {dest}...")
+    print(f"  Downloading to {dest.name}...")
     urllib.request.urlretrieve(url, str(dest))
     size_mb = dest.stat().st_size / (1024 * 1024)
     print(f"  Saved ({size_mb:.1f} MB)")
@@ -134,24 +162,42 @@ def main():
         print("Then add to .env:  FAL_KEY=your_key_here")
         sys.exit(1)
 
-    os.environ["FAL_KEY"] = fal_key
     KLING_DIR.mkdir(parents=True, exist_ok=True)
 
-    results = {}
+    jobs = []
     for clip in CLIPS:
         out = KLING_DIR / clip["file"]
         if out.exists():
             print(f"  SKIP {clip['file']} (exists)")
-            results[clip["id"]] = str(out)
             continue
-
         try:
-            url = generate_clip(clip)
-            if url:
-                download_video(url, out)
-                results[clip["id"]] = str(out)
+            req_id, status_url, resp_url = submit_clip(clip, fal_key)
+            jobs.append((clip, req_id, status_url, resp_url))
         except Exception as e:
-            print(f"  FAILED: {e}")
+            print(f"  SUBMIT FAILED: {e}")
+
+    if not jobs:
+        print("\nAll clips already exist or no jobs submitted.")
+        return
+
+    print(f"\n{'='*60}")
+    print(f"Waiting for {len(jobs)} clips to generate...")
+    print("(Kling Pro typically takes 2-5 minutes per clip)")
+
+    results = {}
+    for clip, req_id, status_url, resp_url in jobs:
+        print(f"\n--- Polling: {clip['id']} ({req_id}) ---")
+        result = poll_until_done(status_url, resp_url, fal_key)
+        if result:
+            video_url = result.get("video", {}).get("url")
+            if video_url:
+                out = KLING_DIR / clip["file"]
+                download_video(video_url, out)
+                results[clip["id"]] = str(out)
+            else:
+                print(f"  No video URL in result: {json.dumps(result)[:200]}")
+                results[clip["id"]] = None
+        else:
             results[clip["id"]] = None
 
     print(f"\n{'='*60}")

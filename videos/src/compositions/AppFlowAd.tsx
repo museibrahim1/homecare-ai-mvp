@@ -525,10 +525,10 @@ const SceneRecord: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      {/* Cinematic background — use existing footage or Kling clip */}
+      {/* Cinematic Kling clip — caregiver with client */}
       <div style={{ opacity: bgOp, position: "absolute", inset: 0 }}>
         <OffthreadVideo
-          src={staticFile("elevenlabs-veo.mp4")}
+          src={staticFile("kling-clips/caregiver_with_client.mp4")}
           volume={0}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
@@ -882,9 +882,10 @@ const SceneReaction: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
+      {/* Cinematic Kling clip — success handshake */}
       <div style={{ opacity: bgOp, position: "absolute", inset: 0 }}>
         <OffthreadVideo
-          src={staticFile("elevenlabs-gen4.mp4")}
+          src={staticFile("kling-clips/success_handshake.mp4")}
           volume={0}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
