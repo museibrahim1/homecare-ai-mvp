@@ -19,6 +19,13 @@ alwaysApply: true
 - Contract generation uses 50-state rules from `apps/worker/libs/state_rules.py`
 - Pipeline: transcribe → speakers → billables → notes → contract
 
+## Marketing Website State (Feb 22)
+- `/features` page: 3 sections (AI Intelligence, Mobile App, Billing & Analytics) with real screenshots
+- `/mobile-app` page: PhoneFrame component with actual iOS screenshots (no more React mock UI)
+- Nav: Resources dropdown has Contact Us, System Status, Privacy Policy (Help Center removed — it's auth-only)
+- Contact page: email only (sales@palmtai.com), no phone number
+- Screenshots live in `apps/web/public/screenshots/` and `ios/` subfolder
+
 ## Pending Tasks
 1. LinkedIn: Re-authorize with `openid profile w_member_social` scopes (Share on LinkedIn product now enabled)
 2. Facebook: Create Meta Developer App, get Page Access Token with `pages_manage_posts`

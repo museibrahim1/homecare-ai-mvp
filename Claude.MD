@@ -146,36 +146,30 @@ Fixed JSON parsing (balanced-brace parser), PROJECT_ROOT detection, duplicate lo
 13 new AI-generated marketing graphics via Nano Banana 2. Agency/investor emails updated. Old pitch decks deleted. Pillow/PIL banned for mockups.
 
 ### Mar 6–7 — Web/Mobile Feature Sprint + Demo Booking
-**iOS app changes:**
-- Removed TasksView from WorkspaceView (not needed)
-- Calendar events sync to API when Google Calendar connected
-- Removed dead language picker from SettingsView
-- Added API_BASE_URL to Info.plist
+iOS: Removed TasksView from WorkspaceView, calendar sync to API, removed language picker, API_BASE_URL in Info.plist.
+Web: CSV client import, removed automations modal, localStorage notification prefs, 2FA/MFA wired up, CSV export on /reports.
+API: POST /clients optimized (index + flush), CSV export endpoints, admin email → sales@palmtai.com, demo booking system.
+Demo booking: 4-step form, GET /demos/slots (14 days × 14 slots), POST /demos/book (Calendar + Meet + emails), fixed OAuth invalid_client on Railway, Zoom-style emails, switched sender to onboarding@resend.dev.
 
-**Web app changes:**
-- CSV client import on /clients page (parses CSV, POSTs each client)
-- Removed automations modal from /clients
-- Notification preferences persisted to localStorage on /settings
-- 2FA/MFA wired up: setup QR code, verify, enable/disable via API
-- CSV export for monthly + activity reports on /reports
+### Feb 22 — Marketing Pages, Nav Fixes, UI Polish
+**Marketing website updates:**
+- Features page (`/features`): removed 5 outdated cards (OCR Template Engine, Custom Forms, Custom Reporting, 2× Security), renamed sections (Caregiver Tools→Mobile App, Billing & Reports→Billing & Analytics), updated descriptions, mapped real CRM/iOS screenshots
+- Mobile-app page (`/mobile-app`): replaced all React mock UI components with `PhoneFrame` component displaying actual iOS screenshots, added CSS for phone mockup frames with responsive styles
+- Screenshots: 21 fresh CRM + iOS screenshots copied to `apps/web/public/screenshots/` and `ios/` subfolder
 
-**API changes:**
-- `POST /clients` optimized: added `ix_clients_created_by` index, `db.flush()` instead of `db.refresh()`
-- Monthly + activity CSV export endpoints on /reports
-- Default admin notification email changed to sales@palmtai.com
-- Demo booking system built (see Skills section above)
+**Nav & contact fixes:**
+- Removed "Help Center" link from Resources dropdown on landing page + features page (was redirecting to authenticated `/help` page)
+- "Contact Us" now first item in Resources dropdown
+- Removed fake phone number `(800) 555-1234` from contact page sidebar
+- Removed `/help` from public sitemap (authenticated page)
 
-**Demo booking system (this session):**
-- Rebuilt form as 4-step flow with date/time picker (Step 4)
-- `GET /demos/slots` returns next 14 weekdays × 14 time slots
-- `POST /demos/book` creates Google Calendar event + Meet link + sends emails
-- Fixed Google OAuth `invalid_client` error — credentials were missing on Railway, now set
-- Google Calendar successfully connected on production
-- Test booking confirmed working: calendar event created, Meet link generated
-- Redesigned emails to Zoom-style clean layout (centered card, details table, teal CTA button)
-- Fixed email delivery: palmtai.com not verified in Resend → switched to `onboarding@resend.dev`
-- Added `/calendar/oauth-configured` diagnostic endpoint
-- Added better error messages for OAuth failures
+**iOS app UI fixes (prior sessions carried forward):**
+- Emergency contact card redesigned in ClientDetailView (new `emergencyContactCard` function with structured layout)
+- Visit Overview tab now eagerly loads all pipeline data concurrently (`loadAllTabData`)
+- Contract view formatted properly (was showing raw syntax)
+- Billables view: removed timestamps, added accept/deny buttons
+- Contract style gallery with 3 previewable visual styles
+- Full app flow marketing video recorded (client → assessment → contract, 41s)
 
 ---
 
@@ -185,10 +179,11 @@ Fixed JSON parsing (balanced-brace parser), PROJECT_ROOT detection, duplicate lo
 1. **Re-verify palmtai.com in Resend** — Add DNS records so emails send from your own domain
 2. **Marketing email launch** — 5-email cold outreach to 163+ agencies
 3. **Investor outreach** — Email 60+ investors with v4 pitch deck
+4. **Apple Developer enrollment** — business account museibrahim@palmtai.com
+5. **Social media agents** — LinkedIn re-auth, Facebook Page token, Instagram business conversion
 
 ### BACKLOG
 - Dark mode refinement (hardcoded light colors)
-- Mobile companion app (`/mobile/`)
 - BAAs and Resend replacement for full HIPAA compliance
 - Gust Executive Summary completion
 

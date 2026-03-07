@@ -36,6 +36,14 @@ alwaysApply: false
 cd ios-app && xcodegen generate && xcodebuild -project PalmCareAI.xcodeproj -scheme PalmCareAI -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -derivedDataPath build build
 ```
 
+## Recent Fixes (Feb 22)
+- **ClientDetailView**: Emergency contacts use `emergencyContactCard()` — structured multi-line layout with icons
+- **VisitDetailView**: Overview tab calls `loadAllTabData()` to eagerly fetch transcript/billables/notes/contract concurrently
+- **Contract view**: Properly formatted (was showing raw syntax), 3 previewable style templates
+- **Billables view**: Timestamps removed, accept/deny buttons added
+- **RecordView**: `MARKETING_DEMO_FLOW` debug flag for automated demo recordings
+- **Recording orb**: Uses `mic.fill` icon (NOT waveform — reverted per user request)
+
 ## Important Rules
 - Always use `Color.palmPrimary`, `Color.palmText` etc. from theme — never hardcode colors
 - Use `Color(UIColor.secondarySystemGroupedBackground)` for adaptive backgrounds
