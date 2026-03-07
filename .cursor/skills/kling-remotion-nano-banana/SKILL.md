@@ -21,12 +21,14 @@ Use this skill when the task includes any of:
 
 ## Kling O3 Pro quick reference
 
-- Model id: `fal-ai/kling-video/o3/pro/text-to-video`
+- Model ids:
+  - `fal-ai/kling-video/o3/pro/text-to-video`
+  - `fal-ai/kling-video/o3/pro/image-to-video`
 - Client package: `@fal-ai/client`
 - Auth: set `FAL_KEY` server-side (never expose in browser/mobile).
 - O3 Pro supports:
   - Duration: `3` to `15` seconds
-  - Aspect ratio: `16:9`, `9:16`, `1:1`
+  - Aspect ratio (text-to-video): `16:9`, `9:16`, `1:1`
   - Native audio generation via `generate_audio`
   - 1080p output in pro mode
 
@@ -43,6 +45,7 @@ Use this skill when the task includes any of:
 4. Generate motion clips with Kling
    - Start with short clips (4-6s) and iterate quickly.
    - Raise duration only after style/motion direction looks right.
+   - For image-driven shots, use start-frame or start/end-frame image-to-video.
 5. Assemble in Remotion
    - Sequence clips, transitions, overlays, captions, logo lockups, CTA end card.
 6. QA and export
@@ -62,12 +65,27 @@ Example:
 
 Use `fal.subscribe(...)` for straightforward calls, or queue for long-running/multi-step pipelines.
 
-### Minimal request fields
+### Text-to-video minimal request fields
 
 - `prompt`
 - `duration`
 - `aspect_ratio`
 - `generate_audio` (optional)
+
+### Image-to-video minimal request fields
+
+- `image_url` (required start frame)
+- `prompt` (optional but recommended for motion/style guidance)
+- `end_image_url` (optional end frame for controlled transitions)
+- `duration`
+- `generate_audio` (optional)
+
+### Image-to-video best use
+
+- Use when you need visual continuity from a designed frame.
+- Use `end_image_url` when you need deterministic start-to-end transitions.
+- Keep prompts motion-specific (camera move + subject action) instead of broad style-only prompts.
+- Prefer 5-8s shots first; extend to 10-15s after motion quality is stable.
 
 ### Reliability pattern
 
