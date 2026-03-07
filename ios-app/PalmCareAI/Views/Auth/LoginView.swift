@@ -14,7 +14,6 @@ struct LoginView: View {
     
 
     var body: some View {
-        NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -235,7 +234,6 @@ struct LoginView: View {
             .sheet(isPresented: $showForgotPassword) {
                 ForgotPasswordSheet().environmentObject(api)
             }
-        }
     }
 
     private func performLogin() {

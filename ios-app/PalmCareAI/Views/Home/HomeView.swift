@@ -25,10 +25,8 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Top bar
                     HStack {
                         VStack(alignment: .leading, spacing: 1) {
                             Text("PALM IT, \(firstName.uppercased()) 🌴")
@@ -193,7 +191,6 @@ struct HomeView: View {
             .background(Color.palmBackground)
             .refreshable { await loadData(forceRefresh: true) }
             .task { await loadData() }
-        }
     }
 
     private var visitsThisWeek: Int {

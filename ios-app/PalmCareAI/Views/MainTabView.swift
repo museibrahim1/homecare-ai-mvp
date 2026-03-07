@@ -3,36 +3,63 @@ import SwiftUI
 struct MainTabView: View {
     @EnvironmentObject var api: APIService
     @State private var selectedTab = 0
+    @State private var navigationResetIds: [Int: UUID] = [
+        0: UUID(), 1: UUID(), 2: UUID(), 3: UUID(), 4: UUID()
+    ]
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
                 switch selectedTab {
                 case 0:
-                    HomeView(onNavigateToRecord: { selectedTab = 2 })
+                    NavigationStack {
+                        HomeView(onNavigateToRecord: { selectedTab = 2 })
+                            .environmentObject(api)
+                    }
+                    .id(navigationResetIds[0])
                 case 1:
-                    ClientsView()
+                    NavigationStack {
+                        ClientsView()
+                            .environmentObject(api)
+                    }
+                    .id(navigationResetIds[1])
                 case 2:
-                    RecordView()
+                    NavigationStack {
+                        RecordView()
+                            .environmentObject(api)
+                    }
+                    .id(navigationResetIds[2])
                 case 3:
                     WorkspaceView()
+                        .environmentObject(api)
+                        .id(navigationResetIds[3])
                 case 4:
-                    SettingsView()
+                    NavigationStack {
+                        SettingsView()
+                            .environmentObject(api)
+                    }
+                    .id(navigationResetIds[4])
                 default:
-                    HomeView(onNavigateToRecord: { selectedTab = 2 })
+                    NavigationStack {
+                        HomeView(onNavigateToRecord: { selectedTab = 2 })
+                            .environmentObject(api)
+                    }
+                    .id(navigationResetIds[0])
                 }
             }
             .padding(.bottom, 60)
 
-            CustomTabBar(selectedTab: $selectedTab)
+            CustomTabBar(selectedTab: $selectedTab, onTabReselected: { tab in
+                navigationResetIds[tab] = UUID()
+            })
         }
         .edgesIgnoringSafeArea(.bottom)
-        .environmentObject(api)
     }
 }
 
 struct CustomTabBar: View {
     @Binding var selectedTab: Int
+    var onTabReselected: ((Int) -> Void)?
 
     private let tabs: [(icon: String, label: String)] = [
         ("house.fill", "Home"),
@@ -46,9 +73,11 @@ struct CustomTabBar: View {
         HStack {
             ForEach(0..<tabs.count, id: \.self) { index in
                 if index == 2 {
-                    // Center "Palm It" button
                     VStack(spacing: 3) {
                         Button {
+                            if selectedTab == index {
+                                onTabReselected?(index)
+                            }
                             selectedTab = index
                         } label: {
                             ZStack {
@@ -80,6 +109,9 @@ struct CustomTabBar: View {
                     .frame(maxWidth: .infinity)
                 } else {
                     Button {
+                        if selectedTab == index {
+                            onTabReselected?(index)
+                        }
                         selectedTab = index
                     } label: {
                         VStack(spacing: 3) {

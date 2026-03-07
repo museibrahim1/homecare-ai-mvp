@@ -28,7 +28,6 @@ struct ClientsView: View {
     }
 
     var body: some View {
-        NavigationStack {
             VStack(spacing: 0) {
                 VStack(spacing: 11) {
                     HStack {
@@ -153,7 +152,6 @@ struct ClientsView: View {
                 })
                 .environmentObject(api)
             }
-        }
     }
 
     private func loadClients() async {

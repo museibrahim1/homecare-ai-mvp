@@ -21,7 +21,6 @@ struct SettingsView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
 
     var body: some View {
-        NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
                     profileHeader
@@ -57,7 +56,6 @@ struct SettingsView: View {
             }
             .task { await loadData() }
             .preferredColorScheme(isDarkMode ? .dark : .light)
-        }
     }
 
     // MARK: - Profile Header

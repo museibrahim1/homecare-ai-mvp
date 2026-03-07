@@ -189,7 +189,6 @@ struct RecordView: View {
     @State private var pipelineSteps: [(String, String)] = []
 
     var body: some View {
-        NavigationStack {
             ZStack {
                 Color(red: 12/255, green: 12/255, blue: 14/255)
                     .ignoresSafeArea()
@@ -311,7 +310,6 @@ struct RecordView: View {
             .onChange(of: isProcessing) { processing in
                 assessmentInProgress = recorder.isRecording || processing
             }
-        }
     }
 
     private var transcriptSegments: [TranscriptSegment] {

@@ -26,11 +26,6 @@ struct WorkspaceView: View {
             .background(Color.palmBackground)
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EmptyView()
-                }
-            }
         }
     }
 
