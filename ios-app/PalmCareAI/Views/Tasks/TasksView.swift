@@ -5,6 +5,9 @@ struct TasksView: View {
 
     @State private var tasks: [TaskItem] = []
     @State private var isLoading = true
+    @State private var loadError: String?
+    @State private var actionError: String?
+    @State private var showActionError = false
     @State private var selectedFilter = "All"
     @State private var showAddTask = false
 
@@ -26,6 +29,8 @@ struct TasksView: View {
             Group {
                 if isLoading {
                     VStack { Spacer(); ProgressView("Loading tasks..."); Spacer() }
+                } else if loadError != nil {
+                    errorView
                 } else if filteredTasks.isEmpty {
                     emptyState
                 } else {
@@ -57,11 +62,15 @@ struct TasksView: View {
                         let created = try await api.createTask(task)
                         await MainActor.run { tasks.insert(created, at: 0) }
                     } catch {
-                        // Task creation failed silently; user can retry
+                        await MainActor.run {
+                            actionError = error.localizedDescription
+                            showActionError = true
+                        }
                     }
                 }
             })
         }
+        .palmErrorAlert("Action Failed", message: $actionError, isPresented: $showActionError)
         .task { await loadTasks() }
     }
 
@@ -177,7 +186,10 @@ struct TasksView: View {
                 isLoading = false
             }
         } catch {
-            await MainActor.run { isLoading = false }
+            await MainActor.run {
+                loadError = error.localizedDescription
+                isLoading = false
+            }
         }
     }
 
@@ -190,7 +202,10 @@ struct TasksView: View {
                 }
             }
         } catch {
-            // Complete failed; task remains in current state
+            await MainActor.run {
+                actionError = error.localizedDescription
+                showActionError = true
+            }
         }
     }
 
@@ -201,8 +216,44 @@ struct TasksView: View {
                 tasks.removeAll { $0.id == task.id }
             }
         } catch {
-            // Delete failed; task remains in list
+            await MainActor.run {
+                actionError = error.localizedDescription
+                showActionError = true
+            }
         }
+    }
+
+    private var errorView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 36))
+                .foregroundColor(.palmOrange)
+            Text("Something went wrong")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.palmText)
+            Text(loadError ?? "")
+                .font(.system(size: 13))
+                .foregroundColor(.palmSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            Button {
+                loadError = nil
+                Task { await loadTasks() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 12, weight: .bold))
+                    Text("Try Again")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(Color.palmPrimary)
+                .cornerRadius(10)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

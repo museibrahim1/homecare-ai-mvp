@@ -55,6 +55,7 @@ struct CalendarView: View {
     @State private var selectedDate = Date()
     @State private var displayedMonth = Date()
     @State private var showAddEvent = false
+    @State private var syncError: String?
 
     private let cal = Calendar.current
     private let weekdaySymbols = Calendar.current.shortWeekdaySymbols
@@ -89,7 +90,7 @@ struct CalendarView: View {
                 do {
                     apiEvents = try await api.fetchCalendarEvents()
                 } catch {
-                    // Google Calendar fetch failed; show local events only
+                    syncError = "Calendar sync failed"
                 }
             }
         }
@@ -293,6 +294,50 @@ struct CalendarView: View {
         }
 
         return VStack(alignment: .leading, spacing: 0) {
+            if let syncError = syncError {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.icloud.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.palmOrange)
+                    Text(syncError)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.palmOrange)
+                    Spacer()
+                    Button {
+                        self.syncError = nil
+                        Task {
+                            do {
+                                apiEvents = try await api.fetchCalendarEvents()
+                            } catch {
+                                self.syncError = "Calendar sync failed"
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 10, weight: .bold))
+                            Text("Retry")
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        .foregroundColor(.palmPrimary)
+                    }
+                    Button {
+                        withAnimation { self.syncError = nil }
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.palmSecondary)
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(Color.palmOrange.opacity(0.08))
+                .cornerRadius(10)
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.palmOrange.opacity(0.2), lineWidth: 1))
+                .padding(.horizontal, 18)
+                .padding(.top, 10)
+            }
+
             HStack {
                 Text(dateLabelFmt.string(from: selectedDate))
                     .font(.system(size: 14, weight: .bold))
