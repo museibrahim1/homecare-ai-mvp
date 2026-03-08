@@ -391,55 +391,32 @@ async def health_check():
 
 @app.get("/health/redis", tags=["Health"])
 async def redis_health_check():
-    """Check Redis connectivity for task queue."""
+    """Check Redis connectivity for task queue (no connection details exposed)."""
     import redis
-    redis_url = settings.redis_url
-    
+
     try:
-        r = redis.from_url(redis_url)
+        r = redis.from_url(settings.redis_url)
         r.ping()
         connected = True
-        error = None
-    except Exception as e:
+    except Exception:
         connected = False
-        error = str(e)
-    
-    # Mask password in URL for display
-    display_url = redis_url
-    if "@" in display_url:
-        parts = display_url.split("@")
-        display_url = parts[0].split(":")[0] + ":***@" + parts[1]
-    
-    return {
-        "redis_url": display_url,
-        "redis_url_source": "REDIS_URL env" if os.getenv("REDIS_URL") else "default (localhost)",
-        "connected": connected,
-        "error": error,
-    }
+
+    return {"status": "ok" if connected else "degraded"}
 
 
 @app.get("/health/celery", tags=["Health"])
 async def celery_health_check():
-    """Check Celery task queue status."""
+    """Check Celery task queue status (no internal details in production)."""
     from app.services.jobs import celery_app
-    
+
     try:
-        # Check if we can inspect workers
         inspector = celery_app.control.inspect()
         active_workers = inspector.active()
-        registered_tasks = inspector.registered()
-        
-        return {
-            "status": "ok",
-            "workers_found": active_workers is not None and len(active_workers) > 0,
-            "active_workers": list(active_workers.keys()) if active_workers else [],
-            "registered_tasks": registered_tasks,
-        }
-    except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-        }
+        ok = active_workers is not None and len(active_workers) > 0
+    except Exception:
+        ok = False
+
+    return {"status": "ok" if ok else "degraded"}
 
 
 @app.get("/health/s3", tags=["Health"])
@@ -447,7 +424,7 @@ async def s3_health_check():
     """Check S3/MinIO storage connectivity."""
     import boto3
     from botocore.config import Config
-    
+
     try:
         client = boto3.client(
             "s3",
@@ -457,54 +434,23 @@ async def s3_health_check():
             config=Config(signature_version="s3v4"),
             region_name="us-east-1",
         )
-        # Try to list the bucket
         client.head_bucket(Bucket=settings.s3_bucket)
         connected = True
-        error = None
-    except Exception as e:
+    except Exception:
         connected = False
-        error = str(e)
-    
-    # Mask sensitive values
-    endpoint_display = settings.s3_endpoint_url if settings.s3_endpoint_url else "NOT SET"
-    
-    return {
-        "s3_endpoint_url": endpoint_display,
-        "s3_bucket": settings.s3_bucket,
-        "s3_access_key_set": bool(settings.s3_access_key) and settings.s3_access_key != "minio",
-        "s3_secret_key_set": bool(settings.s3_secret_key) and settings.s3_secret_key != "minio12345",
-        "connected": connected,
-        "error": error,
-    }
+
+    return {"status": "ok" if connected else "degraded"}
 
 
 @app.get("/health/openai", tags=["Health"])
 async def openai_health_check():
-    """Check OpenAI API key configuration."""
-    openai_key = os.getenv("OPENAI_API_KEY", "")
-    
-    # Try to use the key
-    test_result = None
-    if openai_key and len(openai_key) > 10:
-        try:
-            from openai import OpenAI
-            client = OpenAI(api_key=openai_key)
-            # Quick test - list models
-            models = client.models.list()
-            test_result = "success"
-        except Exception as e:
-            test_result = f"error: {str(e)[:100]}"
-    
-    return {
-        "openai_configured": bool(openai_key) and len(openai_key) > 10,
-        "test_result": test_result,
-    }
+    """Check OpenAI API key presence (no key details exposed)."""
+    return {"configured": bool(os.getenv("OPENAI_API_KEY", ""))}
 
 
 @app.get("/health/google", tags=["Health"])
 async def google_health_check():
-    """Check if Google OAuth credentials are configured."""
+    """Check if Google OAuth credentials are present (no details exposed)."""
     return {
-        "google_client_id_configured": bool(settings.google_client_id),
-        "google_client_secret_configured": bool(settings.google_client_secret),
+        "configured": bool(settings.google_client_id and settings.google_client_secret),
     }

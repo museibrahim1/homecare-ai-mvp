@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-production-a0a2.up.railway.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 /** Format a Date to YYYY-MM-DD string in LOCAL timezone (avoids UTC shift bugs) */
 export function formatLocalDate(date: Date): string {

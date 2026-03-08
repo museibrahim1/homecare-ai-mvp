@@ -197,8 +197,11 @@ def _get_s3_public_url(audio_path: str) -> Optional[str]:
         from botocore.config import Config
         
         s3_endpoint = os.getenv("S3_ENDPOINT_URL", "http://localhost:9000")
-        s3_access_key = os.getenv("S3_ACCESS_KEY", "minio")
-        s3_secret_key = os.getenv("S3_SECRET_KEY", "minio12345")
+        s3_access_key = os.getenv("S3_ACCESS_KEY", "")
+        s3_secret_key = os.getenv("S3_SECRET_KEY", "")
+        if not s3_access_key or not s3_secret_key:
+            logger.warning("S3_ACCESS_KEY / S3_SECRET_KEY not set, cannot generate presigned URL")
+            return None
         s3_bucket = os.getenv("S3_BUCKET", "palmcare-audio")
         
         # Extract the S3 key from the path

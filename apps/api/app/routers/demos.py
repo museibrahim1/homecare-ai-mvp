@@ -5,13 +5,15 @@ Public endpoints for scheduling product demo calls via Google Meet.
 """
 
 import os
+import time
 import logging
+from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from uuid import uuid4
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -23,6 +25,22 @@ from app.services.email import get_email_service
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+_demo_rate_store: dict[str, list[float]] = defaultdict(list)
+DEMO_RATE_WINDOW = 300  # 5 minutes
+DEMO_RATE_MAX = 5
+
+
+def _check_demo_rate_limit(ip: str) -> None:
+    key = f"demo_book:{ip}"
+    now = time.time()
+    _demo_rate_store[key] = [t for t in _demo_rate_store[key] if now - t < DEMO_RATE_WINDOW]
+    if len(_demo_rate_store[key]) >= DEMO_RATE_MAX:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many booking requests. Please try again in a few minutes.",
+        )
+    _demo_rate_store[key].append(now)
 
 DEMO_DURATION_MINUTES = 30
 
@@ -170,10 +188,13 @@ async def get_available_slots():
 
 @router.post("/book", response_model=DemoBookingResponse)
 async def book_demo(
+    request: Request,
     booking: DemoBookingRequest,
     db: Session = Depends(get_db),
 ):
     """Book a product demo — auto-schedules via Google Calendar when connected."""
+    client_ip = request.client.host if request.client else "unknown"
+    _check_demo_rate_limit(client_ip)
 
     has_schedule = booking.date and booking.time_slot
     meeting_link = None

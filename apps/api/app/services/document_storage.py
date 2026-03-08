@@ -48,8 +48,10 @@ class DocumentStorageService:
         bucket_name: str = "business-documents",
     ):
         self.endpoint_url = endpoint_url or os.getenv("MINIO_ENDPOINT", "http://minio:9000")
-        self.access_key = access_key or os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-        self.secret_key = secret_key or os.getenv("MINIO_SECRET_KEY", "minioadmin")
+        self.access_key = access_key or os.getenv("MINIO_ACCESS_KEY", "")
+        self.secret_key = secret_key or os.getenv("MINIO_SECRET_KEY", "")
+        if not self.access_key or not self.secret_key:
+            raise RuntimeError("MINIO_ACCESS_KEY and MINIO_SECRET_KEY environment variables are required")
         self.bucket_name = bucket_name
         
         # Create S3 client for MinIO

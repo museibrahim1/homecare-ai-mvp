@@ -30,6 +30,16 @@ from app.models.caregiver import Caregiver
 from app.models.visit import Visit
 
 
+def _require_env(var: str) -> str:
+    val = os.environ.get(var, "")
+    if not val or val in ("change-me-in-production", "demo1234", "password123"):
+        raise RuntimeError(
+            f"{var} environment variable must be set to a strong password. "
+            f"Refusing to seed with weak/default credentials."
+        )
+    return val
+
+
 def seed_database():
     """Seed the database with initial data."""
     db = SessionLocal()
@@ -60,7 +70,7 @@ def seed_database():
             admin = User(
                 id=uuid4(),
                 email=admin_email,
-                hashed_password=get_password_hash(os.environ.get("ADMIN_PASSWORD", "change-me-in-production")),
+                hashed_password=get_password_hash(_require_env("ADMIN_PASSWORD")),
                 full_name="Musa Ibrahim",
                 role="admin",
                 is_active=True,
@@ -80,7 +90,7 @@ def seed_database():
             demo_user = User(
                 id=uuid4(),
                 email=demo_agency_email,
-                hashed_password=get_password_hash(os.environ.get("DEMO_PASSWORD", "demo1234")),
+                hashed_password=get_password_hash(_require_env("DEMO_PASSWORD")),
                 full_name="Demo Agency",
                 role="owner",  # Agency owner role - no platform admin access
                 is_active=True,
@@ -111,7 +121,7 @@ def seed_database():
             caregiver = User(
                 id=uuid4(),
                 email=cg_data["email"],
-                hashed_password=get_password_hash(os.environ.get("SEED_CAREGIVER_PASSWORD", "password123")),
+                hashed_password=get_password_hash(_require_env("SEED_CAREGIVER_PASSWORD")),
                 full_name=cg_data["full_name"],
                 role="caregiver",
                 is_active=True,

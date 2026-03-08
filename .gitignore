@@ -11,11 +11,18 @@ __pycache__/
 
 # Environment (never commit real secrets)
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
 .env.production
 apps/web/.env.production
 apps/web/.env.local
+*.pem
+*.key
+credentials.json
+token.json
+service-account*.json
 venv/
 .venv/
 ENV/

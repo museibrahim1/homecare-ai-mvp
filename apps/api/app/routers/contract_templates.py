@@ -246,7 +246,9 @@ async def list_templates(
 
 
 @router.get("/registry/fields")
-async def get_field_registry():
+async def get_field_registry(
+    current_user: User = Depends(get_current_user),
+):
     """
     Return all known database fields that templates can map to.
     Used by the frontend to let users manually map unmapped fields.

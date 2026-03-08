@@ -1865,19 +1865,44 @@ async def resend_webhook(
 ):
     """
     Receives Resend webhook events for email tracking.
-    Validates webhook signature when RESEND_WEBHOOK_SECRET is set.
+    Validates Svix webhook signature when RESEND_WEBHOOK_SECRET is set.
+    Rejects all requests when secret is not configured.
     Events: email.delivered, email.opened, email.clicked, email.bounced, email.complained.
     """
-    import os, hmac, hashlib
+    import os, hmac, hashlib, base64, time as _time
+
     webhook_secret = os.getenv("RESEND_WEBHOOK_SECRET", "")
-    if webhook_secret:
-        signature = request.headers.get("svix-signature", "")
-        svix_id = request.headers.get("svix-id", "")
-        svix_timestamp = request.headers.get("svix-timestamp", "")
-        if not signature or not svix_id or not svix_timestamp:
-            raise HTTPException(status_code=401, detail="Missing webhook signature headers")
+    if not webhook_secret:
+        raise HTTPException(status_code=503, detail="Webhook not configured")
+
+    signature_header = request.headers.get("svix-signature", "")
+    svix_id = request.headers.get("svix-id", "")
+    svix_timestamp = request.headers.get("svix-timestamp", "")
+    if not signature_header or not svix_id or not svix_timestamp:
+        raise HTTPException(status_code=401, detail="Missing webhook signature headers")
+
     try:
-        payload = await request.json()
+        ts = int(svix_timestamp)
+        if abs(_time.time() - ts) > 300:
+            raise HTTPException(status_code=401, detail="Webhook timestamp too old")
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid webhook timestamp")
+
+    raw_body = await request.body()
+    signed_content = f"{svix_id}.{svix_timestamp}.{raw_body.decode('utf-8')}"
+
+    secret_bytes = base64.b64decode(webhook_secret.removeprefix("whsec_"))
+    expected_sig = base64.b64encode(
+        hmac.new(secret_bytes, signed_content.encode("utf-8"), hashlib.sha256).digest()
+    ).decode("utf-8")
+
+    signatures = [s.strip().removeprefix("v1,") for s in signature_header.split(" ") if s.strip().startswith("v1,")]
+    if not any(hmac.compare_digest(expected_sig, sig) for sig in signatures):
+        raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    try:
+        import json
+        payload = json.loads(raw_body)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid JSON")
 
