@@ -460,14 +460,15 @@ async def monday_webhook(
             external_source="monday.com",
         )
         
-        # Check if client exists (update) or create new
+        system_uid = _get_system_user_id(db)
+
         existing = db.query(Client).filter(
             Client.external_id == str(item_id),
-            Client.external_source == "monday.com"
+            Client.external_source == "monday.com",
+            Client.created_by == system_uid,
         ).first()
         
         if existing:
-            # Update existing client
             existing.full_name = client_data.full_name
             if client_data.phone:
                 existing.phone = client_data.phone
@@ -479,8 +480,6 @@ async def monday_webhook(
                 existing.notes = client_data.notes
             existing.updated_at = datetime.now(timezone.utc)
         else:
-            # Create new client
-            system_uid = _get_system_user_id(db)
             create_client_from_import(db, client_data, system_uid)
         
         db.commit()

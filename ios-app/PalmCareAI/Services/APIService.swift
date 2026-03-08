@@ -629,6 +629,22 @@ class APIService: ObservableObject {
 
     func logout() {
         token = nil
+
+        UserDefaults.standard.removeObject(forKey: "palmcare_calendar_events")
+        UserDefaults.standard.removeObject(forKey: "googleCalendarConnected")
+        URLCache.shared.removeAllCachedResponses()
+
+        let fm = FileManager.default
+        let recordingsDir = fm.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Recordings")
+        if let dir = recordingsDir, fm.fileExists(atPath: dir.path) {
+            try? fm.removeItem(at: dir)
+        }
+        let tmpDir = fm.temporaryDirectory
+        if let files = try? fm.contentsOfDirectory(atPath: tmpDir.path) {
+            for file in files {
+                try? fm.removeItem(at: tmpDir.appendingPathComponent(file))
+            }
+        }
     }
 }
 
