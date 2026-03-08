@@ -13,36 +13,9 @@ import {
   Easing,
 } from "remotion";
 
-// ================================================================
-// PALMCARE AI — FINAL PRODUCT AD
-//
-// Audio-first build. Every visual is locked to voiceover timing.
-// 9 VO segments, 6 visual scenes, 20-frame overlapping dissolves.
-//
-// AUDIO MAP (absolute frames):
-//   f20:   "Every client has a story worth capturing."        (82fr)
-//   f140:  "A care professional. A family trusting you..."    (143fr)
-//   f320:  "PalmCare AI listens — so you never miss..."       (99fr)
-//   f450:  "Assessment complete."                              (46fr)
-//   f520:  "In seconds, your care plan and service..."        (134fr)
-//   f660:  "No paperwork. No delays. Just care, done right." (94fr)
-//   f800:  "PalmCare AI."                                     (28fr)
-//   f855:  "Record it. Transcribe it. Contract it."           (74fr)
-//   f960:  "Palm it."                                          (18fr)
-//
-// VISUAL SCENES:
-//   1A  Sunrise establishing       f0–f140
-//   1B  Greeting → Recording       f120–f330
-//   1C  Live transcription          f310–f460
-//   2A  Contract + showing          f440–f670
-//   2B  Family relief               f650–f800
-//   3   Hero → Brand close          f780–f1050
-//
-// Total: 1050 frames = 35s
-// ================================================================
-
 const FPS = 30;
 const OVL = 20;
+const TOTAL = 1080;
 
 const BG = "#050a0a";
 const TEAL = "#0d9488";
@@ -52,79 +25,37 @@ const W = "#ffffff";
 const MUTED = "#94a3b8";
 const F = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif';
 
-const SCENES = {
-  s1a: { from: 0,   dur: 140 },
-  s1b: { from: 120, dur: 210 },
-  s1c: { from: 310, dur: 150 },
-  s2a: { from: 440, dur: 230 },
-  s2b: { from: 650, dur: 150 },
-  s3:  { from: 780, dur: 270 },
+const S = {
+  palm:     { from: 0,   dur: 150 },
+  greet:    { from: 130, dur: 160 },
+  convo:    { from: 270, dur: 250 },
+  snap:     { from: 500, dur: 110 },
+  contract: { from: 590, dur: 160 },
+  care:     { from: 730, dur: 110 },
+  hero:     { from: 820, dur: 260 },
 };
-const TOTAL = 1050;
 
-// Audio cue sheet (absolute frame positions)
 const VO = {
-  story:    { from: 20,  dur: 90 },
-  trust:    { from: 140, dur: 150 },
-  listens:  { from: 320, dur: 105 },
-  complete: { from: 450, dur: 52 },
-  seconds:  { from: 520, dur: 140 },
-  nodelay:  { from: 660, dur: 100 },
-  brand:    { from: 800, dur: 35 },
-  tagline:  { from: 855, dur: 80 },
-  palmit:   { from: 960, dur: 25 },
+  story:    { from: 25,  dur: 88 },
+  trust:    { from: 150, dur: 150 },
+  listens:  { from: 310, dur: 105 },
+  complete: { from: 510, dur: 52 },
+  seconds:  { from: 610, dur: 140 },
+  nodelay:  { from: 740, dur: 100 },
+  brand:    { from: 850, dur: 35 },
+  tagline:  { from: 900, dur: 80 },
+  palmit:   { from: 980, dur: 25 },
 };
 
-// ================================================================
-// PRIMITIVES
-// ================================================================
+// ─── Primitives ───
 
-const Vig: React.FC<{ i?: number }> = ({ i = 0.5 }) => (
+const Vig: React.FC<{ i?: number }> = ({ i = 0.45 }) => (
   <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,${i}) 100%)`, pointerEvents: "none" }} />
 );
 
-const Grad: React.FC<{ h?: string; o?: number }> = ({ h = "50%", o = 0.9 }) => (
+const Grad: React.FC<{ h?: string; o?: number }> = ({ h = "48%", o = 0.85 }) => (
   <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: h, background: `linear-gradient(to top, rgba(0,0,0,${o}) 0%, rgba(0,0,0,${o * 0.3}) 60%, transparent 100%)`, pointerEvents: "none" }} />
 );
-
-const LogoBadge: React.FC = () => {
-  const frame = useCurrentFrame();
-  const op = interpolate(frame, [0, 8], [0, 0.85], { extrapolateRight: "clamp" });
-  return (
-    <div style={{ position: "absolute", top: 30, left: 34, display: "flex", alignItems: "center", gap: 9, opacity: op, zIndex: 5 }}>
-      <div style={{ width: 30, height: 30, borderRadius: 8, overflow: "hidden", boxShadow: "0 3px 10px rgba(0,0,0,0.5)" }}>
-        <Img src={staticFile("palmcare-logo.png")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-      </div>
-      <span style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.7)", letterSpacing: 1.1, textShadow: "0 2px 8px rgba(0,0,0,0.6)", fontFamily: F }}>PALMCARE AI</span>
-    </div>
-  );
-};
-
-const Cap: React.FC<{
-  text: string; delay?: number; size?: number; color?: string;
-  weight?: number; maxW?: number; align?: string; fadeOut?: number;
-}> = ({ text, delay = 0, size = 44, color = W, weight = 600, maxW = 840, align = "center", fadeOut = 999 }) => {
-  const frame = useCurrentFrame();
-  const lf = frame - delay;
-  const fadeIn = interpolate(lf, [0, 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const fadeOutOp = interpolate(frame, [fadeOut, fadeOut + 12], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const y = interpolate(lf, [0, 10], [14, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  if (lf < 0) return null;
-  return (
-    <div style={{ opacity: fadeIn * fadeOutOp, transform: `translateY(${y}px)`, textAlign: align as any, maxWidth: maxW }}>
-      <p style={{ fontSize: size, fontWeight: weight, color, lineHeight: 1.3, margin: 0, fontFamily: F, textShadow: "0 3px 18px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.6)" }}>{text}</p>
-    </div>
-  );
-};
-
-const PhoneVideo: React.FC<{ videoStartSec: number; height?: number; glow?: number }> = ({ videoStartSec, height = 540, glow = 0.22 }) => {
-  const w = Math.round(height * (870 / 1800));
-  return (
-    <div style={{ width: w, height, borderRadius: 32, overflow: "hidden", border: "3px solid rgba(255,255,255,0.1)", boxShadow: `0 25px 70px rgba(0,0,0,0.7), 0 0 45px rgba(13,148,136,${glow})` }}>
-      <OffthreadVideo src={staticFile("clip4-app-flow.mp4")} startFrom={Math.round(videoStartSec * FPS)} volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-    </div>
-  );
-};
 
 const Dissolve: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const frame = useCurrentFrame();
@@ -134,221 +65,292 @@ const Dissolve: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <AbsoluteFill style={{ opacity: Math.min(fi, fo) }}>{children}</AbsoluteFill>;
 };
 
-// ================================================================
-// SCENE 1A — Sunrise establishing
-// VO: "Every client has a story worth capturing."
-// ================================================================
+const Cap: React.FC<{
+  text: string; delay?: number; size?: number; color?: string;
+  weight?: number; maxW?: number; align?: string;
+}> = ({ text, delay = 0, size = 42, color = W, weight = 600, maxW = 880, align = "center" }) => {
+  const frame = useCurrentFrame();
+  const lf = frame - delay;
+  const fadeIn = interpolate(lf, [0, 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const y = interpolate(lf, [0, 10], [14, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  if (lf < 0) return null;
+  return (
+    <div style={{ opacity: fadeIn, transform: `translateY(${y}px)`, textAlign: align as any, maxWidth: maxW }}>
+      <p style={{ fontSize: size, fontWeight: weight, color, lineHeight: 1.3, margin: 0, fontFamily: F,
+        textShadow: "0 3px 18px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.6)" }}>{text}</p>
+    </div>
+  );
+};
 
-const Scene1A: React.FC = () => (
-  <AbsoluteFill style={{ backgroundColor: "#000" }}>
-    <OffthreadVideo src={staticFile("kling-product-ad/01_sunrise_home.mp4")} volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-    <Vig i={0.4} />
-    <Grad h="48%" o={0.85} />
-    <div style={{ position: "absolute", bottom: 75, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-      <Cap text={`"Every client has a story worth capturing."`} delay={20} size={44} weight={500} />
+const LogoBadge: React.FC = () => {
+  const frame = useCurrentFrame();
+  const op = interpolate(frame, [0, 8], [0, 0.85], { extrapolateRight: "clamp" });
+  return (
+    <div style={{ position: "absolute", top: 28, left: 32, display: "flex", alignItems: "center", gap: 9, opacity: op, zIndex: 5 }}>
+      <div style={{ width: 28, height: 28, borderRadius: 7, overflow: "hidden", boxShadow: "0 3px 10px rgba(0,0,0,0.5)" }}>
+        <Img src={staticFile("palmcare-logo.png")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </div>
+      <span style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.7)", letterSpacing: 1.1,
+        textShadow: "0 2px 8px rgba(0,0,0,0.6)", fontFamily: F }}>PALMCARE AI</span>
+    </div>
+  );
+};
+
+const PhoneFrame: React.FC<{ videoStartSec: number; height?: number; glow?: number; enterDelay?: number }> = ({
+  videoStartSec, height = 520, glow = 0.22, enterDelay = 0,
+}) => {
+  const frame = useCurrentFrame();
+  const w = Math.round(height * (870 / 1800));
+  const op = interpolate(frame, [enterDelay, enterDelay + 18], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const sc = interpolate(frame, [enterDelay, enterDelay + 22], [0.9, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  if (frame < enterDelay) return null;
+  return (
+    <div style={{ opacity: op, transform: `scale(${sc})` }}>
+      <div style={{ width: w, height, borderRadius: 30, overflow: "hidden",
+        border: "3px solid rgba(255,255,255,0.12)",
+        boxShadow: `0 25px 65px rgba(0,0,0,0.7), 0 0 40px rgba(13,148,136,${glow})` }}>
+        <OffthreadVideo src={staticFile("clip4-app-flow.mp4")} startFrom={Math.round(videoStartSec * FPS)}
+          volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </div>
+    </div>
+  );
+};
+
+// ─── Scene 1: Palm Trees Establishing ───
+// VO: "Every client has a story worth capturing."
+
+const ScenePalm: React.FC = () => (
+  <AbsoluteFill>
+    <OffthreadVideo src={staticFile("kling-brand/01_palm_trees_establishing.mp4")}
+      volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    <Vig i={0.35} />
+    <Grad h="45%" o={0.82} />
+    <div style={{ position: "absolute", bottom: 70, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+      <Cap text={`"Every client has a story worth capturing."`} delay={25} size={46} weight={500} />
     </div>
   </AbsoluteFill>
 );
 
-// ================================================================
-// SCENE 1B — Greeting client + Recording
-// VO: "A care professional. A family trusting you..."
-//     "PalmCare AI listens — so you never miss a detail."
-// ================================================================
+// ─── Scene 2: Greeting Outdoor ───
+// VO: "A care professional. A family trusting you with someone they love."
 
-const Scene1B: React.FC = () => {
+const SceneGreet: React.FC = () => (
+  <AbsoluteFill>
+    <OffthreadVideo src={staticFile("kling-brand/02_greeting_outdoor.mp4")}
+      volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    <Vig i={0.4} />
+    <Grad h="46%" o={0.88} />
+    <LogoBadge />
+    <div style={{ position: "absolute", bottom: 60, left: 50, right: 50, display: "flex", justifyContent: "center" }}>
+      <Cap text={`"A care professional. A family trusting you with someone they love."`}
+        delay={20} size={38} weight={500} maxW={900} />
+    </div>
+  </AbsoluteFill>
+);
+
+// ─── Scene 3: Conversation + Recording ───
+// VO: "PalmCare AI listens — so you never miss a detail."
+// Phone overlay: recording UI (clip4 at 15s)
+
+const SceneConvo: React.FC = () => {
   const frame = useCurrentFrame();
-  const phoneOp = interpolate(frame, [80, 100], [0, 1], { extrapolateRight: "clamp" });
-  const phoneSc = interpolate(frame, [80, 105], [0.88, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-
   return (
-    <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      <OffthreadVideo src={staticFile("kling-product-ad/03_greeting_client.mp4")} volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    <AbsoluteFill>
+      <OffthreadVideo src={staticFile("kling-brand/03_conversation_patio.mp4")}
+        volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      <Vig i={0.45} />
+      <Grad h="50%" o={0.88} />
+      <LogoBadge />
+
+      {/* Phone slides in from right showing recording UI */}
+      <div style={{ position: "absolute", right: 50, top: "50%", transform: "translateY(-55%)" }}>
+        <PhoneFrame videoStartSec={15} height={480} glow={0.28} enterDelay={60} />
+      </div>
+
+      <div style={{ position: "absolute", bottom: 55, left: 50, right: 320 }}>
+        <Cap text={`"PalmCare AI listens — so you never miss a detail."`}
+          delay={40} size={40} color={TEAL_X} weight={600} maxW={700} align="left" />
+      </div>
+
+      {/* Subtle recording indicator */}
+      {frame >= 65 && (() => {
+        const pulse = Math.sin((frame - 65) * 0.15) * 0.4 + 0.6;
+        return (
+          <div style={{ position: "absolute", top: 28, right: 35, display: "flex", alignItems: "center", gap: 7, opacity: pulse }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 8px #ef4444" }} />
+            <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.7)", fontFamily: F }}>RECORDING</span>
+          </div>
+        );
+      })()}
+    </AbsoluteFill>
+  );
+};
+
+// ─── Scene 4: Assessment Complete (quick punch) ───
+// VO: "Assessment complete."
+// Phone: transcript view (clip4 at 20s)
+
+const SceneSnap: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const badgeSc = spring({ frame: Math.max(0, frame - 8), fps, config: { damping: 12, stiffness: 100 } });
+  return (
+    <AbsoluteFill>
+      <OffthreadVideo src={staticFile("kling-brand/04_phone_recording.mp4")}
+        volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      <Vig i={0.5} />
+
+      {/* Assessment Complete badge */}
+      <div style={{ position: "absolute", top: "50%", left: "50%", transform: `translate(-50%, -50%) scale(${Math.max(0, badgeSc)})` }}>
+        <div style={{ background: `rgba(5,10,10,0.85)`, border: `2px solid ${TEAL}`, borderRadius: 18, padding: "18px 36px",
+          display: "flex", alignItems: "center", gap: 12, boxShadow: `0 15px 50px rgba(0,0,0,0.6), 0 0 30px rgba(13,148,136,0.3)` }}>
+          <span style={{ fontSize: 32, color: TEAL_L }}>✓</span>
+          <span style={{ fontSize: 28, fontWeight: 700, color: W, fontFamily: F }}>Assessment Complete</span>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// ─── Scene 5: Contract Reveal ───
+// VO: "In seconds, your care plan and service agreement — ready to sign."
+// Phone: contract view (clip4 at 33s)
+
+const SceneContract: React.FC = () => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill>
+      <OffthreadVideo src={staticFile("kling-brand/05_showing_contract.mp4")}
+        volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       <Vig i={0.45} />
       <Grad h="50%" o={0.9} />
       <LogoBadge />
 
-      {/* Phone slides in at "PalmCare AI listens" */}
-      <div style={{ position: "absolute", right: 55, top: "50%", transform: `translateY(-50%) scale(${phoneSc})`, opacity: phoneOp }}>
-        <PhoneVideo videoStartSec={15} height={480} glow={0.25} />
+      {/* Phone with contract UI — centered left */}
+      <div style={{ position: "absolute", left: 60, top: "50%", transform: "translateY(-55%)" }}>
+        <PhoneFrame videoStartSec={33} height={500} glow={0.25} enterDelay={10} />
       </div>
 
-      <div style={{ position: "absolute", bottom: 60, left: 55, right: 340, display: "flex", flexDirection: "column", gap: 6 }}>
-        {/* "A care professional..." — local frame 20 = abs frame 140 */}
-        <Cap text={`"A care professional. A family trusting you with someone they love."`} delay={20} size={36} weight={500} fadeOut={120} />
-        {/* "PalmCare AI listens..." — local frame 200 = abs frame 320 */}
-        {frame >= 195 && <Cap text={`"PalmCare AI listens — so you never miss a detail."`} delay={200} size={38} color={TEAL_X} weight={600} />}
+      <div style={{ position: "absolute", bottom: 55, right: 50, maxWidth: 600 }}>
+        <Cap text={`"In seconds, your care plan and service agreement — ready to sign."`}
+          delay={20} size={36} weight={500} align="right" maxW={600} />
       </div>
     </AbsoluteFill>
   );
 };
 
-// ================================================================
-// SCENE 1C — Live transcription close-up
-// (visual breathing room, transcript scrolling in phone)
-// ================================================================
+// ─── Scene 6: Care Done Right ───
+// VO: "No paperwork. No delays. Just care, done right."
+// Teal ambient scene (emotional payoff before brand close)
 
-const Scene1C: React.FC = () => {
+const SceneCare: React.FC = () => {
   const frame = useCurrentFrame();
-  const phoneOp = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
-  const phoneY = interpolate(frame, [0, 18], [25, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  const scanLine = interpolate(frame, [0, 150], [0, 100], { extrapolateRight: "clamp" });
-
+  const pulse = Math.sin(frame * 0.07) * 0.15 + 0.85;
   return (
     <AbsoluteFill style={{ backgroundColor: BG }}>
-      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 45% 50%, rgba(13,148,136,0.1) 0%, transparent 55%)` }} />
-      <div style={{ position: "absolute", top: `${scanLine}%`, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${TEAL}, ${TEAL_L}, ${TEAL}, transparent)`, boxShadow: `0 0 18px ${TEAL}`, opacity: 0.5 }} />
+      <div style={{ position: "absolute", inset: 0,
+        background: `radial-gradient(ellipse at 50% 45%, rgba(13,148,136,${pulse * 0.12}) 0%, transparent 60%)` }} />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", gap: 50 }}>
-        <div style={{ opacity: phoneOp, transform: `translateY(${phoneY}px)` }}>
-          <PhoneVideo videoStartSec={20} height={560} glow={0.3} />
-        </div>
-        <div style={{ maxWidth: 420 }}>
-          <Cap text="Live transcription" delay={10} size={36} color={TEAL_L} weight={700} align="left" maxW={420} />
-          <div style={{ marginTop: 8 }}>
-            <Cap text="Every speaker identified. Every detail captured." delay={30} size={24} color={MUTED} weight={500} align="left" maxW={420} />
-          </div>
-        </div>
+      {/* Subtle palm leaf silhouette pattern */}
+      {[...Array(5)].map((_, i) => {
+        const x = 15 + i * 20;
+        const sway = Math.sin(frame * 0.03 + i * 1.5) * 3;
+        const a = 0.04 + (i % 2) * 0.02;
+        return (
+          <div key={i} style={{ position: "absolute", left: `${x}%`, top: -20,
+            width: 200, height: 400, opacity: a,
+            background: `linear-gradient(180deg, rgba(13,148,136,0.3) 0%, transparent 70%)`,
+            borderRadius: "0 0 50% 50%", transform: `rotate(${sway + (i - 2) * 8}deg)` }} />
+        );
+      })}
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12 }}>
+        <Cap text={`"No paperwork. No delays."`} delay={10} size={48} color={W} weight={600} />
+        <Cap text={`"Just care, done right."`} delay={30} size={48} color={TEAL_X} weight={700} />
       </div>
     </AbsoluteFill>
   );
 };
 
-// ================================================================
-// SCENE 2A — Contract generated + showing to client
-// VO: "Assessment complete." → "In seconds, your care plan..."
-// ================================================================
+// ─── Scene 7: Palm Sunset Hero → Brand Close ───
+// VO: "PalmCare AI." → "Record it. Transcribe it. Contract it." → "Palm it."
 
-const Scene2A: React.FC = () => {
-  const frame = useCurrentFrame();
-  const phoneOp = interpolate(frame, [30, 50], [0, 1], { extrapolateRight: "clamp" });
-  const phoneX = interpolate(frame, [30, 55], [-50, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-
-  const completeBadgeOp = interpolate(frame, [5, 20], [0, 1], { extrapolateRight: "clamp" });
-  const completeBadgeSc = spring({ frame: Math.max(0, frame - 5), fps: FPS, config: { damping: 12, stiffness: 100 } });
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      <OffthreadVideo src={staticFile("kling-product-ad/06_showing_contract.mp4")} volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-      <Vig i={0.5} />
-      <Grad h="50%" o={0.9} />
-      <LogoBadge />
-
-      {/* "Assessment Complete" badge */}
-      <div style={{ position: "absolute", top: 35, right: 40, opacity: completeBadgeOp, transform: `scale(${Math.max(0, completeBadgeSc)})` }}>
-        <div style={{ background: `${TEAL}33`, border: `1px solid ${TEAL}80`, borderRadius: 12, padding: "8px 18px", display: "flex", alignItems: "center", gap: 7 }}>
-          <span style={{ fontSize: 18, color: TEAL_L }}>✓</span>
-          <span style={{ fontSize: 15, fontWeight: 600, color: TEAL_L, fontFamily: F }}>Assessment Complete</span>
-        </div>
-      </div>
-
-      {/* Phone with contract */}
-      <div style={{ position: "absolute", left: 55, top: "50%", transform: `translateY(-50%) translateX(${phoneX}px)`, opacity: phoneOp }}>
-        <PhoneVideo videoStartSec={32} height={480} glow={0.22} />
-      </div>
-
-      <div style={{ position: "absolute", bottom: 55, right: 55, maxWidth: 580, display: "flex", flexDirection: "column", gap: 6 }}>
-        {/* "Assessment complete." — local frame 10 = abs 450 */}
-        <Cap text={`"Assessment complete."`} delay={10} size={46} color={TEAL_X} weight={700} align="right" maxW={580} fadeOut={70} />
-        {/* "In seconds, your care plan..." — local frame 80 = abs 520 */}
-        {frame >= 75 && <Cap text={`"In seconds, your care plan and service agreement — ready to sign."`} delay={80} size={34} weight={500} align="right" maxW={580} />}
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-// ================================================================
-// SCENE 2B — Family relief / emotional payoff
-// VO: "No paperwork. No delays. Just care, done right."
-// ================================================================
-
-const Scene2B: React.FC = () => (
-  <AbsoluteFill style={{ backgroundColor: "#000" }}>
-    <OffthreadVideo src={staticFile("kling-product-ad/07_family_relief.mp4")} volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-    <Vig i={0.3} />
-    <Grad h="42%" o={0.82} />
-    <div style={{ position: "absolute", bottom: 65, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-      <Cap text={`"No paperwork. No delays. Just care, done right."`} delay={10} size={42} weight={600} />
-    </div>
-  </AbsoluteFill>
-);
-
-// ================================================================
-// SCENE 3 — Hero shot → Brand close
-// VO: "PalmCare AI." → "Record it..." → "Palm it."
-// ================================================================
-
-const Scene3Hero: React.FC = () => {
+const SceneHero: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const klingOp = interpolate(frame, [0, 70], [1, 0], { extrapolateRight: "clamp" });
-  const brandOp = interpolate(frame, [50, 75], [0, 1], { extrapolateRight: "clamp" });
-  const logoSc = spring({ frame: Math.max(0, frame - 55), fps, config: { damping: 14, stiffness: 80 } });
-  const nameOp = interpolate(frame, [70, 88], [0, 1], { extrapolateRight: "clamp" });
-  const tagOp = interpolate(frame, [95, 112], [0, 1], { extrapolateRight: "clamp" });
-  const palmOp = interpolate(frame, [140, 158], [0, 1], { extrapolateRight: "clamp" });
-  const palmSc = spring({ frame: Math.max(0, frame - 140), fps, config: { damping: 10, stiffness: 120 } });
-  const qrOp = interpolate(frame, [185, 205], [0, 1], { extrapolateRight: "clamp" });
+  const klingOp = interpolate(frame, [0, 80], [1, 0], { extrapolateRight: "clamp" });
+  const brandOp = interpolate(frame, [55, 80], [0, 1], { extrapolateRight: "clamp" });
+  const logoSc = spring({ frame: Math.max(0, frame - 60), fps, config: { damping: 14, stiffness: 80 } });
+  const nameOp = interpolate(frame, [75, 92], [0, 1], { extrapolateRight: "clamp" });
+  const tagOp = interpolate(frame, [100, 118], [0, 1], { extrapolateRight: "clamp" });
+  const palmOp = interpolate(frame, [145, 165], [0, 1], { extrapolateRight: "clamp" });
+  const palmSc = spring({ frame: Math.max(0, frame - 145), fps, config: { damping: 10, stiffness: 120 } });
+  const qrOp = interpolate(frame, [190, 215], [0, 1], { extrapolateRight: "clamp" });
   const pulse = Math.sin(frame * 0.08) * 0.3 + 0.7;
 
   return (
     <AbsoluteFill style={{ backgroundColor: BG, overflow: "hidden" }}>
-      {/* Kling hero fading out */}
+      {/* Kling sunset fading out behind brand */}
       <div style={{ opacity: klingOp, position: "absolute", inset: 0 }}>
-        <OffthreadVideo src={staticFile("kling-product-ad/08_palm_it_hero.mp4")} volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <OffthreadVideo src={staticFile("kling-brand/06_palm_sunset_hero.mp4")}
+          volume={0} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
       <Vig i={0.5} />
 
-      {/* Brand backdrop */}
-      <div style={{ opacity: brandOp, position: "absolute", inset: 0, background: BG }} />
-      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 50% 40%, rgba(13,148,136,${pulse * 0.1}) 0%, transparent 55%)`, opacity: brandOp }} />
+      <div style={{ opacity: brandOp, position: "absolute", inset: 0, backgroundColor: BG }} />
+      <div style={{ position: "absolute", inset: 0, opacity: brandOp,
+        background: `radial-gradient(ellipse at 50% 40%, rgba(13,148,136,${pulse * 0.1}) 0%, transparent 55%)` }} />
 
-      {brandOp > 0 && [...Array(10)].map((_, i) => {
-        const speed = 0.01 + (i % 4) * 0.003;
-        const x = Math.sin(frame * speed + i * 1.3) * 400 + 960;
-        const y = Math.cos(frame * speed * 0.7 + i * 0.8) * 300 + 540;
-        const sz = 2 + (i % 3) * 2;
-        const a = (0.06 + Math.sin(frame * 0.07 + i) * 0.04) * brandOp;
-        return <div key={i} style={{ position: "absolute", left: x, top: y, width: sz, height: sz, borderRadius: "50%", background: `rgba(13,148,136,${a})` }} />;
+      {/* Subtle floating particles */}
+      {brandOp > 0 && [...Array(8)].map((_, i) => {
+        const sp = 0.01 + (i % 3) * 0.004;
+        const x = Math.sin(frame * sp + i * 1.5) * 380 + 960;
+        const y = Math.cos(frame * sp * 0.7 + i * 0.9) * 280 + 540;
+        const sz = 2 + (i % 3) * 1.5;
+        const a = (0.05 + Math.sin(frame * 0.06 + i) * 0.03) * brandOp;
+        return <div key={i} style={{ position: "absolute", left: x, top: y, width: sz, height: sz,
+          borderRadius: "50%", background: `rgba(13,148,136,${a})` }} />;
       })}
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", opacity: brandOp }}>
-        {/* Logo */}
-        <div style={{ transform: `scale(${Math.max(0, logoSc)})`, marginBottom: 18 }}>
-          <div style={{ width: 92, height: 92, borderRadius: 23, overflow: "hidden", boxShadow: `0 18px 55px rgba(13,148,136,${pulse * 0.4})` }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        height: "100%", opacity: brandOp }}>
+        <div style={{ transform: `scale(${Math.max(0, logoSc)})`, marginBottom: 16 }}>
+          <div style={{ width: 88, height: 88, borderRadius: 22, overflow: "hidden",
+            boxShadow: `0 18px 50px rgba(13,148,136,${pulse * 0.4})` }}>
             <Img src={staticFile("palmcare-logo.png")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         </div>
 
-        {/* PalmCare AI */}
-        <div style={{ opacity: nameOp, marginBottom: 5 }}>
-          <h1 style={{ fontSize: 52, fontWeight: 800, color: W, margin: 0, fontFamily: F }}>
-            PalmCare <span style={{ background: `linear-gradient(135deg, ${TEAL_L}, ${TEAL_X})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI</span>
+        <div style={{ opacity: nameOp, marginBottom: 4 }}>
+          <h1 style={{ fontSize: 50, fontWeight: 800, color: W, margin: 0, fontFamily: F }}>
+            PalmCare <span style={{ background: `linear-gradient(135deg, ${TEAL_L}, ${TEAL_X})`,
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI</span>
           </h1>
         </div>
 
-        {/* Tagline */}
-        <div style={{ opacity: tagOp, marginBottom: 28 }}>
-          <p style={{ fontSize: 20, fontWeight: 500, color: MUTED, margin: 0, fontFamily: F }}>Record it. Transcribe it. Contract it.</p>
+        <div style={{ opacity: tagOp, marginBottom: 26 }}>
+          <p style={{ fontSize: 19, fontWeight: 500, color: MUTED, margin: 0, fontFamily: F }}>
+            Record it. Transcribe it. Contract it.</p>
         </div>
 
-        <div style={{ width: 50, height: 2, background: `linear-gradient(90deg, transparent, ${TEAL}, transparent)`, marginBottom: 24, opacity: tagOp }} />
+        <div style={{ width: 45, height: 2, marginBottom: 22, opacity: tagOp,
+          background: `linear-gradient(90deg, transparent, ${TEAL}, transparent)` }} />
 
-        {/* PALM IT. */}
-        <div style={{ opacity: palmOp, transform: `scale(${Math.max(0, palmSc)})`, marginBottom: 32 }}>
-          <span style={{ fontSize: 62, fontWeight: 900, color: W, letterSpacing: -2, fontFamily: F }}>PALM </span>
-          <span style={{ fontSize: 62, fontWeight: 900, fontStyle: "italic", letterSpacing: -2, fontFamily: F, background: `linear-gradient(135deg, ${TEAL_L}, ${TEAL_X})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>IT.</span>
+        <div style={{ opacity: palmOp, transform: `scale(${Math.max(0, palmSc)})`, marginBottom: 30 }}>
+          <span style={{ fontSize: 58, fontWeight: 900, color: W, letterSpacing: -2, fontFamily: F }}>PALM </span>
+          <span style={{ fontSize: 58, fontWeight: 900, fontStyle: "italic", letterSpacing: -2, fontFamily: F,
+            background: `linear-gradient(135deg, ${TEAL_L}, ${TEAL_X})`,
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>IT.</span>
         </div>
 
-        {/* QR + URL */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20, opacity: qrOp }}>
-          <div style={{ background: "white", borderRadius: 13, padding: 9, boxShadow: "0 8px 25px rgba(0,0,0,0.3)" }}>
-            <Img src={staticFile("palmcare-qr.png")} style={{ width: 72, height: 72 }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 18, opacity: qrOp }}>
+          <div style={{ background: "white", borderRadius: 12, padding: 8, boxShadow: "0 8px 22px rgba(0,0,0,0.3)" }}>
+            <Img src={staticFile("palmcare-qr.png")} style={{ width: 68, height: 68 }} />
           </div>
           <div>
-            <p style={{ fontSize: 17, fontWeight: 600, color: TEAL_L, margin: 0, fontFamily: F }}>palmcareai.com</p>
-            <p style={{ fontSize: 12, color: MUTED, margin: "3px 0 0", fontFamily: F }}>Start your free trial</p>
+            <p style={{ fontSize: 16, fontWeight: 600, color: TEAL_L, margin: 0, fontFamily: F }}>palmcareai.com</p>
+            <p style={{ fontSize: 11, color: MUTED, margin: "3px 0 0", fontFamily: F }}>Start your free trial</p>
           </div>
         </div>
       </div>
@@ -356,77 +358,79 @@ const Scene3Hero: React.FC = () => {
   );
 };
 
-// ================================================================
-// MAIN — everything stitched seamlessly
-// ================================================================
+// ─── Main Composition ───
 
-export const ProductAd: React.FC<{ showAudio?: boolean }> = ({ showAudio = false }) => {
-  return (
-    <AbsoluteFill style={{ backgroundColor: BG }}>
-      {/* Persistent teal accent */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, transparent 5%, ${TEAL} 30%, ${TEAL_L} 50%, ${TEAL} 70%, transparent 95%)`, zIndex: 10 }} />
+export const ProductAd: React.FC<{ showAudio?: boolean }> = ({ showAudio = false }) => (
+  <AbsoluteFill style={{ backgroundColor: BG }}>
+    {/* Teal accent line */}
+    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, zIndex: 10,
+      background: `linear-gradient(90deg, transparent 5%, ${TEAL} 30%, ${TEAL_L} 50%, ${TEAL} 70%, transparent 95%)` }} />
 
-      {/* Visual scenes — later JSX renders on top during overlaps */}
-      <Sequence from={SCENES.s1a.from} durationInFrames={SCENES.s1a.dur}>
-        <Dissolve><Scene1A /></Dissolve>
-      </Sequence>
-      <Sequence from={SCENES.s1b.from} durationInFrames={SCENES.s1b.dur}>
-        <Dissolve><Scene1B /></Dissolve>
-      </Sequence>
-      <Sequence from={SCENES.s1c.from} durationInFrames={SCENES.s1c.dur}>
-        <Dissolve><Scene1C /></Dissolve>
-      </Sequence>
-      <Sequence from={SCENES.s2a.from} durationInFrames={SCENES.s2a.dur}>
-        <Dissolve><Scene2A /></Dissolve>
-      </Sequence>
-      <Sequence from={SCENES.s2b.from} durationInFrames={SCENES.s2b.dur}>
-        <Dissolve><Scene2B /></Dissolve>
-      </Sequence>
-      <Sequence from={SCENES.s3.from} durationInFrames={SCENES.s3.dur}>
-        <Dissolve><Scene3Hero /></Dissolve>
-      </Sequence>
+    {/* 7 scenes with dissolve overlaps */}
+    <Sequence from={S.palm.from} durationInFrames={S.palm.dur}>
+      <Dissolve><ScenePalm /></Dissolve>
+    </Sequence>
+    <Sequence from={S.greet.from} durationInFrames={S.greet.dur}>
+      <Dissolve><SceneGreet /></Dissolve>
+    </Sequence>
+    <Sequence from={S.convo.from} durationInFrames={S.convo.dur}>
+      <Dissolve><SceneConvo /></Dissolve>
+    </Sequence>
+    <Sequence from={S.snap.from} durationInFrames={S.snap.dur}>
+      <Dissolve><SceneSnap /></Dissolve>
+    </Sequence>
+    <Sequence from={S.contract.from} durationInFrames={S.contract.dur}>
+      <Dissolve><SceneContract /></Dissolve>
+    </Sequence>
+    <Sequence from={S.care.from} durationInFrames={S.care.dur}>
+      <Dissolve><SceneCare /></Dissolve>
+    </Sequence>
+    <Sequence from={S.hero.from} durationInFrames={S.hero.dur}>
+      <Dissolve><SceneHero /></Dissolve>
+    </Sequence>
 
-      {/* Progress bar */}
-      <Sequence from={0} durationInFrames={TOTAL}>
-        {React.createElement(() => {
-          const frame = useCurrentFrame();
-          const progress = frame / TOTAL;
-          return <div style={{ position: "absolute", bottom: 0, left: 0, height: 3, width: `${progress * 100}%`, background: `linear-gradient(90deg, ${TEAL}, ${TEAL_L})`, boxShadow: `0 0 10px ${TEAL}`, zIndex: 20 }} />;
-        })}
-      </Sequence>
+    {/* Progress bar */}
+    <Sequence from={0} durationInFrames={TOTAL}>
+      {React.createElement(() => {
+        const frame = useCurrentFrame();
+        return <div style={{ position: "absolute", bottom: 0, left: 0, height: 3, zIndex: 20,
+          width: `${(frame / TOTAL) * 100}%`,
+          background: `linear-gradient(90deg, ${TEAL}, ${TEAL_L})`,
+          boxShadow: `0 0 10px ${TEAL}` }} />;
+      })}
+    </Sequence>
 
-      {/* Audio — locked to absolute frame positions */}
-      {showAudio && (
-        <>
-          <Sequence from={VO.story.from} durationInFrames={VO.story.dur}>
-            <Audio src={staticFile("segments-final-ad/01-story.mp3")} />
-          </Sequence>
-          <Sequence from={VO.trust.from} durationInFrames={VO.trust.dur}>
-            <Audio src={staticFile("segments-final-ad/02-trust.mp3")} />
-          </Sequence>
-          <Sequence from={VO.listens.from} durationInFrames={VO.listens.dur}>
-            <Audio src={staticFile("segments-final-ad/03-listens.mp3")} />
-          </Sequence>
-          <Sequence from={VO.complete.from} durationInFrames={VO.complete.dur}>
-            <Audio src={staticFile("segments-final-ad/04-complete.mp3")} />
-          </Sequence>
-          <Sequence from={VO.seconds.from} durationInFrames={VO.seconds.dur}>
-            <Audio src={staticFile("segments-final-ad/05-seconds.mp3")} />
-          </Sequence>
-          <Sequence from={VO.nodelay.from} durationInFrames={VO.nodelay.dur}>
-            <Audio src={staticFile("segments-final-ad/06-nodelay.mp3")} />
-          </Sequence>
-          <Sequence from={VO.brand.from} durationInFrames={VO.brand.dur}>
-            <Audio src={staticFile("segments-final-ad/07-brand.mp3")} />
-          </Sequence>
-          <Sequence from={VO.tagline.from} durationInFrames={VO.tagline.dur}>
-            <Audio src={staticFile("segments-final-ad/08-tagline.mp3")} />
-          </Sequence>
-          <Sequence from={VO.palmit.from} durationInFrames={VO.palmit.dur}>
-            <Audio src={staticFile("segments-final-ad/09-palmit.mp3")} />
-          </Sequence>
-        </>
-      )}
-    </AbsoluteFill>
-  );
-};
+    {/* Audio — locked to absolute frame positions */}
+    {showAudio && (
+      <>
+        <Sequence from={VO.story.from} durationInFrames={VO.story.dur}>
+          <Audio src={staticFile("segments-final-ad/01-story.mp3")} />
+        </Sequence>
+        <Sequence from={VO.trust.from} durationInFrames={VO.trust.dur}>
+          <Audio src={staticFile("segments-final-ad/02-trust.mp3")} />
+        </Sequence>
+        <Sequence from={VO.listens.from} durationInFrames={VO.listens.dur}>
+          <Audio src={staticFile("segments-final-ad/03-listens.mp3")} />
+        </Sequence>
+        <Sequence from={VO.complete.from} durationInFrames={VO.complete.dur}>
+          <Audio src={staticFile("segments-final-ad/04-complete.mp3")} />
+        </Sequence>
+        <Sequence from={VO.seconds.from} durationInFrames={VO.seconds.dur}>
+          <Audio src={staticFile("segments-final-ad/05-seconds.mp3")} />
+        </Sequence>
+        <Sequence from={VO.nodelay.from} durationInFrames={VO.nodelay.dur}>
+          <Audio src={staticFile("segments-final-ad/06-nodelay.mp3")} />
+        </Sequence>
+        <Sequence from={VO.brand.from} durationInFrames={VO.brand.dur}>
+          <Audio src={staticFile("segments-final-ad/07-brand.mp3")} />
+        </Sequence>
+        <Sequence from={VO.tagline.from} durationInFrames={VO.tagline.dur}>
+          <Audio src={staticFile("segments-final-ad/08-tagline.mp3")} />
+        </Sequence>
+        <Sequence from={VO.palmit.from} durationInFrames={VO.palmit.dur}>
+          <Audio src={staticFile("segments-final-ad/09-palmit.mp3")} />
+        </Sequence>
+      </>
+    )}
+  </AbsoluteFill>
+);
