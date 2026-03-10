@@ -240,39 +240,97 @@ AGENCY_SUBJECT_HOOKS = [
     "This is changing how agencies handle assessments",
     "Saw you're in {state} — thought this might help",
     "30 seconds to see why agencies are ditching paper",
-    "A question for the team at your agency",
+    "Three steps to zero paperwork",
 ]
 
 SITE_URL = "https://palmcareai.com"
+IMG = f"{SITE_URL}/screenshots"
 
+_S = "border-radius:8px;border:1px solid #e5e7eb;"
 
-def _build_agency_html(provider_name: str, city: str, state: str) -> tuple[str, str]:
-    """Generate a clean, personal-looking email for an agency lead with app screenshots."""
-    import hashlib
-    idx = int(hashlib.md5(provider_name.encode()).hexdigest(), 16) % len(AGENCY_SUBJECT_HOOKS)
-    subject = AGENCY_SUBJECT_HOOKS[idx].format(state=state or "your state")
-
-    body = f"""\
-<html>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:#ffffff;">
-<div style="max-width:580px;margin:0 auto;padding:20px;">
-
+AGENCY_TEMPLATES = [
+    # Template 0: Three Steps pitch (mirrors landing page "How It Works")
+    # Shows: mobile recording + contract view screenshots
+    lambda city, state: f"""\
 <p style="font-size:15px;color:#1a1a1a;line-height:1.7;margin:0 0 16px;">Hi there,</p>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">I'm Muse — I built PalmCare AI specifically for home care agencies like yours in {city or "your area"}, {state}.</p>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">The short version: launch our app, hit the <strong>Palm It</strong> button to start an assessment while with a client, and our AI automatically generates the care plan, contract, billables, and compliance docs. The whole process takes about 60 seconds.</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;">Here's how it works — three steps, zero paperwork:</p>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Agencies using PalmCare are saving 15+ hours a week on documentation. It handles all 50 states' regulations, supports Medicaid, Medicare, and private pay, and the AI cost per assessment is under $0.40.</p>
+<table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
+<tr><td style="padding:8px 0;font-size:15px;color:#333;line-height:1.5;"><strong style="color:#0d9488;">1. Open the app</strong> — Your caregiver launches PalmCare and hits the <strong>Palm It</strong> button to start an assessment while with a client.</td></tr>
+<tr><td style="padding:8px 0;font-size:15px;color:#333;line-height:1.5;"><strong style="color:#0d9488;">2. AI transcribes everything</strong> — The conversation is transcribed in real time. Speakers are identified. Every care need and billable item is extracted automatically.</td></tr>
+<tr><td style="padding:8px 0;font-size:15px;color:#333;line-height:1.5;"><strong style="color:#0d9488;">3. Contract is ready</strong> — A complete assessment, care plan, and service agreement is generated — ready to review, send, and sign.</td></tr>
+</table>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">I'd love to show you a quick demo — 15 minutes, no commitment. You can book one directly on our site:</p>
+<table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
+<tr>
+<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/recording_screen.png" width="280" style="width:100%;{_S}" alt="Voice Assessment" /></a></td>
+<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/contract_view.png" width="280" style="width:100%;{_S}" alt="AI-Generated Contract" /></a></td>
+</tr>
+<tr><td colspan="2" style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Record an assessment → AI generates the contract</td></tr>
+</table>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">It handles Medicaid, Medicare, and private pay across all 50 states. The AI cost per assessment is under $0.40 — and agencies are saving 15+ hours a week on documentation.</p>""",
+
+    # Template 1: Problem/Solution pitch (mirrors landing page features)
+    # Shows: CRM dashboard + client management screenshots
+    lambda city, state: f"""\
+<p style="font-size:15px;color:#1a1a1a;line-height:1.7;margin:0 0 16px;">Hi there,</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">I'm Muse, founder of PalmCare AI. I'm reaching out because I know agencies in {city or "your area"}, {state} are dealing with the same problem we built our platform to solve.</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">40–60% of your staff's time is going to documentation, billing, and manual paperwork. Assessment to onboarding is slow, manual, and inconsistent. Your team is probably using 3-5 disconnected tools with no integration between them.</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">PalmCare AI replaces all of that with one platform. Launch the app, hit <strong>Palm It</strong>, and AI handles the rest — voice transcription, speaker identification, care plan generation, contract creation, and billing extraction. All in about 60 seconds.</p>
+
+<table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
+<tr><td style="padding-bottom:6px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_dashboard.png" width="580" style="width:100%;{_S}" alt="Agency Operations Dashboard" /></a></td></tr>
+<tr><td style="font-size:11px;color:#999;text-align:center;padding-bottom:8px;">Real-time agency dashboard — clients, assessments, revenue at a glance</td></tr>
+<tr>
+<td><table cellpadding="0" cellspacing="0" width="100%"><tr>
+<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_clients.png" width="280" style="width:100%;{_S}" alt="Client CRM" /></a></td>
+<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_pipeline.png" width="280" style="width:100%;{_S}" alt="Deals Pipeline" /></a></td>
+</tr></table></td>
+</tr>
+<tr><td style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Client CRM &amp; visual pipeline — track every client from first contact through active care</td></tr>
+</table>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Everything you need to run your agency — built for care professionals, not retrofitted from generic software.</p>""",
+
+    # Template 2: Social proof pitch (mirrors testimonials section)
+    # Shows: assessments view + contract preview screenshots
+    lambda city, state: f"""\
+<p style="font-size:15px;color:#1a1a1a;line-height:1.7;margin:0 0 16px;">Hi there,</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">I'm Muse from PalmCare AI. Agencies across the country are switching from paper-based workflows to our AI-powered platform, and I thought your team in {city or "your area"}, {state} might want to see why.</p>
+
+<p style="font-size:14px;color:#555;line-height:1.6;margin:0 0 4px;padding:12px 16px;background:#f8fafb;border-left:3px solid #0d9488;border-radius:0 8px 8px 0;"><em>"PalmCare AI cut our contract generation time from hours to minutes. We went from 3 hours of paperwork per client to under 10 minutes."</em></p>
+<p style="font-size:13px;color:#888;margin:0 0 16px;padding-left:16px;">— Sarah Mitchell, Agency Owner, Sunrise Home Care TX</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Here's the short version: your caregiver opens our app, hits <strong>Palm It</strong> to start an assessment, and the AI automatically generates the care plan, contract, billables, and compliance docs. One tap — AI does the rest.</p>
+
+<table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
+<tr>
+<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_assessments.png" width="280" style="width:100%;{_S}" alt="Assessment Tracking" /></a></td>
+<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_contract.png" width="280" style="width:100%;{_S}" alt="Contract Preview" /></a></td>
+</tr>
+<tr><td colspan="2" style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Assessment tracking &amp; AI-generated contracts — all in one platform</td></tr>
+</table>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">We support Medicaid, Medicare, and private pay across all 50 states. Agencies are seeing 95% less time on documentation and 80% fewer billing errors.</p>""",
+]
+
+AGENCY_FOOTER = f"""\
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">I'd love to show you a quick demo — 15 minutes, no commitment:</p>
 
 <p style="margin:0 0 24px;">
 <a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book a Demo</a>
 </p>
 
 <a href="{SITE_URL}/#book-demo" style="text-decoration:none;">
-<img src="{SITE_URL}/screenshots/email/app_interface.png" width="580" style="width:100%;max-width:580px;border-radius:12px;border:1px solid #e5e5e5;margin:0 0 24px;" alt="PalmCare AI — Designed for Care Professionals" />
+<img src="{IMG}/email/app_interface.png" width="580" style="width:100%;max-width:580px;border-radius:12px;border:1px solid #e5e5e5;margin:0 0 24px;" alt="PalmCare AI — Designed for Care Professionals" />
 </a>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;">Visit our website @ <a href="{SITE_URL}" style="color:#0d9488;text-decoration:none;">palmcareai.com</a></p>
@@ -280,8 +338,25 @@ def _build_agency_html(provider_name: str, city: str, state: str) -> tuple[str, 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 4px;">Warm regards,</p>
 <p style="font-size:15px;color:#1a1a1a;line-height:1.5;margin:0 0 4px;"><strong>Muse Ibrahim</strong></p>
 <p style="font-size:13px;color:#888;line-height:1.5;margin:0;">Founder &amp; CEO, Palm Technologies Inc.<br/>
-<a href="mailto:sales@palmtai.com" style="color:#0d9488;text-decoration:none;">sales@palmtai.com</a></p>
+<a href="mailto:sales@palmtai.com" style="color:#0d9488;text-decoration:none;">sales@palmtai.com</a></p>"""
 
+
+def _build_agency_html(provider_name: str, city: str, state: str) -> tuple[str, str]:
+    """Generate a clean, personal email with rotating templates drawn from landing page messaging."""
+    import hashlib
+    h = int(hashlib.md5(provider_name.encode()).hexdigest(), 16)
+    subj_idx = h % len(AGENCY_SUBJECT_HOOKS)
+    tmpl_idx = h % len(AGENCY_TEMPLATES)
+    subject = AGENCY_SUBJECT_HOOKS[subj_idx].format(state=state or "your state")
+
+    body_content = AGENCY_TEMPLATES[tmpl_idx](city, state)
+
+    body = f"""\
+<html>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:#ffffff;">
+<div style="max-width:580px;margin:0 auto;padding:20px;">
+{body_content}
+{AGENCY_FOOTER}
 </div>
 </body>
 </html>"""
