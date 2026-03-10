@@ -296,10 +296,12 @@ def _build_agency_html(provider_name: str, city: str, state: str) -> tuple[str, 
 <a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book a Demo</a>
 </p>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 4px;">Best,</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;">Visit our website @ <a href="{SITE_URL}" style="color:#0d9488;text-decoration:none;">palmcareai.com</a></p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 4px;">Warm regards,</p>
 <p style="font-size:15px;color:#1a1a1a;line-height:1.5;margin:0 0 4px;"><strong>Muse Ibrahim</strong></p>
-<p style="font-size:13px;color:#888;line-height:1.5;margin:0;">Founder & CEO, Palm Technologies<br/>
-<a href="mailto:sales@palmtai.com" style="color:#0d9488;text-decoration:none;">sales@palmtai.com</a> · <a href="{SITE_URL}" style="color:#0d9488;text-decoration:none;">palmcareai.com</a></p>
+<p style="font-size:13px;color:#888;line-height:1.5;margin:0;">Founder &amp; CEO, Palm Technologies Inc.<br/>
+213-569-7693 | <a href="mailto:invest@palmtai.com" style="color:#0d9488;text-decoration:none;">invest@palmtai.com</a></p>
 
 </div>
 </body>
