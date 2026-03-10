@@ -162,6 +162,57 @@ class WeeklySummaryResponse(BaseModel):
     week_end: str
 
 
+class AgencyDraftItem(BaseModel):
+    id: UUID
+    provider_name: str
+    state: Optional[str]
+    city: Optional[str]
+    contact_email: Optional[str]
+    contact_name: Optional[str]
+    phone: Optional[str]
+    status: str
+    priority: str
+    email_send_count: int
+    last_email_sent_at: Optional[datetime]
+    draft_subject: str
+    draft_body: str
+    is_html: bool
+
+
+class InvestorDraftItem(BaseModel):
+    id: UUID
+    fund_name: str
+    investor_type: Optional[str]
+    contact_name: Optional[str]
+    contact_email: Optional[str]
+    location: Optional[str]
+    focus_stages: list
+    check_size_display: Optional[str]
+    status: str
+    priority: str
+    email_send_count: int
+    last_email_sent_at: Optional[datetime]
+    draft_subject: str
+    draft_body: str
+    is_html: bool
+
+
+class WeeklyDayPlan(BaseModel):
+    date: str
+    day_name: str
+    is_today: bool
+    agency_drafts: List[AgencyDraftItem]
+    investor_drafts: List[InvestorDraftItem]
+    calls: List[AgencyCallItem]
+
+
+class WeeklyPlanResponse(BaseModel):
+    days: List[WeeklyDayPlan]
+    stats: OutreachStats
+    week_start: str
+    week_end: str
+
+
 # ─── Helpers ───
 
 def _today_start() -> datetime:
@@ -423,6 +474,174 @@ def get_daily_plan(
         investor_emails=investor_emails,
         stats=stats,
         week_progress=week_progress,
+    )
+
+
+@router.get("/weekly-plan", response_model=WeeklyPlanResponse)
+def get_weekly_plan(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_ceo),
+):
+    """Return the full Mon–Fri weekly plan with pre-generated email drafts."""
+    today = datetime.now(timezone.utc).date()
+    week_start, week_end = _week_bounds()
+
+    agency_q = (
+        db.query(SalesLead)
+        .filter(
+            SalesLead.contact_email.isnot(None),
+            SalesLead.contact_email != "",
+            SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+        )
+        .order_by(PRIORITY_ORDER, SalesLead.created_at)
+        .limit(250)
+        .all()
+    )
+
+    investor_q = (
+        db.query(Investor)
+        .filter(
+            Investor.contact_email.isnot(None),
+            Investor.contact_email != "",
+            Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+        )
+        .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+        .limit(50)
+        .all()
+    )
+
+    call_q = (
+        db.query(SalesLead)
+        .filter(
+            (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
+            SalesLead.phone.isnot(None),
+            SalesLead.phone != "",
+            SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
+        )
+        .order_by(PRIORITY_ORDER)
+        .limit(50)
+        .all()
+    )
+
+    days: List[WeeklyDayPlan] = []
+    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+    monday = (week_start).date()
+
+    for i, day_name in enumerate(day_names):
+        day_date = monday + timedelta(days=i)
+
+        a_start = i * 50
+        a_end = a_start + 50
+        day_agencies = agency_q[a_start:a_end]
+
+        inv_start = i * 10
+        inv_end = inv_start + 10
+        day_investors = investor_q[inv_start:inv_end]
+
+        c_start = i * 10
+        c_end = c_start + 10
+        day_calls = call_q[c_start:c_end]
+
+        agency_drafts = []
+        for lead in day_agencies:
+            subj, body = _build_agency_html(
+                lead.provider_name,
+                lead.city or "your area",
+                lead.state or "US",
+            )
+            agency_drafts.append(AgencyDraftItem(
+                id=lead.id, provider_name=lead.provider_name,
+                state=lead.state, city=lead.city,
+                contact_email=lead.contact_email, contact_name=lead.contact_name,
+                phone=lead.phone, status=lead.status, priority=lead.priority,
+                email_send_count=lead.email_send_count or 0,
+                last_email_sent_at=lead.last_email_sent_at,
+                draft_subject=subj, draft_body=body, is_html=True,
+            ))
+
+        investor_drafts = []
+        for inv in day_investors:
+            focus = ", ".join(inv.focus_sectors or []) or "early-stage technology"
+            subj, body = _build_investor_text(
+                inv.fund_name,
+                inv.contact_name or "",
+                focus,
+            )
+            investor_drafts.append(InvestorDraftItem(
+                id=inv.id, fund_name=inv.fund_name,
+                investor_type=inv.investor_type,
+                contact_name=inv.contact_name, contact_email=inv.contact_email,
+                location=inv.location, focus_stages=inv.focus_stages or [],
+                check_size_display=inv.check_size_display,
+                status=inv.status, priority=inv.priority,
+                email_send_count=inv.email_send_count or 0,
+                last_email_sent_at=inv.last_email_sent_at,
+                draft_subject=subj, draft_body=body, is_html=False,
+            ))
+
+        calls = [
+            AgencyCallItem(
+                id=l.id, provider_name=l.provider_name, state=l.state,
+                city=l.city, phone=l.phone, status=l.status,
+                priority=l.priority, is_contacted=l.is_contacted or False,
+                notes=l.notes,
+            )
+            for l in day_calls
+        ]
+
+        days.append(WeeklyDayPlan(
+            date=day_date.isoformat(),
+            day_name=day_name,
+            is_today=(day_date == today),
+            agency_drafts=agency_drafts,
+            investor_drafts=investor_drafts,
+            calls=calls,
+        ))
+
+    total_leads = db.query(func.count(SalesLead.id)).scalar() or 0
+    leads_with_email = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+    ).scalar() or 0
+    leads_contacted = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.is_contacted == True,  # noqa: E712
+    ).scalar() or 0
+    leads_remaining_email = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+        SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+    ).scalar() or 0
+    leads_no_email = db.query(func.count(SalesLead.id)).filter(
+        (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
+    ).scalar() or 0
+    calls_remaining = db.query(func.count(SalesLead.id)).filter(
+        (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
+        SalesLead.phone.isnot(None), SalesLead.phone != "",
+        SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
+    ).scalar() or 0
+    total_investors = db.query(func.count(Investor.id)).scalar() or 0
+    investors_with_email = db.query(func.count(Investor.id)).filter(
+        Investor.contact_email.isnot(None), Investor.contact_email != "",
+    ).scalar() or 0
+    investors_contacted = db.query(func.count(Investor.id)).filter(
+        Investor.email_send_count > 0,
+    ).scalar() or 0
+    investors_remaining = db.query(func.count(Investor.id)).filter(
+        Investor.contact_email.isnot(None), Investor.contact_email != "",
+        Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+    ).scalar() or 0
+
+    stats = OutreachStats(
+        total_leads=total_leads, leads_with_email=leads_with_email,
+        leads_contacted=leads_contacted, leads_remaining_email=leads_remaining_email,
+        leads_no_email=leads_no_email, calls_remaining=calls_remaining,
+        total_investors=total_investors, investors_with_email=investors_with_email,
+        investors_contacted=investors_contacted, investors_remaining=investors_remaining,
+    )
+
+    return WeeklyPlanResponse(
+        days=days,
+        stats=stats,
+        week_start=week_start.strftime("%Y-%m-%d"),
+        week_end=week_end.strftime("%Y-%m-%d"),
     )
 
 

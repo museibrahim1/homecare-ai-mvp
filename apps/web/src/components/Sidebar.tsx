@@ -256,24 +256,15 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav ref={navRef} data-tour="sidebar-nav" className="flex-1 px-2 py-2 overflow-y-auto overflow-x-hidden min-h-0">
-          <CollapsibleSection title="Overview" items={salesNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={true} />
-          <CollapsibleSection title="Clients" items={clientsNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={true} />
-          <CollapsibleSection title="Communication" items={communicationNavItems} pathname={pathname} onNavigate={handleNavigate} />
-          <CollapsibleSection title="Resources" items={resourcesNavItems} pathname={pathname} onNavigate={handleNavigate} />
-          <CollapsibleSection title="Administration" items={agencyAdminNavItems} pathname={pathname} onNavigate={handleNavigate} />
-
           {isAdmin && (
             <>
               <div className="mb-1">
-                <button
-                  onClick={() => {}}
-                  className="flex items-center justify-between w-full px-3 py-2"
-                >
+                <div className="flex items-center justify-between w-full px-3 py-2">
                   <span className="text-[10px] font-semibold text-primary-500 uppercase tracking-widest flex items-center gap-1.5">
                     <Rocket className="w-3 h-3" />
                     CEO Workspace
                   </span>
-                </button>
+                </div>
                 <div className="space-y-px pb-2">
                   {adminCoreNavItems.map((item) => {
                     const isActive = pathname === item.href || 
@@ -282,8 +273,18 @@ export default function Sidebar() {
                   })}
                 </div>
               </div>
-              <CollapsibleSection title="System Admin" items={adminSystemNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
+              <div className="mx-3 mb-2 border-t border-slate-200" />
             </>
+          )}
+
+          <CollapsibleSection title="Overview" items={salesNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={!isAdmin} />
+          <CollapsibleSection title="Clients" items={clientsNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={!isAdmin} />
+          <CollapsibleSection title="Communication" items={communicationNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
+          <CollapsibleSection title="Resources" items={resourcesNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
+          <CollapsibleSection title="Administration" items={agencyAdminNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
+
+          {isAdmin && (
+            <CollapsibleSection title="System Admin" items={adminSystemNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
           )}
         </nav>
 
