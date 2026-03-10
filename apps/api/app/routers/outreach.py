@@ -572,12 +572,26 @@ def get_daily_plan(
 
 EMAILS_PER_DAY = 50
 INVESTORS_PER_DAY = 10
-CALLS_PER_DAY = 10
+CALLS_PER_DAY = 25
 FULL_WORK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]
 
 # Week 0 (launched Mar 10 2026) starts on Tuesday since Monday was off.
 # All subsequent weeks are normal Mon-Fri.
 LAUNCH_DATE = date(2026, 3, 10)
+
+# Timezone regions for call ordering: East Coast first (morning), West Coast last (afternoon)
+EASTERN_STATES = {"CT", "DC", "DE", "FL", "GA", "MA", "MD", "ME", "NC", "NH", "NJ", "NY", "OH", "PA", "RI", "SC", "VA", "VT", "WV"}
+CENTRAL_STATES = {"AL", "AR", "IA", "IL", "IN", "KS", "KY", "LA", "MI", "MN", "MO", "MS", "ND", "NE", "OK", "SD", "TN", "TX", "WI"}
+MOUNTAIN_STATES = {"AZ", "CO", "ID", "MT", "NM", "UT", "WY"}
+PACIFIC_STATES = {"AK", "CA", "HI", "NV", "OR", "WA"}
+
+TZ_ORDER = case(
+    (SalesLead.state.in_(EASTERN_STATES), 1),
+    (SalesLead.state.in_(CENTRAL_STATES), 2),
+    (SalesLead.state.in_(MOUNTAIN_STATES), 3),
+    (SalesLead.state.in_(PACIFIC_STATES), 4),
+    else_=2,
+)
 
 
 def _week_work_days(week_offset: int) -> list[tuple[str, date]]:
@@ -640,15 +654,16 @@ def get_weekly_plan(
         .all()
     )
 
+    # STABLE call pool: include ALL leads with phones (regardless of status).
+    # Day assignment is deterministic — marking a lead as called does NOT shift the list.
     all_calls = (
         db.query(SalesLead)
         .filter(
             (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
-            SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
         )
-        .order_by(PRIORITY_ORDER)
+        .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
         .all()
     )
 
@@ -826,6 +841,79 @@ def mark_called(
     db.commit()
     db.refresh(lead)
     return {"ok": True, "lead_id": str(lead.id), "status": lead.status}
+
+
+class BulkMarkCalledItem(BaseModel):
+    phone: str
+    notes: Optional[str] = None
+    follow_up: Optional[str] = None
+    contact_name: Optional[str] = None
+    contact_email: Optional[str] = None
+
+
+@router.post("/cron/bulk-mark-called")
+def cron_bulk_mark_called(
+    request: Request,
+    items: List[BulkMarkCalledItem],
+    db: Session = Depends(get_db),
+):
+    """Bulk mark leads as called via internal key. Also updates contact info if provided."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+    now = datetime.now(timezone.utc)
+    results = []
+    for item in items:
+        phone_clean = item.phone.strip().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
+        lead = db.query(SalesLead).filter(
+            func.replace(func.replace(func.replace(func.replace(
+                SalesLead.phone, " ", ""), "-", ""), "(", ""), ")", "") == phone_clean
+        ).first()
+
+        if not lead:
+            results.append({"phone": item.phone, "status": "not_found"})
+            continue
+
+        lead.is_contacted = True
+        lead.status = "contacted"
+        lead.updated_at = now
+
+        if item.contact_name:
+            lead.contact_name = item.contact_name
+        if item.contact_email:
+            lead.contact_email = item.contact_email
+
+        log_entry = {
+            "action": "called",
+            "timestamp": now.isoformat(),
+            "notes": item.notes or "",
+            "by": "system/bulk",
+        }
+        activity = list(lead.activity_log or [])
+        activity.append(log_entry)
+        lead.activity_log = activity
+
+        if item.notes:
+            existing = lead.notes or ""
+            lead.notes = f"{existing}\n[{now.strftime('%Y-%m-%d %H:%M')}] Call: {item.notes}".strip()
+
+        if item.follow_up:
+            existing = lead.notes or ""
+            lead.notes = f"{existing}\n[{now.strftime('%Y-%m-%d %H:%M')}] Follow-up: {item.follow_up}".strip()
+
+        results.append({
+            "phone": item.phone,
+            "status": "marked",
+            "provider_name": lead.provider_name,
+            "lead_id": str(lead.id),
+        })
+
+    db.commit()
+    marked = sum(1 for r in results if r["status"] == "marked")
+    return {"marked": marked, "not_found": len(results) - marked, "results": results}
 
 
 @router.post("/generate-draft", response_model=DraftResponse)
@@ -1062,9 +1150,8 @@ def _get_todays_plan_data(db: Session) -> dict:
             (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
-            SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
         )
-        .order_by(PRIORITY_ORDER)
+        .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
         .all()
     )
     day_calls = calls[global_idx * CALLS_PER_DAY:(global_idx + 1) * CALLS_PER_DAY]
