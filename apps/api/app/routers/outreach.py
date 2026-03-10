@@ -1354,6 +1354,78 @@ def daily_digest_preview(
     }
 
 
+@router.get("/cron/daily-data")
+def cron_daily_data(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Return today's outreach data (calls, agencies, investors) for external use."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+
+    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
+    if not key_valid:
+        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+
+    data = _get_todays_plan_data(db)
+    calls = data["calls"]
+    agencies = data["agencies"]
+    investors = data["investors"]
+
+    return {
+        "date": data["date"],
+        "day_name": data["day_name"],
+        "calls": [
+            {
+                "provider_name": c.provider_name,
+                "phone": c.phone,
+                "city": c.city,
+                "state": c.state,
+                "address": c.address,
+                "zip_code": c.zip_code,
+                "priority": c.priority,
+                "ownership_type": c.ownership_type,
+                "years_in_operation": c.years_in_operation,
+                "star_rating": c.star_rating,
+                "offers_nursing": c.offers_nursing,
+                "offers_pt": c.offers_pt,
+                "offers_ot": c.offers_ot,
+                "offers_speech": c.offers_speech,
+                "offers_aide": c.offers_aide,
+                "offers_social": c.offers_social,
+                "status": c.status,
+                "is_contacted": c.is_contacted,
+            }
+            for c in calls
+        ],
+        "agencies": [
+            {
+                "provider_name": a.provider_name,
+                "city": a.city,
+                "state": a.state,
+                "contact_email": a.contact_email,
+                "contact_name": a.contact_name,
+                "priority": a.priority,
+            }
+            for a in agencies[:15]
+        ],
+        "agency_count": len(agencies),
+        "investors": [
+            {
+                "fund_name": inv.fund_name,
+                "contact_name": inv.contact_name,
+                "contact_email": inv.contact_email,
+                "location": inv.location,
+                "check_size_display": inv.check_size_display,
+                "focus_sectors": inv.focus_sectors or [],
+                "relevance_reason": inv.relevance_reason,
+            }
+            for inv in investors
+        ],
+    }
+
+
 @router.post("/cron/daily-digest")
 def cron_daily_digest(
     request: Request,
