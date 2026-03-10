@@ -692,21 +692,24 @@ def get_weekly_plan(
         inv_start = global_idx * INVESTORS_PER_DAY
         day_investors = all_investors[inv_start:inv_start + INVESTORS_PER_DAY]
 
-        if day_date <= today:
-            # Past/today: show leads ACTUALLY contacted on this date
-            day_start = datetime(day_date.year, day_date.month, day_date.day, tzinfo=timezone.utc)
-            day_end = day_start + timedelta(days=1)
-            day_calls = (
+        if day_date == today:
+            # Today: show contacted leads first, then fill with uncalled
+            contacted = (
                 db.query(SalesLead)
                 .filter(
                     SalesLead.is_contacted == True,  # noqa: E712
-                    SalesLead.updated_at >= day_start,
-                    SalesLead.updated_at < day_end,
                     (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
+                    SalesLead.phone.isnot(None),
+                    SalesLead.phone != "",
                 )
-                .order_by(SalesLead.updated_at)
+                .order_by(SalesLead.updated_at.desc())
                 .all()
             )
+            remaining = max(CALLS_PER_DAY - len(contacted), 0)
+            day_calls = contacted + uncalled_pool[:remaining]
+        elif day_date < today:
+            # Past days: show contacted leads from before today
+            day_calls = []
         else:
             # Future: next batch from uncalled pool
             c_start = future_call_counter * CALLS_PER_DAY
@@ -1162,18 +1165,16 @@ def _get_todays_plan_data(db: Session) -> dict:
 
     global_idx = global_day_offset + today_idx
 
-    # Show leads actually contacted today + remaining uncalled from algorithm
-    day_start = datetime(today.year, today.month, today.day, tzinfo=timezone.utc)
-    day_end = day_start + timedelta(days=1)
-    contacted_today = (
+    # Show contacted leads first, then fill remaining slots with uncalled
+    contacted = (
         db.query(SalesLead)
         .filter(
             SalesLead.is_contacted == True,  # noqa: E712
-            SalesLead.updated_at >= day_start,
-            SalesLead.updated_at < day_end,
             (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
+            SalesLead.phone.isnot(None),
+            SalesLead.phone != "",
         )
-        .order_by(SalesLead.updated_at)
+        .order_by(SalesLead.updated_at.desc())
         .all()
     )
     uncalled = (
@@ -1187,8 +1188,8 @@ def _get_todays_plan_data(db: Session) -> dict:
         .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
         .all()
     )
-    remaining_slots = max(CALLS_PER_DAY - len(contacted_today), 0)
-    day_calls = contacted_today + uncalled[:remaining_slots]
+    remaining_slots = max(CALLS_PER_DAY - len(contacted), 0)
+    day_calls = contacted + uncalled[:remaining_slots]
 
     agencies = (
         db.query(SalesLead)
