@@ -67,6 +67,7 @@ class DemoBookingRequest(BaseModel):
     services: Optional[list[str]] = None
     estimated_clients: Optional[str] = None
     current_software: Optional[str] = None
+    referral_source: Optional[str] = None  # How did you hear about us?
 
 
 class DemoBookingResponse(BaseModel):
@@ -277,7 +278,7 @@ async def book_demo(
             state=booking.state or "NA",
             source="demo_request",
             status="new",
-            notes=f"Role: {booking.role or 'N/A'}\nServices: {', '.join(booking.services or [])}\nClients: {booking.estimated_clients or 'N/A'}\nCurrent Software: {booking.current_software or 'N/A'}",
+            notes=f"Role: {booking.role or 'N/A'}\nServices: {', '.join(booking.services or [])}\nClients: {booking.estimated_clients or 'N/A'}\nCurrent Software: {booking.current_software or 'N/A'}\nHeard About Us: {booking.referral_source or 'N/A'}",
         )
         db.add(lead)
         db.commit()
@@ -404,6 +405,10 @@ async def book_demo(
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Clients</td>
                             <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.estimated_clients or 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Heard About Us</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.referral_source or 'N/A'}</td>
                         </tr>
                         {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' ET</td></tr>' if has_schedule else ''}
                         {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Meet Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="' + (meeting_link or '') + '" style="color: #0d9488; text-decoration: none;">' + (meeting_link or '') + '</a></td></tr>' if meeting_link else ''}

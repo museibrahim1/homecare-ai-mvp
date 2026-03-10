@@ -9,6 +9,7 @@ import {
   CheckCircle2, Edit3,
   DollarSign, StickyNote,
   Sun, Coffee, Moon,
+  ChevronDown, ChevronUp, FileText,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -466,14 +467,17 @@ export default function CommandCenterPage() {
             />
           )}
           {activeTab === 'calls' && (
-            <CallsTable
-              rows={plan?.calls || []}
-              statuses={callStatuses}
-              notes={callNotes}
-              loading={loading}
-              onMarkCalled={markCalled}
-              onNotesChange={(id, val) => setCallNotes(prev => ({ ...prev, [id]: val }))}
-            />
+            <>
+              <PhoneScriptsPanel />
+              <CallsTable
+                rows={plan?.calls || []}
+                statuses={callStatuses}
+                notes={callNotes}
+                loading={loading}
+                onMarkCalled={markCalled}
+                onNotesChange={(id, val) => setCallNotes(prev => ({ ...prev, [id]: val }))}
+              />
+            </>
           )}
           {activeTab === 'investors' && (
             <InvestorTable
@@ -686,6 +690,118 @@ function AgencyTable({
 }
 
 // ── Calls Table ──────────────────────────────────────────────────────
+
+// ── Phone Scripts Panel ──────────────────────────────────────────────
+
+const PHONE_SCRIPTS = [
+  {
+    id: 'cold',
+    title: 'Cold Call — First Contact',
+    steps: [
+      { label: 'Intro', text: `"Hi, this is Muse Ibrahim from PalmCare AI. I'm reaching out to home care agencies in [STATE] — is this [AGENCY NAME]?"` },
+      { label: 'Hook', text: `"We built an AI platform that lets your staff record client assessments on their phone and automatically generates compliant care plans, contracts, and billing — saving agencies 15+ hours a week on paperwork."` },
+      { label: 'Qualify', text: `"How many clients are you currently managing? And what software are you using for your documentation right now?"` },
+      { label: 'Pain Point', text: `"A lot of agencies we work with were spending hours on manual intake forms and compliance docs. Are you running into similar challenges?"` },
+      { label: 'Offer', text: `"I'd love to show you a quick 30-minute demo — no commitment. You'll see exactly how it works with a real assessment recording. Would [DAY] at [TIME] work for you?"` },
+      { label: 'Collect Info', text: `"Great! Let me grab your info — what's the best email to send the calendar invite to? And who else on your team should I include?"` },
+      { label: 'Close', text: `"Perfect. I'll send that over right now. Looking forward to showing you what PalmCare can do for [AGENCY NAME]. Have a great day!"` },
+    ],
+  },
+  {
+    id: 'warm',
+    title: 'Warm Follow-Up — After Email',
+    steps: [
+      { label: 'Intro', text: `"Hi, this is Muse from PalmCare AI. I sent over an email earlier this week about our AI-powered documentation platform for home care — did you get a chance to take a look?"` },
+      { label: 'Re-hook', text: `"No worries if not — the quick version is we help agencies like yours cut documentation time by 80% using voice AI. Your staff just records the assessment on their phone and our system handles the rest — care plans, contracts, billing codes, all compliant."` },
+      { label: 'Social Proof', text: `"We're already working with agencies across [X] states and our cost per assessment is under 40 cents. Agencies tell us it's a game-changer for their workflow."` },
+      { label: 'Ask', text: `"Would you be open to a quick 30-minute demo this week? I can walk you through exactly how it works with your type of services."` },
+      { label: 'Handle Objection — Too Busy', text: `"Totally understand — that's actually why agencies love it. It frees up so much time. Even 15 minutes would be enough to show you the value."` },
+      { label: 'Handle Objection — Already Have Software', text: `"That's great — we actually integrate alongside existing systems. Most agencies find PalmCare handles the clinical documentation and intake side much faster than what they're currently using."` },
+      { label: 'Close', text: `"Let me send you a quick calendar link — what's the best email and time for you?"` },
+    ],
+  },
+  {
+    id: 'demo',
+    title: 'Demo Booking — Schedule Confirmation',
+    steps: [
+      { label: 'Intro', text: `"Hi [NAME], this is Muse from PalmCare AI. I'm calling to confirm your demo scheduled for [DATE] at [TIME] — does that still work for you?"` },
+      { label: 'Set Expectations', text: `"Great! The demo will be about 30 minutes. I'll walk you through a live assessment recording, show you how contracts and care plans are generated automatically, and answer any questions."` },
+      { label: 'Prep Question', text: `"To make the demo most relevant for you — what type of services does your agency primarily provide? And roughly how many clients are you managing?"` },
+      { label: 'Decision Makers', text: `"Will anyone else from your team be joining? It's really helpful if your administrator or clinical director can see it too."` },
+      { label: 'Tech Check', text: `"You'll get a Google Meet link in your email — just make sure you have a decent internet connection and you're good to go."` },
+      { label: 'Close', text: `"Awesome — I'm looking forward to it. If anything comes up, just reply to the email or call me back at this number. See you on [DATE]!"` },
+    ],
+  },
+  {
+    id: 'data',
+    title: 'Data Collection Checklist',
+    steps: [
+      { label: 'Company Name', text: `Confirm the full legal name of the agency.` },
+      { label: 'Contact Info', text: `Full name, title/role, email, direct phone number.` },
+      { label: 'State & City', text: `Where they operate — ask if they serve multiple states.` },
+      { label: 'Services', text: `Hospice, IDD, Non-Skilled, Skilled Nursing, Personal Care, Companion Care?` },
+      { label: 'Client Count', text: `"Roughly how many active clients do you have right now?" (1-10, 11-25, 26-50, 51-100, 101-250, 250+)` },
+      { label: 'Current Software', text: `"What are you using for documentation/scheduling today?" (AxisCare, ClearCare, Alora, HHAeXchange, Axxess, pen & paper, etc.)` },
+      { label: 'Pain Points', text: `"What's your biggest challenge with documentation or compliance right now?"` },
+      { label: 'Decision Timeline', text: `"Are you actively looking for a solution, or just exploring options?"` },
+      { label: 'Budget Authority', text: `"Are you the one who makes software decisions, or is there someone else I should loop in?"` },
+      { label: 'How They Found Us', text: `"Just curious — how did you hear about PalmCare AI?" (Google, LinkedIn, referral, conference, email, phone call)` },
+    ],
+  },
+];
+
+function PhoneScriptsPanel() {
+  const [open, setOpen] = useState(false);
+  const [activeScript, setActiveScript] = useState('cold');
+
+  const script = PHONE_SCRIPTS.find(s => s.id === activeScript) || PHONE_SCRIPTS[0];
+
+  return (
+    <div className="mb-4">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-xl text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <FileText className="w-4 h-4" />
+          Phone Call Scripts & Data Checklist
+        </span>
+        {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+      </button>
+      {open && (
+        <div className="mt-2 border border-slate-200 rounded-xl bg-white overflow-hidden">
+          <div className="flex border-b border-slate-100 overflow-x-auto">
+            {PHONE_SCRIPTS.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setActiveScript(s.id)}
+                className={`px-4 py-2.5 text-xs font-medium whitespace-nowrap transition-colors ${
+                  activeScript === s.id
+                    ? 'text-indigo-700 border-b-2 border-indigo-500 bg-indigo-50/50'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {s.title}
+              </button>
+            ))}
+          </div>
+          <div className="p-4 max-h-96 overflow-y-auto space-y-3">
+            {script.steps.map((step, i) => (
+              <div key={i} className="flex gap-3">
+                <span className="shrink-0 w-24 text-xs font-semibold text-slate-500 uppercase tracking-wide pt-0.5">
+                  {step.label}
+                </span>
+                <p className="text-sm text-slate-700 leading-relaxed">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Calls Table ─────────────────────────────────────────────────────
 
 function CallsTable({
   rows,

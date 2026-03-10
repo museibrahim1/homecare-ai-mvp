@@ -331,6 +331,8 @@ const CLIENT_RANGES = ['1-10', '11-25', '26-50', '51-100', '101-250', '250+'];
 
 const SOFTWARE_OPTIONS = ['None / Pen & Paper', 'AxisCare', 'ClearCare / WellSky', 'Alora', 'HHAeXchange', 'Axxess', 'MatrixCare', 'KanTime', 'Sandata', 'Other'];
 
+const REFERRAL_SOURCES = ['Google Search', 'LinkedIn', 'Facebook', 'Instagram', 'Referral from a Friend/Colleague', 'Industry Conference/Event', 'Email', 'Phone Call', 'Other'];
+
 const DEMO_STEPS = [
   { title: 'Step 1: Record It', description: 'Staff records the client assessment on their phone — one tap to start', duration: 5000 },
   { title: 'Step 2: Transcribe It', description: 'AI transcribes the conversation and identifies who is speaking', duration: 4000 },
@@ -546,7 +548,7 @@ function BookDemoSection() {
   const [form, setForm] = useState({
     email: '', first_name: '', last_name: '', phone: '',
     company_name: '', state: '', role: '', services: [] as string[],
-    estimated_clients: '', current_software: '',
+    estimated_clients: '', current_software: '', referral_source: '',
     date: '', time_slot: '',
   });
 
@@ -604,6 +606,7 @@ function BookDemoSection() {
           current_software: form.current_software,
           date: form.date,
           time_slot: form.time_slot,
+          referral_source: form.referral_source,
         }),
       });
       if (res.ok) {
@@ -655,7 +658,7 @@ function BookDemoSection() {
             )}
           </div>
           <p className="text-dark-500 text-sm mt-4">A confirmation email with the meeting link has been sent to {form.email}</p>
-          <button onClick={() => { setSubmitted(false); setStep(1); setForm({ email: '', first_name: '', last_name: '', phone: '', company_name: '', state: '', role: '', services: [], estimated_clients: '', current_software: '', date: '', time_slot: '' }); }}
+          <button onClick={() => { setSubmitted(false); setStep(1); setForm({ email: '', first_name: '', last_name: '', phone: '', company_name: '', state: '', role: '', services: [], estimated_clients: '', current_software: '', referral_source: '', date: '', time_slot: '' }); }}
             className="text-primary-400 hover:text-primary-300 text-sm font-medium transition mt-4 inline-block">Submit another request</button>
         </div>
         <style jsx>{`
@@ -786,6 +789,14 @@ function BookDemoSection() {
                   className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition appearance-none cursor-pointer">
                   <option value="" className="bg-dark-800">Select software</option>
                   {SOFTWARE_OPTIONS.map(s => <option key={s} value={s} className="bg-dark-800">{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-300 mb-1.5">How did you hear about us?</label>
+                <select value={form.referral_source} onChange={e => setForm({ ...form, referral_source: e.target.value })}
+                  className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition appearance-none cursor-pointer">
+                  <option value="" className="bg-dark-800">Select an option</option>
+                  {REFERRAL_SOURCES.map(s => <option key={s} value={s} className="bg-dark-800">{s}</option>)}
                 </select>
               </div>
               <div className="flex gap-3 mt-2">
