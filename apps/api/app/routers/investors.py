@@ -7,11 +7,12 @@ Only accessible to platform admin accounts (@palmtai.com).
 """
 
 import logging
+import os
 from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, asc, or_
 from pydantic import BaseModel
@@ -459,6 +460,50 @@ def delete_investor(investor_id: UUID, db: Session = Depends(get_db), user: User
     db.delete(inv)
     db.commit()
     return {"ok": True}
+
+
+@router.post("/batch-import")
+def batch_import_investors(
+    request: Request,
+    investors: List[InvestorCreate],
+    db: Session = Depends(get_db),
+):
+    """Batch import investors via internal API key. Skips duplicates by fund_name."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+
+    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
+    if not key_valid:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+    added, skipped = 0, 0
+    results = []
+    for data in investors:
+        existing = db.query(Investor).filter(Investor.fund_name == data.fund_name).first()
+        if existing:
+            skipped += 1
+            results.append({"fund_name": data.fund_name, "status": "skipped", "reason": "already_exists"})
+            continue
+
+        inv = Investor(
+            fund_name=data.fund_name, investor_type=data.investor_type,
+            website=data.website, description=data.description,
+            focus_sectors=data.focus_sectors, focus_stages=data.focus_stages,
+            check_size_min=data.check_size_min, check_size_max=data.check_size_max,
+            check_size_display=data.check_size_display, location=data.location,
+            contact_name=data.contact_name, contact_email=data.contact_email,
+            contact_title=data.contact_title, contact_linkedin=data.contact_linkedin,
+            contact_twitter=data.contact_twitter, relevance_reason=data.relevance_reason,
+            portfolio_companies=data.portfolio_companies, source=data.source,
+            priority=data.priority, notes=data.notes,
+        )
+        db.add(inv)
+        added += 1
+        results.append({"fund_name": data.fund_name, "status": "added"})
+
+    db.commit()
+    return {"added": added, "skipped": skipped, "results": results}
 
 
 @router.post("/bulk-status")
