@@ -727,7 +727,7 @@ function CallsTable({
             </tr>
           ) : (
             rows.map((row) => {
-              const called = callStatuses[row.id] || false;
+              const called = statuses[row.id] || false;
               return (
                 <tr
                   key={row.id}
