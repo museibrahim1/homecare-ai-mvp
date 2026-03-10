@@ -7,12 +7,13 @@ Only accessible to platform admin accounts (@palmtai.com).
 """
 
 import logging
+import os
 import uuid as _uuid
 from datetime import date, datetime, timezone, timedelta
 from typing import Dict, List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import func, case
 from sqlalchemy.orm import Session
@@ -1351,4 +1352,48 @@ def daily_digest_preview(
             }
             for inv in data["investors"]
         ],
+    }
+
+
+@router.post("/cron/daily-digest")
+def cron_daily_digest(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Cron-accessible daily digest. Requires X-Internal-Key header or CRON_SECRET query param."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+
+    if not expected_key or provided_key != expected_key:
+        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+
+    data = _get_todays_plan_data(db)
+
+    if not data["calls"] and not data["agencies"] and not data["investors"]:
+        return {"ok": True, "skipped": True, "reason": "No tasks for today (weekend or no data)"}
+
+    html = _build_daily_digest_html(data)
+
+    day_full = {
+        "Mon": "Monday", "Tue": "Tuesday", "Wed": "Wednesday",
+        "Thu": "Thursday", "Fri": "Friday",
+    }.get(data["day_name"], data["day_name"])
+
+    subject = f"🌴 {day_full} Task List — {len(data['calls'])} Calls, {len(data['agencies'])} Emails, {len(data['investors'])} Investors"
+
+    result = email_service.send_email(
+        to=[CEO_EMAIL, CEO_WORK_EMAIL],
+        subject=subject,
+        html=html,
+        sender="PalmCare AI <onboarding@resend.dev>",
+        reply_to="sales@palmtai.com",
+    )
+
+    return {
+        "ok": result.get("success", False),
+        "subject": subject,
+        "calls": len(data["calls"]),
+        "agency_emails": len(data["agencies"]),
+        "investor_emails": len(data["investors"]),
+        "date": data["date"],
     }
