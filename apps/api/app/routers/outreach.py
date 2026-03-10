@@ -511,7 +511,7 @@ def get_daily_plan(
     calls_remaining = db.query(func.count(SalesLead.id)).filter(
         (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
         SalesLead.phone.isnot(None), SalesLead.phone != "",
-        SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
+        SalesLead.is_contacted != True,  # noqa: E712
     ).scalar() or 0
     total_investors = db.query(func.count(Investor.id)).scalar() or 0
     investors_with_email = db.query(func.count(Investor.id)).filter(
@@ -654,14 +654,14 @@ def get_weekly_plan(
         .all()
     )
 
-    # STABLE call pool: include ALL leads with phones (regardless of status).
-    # Day assignment is deterministic — marking a lead as called does NOT shift the list.
-    all_calls = (
+    # Uncalled leads pool for FUTURE day assignment (timezone-ordered)
+    uncalled_pool = (
         db.query(SalesLead)
         .filter(
             (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
+            SalesLead.is_contacted != True,  # noqa: E712
         )
         .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
         .all()
@@ -670,19 +670,19 @@ def get_weekly_plan(
     import math
     total_days_agencies = math.ceil(len(all_agencies) / EMAILS_PER_DAY) if all_agencies else 1
     total_days_investors = math.ceil(len(all_investors) / INVESTORS_PER_DAY) if all_investors else 1
-    total_days_calls = math.ceil(len(all_calls) / CALLS_PER_DAY) if all_calls else 1
+    total_days_calls = math.ceil(len(uncalled_pool) / CALLS_PER_DAY) if uncalled_pool else 1
     total_days_needed = max(total_days_agencies, total_days_investors, total_days_calls, 1)
 
-    # Calculate total weeks needed (week 0 may have fewer days)
     days_accum = len(_week_work_days(0))
     total_weeks = 1
     while days_accum < total_days_needed:
         total_weeks += 1
-        days_accum += 5  # full Mon-Fri weeks after week 0
+        days_accum += 5
 
     global_day_offset = _cumulative_days_before(week_offset)
 
     days: List[WeeklyDayPlan] = []
+    future_call_counter = 0
     for i, (day_name, day_date) in enumerate(work_days):
         global_idx = global_day_offset + i
 
@@ -692,8 +692,26 @@ def get_weekly_plan(
         inv_start = global_idx * INVESTORS_PER_DAY
         day_investors = all_investors[inv_start:inv_start + INVESTORS_PER_DAY]
 
-        c_start = global_idx * CALLS_PER_DAY
-        day_calls = all_calls[c_start:c_start + CALLS_PER_DAY]
+        if day_date <= today:
+            # Past/today: show leads ACTUALLY contacted on this date
+            day_start = datetime(day_date.year, day_date.month, day_date.day, tzinfo=timezone.utc)
+            day_end = day_start + timedelta(days=1)
+            day_calls = (
+                db.query(SalesLead)
+                .filter(
+                    SalesLead.is_contacted == True,  # noqa: E712
+                    SalesLead.updated_at >= day_start,
+                    SalesLead.updated_at < day_end,
+                    (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
+                )
+                .order_by(SalesLead.updated_at)
+                .all()
+            )
+        else:
+            # Future: next batch from uncalled pool
+            c_start = future_call_counter * CALLS_PER_DAY
+            day_calls = uncalled_pool[c_start:c_start + CALLS_PER_DAY]
+            future_call_counter += 1
 
         agency_drafts = []
         for lead in day_agencies:
@@ -768,7 +786,7 @@ def get_weekly_plan(
     calls_remaining = db.query(func.count(SalesLead.id)).filter(
         (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
         SalesLead.phone.isnot(None), SalesLead.phone != "",
-        SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
+        SalesLead.is_contacted != True,  # noqa: E712
     ).scalar() or 0
     total_investors = db.query(func.count(Investor.id)).scalar() or 0
     investors_with_email = db.query(func.count(Investor.id)).filter(
@@ -1144,17 +1162,33 @@ def _get_todays_plan_data(db: Session) -> dict:
 
     global_idx = global_day_offset + today_idx
 
-    calls = (
+    # Show leads actually contacted today + remaining uncalled from algorithm
+    day_start = datetime(today.year, today.month, today.day, tzinfo=timezone.utc)
+    day_end = day_start + timedelta(days=1)
+    contacted_today = (
+        db.query(SalesLead)
+        .filter(
+            SalesLead.is_contacted == True,  # noqa: E712
+            SalesLead.updated_at >= day_start,
+            SalesLead.updated_at < day_end,
+            (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
+        )
+        .order_by(SalesLead.updated_at)
+        .all()
+    )
+    uncalled = (
         db.query(SalesLead)
         .filter(
             (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
+            SalesLead.is_contacted != True,  # noqa: E712
         )
         .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
         .all()
     )
-    day_calls = calls[global_idx * CALLS_PER_DAY:(global_idx + 1) * CALLS_PER_DAY]
+    remaining_slots = max(CALLS_PER_DAY - len(contacted_today), 0)
+    day_calls = contacted_today + uncalled[:remaining_slots]
 
     agencies = (
         db.query(SalesLead)
