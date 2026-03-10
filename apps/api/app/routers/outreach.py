@@ -572,16 +572,39 @@ def get_daily_plan(
 EMAILS_PER_DAY = 50
 INVESTORS_PER_DAY = 10
 CALLS_PER_DAY = 10
-WORK_DAYS = ["Tue", "Wed", "Thu", "Fri"]  # Tue-Fri schedule
-DAYS_PER_WEEK = len(WORK_DAYS)
+FULL_WORK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+
+# Week 0 (launched Mar 10 2026) starts on Tuesday since Monday was off.
+# All subsequent weeks are normal Mon-Fri.
+LAUNCH_DATE = date(2026, 3, 10)
 
 
-def _week_tuesday(week_offset: int = 0) -> date:
-    """Return the Tuesday of the target week. Offset 0 = this week's Tuesday."""
+def _week_work_days(week_offset: int) -> list[tuple[str, date]]:
+    """Return list of (day_name, date) for working days in the given week."""
     today = datetime.now(timezone.utc).date()
-    days_since_tuesday = (today.weekday() - 1) % 7  # Tuesday = weekday 1
-    this_tuesday = today - timedelta(days=days_since_tuesday)
-    return this_tuesday + timedelta(weeks=week_offset)
+    days_since_monday = today.weekday()
+    this_monday = today - timedelta(days=days_since_monday)
+    target_monday = this_monday + timedelta(weeks=week_offset)
+
+    if week_offset == 0 and target_monday <= LAUNCH_DATE:
+        return [
+            (FULL_WORK_DAYS[i], target_monday + timedelta(days=i))
+            for i in range(5)
+            if (target_monday + timedelta(days=i)) >= LAUNCH_DATE
+        ]
+
+    return [
+        (FULL_WORK_DAYS[i], target_monday + timedelta(days=i))
+        for i in range(5)
+    ]
+
+
+def _cumulative_days_before(week_offset: int) -> int:
+    """Count total working days scheduled before this week."""
+    total = 0
+    for w in range(week_offset):
+        total += len(_week_work_days(w))
+    return total
 
 
 @router.get("/weekly-plan", response_model=WeeklyPlanResponse)
@@ -590,8 +613,9 @@ def get_weekly_plan(
     db: Session = Depends(get_db),
     user: User = Depends(require_ceo),
 ):
-    """Return Tue-Fri weekly plan with pre-generated drafts. Flows across weeks until everyone is reached."""
+    """Return weekly plan with pre-generated drafts. Flows Mon-Fri across weeks until everyone is reached."""
     today = datetime.now(timezone.utc).date()
+    work_days = _week_work_days(week_offset)
 
     all_agencies = (
         db.query(SalesLead)
@@ -632,27 +656,28 @@ def get_weekly_plan(
     total_days_investors = math.ceil(len(all_investors) / INVESTORS_PER_DAY) if all_investors else 1
     total_days_calls = math.ceil(len(all_calls) / CALLS_PER_DAY) if all_calls else 1
     total_days_needed = max(total_days_agencies, total_days_investors, total_days_calls, 1)
-    total_weeks = math.ceil(total_days_needed / DAYS_PER_WEEK)
 
-    global_day_offset = week_offset * DAYS_PER_WEEK
-    tue = _week_tuesday(week_offset)
+    # Calculate total weeks needed (week 0 may have fewer days)
+    days_accum = len(_week_work_days(0))
+    total_weeks = 1
+    while days_accum < total_days_needed:
+        total_weeks += 1
+        days_accum += 5  # full Mon-Fri weeks after week 0
+
+    global_day_offset = _cumulative_days_before(week_offset)
 
     days: List[WeeklyDayPlan] = []
-    for i, day_name in enumerate(WORK_DAYS):
-        day_date = tue + timedelta(days=i)
+    for i, (day_name, day_date) in enumerate(work_days):
         global_idx = global_day_offset + i
 
         a_start = global_idx * EMAILS_PER_DAY
-        a_end = a_start + EMAILS_PER_DAY
-        day_agencies = all_agencies[a_start:a_end]
+        day_agencies = all_agencies[a_start:a_start + EMAILS_PER_DAY]
 
         inv_start = global_idx * INVESTORS_PER_DAY
-        inv_end = inv_start + INVESTORS_PER_DAY
-        day_investors = all_investors[inv_start:inv_end]
+        day_investors = all_investors[inv_start:inv_start + INVESTORS_PER_DAY]
 
         c_start = global_idx * CALLS_PER_DAY
-        c_end = c_start + CALLS_PER_DAY
-        day_calls = all_calls[c_start:c_end]
+        day_calls = all_calls[c_start:c_start + CALLS_PER_DAY]
 
         agency_drafts = []
         for lead in day_agencies:
@@ -750,14 +775,17 @@ def get_weekly_plan(
     )
 
     all_covered = (
-        global_day_offset + DAYS_PER_WEEK >= total_days_needed
+        global_day_offset + len(work_days) >= total_days_needed
     )
+
+    week_start_date = work_days[0][1] if work_days else today
+    week_end_date = work_days[-1][1] if work_days else today
 
     return WeeklyPlanResponse(
         days=days,
         stats=stats,
-        week_start=tue.isoformat(),
-        week_end=(tue + timedelta(days=3)).isoformat(),
+        week_start=week_start_date.isoformat(),
+        week_end=week_end_date.isoformat(),
         week_offset=week_offset,
         total_weeks=total_weeks,
         all_contacts_covered=all_covered,

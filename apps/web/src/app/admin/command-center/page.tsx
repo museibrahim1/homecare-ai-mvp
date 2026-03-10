@@ -366,7 +366,7 @@ export default function CommandCenterPage() {
 
             {/* ── Day Picker ─────────────────────────────────── */}
             {!loading && weeklyPlan && (
-              <div className="grid grid-cols-4 gap-2">
+              <div className={`grid gap-2 ${weeklyPlan.days.length <= 4 ? 'grid-cols-4' : 'grid-cols-5'}`}>
                 {weeklyPlan.days.map((day, idx) => {
                   const daySent = day.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length;
                   const dayInvSent = day.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length;
@@ -1089,18 +1089,18 @@ function mockWeeklyPlan(): WeeklyPlan {
     'Andreessen Horowitz', 'General Catalyst', 'Founders Fund', 'Lux Capital',
     'NEA', 'Khosla Ventures', 'SignalFire', 'First Round', 'Bessemer', 'GV',
   ];
-  const dayNames = ['Tue', 'Wed', 'Thu', 'Fri'];
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const todayDow = new Date().getDay();
-  const todayIdx = todayDow >= 2 && todayDow <= 5 ? todayDow - 2 : 0;
+  const todayIdx = todayDow >= 1 && todayDow <= 5 ? todayDow - 1 : 0;
 
   const now = new Date();
-  const tuesday = new Date(now);
-  const daysSinceTue = (now.getDay() - 2 + 7) % 7;
-  tuesday.setDate(now.getDate() - daysSinceTue);
+  const monday = new Date(now);
+  const daysSinceMon = (now.getDay() - 1 + 7) % 7;
+  monday.setDate(now.getDate() - daysSinceMon);
 
   const days: DayPlan[] = dayNames.map((name, idx) => {
-    const date = new Date(tuesday);
-    date.setDate(tuesday.getDate() + idx);
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + idx);
 
     return {
       date: date.toISOString().slice(0, 10),
@@ -1162,7 +1162,7 @@ function mockWeeklyPlan(): WeeklyPlan {
       investors_remaining: 60,
     },
     week_start: days[0].date,
-    week_end: days[3].date,
+    week_end: days[days.length - 1].date,
     week_offset: 0,
     total_weeks: 3,
     all_contacts_covered: false,
