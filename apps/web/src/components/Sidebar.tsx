@@ -10,7 +10,7 @@ import {
   AlertTriangle, Ticket, Activity, DollarSign, Target, CalendarDays, TrendingUp,
   MessageSquare, MessagesSquare, FolderOpen, UserCog, Eye, RefreshCw,
   HelpCircle, HeartPulse, FilePlus, Layers, Menu, X, Zap,
-  ChevronDown, LucideIcon
+  ChevronDown, LucideIcon, Rocket, Phone
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -64,21 +64,20 @@ const agencyAdminNavItems: NavItemData[] = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-const adminNavItems: NavItemData[] = [
-  { href: '/admin', label: 'Dashboard', icon: BarChart3 },
-  { href: '/admin/quick-setup', label: 'Quick Setup', icon: Zap },
-  { href: '/admin/approvals', label: 'Approvals', icon: Building2 },
-  { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard },
-  { href: '/admin/billing', label: 'Stripe Config', icon: DollarSign },
-  { href: '/admin/compliance', label: 'Compliance', icon: AlertTriangle },
-  { href: '/admin/support', label: 'Support', icon: Ticket },
-  { href: '/admin/audit', label: 'Audit Logs', icon: FileText },
-  { href: '/admin/users', label: 'Platform Users', icon: UserCheck },
-  { href: '/admin/system', label: 'System Health', icon: Activity },
-  { href: '/admin/incidents', label: 'Status Page', icon: AlertTriangle },
+const adminCoreNavItems: NavItemData[] = [
+  { href: '/admin/command-center', label: 'Command Center', icon: Rocket },
   { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target },
   { href: '/admin/investors', label: 'Investors', icon: TrendingUp },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+];
+
+const adminSystemNavItems: NavItemData[] = [
+  { href: '/admin', label: 'Overview', icon: BarChart3 },
+  { href: '/admin/approvals', label: 'Approvals', icon: Building2 },
+  { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard },
+  { href: '/admin/users', label: 'Users', icon: UserCheck },
+  { href: '/admin/system', label: 'System', icon: Activity },
+  { href: '/admin/audit', label: 'Audit', icon: FileText },
 ];
 
 const NavItem = memo(function NavItem({ 
@@ -264,24 +263,27 @@ export default function Sidebar() {
           <CollapsibleSection title="Administration" items={agencyAdminNavItems} pathname={pathname} onNavigate={handleNavigate} />
 
           {isAdmin && (
-            <div className="mb-1">
-              <button
-                onClick={() => {}}
-                className="flex items-center justify-between w-full px-3 py-2"
-              >
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <Shield className="w-3 h-3" />
-                  Platform Admin
-                </span>
-              </button>
-              <div className="space-y-px pb-2">
-                {adminNavItems.map((item) => {
-                  const isActive = pathname === item.href || 
-                    (item.href !== '/dashboard' && pathname.startsWith(item.href));
-                  return <NavItem key={item.href} item={item} isActive={isActive} onNavigate={handleNavigate} />;
-                })}
+            <>
+              <div className="mb-1">
+                <button
+                  onClick={() => {}}
+                  className="flex items-center justify-between w-full px-3 py-2"
+                >
+                  <span className="text-[10px] font-semibold text-primary-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <Rocket className="w-3 h-3" />
+                    CEO Workspace
+                  </span>
+                </button>
+                <div className="space-y-px pb-2">
+                  {adminCoreNavItems.map((item) => {
+                    const isActive = pathname === item.href || 
+                      (item.href !== '/admin' && item.href !== '/dashboard' && pathname.startsWith(item.href));
+                    return <NavItem key={item.href} item={item} isActive={isActive} onNavigate={handleNavigate} />;
+                  })}
+                </div>
               </div>
-            </div>
+              <CollapsibleSection title="System Admin" items={adminSystemNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
+            </>
           )}
         </nav>
 
