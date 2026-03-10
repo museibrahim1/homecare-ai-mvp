@@ -8,7 +8,7 @@ Only accessible to platform admin accounts (@palmtai.com).
 
 import logging
 import uuid as _uuid
-from datetime import datetime, timezone, timedelta
+from datetime import date, datetime, timezone, timedelta
 from typing import Dict, List, Optional
 from uuid import UUID
 
