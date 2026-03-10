@@ -302,20 +302,20 @@ export default function CommandCenterPage() {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
-      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+      <main className="flex-1 p-3 sm:p-6 lg:p-8 overflow-y-auto">
         {/* ── Top Banner ──────────────────────────────────── */}
         <div className="mb-6">
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+              <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <greeting.Icon className="w-5 h-5 text-teal-500" />
-                  <h1 className="text-2xl font-bold text-slate-900">{greeting.text}, Muse</h1>
+                  <greeting.Icon className="w-5 h-5 text-teal-500 shrink-0" />
+                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">{greeting.text}, Muse</h1>
                 </div>
-                <div className="flex items-center gap-3">
-                  <p className="text-slate-500 text-sm">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <p className="text-slate-500 text-xs sm:text-sm">
                     Week of {weeklyPlan?.week_start || '...'} — {weeklyPlan?.week_end || '...'}
-                    {weeklyPlan && <span className="text-slate-400 ml-2">(Week {weekOffset + 1} of {weeklyPlan.total_weeks})</span>}
+                    {weeklyPlan && <span className="text-slate-400 ml-1">(Week {weekOffset + 1} of {weeklyPlan.total_weeks})</span>}
                   </p>
                   <div className="flex items-center gap-1">
                     <button
@@ -347,7 +347,7 @@ export default function CommandCenterPage() {
               <button
                 onClick={() => loadWeeklyPlan(true)}
                 disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors text-sm font-medium disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors text-sm font-medium disabled:opacity-50 shrink-0 self-start sm:self-auto"
               >
                 <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                 Refresh
@@ -366,7 +366,7 @@ export default function CommandCenterPage() {
 
             {/* ── Day Picker ─────────────────────────────────── */}
             {!loading && weeklyPlan && (
-              <div className={`grid gap-2 ${weeklyPlan.days.length <= 4 ? 'grid-cols-4' : 'grid-cols-5'}`}>
+              <div className={`grid gap-2 grid-cols-2 sm:grid-cols-3 ${weeklyPlan.days.length <= 4 ? 'md:grid-cols-4' : 'md:grid-cols-5'}`}>
                 {weeklyPlan.days.map((day, idx) => {
                   const daySent = day.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length;
                   const dayInvSent = day.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length;
@@ -431,7 +431,7 @@ export default function CommandCenterPage() {
             )}
 
             {loading && (
-              <div className="grid grid-cols-5 gap-2 animate-pulse">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 animate-pulse">
                 {[0,1,2,3,4].map(i => (
                   <div key={i} className="h-32 bg-slate-100 rounded-xl" />
                 ))}
@@ -442,32 +442,34 @@ export default function CommandCenterPage() {
 
         {/* ── Selected Day Header ─────────────────────────── */}
         {currentDay && !loading && (
-          <div className="flex items-center gap-3 mb-4">
-            <button
-              onClick={() => setSelectedDayIdx(Math.max(0, selectedDayIdx - 1))}
-              disabled={selectedDayIdx === 0}
-              className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-30"
-            >
-              <ChevronLeft className="w-4 h-4 text-slate-600" />
-            </button>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-teal-500" />
-              <h2 className="text-lg font-bold text-slate-900">
-                {currentDay.day_name}, {new Date(currentDay.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-              </h2>
-              {currentDay.is_today && (
-                <span className="text-xs font-semibold px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full">Today</span>
-              )}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                onClick={() => setSelectedDayIdx(Math.max(0, selectedDayIdx - 1))}
+                disabled={selectedDayIdx === 0}
+                className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-30 shrink-0"
+              >
+                <ChevronLeft className="w-4 h-4 text-slate-600" />
+              </button>
+              <div className="flex items-center gap-2 min-w-0">
+                <Calendar className="w-4 h-4 text-teal-500 shrink-0" />
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate">
+                  {currentDay.day_name}, {new Date(currentDay.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                </h2>
+                {currentDay.is_today && (
+                  <span className="text-xs font-semibold px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full shrink-0">Today</span>
+                )}
+              </div>
+              <button
+                onClick={() => setSelectedDayIdx(Math.min((weeklyPlan?.days.length || 5) - 1, selectedDayIdx + 1))}
+                disabled={selectedDayIdx >= (weeklyPlan?.days.length || 5) - 1}
+                className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-30 shrink-0"
+              >
+                <ChevronRightIcon className="w-4 h-4 text-slate-600" />
+              </button>
             </div>
-            <button
-              onClick={() => setSelectedDayIdx(Math.min((weeklyPlan?.days.length || 5) - 1, selectedDayIdx + 1))}
-              disabled={selectedDayIdx >= (weeklyPlan?.days.length || 5) - 1}
-              className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-30"
-            >
-              <ChevronRightIcon className="w-4 h-4 text-slate-600" />
-            </button>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 sm:ml-auto overflow-x-auto">
               <StatPill icon={<Mail className="w-3.5 h-3.5" />} label="Emails" done={agencySentCount} total={agencyTotal} color="teal" />
               <StatPill icon={<Phone className="w-3.5 h-3.5" />} label="Calls" done={callsMadeCount} total={callsTotal} color="indigo" />
               <StatPill icon={<DollarSign className="w-3.5 h-3.5" />} label="Investors" done={investorSentCount} total={investorTotal} color="violet" />
@@ -476,7 +478,7 @@ export default function CommandCenterPage() {
         )}
 
         {/* ── Tab Navigation ──────────────────────────────── */}
-        <div className="flex gap-1 mb-4 bg-white rounded-xl p-1 shadow-sm border border-slate-100 w-fit">
+        <div className="flex gap-1 mb-4 bg-white rounded-xl p-1 shadow-sm border border-slate-100 w-full sm:w-fit overflow-x-auto">
           {([
             { key: 'agencies' as TabKey, label: 'Agency Emails', Icon: Mail, count: `${agencySentCount}/${agencyTotal}` },
             { key: 'calls' as TabKey, label: 'Phone Calls', Icon: Phone, count: `${callsMadeCount}/${callsTotal}` },
