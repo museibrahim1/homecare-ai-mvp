@@ -1031,3 +1031,324 @@ def get_weekly_summary(
         week_start=week_start.strftime("%Y-%m-%d"),
         week_end=week_end.strftime("%Y-%m-%d"),
     )
+
+
+# ─── Daily Digest Email ───
+
+CEO_EMAIL = "musajama89@gmail.com"
+CEO_WORK_EMAIL = "museibrahim@palmtai.com"
+
+
+def _get_todays_plan_data(db: Session) -> dict:
+    """Extract today's calls, emails, and investor emails from the weekly plan."""
+    today = datetime.now(timezone.utc).date()
+    work_days = _week_work_days(0)
+    global_day_offset = _cumulative_days_before(0)
+
+    today_idx = None
+    for i, (day_name, day_date) in enumerate(work_days):
+        if day_date == today:
+            today_idx = i
+            break
+
+    if today_idx is None:
+        return {"calls": [], "agencies": [], "investors": [], "day_name": today.strftime("%A"), "date": today.isoformat()}
+
+    global_idx = global_day_offset + today_idx
+
+    calls = (
+        db.query(SalesLead)
+        .filter(
+            (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
+            SalesLead.phone.isnot(None),
+            SalesLead.phone != "",
+            SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
+        )
+        .order_by(PRIORITY_ORDER)
+        .all()
+    )
+    day_calls = calls[global_idx * CALLS_PER_DAY:(global_idx + 1) * CALLS_PER_DAY]
+
+    agencies = (
+        db.query(SalesLead)
+        .filter(
+            SalesLead.contact_email.isnot(None),
+            SalesLead.contact_email != "",
+            SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+        )
+        .order_by(PRIORITY_ORDER, SalesLead.created_at)
+        .all()
+    )
+    day_agencies = agencies[global_idx * EMAILS_PER_DAY:(global_idx + 1) * EMAILS_PER_DAY]
+
+    investors = (
+        db.query(Investor)
+        .filter(
+            Investor.contact_email.isnot(None),
+            Investor.contact_email != "",
+            Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+        )
+        .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+        .all()
+    )
+    day_investors = investors[global_idx * INVESTORS_PER_DAY:(global_idx + 1) * INVESTORS_PER_DAY]
+
+    return {
+        "calls": day_calls,
+        "agencies": day_agencies,
+        "investors": day_investors,
+        "day_name": work_days[today_idx][0],
+        "date": today.isoformat(),
+    }
+
+
+def _build_daily_digest_html(data: dict) -> str:
+    """Build a clean, professional daily digest email."""
+    day_name = data["day_name"]
+    date_str = data["date"]
+    calls = data["calls"]
+    agencies = data["agencies"]
+    investors = data["investors"]
+
+    day_full = {
+        "Mon": "Monday", "Tue": "Tuesday", "Wed": "Wednesday",
+        "Thu": "Thursday", "Fri": "Friday",
+    }.get(day_name, day_name)
+
+    call_rows = ""
+    for i, lead in enumerate(calls, 1):
+        services = []
+        if lead.offers_nursing:
+            services.append("Nursing")
+        if lead.offers_pt:
+            services.append("PT")
+        if lead.offers_ot:
+            services.append("OT")
+        if lead.offers_speech:
+            services.append("Speech")
+        if lead.offers_aide:
+            services.append("Aide")
+        if lead.offers_social:
+            services.append("Social Work")
+        svc_str = ", ".join(services) if services else "Home Care"
+
+        ownership = lead.ownership_type or "N/A"
+        years = f"{lead.years_in_operation:.0f} yrs" if lead.years_in_operation else "N/A"
+        star = lead.star_rating or "N/A"
+        city_state = f"{lead.city or '—'}, {lead.state or '—'}"
+        priority_color = "#dc2626" if lead.priority == "high" else "#f59e0b" if lead.priority == "medium" else "#6b7280"
+        priority_badge = f'<span style="background:{priority_color};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">{lead.priority.upper()}</span>'
+
+        call_rows += f"""
+        <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:14px 12px;font-size:14px;color:#64748b;font-weight:600;">{i}</td>
+            <td style="padding:14px 12px;">
+                <div style="font-size:14px;font-weight:600;color:#1e293b;">{lead.provider_name}</div>
+                <div style="font-size:12px;color:#64748b;margin-top:2px;">{city_state}</div>
+            </td>
+            <td style="padding:14px 12px;">
+                <a href="tel:{lead.phone}" style="font-size:14px;color:#0d9488;font-weight:600;text-decoration:none;">{lead.phone}</a>
+            </td>
+            <td style="padding:14px 12px;font-size:12px;color:#475569;">{svc_str}</td>
+            <td style="padding:14px 12px;font-size:12px;color:#475569;">{ownership}<br/>{years} · ★ {star}</td>
+            <td style="padding:14px 12px;text-align:center;">{priority_badge}</td>
+        </tr>"""
+
+    agency_email_rows = ""
+    for i, lead in enumerate(agencies[:10], 1):
+        city_state = f"{lead.city or '—'}, {lead.state or '—'}"
+        agency_email_rows += f"""
+        <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:10px 12px;font-size:13px;color:#1e293b;">{lead.provider_name}</td>
+            <td style="padding:10px 12px;font-size:13px;color:#64748b;">{city_state}</td>
+            <td style="padding:10px 12px;font-size:13px;color:#0d9488;">{lead.contact_email or '—'}</td>
+        </tr>"""
+
+    investor_rows = ""
+    for i, inv in enumerate(investors, 1):
+        sectors = ", ".join(inv.focus_sectors or [])[:40]
+        investor_rows += f"""
+        <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#1e293b;">{inv.fund_name}</td>
+            <td style="padding:10px 12px;font-size:13px;color:#64748b;">{inv.contact_name or '—'}</td>
+            <td style="padding:10px 12px;font-size:13px;color:#64748b;">{inv.location or '—'}</td>
+            <td style="padding:10px 12px;font-size:12px;color:#64748b;">{inv.check_size_display or '—'}</td>
+        </tr>"""
+
+    remaining_agencies = max(0, len(agencies) - 10)
+    agency_note = f"<p style='font-size:12px;color:#94a3b8;margin:8px 0 0 12px;'>+ {remaining_agencies} more queued for email today</p>" if remaining_agencies > 0 else ""
+
+    html = f"""\
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;">
+<tr><td align="center" style="padding:24px 16px;">
+<table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;">
+
+<!-- Header -->
+<tr><td style="background:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);border-radius:16px 16px 0 0;padding:32px 32px 24px;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td><span style="font-size:28px;">🌴</span></td>
+        <td style="text-align:right;">
+            <span style="background:rgba(255,255,255,0.2);color:#fff;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:600;">{day_full}</span>
+        </td>
+    </tr>
+    <tr><td colspan="2" style="padding-top:16px;">
+        <h1 style="margin:0;font-size:24px;font-weight:700;color:#fff;">Daily Task Digest</h1>
+        <p style="margin:6px 0 0;font-size:14px;color:rgba(255,255,255,0.8);">{date_str} · PalmCare AI Outreach</p>
+    </td></tr>
+    </table>
+</td></tr>
+
+<!-- Summary Cards -->
+<tr><td style="background:#fff;padding:24px 32px 16px;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="33%" style="text-align:center;padding:12px 8px;background:#f0fdfa;border-radius:12px;">
+            <div style="font-size:28px;font-weight:700;color:#0d9488;">{len(calls)}</div>
+            <div style="font-size:12px;color:#64748b;margin-top:4px;">Calls to Make</div>
+        </td>
+        <td width="8"></td>
+        <td width="33%" style="text-align:center;padding:12px 8px;background:#eff6ff;border-radius:12px;">
+            <div style="font-size:28px;font-weight:700;color:#2563eb;">{len(agencies)}</div>
+            <div style="font-size:12px;color:#64748b;margin-top:4px;">Emails to Send</div>
+        </td>
+        <td width="8"></td>
+        <td width="33%" style="text-align:center;padding:12px 8px;background:#faf5ff;border-radius:12px;">
+            <div style="font-size:28px;font-weight:700;color:#7c3aed;">{len(investors)}</div>
+            <div style="font-size:12px;color:#64748b;margin-top:4px;">Investor Emails</div>
+        </td>
+    </tr>
+    </table>
+</td></tr>
+
+<!-- Calls Section -->
+<tr><td style="background:#fff;padding:8px 32px 24px;">
+    <h2 style="margin:0 0 4px;font-size:18px;font-weight:700;color:#1e293b;">📞 Phone Calls</h2>
+    <p style="margin:0 0 16px;font-size:13px;color:#94a3b8;">Agencies without email — call to pitch PalmCare AI</p>
+
+    {"<table width='100%' cellpadding='0' cellspacing='0' style='border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;'><tr style='background:#f8fafc;'><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>#</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Agency</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Phone</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Services</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Details</th><th style='padding:10px 12px;text-align:center;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Priority</th></tr>" + call_rows + "</table>" if calls else "<div style='text-align:center;padding:24px;background:#f8fafc;border-radius:12px;color:#94a3b8;font-size:14px;'>No calls scheduled for today</div>"}
+</td></tr>
+
+<!-- Agency Emails Section -->
+<tr><td style="background:#fff;padding:8px 32px 24px;">
+    <h2 style="margin:0 0 4px;font-size:18px;font-weight:700;color:#1e293b;">📧 Agency Emails</h2>
+    <p style="margin:0 0 16px;font-size:13px;color:#94a3b8;">Queued for outreach — approve in Command Center</p>
+
+    {"<table width='100%' cellpadding='0' cellspacing='0' style='border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;'><tr style='background:#f8fafc;'><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Agency</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Location</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Email</th></tr>" + agency_email_rows + "</table>" + agency_note if agencies else "<div style='text-align:center;padding:24px;background:#f8fafc;border-radius:12px;color:#94a3b8;font-size:14px;'>No agency emails for today</div>"}
+</td></tr>
+
+<!-- Investor Emails Section -->
+<tr><td style="background:#fff;padding:8px 32px 24px;">
+    <h2 style="margin:0 0 4px;font-size:18px;font-weight:700;color:#1e293b;">💼 Investor Outreach</h2>
+    <p style="margin:0 0 16px;font-size:13px;color:#94a3b8;">Fundraising emails queued — approve in Command Center</p>
+
+    {"<table width='100%' cellpadding='0' cellspacing='0' style='border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;'><tr style='background:#f8fafc;'><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Fund</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Contact</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Location</th><th style='padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;'>Check Size</th></tr>" + investor_rows + "</table>" if investors else "<div style='text-align:center;padding:24px;background:#f8fafc;border-radius:12px;color:#94a3b8;font-size:14px;'>No investor emails for today</div>"}
+</td></tr>
+
+<!-- CTA -->
+<tr><td style="background:#fff;padding:8px 32px 32px;border-radius:0 0 16px 16px;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="text-align:center;padding:16px 0;">
+        <a href="https://palmcareai.com/admin/command-center" style="display:inline-block;background:#0d9488;color:#fff;padding:14px 32px;border-radius:10px;font-size:15px;font-weight:600;text-decoration:none;">Open Command Center →</a>
+    </td></tr>
+    </table>
+</td></tr>
+
+<!-- Footer -->
+<tr><td style="padding:24px 32px;text-align:center;">
+    <p style="margin:0;font-size:12px;color:#94a3b8;">🌴 PalmCare AI · Daily Outreach Digest</p>
+    <p style="margin:4px 0 0;font-size:11px;color:#cbd5e1;">Palm Technologies, INC. · Where care meets intelligence</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+
+</body>
+</html>"""
+    return html
+
+
+@router.post("/send-daily-digest")
+def send_daily_digest(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_ceo),
+):
+    """Build and send today's daily task digest email to the CEO."""
+    data = _get_todays_plan_data(db)
+    html = _build_daily_digest_html(data)
+
+    day_full = {
+        "Mon": "Monday", "Tue": "Tuesday", "Wed": "Wednesday",
+        "Thu": "Thursday", "Fri": "Friday",
+    }.get(data["day_name"], data["day_name"])
+
+    subject = f"🌴 {day_full} Task List — {len(data['calls'])} Calls, {len(data['agencies'])} Emails, {len(data['investors'])} Investors"
+
+    result = email_service.send_email(
+        to=[CEO_EMAIL, CEO_WORK_EMAIL],
+        subject=subject,
+        html=html,
+        sender=f"PalmCare AI <onboarding@resend.dev>",
+        reply_to="sales@palmtai.com",
+    )
+
+    return {
+        "ok": result.get("success", False),
+        "subject": subject,
+        "calls": len(data["calls"]),
+        "agency_emails": len(data["agencies"]),
+        "investor_emails": len(data["investors"]),
+        "date": data["date"],
+        "send_result": result,
+    }
+
+
+@router.get("/daily-digest-preview")
+def daily_digest_preview(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_ceo),
+):
+    """Preview today's daily digest without sending."""
+    data = _get_todays_plan_data(db)
+    return {
+        "date": data["date"],
+        "day_name": data["day_name"],
+        "calls": len(data["calls"]),
+        "agency_emails": len(data["agencies"]),
+        "investor_emails": len(data["investors"]),
+        "call_details": [
+            {
+                "provider_name": c.provider_name,
+                "phone": c.phone,
+                "city": c.city,
+                "state": c.state,
+                "priority": c.priority,
+                "ownership_type": c.ownership_type,
+                "services": [
+                    s for s, has in [
+                        ("Nursing", c.offers_nursing), ("PT", c.offers_pt),
+                        ("OT", c.offers_ot), ("Speech", c.offers_speech),
+                        ("Aide", c.offers_aide), ("Social Work", c.offers_social),
+                    ] if has
+                ],
+            }
+            for c in data["calls"]
+        ],
+        "investor_details": [
+            {
+                "fund_name": inv.fund_name,
+                "contact_name": inv.contact_name,
+                "contact_email": inv.contact_email,
+                "location": inv.location,
+                "check_size": inv.check_size_display,
+                "relevance": inv.relevance_reason,
+            }
+            for inv in data["investors"]
+        ],
+    }
