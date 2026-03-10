@@ -84,6 +84,9 @@ interface WeeklyPlan {
   };
   week_start: string;
   week_end: string;
+  week_offset: number;
+  total_weeks: number;
+  all_contacts_covered: boolean;
 }
 
 interface DraftEdit {
@@ -136,6 +139,7 @@ export default function CommandCenterPage() {
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
 
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan | null>(null);
+  const [weekOffset, setWeekOffset] = useState(0);
 
   // Per-entity state
   const [agencyStatuses, setAgencyStatuses] = useState<Record<string, string>>({});
@@ -169,10 +173,11 @@ export default function CommandCenterPage() {
 
   // ── Load weekly plan ──────────────────────────────────────────────
 
-  const loadWeeklyPlan = useCallback(async (isRefresh = false) => {
+  const loadWeeklyPlan = useCallback(async (isRefresh = false, offset?: number) => {
     if (isRefresh) setRefreshing(true); else setLoading(true);
+    const wo = offset !== undefined ? offset : weekOffset;
     try {
-      const data: WeeklyPlan = await apiFetch('/platform/outreach/weekly-plan');
+      const data: WeeklyPlan = await apiFetch(`/platform/outreach/weekly-plan?week_offset=${wo}`);
       setWeeklyPlan(data);
 
       const todayIdx = data.days.findIndex(d => d.is_today);
@@ -210,7 +215,7 @@ export default function CommandCenterPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [apiFetch]);
+  }, [apiFetch, weekOffset]);
 
   useEffect(() => { loadWeeklyPlan(); }, [loadWeeklyPlan]);
 
@@ -307,9 +312,37 @@ export default function CommandCenterPage() {
                   <greeting.Icon className="w-5 h-5 text-teal-500" />
                   <h1 className="text-2xl font-bold text-slate-900">{greeting.text}, Muse</h1>
                 </div>
-                <p className="text-slate-500 text-sm">
-                  Week of {weeklyPlan?.week_start || '...'} — {weeklyPlan?.week_end || '...'}
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-slate-500 text-sm">
+                    Week of {weeklyPlan?.week_start || '...'} — {weeklyPlan?.week_end || '...'}
+                    {weeklyPlan && <span className="text-slate-400 ml-2">(Week {weekOffset + 1} of {weeklyPlan.total_weeks})</span>}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => { const w = weekOffset - 1; setWeekOffset(w); loadWeeklyPlan(true, w); }}
+                      disabled={weekOffset <= 0 || refreshing}
+                      className="p-1.5 rounded-md hover:bg-slate-100 disabled:opacity-30 transition-colors"
+                      title="Previous week"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-slate-500" />
+                    </button>
+                    <button
+                      onClick={() => { setWeekOffset(0); loadWeeklyPlan(true, 0); }}
+                      disabled={weekOffset === 0 || refreshing}
+                      className="px-2 py-1 text-xs font-medium text-teal-600 rounded-md hover:bg-teal-50 disabled:opacity-30 transition-colors"
+                    >
+                      This Week
+                    </button>
+                    <button
+                      onClick={() => { const w = weekOffset + 1; setWeekOffset(w); loadWeeklyPlan(true, w); }}
+                      disabled={(weeklyPlan?.all_contacts_covered) || refreshing}
+                      className="p-1.5 rounded-md hover:bg-slate-100 disabled:opacity-30 transition-colors"
+                      title="Next week"
+                    >
+                      <ChevronRightIcon className="w-4 h-4 text-slate-500" />
+                    </button>
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => loadWeeklyPlan(true)}
@@ -333,7 +366,7 @@ export default function CommandCenterPage() {
 
             {/* ── Day Picker ─────────────────────────────────── */}
             {!loading && weeklyPlan && (
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {weeklyPlan.days.map((day, idx) => {
                   const daySent = day.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length;
                   const dayInvSent = day.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length;
@@ -1056,17 +1089,18 @@ function mockWeeklyPlan(): WeeklyPlan {
     'Andreessen Horowitz', 'General Catalyst', 'Founders Fund', 'Lux Capital',
     'NEA', 'Khosla Ventures', 'SignalFire', 'First Round', 'Bessemer', 'GV',
   ];
-  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  const dayNames = ['Tue', 'Wed', 'Thu', 'Fri'];
   const todayDow = new Date().getDay();
-  const todayIdx = todayDow >= 1 && todayDow <= 5 ? todayDow - 1 : 0;
+  const todayIdx = todayDow >= 2 && todayDow <= 5 ? todayDow - 2 : 0;
 
   const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+  const tuesday = new Date(now);
+  const daysSinceTue = (now.getDay() - 2 + 7) % 7;
+  tuesday.setDate(now.getDate() - daysSinceTue);
 
   const days: DayPlan[] = dayNames.map((name, idx) => {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + idx);
+    const date = new Date(tuesday);
+    date.setDate(tuesday.getDate() + idx);
 
     return {
       date: date.toISOString().slice(0, 10),
@@ -1128,6 +1162,9 @@ function mockWeeklyPlan(): WeeklyPlan {
       investors_remaining: 60,
     },
     week_start: days[0].date,
-    week_end: days[4].date,
+    week_end: days[3].date,
+    week_offset: 0,
+    total_weeks: 3,
+    all_contacts_covered: false,
   };
 }

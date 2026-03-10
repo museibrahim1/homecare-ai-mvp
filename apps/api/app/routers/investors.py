@@ -539,7 +539,8 @@ async def send_bulk_investor_email(
     for inv in investors:
         try:
             personalized_body = data.html_body.replace("{fund_name}", inv.fund_name or "")
-            personalized_body = personalized_body.replace("{contact_name}", inv.contact_name or "there")
+            first_name = (inv.contact_name or "").split()[0] if inv.contact_name and inv.contact_name.strip() else "there"
+            personalized_body = personalized_body.replace("{contact_name}", first_name)
             personalized_subject = data.subject.replace("{fund_name}", inv.fund_name or "")
 
             html = _investor_email_wrap(personalized_body)

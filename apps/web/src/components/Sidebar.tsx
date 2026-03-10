@@ -68,6 +68,7 @@ const adminCoreNavItems: NavItemData[] = [
   { href: '/admin/command-center', label: 'Command Center', icon: Rocket },
   { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target },
   { href: '/admin/investors', label: 'Investors', icon: TrendingUp },
+  { href: '/admin/marketing', label: 'Marketing Materials', icon: Layers },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 

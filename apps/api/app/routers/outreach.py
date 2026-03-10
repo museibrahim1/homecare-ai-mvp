@@ -211,6 +211,9 @@ class WeeklyPlanResponse(BaseModel):
     stats: OutreachStats
     week_start: str
     week_end: str
+    week_offset: int
+    total_weeks: int
+    all_contacts_covered: bool
 
 
 # ─── Helpers ───
@@ -365,7 +368,8 @@ PITCH_DECK_URL = f"{SITE_URL}/PalmCare_Full_v4.pdf"
 
 def _build_investor_text(fund_name: str, contact_name: str, focus_areas: str) -> tuple[str, str]:
     """Generate the investor pitch email using the founder's voice."""
-    greeting = f"Hi {contact_name}" if contact_name else f"Hi {fund_name} Team"
+    first_name = contact_name.split()[0] if contact_name and contact_name.strip() else ""
+    greeting = f"Hi {first_name}" if first_name else f"Hi {fund_name} Team"
     subject = "Pre-Seed: Defining the Future of Home Care Operations"
     body = f"""{greeting},
 
@@ -565,16 +569,31 @@ def get_daily_plan(
     )
 
 
+EMAILS_PER_DAY = 50
+INVESTORS_PER_DAY = 10
+CALLS_PER_DAY = 10
+WORK_DAYS = ["Tue", "Wed", "Thu", "Fri"]  # Tue-Fri schedule
+DAYS_PER_WEEK = len(WORK_DAYS)
+
+
+def _week_tuesday(week_offset: int = 0) -> date:
+    """Return the Tuesday of the target week. Offset 0 = this week's Tuesday."""
+    today = datetime.now(timezone.utc).date()
+    days_since_tuesday = (today.weekday() - 1) % 7  # Tuesday = weekday 1
+    this_tuesday = today - timedelta(days=days_since_tuesday)
+    return this_tuesday + timedelta(weeks=week_offset)
+
+
 @router.get("/weekly-plan", response_model=WeeklyPlanResponse)
 def get_weekly_plan(
+    week_offset: int = 0,
     db: Session = Depends(get_db),
     user: User = Depends(require_ceo),
 ):
-    """Return the full Mon–Fri weekly plan with pre-generated email drafts."""
+    """Return Tue-Fri weekly plan with pre-generated drafts. Flows across weeks until everyone is reached."""
     today = datetime.now(timezone.utc).date()
-    week_start, week_end = _week_bounds()
 
-    agency_q = (
+    all_agencies = (
         db.query(SalesLead)
         .filter(
             SalesLead.contact_email.isnot(None),
@@ -582,11 +601,10 @@ def get_weekly_plan(
             SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
         )
         .order_by(PRIORITY_ORDER, SalesLead.created_at)
-        .limit(250)
         .all()
     )
 
-    investor_q = (
+    all_investors = (
         db.query(Investor)
         .filter(
             Investor.contact_email.isnot(None),
@@ -594,11 +612,10 @@ def get_weekly_plan(
             Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
         )
         .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
-        .limit(50)
         .all()
     )
 
-    call_q = (
+    all_calls = (
         db.query(SalesLead)
         .filter(
             (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
@@ -607,28 +624,35 @@ def get_weekly_plan(
             SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
         )
         .order_by(PRIORITY_ORDER)
-        .limit(50)
         .all()
     )
 
+    import math
+    total_days_agencies = math.ceil(len(all_agencies) / EMAILS_PER_DAY) if all_agencies else 1
+    total_days_investors = math.ceil(len(all_investors) / INVESTORS_PER_DAY) if all_investors else 1
+    total_days_calls = math.ceil(len(all_calls) / CALLS_PER_DAY) if all_calls else 1
+    total_days_needed = max(total_days_agencies, total_days_investors, total_days_calls, 1)
+    total_weeks = math.ceil(total_days_needed / DAYS_PER_WEEK)
+
+    global_day_offset = week_offset * DAYS_PER_WEEK
+    tue = _week_tuesday(week_offset)
+
     days: List[WeeklyDayPlan] = []
-    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri"]
-    monday = (week_start).date()
+    for i, day_name in enumerate(WORK_DAYS):
+        day_date = tue + timedelta(days=i)
+        global_idx = global_day_offset + i
 
-    for i, day_name in enumerate(day_names):
-        day_date = monday + timedelta(days=i)
+        a_start = global_idx * EMAILS_PER_DAY
+        a_end = a_start + EMAILS_PER_DAY
+        day_agencies = all_agencies[a_start:a_end]
 
-        a_start = i * 50
-        a_end = a_start + 50
-        day_agencies = agency_q[a_start:a_end]
+        inv_start = global_idx * INVESTORS_PER_DAY
+        inv_end = inv_start + INVESTORS_PER_DAY
+        day_investors = all_investors[inv_start:inv_end]
 
-        inv_start = i * 10
-        inv_end = inv_start + 10
-        day_investors = investor_q[inv_start:inv_end]
-
-        c_start = i * 10
-        c_end = c_start + 10
-        day_calls = call_q[c_start:c_end]
+        c_start = global_idx * CALLS_PER_DAY
+        c_end = c_start + CALLS_PER_DAY
+        day_calls = all_calls[c_start:c_end]
 
         agency_drafts = []
         for lead in day_agencies:
@@ -725,11 +749,18 @@ def get_weekly_plan(
         investors_contacted=investors_contacted, investors_remaining=investors_remaining,
     )
 
+    all_covered = (
+        global_day_offset + DAYS_PER_WEEK >= total_days_needed
+    )
+
     return WeeklyPlanResponse(
         days=days,
         stats=stats,
-        week_start=week_start.strftime("%Y-%m-%d"),
-        week_end=week_end.strftime("%Y-%m-%d"),
+        week_start=tue.isoformat(),
+        week_end=(tue + timedelta(days=3)).isoformat(),
+        week_offset=week_offset,
+        total_weeks=total_weeks,
+        all_contacts_covered=all_covered,
     )
 
 
