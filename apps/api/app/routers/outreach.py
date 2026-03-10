@@ -1362,9 +1362,11 @@ def cron_daily_digest(
 ):
     """Cron-accessible daily digest. Requires X-Internal-Key header or CRON_SECRET query param."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
 
-    if not expected_key or provided_key != expected_key:
+    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
+    if not key_valid:
         raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
 
     data = _get_todays_plan_data(db)
