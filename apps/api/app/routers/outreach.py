@@ -1036,8 +1036,7 @@ def get_weekly_summary(
 
 # ─── Daily Digest Email ───
 
-CEO_EMAIL = "musajama89@gmail.com"
-CEO_WORK_EMAIL = "museibrahim@palmtai.com"
+CEO_EMAILS = ["museibrahim@palmtai.com"]
 
 
 def _get_todays_plan_data(db: Session) -> dict:
@@ -1292,10 +1291,10 @@ def send_daily_digest(
     subject = f"🌴 {day_full} Task List — {len(data['calls'])} Calls, {len(data['agencies'])} Emails, {len(data['investors'])} Investors"
 
     result = email_service.send_email(
-        to=[CEO_EMAIL, CEO_WORK_EMAIL],
+        to=CEO_EMAILS,
         subject=subject,
         html=html,
-        sender=f"PalmCare AI <onboarding@resend.dev>",
+        sender="PalmCare AI <onboarding@resend.dev>",
         reply_to="sales@palmtai.com",
     )
 
@@ -1384,7 +1383,7 @@ def cron_daily_digest(
     subject = f"🌴 {day_full} Task List — {len(data['calls'])} Calls, {len(data['agencies'])} Emails, {len(data['investors'])} Investors"
 
     result = email_service.send_email(
-        to=[CEO_EMAIL, CEO_WORK_EMAIL],
+        to=CEO_EMAILS,
         subject=subject,
         html=html,
         sender="PalmCare AI <onboarding@resend.dev>",
