@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Sidebar from '@/components/Sidebar';
 import {
   Layers, Download, Eye, X, Smartphone, Monitor, Mail, Share2,
   Image as ImageIcon, FileText, ChevronDown, ExternalLink
@@ -29,22 +30,47 @@ const ASSETS: Asset[] = [
   { src: '/screenshots/email/crm_assessments.png', title: 'Assessments View', category: 'email', dimensions: '280px wide', use: 'Template 3 email — assessment tracking' },
   { src: '/screenshots/email/crm_contract.png', title: 'Contract Preview', category: 'email', dimensions: '280px wide', use: 'Template 3 email — contract generation' },
 
-  // Social media assets
-  { src: '/marketing/hero_banner.png', title: 'Hero Banner', category: 'social', dimensions: '1920×1080', use: 'Website hero, LinkedIn cover, presentation slides' },
-  { src: '/marketing/linkedin_crm.png', title: 'LinkedIn CRM Post', category: 'social', dimensions: '1200×1200', use: 'LinkedIn feed posts, CRM showcase' },
-  { src: '/marketing/fb_ad.png', title: 'Facebook Ad', category: 'social', dimensions: '1200×628', use: 'Facebook ads, social media campaigns' },
-  { src: '/marketing/ig_square.png', title: 'Instagram Square', category: 'social', dimensions: '1080×1080', use: 'Instagram feed posts' },
-  { src: '/marketing/ig_story.png', title: 'Instagram Story', category: 'social', dimensions: '1080×1920', use: 'Instagram & Facebook stories' },
-  { src: '/marketing/twitter_banner.png', title: 'Twitter/X Banner', category: 'social', dimensions: '1500×500', use: 'Twitter/X profile banner' },
-  { src: '/marketing/email_header.png', title: 'Email Header Graphic', category: 'social', dimensions: '600×200', use: 'Marketing email headers' },
-  { src: '/marketing/carousel_1.png', title: 'Carousel Slide 1', category: 'social', dimensions: '1080×1080', use: 'Social media carousel — slide 1' },
-  { src: '/marketing/carousel_2.png', title: 'Carousel Slide 2', category: 'social', dimensions: '1080×1080', use: 'Social media carousel — slide 2' },
-  { src: '/marketing/carousel_3.png', title: 'Carousel Slide 3', category: 'social', dimensions: '1080×1080', use: 'Social media carousel — slide 3' },
+  // ── LinkedIn / Facebook / Twitter (Nano Banana Pro — palm tree brand) ──
+  { src: '/marketing/social/linkedin_palm_hero.png', title: 'LinkedIn Hero — Palm Trees', category: 'social', dimensions: '2K 16:9', use: 'LinkedIn cover, website hero, palm tree brand imagery' },
+  { src: '/marketing/social/linkedin_caregiver_assessment.png', title: 'LinkedIn — Caregiver Assessment', category: 'social', dimensions: '2K 16:9', use: 'LinkedIn posts, caregiver recording assessment at home' },
+  { src: '/marketing/social/linkedin_crm_showcase.png', title: 'LinkedIn — CRM Showcase', category: 'social', dimensions: '2K 16:9', use: 'LinkedIn posts, MacBook + iPhone product shot' },
+  { src: '/marketing/social/linkedin_team_outdoors.png', title: 'LinkedIn — Team Under Palms', category: 'social', dimensions: '2K 16:9', use: 'LinkedIn team photo, diverse healthcare professionals' },
+  { src: '/marketing/social/fb_ad_palm_sunset.png', title: 'FB Ad — Palm Sunset', category: 'social', dimensions: '2K 16:9', use: 'Facebook ads, sunset palm tree brand shot' },
+  { src: '/marketing/social/fb_ad_problem_solution.png', title: 'FB Ad — Problem/Solution', category: 'social', dimensions: '2K 16:9', use: 'Facebook ads, paperwork vs digital split' },
+  { src: '/marketing/social/fb_ad_three_phones.png', title: 'FB Ad — Three Phones', category: 'social', dimensions: '2K 16:9', use: 'Facebook ads, Record → Analyze → Contract flow' },
+  { src: '/marketing/social/twitter_brand_banner.png', title: 'Twitter/X Banner — Palms', category: 'social', dimensions: '2K 21:9', use: 'Twitter/X profile banner, palm coastline' },
 
-  // iPhone mockup assets
-  { src: '/marketing/iphone_home.png', title: 'iPhone — Home Screen', category: 'social', dimensions: '1080×1920', use: 'App Store screenshots, social posts' },
-  { src: '/marketing/iphone_record.png', title: 'iPhone — Recording', category: 'social', dimensions: '1080×1920', use: 'App Store screenshots, demo videos' },
-  { src: '/marketing/iphone_clients.png', title: 'iPhone — Clients', category: 'social', dimensions: '1080×1920', use: 'App Store screenshots, feature showcase' },
+  // ── Instagram Feed (square + 4:5) ──
+  { src: '/marketing/social/ig_square_palm_app.png', title: 'IG — Palm + App', category: 'social', dimensions: '2K 1:1', use: 'Instagram feed, phone with palm tree bokeh' },
+  { src: '/marketing/social/ig_square_assessment_home.png', title: 'IG — Home Assessment', category: 'social', dimensions: '2K 1:1', use: 'Instagram feed, caregiver recording in home' },
+  { src: '/marketing/social/ig_square_contract_signing.png', title: 'IG — Contract Flat Lay', category: 'social', dimensions: '2K 1:1', use: 'Instagram feed, completed contract flat lay' },
+  { src: '/marketing/social/ig_square_stats_infographic.png', title: 'IG — Stats Infographic', category: 'social', dimensions: '2K 1:1', use: 'Instagram feed, data visualization post' },
+
+  // ── Instagram Stories (9:16) ──
+  { src: '/marketing/social/ig_story_palm_phone.png', title: 'IG Story — Palm + Phone', category: 'social', dimensions: '2K 9:16', use: 'Instagram/FB story, phone against palm sunset' },
+  { src: '/marketing/social/ig_story_assessment_vertical.png', title: 'IG Story — Assessment', category: 'social', dimensions: '2K 9:16', use: 'Instagram/FB story, caregiver with patient' },
+  { src: '/marketing/social/ig_story_palm_it_cta.png', title: 'IG Story — PALM IT CTA', category: 'social', dimensions: '2K 9:16', use: 'Instagram/FB story, brand CTA with palm tree' },
+  { src: '/marketing/social/ig_story_before_after.png', title: 'IG Story — Before/After', category: 'social', dimensions: '2K 9:16', use: 'Instagram/FB story, paperwork vs digital split' },
+
+  // ── Carousel Series (1:1) ──
+  { src: '/marketing/social/carousel_step1_record.png', title: 'Carousel 1 — Record', category: 'social', dimensions: '2K 1:1', use: 'Social carousel slide 1: Record the Assessment' },
+  { src: '/marketing/social/carousel_step2_analyze.png', title: 'Carousel 2 — Analyze', category: 'social', dimensions: '2K 1:1', use: 'Social carousel slide 2: AI Extracts Everything' },
+  { src: '/marketing/social/carousel_step3_contract.png', title: 'Carousel 3 — Contract', category: 'social', dimensions: '2K 1:1', use: 'Social carousel slide 3: Contract Ready' },
+  { src: '/marketing/social/carousel_step4_cta.png', title: 'Carousel 4 — PALM IT', category: 'social', dimensions: '2K 1:1', use: 'Social carousel final CTA slide' },
+
+  // ── iPhone Mockups (Nano Banana Pro) ──
+  { src: '/marketing/social/iphone_mockup_home.png', title: 'iPhone — Home Dashboard', category: 'social', dimensions: '2K 9:16', use: 'App Store screenshots, social posts' },
+  { src: '/marketing/social/iphone_mockup_recording.png', title: 'iPhone — Recording', category: 'social', dimensions: '2K 9:16', use: 'App Store screenshots, voice assessment' },
+  { src: '/marketing/social/iphone_mockup_contract.png', title: 'iPhone — Contract', category: 'social', dimensions: '2K 9:16', use: 'App Store screenshots, contract view' },
+
+  // ── Brand Visuals ──
+  { src: '/marketing/social/palm_brand_sunset.png', title: 'Palm Brand — Sunset', category: 'social', dimensions: '2K 16:9', use: 'Brand imagery, palm trees sunset with data overlay' },
+  { src: '/marketing/social/palm_brand_minimal.png', title: 'Palm Brand — Minimal', category: 'social', dimensions: '2K 1:1', use: 'Brand imagery, minimal palm tree illustration' },
+
+  // ── Legacy social assets ──
+  { src: '/marketing/hero_banner.png', title: 'Hero Banner (v1)', category: 'social', dimensions: '1920×1080', use: 'Legacy website hero' },
+  { src: '/marketing/linkedin_crm.png', title: 'LinkedIn CRM (v1)', category: 'social', dimensions: '1200×1200', use: 'Legacy LinkedIn post' },
+  { src: '/marketing/email_header.png', title: 'Email Header (v1)', category: 'social', dimensions: '600×200', use: 'Legacy email header' },
 
   // CRM screenshots
   { src: '/screenshots/crm/dashboard.png', title: 'Dashboard Overview', category: 'crm', use: 'Website features page, pitch deck, demos' },
@@ -88,8 +114,9 @@ export default function MarketingMaterialsPage() {
   const isPdf = (src: string) => src.endsWith('.pdf');
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="flex min-h-screen bg-slate-50">
+      <Sidebar />
+      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -228,7 +255,7 @@ export default function MarketingMaterialsPage() {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
