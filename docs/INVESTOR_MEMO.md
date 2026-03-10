@@ -103,13 +103,12 @@ We're not building another EHR or scheduling tool. We're building the **AI brain
 
 | Metric | Value |
 |--------|-------|
-| AI cost per assessment (~30 min audio) | **$0.37** |
 | Revenue per assessment (Starter plan) | **$59.80** |
-| **Gross margin per assessment** | **~99.4%** |
+| **Gross margin** | **82%+** |
 | Infrastructure cost (Railway) | **~$35/mo** |
 | Typical client value to agency | **$2,000–$2,800/mo** |
 
-The AI cost structure is our moat. At $0.37 per assessment, we can profitably serve the smallest agencies while maintaining 95%+ gross margins at scale.
+Our AI cost structure is our moat. We can profitably serve the smallest agencies while maintaining strong gross margins at scale.
 
 ---
 

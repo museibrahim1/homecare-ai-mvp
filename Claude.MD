@@ -51,7 +51,7 @@
 | CMS Leads | 163 agencies with emails across 48 states |
 | Investors | 60+ seeded with emails |
 | Tech stack | Next.js (web), SwiftUI (iOS), FastAPI (API), Celery (worker), Deepgram (ASR), Claude (AI) |
-| Cost per assessment | ~$0.37 |
+| Cost per assessment | CONFIDENTIAL — do not include in any outgoing emails or marketing |
 | API Keys | Anthropic, OpenAI, Deepgram, Resend, WaveSpeed, Nano Banana, Google Calendar |
 | Google OAuth | Client ID `668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com` — set on Railway |
 | Google Calendar | Connected on production — auto-schedules demos with Meet links |
@@ -116,7 +116,7 @@
 Sales Leads CRM (190+ agencies), 5-email cold outreach, campaign analytics, churn analytics, HIPAA hardening, 50-state knowledge base, pipeline UI, Twilio removal (~2K lines), voiceprint disabled, EIN optional, privacy policy, marketing research.
 
 ### Feb 25 (B) — Testing & Performance
-UI/CSS fixes, nav accessibility, 76+ tests passing, Pydantic v2 migration, k6 load tests (POST /clients bottleneck), pyannote removal, landing chat → Claude Haiku, cost model ($0.37/assessment).
+UI/CSS fixes, nav accessibility, 76+ tests passing, Pydantic v2 migration, k6 load tests (POST /clients bottleneck), pyannote removal, landing chat → Claude Haiku, internal cost model.
 
 ### Mar 1 (AM-A) — Architecture & Email Setup
 ARCHITECTURE.md, MX/TXT records on send.palmcareai.com, Cloudflare Email Routing.

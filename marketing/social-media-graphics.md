@@ -56,7 +56,7 @@ App screenshots in `screenshots/` and `screenshots/ios/`.
 - **File:** `generated/linkedin_post_roi.png`
 - **Size:** 2K, 1:1 square
 - **Use:** LinkedIn feed post, investor pitch deck slide, sales collateral
-- **Content:** Dark navy background, teal data bars/charts, "$0.37 per assessment", "5,400x ROI", "163 agencies"
+- **Content:** Dark navy background, teal data bars/charts, "60-second assessments", "15+ hours saved weekly", "All 50 states"
 - **Pair with:** LinkedIn Post 3 copy (ROI Focus)
 
 ### 7–9. Instagram Carousel — 3-Step Flow

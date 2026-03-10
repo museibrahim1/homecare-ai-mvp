@@ -83,7 +83,7 @@ def main():
     
     # 3. Stats/ROI graphic - clean data visualization
     generate_image(
-        "Clean minimal infographic, dark navy background, three key metrics highlighted in teal #0d9488: '$0.37 per assessment', '90% faster evaluations', '163 agencies trust us', modern data visualization with subtle geometric shapes, professional typography, enterprise dashboard aesthetic",
+        "Clean minimal infographic, dark navy background, three key metrics highlighted in teal #0d9488: '60-second assessments', '90% faster evaluations', '15+ hours saved weekly', modern data visualization with subtle geometric shapes, professional typography, enterprise dashboard aesthetic",
         "sage_style_stats.png",
         "2k",
         "1:1"

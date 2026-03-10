@@ -178,7 +178,7 @@ ABOUT PALMCARE AI:
 - Full CRM dashboard with pipeline, client management, scheduling
 - Mobile app (iOS) for field use + web CRM for the office
 - $450K SAFE round, $2.25M post-money valuation
-- $92K ARR, cost per assessment ~$0.37, 82% gross margin
+- $92K ARR, 82% gross margin with strong unit economics
 - 163 agencies across 48 states, 700 target by EOY 2027 = $3.35M ARR
 - Pricing: $299/mo Mobile, $499/mo Full Platform, Enterprise custom
 - 50-state compliance knowledge base, HIPAA compliant

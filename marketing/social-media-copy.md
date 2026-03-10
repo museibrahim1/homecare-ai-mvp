@@ -23,7 +23,7 @@ PalmCare AI combines:
 
 The mobile app and web dashboard work together — record assessments on your phone, manage everything from your desk.
 
-163 agencies across 48 states. $0.37 per assessment. 90% faster than paper.
+163 agencies across 48 states. 60-second assessments. 90% faster than paper.
 
 Where care meets intelligence.
 
@@ -63,8 +63,8 @@ After PalmCare AI: 3 hours.
 That's 12 hours back. Every single week.
 
 The numbers:
-→ $0.37 per 30-minute assessment
-→ 5,400x ROI per client
+→ 60-second AI-powered assessments
+→ 15+ hours saved per week
 → 163 agencies already using it
 → 48 states covered
 → 100% HIPAA compliant
@@ -219,10 +219,10 @@ Where care meets intelligence 🌿
 ### Tweet 2: Numbers
 **Image:** `generated/fb_ad_before_after.png`
 
-"$0.37 per assessment.
-5,400x ROI per client.
+"60-second assessments.
+15+ hours saved per week.
 163 agencies across 48 states.
-12 hours saved per week.
+All 50 states supported.
 
 PalmCare AI. The numbers speak for themselves.
 
@@ -281,7 +281,7 @@ Where care meets intelligence."
 
 📊 90% faster assessment completion
 ⏰ 12 hours saved per week on documentation
-📈 $0.37 cost per 30-minute assessment
+📈 60-second AI-powered assessments
 ✅ 100% HIPAA compliance built in
 📱 Mobile app + web dashboard
 

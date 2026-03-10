@@ -51,7 +51,7 @@ Inspired by Sage.ai's clean, professional approach to healthcare technology mark
 ### 3. Stats/ROI
 - **File:** `marketing/generated/sage_style_stats.png`
 - **Size:** 2K, 1:1 square
-- **Content:** Clean data visualization with key metrics ($0.37, 90% faster, 163 agencies)
+- **Content:** Clean data visualization with key metrics (60-second assessments, 90% faster, 15+ hours saved weekly)
 - **Use:** LinkedIn posts, investor materials, ROI discussions
 
 ### 4. Video Thumbnail
@@ -80,7 +80,7 @@ Inspired by Sage.ai's clean, professional approach to healthcare technology mark
 ### Key Messages
 1. **Speed:** Reduce assessment time from hours to seconds
 2. **Simplicity:** Just talk - AI handles the rest
-3. **ROI:** $0.37 per assessment, immediate cost savings
+3. **ROI:** 15+ hours saved per week, immediate time savings
 4. **Trust:** 163 agencies already using it
 5. **Innovation:** Where care meets intelligence
 
@@ -103,7 +103,7 @@ Inspired by Sage.ai's clean, professional approach to healthcare technology mark
 
 **Post 2: ROI Focus**
 - Image: `sage_style_stats.png` 
-- Copy: "What if your cost per assessment was $0.37? That's not a typo. 163 agencies already see 5,400x ROI per client. PalmCare AI pays for itself on day one."
+- Copy: "What if your assessments took 60 seconds instead of 60 minutes? 163 agencies are already saving 15+ hours a week. PalmCare AI pays for itself on day one."
 
 ### Instagram (Visual Storytelling)
 **Post 1: Product Demo**
@@ -122,7 +122,7 @@ Inspired by Sage.ai's clean, professional approach to healthcare technology mark
 ### Twitter/X (Concise Impact)
 **Tweet 1:**
 - Image: `sage_style_product_demo.png`
-- Copy: "Healthcare assessments: Hours → Seconds. PalmCare AI = Voice-to-contract technology. 90% faster. 163 agencies. $0.37 per assessment. Where care meets intelligence 🌿"
+- Copy: "Healthcare assessments: Hours → Seconds. PalmCare AI = Voice-to-contract technology. 90% faster. 163 agencies. 15+ hours saved weekly. Where care meets intelligence 🌿"
 
 ---
 
@@ -132,7 +132,7 @@ Inspired by Sage.ai's clean, professional approach to healthcare technology mark
 1. "Healthcare assessments in 37 cents"
 2. "Why 163 agencies switched from paperwork"
 3. "Voice to contract in seconds (see how)"
-4. "The $0.37 assessment breakthrough" 
+4. "The 60-second assessment breakthrough" 
 5. "Healthcare's paperwork problem, solved"
 
 ### Email 1: Problem Introduction
@@ -147,7 +147,7 @@ What if that changed?
 
 PalmCare AI transforms voice into contracts instantly. No forms. No typing. No duplicate entry.
 
-Result: $0.37 per 30-minute assessment. 90% faster completion. 163 agencies already made the switch.
+Result: 60-second assessments. 90% faster completion. 163 agencies already made the switch.
 
 See it in action: [Demo Link]
 

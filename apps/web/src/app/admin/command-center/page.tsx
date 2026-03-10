@@ -695,7 +695,7 @@ const PHONE_SCRIPTS = [
     steps: [
       { label: 'Intro', text: `"Hi, this is Muse from PalmCare AI. I sent over an email earlier this week about our AI-powered documentation platform for home care — did you get a chance to take a look?"` },
       { label: 'Re-hook', text: `"No worries if not — the quick version is we help agencies like yours cut documentation time by 80% using voice AI. Your staff just records the assessment on their phone and our system handles the rest — care plans, contracts, billing codes, all compliant."` },
-      { label: 'Social Proof', text: `"We're already working with agencies across [X] states and our cost per assessment is under 40 cents. Agencies tell us it's a game-changer for their workflow."` },
+      { label: 'Social Proof', text: `"We're already working with agencies across [X] states. Agencies tell us it's a game-changer — they're saving 15+ hours a week on documentation alone."` },
       { label: 'Ask', text: `"Would you be open to a quick 30-minute demo this week? I can walk you through exactly how it works with your type of services."` },
       { label: 'Objection — Too Busy', text: `"Totally understand — that's actually why agencies love it. It frees up so much time. Even 15 minutes would be enough to show you the value."` },
       { label: 'Objection — Have Software', text: `"That's great — we actually integrate alongside existing systems. Most agencies find PalmCare handles the clinical documentation and intake side much faster than what they're currently using."` },
@@ -969,7 +969,9 @@ function DraftEditor({
   onSkip: () => void;
   accent?: 'teal' | 'violet';
 }) {
+  const [mode, setMode] = useState<'preview' | 'edit'>('preview');
   const btnColor = accent === 'violet' ? 'bg-violet-500 hover:bg-violet-600' : 'bg-teal-500 hover:bg-teal-600';
+  const isHtml = edit.body.trim().startsWith('<');
 
   return (
     <div className="space-y-3 max-w-2xl">
@@ -983,13 +985,46 @@ function DraftEditor({
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-slate-500 mb-1">Body</label>
-        <textarea
-          value={edit.body}
-          onChange={(e) => onChange({ ...edit, body: e.target.value })}
-          rows={8}
-          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 resize-none font-mono text-xs"
-        />
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-xs font-medium text-slate-500">Body</label>
+          {isHtml && (
+            <div className="flex bg-slate-100 rounded-lg p-0.5">
+              <button
+                onClick={() => setMode('preview')}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${mode === 'preview' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                Preview
+              </button>
+              <button
+                onClick={() => setMode('edit')}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${mode === 'edit' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                Edit HTML
+              </button>
+            </div>
+          )}
+        </div>
+        {isHtml && mode === 'preview' ? (
+          <div
+            className="w-full bg-white border border-slate-200 rounded-lg overflow-auto"
+            style={{ maxHeight: 420 }}
+          >
+            <iframe
+              srcDoc={edit.body}
+              className="w-full border-0"
+              style={{ minHeight: 350, height: 400 }}
+              sandbox="allow-same-origin"
+              title="Email preview"
+            />
+          </div>
+        ) : (
+          <textarea
+            value={edit.body}
+            onChange={(e) => onChange({ ...edit, body: e.target.value })}
+            rows={isHtml ? 12 : 8}
+            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 resize-none font-mono text-xs"
+          />
+        )}
       </div>
       <div className="flex gap-2">
         <button

@@ -169,7 +169,7 @@ def build_instagram_story():
     stats = [
         ("90%", "Faster Assessments"),
         ("50%", "Less Paperwork"),
-        ("$0.37", "Per Assessment"),
+        ("60s", "Per Assessment"),
     ]
     stat_y = 1340
     for i, (num, label) in enumerate(stats):

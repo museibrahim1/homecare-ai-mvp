@@ -95,7 +95,7 @@ image_specs = [
     },
     {
         'filename': 'linkedin_post_roi.png',
-        'prompt': 'ROI infographic with dark navy background. Teal data visualization bars and charts (#0d9488). Key statistics prominently displayed: "$0.37 per assessment", "5,400x ROI", "163 agencies". Modern data visualization style. PalmCare AI branding. Professional business aesthetic for LinkedIn audience.',
+        'prompt': 'ROI infographic with dark navy background. Teal data visualization bars and charts (#0d9488). Key statistics prominently displayed: "60-second assessments", "15+ hours saved weekly", "All 50 states". Modern data visualization style. PalmCare AI branding. Professional business aesthetic for LinkedIn audience.',
         'aspect_ratio': '1:1'
     },
     {

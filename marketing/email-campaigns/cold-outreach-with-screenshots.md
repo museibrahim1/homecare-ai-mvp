@@ -57,7 +57,7 @@ I'm reaching out because 163 home care agencies across 48 states are already usi
 
 • 90% faster patient assessments
 • 50% reduction in paperwork time  
-• $0.37 cost per 30-minute assessment
+• 60-second AI-powered assessments
 • 100% HIPAA compliant
 
 [ATTACH: screenshots/ios/04-home.png]
@@ -158,7 +158,7 @@ If voice-powered assessments and automated contract generation aren't priorities
 
 [ATTACH: screenshots/ios/01-landing.png]
 
-But if you're curious about how 163 agencies reduced their cost per assessment to $0.37 while improving patient satisfaction, I'm here.
+But if you're curious about how 163 agencies cut assessment time from hours to 60 seconds while improving patient satisfaction, I'm here.
 
 No pressure. No follow-ups after this.
 
@@ -184,7 +184,7 @@ P.S. — If you ever want to see the 30-second demo, just reply "show me." I'll 
 
 **Key Improvements:**
 - Real app screenshots (not mockups) for credibility
-- Specific metrics ($0.37, 163 agencies, 90% faster)
+- Specific metrics (60-second assessments, 163 agencies, 90% faster)
 - Story-driven proof points (Texas agency example)
 - Progressive value reveal across 5 touches
 - Founder authenticity (Muse Ibrahim signature)

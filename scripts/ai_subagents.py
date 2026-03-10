@@ -49,7 +49,7 @@ COMPANY INFO:
 - Tagline: "Where care meets intelligence" / "PALM IT"
 - Fundraising: $450K SAFE, $2.25M post-money valuation
 - ARR: $92K
-- Cost per assessment: ~$0.37
+- Strong unit economics with 82% gross margin
 
 IMAGE GENERATION (Nano Banana 2 via WaveSpeed) — DEFAULT for all visual work:
 - API Key env var: WAVESPEED_API_KEY

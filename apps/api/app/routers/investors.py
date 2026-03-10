@@ -263,7 +263,7 @@ INVESTOR_EMAIL_TEMPLATES = {
             '<li style="margin-bottom: 6px;">Full platform built and live today&mdash;AI assessment pipeline, '
             'voice documentation engine, CRM</li>'
             '<li style="margin-bottom: 6px;">$414/mo blended ARPU across mobile and full platform tiers</li>'
-            '<li style="margin-bottom: 6px;">82% gross margin driven by a $0.37/assessment AI pipeline cost</li>'
+            '<li style="margin-bottom: 6px;">82% gross margin with strong unit economics</li>'
             '<li style="margin-bottom: 6px;">Structural retention: agencies run daily operations through the platform, '
             'switching cost is high by design</li>'
             '<li style="margin-bottom: 6px;">Founder with a rare combination: software engineer, B2B sales professional, '

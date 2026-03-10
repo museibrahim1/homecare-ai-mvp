@@ -44,7 +44,7 @@ Generated on [Date] via Nano Banana 2 AI for immediate marketing deployment.
 ### 6. LinkedIn ROI Infographic
 **File:** `generated/linkedin_post_roi.png`
 - **Specs:** 2K resolution, 1:1 square
-- **Content:** Dark navy background with teal data visualization, key metrics prominently displayed: "$0.37 per assessment", "5,400x ROI", "163 agencies", professional chart design
+- **Content:** Dark navy background with teal data visualization, key metrics prominently displayed: "60-second assessments", "15+ hours saved weekly", "All 50 states", professional chart design
 - **Usage:** LinkedIn feed posts, investor pitch deck slides, sales collateral
 - **Pairs with:** LinkedIn Post 3 (ROI Focus) copy
 

@@ -103,7 +103,7 @@ IMAGES_TO_GENERATE = [
         "prompt": (
             "LinkedIn post graphic for PalmCare AI showing ROI data. "
             "Dark navy background with teal (#0d9488) accent bars and charts. "
-            "Infographic style showing: '$0.37 per assessment' with a downward arrow, "
+            "Infographic style showing: '60-second assessments' with a lightning bolt icon, "
             "'5,400x ROI per client' with an upward arrow, "
             "'163 agencies onboarded' with a map outline. "
             "Clean data visualization, corporate infographic style. "
