@@ -261,47 +261,26 @@ def _build_agency_html(provider_name: str, city: str, state: str) -> tuple[str, 
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">I'm Muse — I built PalmCare AI specifically for home care agencies like yours in {city or "your area"}, {state}.</p>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">The short version: your staff records a client assessment on their phone, and our AI automatically generates the care plan, contract, billables, and compliance docs. The whole process takes about 60 seconds.</p>
-
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;">Here's what that looks like in practice:</p>
-
-<table cellpadding="0" cellspacing="0" width="100%" style="margin:16px 0 20px;">
-<tr>
-<td width="33%" style="padding:0 4px 0 0;vertical-align:top;">
-<a href="{SITE_URL}" style="text-decoration:none;">
-<img src="{SITE_URL}/screenshots/email/home_dashboard.png" width="170" style="width:100%;max-width:170px;border-radius:12px;border:1px solid #e5e5e5;" alt="PalmCare Dashboard" />
-<p style="font-size:11px;color:#888;text-align:center;margin:6px 0 0;">Dashboard</p>
-</a>
-</td>
-<td width="33%" style="padding:0 2px;vertical-align:top;">
-<a href="{SITE_URL}" style="text-decoration:none;">
-<img src="{SITE_URL}/screenshots/email/recording_screen.png" width="170" style="width:100%;max-width:170px;border-radius:12px;border:1px solid #e5e5e5;" alt="Voice Recording" />
-<p style="font-size:11px;color:#888;text-align:center;margin:6px 0 0;">Voice Assessment</p>
-</a>
-</td>
-<td width="33%" style="padding:0 0 0 4px;vertical-align:top;">
-<a href="{SITE_URL}" style="text-decoration:none;">
-<img src="{SITE_URL}/screenshots/email/contract_view.png" width="170" style="width:100%;max-width:170px;border-radius:12px;border:1px solid #e5e5e5;" alt="Auto Contract" />
-<p style="font-size:11px;color:#888;text-align:center;margin:6px 0 0;">Auto Contract</p>
-</a>
-</td>
-</tr>
-</table>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">The short version: launch our app, hit the <strong>Palm It</strong> button to start an assessment while with a client, and our AI automatically generates the care plan, contract, billables, and compliance docs. The whole process takes about 60 seconds.</p>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Agencies using PalmCare are saving 15+ hours a week on documentation. It handles all 50 states' regulations, supports Medicaid, Medicare, and private pay, and the AI cost per assessment is under $0.40.</p>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">I'd love to show you a quick demo — 15 minutes, no commitment. You can book one here:</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">I'd love to show you a quick demo — 15 minutes, no commitment. You can book one directly on our site:</p>
 
 <p style="margin:0 0 24px;">
 <a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book a Demo</a>
 </p>
+
+<a href="{SITE_URL}/#book-demo" style="text-decoration:none;">
+<img src="{SITE_URL}/screenshots/email/app_interface.png" width="580" style="width:100%;max-width:580px;border-radius:12px;border:1px solid #e5e5e5;margin:0 0 24px;" alt="PalmCare AI — Designed for Care Professionals" />
+</a>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;">Visit our website @ <a href="{SITE_URL}" style="color:#0d9488;text-decoration:none;">palmcareai.com</a></p>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 4px;">Warm regards,</p>
 <p style="font-size:15px;color:#1a1a1a;line-height:1.5;margin:0 0 4px;"><strong>Muse Ibrahim</strong></p>
 <p style="font-size:13px;color:#888;line-height:1.5;margin:0;">Founder &amp; CEO, Palm Technologies Inc.<br/>
-213-569-7693 | <a href="mailto:invest@palmtai.com" style="color:#0d9488;text-decoration:none;">invest@palmtai.com</a></p>
+<a href="mailto:sales@palmtai.com" style="color:#0d9488;text-decoration:none;">sales@palmtai.com</a></p>
 
 </div>
 </body>
