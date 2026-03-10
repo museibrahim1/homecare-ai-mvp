@@ -89,6 +89,7 @@ from app.routers import (
     contract_templates,
     sales_leads,
     investors,
+    outreach,
     smart_notes,
     analytics,
     landing_chat,
@@ -197,6 +198,7 @@ app.include_router(status.router, prefix="/status", tags=["Status Page"])
 app.include_router(contract_templates.router, prefix="/contract-templates", tags=["Contract Templates"])
 app.include_router(sales_leads.router, prefix="/platform/sales", tags=["Sales Leads (CEO Only)"])
 app.include_router(investors.router, prefix="/platform/investors", tags=["Investors (CEO Only)"])
+app.include_router(outreach.router, prefix="/platform/outreach", tags=["Outreach (CEO Only)"])
 app.include_router(smart_notes.router, prefix="/notes", tags=["Smart Notes & Tasks"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics & Churn"])
 app.include_router(landing_chat.router, prefix="/chat", tags=["Landing Page Chat"])
