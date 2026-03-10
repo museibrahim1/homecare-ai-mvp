@@ -417,4 +417,4 @@ async def caregiver_webhook(
         return {"status": "success", "caregiver_id": str(caregiver.id)}
     except Exception as e:
         logger.error(f"Webhook error: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="Webhook processing failed")

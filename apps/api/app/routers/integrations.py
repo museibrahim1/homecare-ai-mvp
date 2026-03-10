@@ -13,6 +13,9 @@ from uuid import UUID
 import json
 import csv
 import io
+import logging
+
+logger = logging.getLogger(__name__)
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Header
@@ -633,15 +636,16 @@ async def fetch_from_monday(
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Monday.com API error: {response.text}"
+                detail="Monday.com integration request failed"
             )
         
         data = response.json()
     
     if "errors" in data:
+        logger.error(f"Monday.com API error: {data['errors']}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Monday.com API error: {data['errors']}"
+            detail="Monday.com integration request failed"
         )
     
     boards = data.get("data", {}).get("boards", [])

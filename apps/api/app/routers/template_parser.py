@@ -91,7 +91,7 @@ async def extract_agency_info(
         
     except Exception as e:
         logger.error(f"Failed to extract agency info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to extract agency info")
 
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:

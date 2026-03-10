@@ -11,7 +11,7 @@ struct GoogleCalendarSetupSheet: View {
     @State private var showDisconnectConfirm = false
     @State private var didStartAuth = false
 
-    private let googleClientId = "668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com"
+    private let googleClientId = Bundle.main.infoDictionary?["GOOGLE_CLIENT_ID"] as? String ?? ""
     private let callbackScheme = "com.palmcare.ai"
     private let scopes = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events"
 

@@ -37,6 +37,8 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>GOOGLE_CLIENT_ID</key>
+	<string>668945369325-lrmdd9q1d6m7ggojiqvporj8frqso31j.apps.googleusercontent.com</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>PalmCareAI needs microphone access to record client visits and assessments.</string>
 	<key>UILaunchScreen</key>

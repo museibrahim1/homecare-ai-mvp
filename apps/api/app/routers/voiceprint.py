@@ -91,7 +91,7 @@ async def create_voiceprint(
             logger.error(f"Pyannote voiceprint creation failed: {response.status_code} - {response.text}")
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Failed to create voiceprint: {response.text}"
+                detail="Failed to create voiceprint"
             )
         
         result = response.json()

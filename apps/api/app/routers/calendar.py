@@ -53,9 +53,6 @@ async def check_oauth_configured():
     has_secret = bool(settings.google_client_secret)
     return {
         "configured": has_id and has_secret,
-        "client_id_set": has_id,
-        "client_secret_set": has_secret,
-        "client_id_prefix": settings.google_client_id[:12] + "..." if has_id else None,
     }
 
 
@@ -153,7 +150,7 @@ async def connect_google_calendar(
                     )
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Failed to exchange code: {response.text}",
+                    detail="Failed to exchange authorization code",
                 )
             
             tokens = response.json()
@@ -280,7 +277,7 @@ async def create_calendar_event(
         if response.status_code not in [200, 201]:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to create calendar event: {response.text}",
+                detail="Failed to create calendar event",
             )
         
         created_event = response.json()
@@ -323,7 +320,7 @@ async def get_calendar_events(
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to fetch calendar events: {response.text}",
+                detail="Failed to fetch calendar events",
             )
         
         data = response.json()
@@ -364,7 +361,7 @@ async def update_calendar_event(
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to update calendar event: {response.text}",
+                detail="Failed to update calendar event",
             )
         
         updated_event = response.json()
@@ -390,7 +387,7 @@ async def delete_calendar_event(
         if response.status_code not in [200, 204]:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to delete calendar event: {response.text}",
+                detail="Failed to delete calendar event",
             )
         
     return {"success": True}

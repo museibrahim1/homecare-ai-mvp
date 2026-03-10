@@ -235,7 +235,7 @@ async def list_messages(
             logger.error(f"Gmail API error: {list_response.text}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Gmail API error ({list_response.status_code}): {list_response.text}",
+                detail="Failed to fetch emails from Gmail",
             )
         
         message_list = list_response.json().get("messages", [])
@@ -319,7 +319,7 @@ async def send_email(
         if response.status_code not in [200, 201]:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to send email: {response.text}",
+                detail="Failed to send email",
             )
         
         return {"success": True, "message": "Email sent successfully"}
@@ -380,7 +380,7 @@ async def toggle_star(
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to modify star: {response.text}",
+                detail="Failed to modify email star status",
             )
         
         return {"success": True, "starred": starred}
@@ -415,7 +415,7 @@ async def mark_as_read(
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to mark as read: {response.text}",
+                detail="Failed to update email read status",
             )
         
         return {"success": True, "read": read}

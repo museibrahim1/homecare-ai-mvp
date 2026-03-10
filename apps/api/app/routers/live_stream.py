@@ -147,7 +147,7 @@ async def websocket_stream(
             except Exception as e:
                 logger.error(f"Deepgram forward error: {e}")
                 try:
-                    await websocket.send_json({"type": "error", "message": str(e)})
+                    await websocket.send_json({"type": "error", "message": "Transcription service error"})
                 except Exception:
                     pass
 
@@ -196,7 +196,7 @@ async def websocket_stream(
     except Exception as e:
         logger.error(f"WebSocket stream error: {e}")
         try:
-            await websocket.send_json({"type": "error", "message": str(e)})
+            await websocket.send_json({"type": "error", "message": "Stream connection error"})
         except Exception:
             pass
     finally:
