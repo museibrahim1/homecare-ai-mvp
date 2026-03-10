@@ -62,34 +62,19 @@ def get_today_index():
     return None, today.strftime("%A"), today
 
 
-def login_to_api():
-    """Try to authenticate. If no password, return None."""
-    password = os.getenv("CEO_PASSWORD")
-    if not password:
-        return None
-    r = requests.post(f"{API_BASE}/auth/login", json={
-        "email": CEO_WORK_EMAIL, "password": password
-    }, timeout=15)
+CRON_SECRET = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+
+
+def fetch_daily_data():
+    """Fetch today's outreach data from the production cron endpoint."""
+    r = requests.get(
+        f"{API_BASE}/platform/outreach/cron/daily-data",
+        params={"key": CRON_SECRET},
+        timeout=30,
+    )
     if r.status_code == 200:
-        return r.json().get("access_token")
-    return None
-
-
-def fetch_plan_via_api(token: str):
-    """Fetch weekly plan data from the production API."""
-    headers = {"Authorization": f"Bearer {token}"}
-    r = requests.get(f"{API_BASE}/platform/outreach/weekly-plan?week_offset=0", headers=headers, timeout=30)
-    if r.status_code != 200:
-        print(f"Failed to fetch weekly plan: {r.status_code}")
-        return None
-    return r.json()
-
-
-def extract_today_from_plan(plan: dict):
-    """Extract today's data from the weekly plan response."""
-    for day in plan.get("days", []):
-        if day.get("is_today"):
-            return day
+        return r.json()
+    print(f"Failed to fetch daily data: {r.status_code} — {r.text[:200]}")
     return None
 
 
@@ -284,47 +269,35 @@ def main():
     print(f"\nDate: {today.isoformat()}")
     print(f"Day: {today.strftime('%A')}")
 
-    # Try to get data from production API
-    print("\nAuthenticating with production API...")
-    token = login_to_api()
+    print("\nFetching today's outreach data from production...")
+    raw_data = fetch_daily_data()
 
-    today_data = None
-    if token:
-        print("Authenticated. Fetching weekly plan...")
-        plan = fetch_plan_via_api(token)
-        if plan:
-            today_data = extract_today_from_plan(plan)
-            if today_data:
-                print(f"Found today's plan: {today_data.get('day_name')}")
-            else:
-                print("Today not found in weekly plan (may be weekend)")
+    if raw_data:
+        day_name = raw_data.get("day_name", today.strftime("%a")[:3])
+        date_str = raw_data.get("date", today.isoformat())
+
+        today_data = {
+            "calls": raw_data.get("calls", []),
+            "agency_drafts": raw_data.get("agencies", []),
+            "investor_drafts": raw_data.get("investors", []),
+        }
+        agency_count = raw_data.get("agency_count", len(today_data["agency_drafts"]))
+        print(f"Found data for {day_name}, {date_str}")
     else:
-        print("No CEO_PASSWORD set — can't fetch live data from API.")
-        print("Will send digest with placeholder data to confirm email works.")
-
-    if not today_data:
-        # Build placeholder data if we can't fetch from API
         global_idx, day_name, today_date = get_today_index()
         if global_idx is None:
             print("Today is not a work day. No digest to send.")
             return
-
-        today_data = {
-            "calls": [],
-            "agency_drafts": [],
-            "investor_drafts": [],
-        }
         date_str = today_date.isoformat()
-    else:
-        day_name = today_data.get("day_name", today.strftime("%a")[:3])
-        date_str = today_data.get("date", today.isoformat())
+        today_data = {"calls": [], "agency_drafts": [], "investor_drafts": []}
+        agency_count = 0
 
     calls = today_data.get("calls", [])
     agencies = today_data.get("agency_drafts", [])
     investors = today_data.get("investor_drafts", [])
 
     print(f"\n📞 Calls: {len(calls)}")
-    print(f"📧 Agency Emails: {len(agencies)}")
+    print(f"📧 Agency Emails: {agency_count} total ({len(agencies)} shown)")
     print(f"💼 Investor Emails: {len(investors)}")
 
     if calls:
@@ -332,12 +305,17 @@ def main():
         for i, c in enumerate(calls, 1):
             print(f"  {i}. {c.get('provider_name', '?')} — {c.get('phone', '?')} ({c.get('city', '?')}, {c.get('state', '?')})")
 
+    if investors:
+        print("\n--- INVESTORS TO EMAIL ---")
+        for i, inv in enumerate(investors, 1):
+            print(f"  {i}. {inv.get('fund_name', '?')} — {inv.get('contact_name', '?')} ({inv.get('location', '?')})")
+
     print("\nBuilding HTML email...")
     html, day_full = build_digest_html(today_data, day_name, date_str)
-    subject = f"🌴 {day_full} Task List — {len(calls)} Calls, {len(agencies)} Emails, {len(investors)} Investors"
+    subject = f"🌴 {day_full} Task List — {len(calls)} Calls, {agency_count} Emails, {len(investors)} Investors"
 
     print(f"Subject: {subject}")
-    print(f"To: {CEO_EMAIL}, {CEO_WORK_EMAIL}")
+    print(f"To: {CEO_WORK_EMAIL}")
 
     print("\nSending via Resend...")
     success = send_via_resend(subject, html)
