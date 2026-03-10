@@ -230,89 +230,124 @@ def _week_bounds() -> tuple[datetime, datetime]:
     return monday, sunday
 
 
+AGENCY_SUBJECT_HOOKS = [
+    "Quick question about your documentation process",
+    "Are your caregivers still filling out paper forms?",
+    "What if assessments took 60 seconds instead of 60 minutes?",
+    "The documentation tool agencies in {state} are switching to",
+    "Your staff shouldn't be doing this manually",
+    "How much time does your team spend on paperwork?",
+    "This is changing how agencies handle assessments",
+    "Saw you're in {state} — thought this might help",
+    "30 seconds to see why agencies are ditching paper",
+    "A question for the team at your agency",
+]
+
+SITE_URL = "https://palmcareai.com"
+
+
 def _build_agency_html(provider_name: str, city: str, state: str) -> tuple[str, str]:
-    """Generate a branded HTML email for an agency lead."""
-    subject = f"Reduce Paperwork by 80% — PalmCare AI for {provider_name}"
+    """Generate a clean, personal-looking email for an agency lead with app screenshots."""
+    import hashlib
+    idx = int(hashlib.md5(provider_name.encode()).hexdigest(), 16) % len(AGENCY_SUBJECT_HOOKS)
+    subject = AGENCY_SUBJECT_HOOKS[idx].format(state=state or "your state")
+
     body = f"""\
 <html>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f7f7f7;">
-<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;">
-  <tr>
-    <td style="background:#0d9488;padding:28px 32px;text-align:center;">
-      <h1 style="color:#ffffff;margin:0;font-size:22px;">PalmCare AI</h1>
-      <p style="color:#ccfbf1;margin:6px 0 0;font-size:13px;">Where care meets intelligence</p>
-    </td>
-  </tr>
-  <tr>
-    <td style="padding:32px;">
-      <p style="font-size:15px;color:#1a1a1a;line-height:1.6;">
-        Hi {provider_name} team,
-      </p>
-      <p style="font-size:15px;color:#333;line-height:1.6;">
-        I'm Muse Ibrahim, CEO of <strong>PalmCare AI</strong>. We help home care agencies
-        in <strong>{city}, {state}</strong> eliminate paperwork and get paid faster using
-        voice-powered AI.
-      </p>
-      <ul style="font-size:14px;color:#333;line-height:1.8;">
-        <li>Voice-to-contract in under 60 seconds</li>
-        <li>Auto-generated OASIS-compliant documentation</li>
-        <li>Real-time billing capture — average $0.37/assessment</li>
-        <li>50-state regulatory knowledge built in</li>
-      </ul>
-      <p style="font-size:15px;color:#333;line-height:1.6;">
-        We're already serving agencies across {state} and would love to show you a
-        quick 15-minute demo.
-      </p>
-      <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
-        <tr>
-          <td style="background:#0d9488;border-radius:6px;padding:12px 28px;">
-            <a href="https://palmcareai.com/#demo" style="color:#fff;text-decoration:none;font-weight:bold;font-size:15px;">
-              Book a Free Demo
-            </a>
-          </td>
-        </tr>
-      </table>
-      <p style="font-size:14px;color:#666;line-height:1.5;">
-        Best regards,<br/>
-        <strong>Muse Ibrahim</strong><br/>
-        President &amp; CEO, Palm Technologies<br/>
-        <a href="mailto:sales@palmtai.com" style="color:#0d9488;">sales@palmtai.com</a>
-      </p>
-    </td>
-  </tr>
-  <tr>
-    <td style="background:#f0fdfa;padding:16px 32px;text-align:center;font-size:12px;color:#999;">
-      Palm Technologies, INC. &middot; palmcareai.com
-    </td>
-  </tr>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:#ffffff;">
+<div style="max-width:580px;margin:0 auto;padding:20px;">
+
+<p style="font-size:15px;color:#1a1a1a;line-height:1.7;margin:0 0 16px;">Hi there,</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">I'm Muse — I built PalmCare AI specifically for home care agencies like yours in {city or "your area"}, {state}.</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">The short version: your staff records a client assessment on their phone, and our AI automatically generates the care plan, contract, billables, and compliance docs. The whole process takes about 60 seconds.</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;">Here's what that looks like in practice:</p>
+
+<table cellpadding="0" cellspacing="0" width="100%" style="margin:16px 0 20px;">
+<tr>
+<td width="33%" style="padding:0 4px 0 0;vertical-align:top;">
+<a href="{SITE_URL}" style="text-decoration:none;">
+<img src="{SITE_URL}/screenshots/email/home_dashboard.png" width="170" style="width:100%;max-width:170px;border-radius:12px;border:1px solid #e5e5e5;" alt="PalmCare Dashboard" />
+<p style="font-size:11px;color:#888;text-align:center;margin:6px 0 0;">Dashboard</p>
+</a>
+</td>
+<td width="33%" style="padding:0 2px;vertical-align:top;">
+<a href="{SITE_URL}" style="text-decoration:none;">
+<img src="{SITE_URL}/screenshots/email/recording_screen.png" width="170" style="width:100%;max-width:170px;border-radius:12px;border:1px solid #e5e5e5;" alt="Voice Recording" />
+<p style="font-size:11px;color:#888;text-align:center;margin:6px 0 0;">Voice Assessment</p>
+</a>
+</td>
+<td width="33%" style="padding:0 0 0 4px;vertical-align:top;">
+<a href="{SITE_URL}" style="text-decoration:none;">
+<img src="{SITE_URL}/screenshots/email/contract_view.png" width="170" style="width:100%;max-width:170px;border-radius:12px;border:1px solid #e5e5e5;" alt="Auto Contract" />
+<p style="font-size:11px;color:#888;text-align:center;margin:6px 0 0;">Auto Contract</p>
+</a>
+</td>
+</tr>
 </table>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Agencies using PalmCare are saving 15+ hours a week on documentation. It handles all 50 states' regulations, supports Medicaid, Medicare, and private pay, and the AI cost per assessment is under $0.40.</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">I'd love to show you a quick demo — 15 minutes, no commitment. You can book one here:</p>
+
+<p style="margin:0 0 24px;">
+<a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book a Demo</a>
+</p>
+
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 4px;">Best,</p>
+<p style="font-size:15px;color:#1a1a1a;line-height:1.5;margin:0 0 4px;"><strong>Muse Ibrahim</strong></p>
+<p style="font-size:13px;color:#888;line-height:1.5;margin:0;">Founder & CEO, Palm Technologies<br/>
+<a href="mailto:sales@palmtai.com" style="color:#0d9488;text-decoration:none;">sales@palmtai.com</a> · <a href="{SITE_URL}" style="color:#0d9488;text-decoration:none;">palmcareai.com</a></p>
+
+</div>
 </body>
 </html>"""
     return subject, body
 
 
+PITCH_DECK_URL = f"{SITE_URL}/PalmCare_Full_v4.pdf"
+
+
 def _build_investor_text(fund_name: str, contact_name: str, focus_areas: str) -> tuple[str, str]:
-    """Generate a plain-text investor pitch email."""
-    greeting = f"Dear {contact_name}" if contact_name else f"Dear {fund_name} Team"
-    subject = f"PalmCare AI — Voice-Powered AI for Home Healthcare ($92K ARR, Pre-Seed)"
+    """Generate the investor pitch email using the founder's voice."""
+    greeting = f"Hi {contact_name}" if contact_name else f"Hi {fund_name} Team"
+    subject = "Pre-Seed: Defining the Future of Home Care Operations"
     body = f"""{greeting},
 
-I'm Muse Ibrahim, CEO of PalmCare AI (Palm Technologies, INC.). Given your focus on {focus_areas}, I wanted to reach out directly.
+I hope you're well. I'm reaching out to share what we're building at Palm Technologies Inc, a Nebraska-based C-Corp developing an AI-powered platform that automates the patient assessment, care planning, and contracting workflow for home care agencies.
 
-PalmCare AI converts voice into compliant home-care contracts in under 60 seconds using Deepgram Nova-3 and Claude. We're live with paying customers at $92K ARR and a cost of $0.37 per assessment.
+One of the strongest signals that this market is ready for disruption is how little has changed. Home care is a $343B industry processing millions of Medicaid and private-pay assessments every year, and nearly all of it still happens on paper, spreadsheets, and legacy software built two decades ago. The incumbents — WellSky, AxisCare, and CareTime — proved that agencies will pay for software. What they never delivered was intelligence. Not one of them has touched AI in a meaningful way, meaning agencies are still leaving deals on the table and losing trust through slow, error-prone processes.
 
-Key metrics:
-- $92K ARR, growing month-over-month
-- 163+ agency leads across 48 states
-- $450K SAFE round at $2.25M post-money valuation
-- 50-state regulatory knowledge base built in
+What the incumbents validated was the willingness to pay. What agencies are urgently asking for now is a platform that actually thinks — one that eliminates the documentation burden consuming 40-60% of their staff's time and replaces it with automation. That is the gap PalmCare AI is filling.
 
-We're raising a pre-seed round to scale sales and expand our AI pipeline. I'd welcome a 15-minute call to share more.
+We are raising a $450K seed round via SAFE or convertible note at a $1.8M pre-money valuation. This capital will fund our first AI engineering hire, go-to-market execution, and compliance infrastructure as we scale to 700 agencies by the end of 2027.
 
-Best regards,
+Why this market and why now:
+- LLMs and voice AI are now production-ready at the cost structures vertical SaaS requires; this window just opened
+- 10,000 Americans turn 65 every day through 2030, accelerating home-based care demand
+- Medicaid and Medicare Advantage are actively shifting reimbursement toward home care over institutional settings
+- No competitor has an AI roadmap; this is a greenfield opportunity inside a mature, paying market
+
+PalmCare AI Highlights:
+- Full platform built and live today — AI assessment pipeline, voice documentation engine, CRM
+- $399/mo blended ARPU across mobile and full platform tiers
+- 82% gross margin driven by low AI pipeline cost
+- Structural retention: agencies run daily operations through the platform, switching cost is high by design
+- Founder with a rare combination: software engineer, B2B sales professional, and former home care experience
+- Clean cap table — 100% bootstrapped, no prior dilution
+
+I've attached our deck below. I'd welcome the chance to walk you through what we're building and get your feedback.
+
+Deck: {PITCH_DECK_URL}
+
+Visit our website @ palmcareai.com
+
+Warm regards,
 Muse Ibrahim
-President & CEO, Palm Technologies, INC.
-sales@palmtai.com | palmcareai.com"""
+Founder & CEO, Palm Technologies Inc.
+213-569-7693 | invest@palmtai.com"""
     return subject, body
 
 
@@ -775,15 +810,21 @@ def approve_draft(
             subject=subject,
             html=email_body,
             reply_to="sales@palmtai.com",
+            sender="Muse Ibrahim <sales@send.palmtai.com>",
         )
     else:
-        html_plain = f"<pre style='font-family:Arial,sans-serif;font-size:14px;line-height:1.6;white-space:pre-wrap;'>{email_body}</pre>"
+        html_plain = f"<pre style='font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;'>{email_body}</pre>"
+        attachments = None
+        if target_type == "investor":
+            attachments = [{"filename": "PalmCare_AI_Pitch_Deck.pdf", "path": PITCH_DECK_URL}]
         result = email_service.send_email(
             to=to_email,
             subject=subject,
             html=html_plain,
             text=email_body,
-            reply_to="sales@palmtai.com",
+            reply_to="invest@palmtai.com" if target_type == "investor" else "sales@palmtai.com",
+            attachments=attachments,
+            sender="Muse Ibrahim <invest@send.palmtai.com>" if target_type == "investor" else "Muse Ibrahim <sales@send.palmtai.com>",
         )
 
     now = datetime.now(timezone.utc)

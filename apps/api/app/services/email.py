@@ -34,16 +34,16 @@ class EmailService:
 
         # Dedicated sender addresses — each maps to a verified Resend identity
         self.from_onboarding = os.getenv(
-            "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@palmtai.com>"
+            "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@send.palmtai.com>"
         )
         self.from_welcome = os.getenv(
-            "EMAIL_FROM_WELCOME", f"{BRAND} <welcome@palmtai.com>"
+            "EMAIL_FROM_WELCOME", f"{BRAND} <welcome@send.palmtai.com>"
         )
         self.from_sales = os.getenv(
-            "EMAIL_FROM_SALES", "Muse Ibrahim <sales@palmtai.com>"
+            "EMAIL_FROM_SALES", "Muse Ibrahim <sales@send.palmtai.com>"
         )
         self.from_support = os.getenv(
-            "EMAIL_FROM_SUPPORT", f"{BRAND} <support@palmtai.com>"
+            "EMAIL_FROM_SUPPORT", f"{BRAND} <support@send.palmtai.com>"
         )
 
         # Legacy fallback (used by generic send_email when no sender specified)

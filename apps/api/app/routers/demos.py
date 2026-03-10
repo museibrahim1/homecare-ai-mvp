@@ -288,8 +288,7 @@ async def book_demo(
 
     email_svc = get_email_service()
 
-    # Use a verified sender; palmtai.com is not yet verified in Resend
-    verified_sender = "PalmCare AI <onboarding@resend.dev>"
+    verified_sender = "PalmCare AI <onboarding@send.palmtai.com>"
 
     services_list = ', '.join(booking.services or []) or 'Not specified'
 
