@@ -654,7 +654,19 @@ def get_weekly_plan(
         .all()
     )
 
-    # Uncalled leads pool for FUTURE day assignment (timezone-ordered)
+    # All contacted leads (shown on past days, regardless of email status)
+    all_contacted = (
+        db.query(SalesLead)
+        .filter(
+            SalesLead.is_contacted == True,  # noqa: E712
+            SalesLead.phone.isnot(None),
+            SalesLead.phone != "",
+        )
+        .order_by(SalesLead.updated_at)
+        .all()
+    )
+
+    # Uncalled leads pool for today + future (timezone-ordered)
     uncalled_pool = (
         db.query(SalesLead)
         .filter(
@@ -682,7 +694,8 @@ def get_weekly_plan(
     global_day_offset = _cumulative_days_before(week_offset)
 
     days: List[WeeklyDayPlan] = []
-    future_call_counter = 0
+    contacted_idx = 0
+    uncalled_idx = 0
     for i, (day_name, day_date) in enumerate(work_days):
         global_idx = global_day_offset + i
 
@@ -692,28 +705,21 @@ def get_weekly_plan(
         inv_start = global_idx * INVESTORS_PER_DAY
         day_investors = all_investors[inv_start:inv_start + INVESTORS_PER_DAY]
 
-        if day_date == today:
-            # Today: show ALL contacted leads with phones (even if they now have emails)
-            contacted = (
-                db.query(SalesLead)
-                .filter(
-                    SalesLead.is_contacted == True,  # noqa: E712
-                    SalesLead.phone.isnot(None),
-                    SalesLead.phone != "",
-                )
-                .order_by(SalesLead.updated_at.desc())
-                .all()
-            )
-            remaining = max(CALLS_PER_DAY - len(contacted), 0)
-            day_calls = contacted + uncalled_pool[:remaining]
-        elif day_date < today:
-            # Past days: show contacted leads from that era
-            day_calls = []
+        if day_date < today:
+            # Past day: show completed calls (batch of contacted leads)
+            day_calls = all_contacted[contacted_idx:contacted_idx + CALLS_PER_DAY]
+            contacted_idx += len(day_calls)
+        elif day_date == today:
+            # Today: any remaining contacted + fill with uncalled
+            remaining_contacted = all_contacted[contacted_idx:]
+            contacted_idx = len(all_contacted)
+            fill = max(CALLS_PER_DAY - len(remaining_contacted), 0)
+            day_calls = list(remaining_contacted) + uncalled_pool[uncalled_idx:uncalled_idx + fill]
+            uncalled_idx += fill
         else:
             # Future: next batch from uncalled pool
-            c_start = future_call_counter * CALLS_PER_DAY
-            day_calls = uncalled_pool[c_start:c_start + CALLS_PER_DAY]
-            future_call_counter += 1
+            day_calls = uncalled_pool[uncalled_idx:uncalled_idx + CALLS_PER_DAY]
+            uncalled_idx += CALLS_PER_DAY
 
         agency_drafts = []
         for lead in day_agencies:
@@ -1164,17 +1170,21 @@ def _get_todays_plan_data(db: Session) -> dict:
 
     global_idx = global_day_offset + today_idx
 
-    # Show ALL contacted leads with phones (even if they now have emails)
-    contacted = (
+    # Count contacted leads assigned to past days
+    all_contacted = (
         db.query(SalesLead)
         .filter(
             SalesLead.is_contacted == True,  # noqa: E712
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
         )
-        .order_by(SalesLead.updated_at.desc())
+        .order_by(SalesLead.updated_at)
         .all()
     )
+    past_days_count = sum(1 for _, d in work_days[:today_idx] if d < today)
+    past_slots = past_days_count * CALLS_PER_DAY
+    remaining_contacted = all_contacted[past_slots:]
+
     uncalled = (
         db.query(SalesLead)
         .filter(
@@ -1186,8 +1196,8 @@ def _get_todays_plan_data(db: Session) -> dict:
         .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
         .all()
     )
-    remaining_slots = max(CALLS_PER_DAY - len(contacted), 0)
-    day_calls = contacted + uncalled[:remaining_slots]
+    fill = max(CALLS_PER_DAY - len(remaining_contacted), 0)
+    day_calls = list(remaining_contacted) + uncalled[:fill]
 
     agencies = (
         db.query(SalesLead)
