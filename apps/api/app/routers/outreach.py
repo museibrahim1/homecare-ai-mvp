@@ -693,12 +693,11 @@ def get_weekly_plan(
         day_investors = all_investors[inv_start:inv_start + INVESTORS_PER_DAY]
 
         if day_date == today:
-            # Today: show contacted leads first, then fill with uncalled
+            # Today: show ALL contacted leads with phones (even if they now have emails)
             contacted = (
                 db.query(SalesLead)
                 .filter(
                     SalesLead.is_contacted == True,  # noqa: E712
-                    (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
                     SalesLead.phone.isnot(None),
                     SalesLead.phone != "",
                 )
@@ -708,7 +707,7 @@ def get_weekly_plan(
             remaining = max(CALLS_PER_DAY - len(contacted), 0)
             day_calls = contacted + uncalled_pool[:remaining]
         elif day_date < today:
-            # Past days: show contacted leads from before today
+            # Past days: show contacted leads from that era
             day_calls = []
         else:
             # Future: next batch from uncalled pool
@@ -1165,12 +1164,11 @@ def _get_todays_plan_data(db: Session) -> dict:
 
     global_idx = global_day_offset + today_idx
 
-    # Show contacted leads first, then fill remaining slots with uncalled
+    # Show ALL contacted leads with phones (even if they now have emails)
     contacted = (
         db.query(SalesLead)
         .filter(
             SalesLead.is_contacted == True,  # noqa: E712
-            (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
         )
