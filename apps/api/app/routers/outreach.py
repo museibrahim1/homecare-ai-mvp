@@ -1488,8 +1488,9 @@ def daily_digest_preview(
 def cron_daily_data(
     request: Request,
     db: Session = Depends(get_db),
+    day_index: Optional[int] = None,
 ):
-    """Return today's outreach data (calls, agencies, investors) for external use."""
+    """Return outreach data for a specific day. day_index=0 is first work day of week."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
     cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
@@ -1498,7 +1499,33 @@ def cron_daily_data(
     if not key_valid:
         raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
 
-    data = _get_todays_plan_data(db)
+    if day_index is not None:
+        work_days = _week_work_days(0)
+        global_day_offset = _cumulative_days_before(0)
+        if day_index < 0 or day_index >= len(work_days):
+            raise HTTPException(status_code=400, detail="Invalid day_index")
+        day_name, day_date = work_days[day_index]
+        global_idx = global_day_offset + day_index
+        agencies = (
+            db.query(SalesLead)
+            .filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+                    SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES))
+            .order_by(PRIORITY_ORDER, SalesLead.created_at)
+            .all()
+        )
+        day_agencies = agencies[global_idx * EMAILS_PER_DAY:(global_idx + 1) * EMAILS_PER_DAY]
+        investors = (
+            db.query(Investor)
+            .filter(Investor.contact_email.isnot(None), Investor.contact_email != "",
+                    Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES))
+            .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+            .all()
+        )
+        day_investors = investors[global_idx * INVESTORS_PER_DAY:(global_idx + 1) * INVESTORS_PER_DAY]
+        data = {"calls": [], "agencies": day_agencies, "investors": day_investors,
+                "day_name": day_name, "date": day_date.isoformat()}
+    else:
+        data = _get_todays_plan_data(db)
     calls = data["calls"]
     agencies = data["agencies"]
     investors = data["investors"]
@@ -1566,7 +1593,7 @@ def cron_mark_emails_sent(
     body: dict,
     db: Session = Depends(get_db),
 ):
-    """Mark specific agency/investor leads as email_sent by ID list."""
+    """Mark or unmark agency/investor leads as email_sent by ID list."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
     cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
@@ -1575,24 +1602,42 @@ def cron_mark_emails_sent(
         raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
 
     now = datetime.now(timezone.utc)
+    action = body.get("action", "mark")
     lead_ids = body.get("lead_ids", [])
     investor_ids = body.get("investor_ids", [])
     updated = 0
-    for lid in lead_ids:
-        lead = db.query(SalesLead).filter(SalesLead.id == lid).first()
-        if lead and lead.status != "email_sent":
-            lead.status = "email_sent"
-            lead.last_email_sent_at = now
-            lead.email_send_count = (lead.email_send_count or 0) + 1
-            lead.updated_at = now
-            updated += 1
-    for iid in investor_ids:
-        inv = db.query(Investor).filter(Investor.id == iid).first()
-        if inv and inv.status != "email_sent":
-            inv.status = "email_sent"
-            inv.last_email_sent_at = now
-            inv.email_send_count = (inv.email_send_count or 0) + 1
-            inv.updated_at = now
+
+    if action == "unmark":
+        for lid in lead_ids:
+            lead = db.query(SalesLead).filter(SalesLead.id == lid).first()
+            if lead and lead.status == "email_sent":
+                lead.status = "new"
+                lead.last_email_sent_at = None
+                lead.email_send_count = max((lead.email_send_count or 1) - 1, 0)
+                updated += 1
+        for iid in investor_ids:
+            inv = db.query(Investor).filter(Investor.id == iid).first()
+            if inv and inv.status == "email_sent":
+                inv.status = "new"
+                inv.last_email_sent_at = None
+                inv.email_send_count = max((inv.email_send_count or 1) - 1, 0)
+                updated += 1
+    else:
+        for lid in lead_ids:
+            lead = db.query(SalesLead).filter(SalesLead.id == lid).first()
+            if lead and lead.status != "email_sent":
+                lead.status = "email_sent"
+                lead.last_email_sent_at = now
+                lead.email_send_count = (lead.email_send_count or 0) + 1
+                lead.updated_at = now
+                updated += 1
+        for iid in investor_ids:
+            inv = db.query(Investor).filter(Investor.id == iid).first()
+            if inv and inv.status != "email_sent":
+                inv.status = "email_sent"
+                inv.last_email_sent_at = now
+                inv.email_send_count = (inv.email_send_count or 0) + 1
+                inv.updated_at = now
             updated += 1
     db.commit()
     return {"ok": True, "updated": updated}
