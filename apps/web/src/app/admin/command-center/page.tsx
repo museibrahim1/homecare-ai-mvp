@@ -244,7 +244,6 @@ export default function CommandCenterPage() {
     setSendingId(id);
     const edit = draftEdits[id];
     try {
-      // First generate a server-side draft, then approve it
       const draftRes = await apiFetch('/platform/outreach/generate-draft', {
         method: 'POST',
         body: JSON.stringify({ target_type: type, target_id: id }),
@@ -256,8 +255,8 @@ export default function CommandCenterPage() {
       if (type === 'agency') setAgencyStatuses(prev => ({ ...prev, [id]: 'sent' }));
       else setInvestorStatuses(prev => ({ ...prev, [id]: 'sent' }));
     } catch {
-      if (type === 'agency') setAgencyStatuses(prev => ({ ...prev, [id]: 'sent' }));
-      else setInvestorStatuses(prev => ({ ...prev, [id]: 'sent' }));
+      if (type === 'agency') setAgencyStatuses(prev => ({ ...prev, [id]: 'failed' }));
+      else setInvestorStatuses(prev => ({ ...prev, [id]: 'failed' }));
     } finally {
       setSendingId(null);
       setExpandedDraft(null);
@@ -644,14 +643,15 @@ function AgencyDraftTable({
             rows.map((row) => {
               const status = statuses[row.id] || 'pending';
               const isExpanded = expandedDraft === row.id;
-              const isSent = status === 'sent' || status === 'email_sent';
+              const isSent = status === 'sent' || status === 'email_sent' || (row.email_send_count > 0);
               const isSkipped = status === 'skipped';
+              const isFailed = status === 'failed';
               const edit = draftEdits[row.id];
 
               return (
                 <React.Fragment key={row.id}>
                   <tr className={`border-b border-slate-50 transition-colors ${
-                    isExpanded ? 'bg-teal-50/30' : isSent ? 'bg-emerald-50/30' : 'hover:bg-slate-50/50'
+                    isExpanded ? 'bg-teal-50/30' : isSent ? 'bg-emerald-50/30' : isFailed ? 'bg-red-50/30' : 'hover:bg-slate-50/50'
                   }`}>
                     <td className="px-4 py-3">
                       <span className="font-medium text-slate-800">{row.provider_name}</span>
@@ -671,6 +671,13 @@ function AgencyDraftTable({
                         <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-medium">
                           <CheckCircle2 className="w-4 h-4" /> Sent
                         </span>
+                      ) : isFailed ? (
+                        <button
+                          onClick={() => onToggleDraft(row.id)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600 transition-colors"
+                        >
+                          Failed — Retry
+                        </button>
                       ) : isSkipped ? (
                         <span className="text-xs text-slate-400">Skipped</span>
                       ) : (

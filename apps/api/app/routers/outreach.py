@@ -1521,14 +1521,18 @@ def cron_daily_data(
         ],
         "agencies": [
             {
+                "id": str(a.id),
                 "provider_name": a.provider_name,
                 "city": a.city,
                 "state": a.state,
                 "contact_email": a.contact_email,
                 "contact_name": a.contact_name,
                 "priority": a.priority,
+                "status": a.status,
+                "email_send_count": a.email_send_count or 0,
+                "last_email_sent_at": a.last_email_sent_at.isoformat() if a.last_email_sent_at else None,
             }
-            for a in agencies[:15]
+            for a in agencies
         ],
         "agency_count": len(agencies),
         "investors": [
@@ -1544,6 +1548,44 @@ def cron_daily_data(
             for inv in investors
         ],
     }
+
+
+@router.post("/cron/mark-emails-sent")
+def cron_mark_emails_sent(
+    request: Request,
+    body: dict,
+    db: Session = Depends(get_db),
+):
+    """Mark specific agency/investor leads as email_sent by ID list."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
+    if not key_valid:
+        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+
+    now = datetime.now(timezone.utc)
+    lead_ids = body.get("lead_ids", [])
+    investor_ids = body.get("investor_ids", [])
+    updated = 0
+    for lid in lead_ids:
+        lead = db.query(SalesLead).filter(SalesLead.id == lid).first()
+        if lead and lead.status != "email_sent":
+            lead.status = "email_sent"
+            lead.last_email_sent_at = now
+            lead.email_send_count = (lead.email_send_count or 0) + 1
+            lead.updated_at = now
+            updated += 1
+    for iid in investor_ids:
+        inv = db.query(Investor).filter(Investor.id == iid).first()
+        if inv and inv.status != "email_sent":
+            inv.status = "email_sent"
+            inv.last_email_sent_at = now
+            inv.email_send_count = (inv.email_send_count or 0) + 1
+            inv.updated_at = now
+            updated += 1
+    db.commit()
+    return {"ok": True, "updated": updated}
 
 
 @router.post("/cron/daily-digest")
