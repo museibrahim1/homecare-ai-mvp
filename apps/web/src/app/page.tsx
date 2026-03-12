@@ -559,6 +559,8 @@ function BookDemoSection() {
     }));
   };
 
+  const STEP_NAMES: Record<number, string> = { 1: 'contact_info', 2: 'agency_info', 3: 'details', 4: 'pick_time', 5: 'booked' };
+
   const trackStep = (stepNum: number) => {
     try {
       fetch(`${API}/demos/funnel-event`, {
@@ -572,6 +574,13 @@ function BookDemoSection() {
           referrer: document.referrer || undefined,
         }),
       }).catch(() => {});
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', `demo_step_${STEP_NAMES[stepNum] || stepNum}`, {
+          event_category: 'demo_funnel',
+          event_label: `Step ${stepNum}`,
+          value: stepNum,
+        });
+      }
     } catch {}
   };
 
