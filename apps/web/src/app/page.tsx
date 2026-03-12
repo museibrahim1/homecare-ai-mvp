@@ -559,6 +559,27 @@ function BookDemoSection() {
     }));
   };
 
+  const trackStep = (stepNum: number) => {
+    try {
+      fetch(`${API}/demos/funnel-event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          step: stepNum,
+          email: form.email || undefined,
+          name: form.first_name ? `${form.first_name} ${form.last_name}` : undefined,
+          company: form.company_name || undefined,
+          referrer: document.referrer || undefined,
+        }),
+      }).catch(() => {});
+    } catch {}
+  };
+
+  const goToStep = (nextStep: number) => {
+    setStep(nextStep);
+    trackStep(nextStep);
+  };
+
   const loadSlots = async () => {
     setLoadingSlots(true);
     try {
@@ -570,6 +591,20 @@ function BookDemoSection() {
     } catch { /* slots will be empty, user can still submit */ }
     finally { setLoadingSlots(false); }
   };
+
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const trackedView = useRef(false);
+  useEffect(() => {
+    if (!sectionRef.current || trackedView.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !trackedView.current) {
+        trackedView.current = true;
+        trackStep(1);
+      }
+    }, { threshold: 0.3 });
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const canProceed1 = form.email && form.first_name && form.last_name && form.phone;
   const canProceed2 = form.company_name && form.state && form.role && form.services.length > 0;
@@ -615,6 +650,7 @@ function BookDemoSection() {
         setBookedTime(data.time || formatTimeLabel(form.time_slot));
         setMeetLink(data.meeting_link || '');
         setSubmitted(true);
+        trackStep(5);
       } else {
         const data = await res.json().catch(() => ({}));
         alert(data.detail || 'Something went wrong. Please try again.');
@@ -670,7 +706,7 @@ function BookDemoSection() {
   }
 
   return (
-    <section id="book-demo" className="py-20 px-6 bg-dark-800/30">
+    <section id="book-demo" ref={sectionRef} className="py-20 px-6 bg-dark-800/30">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full mb-6">
@@ -715,7 +751,7 @@ function BookDemoSection() {
                 </div>
               </div>
               <p className="text-xs text-red-400/80 italic">If you are a caregiver, please visit our <a href="/contact" className="underline hover:text-red-300">caregiver resources page</a> instead.</p>
-              <button disabled={!canProceed1} onClick={() => setStep(2)}
+              <button disabled={!canProceed1} onClick={() => goToStep(2)}
                 className="w-full btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed mt-2">
                 Next <ArrowRight className="w-5 h-5" />
               </button>
@@ -763,8 +799,8 @@ function BookDemoSection() {
                 </div>
               </div>
               <div className="flex gap-3 mt-2">
-                <button onClick={() => setStep(1)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
-                <button disabled={!canProceed2} onClick={() => setStep(3)}
+                <button onClick={() => goToStep(1)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
+                <button disabled={!canProceed2} onClick={() => goToStep(3)}
                   className="flex-1 btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                   Next <ArrowRight className="w-5 h-5" />
                 </button>
@@ -800,8 +836,8 @@ function BookDemoSection() {
                 </select>
               </div>
               <div className="flex gap-3 mt-2">
-                <button onClick={() => setStep(2)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
-                <button disabled={!canProceed3} onClick={() => { setStep(4); loadSlots(); }}
+                <button onClick={() => goToStep(2)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
+                <button disabled={!canProceed3} onClick={() => { goToStep(4); loadSlots(); }}
                   className="flex-1 btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                   Pick a Time <ArrowRight className="w-5 h-5" />
                 </button>
@@ -872,7 +908,7 @@ function BookDemoSection() {
               )}
 
               <div className="flex gap-3 mt-2">
-                <button onClick={() => setStep(3)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
+                <button onClick={() => goToStep(3)} className="flex-1 py-3.5 text-lg font-semibold rounded-xl bg-dark-700 text-white hover:bg-dark-600 transition">Previous</button>
                 <button disabled={!canSubmit || submitting} onClick={handleSubmit}
                   className="flex-1 btn-primary py-3.5 text-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                   {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />Booking...</> : <>Confirm Booking</>}

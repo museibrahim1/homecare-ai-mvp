@@ -78,6 +78,55 @@ class DemoBookingResponse(BaseModel):
     message: str
 
 
+class DemoFunnelEvent(BaseModel):
+    step: int
+    email: Optional[str] = None
+    name: Optional[str] = None
+    company: Optional[str] = None
+    referrer: Optional[str] = None
+
+
+_funnel_events: list[dict] = []
+
+
+@router.post("/funnel-event")
+def track_funnel_event(event: DemoFunnelEvent, request: Request):
+    """Track demo booking funnel progression (lightweight, in-memory)."""
+    ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+    _funnel_events.append({
+        "step": event.step,
+        "email": event.email,
+        "name": event.name,
+        "company": event.company,
+        "referrer": event.referrer,
+        "ip": ip.split(",")[0].strip(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+    if len(_funnel_events) > 5000:
+        _funnel_events[:] = _funnel_events[-2500:]
+    return {"ok": True}
+
+
+@router.get("/funnel-stats")
+def get_funnel_stats(request: Request):
+    """Return demo booking funnel stats. Requires internal key."""
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    if key != cron_secret:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    from collections import Counter
+    step_counts = Counter(e["step"] for e in _funnel_events)
+    step_labels = {1: "Contact Info", 2: "Agency Info", 3: "Details", 4: "Pick Time", 5: "Booked"}
+    funnel = [
+        {"step": s, "label": step_labels.get(s, f"Step {s}"), "count": step_counts.get(s, 0)}
+        for s in sorted(step_labels.keys())
+    ]
+    unique_visitors = len(set(e["ip"] for e in _funnel_events))
+    recent = _funnel_events[-20:][::-1]
+    return {"funnel": funnel, "unique_visitors": unique_visitors, "total_events": len(_funnel_events), "recent": recent}
+
+
 def _find_calendar_admin(db: Session) -> Optional[User]:
     """Find an admin user with Google Calendar connected."""
     admin = db.query(User).filter(
