@@ -220,19 +220,36 @@ class WeeklyPlanResponse(BaseModel):
 
 # ─── Helpers ───
 
+from zoneinfo import ZoneInfo
+
+BUSINESS_TZ = ZoneInfo("America/New_York")
+
+
+def _now_eastern() -> datetime:
+    """Current time in US Eastern (business timezone)."""
+    return datetime.now(BUSINESS_TZ)
+
+
+def _today_eastern() -> date:
+    """Today's date in US Eastern."""
+    return _now_eastern().date()
+
+
 def _today_start() -> datetime:
-    now = datetime.now(timezone.utc)
-    return now.replace(hour=0, minute=0, second=0, microsecond=0)
+    """Start of today in US Eastern, converted to UTC for DB queries."""
+    eastern_now = _now_eastern()
+    eastern_midnight = eastern_now.replace(hour=0, minute=0, second=0, microsecond=0)
+    return eastern_midnight.astimezone(timezone.utc)
 
 
 def _week_bounds() -> tuple[datetime, datetime]:
-    """Return (Monday 00:00, Sunday 23:59:59) of the current week in UTC."""
-    now = datetime.now(timezone.utc)
-    monday = (now - timedelta(days=now.weekday())).replace(
+    """Return (Monday 00:00, Sunday 23:59:59) of the current week in Eastern, as UTC."""
+    eastern_now = _now_eastern()
+    monday_eastern = (eastern_now - timedelta(days=eastern_now.weekday())).replace(
         hour=0, minute=0, second=0, microsecond=0,
     )
-    sunday = monday + timedelta(days=6, hours=23, minutes=59, seconds=59)
-    return monday, sunday
+    sunday_eastern = monday_eastern + timedelta(days=6, hours=23, minutes=59, seconds=59)
+    return monday_eastern.astimezone(timezone.utc), sunday_eastern.astimezone(timezone.utc)
 
 
 AGENCY_SUBJECT_HOOKS = [
@@ -597,7 +614,7 @@ TZ_ORDER = case(
 
 def _week_work_days(week_offset: int) -> list[tuple[str, date]]:
     """Return list of (day_name, date) for working days in the given week."""
-    today = datetime.now(timezone.utc).date()
+    today = _today_eastern()
     days_since_monday = today.weekday()
     this_monday = today - timedelta(days=days_since_monday)
     target_monday = this_monday + timedelta(weeks=week_offset)
@@ -630,7 +647,7 @@ def get_weekly_plan(
     user: User = Depends(require_ceo),
 ):
     """Return weekly plan with pre-generated drafts. Flows Mon-Fri across weeks until everyone is reached."""
-    today = datetime.now(timezone.utc).date()
+    today = _today_eastern()
     work_days = _week_work_days(week_offset)
 
     all_agencies = (
@@ -1161,7 +1178,7 @@ CEO_EMAILS = ["museibrahim@palmtai.com"]
 
 def _get_todays_plan_data(db: Session) -> dict:
     """Extract today's calls, emails, and investor emails from the weekly plan."""
-    today = datetime.now(timezone.utc).date()
+    today = _today_eastern()
     work_days = _week_work_days(0)
     global_day_offset = _cumulative_days_before(0)
 

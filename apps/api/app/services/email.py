@@ -29,7 +29,7 @@ class EmailService:
     """Service for sending transactional emails via Resend."""
 
     def __init__(self):
-        self.api_key = os.getenv("RESEND_API_KEY")
+        self.api_key = (os.getenv("RESEND_API_KEY") or "").strip()
         self.app_url = os.getenv("APP_URL", "https://palmcareai.com")
 
         # Dedicated sender addresses — each maps to a verified Resend identity
