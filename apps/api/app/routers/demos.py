@@ -337,13 +337,13 @@ async def book_demo(
 
     email_svc = get_email_service()
 
-    verified_sender = "PalmCare AI <onboarding@send.palmtai.com>"
+    verified_sender = "Muse Ibrahim <sales@send.palmtai.com>"
 
     services_list = ', '.join(booking.services or []) or 'Not specified'
 
     # Confirmation email to prospect
     if has_schedule and formatted_date:
-        subject = f"{booking.name} has joined your demo - PalmCare AI Demo"
+        subject = f"Your PalmCare AI Demo is Confirmed — {formatted_date}"
     else:
         subject = f"We Received Your Demo Request — {booking.company_name}"
 
@@ -402,21 +402,23 @@ async def book_demo(
         </div>
         """
 
-    email_svc.send_email(
+    prospect_result = email_svc.send_email(
         to=booking.email,
         subject=subject,
         sender=verified_sender,
         reply_to="sales@palmtai.com",
         html=prospect_html,
     )
+    if not prospect_result.get("success"):
+        logger.error(f"Failed to send demo confirmation to {booking.email}: {prospect_result.get('error')}")
 
-    # Admin notification (same clean style)
-    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com")
-    email_svc.send_email(
-        to=admin_email,
-        subject=f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name} — {booking.name}",
-        sender=verified_sender,
-        html=f"""
+    # Admin notification to both sales and personal email
+    admin_emails = [
+        os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com"),
+        "musajama89@gmail.com",
+    ]
+    admin_subject = f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name} — {booking.name}"
+    admin_html = f"""
         <div style="font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif; background-color: #f6f6f6; padding: 40px 20px;">
             <div style="max-width: 520px; margin: 0 auto;">
                 <div style="text-align: center; padding-bottom: 30px;">
@@ -468,8 +470,13 @@ async def book_demo(
                 </div>
             </div>
         </div>
-        """,
-    )
+        """
+    for ae in admin_emails:
+        result = email_svc.send_email(
+            to=ae, subject=admin_subject, sender=verified_sender, html=admin_html,
+        )
+        if not result.get("success"):
+            logger.error(f"Failed to send admin demo notification to {ae}: {result.get('error')}")
 
     if has_schedule:
         return DemoBookingResponse(
