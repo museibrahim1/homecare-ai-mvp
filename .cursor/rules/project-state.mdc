@@ -35,5 +35,6 @@ alwaysApply: true
 
 ## Environment
 - `.env` has all API keys — NEVER commit secrets or show them in responses
-- Email: Resend API (`re_fYB7LY6X_...`), domain `palmtai.com` status: failed verification
+- Email: Resend API (`re_fYB7LY6X_...`), domain `send.palmtai.com` VERIFIED, `palmtai.com` failed verification. Use `sales@send.palmtai.com` as sender.
+- Railway RESEND_API_KEY may be expired — needs refresh via Railway dashboard
 - User emails: `musajama89@gmail.com` (personal), `museibrahim@palmtai.com` (business)

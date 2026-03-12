@@ -162,13 +162,17 @@ def send_emails():
     print(f"SENDING OUTREACH EMAILS TO {len(CONTACTS)} CONTACTS")
     print(f"{'='*60}\n")
 
+    import time
     results = []
-    for c in CONTACTS:
+    for i, c in enumerate(CONTACTS):
+        if i > 0:
+            time.sleep(1.5)
+
         subject, html = build_warm_open(c["provider_name"], c["city"], c["state"], c["state_full"])
 
         try:
             resp = resend.Emails.send({
-                "from": "PalmCare AI <onboarding@resend.dev>",
+                "from": "Muse Ibrahim <sales@send.palmtai.com>",
                 "to": [c["email"]],
                 "subject": subject,
                 "html": html,

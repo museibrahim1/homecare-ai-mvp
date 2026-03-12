@@ -38,7 +38,7 @@
 | Company | Palm Technologies, INC. |
 | Website | palmcareai.com |
 | Email (workspace) | palmtai.com (Google Workspace) |
-| Email (transactional) | `onboarding@resend.dev` — **palmtai.com domain FAILED verification in Resend** |
+| Email (transactional) | `sales@send.palmtai.com` — **send.palmtai.com VERIFIED in Resend** (palmtai.com failed, use send.palmtai.com) |
 | Reply-to | sales@palmtai.com |
 | AI Agent email | ai@palmcareai.com (Cloudflare Worker → local daemon) |
 | Dashboard | http://localhost:5050 (Flask, launchd) |
@@ -85,9 +85,10 @@
 - Batch: `apps/worker/libs/deepgram_asr.py` | Live: `POST /live/transcribe` | Fallback: Whisper
 
 ### Email Sending (Resend)
-- **CRITICAL**: `palmtai.com` domain verification FAILED in Resend. All emails must use `onboarding@resend.dev` as sender.
+- `send.palmtai.com` is **VERIFIED** in Resend (verified March 10, 2026). Use `sales@send.palmtai.com` as sender.
+- `palmtai.com` root domain verification failed — only use `send.palmtai.com` subdomain addresses.
 - Always set `reply_to="sales@palmtai.com"` so replies go to the right place.
-- To fix permanently: re-verify palmtai.com at https://resend.com/domains with DNS records.
+- Railway production `RESEND_API_KEY` may need refresh — check via Railway dashboard if sends fail.
 
 ### Demo Booking System
 - Frontend: 4-step form on landing page (`apps/web/src/app/page.tsx` → `BookDemoSection`)
@@ -171,12 +172,29 @@ Demo booking: 4-step form, GET /demos/slots (14 days × 14 slots), POST /demos/b
 - Contract style gallery with 3 previewable visual styles
 - Full app flow marketing video recorded (client → assessment → contract, 41s)
 
+### Mar 11 — Phone Outreach, CRM Updates, Auto-Sequencing
+**Outreach:**
+- 17 phone calls logged and marked as completed in CRM (FL, NY, CT, DE agencies matched by phone number)
+- 5 new agency contacts added from calls: McAngel Nurses (Lordina/Angela Berko), Doctors Preferred Healthcare (Sebrina Houston), Paradis HS Home Health (Ms Donaldson), Empower/Healthy Home Primary (Courtney Crane), Lucent Healthcare (Ivad)
+- All 5 contacts emailed with warm_open template via verified `send.palmtai.com` domain
+- 100 agencies from last 2 days enrolled in 5-email drip sequence
+
+**Auto-sequencing feature:**
+- Every email send now auto-starts the 5-email drip sequence for the lead (send_lead_email, approve_draft, campaign send, internal endpoints)
+- New internal endpoints: `POST /leads/internal/add-and-email` (add leads + send + sequence), `POST /leads/internal/start-recent-sequences` (retroactive sequence start)
+- Expanded STATE_NAMES to all 50 states + DC (was only NE/IA)
+
+**Domain fix:**
+- Discovered `send.palmtai.com` is already VERIFIED in Resend (since Mar 10)
+- Fixed sender address from `onboarding@resend.dev` to `sales@send.palmtai.com`
+- Railway production RESEND_API_KEY needs refresh (returning "API key is invalid")
+
 ---
 
 ## Upcoming Tasks
 
 ### IMMEDIATE
-1. **Re-verify palmtai.com in Resend** — Add DNS records so emails send from your own domain
+1. **Refresh RESEND_API_KEY on Railway** — Production key returns "invalid", update in Railway dashboard
 2. **Marketing email launch** — 5-email cold outreach to 163+ agencies
 3. **Investor outreach** — Email 60+ investors with v4 pitch deck
 4. **Apple Developer enrollment** — business account museibrahim@palmtai.com
@@ -189,4 +207,4 @@ Demo booking: 4-step form, GET /demos/slots (14 days × 14 slots), POST /demos/b
 
 ---
 
-*Last updated: March 7, 2026*
+*Last updated: March 11, 2026*
