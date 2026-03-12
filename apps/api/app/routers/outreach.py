@@ -1597,6 +1597,7 @@ def cron_daily_data(
         "agency_count": len(agencies),
         "investors": [
             {
+                "id": str(inv.id),
                 "fund_name": inv.fund_name,
                 "contact_name": inv.contact_name,
                 "contact_email": inv.contact_email,
@@ -1604,6 +1605,8 @@ def cron_daily_data(
                 "check_size_display": inv.check_size_display,
                 "focus_sectors": inv.focus_sectors or [],
                 "relevance_reason": inv.relevance_reason,
+                "status": inv.status,
+                "email_send_count": inv.email_send_count or 0,
             }
             for inv in investors
         ],
