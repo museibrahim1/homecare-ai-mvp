@@ -15,7 +15,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
-from sqlalchemy import func, case, asc
+from sqlalchemy import func, case
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
@@ -657,7 +657,7 @@ def get_weekly_plan(
             SalesLead.contact_email != "",
             SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
         )
-        .order_by(asc(SalesLead.created_at))
+        .order_by(PRIORITY_ORDER, SalesLead.created_at)
         .all()
     )
 
@@ -668,7 +668,7 @@ def get_weekly_plan(
             Investor.contact_email != "",
             Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
         )
-        .order_by(asc(Investor.created_at))
+        .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
         .all()
     )
 
@@ -1229,7 +1229,7 @@ def _get_todays_plan_data(db: Session) -> dict:
             SalesLead.contact_email != "",
             SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
         )
-        .order_by(asc(SalesLead.created_at))
+        .order_by(PRIORITY_ORDER, SalesLead.created_at)
         .all()
     )
     day_agencies = agencies[global_idx * EMAILS_PER_DAY:(global_idx + 1) * EMAILS_PER_DAY]
@@ -1241,7 +1241,7 @@ def _get_todays_plan_data(db: Session) -> dict:
             Investor.contact_email != "",
             Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
         )
-        .order_by(asc(Investor.created_at))
+        .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
         .all()
     )
     day_investors = investors[global_idx * INVESTORS_PER_DAY:(global_idx + 1) * INVESTORS_PER_DAY]
@@ -1533,7 +1533,7 @@ def cron_daily_data(
             db.query(SalesLead)
             .filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
                     SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES))
-            .order_by(asc(SalesLead.created_at))
+            .order_by(PRIORITY_ORDER, SalesLead.created_at)
             .all()
         )
         day_agencies = agencies[global_idx * EMAILS_PER_DAY:(global_idx + 1) * EMAILS_PER_DAY]
@@ -1541,7 +1541,7 @@ def cron_daily_data(
             db.query(Investor)
             .filter(Investor.contact_email.isnot(None), Investor.contact_email != "",
                     Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES))
-            .order_by(asc(Investor.created_at))
+            .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
             .all()
         )
         day_investors = investors[global_idx * INVESTORS_PER_DAY:(global_idx + 1) * INVESTORS_PER_DAY]
