@@ -753,7 +753,7 @@ function BookDemoSection() {
                 <label className="block text-sm font-medium text-dark-300 mb-2">What services do you provide?<span className="text-red-400">*</span></label>
                 <div className="space-y-2">
                   {SERVICES_OPTIONS.map(svc => (
-                    <label key={svc} className="flex items-center gap-3 p-3 rounded-xl bg-dark-700/50 border border-dark-600 hover:border-dark-500 transition cursor-pointer group">
+                    <label key={svc} onClick={() => toggleService(svc)} className="flex items-center gap-3 p-3 rounded-xl bg-dark-700/50 border border-dark-600 hover:border-dark-500 transition cursor-pointer group">
                       <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition ${form.services.includes(svc) ? 'bg-primary-500 border-primary-500' : 'border-dark-500 group-hover:border-dark-400'}`}>
                         {form.services.includes(svc) && <CheckCircle className="w-3.5 h-3.5 text-white" />}
                       </div>
