@@ -1628,7 +1628,19 @@ def cron_mark_emails_sent(
     action = body.get("action", "mark")
     lead_ids = body.get("lead_ids", [])
     investor_ids = body.get("investor_ids", [])
+    investor_emails = body.get("investor_emails", [])
+    lead_emails = body.get("lead_emails", [])
     updated = 0
+
+    for email in lead_emails:
+        lead = db.query(SalesLead).filter(SalesLead.contact_email == email).first()
+        if lead:
+            lead_ids.append(str(lead.id))
+
+    for email in investor_emails:
+        inv = db.query(Investor).filter(Investor.contact_email == email).first()
+        if inv:
+            investor_ids.append(str(inv.id))
 
     if action == "unmark":
         for lid in lead_ids:
@@ -1661,7 +1673,7 @@ def cron_mark_emails_sent(
                 inv.last_email_sent_at = now
                 inv.email_send_count = (inv.email_send_count or 0) + 1
                 inv.updated_at = now
-            updated += 1
+                updated += 1
     db.commit()
     return {"ok": True, "updated": updated}
 
