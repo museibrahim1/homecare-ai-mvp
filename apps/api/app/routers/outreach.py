@@ -1072,6 +1072,12 @@ def approve_draft(
             sender="Muse Ibrahim <invest@send.palmtai.com>" if target_type == "investor" else "Muse Ibrahim <sales@send.palmtai.com>",
         )
 
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=502,
+            detail=f"Email failed to send: {result.get('error', 'unknown error')}",
+        )
+
     now = datetime.now(timezone.utc)
 
     if target_type == "agency":
