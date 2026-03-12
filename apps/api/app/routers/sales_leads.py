@@ -458,7 +458,21 @@ EMAIL_TEMPLATES = {
     },
 }
 
-STATE_NAMES = {"NE": "Nebraska", "IA": "Iowa"}
+STATE_NAMES = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
+    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
+    "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho",
+    "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
+    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+    "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi",
+    "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada",
+    "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York",
+    "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
+    "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
+    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
+    "VT": "Vermont", "VA": "Virginia", "WA": "Washington", "WV": "West Virginia",
+    "WI": "Wisconsin", "WY": "Wyoming", "DC": "District of Columbia",
+}
 
 
 # =============================================================================
@@ -760,6 +774,7 @@ async def send_campaign(
                 "at": now.isoformat(),
             })
             lead.activity_log = activity
+            _auto_start_sequence(lead, req.campaign_name, db)
             sent += 1
         else:
             failed += 1
@@ -1794,6 +1809,10 @@ async def send_lead_email(
         "at": now.isoformat(),
     })
     lead.activity_log = activity
+
+    if result.get("success"):
+        _auto_start_sequence(lead, lead.campaign_tag or "manual-outreach", db)
+
     db.commit()
 
     return {
@@ -1970,3 +1989,218 @@ async def resend_webhook(
     db.commit()
 
     return {"status": "processed", "event": event_type, "lead": str(lead.id)}
+
+
+# =============================================================================
+# AUTO-SEQUENCING — start drip sequence when first email is sent
+# =============================================================================
+
+def _auto_start_sequence(lead: SalesLead, campaign_name: str, db: Session):
+    """Start the 5-email drip sequence for a lead if not already in one.
+
+    Called automatically whenever an email is sent to a lead that
+    doesn't have an active sequence. Sets sequence_step=1 and schedules
+    the next email (pattern_interrupt) in 2 days.
+    """
+    if lead.sequence_step and lead.sequence_step > 0:
+        return
+    if lead.sequence_completed:
+        return
+
+    now = datetime.now(timezone.utc)
+    lead.sequence_step = 1
+    lead.sequence_started_at = now
+    lead.sequence_completed = False
+    lead.last_template_sent = "warm_open"
+    lead.campaign_tag = campaign_name or "auto-sequence"
+    lead.next_email_scheduled_at = now + timedelta(days=SEQUENCE_DAYS["pattern_interrupt"])
+
+    activity = lead.activity_log or []
+    activity.append({
+        "action": "Auto-sequence started (Email 1/5 counted from initial send)",
+        "campaign": lead.campaign_tag,
+        "at": now.isoformat(),
+    })
+    lead.activity_log = activity
+
+    db.add(EmailCampaignEvent(
+        lead_id=lead.id,
+        template_id="warm_open",
+        campaign_tag=lead.campaign_tag,
+        event_type="sent",
+        subject=lead.last_email_subject or "initial outreach",
+        to_email=lead.contact_email,
+        created_at=now,
+    ))
+
+
+# =============================================================================
+# INTERNAL ENDPOINTS — cron-key auth for scripts and automation
+# =============================================================================
+
+import os as _os
+
+
+def _require_internal_key(request: Request):
+    """Validate internal API key or cron secret."""
+    expected_key = _os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = _os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    provided_key = (
+        request.headers.get("X-Internal-Key", "")
+        or request.query_params.get("key", "")
+    )
+    if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+
+class InternalAddLeadAndEmail(BaseModel):
+    provider_name: str
+    state: str
+    city: Optional[str] = None
+    contact_name: Optional[str] = None
+    contact_email: str
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+    send_email: bool = True
+    campaign_name: str = "cold-outreach-mar-2026"
+
+
+@router.post("/leads/internal/add-and-email")
+async def internal_add_lead_and_email(
+    request: Request,
+    items: List[InternalAddLeadAndEmail],
+    db: Session = Depends(get_db),
+):
+    """Add new leads, send outreach emails, and auto-start sequences. Internal key auth."""
+    _require_internal_key(request)
+
+    now = datetime.now(timezone.utc)
+    results = []
+
+    for item in items:
+        existing = db.query(SalesLead).filter(
+            SalesLead.contact_email == item.contact_email.lower().strip()
+        ).first()
+
+        if existing:
+            lead = existing
+            if item.contact_name and not lead.contact_name:
+                lead.contact_name = item.contact_name
+            if item.notes:
+                lead.notes = f"{lead.notes or ''}\n{item.notes}".strip()
+        else:
+            lead = SalesLead(
+                provider_name=item.provider_name.strip().title(),
+                state=item.state.upper(),
+                city=(item.city or "").strip().title() or None,
+                contact_email=item.contact_email.lower().strip(),
+                contact_name=item.contact_name,
+                phone=item.phone,
+                notes=item.notes,
+                priority="high",
+                source="phone_outreach",
+            )
+            db.add(lead)
+            db.flush()
+
+        if item.send_email and lead.contact_email:
+            data = {
+                "provider_name": lead.provider_name,
+                "city": lead.city or "your area",
+                "state": lead.state,
+                "state_full": STATE_NAMES.get(lead.state, lead.state),
+            }
+            tmpl = EMAIL_TEMPLATES["warm_open"]
+            subject = _render_template(tmpl["subject"], data)
+            body = _render_template(tmpl["body"], data)
+
+            result = email_service.send_email(
+                to=lead.contact_email,
+                subject=subject,
+                sender=email_service.from_sales,
+                html=body,
+            )
+
+            if result.get("success"):
+                lead.last_email_sent_at = now
+                lead.last_email_subject = subject
+                lead.email_send_count = (lead.email_send_count or 0) + 1
+                lead.is_contacted = True
+                lead.status = LeadStatus.email_sent.value
+                if result.get("id"):
+                    lead.resend_email_id = result["id"]
+
+                activity = lead.activity_log or []
+                activity.append({
+                    "action": "Email sent (internal/phone-outreach)",
+                    "subject": subject,
+                    "to": lead.contact_email,
+                    "resend_id": result.get("id"),
+                    "at": now.isoformat(),
+                })
+                lead.activity_log = activity
+
+                _auto_start_sequence(lead, item.campaign_name, db)
+
+                results.append({
+                    "provider_name": lead.provider_name,
+                    "email": lead.contact_email,
+                    "status": "sent",
+                    "lead_id": str(lead.id),
+                })
+            else:
+                results.append({
+                    "provider_name": lead.provider_name,
+                    "email": lead.contact_email,
+                    "status": "send_failed",
+                    "error": result.get("error"),
+                })
+        else:
+            results.append({
+                "provider_name": lead.provider_name,
+                "email": lead.contact_email,
+                "status": "added_no_email",
+                "lead_id": str(lead.id),
+            })
+
+    db.commit()
+    sent_count = sum(1 for r in results if r["status"] == "sent")
+    return {"total": len(results), "sent": sent_count, "results": results}
+
+
+@router.post("/leads/internal/start-recent-sequences")
+async def internal_start_recent_sequences(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Find all leads emailed in the last N days without active sequences and start them.
+
+    Query param: days (default 2), campaign_name (default auto-sequence-mar-2026)
+    """
+    _require_internal_key(request)
+
+    days = int(request.query_params.get("days", "2"))
+    campaign_name = request.query_params.get("campaign_name", "auto-sequence-mar-2026")
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+
+    leads = db.query(SalesLead).filter(
+        SalesLead.last_email_sent_at >= cutoff,
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+        (SalesLead.sequence_step.is_(None)) | (SalesLead.sequence_step == 0),
+        SalesLead.sequence_completed != True,
+        SalesLead.status.notin_(["not_interested", "converted", "responded"]),
+    ).all()
+
+    started = 0
+    for lead in leads:
+        _auto_start_sequence(lead, campaign_name, db)
+        started += 1
+
+    db.commit()
+    return {
+        "message": f"Started sequences for {started} leads emailed in last {days} days",
+        "started": started,
+        "total_checked": len(leads),
+    }

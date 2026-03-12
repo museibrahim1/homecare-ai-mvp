@@ -22,6 +22,7 @@ from app.core.deps import get_db, get_current_user
 from app.models.user import User, UserRole
 from app.models.sales_lead import SalesLead
 from app.models.investor import Investor
+from app.models.analytics import EmailCampaignEvent
 from app.services.email import email_service
 
 logger = logging.getLogger(__name__)
@@ -1064,6 +1065,7 @@ def approve_draft(
             lead.email_send_count = (lead.email_send_count or 0) + 1
             lead.status = "email_sent"
             lead.updated_at = now
+            lead.is_contacted = True
             activity = list(lead.activity_log or [])
             activity.append({
                 "action": "email_sent",
@@ -1072,6 +1074,10 @@ def approve_draft(
                 "by": user.email,
             })
             lead.activity_log = activity
+
+            from app.routers.sales_leads import _auto_start_sequence
+            _auto_start_sequence(lead, lead.campaign_tag or "outreach-draft", db)
+
     elif target_type == "investor":
         inv = db.query(Investor).filter(Investor.id == target_id).first()
         if inv:
