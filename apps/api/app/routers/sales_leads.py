@@ -742,7 +742,6 @@ async def send_campaign(
             lead.last_email_sent_at = now
             lead.last_email_subject = subject
             lead.email_send_count = (lead.email_send_count or 0) + 1
-            lead.is_contacted = True
             lead.campaign_tag = req.campaign_name
             lead.last_template_sent = req.template_id
 
@@ -919,7 +918,6 @@ async def launch_email_sequence(
             lead.last_email_sent_at = now
             lead.last_email_subject = subject
             lead.email_send_count = (lead.email_send_count or 0) + 1
-            lead.is_contacted = True
             lead.campaign_tag = req.campaign_name
             lead.sequence_step = 1
             lead.sequence_started_at = now
@@ -1791,7 +1789,6 @@ async def send_lead_email(
     lead.last_email_sent_at = now
     lead.last_email_subject = email_req.subject
     lead.email_send_count = (lead.email_send_count or 0) + 1
-    lead.is_contacted = True
 
     if lead.status == LeadStatus.new.value:
         lead.status = LeadStatus.email_sent.value
@@ -2125,7 +2122,6 @@ async def internal_add_lead_and_email(
                 lead.last_email_sent_at = now
                 lead.last_email_subject = subject
                 lead.email_send_count = (lead.email_send_count or 0) + 1
-                lead.is_contacted = True
                 lead.status = LeadStatus.email_sent.value
                 if result.get("id"):
                     lead.resend_email_id = result["id"]

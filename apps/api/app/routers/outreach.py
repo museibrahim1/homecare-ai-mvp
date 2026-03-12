@@ -680,7 +680,7 @@ def get_weekly_plan(
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
         )
-        .order_by(SalesLead.updated_at)
+        .order_by(SalesLead.created_at)
         .all()
     )
 
@@ -1088,7 +1088,6 @@ def approve_draft(
             lead.email_send_count = (lead.email_send_count or 0) + 1
             lead.status = "email_sent"
             lead.updated_at = now
-            lead.is_contacted = True
             activity = list(lead.activity_log or [])
             activity.append({
                 "action": "email_sent",
@@ -1207,7 +1206,7 @@ def _get_todays_plan_data(db: Session) -> dict:
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
         )
-        .order_by(SalesLead.updated_at)
+        .order_by(SalesLead.created_at)
         .all()
     )
     past_days_count = sum(1 for _, d in work_days[:today_idx] if d < today)
