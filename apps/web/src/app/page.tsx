@@ -1357,6 +1357,8 @@ export default function LandingPage() {
                   <div className="absolute top-full left-0 pt-2 w-64">
                     <div className="bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-3 space-y-1">
                       {[
+                        { label: 'Blog', href: '/blog' },
+                        { label: 'FAQ', href: '/faq' },
                         { label: 'Contact Us', href: '/contact' },
                         { label: 'System Status', href: '/status' },
                         { label: 'Privacy Policy', href: '/privacy' },
@@ -1588,6 +1590,20 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 9. FAQ — Bottom, for hesitant visitors ═══ */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: FAQ_ITEMS.map((item) => ({
+              '@type': 'Question',
+              name: item.q,
+              acceptedAnswer: { '@type': 'Answer', text: item.a },
+            })),
+          }),
+        }}
+      />
       <section className="py-20 px-6 bg-dark-800/30">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
@@ -1599,9 +1615,14 @@ export default function LandingPage() {
           </div>
           <div className="text-center mt-8">
             <p className="text-dark-400 mb-3">Still have questions?</p>
-            <Link href="/contact" className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-medium transition">
-              Contact our team <ArrowRight className="w-4 h-4" />
-            </Link>
+            <div className="flex justify-center gap-4">
+              <Link href="/faq" className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 font-medium transition">
+                View all FAQs <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link href="/contact" className="inline-flex items-center gap-2 text-dark-400 hover:text-white font-medium transition">
+                Contact our team <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -1632,8 +1653,9 @@ export default function LandingPage() {
                 <li><Link href="/features" className="hover:text-white transition">Features</Link></li>
                 <li><Link href="/mobile-app" className="hover:text-white transition">Mobile App</Link></li>
                 <li><a href="#book-demo" className="hover:text-white transition">Book a Demo</a></li>
+                <li><Link href="/blog" className="hover:text-white transition">Blog</Link></li>
+                <li><Link href="/faq" className="hover:text-white transition">FAQ</Link></li>
                 <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
-                <li><Link href="/status" className="hover:text-white transition">System Status</Link></li>
               </ul>
             </div>
             <div>
