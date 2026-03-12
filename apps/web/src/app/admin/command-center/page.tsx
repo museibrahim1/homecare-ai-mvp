@@ -29,6 +29,7 @@ interface AgencyDraft {
   priority: string;
   status: string;
   email_send_count: number;
+  last_email_sent_at: string | null;
   draft_subject: string;
   draft_body: string;
   is_html: boolean;
@@ -43,6 +44,7 @@ interface InvestorDraft {
   priority: string;
   status: string;
   email_send_count: number;
+  last_email_sent_at: string | null;
   draft_subject: string;
   draft_body: string;
   is_html: boolean;
@@ -191,12 +193,15 @@ export default function CommandCenterPage() {
       const edits: Record<string, DraftEdit> = {};
 
       for (const day of data.days) {
+        const dayDate = day.date;
         for (const a of day.agency_drafts) {
-          aStatus[a.id] = a.status === 'email_sent' ? 'sent' : 'pending';
+          const sentOnOrAfter = a.last_email_sent_at && a.last_email_sent_at.slice(0, 10) >= dayDate;
+          aStatus[a.id] = sentOnOrAfter ? 'sent' : 'pending';
           edits[a.id] = { subject: a.draft_subject, body: a.draft_body };
         }
         for (const inv of day.investor_drafts) {
-          iStatus[inv.id] = inv.status === 'email_sent' ? 'sent' : 'pending';
+          const sentOnOrAfter = inv.last_email_sent_at && inv.last_email_sent_at.slice(0, 10) >= dayDate;
+          iStatus[inv.id] = sentOnOrAfter ? 'sent' : 'pending';
           edits[inv.id] = { subject: inv.draft_subject, body: inv.draft_body };
         }
         for (const c of day.calls) {
@@ -238,7 +243,36 @@ export default function CommandCenterPage() {
     }, 500);
   };
 
+  // ── Batch send state ────────────────────────────────────────────
+  const [batchSending, setBatchSending] = useState(false);
+  const [batchProgress, setBatchProgress] = useState('');
+
   // ── Send / approve flow ───────────────────────────────────────────
+
+  const sendAllEmails = async () => {
+    if (!currentDay || batchSending) return;
+    const dayIdx = selectedDayIdx;
+    setBatchSending(true);
+    setBatchProgress('Sending all emails...');
+    try {
+      const res = await apiFetch('/platform/outreach/batch-send', {
+        method: 'POST',
+        body: JSON.stringify({ day_index: dayIdx, week_offset: weekOffset }),
+      });
+      const r = res.results || {};
+      const aSent = r.agencies?.sent || 0;
+      const iSent = r.investors?.sent || 0;
+      const aFail = r.agencies?.failed || 0;
+      const iFail = r.investors?.failed || 0;
+      setBatchProgress(`Done: ${aSent} agencies, ${iSent} investors sent${aFail + iFail > 0 ? ` (${aFail + iFail} failed)` : ''}`);
+      await loadWeeklyPlan(true);
+    } catch (e) {
+      setBatchProgress('Batch send failed — try again');
+    } finally {
+      setBatchSending(false);
+      setTimeout(() => setBatchProgress(''), 5000);
+    }
+  };
 
   const sendEmail = async (id: string, type: 'agency' | 'investor') => {
     setSendingId(id);
@@ -498,6 +532,26 @@ export default function CommandCenterPage() {
             </button>
           ))}
         </div>
+
+        {/* ── Batch Send Bar ──────────────────────────────── */}
+        {currentDay && (agencySentCount < agencyTotal || investorSentCount < investorTotal) && (
+          <div className="flex items-center gap-3 mb-4 bg-teal-50 border border-teal-200 rounded-xl px-4 py-3">
+            <button
+              onClick={sendAllEmails}
+              disabled={batchSending}
+              className="inline-flex items-center gap-2 px-5 py-2 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 transition-colors disabled:opacity-50"
+            >
+              {batchSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {batchSending ? 'Sending...' : 'Send All Remaining Emails'}
+            </button>
+            <span className="text-sm text-teal-700">
+              {agencyTotal - agencySentCount} agencies + {investorTotal - investorSentCount} investors pending
+            </span>
+            {batchProgress && (
+              <span className="text-sm font-medium text-teal-800 ml-auto">{batchProgress}</span>
+            )}
+          </div>
+        )}
 
         {/* ── Tab Content ─────────────────────────────────── */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">

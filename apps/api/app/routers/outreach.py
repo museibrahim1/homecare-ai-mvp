@@ -1129,6 +1129,120 @@ def approve_draft(
     }
 
 
+class BatchSendRequest(BaseModel):
+    day_index: int
+    week_offset: int = 0
+    types: List[str] = ["agency", "investor"]
+
+
+@router.post("/batch-send")
+def batch_send_day(
+    body: BatchSendRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_ceo),
+):
+    """Send all unsent emails for a given day. Only sends to leads whose last email
+    was sent BEFORE the assigned day (avoids double-sending)."""
+    import time as _time
+
+    work_days = _week_work_days(body.week_offset)
+    if body.day_index < 0 or body.day_index >= len(work_days):
+        raise HTTPException(status_code=400, detail="Invalid day_index")
+    day_name, day_date = work_days[body.day_index]
+    global_idx = _cumulative_days_before(body.week_offset) + body.day_index
+
+    results = {"agencies": {"sent": 0, "skipped": 0, "failed": 0, "errors": []},
+               "investors": {"sent": 0, "skipped": 0, "failed": 0, "errors": []}}
+    now = datetime.now(timezone.utc)
+
+    if "agency" in body.types:
+        all_agencies = (
+            db.query(SalesLead)
+            .filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+                    SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES))
+            .order_by(PRIORITY_ORDER, SalesLead.created_at)
+            .all()
+        )
+        day_agencies = all_agencies[global_idx * EMAILS_PER_DAY:(global_idx + 1) * EMAILS_PER_DAY]
+
+        for lead in day_agencies:
+            if lead.last_email_sent_at and lead.last_email_sent_at.date() >= day_date:
+                results["agencies"]["skipped"] += 1
+                continue
+
+            subj, body_html = _build_agency_html(
+                lead.provider_name, lead.city or "your area", lead.state or "US"
+            )
+            result = email_service.send_email(
+                to=lead.contact_email, subject=subj, html=body_html,
+                reply_to="sales@palmtai.com",
+                sender="Muse Ibrahim <sales@send.palmtai.com>",
+            )
+            if result.get("success"):
+                lead.last_email_sent_at = now
+                lead.last_email_subject = subj
+                lead.email_send_count = (lead.email_send_count or 0) + 1
+                lead.status = "email_sent"
+                lead.updated_at = now
+                activity = list(lead.activity_log or [])
+                activity.append({"action": "email_sent", "timestamp": now.isoformat(),
+                                 "subject": subj, "by": user.email})
+                lead.activity_log = activity
+                results["agencies"]["sent"] += 1
+            else:
+                results["agencies"]["failed"] += 1
+                results["agencies"]["errors"].append(
+                    f"{lead.provider_name}: {result.get('error', 'unknown')}"
+                )
+            _time.sleep(0.6)
+
+    if "investor" in body.types:
+        all_investors = (
+            db.query(Investor)
+            .filter(Investor.contact_email.isnot(None), Investor.contact_email != "",
+                    Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES))
+            .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+            .all()
+        )
+        day_investors = all_investors[global_idx * INVESTORS_PER_DAY:(global_idx + 1) * INVESTORS_PER_DAY]
+
+        for inv in day_investors:
+            if inv.last_email_sent_at and inv.last_email_sent_at.date() >= day_date:
+                results["investors"]["skipped"] += 1
+                continue
+
+            focus = ", ".join(inv.focus_sectors or []) or "early-stage technology"
+            subj, body_text = _build_investor_text(
+                inv.fund_name, inv.contact_name or "", focus
+            )
+            html = f"<pre style='font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;'>{body_text}</pre>"
+            result = email_service.send_email(
+                to=inv.contact_email, subject=subj, html=html, text=body_text,
+                reply_to="invest@palmtai.com",
+                sender="Muse Ibrahim <invest@send.palmtai.com>",
+            )
+            if result.get("success"):
+                inv.last_email_sent_at = now
+                inv.last_email_subject = subj
+                inv.email_send_count = (inv.email_send_count or 0) + 1
+                inv.status = "email_sent"
+                inv.updated_at = now
+                activity = list(inv.activity_log or [])
+                activity.append({"action": "email_sent", "timestamp": now.isoformat(),
+                                 "subject": subj, "by": user.email})
+                inv.activity_log = activity
+                results["investors"]["sent"] += 1
+            else:
+                results["investors"]["failed"] += 1
+                results["investors"]["errors"].append(
+                    f"{inv.fund_name}: {result.get('error', 'unknown')}"
+                )
+            _time.sleep(0.6)
+
+    db.commit()
+    return {"ok": True, "day": day_name, "date": day_date.isoformat(), "results": results}
+
+
 @router.delete("/drafts/{draft_id}")
 def delete_draft(draft_id: str, user: User = Depends(require_ceo)):
     if draft_id not in _drafts:
