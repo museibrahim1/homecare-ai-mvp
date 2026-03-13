@@ -498,8 +498,8 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                     </div>
                   </div>
                   <div className="mt-4 flex gap-2">
-                    <button className="flex-1 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium">Download PDF</button>
-                    <button className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">Send to Client</button>
+                    <button onClick={() => alert('PDF download available in the full product — book a demo to see it live!')} className="flex-1 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 transition">Download PDF</button>
+                    <button onClick={() => alert('Client delivery available in the full product — book a demo to see it live!')} className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">Send to Client</button>
                   </div>
                 </div>
               </div>

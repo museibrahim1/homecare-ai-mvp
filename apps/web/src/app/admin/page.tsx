@@ -149,17 +149,24 @@ export default function AdminDashboardPage() {
     return null;
   }
 
+  const BG_COLOR_MAP: Record<string, string> = {
+    'text-emerald-600': 'bg-emerald-600/10',
+    'text-emerald-400': 'bg-emerald-400/10',
+    'text-amber-600': 'bg-amber-600/10',
+    'text-blue-600': 'bg-blue-600/10',
+  };
+
   const StatCard = ({ label, value, icon: Icon, color, href }: any) => (
     <Link
       href={href || '#'}
-      className="p-6 bg-white rounded-xl border border-slate-200 hover:border-slate-200 transition group"
+      className="p-6 bg-white rounded-xl border border-slate-200 hover:border-primary-300 hover:shadow-sm transition group"
     >
       <div className="flex items-center justify-between">
         <div>
           <p className="text-slate-500 text-sm">{label}</p>
           <p className={`text-3xl font-bold mt-1 ${color}`}>{value}</p>
         </div>
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color.replace('text-', 'bg-')}/10`}>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${BG_COLOR_MAP[color] || 'bg-slate-100'}`}>
           <Icon className={`w-6 h-6 ${color}`} />
         </div>
       </div>

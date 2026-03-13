@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getStoredToken } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 import {
-  Users, Plus, Loader2, Shield, Mail, Key, UserPlus,
+  Users, Loader2, Shield, Mail, Key, UserPlus,
   ToggleLeft, ToggleRight, RefreshCw, CheckCircle, XCircle, AlertCircle,
 } from 'lucide-react';
 
@@ -43,6 +43,8 @@ export default function TeamManagementPage() {
   const [inviteError, setInviteError] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toast, setToast] = useState('');
+  const [editingPerms, setEditingPerms] = useState<TeamMember | null>(null);
+  const [editPermsSelection, setEditPermsSelection] = useState<string[]>([]);
 
   const token = typeof window !== 'undefined' ? getStoredToken() : null;
 
@@ -145,7 +147,7 @@ export default function TeamManagementPage() {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
-      <main className="flex-1 p-6 md:p-8 ml-0 md:ml-64">
+      <main className="flex-1 p-6 md:p-8 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
@@ -230,6 +232,7 @@ export default function TeamManagementPage() {
                             disabled={actionLoading === m.id}
                             className="text-slate-400 hover:text-indigo-600 transition p-1.5 rounded-lg hover:bg-indigo-50"
                             title="Reset password"
+                            aria-label={`Reset password for ${m.full_name}`}
                           >
                             <Key className="w-4 h-4" />
                           </button>
@@ -238,21 +241,15 @@ export default function TeamManagementPage() {
                             disabled={actionLoading === m.id}
                             className={`p-1.5 rounded-lg transition ${m.is_active ? 'text-green-500 hover:text-red-500 hover:bg-red-50' : 'text-red-400 hover:text-green-500 hover:bg-green-50'}`}
                             title={m.is_active ? 'Deactivate' : 'Activate'}
+                            aria-label={m.is_active ? `Deactivate ${m.full_name}` : `Activate ${m.full_name}`}
                           >
                             {m.is_active ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
                           </button>
                           <button
-                            onClick={() => {
-                              const newPerms = prompt(
-                                'Edit permissions (comma-separated):\nOptions: command_center, sales_leads, investors, marketing, analytics, admin_full',
-                                (m.permissions || []).join(', ')
-                              );
-                              if (newPerms !== null) {
-                                updatePermissions(m, newPerms.split(',').map(s => s.trim()).filter(Boolean));
-                              }
-                            }}
+                            onClick={() => { setEditingPerms(m); setEditPermsSelection([...(m.permissions || [])]); }}
                             className="text-slate-400 hover:text-indigo-600 transition p-1.5 rounded-lg hover:bg-indigo-50"
                             title="Edit permissions"
+                            aria-label={`Edit permissions for ${m.full_name}`}
                           >
                             <Shield className="w-4 h-4" />
                           </button>
@@ -265,6 +262,61 @@ export default function TeamManagementPage() {
             </div>
           )}
         </div>
+
+        {/* Edit Permissions Modal */}
+        {editingPerms && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setEditingPerms(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+              <div className="p-6 border-b border-slate-200">
+                <h2 className="text-lg font-bold text-slate-800">Edit Permissions</h2>
+                <p className="text-slate-500 text-sm mt-1">{editingPerms.full_name} ({editingPerms.email})</p>
+              </div>
+              <div className="p-6 space-y-2">
+                {PERMISSION_OPTIONS.map(opt => (
+                  <label
+                    key={opt.key}
+                    className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                      editPermsSelection.includes(opt.key)
+                        ? 'border-indigo-300 bg-indigo-50'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={editPermsSelection.includes(opt.key)}
+                      onChange={() => setEditPermsSelection(prev =>
+                        prev.includes(opt.key) ? prev.filter(p => p !== opt.key) : [...prev, opt.key]
+                      )}
+                      className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <div>
+                      <div className="text-sm font-semibold text-slate-800">{opt.label}</div>
+                      <div className="text-xs text-slate-400">{opt.desc}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
+                <button onClick={() => setEditingPerms(null)} className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 transition">
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (editingPerms) {
+                      updatePermissions(editingPerms, editPermsSelection);
+                      setToast(`Permissions updated for ${editingPerms.full_name}`);
+                      setTimeout(() => setToast(''), 4000);
+                    }
+                    setEditingPerms(null);
+                  }}
+                  className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition"
+                >
+                  Save Permissions
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Invite Modal */}
         {showInvite && (

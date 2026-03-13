@@ -11,7 +11,7 @@ import {
   Sun, Coffee, Moon,
   ChevronDown, ChevronUp, FileText, Calendar,
   ChevronLeft, ChevronRight as ChevronRightIcon,
-  Eye, PhoneForwarded, Users, Filter, MapPin,
+  Eye, PhoneForwarded, Users, MapPin,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -461,6 +461,7 @@ export default function CommandCenterPage() {
                       disabled={weekOffset <= 0 || refreshing}
                       className="p-1.5 rounded-md hover:bg-slate-100 disabled:opacity-30 transition-colors"
                       title="Previous week"
+                      aria-label="Previous week"
                     >
                       <ChevronLeft className="w-4 h-4 text-slate-500" />
                     </button>
@@ -476,6 +477,7 @@ export default function CommandCenterPage() {
                       disabled={(weeklyPlan?.all_contacts_covered) || refreshing}
                       className="p-1.5 rounded-md hover:bg-slate-100 disabled:opacity-30 transition-colors"
                       title="Next week"
+                      aria-label="Next week"
                     >
                       <ChevronRightIcon className="w-4 h-4 text-slate-500" />
                     </button>
@@ -586,6 +588,7 @@ export default function CommandCenterPage() {
                 onClick={() => setSelectedDayIdx(Math.max(0, selectedDayIdx - 1))}
                 disabled={selectedDayIdx === 0}
                 className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-30 shrink-0"
+                aria-label="Previous day"
               >
                 <ChevronLeft className="w-4 h-4 text-slate-600" />
               </button>
@@ -602,6 +605,7 @@ export default function CommandCenterPage() {
                 onClick={() => setSelectedDayIdx(Math.min((weeklyPlan?.days.length || 5) - 1, selectedDayIdx + 1))}
                 disabled={selectedDayIdx >= (weeklyPlan?.days.length || 5) - 1}
                 className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-30 shrink-0"
+                aria-label="Next day"
               >
                 <ChevronRightIcon className="w-4 h-4 text-slate-600" />
               </button>
