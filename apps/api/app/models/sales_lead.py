@@ -86,6 +86,16 @@ class SalesLead(Base, TimestampMixin):
     is_contacted = Column(Boolean, default=False)
     is_converted = Column(Boolean, default=False)
     converted_at = Column(DateTime(timezone=True), nullable=True)
+    called_at = Column(DateTime(timezone=True), nullable=True, index=True)
+
+    # Callback tracking
+    callback_requested = Column(Boolean, default=False, nullable=False, server_default="false")
+    callback_date = Column(DateTime(timezone=True), nullable=True)
+    callback_notes = Column(Text, nullable=True)
+
+    # Team assignment
+    assigned_to = Column(String(36), nullable=True, index=True)
+    assigned_type = Column(String(20), nullable=True)
 
     # Email sequence tracking
     sequence_step = Column(Integer, default=0)

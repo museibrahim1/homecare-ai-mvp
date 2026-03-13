@@ -74,6 +74,13 @@ class AgencyCallItem(BaseModel):
     priority: str
     is_contacted: bool
     notes: Optional[str]
+    called_at: Optional[datetime] = None
+    callback_requested: bool = False
+    callback_date: Optional[datetime] = None
+    callback_notes: Optional[str] = None
+    assigned_to: Optional[str] = None
+    contact_name: Optional[str] = None
+    contact_email: Optional[str] = None
 
 
 class InvestorEmailItem(BaseModel):
@@ -555,8 +562,8 @@ def get_daily_plan(
 
         calls_made = db.query(func.count(SalesLead.id)).filter(
             SalesLead.is_contacted == True,  # noqa: E712
-            SalesLead.updated_at >= day_start,
-            SalesLead.updated_at <= day_end,
+            SalesLead.called_at >= day_start,
+            SalesLead.called_at <= day_end,
         ).scalar() or 0
 
         inv_emails_sent = db.query(func.count(Investor.id)).filter(
@@ -771,7 +778,13 @@ def get_weekly_plan(
                 id=l.id, provider_name=l.provider_name, state=l.state,
                 city=l.city, phone=l.phone, status=l.status,
                 priority=l.priority, is_contacted=l.is_contacted or False,
-                notes=l.notes,
+                notes=l.notes, called_at=l.called_at,
+                callback_requested=l.callback_requested or False,
+                callback_date=l.callback_date,
+                callback_notes=l.callback_notes,
+                assigned_to=l.assigned_to,
+                contact_name=l.contact_name,
+                contact_email=l.contact_email,
             )
             for l in day_calls
         ]
@@ -856,6 +869,7 @@ def mark_called(
     now = datetime.now(timezone.utc)
     lead.is_contacted = True
     lead.status = "contacted"
+    lead.called_at = now
     lead.updated_at = now
 
     log_entry = {
@@ -877,12 +891,325 @@ def mark_called(
     return {"ok": True, "lead_id": str(lead.id), "status": lead.status}
 
 
+class MarkCallbackBody(BaseModel):
+    callback_date: Optional[str] = None
+    callback_notes: Optional[str] = None
+
+
+@router.post("/mark-callback/{lead_id}")
+def mark_callback(
+    lead_id: UUID,
+    body: MarkCallbackBody,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """Flag a lead for callback."""
+    lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    lead.callback_requested = True
+    if body.callback_notes:
+        lead.callback_notes = body.callback_notes
+    if body.callback_date:
+        lead.callback_date = datetime.fromisoformat(body.callback_date)
+    lead.updated_at = datetime.now(timezone.utc)
+
+    activity = list(lead.activity_log or [])
+    activity.append({
+        "action": "callback_requested",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "notes": body.callback_notes or "",
+        "by": user.email,
+    })
+    lead.activity_log = activity
+    db.commit()
+    return {"ok": True, "lead_id": str(lead.id)}
+
+
+@router.get("/callbacks")
+def list_callbacks(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """List all leads that need callbacks."""
+    leads = (
+        db.query(SalesLead)
+        .filter(SalesLead.callback_requested == True)  # noqa: E712
+        .order_by(SalesLead.callback_date.asc().nullslast(), SalesLead.updated_at.desc())
+        .all()
+    )
+    return [
+        {
+            "id": str(l.id),
+            "provider_name": l.provider_name,
+            "phone": l.phone,
+            "state": l.state,
+            "city": l.city,
+            "contact_name": l.contact_name,
+            "contact_email": l.contact_email,
+            "callback_date": l.callback_date.isoformat() if l.callback_date else None,
+            "callback_notes": l.callback_notes,
+            "notes": l.notes,
+            "priority": l.priority,
+            "status": l.status,
+            "called_at": l.called_at.isoformat() if l.called_at else None,
+        }
+        for l in leads
+    ]
+
+
+@router.post("/callbacks/{lead_id}/complete")
+def complete_callback(
+    lead_id: UUID,
+    body: MarkCalledBody = MarkCalledBody(),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """Mark a callback as completed."""
+    lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    now = datetime.now(timezone.utc)
+    lead.callback_requested = False
+    lead.callback_date = None
+    lead.is_contacted = True
+    lead.called_at = now
+    lead.updated_at = now
+
+    activity = list(lead.activity_log or [])
+    activity.append({
+        "action": "callback_completed",
+        "timestamp": now.isoformat(),
+        "notes": body.notes or "",
+        "by": user.email,
+    })
+    lead.activity_log = activity
+
+    if body.notes:
+        existing = lead.notes or ""
+        lead.notes = f"{existing}\n[{now.strftime('%Y-%m-%d %H:%M')}] Callback: {body.notes}".strip()
+
+    db.commit()
+    return {"ok": True, "lead_id": str(lead.id)}
+
+
+class AssignLeadsBody(BaseModel):
+    user_id: str
+    lead_ids: Optional[List[str]] = None
+    assign_type: str = "call"
+    count: int = 25
+    states: Optional[List[str]] = None
+
+
+@router.post("/assign")
+def assign_leads_to_team(
+    body: AssignLeadsBody,
+    db: Session = Depends(get_db),
+    ceo: User = Depends(require_permission("command_center")),
+):
+    """Assign a batch of leads to a team member for calls or emails.
+    If lead_ids is provided, assigns those specific leads.
+    Otherwise, auto-selects `count` unassigned leads with optional state filter."""
+
+    target_user = db.query(User).filter(User.id == body.user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Team member not found")
+
+    if body.lead_ids:
+        leads = db.query(SalesLead).filter(SalesLead.id.in_(body.lead_ids)).all()
+    else:
+        q = db.query(SalesLead).filter(
+            SalesLead.assigned_to.is_(None),
+            SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+        )
+
+        if body.assign_type == "call":
+            q = q.filter(
+                SalesLead.phone.isnot(None),
+                SalesLead.phone != "",
+                SalesLead.is_contacted != True,  # noqa: E712
+            )
+        elif body.assign_type == "email":
+            q = q.filter(
+                SalesLead.contact_email.isnot(None),
+                SalesLead.contact_email != "",
+            )
+
+        if body.states:
+            q = q.filter(SalesLead.state.in_(body.states))
+
+        q = q.order_by(PRIORITY_ORDER, SalesLead.created_at)
+        leads = q.limit(body.count).all()
+
+    now = datetime.now(timezone.utc)
+    assigned = 0
+    for lead in leads:
+        lead.assigned_to = body.user_id
+        lead.assigned_type = body.assign_type
+        lead.updated_at = now
+        activity = list(lead.activity_log or [])
+        activity.append({
+            "action": "assigned",
+            "timestamp": now.isoformat(),
+            "assigned_to": target_user.email,
+            "assign_type": body.assign_type,
+            "by": ceo.email,
+        })
+        lead.activity_log = activity
+        assigned += 1
+
+    db.commit()
+    return {
+        "ok": True,
+        "assigned": assigned,
+        "user_id": body.user_id,
+        "user_name": target_user.full_name,
+        "assign_type": body.assign_type,
+    }
+
+
+@router.post("/unassign")
+def unassign_leads(
+    body: dict,
+    db: Session = Depends(get_db),
+    ceo: User = Depends(require_permission("command_center")),
+):
+    """Unassign leads from a team member. Provide lead_ids or user_id to clear all."""
+    lead_ids = body.get("lead_ids", [])
+    user_id = body.get("user_id")
+
+    if lead_ids:
+        leads = db.query(SalesLead).filter(SalesLead.id.in_(lead_ids)).all()
+    elif user_id:
+        leads = db.query(SalesLead).filter(SalesLead.assigned_to == user_id).all()
+    else:
+        raise HTTPException(status_code=400, detail="Provide lead_ids or user_id")
+
+    for lead in leads:
+        lead.assigned_to = None
+        lead.assigned_type = None
+
+    db.commit()
+    return {"ok": True, "unassigned": len(leads)}
+
+
+@router.get("/assignments")
+def list_assignments(
+    user_id: Optional[str] = None,
+    assign_type: Optional[str] = None,
+    state: Optional[str] = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """List assigned leads, with optional filters."""
+    q = db.query(SalesLead).filter(SalesLead.assigned_to.isnot(None))
+
+    if user_id:
+        q = q.filter(SalesLead.assigned_to == user_id)
+    if assign_type:
+        q = q.filter(SalesLead.assigned_type == assign_type)
+    if state:
+        q = q.filter(SalesLead.state == state)
+
+    leads = q.order_by(PRIORITY_ORDER, SalesLead.created_at).all()
+
+    return [
+        {
+            "id": str(l.id),
+            "provider_name": l.provider_name,
+            "phone": l.phone,
+            "state": l.state,
+            "city": l.city,
+            "contact_name": l.contact_name,
+            "contact_email": l.contact_email,
+            "priority": l.priority,
+            "status": l.status,
+            "assigned_to": l.assigned_to,
+            "assigned_type": l.assigned_type,
+            "is_contacted": l.is_contacted or False,
+            "callback_requested": l.callback_requested or False,
+            "notes": l.notes,
+        }
+        for l in leads
+    ]
+
+
+@router.get("/my-assignments")
+def my_assignments(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get the current user's assigned leads (for team member dashboards)."""
+    leads = (
+        db.query(SalesLead)
+        .filter(SalesLead.assigned_to == str(user.id))
+        .order_by(PRIORITY_ORDER, SalesLead.created_at)
+        .all()
+    )
+
+    calls = [l for l in leads if l.assigned_type == "call"]
+    emails = [l for l in leads if l.assigned_type == "email"]
+
+    def _lead_dict(l):
+        return {
+            "id": str(l.id),
+            "provider_name": l.provider_name,
+            "phone": l.phone,
+            "state": l.state,
+            "city": l.city,
+            "contact_name": l.contact_name,
+            "contact_email": l.contact_email,
+            "priority": l.priority,
+            "status": l.status,
+            "assigned_type": l.assigned_type,
+            "is_contacted": l.is_contacted or False,
+            "callback_requested": l.callback_requested or False,
+            "callback_notes": l.callback_notes,
+            "notes": l.notes,
+        }
+
+    return {
+        "calls": [_lead_dict(l) for l in calls],
+        "emails": [_lead_dict(l) for l in emails],
+        "total_calls": len(calls),
+        "total_emails": len(emails),
+        "calls_completed": sum(1 for l in calls if l.is_contacted),
+        "emails_sent": sum(1 for l in emails if l.last_email_sent_at is not None),
+    }
+
+
+@router.get("/available-states")
+def available_states(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """Get all states with lead counts for the assignment filter."""
+    from sqlalchemy import distinct
+    rows = (
+        db.query(SalesLead.state, func.count(SalesLead.id))
+        .filter(
+            SalesLead.state.isnot(None),
+            SalesLead.assigned_to.is_(None),
+            SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+        )
+        .group_by(SalesLead.state)
+        .order_by(SalesLead.state)
+        .all()
+    )
+    return [{"state": r[0], "count": r[1]} for r in rows]
+
+
 class BulkMarkCalledItem(BaseModel):
     phone: str
     notes: Optional[str] = None
     follow_up: Optional[str] = None
     contact_name: Optional[str] = None
     contact_email: Optional[str] = None
+    called_at: Optional[str] = None
+    callback: bool = False
+    callback_notes: Optional[str] = None
 
 
 @router.post("/cron/bulk-mark-called")
@@ -911,8 +1238,10 @@ def cron_bulk_mark_called(
             results.append({"phone": item.phone, "status": "not_found"})
             continue
 
+        call_time = datetime.fromisoformat(item.called_at) if item.called_at else now
         lead.is_contacted = True
         lead.status = "contacted"
+        lead.called_at = call_time
         lead.updated_at = now
 
         if item.contact_name:
@@ -920,9 +1249,13 @@ def cron_bulk_mark_called(
         if item.contact_email:
             lead.contact_email = item.contact_email
 
+        if item.callback:
+            lead.callback_requested = True
+            lead.callback_notes = item.callback_notes or item.notes
+
         log_entry = {
             "action": "called",
-            "timestamp": now.isoformat(),
+            "timestamp": call_time.isoformat(),
             "notes": item.notes or "",
             "by": "system/bulk",
         }
@@ -931,12 +1264,14 @@ def cron_bulk_mark_called(
         lead.activity_log = activity
 
         if item.notes:
+            ts = call_time.strftime('%Y-%m-%d %H:%M')
             existing = lead.notes or ""
-            lead.notes = f"{existing}\n[{now.strftime('%Y-%m-%d %H:%M')}] Call: {item.notes}".strip()
+            lead.notes = f"{existing}\n[{ts}] Call: {item.notes}".strip()
 
         if item.follow_up:
+            ts = call_time.strftime('%Y-%m-%d %H:%M')
             existing = lead.notes or ""
-            lead.notes = f"{existing}\n[{now.strftime('%Y-%m-%d %H:%M')}] Follow-up: {item.follow_up}".strip()
+            lead.notes = f"{existing}\n[{ts}] Follow-up: {item.follow_up}".strip()
 
         results.append({
             "phone": item.phone,
@@ -1255,8 +1590,8 @@ def get_weekly_summary(
 
     calls_made = db.query(func.count(SalesLead.id)).filter(
         SalesLead.is_contacted == True,  # noqa: E712
-        SalesLead.updated_at >= week_start,
-        SalesLead.updated_at <= week_end,
+        SalesLead.called_at >= week_start,
+        SalesLead.called_at <= week_end,
     ).scalar() or 0
 
     investor_emails_sent = db.query(func.count(Investor.id)).filter(
@@ -1834,3 +2169,117 @@ def cron_daily_digest(
         "investor_emails": len(data["investors"]),
         "date": data["date"],
     }
+
+
+# ─── Admin Data Correction ───
+
+
+class LogPastCallItem(BaseModel):
+    phone: str
+    notes: Optional[str] = None
+    called_at: str
+    contact_name: Optional[str] = None
+    contact_email: Optional[str] = None
+    callback: bool = False
+    callback_notes: Optional[str] = None
+
+
+@router.post("/log-past-calls")
+def log_past_calls(
+    items: List[LogPastCallItem],
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """Log calls with specific timestamps (for data correction)."""
+    results = []
+    for item in items:
+        phone_clean = item.phone.strip().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
+        lead = db.query(SalesLead).filter(
+            func.replace(func.replace(func.replace(func.replace(
+                SalesLead.phone, " ", ""), "-", ""), "(", ""), ")", "") == phone_clean
+        ).first()
+
+        if not lead:
+            results.append({"phone": item.phone, "status": "not_found"})
+            continue
+
+        call_time = datetime.fromisoformat(item.called_at)
+        lead.is_contacted = True
+        lead.status = "contacted"
+        lead.called_at = call_time
+        lead.updated_at = datetime.now(timezone.utc)
+
+        if item.contact_name:
+            lead.contact_name = item.contact_name
+        if item.contact_email:
+            lead.contact_email = item.contact_email
+        if item.callback:
+            lead.callback_requested = True
+            lead.callback_notes = item.callback_notes or item.notes
+
+        activity = list(lead.activity_log or [])
+        activity.append({
+            "action": "called",
+            "timestamp": call_time.isoformat(),
+            "notes": item.notes or "",
+            "by": user.email,
+        })
+        lead.activity_log = activity
+
+        if item.notes:
+            ts = call_time.strftime('%Y-%m-%d %H:%M')
+            existing = lead.notes or ""
+            lead.notes = f"{existing}\n[{ts}] Call: {item.notes}".strip()
+
+        results.append({
+            "phone": item.phone,
+            "status": "logged",
+            "provider_name": lead.provider_name,
+            "lead_id": str(lead.id),
+            "called_at": call_time.isoformat(),
+        })
+
+    db.commit()
+    logged = sum(1 for r in results if r["status"] == "logged")
+    return {"logged": logged, "not_found": len(results) - logged, "results": results}
+
+
+@router.post("/fix-thursday-data")
+def fix_thursday_data(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """One-time fix: reset called_at for leads that were falsely marked on Thursday
+    due to updated_at being bumped by non-call updates (migrations, code changes)."""
+    today = _today_eastern()
+    eastern_today_start = datetime.combine(today, datetime.min.time()).replace(tzinfo=BUSINESS_TZ)
+    utc_today_start = eastern_today_start.astimezone(timezone.utc)
+
+    falsely_marked = (
+        db.query(SalesLead)
+        .filter(
+            SalesLead.is_contacted == True,  # noqa: E712
+            SalesLead.called_at >= utc_today_start,
+        )
+        .all()
+    )
+
+    fixed = 0
+    for lead in falsely_marked:
+        has_real_call_today = False
+        for entry in (lead.activity_log or []):
+            if entry.get("action") == "called":
+                try:
+                    entry_time = datetime.fromisoformat(entry["timestamp"])
+                    if entry_time >= utc_today_start:
+                        has_real_call_today = True
+                        break
+                except (ValueError, KeyError):
+                    pass
+
+        if not has_real_call_today:
+            lead.called_at = None
+            fixed += 1
+
+    db.commit()
+    return {"ok": True, "fixed": fixed, "checked": len(falsely_marked)}

@@ -11,7 +11,7 @@ import {
   Sun, Coffee, Moon,
   ChevronDown, ChevronUp, FileText, Calendar,
   ChevronLeft, ChevronRight as ChevronRightIcon,
-  Eye,
+  Eye, PhoneForwarded, Users, Filter, MapPin,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -59,6 +59,42 @@ interface CallRow {
   priority: string;
   notes: string;
   is_contacted: boolean;
+  called_at?: string | null;
+  callback_requested?: boolean;
+  callback_date?: string | null;
+  callback_notes?: string | null;
+  assigned_to?: string | null;
+  contact_name?: string | null;
+  contact_email?: string | null;
+}
+
+interface CallbackItem {
+  id: string;
+  provider_name: string;
+  phone: string | null;
+  state: string | null;
+  city: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  callback_date: string | null;
+  callback_notes: string | null;
+  notes: string | null;
+  priority: string;
+  status: string;
+  called_at: string | null;
+}
+
+interface TeamMember {
+  id: string;
+  full_name: string;
+  email: string;
+  permissions: string[];
+  is_active: boolean;
+}
+
+interface StateCount {
+  state: string;
+  count: number;
 }
 
 interface DayPlan {
@@ -96,7 +132,7 @@ interface DraftEdit {
   body: string;
 }
 
-type TabKey = 'agencies' | 'calls' | 'investors';
+type TabKey = 'agencies' | 'calls' | 'investors' | 'callbacks' | 'assignments';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -153,6 +189,17 @@ export default function CommandCenterPage() {
   const [expandedDraft, setExpandedDraft] = useState<string | null>(null);
   const [draftEdits, setDraftEdits] = useState<Record<string, DraftEdit>>({});
   const [sendingId, setSendingId] = useState<string | null>(null);
+
+  // Callbacks, assignments, team
+  const [callbacks, setCallbacks] = useState<CallbackItem[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [availableStates, setAvailableStates] = useState<StateCount[]>([]);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [assignType, setAssignType] = useState<'call' | 'email'>('call');
+  const [assignUserId, setAssignUserId] = useState('');
+  const [assignCount, setAssignCount] = useState(25);
+  const [assignStates, setAssignStates] = useState<string[]>([]);
+  const [assigning, setAssigning] = useState(false);
 
   // CEO Notes
   const [ceoNotes, setCeoNotes] = useState('');
@@ -223,6 +270,64 @@ export default function CommandCenterPage() {
   }, [apiFetch, weekOffset]);
 
   useEffect(() => { loadWeeklyPlan(); }, [loadWeeklyPlan]);
+
+  const loadCallbacks = useCallback(async () => {
+    try {
+      const data = await apiFetch('/platform/outreach/callbacks');
+      setCallbacks(data);
+    } catch { /* ignore */ }
+  }, [apiFetch]);
+
+  const loadTeamAndStates = useCallback(async () => {
+    try {
+      const [team, states] = await Promise.all([
+        apiFetch('/admin/team'),
+        apiFetch('/platform/outreach/available-states'),
+      ]);
+      setTeamMembers(team);
+      setAvailableStates(states);
+    } catch { /* ignore */ }
+  }, [apiFetch]);
+
+  useEffect(() => { loadCallbacks(); loadTeamAndStates(); }, [loadCallbacks, loadTeamAndStates]);
+
+  const handleMarkCallback = async (leadId: string, callbackNotes: string) => {
+    await apiFetch(`/platform/outreach/mark-callback/${leadId}`, {
+      method: 'POST',
+      body: JSON.stringify({ callback_notes: callbackNotes }),
+    });
+    loadWeeklyPlan(true);
+    loadCallbacks();
+  };
+
+  const handleCompleteCallback = async (leadId: string, notes: string) => {
+    await apiFetch(`/platform/outreach/callbacks/${leadId}/complete`, {
+      method: 'POST',
+      body: JSON.stringify({ notes }),
+    });
+    loadCallbacks();
+    loadWeeklyPlan(true);
+  };
+
+  const handleAssignLeads = async () => {
+    setAssigning(true);
+    try {
+      await apiFetch('/platform/outreach/assign', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: assignUserId,
+          assign_type: assignType,
+          count: assignCount,
+          states: assignStates.length > 0 ? assignStates : undefined,
+        }),
+      });
+      setAssignModalOpen(false);
+      loadWeeklyPlan(true);
+      loadTeamAndStates();
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   // ── CEO Notes persistence ─────────────────────────────────────────
 
@@ -516,6 +621,8 @@ export default function CommandCenterPage() {
             { key: 'agencies' as TabKey, label: 'Agency Emails', Icon: Mail, count: `${agencySentCount}/${agencyTotal}` },
             { key: 'calls' as TabKey, label: 'Phone Calls', Icon: Phone, count: `${callsMadeCount}/${callsTotal}` },
             { key: 'investors' as TabKey, label: 'Investor Emails', Icon: DollarSign, count: `${investorSentCount}/${investorTotal}` },
+            { key: 'callbacks' as TabKey, label: 'Callbacks', Icon: PhoneForwarded, count: `${callbacks.length}` },
+            { key: 'assignments' as TabKey, label: 'Team Assign', Icon: Users, count: `${teamMembers.filter(t => t.is_active).length}` },
           ]).map(({ key, label, Icon, count }) => (
             <button
               key={key}
@@ -579,6 +686,7 @@ export default function CommandCenterPage() {
                 loading={loading}
                 onMarkCalled={markCalled}
                 onNotesChange={(id, val) => setCallNotes(prev => ({ ...prev, [id]: val }))}
+                onMarkCallback={handleMarkCallback}
               />
             </>
           )}
@@ -596,7 +704,196 @@ export default function CommandCenterPage() {
               onSkip={(id) => skipEmail(id, 'investor')}
             />
           )}
-          {!currentDay && !loading && (
+          {activeTab === 'callbacks' && (
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                  <PhoneForwarded className="w-5 h-5 text-amber-500" />
+                  Callbacks ({callbacks.length})
+                </h3>
+                <button onClick={loadCallbacks} className="text-xs text-teal-600 hover:text-teal-700 font-medium">
+                  <RefreshCw className="w-3.5 h-3.5 inline mr-1" />Refresh
+                </button>
+              </div>
+              {callbacks.length === 0 ? (
+                <div className="text-center py-12 text-slate-400">
+                  <PhoneForwarded className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                  No callbacks pending
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {callbacks.map((cb) => (
+                    <div key={cb.id} className="border border-amber-200 bg-amber-50/50 rounded-xl p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-semibold text-slate-800">{cb.provider_name}</p>
+                          <p className="text-sm text-slate-500">{[cb.city, cb.state].filter(Boolean).join(', ')}</p>
+                          {cb.phone && (
+                            <a href={`tel:${cb.phone}`} className="text-sm text-teal-600 hover:underline font-mono">{cb.phone}</a>
+                          )}
+                          {cb.contact_name && <p className="text-xs text-slate-500 mt-1">Contact: {cb.contact_name}</p>}
+                          {cb.contact_email && <p className="text-xs text-slate-500">{cb.contact_email}</p>}
+                        </div>
+                        <div className="text-right">
+                          {cb.callback_date && (
+                            <p className="text-xs font-medium text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                              {new Date(cb.callback_date).toLocaleDateString()}
+                            </p>
+                          )}
+                          {priorityBadge(cb.priority)}
+                        </div>
+                      </div>
+                      {cb.callback_notes && (
+                        <p className="mt-2 text-sm text-slate-600 bg-white rounded-lg px-3 py-2 border border-slate-100">{cb.callback_notes}</p>
+                      )}
+                      {cb.notes && (
+                        <p className="mt-1 text-xs text-slate-400 whitespace-pre-wrap">{cb.notes}</p>
+                      )}
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => handleCompleteCallback(cb.id, 'Callback completed')}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors"
+                        >
+                          <Check className="w-3 h-3" /> Complete
+                        </button>
+                        {cb.phone && (
+                          <a href={`tel:${cb.phone}`} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-medium hover:bg-indigo-600 transition-colors">
+                            <Phone className="w-3 h-3" /> Call Now
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          {activeTab === 'assignments' && (
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-indigo-500" />
+                  Team Assignments
+                </h3>
+                <button
+                  onClick={() => setAssignModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-medium hover:bg-indigo-600 transition-colors"
+                >
+                  <Users className="w-4 h-4" /> Assign Leads
+                </button>
+              </div>
+
+              {/* Team Members Summary */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                {teamMembers.filter(t => t.is_active).map((member) => (
+                  <div key={member.id} className="border border-slate-200 rounded-xl p-4 bg-white">
+                    <p className="font-semibold text-slate-800">{member.full_name}</p>
+                    <p className="text-xs text-slate-500">{member.email}</p>
+                    <div className="flex gap-1 mt-2 flex-wrap">
+                      {member.permissions.map(p => (
+                        <span key={p} className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">{p}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {teamMembers.filter(t => t.is_active).length === 0 && (
+                  <div className="col-span-full text-center py-8 text-slate-400">
+                    No team members yet. Invite members from the Team page.
+                  </div>
+                )}
+              </div>
+
+              {/* Available States */}
+              <div className="border border-slate-200 rounded-xl p-4 bg-white">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-teal-500" />
+                  Unassigned Leads by State
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {availableStates.map((s) => (
+                    <span key={s.state} className="text-xs px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-slate-600">
+                      {s.state} <span className="font-semibold text-teal-600">({s.count})</span>
+                    </span>
+                  ))}
+                  {availableStates.length === 0 && <span className="text-sm text-slate-400">No unassigned leads</span>}
+                </div>
+              </div>
+
+              {/* Assign Modal */}
+              {assignModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-4">Assign Leads to Team Member</h3>
+
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Team Member</label>
+                    <select
+                      value={assignUserId}
+                      onChange={(e) => setAssignUserId(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm mb-4"
+                    >
+                      <option value="">Select member...</option>
+                      {teamMembers.filter(t => t.is_active).map(m => (
+                        <option key={m.id} value={m.id}>{m.full_name} ({m.email})</option>
+                      ))}
+                    </select>
+
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Assignment Type</label>
+                    <div className="flex gap-2 mb-4">
+                      <button onClick={() => setAssignType('call')} className={`px-4 py-2 rounded-lg text-sm font-medium ${assignType === 'call' ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        <Phone className="w-3.5 h-3.5 inline mr-1" /> Calls
+                      </button>
+                      <button onClick={() => setAssignType('email')} className={`px-4 py-2 rounded-lg text-sm font-medium ${assignType === 'email' ? 'bg-teal-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        <Mail className="w-3.5 h-3.5 inline mr-1" /> Emails
+                      </button>
+                    </div>
+
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Number of Leads ({assignCount})</label>
+                    <input
+                      type="range" min={5} max={100} step={5}
+                      value={assignCount}
+                      onChange={(e) => setAssignCount(Number(e.target.value))}
+                      className="w-full mb-1 accent-teal-500"
+                    />
+                    <div className="flex justify-between text-xs text-slate-400 mb-4">
+                      <span>5</span><span>25</span><span>50</span><span>75</span><span>100</span>
+                    </div>
+
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Filter by States (optional)</label>
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto mb-4 p-2 border border-slate-200 rounded-lg">
+                      {availableStates.map((s) => (
+                        <button
+                          key={s.state}
+                          onClick={() => setAssignStates(prev =>
+                            prev.includes(s.state) ? prev.filter(x => x !== s.state) : [...prev, s.state]
+                          )}
+                          className={`text-xs px-2 py-1 rounded-lg border transition-colors ${
+                            assignStates.includes(s.state)
+                              ? 'bg-teal-500 text-white border-teal-500'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300'
+                          }`}
+                        >
+                          {s.state} ({s.count})
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setAssignModalOpen(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                      <button
+                        onClick={handleAssignLeads}
+                        disabled={!assignUserId || assigning}
+                        className="px-4 py-2 bg-indigo-500 text-white text-sm font-medium rounded-lg hover:bg-indigo-600 disabled:opacity-50"
+                      >
+                        {assigning ? <Loader2 className="w-4 h-4 animate-spin inline mr-1" /> : null}
+                        Assign {assignCount} Leads
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {!currentDay && !loading && activeTab !== 'callbacks' && activeTab !== 'assignments' && (
             <div className="px-4 py-12 text-center text-slate-400">No data loaded</div>
           )}
         </div>
@@ -877,7 +1174,7 @@ function PhoneScriptsPanel() {
 // ── Calls Table ─────────────────────────────────────────────────────
 
 function CallsTable({
-  rows, statuses, notes, loading, onMarkCalled, onNotesChange,
+  rows, statuses, notes, loading, onMarkCalled, onNotesChange, onMarkCallback,
 }: {
   rows: CallRow[];
   statuses: Record<string, boolean>;
@@ -885,6 +1182,7 @@ function CallsTable({
   loading: boolean;
   onMarkCalled: (id: string) => void;
   onNotesChange: (id: string, val: string) => void;
+  onMarkCallback?: (id: string, notes: string) => void;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -896,7 +1194,7 @@ function CallsTable({
             <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Phone</th>
             <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Priority</th>
             <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Notes</th>
-            <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+            <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -909,9 +1207,14 @@ function CallsTable({
           ) : (
             rows.map((row) => {
               const called = statuses[row.id] || false;
+              const isCallback = row.callback_requested;
               return (
-                <tr key={row.id} className={`border-b border-slate-50 transition-colors ${called ? 'bg-emerald-50/30' : 'hover:bg-slate-50/50'}`}>
-                  <td className="px-4 py-3"><span className="font-medium text-slate-800">{row.provider_name}</span></td>
+                <tr key={row.id} className={`border-b border-slate-50 transition-colors ${called ? 'bg-emerald-50/30' : isCallback ? 'bg-amber-50/30' : 'hover:bg-slate-50/50'}`}>
+                  <td className="px-4 py-3">
+                    <span className="font-medium text-slate-800">{row.provider_name}</span>
+                    {row.contact_name && <span className="block text-xs text-slate-400">{row.contact_name}</span>}
+                    {isCallback && <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded-full font-medium">Callback</span>}
+                  </td>
                   <td className="px-4 py-3 text-slate-500">{[row.city, row.state].filter(Boolean).join(', ') || '—'}</td>
                   <td className="px-4 py-3">
                     {row.phone ? (
@@ -931,18 +1234,31 @@ function CallsTable({
                     />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {called ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-medium">
-                        <CheckCircle2 className="w-4 h-4" /> Called
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => onMarkCalled(row.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-medium hover:bg-indigo-600 transition-colors"
-                      >
-                        <Check className="w-3 h-3" /> Mark Called
-                      </button>
-                    )}
+                    <div className="flex items-center justify-end gap-1.5">
+                      {called ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-medium">
+                          <CheckCircle2 className="w-4 h-4" /> Called
+                        </span>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => onMarkCalled(row.id)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-medium hover:bg-indigo-600 transition-colors"
+                          >
+                            <Check className="w-3 h-3" /> Called
+                          </button>
+                          {onMarkCallback && !isCallback && (
+                            <button
+                              onClick={() => onMarkCallback(row.id, notes[row.id] || '')}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-medium hover:bg-amber-600 transition-colors"
+                              title="Schedule callback"
+                            >
+                              <PhoneForwarded className="w-3 h-3" /> CB
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
