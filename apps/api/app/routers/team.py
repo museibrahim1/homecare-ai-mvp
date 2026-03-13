@@ -229,7 +229,7 @@ def reset_team_password(
 def _send_invite_email(member: User, password: str, is_reset: bool = False):
     email_svc = get_email_service()
     action = "Password Reset" if is_reset else "Team Invitation"
-    subject = f"{'Your password has been reset' if is_reset else 'You\'ve been invited to PalmCare AI'}"
+    subject = "Your password has been reset" if is_reset else "You have been invited to PalmCare AI"
 
     perms_labels = {
         "command_center": "Command Center",
