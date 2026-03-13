@@ -627,6 +627,84 @@ class APIService: ObservableObject {
         try await request("GET", path: "/calendar/status")
     }
 
+    // MARK: - Admin / Outreach
+
+    func fetchWeeklyPlan(weekOffset: Int = 0) async throws -> OutreachWeeklyPlan {
+        let url = URL(string: "\(baseURL)/platform/outreach/weekly-plan?week_offset=\(weekOffset)")!
+        var req = URLRequest(url: url)
+        req.addValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else { throw APIError.invalidResponse }
+        if http.statusCode == 401 { throw APIError.unauthorized }
+        guard http.statusCode == 200 else { throw APIError.serverError("Failed to load weekly plan") }
+        return try JSONDecoder().decode(OutreachWeeklyPlan.self, from: data)
+    }
+
+    func approveDraft(draftId: Int, type: String) async throws {
+        let url = URL(string: "\(baseURL)/platform/outreach/approve-draft/\(draftId)?type=\(type)")!
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.addValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+        let (_, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else { throw APIError.invalidResponse }
+        if http.statusCode == 401 { throw APIError.unauthorized }
+        guard (200...299).contains(http.statusCode) else { throw APIError.serverError("Failed to approve draft") }
+    }
+
+    func markCalled(leadId: Int, notes: String?) async throws {
+        let url = URL(string: "\(baseURL)/platform/outreach/mark-called")!
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.addValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+        req.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = ["lead_id": leadId, "notes": notes ?? ""]
+        req.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (_, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else { throw APIError.invalidResponse }
+        if http.statusCode == 401 { throw APIError.unauthorized }
+        guard (200...299).contains(http.statusCode) else { throw APIError.serverError("Failed to mark called") }
+    }
+
+    func batchSendEmails(dayIndex: Int, weekOffset: Int = 0) async throws -> BatchSendResponse {
+        let url = URL(string: "\(baseURL)/platform/outreach/batch-send")!
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.addValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+        req.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = ["day_index": dayIndex, "week_offset": weekOffset, "types": ["agency", "investor"]]
+        req.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else { throw APIError.invalidResponse }
+        if http.statusCode == 401 { throw APIError.unauthorized }
+        guard http.statusCode == 200 else { throw APIError.serverError("Failed to batch send") }
+        return try JSONDecoder().decode(BatchSendResponse.self, from: data)
+    }
+
+    func fetchSalesLeads(page: Int = 0, limit: Int = 50) async throws -> [SalesLead] {
+        let url = URL(string: "\(baseURL)/platform/sales/leads?skip=\(page * limit)&limit=\(limit)")!
+        var req = URLRequest(url: url)
+        req.addValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else { throw APIError.invalidResponse }
+        if http.statusCode == 401 { throw APIError.unauthorized }
+        guard http.statusCode == 200 else { throw APIError.serverError("Failed to load leads") }
+        if let wrapper = try? JSONDecoder().decode(SalesLeadsResponse.self, from: data) {
+            return wrapper.leads ?? wrapper.items ?? []
+        }
+        return try JSONDecoder().decode([SalesLead].self, from: data)
+    }
+
+    func fetchInvestors() async throws -> [InvestorRecord] {
+        let url = URL(string: "\(baseURL)/platform/investors/")!
+        var req = URLRequest(url: url)
+        req.addValue("Bearer \(token ?? "")", forHTTPHeaderField: "Authorization")
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else { throw APIError.invalidResponse }
+        if http.statusCode == 401 { throw APIError.unauthorized }
+        guard http.statusCode == 200 else { throw APIError.serverError("Failed to load investors") }
+        return try JSONDecoder().decode([InvestorRecord].self, from: data)
+    }
+
     // MARK: - Logout
 
     func logout() {

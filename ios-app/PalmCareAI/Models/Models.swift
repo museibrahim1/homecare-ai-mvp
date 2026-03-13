@@ -9,6 +9,22 @@ struct User: Codable, Identifiable {
     let is_active: Bool
     let created_at: String?
     let updated_at: String?
+    let permissions: [String]?
+    let temp_password: Bool?
+
+    var isAdmin: Bool {
+        role == "admin" || role == "admin_team"
+    }
+
+    var isCeo: Bool {
+        role == "admin" && (email.hasSuffix("@palmtai.com"))
+    }
+
+    func hasPermission(_ perm: String) -> Bool {
+        if isCeo { return true }
+        guard let perms = permissions else { return false }
+        return perms.contains("admin_full") || perms.contains(perm)
+    }
 }
 
 struct Client: Codable, Identifiable {
@@ -605,6 +621,99 @@ enum ISO8601Flexible {
         }
         return nil
     }
+}
+
+// MARK: - Admin / Outreach Models
+
+struct OutreachWeeklyPlan: Codable {
+    let days: [OutreachDay]
+    let week_label: String?
+}
+
+struct OutreachDay: Codable, Identifiable {
+    let date: String
+    let day_label: String?
+    let agency_drafts: [AgencyDraft]?
+    let investor_drafts: [InvestorDraft]?
+    let calls: [OutreachCall]?
+
+    var id: String { date }
+}
+
+struct AgencyDraft: Codable, Identifiable {
+    let id: Int
+    let provider_name: String?
+    let contact_name: String?
+    let contact_email: String?
+    let state: String?
+    let status: String?
+    let subject: String?
+    let body: String?
+    let last_email_sent_at: String?
+}
+
+struct InvestorDraft: Codable, Identifiable {
+    let id: Int
+    let fund_name: String?
+    let contact_name: String?
+    let contact_email: String?
+    let status: String?
+    let subject: String?
+    let body: String?
+    let last_email_sent_at: String?
+}
+
+struct OutreachCall: Codable, Identifiable {
+    let id: Int
+    let provider_name: String?
+    let contact_name: String?
+    let phone: String?
+    let is_contacted: Bool?
+    let call_notes: String?
+}
+
+struct SalesLead: Codable, Identifiable {
+    let id: Int
+    let provider_name: String?
+    let contact_name: String?
+    let contact_email: String?
+    let phone: String?
+    let state: String?
+    let status: String?
+    let priority: String?
+    let is_contacted: Bool?
+    let email_send_count: Int?
+    let last_email_sent_at: String?
+    let notes: String?
+}
+
+struct SalesLeadsResponse: Codable {
+    let leads: [SalesLead]?
+    let items: [SalesLead]?
+    let total: Int?
+}
+
+struct InvestorRecord: Codable, Identifiable {
+    let id: Int
+    let fund_name: String?
+    let contact_name: String?
+    let contact_email: String?
+    let investor_type: String?
+    let status: String?
+    let priority: String?
+    let email_send_count: Int?
+    let last_email_sent_at: String?
+}
+
+struct BatchSendResponse: Codable {
+    let agencies: BatchSendDetail?
+    let investors: BatchSendDetail?
+}
+
+struct BatchSendDetail: Codable {
+    let sent: Int?
+    let failed: Int?
+    let skipped: Int?
 }
 
 // MARK: - AnyCodable for flexible JSON fields

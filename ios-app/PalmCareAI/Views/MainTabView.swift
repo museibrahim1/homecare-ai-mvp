@@ -6,6 +6,7 @@ struct MainTabView: View {
     @State private var navigationResetIds: [Int: UUID] = [
         0: UUID(), 1: UUID(), 2: UUID(), 3: UUID(), 4: UUID()
     ]
+    @State private var currentUser: User?
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -30,9 +31,15 @@ struct MainTabView: View {
                     }
                     .id(navigationResetIds[2])
                 case 3:
-                    WorkspaceView()
-                        .environmentObject(api)
-                        .id(navigationResetIds[3])
+                    if let user = currentUser, user.isAdmin {
+                        AdminHubView(user: user)
+                            .environmentObject(api)
+                            .id(navigationResetIds[3])
+                    } else {
+                        WorkspaceView()
+                            .environmentObject(api)
+                            .id(navigationResetIds[3])
+                    }
                 case 4:
                     NavigationStack {
                         SettingsView()
@@ -49,25 +56,37 @@ struct MainTabView: View {
             }
             .padding(.bottom, 60)
 
-            CustomTabBar(selectedTab: $selectedTab, onTabReselected: { tab in
-                navigationResetIds[tab] = UUID()
-            })
+            CustomTabBar(
+                selectedTab: $selectedTab,
+                isAdmin: currentUser?.isAdmin ?? false,
+                onTabReselected: { tab in
+                    navigationResetIds[tab] = UUID()
+                }
+            )
         }
         .edgesIgnoringSafeArea(.bottom)
+        .task {
+            do {
+                currentUser = try await api.fetchUser()
+            } catch { /* non-critical */ }
+        }
     }
 }
 
 struct CustomTabBar: View {
     @Binding var selectedTab: Int
+    var isAdmin: Bool = false
     var onTabReselected: ((Int) -> Void)?
 
-    private let tabs: [(icon: String, label: String)] = [
-        ("house.fill", "Home"),
-        ("person.2.fill", "Clients"),
-        ("mic.fill", "Palm It"),
-        ("square.grid.2x2.fill", "Workspace"),
-        ("gearshape.fill", "Settings"),
-    ]
+    private var tabs: [(icon: String, label: String)] {
+        [
+            ("house.fill", "Home"),
+            ("person.2.fill", "Clients"),
+            ("mic.fill", "Palm It"),
+            (isAdmin ? "shield.fill" : "square.grid.2x2.fill", isAdmin ? "Admin" : "Workspace"),
+            ("gearshape.fill", "Settings"),
+        ]
+    }
 
     var body: some View {
         HStack {
