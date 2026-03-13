@@ -48,6 +48,11 @@ class User(Base, TimestampMixin):
     
     # Password history (last 5 hashes) for HIPAA password reuse prevention
     password_history = Column(JSONB, default=list, server_default="[]")
+
+    # Team permissions (list of permission strings)
+    permissions = Column(JSONB, default=list, server_default="[]")
+    invited_by = Column(String(36), nullable=True)
+    temp_password = Column(Boolean, default=False, nullable=False, server_default="false")
     
     @property
     def voiceprint(self):

@@ -18,8 +18,8 @@ from pydantic import BaseModel
 from sqlalchemy import func, case
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_db, get_current_user
-from app.models.user import User, UserRole
+from app.core.deps import get_db, get_current_user, require_permission
+from app.models.user import User
 from app.models.sales_lead import SalesLead
 from app.models.investor import Investor
 from app.models.analytics import EmailCampaignEvent
@@ -46,16 +46,6 @@ INVESTOR_PRIORITY_ORDER = case(
     (Investor.priority == "medium", 2),
     else_=3,
 )
-
-
-# ─── Auth ───
-
-def require_ceo(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != UserRole.admin:
-        raise HTTPException(status_code=403, detail="Access denied")
-    if not current_user.email.endswith("@palmtai.com"):
-        raise HTTPException(status_code=403, detail="Access denied")
-    return current_user
 
 
 # ─── Schemas ───
@@ -432,7 +422,7 @@ Founder & CEO, Palm Technologies Inc.
 @router.get("/daily-plan", response_model=DailyPlanResponse)
 def get_daily_plan(
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     today = _today_start()
     week_start, week_end = _week_bounds()
@@ -644,7 +634,7 @@ def _cumulative_days_before(week_offset: int) -> int:
 def get_weekly_plan(
     week_offset: int = 0,
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     """Return weekly plan with pre-generated drafts. Flows Mon-Fri across weeks until everyone is reached."""
     today = _today_eastern()
@@ -857,7 +847,7 @@ def mark_called(
     lead_id: UUID,
     body: MarkCalledBody = MarkCalledBody(),
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
     if not lead:
@@ -964,7 +954,7 @@ def cron_bulk_mark_called(
 def generate_draft(
     body: GenerateDraftBody,
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     draft_id = str(_uuid.uuid4())[:8]
 
@@ -1027,7 +1017,7 @@ def generate_draft(
 
 
 @router.get("/drafts")
-def list_drafts(user: User = Depends(require_ceo)):
+def list_drafts(user: User = Depends(require_permission("command_center"))):
     return list(_drafts.values())
 
 
@@ -1036,7 +1026,7 @@ def approve_draft(
     draft_id: str,
     body: ApproveDraftBody = ApproveDraftBody(),
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     draft = _drafts.get(draft_id)
     if not draft:
@@ -1139,7 +1129,7 @@ class BatchSendRequest(BaseModel):
 def batch_send_day(
     body: BatchSendRequest,
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     """Send all unsent emails for a given day. Only sends to leads whose last email
     was sent BEFORE the assigned day (avoids double-sending)."""
@@ -1244,7 +1234,7 @@ def batch_send_day(
 
 
 @router.delete("/drafts/{draft_id}")
-def delete_draft(draft_id: str, user: User = Depends(require_ceo)):
+def delete_draft(draft_id: str, user: User = Depends(require_permission("command_center"))):
     if draft_id not in _drafts:
         raise HTTPException(status_code=404, detail="Draft not found")
     del _drafts[draft_id]
@@ -1254,7 +1244,7 @@ def delete_draft(draft_id: str, user: User = Depends(require_ceo)):
 @router.get("/weekly-summary", response_model=WeeklySummaryResponse)
 def get_weekly_summary(
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     week_start, week_end = _week_bounds()
 
@@ -1549,7 +1539,7 @@ def _build_daily_digest_html(data: dict) -> str:
 @router.post("/send-daily-digest")
 def send_daily_digest(
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     """Build and send today's daily task digest email to the CEO."""
     data = _get_todays_plan_data(db)
@@ -1584,7 +1574,7 @@ def send_daily_digest(
 @router.get("/daily-digest-preview")
 def daily_digest_preview(
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("command_center")),
 ):
     """Preview today's daily digest without sending."""
     data = _get_todays_plan_data(db)

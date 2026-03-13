@@ -86,3 +86,44 @@ async def get_current_admin_user(
             detail="Admin access required",
         )
     return current_user
+
+
+def _is_ceo(user: User) -> bool:
+    """Check if user is the platform CEO (@palmtai.com admin)."""
+    return user.role == "admin" and user.email.endswith("@palmtai.com")
+
+
+def _has_permission(user: User, permission: str) -> bool:
+    """Check if a user has a specific permission."""
+    if _is_ceo(user):
+        return True
+    if user.role in ("admin", "admin_team"):
+        perms = getattr(user, "permissions", None) or []
+        return "admin_full" in perms or permission in perms
+    return False
+
+
+def require_permission(permission: str):
+    """FastAPI dependency that checks for a specific permission.
+
+    CEO (@palmtai.com admin) always passes. Team members need
+    the permission in their permissions list or 'admin_full'.
+    """
+    async def checker(user: User = Depends(get_current_user)) -> User:
+        if _has_permission(user, permission):
+            return user
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permission required: {permission}",
+        )
+    return checker
+
+
+async def require_ceo_only(user: User = Depends(get_current_user)) -> User:
+    """Restrict to CEO only (role=admin + @palmtai.com email)."""
+    if not _is_ceo(user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="CEO access required",
+        )
+    return user

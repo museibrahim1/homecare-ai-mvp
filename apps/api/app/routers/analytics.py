@@ -16,20 +16,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, cast, Date, extract
 from pydantic import BaseModel
 
-from app.core.deps import get_db, get_current_user
-from app.models.user import User, UserRole
+from app.core.deps import get_db, get_current_user, require_permission
+from app.models.user import User
 from app.models.analytics import UsageAnalytics, ProviderEngagement
 from app.models.sales_lead import SalesLead
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != UserRole.admin:
-        raise HTTPException(status_code=403, detail="Admin access required")
-    return current_user
 
 
 # =============================================================================
@@ -136,7 +130,7 @@ async def my_usage(
 @router.get("/churn/overview")
 async def churn_overview(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_permission("analytics")),
 ):
     """High-level churn risk breakdown across all providers."""
     engagements = db.query(ProviderEngagement).all()
@@ -185,7 +179,7 @@ async def churn_providers(
     sort_order: str = Query("asc", pattern="^(asc|desc)$"),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_permission("analytics")),
 ):
     """List providers with their engagement scores and churn risk."""
     query = db.query(ProviderEngagement)
@@ -226,7 +220,7 @@ async def churn_providers(
 @router.post("/churn/refresh")
 async def refresh_engagement_scores(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_permission("analytics")),
 ):
     """Recalculate engagement scores for all provider accounts.
 
@@ -383,7 +377,7 @@ async def refresh_engagement_scores(
 @router.get("/leads/funnel")
 async def lead_funnel(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_permission("analytics")),
 ):
     """Sales funnel: new → contacted → email_sent → opened → responded → meeting → converted."""
     stages = [
@@ -425,7 +419,7 @@ async def lead_funnel(
 async def platform_activity(
     days: int = Query(30, ge=1, le=365),
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_permission("analytics")),
 ):
     """Platform-wide activity trends for admin dashboard."""
     since = datetime.now(timezone.utc) - timedelta(days=days)

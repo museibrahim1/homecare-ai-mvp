@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, asc, or_, and_, cast, Date, extract
 from pydantic import BaseModel, EmailStr
 
-from app.core.deps import get_db, get_current_user
+from app.core.deps import get_db, get_current_user, require_permission
 from app.models.user import User, UserRole
 from app.models.sales_lead import SalesLead, LeadStatus
 from app.models.analytics import EmailCampaignEvent
@@ -27,15 +27,6 @@ from app.services.email import email_service
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-def require_ceo(current_user: User = Depends(get_current_user)) -> User:
-    """Only the CEO / platform admin can access sales leads."""
-    if current_user.role != UserRole.admin:
-        raise HTTPException(status_code=403, detail="Access denied")
-    if not current_user.email.endswith("@palmtai.com"):
-        raise HTTPException(status_code=403, detail="Access denied")
-    return current_user
 
 
 # =============================================================================
@@ -497,7 +488,7 @@ async def list_leads(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """List sales leads with comprehensive filtering."""
     query = db.query(SalesLead)
@@ -568,7 +559,7 @@ async def list_leads(
 @router.get("/leads/stats", response_model=LeadStats)
 async def get_lead_stats(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Get aggregate stats for sales leads dashboard."""
     total = db.query(SalesLead).count()
@@ -622,7 +613,7 @@ async def get_lead_stats(
 
 @router.get("/leads/email-templates")
 async def list_email_templates(
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Return available email pitch templates."""
     return [
@@ -643,7 +634,7 @@ async def preview_template(
     template_id: str,
     lead_id: Optional[UUID] = None,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Render a template with sample or actual lead data."""
     tmpl = EMAIL_TEMPLATES.get(template_id)
@@ -687,7 +678,7 @@ async def send_campaign(
     req: CampaignSendRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Send a bulk email campaign to filtered leads."""
     tmpl = EMAIL_TEMPLATES.get(req.template_id)
@@ -801,7 +792,7 @@ async def preview_campaign_recipients(
     max_years: Optional[float] = None,
     exclude_already_emailed: bool = True,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Preview how many leads a campaign would reach."""
     query = db.query(SalesLead).filter(
@@ -840,7 +831,7 @@ async def preview_campaign_recipients(
 @router.get("/leads/campaigns/list")
 async def list_campaigns(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Get all unique campaign tags."""
     tags = db.query(SalesLead.campaign_tag).filter(
@@ -863,7 +854,7 @@ SEQUENCE_DAYS = {
 async def launch_email_sequence(
     req: SequenceLaunchRequest,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Launch the full 5-email sequence for matching leads.
 
@@ -968,7 +959,7 @@ async def launch_email_sequence(
 @router.post("/leads/campaigns/sequence/process")
 async def process_scheduled_emails(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Process all leads that have a scheduled next email due now or in the past.
 
@@ -1075,7 +1066,7 @@ async def process_scheduled_emails(
 @router.get("/leads/campaigns/sequence/status")
 async def sequence_status(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Overview of all active sequences: how many leads at each step."""
     total_in_sequence = db.query(SalesLead).filter(
@@ -1116,7 +1107,7 @@ async def campaign_analytics(
     campaign_tag: Optional[str] = None,
     days: int = Query(30, ge=1, le=365),
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Per-template performance analytics with funnel data."""
     since = datetime.now(timezone.utc) - timedelta(days=days)
@@ -1221,7 +1212,7 @@ async def campaign_analytics(
 async def import_cms_data(
     req: ImportRequest,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Pull home health agency data from CMS Provider Data API and import as leads.
     Uses pagination to pull ALL agencies (not just first 500).
@@ -1350,7 +1341,7 @@ async def import_cms_data(
 async def get_lead(
     lead_id: UUID,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Get full detail for a single lead."""
     lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
@@ -1405,7 +1396,7 @@ async def update_lead(
     lead_id: UUID,
     update: LeadUpdate,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Update lead fields."""
     lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
@@ -1439,7 +1430,7 @@ async def update_lead(
 async def bulk_update_status(
     update: BulkStatusUpdate,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Bulk update status for multiple leads."""
     updated = 0
@@ -1467,7 +1458,7 @@ class BulkEmailUpdate(BaseModel):
 async def bulk_update_emails(
     data: BulkEmailUpdate,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Batch update contact_email and website for leads by provider_name matching."""
     updated = 0
@@ -1518,7 +1509,7 @@ class BulkImportRequest(BaseModel):
 async def bulk_import_with_email(
     data: BulkImportRequest,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Bulk import agencies that already have verified emails. Skips duplicates by name+state."""
     imported = 0
@@ -1559,7 +1550,7 @@ async def bulk_import_with_email(
 @router.delete("/leads/cleanup-no-email")
 async def cleanup_no_email(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Remove all leads that don't have a contact email."""
     no_email = db.query(SalesLead).filter(
@@ -1575,7 +1566,7 @@ async def cleanup_no_email(
 @router.post("/leads/seed-agencies")
 async def seed_agency_leads(
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Seed 163 home care agencies with verified emails across 48 US states."""
     agencies = _get_seed_agencies()
@@ -1767,7 +1758,7 @@ async def send_lead_email(
     lead_id: UUID,
     email_req: LeadEmailRequest,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Send an email to a lead and track it."""
     lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
@@ -1824,7 +1815,7 @@ async def send_lead_email(
 async def log_email_open(
     lead_id: UUID,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Manually log that a lead opened an email."""
     lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()
@@ -1851,7 +1842,7 @@ async def log_response(
     lead_id: UUID,
     notes: Optional[str] = None,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_ceo),
+    admin: User = Depends(require_permission("sales_leads")),
 ):
     """Log that a lead responded."""
     lead = db.query(SalesLead).filter(SalesLead.id == lead_id).first()

@@ -95,6 +95,7 @@ from app.routers import (
     landing_chat,
     live_transcribe,
     live_stream,
+    team,
 )
 
 @asynccontextmanager
@@ -202,6 +203,7 @@ app.include_router(outreach.router, prefix="/platform/outreach", tags=["Outreach
 app.include_router(smart_notes.router, prefix="/notes", tags=["Smart Notes & Tasks"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics & Churn"])
 app.include_router(landing_chat.router, prefix="/chat", tags=["Landing Page Chat"])
+app.include_router(team.router, prefix="/admin", tags=["Team Management"])
 
 
 async def seed_database():

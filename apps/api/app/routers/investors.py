@@ -17,22 +17,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, asc, or_
 from pydantic import BaseModel
 
-from app.core.deps import get_db, get_current_user
-from app.models.user import User, UserRole
+from app.core.deps import get_db, get_current_user, require_permission
+from app.models.user import User
 from app.models.investor import Investor, InvestorStatus, InvestorType
 from app.services.email import email_service
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-def require_ceo(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != UserRole.admin:
-        raise HTTPException(status_code=403, detail="Access denied")
-    if not current_user.email.endswith("@palmtai.com"):
-        raise HTTPException(status_code=403, detail="Access denied")
-    return current_user
 
 
 # ─── Schemas ───
@@ -293,7 +285,7 @@ INVESTOR_EMAIL_TEMPLATES = {
 # ─── Routes ───
 
 @router.get("/email-templates")
-def list_investor_email_templates(user: User = Depends(require_ceo)):
+def list_investor_email_templates(user: User = Depends(require_permission("investors"))):
     """List available investor email templates."""
     return [
         {
@@ -307,7 +299,7 @@ def list_investor_email_templates(user: User = Depends(require_ceo)):
 
 
 @router.get("/email-templates/{template_id}")
-def get_investor_email_template(template_id: str, user: User = Depends(require_ceo)):
+def get_investor_email_template(template_id: str, user: User = Depends(require_permission("investors"))):
     """Get full email template with HTML body."""
     tmpl = INVESTOR_EMAIL_TEMPLATES.get(template_id)
     if not tmpl:
@@ -316,7 +308,7 @@ def get_investor_email_template(template_id: str, user: User = Depends(require_c
 
 
 @router.get("/stats", response_model=InvestorStats)
-def get_investor_stats(db: Session = Depends(get_db), user: User = Depends(require_ceo)):
+def get_investor_stats(db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     total = db.query(func.count(Investor.id)).scalar() or 0
     new = db.query(func.count(Investor.id)).filter(Investor.status == "new").scalar() or 0
     contacted = db.query(func.count(Investor.id)).filter(Investor.status == "contacted").scalar() or 0
@@ -352,7 +344,7 @@ def list_investors(
     skip: int = 0,
     limit: int = Query(default=100, le=500),
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("investors")),
 ):
     q = db.query(Investor)
 
@@ -394,7 +386,7 @@ def list_investors(
 
 
 @router.get("/{investor_id}", response_model=InvestorDetail)
-def get_investor(investor_id: UUID, db: Session = Depends(get_db), user: User = Depends(require_ceo)):
+def get_investor(investor_id: UUID, db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     inv = db.query(Investor).filter(Investor.id == investor_id).first()
     if not inv:
         raise HTTPException(status_code=404, detail="Investor not found")
@@ -418,7 +410,7 @@ def get_investor(investor_id: UUID, db: Session = Depends(get_db), user: User = 
 
 
 @router.post("/", response_model=InvestorDetail)
-def create_investor(data: InvestorCreate, db: Session = Depends(get_db), user: User = Depends(require_ceo)):
+def create_investor(data: InvestorCreate, db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     inv = Investor(
         fund_name=data.fund_name, investor_type=data.investor_type,
         website=data.website, description=data.description,
@@ -438,7 +430,7 @@ def create_investor(data: InvestorCreate, db: Session = Depends(get_db), user: U
 
 
 @router.patch("/{investor_id}", response_model=InvestorDetail)
-def update_investor(investor_id: UUID, data: InvestorUpdate, db: Session = Depends(get_db), user: User = Depends(require_ceo)):
+def update_investor(investor_id: UUID, data: InvestorUpdate, db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     inv = db.query(Investor).filter(Investor.id == investor_id).first()
     if not inv:
         raise HTTPException(status_code=404, detail="Investor not found")
@@ -453,7 +445,7 @@ def update_investor(investor_id: UUID, data: InvestorUpdate, db: Session = Depen
 
 
 @router.delete("/{investor_id}")
-def delete_investor(investor_id: UUID, db: Session = Depends(get_db), user: User = Depends(require_ceo)):
+def delete_investor(investor_id: UUID, db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     inv = db.query(Investor).filter(Investor.id == investor_id).first()
     if not inv:
         raise HTTPException(status_code=404, detail="Investor not found")
@@ -507,7 +499,7 @@ def batch_import_investors(
 
 
 @router.post("/bulk-status")
-def bulk_update_status(data: BulkStatusUpdate, db: Session = Depends(get_db), user: User = Depends(require_ceo)):
+def bulk_update_status(data: BulkStatusUpdate, db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     updated = db.query(Investor).filter(Investor.id.in_(data.investor_ids)).update(
         {Investor.status: data.status, Investor.updated_at: datetime.now(timezone.utc)},
         synchronize_session="fetch",
@@ -522,7 +514,7 @@ async def send_investor_email(
     data: SingleEmailRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("investors")),
 ):
     inv = db.query(Investor).filter(Investor.id == investor_id).first()
     if not inv:
@@ -568,7 +560,7 @@ async def send_bulk_investor_email(
     data: BulkEmailRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    user: User = Depends(require_ceo),
+    user: User = Depends(require_permission("investors")),
 ):
     investors = db.query(Investor).filter(
         Investor.id.in_(data.investor_ids),
@@ -623,7 +615,7 @@ async def send_bulk_investor_email(
 
 
 @router.post("/seed-data")
-def seed_investor_data(db: Session = Depends(get_db), user: User = Depends(require_ceo)):
+def seed_investor_data(db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     """Add curated investors to the database, skipping any that already exist by fund name."""
     investors_data = _get_seed_investors()
     added = 0
@@ -648,7 +640,7 @@ def seed_investor_data(db: Session = Depends(get_db), user: User = Depends(requi
 
 
 @router.delete("/clear-all")
-def clear_all_investors(db: Session = Depends(get_db), user: User = Depends(require_ceo)):
+def clear_all_investors(db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     """Clear all investor data (dev/reset only)."""
     deleted = db.query(Investor).delete()
     db.commit()

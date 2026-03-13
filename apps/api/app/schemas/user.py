@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, ConfigDict
 
@@ -30,3 +30,5 @@ class UserResponse(UserBase):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    permissions: Optional[List[str]] = None
+    temp_password: Optional[bool] = None
