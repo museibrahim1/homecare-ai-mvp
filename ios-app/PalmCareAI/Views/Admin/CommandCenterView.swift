@@ -19,14 +19,14 @@ class CommandCenterViewModel: ObservableObject {
         loading = false
     }
 
-    func approve(draftId: Int, type: String) async {
+    func approve(draftId: String, type: String) async {
         do {
             try await APIService.shared.approveDraft(draftId: draftId, type: type)
             await load()
         } catch let err { self.error = err.localizedDescription }
     }
 
-    func markCalled(leadId: Int, notes: String?) async {
+    func markCalled(leadId: String, notes: String?) async {
         do {
             try await APIService.shared.markCalled(leadId: leadId, notes: notes)
             await load()
@@ -111,7 +111,7 @@ struct CommandCenterView: View {
                         vm.selectedDayIndex = idx
                     } label: {
                         VStack(spacing: 2) {
-                            Text(shortDay(day.day_label ?? day.date))
+                            Text(shortDay(day.day_name ?? day.date))
                                 .font(.caption2.weight(.medium))
                             Text(shortDate(day.date))
                                 .font(.caption.weight(vm.selectedDayIndex == idx ? .bold : .regular))
@@ -162,7 +162,7 @@ struct CommandCenterView: View {
                     DraftCard(
                         name: draft.provider_name ?? "Unknown",
                         email: draft.contact_email ?? "",
-                        subject: draft.subject ?? "",
+                        subject: draft.draft_subject ?? "",
                         status: draft.status ?? "draft",
                         sentAt: draft.last_email_sent_at,
                         onApprove: { Task { await vm.approve(draftId: draft.id, type: "agency") } }
@@ -184,7 +184,7 @@ struct CommandCenterView: View {
                     DraftCard(
                         name: draft.fund_name ?? "Unknown",
                         email: draft.contact_email ?? "",
-                        subject: draft.subject ?? "",
+                        subject: draft.draft_subject ?? "",
                         status: draft.status ?? "draft",
                         sentAt: draft.last_email_sent_at,
                         onApprove: { Task { await vm.approve(draftId: draft.id, type: "investor") } }
