@@ -412,9 +412,10 @@ async def book_demo(
     if not prospect_result.get("success"):
         logger.error(f"Failed to send demo confirmation to {booking.email}: {prospect_result.get('error')}")
 
-    # Admin notification to both sales and personal email
+    # Admin notification to sales, business, and personal email
     admin_emails = [
         os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com"),
+        "museibrahim@palmtai.com",
         "musajama89@gmail.com",
     ]
     admin_subject = f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name} — {booking.name}"
