@@ -64,16 +64,21 @@ const agencyAdminNavItems: NavItemData[] = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-const adminCoreNavItems: NavItemData[] = [
-  { href: '/admin/command-center', label: 'Command Center', icon: Rocket },
-  { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target },
-  { href: '/admin/investors', label: 'Investors', icon: TrendingUp },
-  { href: '/admin/marketing', label: 'Marketing Materials', icon: Layers },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+interface AdminNavItem extends NavItemData {
+  permission?: string;
+}
+
+const adminCoreNavItems: AdminNavItem[] = [
+  { href: '/admin/command-center', label: 'Command Center', icon: Rocket, permission: 'command_center' },
+  { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target, permission: 'sales_leads' },
+  { href: '/admin/investors', label: 'Investors', icon: TrendingUp, permission: 'investors' },
+  { href: '/admin/marketing', label: 'Marketing Materials', icon: Layers, permission: 'marketing' },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, permission: 'analytics' },
 ];
 
 const adminSystemNavItems: NavItemData[] = [
   { href: '/admin', label: 'Overview', icon: BarChart3 },
+  { href: '/admin/team', label: 'Team', icon: Users },
   { href: '/admin/approvals', label: 'Approvals', icon: Building2 },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard },
   { href: '/admin/users', label: 'Users', icon: UserCheck },
@@ -169,7 +174,12 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
-  const isAdmin = user?.role === 'admin';
+  const isCeo = user?.role === 'admin' && user?.email?.endsWith('@palmtai.com');
+  const isTeamAdmin = user?.role === 'admin_team' || (user?.role === 'admin' && !isCeo);
+  const isAdmin = isCeo || isTeamAdmin;
+  const userPerms: string[] = (user as any)?.permissions || [];
+  const hasPermission = (perm: string) => isCeo || userPerms.includes('admin_full') || userPerms.includes(perm);
+  const visibleAdminItems = adminCoreNavItems.filter(item => !item.permission || hasPermission(item.permission));
 
   const handleNavigate = useCallback((href: string) => {
     if (navRef.current) _sidebarScrollTop = navRef.current.scrollTop;
@@ -257,17 +267,17 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav ref={navRef} data-tour="sidebar-nav" className="flex-1 px-2 py-2 overflow-y-auto overflow-x-hidden min-h-0">
-          {isAdmin && (
+          {isAdmin && visibleAdminItems.length > 0 && (
             <>
               <div className="mb-1">
                 <div className="flex items-center justify-between w-full px-3 py-2">
                   <span className="text-[10px] font-semibold text-primary-500 uppercase tracking-widest flex items-center gap-1.5">
                     <Rocket className="w-3 h-3" />
-                    CEO Workspace
+                    {isCeo ? 'CEO Workspace' : 'Admin Workspace'}
                   </span>
                 </div>
                 <div className="space-y-px pb-2">
-                  {adminCoreNavItems.map((item) => {
+                  {visibleAdminItems.map((item) => {
                     const isActive = pathname === item.href || 
                       (item.href !== '/admin' && item.href !== '/dashboard' && pathname.startsWith(item.href));
                     return <NavItem key={item.href} item={item} isActive={isActive} onNavigate={handleNavigate} />;
@@ -284,7 +294,7 @@ export default function Sidebar() {
           <CollapsibleSection title="Resources" items={resourcesNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
           <CollapsibleSection title="Administration" items={agencyAdminNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
 
-          {isAdmin && (
+          {isCeo && (
             <CollapsibleSection title="System Admin" items={adminSystemNavItems} pathname={pathname} onNavigate={handleNavigate} defaultOpen={false} />
           )}
         </nav>
