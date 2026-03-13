@@ -52,6 +52,7 @@ DEMO_SLOTS = [
 
 DEMO_TIMEZONE = os.getenv("DEMO_TIMEZONE", "America/New_York")
 SALES_EMAIL = os.getenv("SALES_CALENDAR_EMAIL", "sales@palmtai.com")
+ZOOM_MEETING_LINK = os.getenv("ZOOM_MEETING_LINK", "")
 
 
 class DemoBookingRequest(BaseModel):
@@ -181,18 +182,16 @@ async def _create_calendar_event(
         {"email": attendee_email},
         {"email": SALES_EMAIL},
     ]
-    event_body = {
+    zoom_link = ZOOM_MEETING_LINK
+    if zoom_link:
+        description = f"{description}\n\nJoin via Zoom: {zoom_link}"
+
+    event_body: dict = {
         "summary": summary,
         "description": description,
         "start": {"dateTime": start_iso, "timeZone": DEMO_TIMEZONE},
         "end": {"dateTime": end_iso, "timeZone": DEMO_TIMEZONE},
         "attendees": attendees,
-        "conferenceData": {
-            "createRequest": {
-                "requestId": str(uuid4()),
-                "conferenceSolutionKey": {"type": "hangoutsMeet"},
-            }
-        },
         "reminders": {
             "useDefault": False,
             "overrides": [
@@ -204,11 +203,25 @@ async def _create_calendar_event(
         "sendUpdates": "all",
     }
 
+    if zoom_link:
+        event_body["location"] = zoom_link
+    else:
+        event_body["conferenceData"] = {
+            "createRequest": {
+                "requestId": str(uuid4()),
+                "conferenceSolutionKey": {"type": "hangoutsMeet"},
+            }
+        }
+
+    params: dict = {"sendUpdates": "all"}
+    if not zoom_link:
+        params["conferenceDataVersion"] = 1
+
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
             headers={"Authorization": f"Bearer {access_token}"},
-            params={"conferenceDataVersion": 1, "sendUpdates": "all"},
+            params=params,
             json=event_body,
         )
 
@@ -304,11 +317,14 @@ async def book_demo(
                 start_iso=start_dt.isoformat(), end_iso=end_dt.isoformat(),
                 attendee_email=booking.email,
             )
-            conf = event.get("conferenceData", {})
-            for ep in conf.get("entryPoints", []):
-                if ep.get("entryPointType") == "video":
-                    meeting_link = ep.get("uri")
-                    break
+            if ZOOM_MEETING_LINK:
+                meeting_link = ZOOM_MEETING_LINK
+            else:
+                conf = event.get("conferenceData", {})
+                for ep in conf.get("entryPoints", []):
+                    if ep.get("entryPointType") == "video":
+                        meeting_link = ep.get("uri")
+                        break
             calendar_created = True
             logger.info(f"Demo booked on {formatted_date} at {formatted_time} for {booking.email}")
         except Exception as e:
@@ -370,10 +386,10 @@ async def book_demo(
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Time</td>
                             <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{formatted_time} Eastern Time (US and Canada)</td>
                         </tr>
-                        {f'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Meeting Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="{meeting_link}" style="color: #0d9488; text-decoration: none;">{meeting_link}</a></td></tr>' if meeting_link else ''}
+                        {f'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">{"Zoom Link" if ZOOM_MEETING_LINK else "Meeting Link"}</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="{meeting_link}" style="color: #0d9488; text-decoration: none;">Join Meeting</a></td></tr>' if meeting_link else ''}
                     </table>
                     <div style="text-align: center; margin: 30px 0 20px;">
-                        <a href="{meeting_link or 'https://palmcareai.com'}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">Join Demo</a>
+                        <a href="{meeting_link or 'https://palmcareai.com'}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">{'Join Zoom Meeting' if ZOOM_MEETING_LINK else 'Join Demo'}</a>
                     </div>
                     <p style="margin: 24px 0 0 0; font-size: 14px; color: #747487; line-height: 1.5;">Thank you for choosing PalmCare AI.<br>-The PalmCare Team</p>
                 </div>
@@ -462,9 +478,9 @@ async def book_demo(
                             <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.referral_source or 'N/A'}</td>
                         </tr>
                         {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' ET</td></tr>' if has_schedule else ''}
-                        {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Meet Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="' + (meeting_link or '') + '" style="color: #0d9488; text-decoration: none;">' + (meeting_link or '') + '</a></td></tr>' if meeting_link else ''}
+                        {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Zoom Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="' + (meeting_link or '') + '" style="color: #0d9488; text-decoration: none;">Join Meeting</a></td></tr>' if meeting_link else ''}
                     </table>
-                    {f'<div style="text-align: center; margin: 20px 0;"><a href="{meeting_link}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">Start Meeting</a></div>' if meeting_link else '<p style="font-size: 14px; color: #e65100; font-weight: 600;">Action needed: Reach out to schedule this demo.</p>'}
+                    {f'<div style="text-align: center; margin: 20px 0;"><a href="{meeting_link}" style="background-color: #0d9488; color: #ffffff; padding: 14px 48px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">Start Zoom Meeting</a></div>' if meeting_link else '<p style="font-size: 14px; color: #e65100; font-weight: 600;">Action needed: Reach out to schedule this demo.</p>'}
                 </div>
                 <div style="text-align: center; padding-top: 24px;">
                     <p style="margin: 0; font-size: 12px; color: #aaaaaa;">Copyright &copy; 2026 Palm Technologies, INC. All rights reserved.</p>
