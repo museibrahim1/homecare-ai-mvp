@@ -245,7 +245,7 @@ struct DraftCard: View {
     let sentAt: String?
     let onApprove: () -> Void
 
-    private var isSent: Bool { sentAt != nil && !sentAt!.isEmpty }
+    private var isSent: Bool { !(sentAt ?? "").isEmpty }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
