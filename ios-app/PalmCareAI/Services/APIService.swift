@@ -634,7 +634,11 @@ class APIService: ObservableObject {
     }
 
     func approveDraft(draftId: String, type: String) async throws {
-        try await requestVoid("POST", path: "/platform/outreach/approve-draft/\(draftId)")
+        let draftRes: DraftResponse = try await request(
+            "POST", path: "/platform/outreach/generate-draft",
+            body: ["target_type": type, "target_id": draftId] as [String: Any]
+        )
+        try await requestVoid("POST", path: "/platform/outreach/approve-draft/\(draftRes.draft_id)")
     }
 
     func markCalled(leadId: String, notes: String?) async throws {

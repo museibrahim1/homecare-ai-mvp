@@ -669,18 +669,6 @@ def get_weekly_plan(
         .all()
     )
 
-    # All contacted leads (shown on past days, regardless of email status)
-    all_contacted = (
-        db.query(SalesLead)
-        .filter(
-            SalesLead.is_contacted == True,  # noqa: E712
-            SalesLead.phone.isnot(None),
-            SalesLead.phone != "",
-        )
-        .order_by(SalesLead.created_at)
-        .all()
-    )
-
     # Uncalled leads pool for today + future (timezone-ordered)
     uncalled_pool = (
         db.query(SalesLead)
@@ -709,7 +697,6 @@ def get_weekly_plan(
     global_day_offset = _cumulative_days_before(week_offset)
 
     days: List[WeeklyDayPlan] = []
-    contacted_idx = 0
     uncalled_idx = 0
     for i, (day_name, day_date) in enumerate(work_days):
         global_idx = global_day_offset + i
@@ -721,18 +708,35 @@ def get_weekly_plan(
         day_investors = all_investors[inv_start:inv_start + INVESTORS_PER_DAY]
 
         if day_date < today:
-            # Past day: show completed calls (batch of contacted leads)
-            day_calls = all_contacted[contacted_idx:contacted_idx + CALLS_PER_DAY]
-            contacted_idx += len(day_calls)
+            day_start_utc = datetime.combine(day_date, datetime.min.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+            day_end_utc = datetime.combine(day_date, datetime.max.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+            day_calls = (
+                db.query(SalesLead)
+                .filter(
+                    SalesLead.is_contacted == True,  # noqa: E712
+                    SalesLead.called_at >= day_start_utc,
+                    SalesLead.called_at <= day_end_utc,
+                )
+                .order_by(SalesLead.called_at)
+                .all()
+            )
         elif day_date == today:
-            # Today: any remaining contacted + fill with uncalled
-            remaining_contacted = all_contacted[contacted_idx:]
-            contacted_idx = len(all_contacted)
-            fill = max(CALLS_PER_DAY - len(remaining_contacted), 0)
-            day_calls = list(remaining_contacted) + uncalled_pool[uncalled_idx:uncalled_idx + fill]
+            day_start_utc = datetime.combine(day_date, datetime.min.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+            day_end_utc = datetime.combine(day_date, datetime.max.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+            today_calls = (
+                db.query(SalesLead)
+                .filter(
+                    SalesLead.is_contacted == True,  # noqa: E712
+                    SalesLead.called_at >= day_start_utc,
+                    SalesLead.called_at <= day_end_utc,
+                )
+                .order_by(SalesLead.called_at)
+                .all()
+            )
+            fill = max(CALLS_PER_DAY - len(today_calls), 0)
+            day_calls = list(today_calls) + uncalled_pool[uncalled_idx:uncalled_idx + fill]
             uncalled_idx += fill
         else:
-            # Future: next batch from uncalled pool
             day_calls = uncalled_pool[uncalled_idx:uncalled_idx + CALLS_PER_DAY]
             uncalled_idx += CALLS_PER_DAY
 
@@ -1348,7 +1352,7 @@ def generate_draft(
         raise HTTPException(status_code=400, detail="target_type must be 'agency' or 'investor'")
 
     _drafts[draft_id] = draft
-    return DraftResponse(**{k: draft[k] for k in DraftResponse.__fields__})
+    return DraftResponse(**{k: draft[k] for k in DraftResponse.model_fields})
 
 
 @router.get("/drafts")
@@ -1891,7 +1895,7 @@ def send_daily_digest(
         to=CEO_EMAILS,
         subject=subject,
         html=html,
-        sender="PalmCare AI <onboarding@resend.dev>",
+        sender="PalmCare AI <sales@send.palmtai.com>",
         reply_to="sales@palmtai.com",
     )
 
@@ -2157,7 +2161,7 @@ def cron_daily_digest(
         to=CEO_EMAILS,
         subject=subject,
         html=html,
-        sender="PalmCare AI <onboarding@resend.dev>",
+        sender="PalmCare AI <sales@send.palmtai.com>",
         reply_to="sales@palmtai.com",
     )
 

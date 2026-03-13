@@ -750,7 +750,25 @@ struct InvestorRecord: Codable, Identifiable {
     let created_at: String?
 }
 
+struct DraftResponse: Codable {
+    let draft_id: String
+    let target_type: String
+    let target_id: String
+    let target_name: String
+    let to_email: String
+    let subject: String
+    let body: String
+    let is_html: Bool
+}
+
 struct BatchSendResponse: Codable {
+    let ok: Bool?
+    let day: String?
+    let date: String?
+    let results: BatchSendResults?
+}
+
+struct BatchSendResults: Codable {
     let agencies: BatchSendDetail?
     let investors: BatchSendDetail?
 }
