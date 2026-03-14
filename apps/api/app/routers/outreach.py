@@ -1320,7 +1320,7 @@ def cron_bulk_mark_called(
 ):
     """Bulk mark leads as called via internal key. Also updates contact info if provided."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
     if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
@@ -2086,7 +2086,7 @@ def cron_daily_data(
 ):
     """Return outreach data for a specific day. day_index=0 is first work day of week."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
 
     key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
@@ -2235,7 +2235,7 @@ def cron_mark_emails_sent(
 ):
     """Mark or unmark agency/investor leads as email_sent by ID list."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
     key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
     if not key_valid:
@@ -2302,7 +2302,7 @@ def cron_daily_digest(
 ):
     """Cron-accessible daily digest. Requires X-Internal-Key header or CRON_SECRET query param."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
 
     key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
@@ -2464,7 +2464,7 @@ def cron_fix_all_call_data(
     Also detects callbacks from notes and marks callback_requested.
     Accessible via cron key."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
     if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
@@ -2586,7 +2586,7 @@ def cron_call_data_audit(
 ):
     """Audit called_at data — shows how many calls per day and flags issues."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
     if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
         raise HTTPException(status_code=401, detail="Invalid or missing API key")

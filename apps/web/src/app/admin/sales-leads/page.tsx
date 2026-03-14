@@ -1,5 +1,6 @@
 'use client';
 
+import DOMPurify from 'dompurify';
 import { getStoredToken } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 
@@ -1774,7 +1775,7 @@ export default function SalesLeadsPage() {
                         {/* Email body */}
                         <div
                           className="px-6 py-5"
-                          dangerouslySetInnerHTML={{ __html: previewHtml.body }}
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewHtml.body) }}
                         />
                       </div>
                     </div>

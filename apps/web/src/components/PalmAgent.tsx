@@ -1,8 +1,16 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import { getStoredToken } from '@/lib/auth';
 import { Send, X, Loader2, Bot, Sparkles, Minimize2, Mic, MicOff, Volume2, VolumeX, Download, FileText } from 'lucide-react';
+
+declare global {
+  interface Window {
+    SpeechRecognition?: any;
+    webkitSpeechRecognition?: any;
+  }
+}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -44,7 +52,7 @@ export default function PalmAgent({ isAdmin = false }: { isAdmin?: boolean }) {
   const [speaking, setSpeaking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const suggestions = isAdmin ? SUGGESTIONS_ADMIN : SUGGESTIONS_USER;
@@ -101,15 +109,14 @@ export default function PalmAgent({ isAdmin = false }: { isAdmin?: boolean }) {
       setListening(false);
       return;
     }
-    const SpeechRec = (window as unknown as { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition
-      || (window as unknown as { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRec) return;
     const recognition = new SpeechRec();
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    recognition.onresult = (e) => {
-      const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    recognition.onresult = (e: any) => {
+      const transcript = Array.from(e.results).map((r: any) => r[0].transcript).join('');
       setInput(transcript);
       if (e.results[e.results.length - 1].isFinal) {
         setListening(false);
@@ -238,15 +245,18 @@ export default function PalmAgent({ isAdmin = false }: { isAdmin?: boolean }) {
                   <div
                     className="px-3.5 py-2.5 prose prose-sm prose-slate max-w-none [&>p]:mb-1 [&>ul]:my-1 [&>ol]:my-1 [&_li]:my-0"
                     dangerouslySetInnerHTML={{
-                      __html: msg.content
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1 py-0.5 rounded text-[11px]">$1</code>')
-                        .replace(/^### (.*)/gm, '<h4 class="font-semibold text-slate-800 mt-2 mb-1">$1</h4>')
-                        .replace(/^## (.*)/gm, '<h3 class="font-bold text-slate-900 mt-2 mb-1">$1</h3>')
-                        .replace(/^- (.*)/gm, '<li class="ml-4 list-disc">$1</li>')
-                        .replace(/^(\d+)\. (.*)/gm, '<li class="ml-4 list-decimal">$2</li>')
-                        .replace(/\n/g, '<br/>')
+                      __html: DOMPurify.sanitize(
+                        msg.content
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                          .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1 py-0.5 rounded text-[11px]">$1</code>')
+                          .replace(/^### (.*)/gm, '<h4 class="font-semibold text-slate-800 mt-2 mb-1">$1</h4>')
+                          .replace(/^## (.*)/gm, '<h3 class="font-bold text-slate-900 mt-2 mb-1">$1</h3>')
+                          .replace(/^- (.*)/gm, '<li class="ml-4 list-disc">$1</li>')
+                          .replace(/^(\d+)\. (.*)/gm, '<li class="ml-4 list-decimal">$2</li>')
+                          .replace(/\n/g, '<br/>'),
+                        { ALLOWED_TAGS: ['strong', 'em', 'code', 'h3', 'h4', 'li', 'br', 'ul', 'ol', 'p', 'a'], ALLOWED_ATTR: ['class', 'href'] }
+                      )
                     }}
                   />
                   {msg.files && msg.files.length > 0 && (

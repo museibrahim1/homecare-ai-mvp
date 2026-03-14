@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import DOMPurify from 'dompurify';
 import { FileSignature, Printer, FileText, RefreshCw, AlertCircle, Edit3, Save, X, Check, Download, Mail, Send, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -924,7 +925,7 @@ export default function ContractPreview({ contract, client, visitId, onContractU
               <div
                 className="p-8 text-gray-800"
                 style={{ fontFamily: 'Calibri, Arial, sans-serif', lineHeight: 1.6 }}
-                dangerouslySetInnerHTML={{ __html: templatePreview.document_html }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(templatePreview.document_html) }}
               />
             ) : (
               /* Fallback: structured field table if HTML not available */

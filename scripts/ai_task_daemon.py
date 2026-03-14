@@ -51,7 +51,7 @@ LOG_FILE = LOG_DIR / "palmcare-ai-tasks.log"
 POLL_INTERVAL = 30
 RESEND_BASE = "https://api.resend.com"
 CF_WORKER_URL = "https://palmcare-email-receiver.museibrahim.workers.dev"
-CF_WORKER_SECRET = "palmcare-ai-daemon-2026"
+CF_WORKER_SECRET = os.getenv("CF_WORKER_SECRET", "")
 
 ALLOWED_SENDERS = {
     "support@palmtai.com",

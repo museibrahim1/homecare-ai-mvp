@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import DOMPurify from 'dompurify';
 import { useRouter } from 'next/navigation';
 import { getStoredToken } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
@@ -1000,13 +1001,16 @@ export default function CommandCenterPage() {
                     }`}>
                       {msg.role === 'assistant' ? (
                         <div className="prose prose-sm prose-slate max-w-none [&>p]:mb-1 [&>ul]:my-1 [&>ol]:my-1 [&_li]:my-0" dangerouslySetInnerHTML={{
-                          __html: msg.content
-                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                            .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1 py-0.5 rounded text-xs">$1</code>')
-                            .replace(/^- (.*)/gm, '<li>$1</li>')
-                            .replace(/(<li>.*<\/li>)/s, '<ul class="list-disc pl-4">$1</ul>')
-                            .replace(/\n/g, '<br/>')
+                          __html: DOMPurify.sanitize(
+                            msg.content
+                              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                              .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                              .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1 py-0.5 rounded text-xs">$1</code>')
+                              .replace(/^- (.*)/gm, '<li>$1</li>')
+                              .replace(/(<li>.*<\/li>)/s, '<ul class="list-disc pl-4">$1</ul>')
+                              .replace(/\n/g, '<br/>'),
+                            { ALLOWED_TAGS: ['strong', 'em', 'code', 'li', 'br', 'ul', 'ol', 'p', 'a'], ALLOWED_ATTR: ['class', 'href'] }
+                          )
                         }} />
                       ) : msg.content}
                     </div>

@@ -3,8 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2024-09-23"
 account_id = "6e6012032e3e36b2ce65d9768ebc6152"
 
+# API_SECRET must be set via `wrangler secret put API_SECRET`
+# Do NOT store secrets in this file.
 [vars]
-API_SECRET = "palmcare-ai-daemon-2026"
 
 [[kv_namespaces]]
 binding = "TASKS"

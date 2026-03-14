@@ -11,8 +11,9 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from app.core.rate_limit import limiter
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from jose import jwt
@@ -96,7 +97,9 @@ def get_current_business_user(
 # =============================================================================
 
 @router.post("/register", response_model=BusinessRegistrationResponse)
+@limiter.limit("5/5minutes")
 async def register_business(
+    request: Request,
     registration: BusinessRegistrationStep1,
     db: Session = Depends(get_db),
 ):

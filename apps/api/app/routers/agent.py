@@ -15,9 +15,10 @@ from datetime import datetime, timezone, date, timedelta
 from typing import Optional, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session
+from app.core.rate_limit import limiter
 from sqlalchemy import func, or_
 
 from app.core.deps import get_db, get_current_user
@@ -969,23 +970,34 @@ def _tool_get_usage(db: Session, user: User) -> dict:
 
 # ── Document tool implementations ────────────────────────────────────
 
-_GENERATED_FILES: dict = {}  # token -> {"path": str, "filename": str, "content_type": str, "created": datetime}
+_GENERATED_FILES: dict = {}  # token -> {path, filename, content_type, created, user_id}
 
-def _make_file_token(file_bytes: bytes, filename: str, content_type: str) -> str:
+def _sanitize_filename(name: str) -> str:
+    """Strip path separators and dangerous characters from filenames."""
+    import re
+    name = os.path.basename(name)
+    name = re.sub(r'[^\w\s\-\.]', '_', name)
+    return name[:200] or "document"
+
+def _make_file_token(file_bytes: bytes, filename: str, content_type: str, user_id: str = "") -> str:
     import hashlib
-    token = hashlib.sha256(file_bytes[:256] + filename.encode() + str(_time.time()).encode()).hexdigest()[:24]
+    import secrets as _secrets
+    safe_name = _sanitize_filename(filename)
+    token = _secrets.token_urlsafe(24)
     import tempfile
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=f"_{filename}")
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=f"_{safe_name}")
     tmp.write(file_bytes)
     tmp.close()
-    _GENERATED_FILES[token] = {"path": tmp.name, "filename": filename, "content_type": content_type, "created": datetime.now(timezone.utc)}
-    # Cleanup old files (>1 hour)
+    _GENERATED_FILES[token] = {
+        "path": tmp.name, "filename": safe_name,
+        "content_type": content_type, "created": datetime.now(timezone.utc),
+        "user_id": str(user_id),
+    }
     cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
     for k in list(_GENERATED_FILES.keys()):
         if _GENERATED_FILES[k]["created"] < cutoff:
             try:
-                import os as _os
-                _os.remove(_GENERATED_FILES[k]["path"])
+                os.remove(_GENERATED_FILES[k]["path"])
             except OSError:
                 pass
             del _GENERATED_FILES[k]
@@ -1009,7 +1021,7 @@ def _tool_export_contract(db: Session, user: User, client_name: str, fmt: str = 
         doc_bytes = generate_contract_pdf(contract, client)
         fname = f"{client.full_name.replace(' ', '_')}_Contract.pdf"
         ctype = "application/pdf"
-    token = _make_file_token(doc_bytes, fname, ctype)
+    token = _make_file_token(doc_bytes, fname, ctype, str(user.id))
     return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": fmt}
 
 
@@ -1030,7 +1042,7 @@ def _tool_export_note(db: Session, user: User, client_name: str, fmt: str = "pdf
         doc_bytes = generate_note_pdf(note, client)
         fname = f"{client.full_name.replace(' ', '_')}_Note.pdf"
         ctype = "application/pdf"
-    token = _make_file_token(doc_bytes, fname, ctype)
+    token = _make_file_token(doc_bytes, fname, ctype, str(user.id))
     return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": fmt}
 
 
@@ -1053,7 +1065,7 @@ def _tool_export_timesheet(db: Session, user: User, client_name: str) -> dict:
                      getattr(i, 'is_approved', False), getattr(i, 'is_flagged', False)])
     csv_bytes = buf.getvalue().encode('utf-8')
     fname = f"{client.full_name.replace(' ', '_')}_Timesheet.csv"
-    token = _make_file_token(csv_bytes, fname, "text/csv")
+    token = _make_file_token(csv_bytes, fname, "text/csv", str(user.id))
     return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": "csv", "rows": len(items)}
 
 
@@ -1083,7 +1095,7 @@ def _tool_export_billing_report(db: Session, user: User, days: int = 30) -> dict
                      getattr(item, 'is_approved', False)])
     csv_bytes = buf.getvalue().encode('utf-8')
     fname = f"Billing_Report_{days}d.csv"
-    token = _make_file_token(csv_bytes, fname, "text/csv")
+    token = _make_file_token(csv_bytes, fname, "text/csv", str(user.id))
     return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": "csv", "rows": len(items)}
 
 
@@ -1133,7 +1145,7 @@ def _tool_generate_document(db: Session, user: User, title: str, doc_type: str, 
     doc.build(story)
     pdf_bytes = buf.getvalue()
     fname = f"{title.replace(' ', '_')}.pdf"
-    token = _make_file_token(pdf_bytes, fname, "application/pdf")
+    token = _make_file_token(pdf_bytes, fname, "application/pdf", str(user.id))
     return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": "pdf", "pages": "~" + str(max(1, len(content) // 3000))}
 
 
@@ -1475,8 +1487,8 @@ def _execute_tool(tool_name: str, tool_input: dict, db: Session, user: User) -> 
         else:
             result = {"error": f"Unknown tool: {tool_name}"}
     except Exception as e:
-        logger.error(f"Tool error [{tool_name}]: {e}")
-        result = {"error": str(e)}
+        logger.error(f"Tool error [{tool_name}]: {e}", exc_info=True)
+        result = {"error": "An internal error occurred while processing this request."}
 
     return json.dumps(result, default=str)
 
@@ -1485,14 +1497,44 @@ def _execute_tool(tool_name: str, tool_input: dict, db: Session, user: User) -> 
 #  API MODELS & ENDPOINT
 # ══════════════════════════════════════════════════════════════════════
 
+ALLOWED_TTS_VOICES = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+ALLOWED_AGENT_ROLES = {"user", "assistant"}
+
+
 class AgentMessage(BaseModel):
     role: str
     content: str
+
+    @validator("role")
+    def validate_role(cls, v):
+        if v not in ALLOWED_AGENT_ROLES:
+            raise ValueError("role must be 'user' or 'assistant'")
+        return v
+
+    @validator("content")
+    def validate_content(cls, v):
+        if len(v) > 50_000:
+            raise ValueError("message too long (max 50000 chars)")
+        return v
 
 
 class AgentChatRequest(BaseModel):
     message: str
     history: List[AgentMessage] = []
+
+    @validator("message")
+    def validate_message(cls, v):
+        if not v or not v.strip():
+            raise ValueError("message cannot be empty")
+        if len(v) > 10_000:
+            raise ValueError("message too long (max 10000 chars)")
+        return v
+
+    @validator("history")
+    def validate_history(cls, v):
+        if len(v) > 40:
+            return v[-40:]
+        return v
 
 
 class AgentChatResponse(BaseModel):
@@ -1502,7 +1544,9 @@ class AgentChatResponse(BaseModel):
 
 
 @router.post("/chat", response_model=AgentChatResponse)
+@limiter.limit("30/minute")
 async def agent_chat(
+    request: Request,
     body: AgentChatRequest,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -1583,14 +1627,21 @@ async def agent_chat(
 
 @router.get("/download/{token}")
 async def download_file(token: str, user: User = Depends(get_current_user)):
-    """Download a file generated by the agent."""
+    """Download a file generated by the agent (user-scoped)."""
     from fastapi.responses import StreamingResponse
     info = _GENERATED_FILES.get(token)
     if not info:
         raise HTTPException(status_code=404, detail="File not found or expired")
+    if info.get("user_id") and info["user_id"] != str(user.id):
+        raise HTTPException(status_code=403, detail="Access denied")
     try:
         with open(info["path"], "rb") as f:
             content = f.read()
+        del _GENERATED_FILES[token]
+        try:
+            os.remove(info["path"])
+        except OSError:
+            pass
         return StreamingResponse(
             iter([content]),
             media_type=info["content_type"],
@@ -1608,9 +1659,22 @@ class TTSRequest(BaseModel):
     text: str
     voice: str = "nova"
 
+    @validator("voice")
+    def validate_voice(cls, v):
+        if v not in ALLOWED_TTS_VOICES:
+            raise ValueError(f"voice must be one of: {', '.join(sorted(ALLOWED_TTS_VOICES))}")
+        return v
+
+    @validator("text")
+    def validate_text(cls, v):
+        if len(v) > 4096:
+            raise ValueError("text too long (max 4096 chars)")
+        return v
+
 
 @router.post("/tts")
-async def text_to_speech(body: TTSRequest, user: User = Depends(get_current_user)):
+@limiter.limit("20/minute")
+async def text_to_speech(request: Request, body: TTSRequest, user: User = Depends(get_current_user)):
     """Convert text to speech using OpenAI TTS. Returns MP3 audio."""
     from fastapi.responses import StreamingResponse
     import openai
@@ -1622,11 +1686,9 @@ async def text_to_speech(body: TTSRequest, user: User = Depends(get_current_user
     text = body.text.strip()
     if not text:
         raise HTTPException(status_code=400, detail="Empty text")
-    if len(text) > 4096:
-        text = text[:4096]
 
-    client = openai.OpenAI(api_key=api_key)
-    response = client.audio.speech.create(
+    oai = openai.OpenAI(api_key=api_key)
+    response = oai.audio.speech.create(
         model="tts-1",
         voice=body.voice,
         input=text,

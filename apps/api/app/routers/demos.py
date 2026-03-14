@@ -18,6 +18,7 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
+from app.core.rate_limit import limiter
 from app.core.config import settings
 from app.models.user import User
 from app.services.email import get_email_service
@@ -91,6 +92,7 @@ _funnel_events: list[dict] = []
 
 
 @router.post("/funnel-event")
+@limiter.limit("30/minute")
 def track_funnel_event(event: DemoFunnelEvent, request: Request):
     """Track demo booking funnel progression (lightweight, in-memory)."""
     ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
@@ -111,7 +113,7 @@ def track_funnel_event(event: DemoFunnelEvent, request: Request):
 @router.get("/funnel-stats")
 def get_funnel_stats(request: Request):
     """Return demo booking funnel stats. Requires internal key."""
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
     if key != cron_secret:
         raise HTTPException(status_code=401, detail="Unauthorized")

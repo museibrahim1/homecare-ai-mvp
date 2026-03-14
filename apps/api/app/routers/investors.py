@@ -14,7 +14,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, asc, or_
+from sqlalchemy import func, desc, asc, or_, cast
+from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import BaseModel
 
 from app.core.deps import get_db, get_current_user, require_permission
@@ -367,7 +368,8 @@ def list_investors(
             Investor.description.ilike(term),
         ))
     if sector:
-        q = q.filter(Investor.focus_sectors.op("@>")(f'["{sector}"]'))
+        import json as _json
+        q = q.filter(Investor.focus_sectors.op("@>")(cast(_json.dumps([sector]), JSONB)))
 
     col = getattr(Investor, sort_by, Investor.created_at)
     q = q.order_by(desc(col) if sort_dir == "desc" else asc(col))
@@ -462,7 +464,7 @@ def batch_import_investors(
 ):
     """Batch import investors via internal API key. Skips duplicates by fund_name."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
 
     key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
@@ -506,7 +508,7 @@ def batch_update_emails(
 ):
     """Batch update investor contact emails via internal API key."""
     expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
 
     key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)

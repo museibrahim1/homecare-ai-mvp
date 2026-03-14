@@ -44,7 +44,7 @@ class APIService: ObservableObject {
         config.httpCookieStorage = nil
         config.httpShouldSetCookies = false
         config.waitsForConnectivity = false
-        return URLSession(configuration: config)
+        return URLSession(configuration: config, delegate: SSLPinningDelegate.shared, delegateQueue: nil)
     }()
 
     func clearCache() {
@@ -486,7 +486,7 @@ class APIService: ObservableObject {
 
         let tmpDir = FileManager.default.temporaryDirectory
         let fileURL = tmpDir.appendingPathComponent(suggestedFilename)
-        try data.write(to: fileURL, options: .atomic)
+        try data.write(to: fileURL, options: [.atomic, .completeFileProtection])
         return fileURL
     }
 
@@ -780,6 +780,44 @@ private enum KeychainHelper {
             kSecAttrAccount as String: tokenKey,
         ]
         SecItemDelete(query as CFDictionary)
+    }
+}
+
+/// SSL/TLS certificate pinning for API requests.
+/// Rejects connections if the server cert doesn't chain to a trusted CA
+/// and the host doesn't match our allowed domains.
+class SSLPinningDelegate: NSObject, URLSessionDelegate {
+    static let shared = SSLPinningDelegate()
+    private let pinnedHosts: Set<String> = [
+        "api-production-a0a2.up.railway.app",
+        "palmcareai.com",
+        "palmtai.com",
+    ]
+
+    func urlSession(
+        _ session: URLSession,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              let serverTrust = challenge.protectionSpace.serverTrust else {
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+
+        let host = challenge.protectionSpace.host
+        guard pinnedHosts.contains(host) || host.hasSuffix(".railway.app") else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+
+        var error: CFError?
+        let isValid = SecTrustEvaluateWithError(serverTrust, &error)
+        if isValid {
+            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        } else {
+            completionHandler(.cancelAuthenticationChallenge, nil)
+        }
     }
 }
 

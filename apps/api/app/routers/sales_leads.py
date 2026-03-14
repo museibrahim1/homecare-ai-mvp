@@ -2032,7 +2032,7 @@ import os as _os
 def _require_internal_key(request: Request):
     """Validate internal API key or cron secret."""
     expected_key = _os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = _os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    cron_secret = _os.getenv("CRON_SECRET", "")
     provided_key = (
         request.headers.get("X-Internal-Key", "")
         or request.query_params.get("key", "")

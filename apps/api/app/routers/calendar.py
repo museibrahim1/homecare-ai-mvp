@@ -172,7 +172,7 @@ async def connect_google_calendar(
     except httpx.RequestError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Network error: {str(e)}",
+            detail="Network error. Please try again.",
         )
 
 

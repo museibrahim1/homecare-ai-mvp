@@ -54,18 +54,24 @@ class Settings(BaseSettings):
     
 @lru_cache()
 def get_settings() -> Settings:
+    import os
     s = Settings()
+    is_production = bool(os.getenv("RAILWAY_ENVIRONMENT"))
     if not s.jwt_secret:
-        if not s.debug:
-            _config_logger.critical(
-                "JWT_SECRET not set in production! Set JWT_SECRET env var. "
-                "Using auto-generated secret — sessions will NOT survive restarts."
+        if is_production:
+            raise RuntimeError(
+                "FATAL: JWT_SECRET is required in production. "
+                "Set the JWT_SECRET environment variable."
             )
-        generated = secrets.token_urlsafe(64)
-        s.jwt_secret = generated
-    if "palmcare:palmcare@localhost" in s.database_url and not s.debug:
         _config_logger.warning(
-            "Using default local database credentials. Set DATABASE_URL env var for production."
+            "JWT_SECRET not set — using auto-generated secret (dev only). "
+            "Sessions will NOT survive restarts."
+        )
+        s.jwt_secret = secrets.token_urlsafe(64)
+    if "palmcare:palmcare@localhost" in s.database_url and is_production:
+        raise RuntimeError(
+            "FATAL: Using default local database credentials in production. "
+            "Set the DATABASE_URL environment variable."
         )
     return s
 

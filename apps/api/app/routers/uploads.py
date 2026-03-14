@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
@@ -78,16 +79,19 @@ async def upload_audio(
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File too large. Maximum size is 500MB.")
     file_size = len(content)
     
-    # Generate S3 key
-    s3_key = f"visits/{visit_id}/audio/{file.filename}"
+    # Sanitize filename to prevent path traversal
+    import re
+    safe_filename = os.path.basename(file.filename or "recording.wav")
+    safe_filename = re.sub(r'[^\w\s\-\.]', '_', safe_filename)[:200] or "recording.wav"
+    s3_key = f"visits/{visit_id}/audio/{safe_filename}"
     
     # Upload to S3
     try:
         upload_file_to_s3(s3_key, content, file.content_type)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to upload file: {str(e)}",
+            detail="Failed to upload file. Please try again.",
         )
     
     # Create audio asset record
@@ -168,5 +172,5 @@ async def download_audio(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to download file: {str(e)}"
+            detail="Failed to download file. Please try again."
         )

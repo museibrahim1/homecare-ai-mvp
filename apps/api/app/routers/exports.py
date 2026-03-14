@@ -477,7 +477,7 @@ async def email_contract(
     if not result.get("success"):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to send email. {result.get('error', 'Please check your email configuration.')}"
+            detail="Failed to send email. Please try again later."
         )
     
     # Auto-move client to "proposal" status when contract/proposal is emailed
@@ -570,7 +570,7 @@ async def email_note(
     if not result.get("success"):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to send email. {result.get('error', 'Please check your email configuration.')}"
+            detail="Failed to send email. Please try again later."
         )
     
     return {

@@ -8,13 +8,14 @@ in real-time using Deepgram Nova-3 (primary) with OpenAI Whisper as fallback.
 
 import os
 import logging
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Request
 from pydantic import BaseModel
 from typing import List, Optional
 
 import requests
 
 from app.core.deps import get_current_user
+from app.core.rate_limit import limiter
 from app.models.user import User
 
 logger = logging.getLogger(__name__)
@@ -40,7 +41,9 @@ class LiveTranscriptResponse(BaseModel):
 
 
 @router.post("/transcribe", response_model=LiveTranscriptResponse)
+@limiter.limit("30/minute")
 async def live_transcribe(
+    request: Request,
     file: UploadFile = File(...),
     language: str = Query("en", description="Language code"),
     diarize: bool = Query(False, description="Enable speaker diarization"),
