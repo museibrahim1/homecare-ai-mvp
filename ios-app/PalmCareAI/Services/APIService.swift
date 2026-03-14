@@ -189,6 +189,25 @@ class APIService: ObservableObject {
         }
     }
 
+    func rawRequest(_ method: String, path: String, jsonBody: [String: Any]? = nil) async throws -> Data {
+        let url = try validatedURL(path: path)
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30
+        if let token = token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        if let jsonBody = jsonBody {
+            request.httpBody = try JSONSerialization.data(withJSONObject: jsonBody)
+        }
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.serverError("Request failed")
+        }
+        return data
+    }
+
     // MARK: - Auth
 
     func login(email: String, password: String) async throws -> LoginResponse {

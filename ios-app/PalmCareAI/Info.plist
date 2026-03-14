@@ -39,6 +39,8 @@
 	</dict>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>PalmCareAI needs microphone access to record client visits and assessments.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>PalmCareAI uses speech recognition for voice commands with the Palm AI assistant.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiresFullScreen</key>

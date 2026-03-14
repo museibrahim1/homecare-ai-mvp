@@ -1,9 +1,39 @@
 import SwiftUI
+import AVFoundation
+import Speech
 
 struct PalmAgentMessage: Identifiable {
     let id = UUID()
     let role: String
     let content: String
+    let files: [AgentFile]
+
+    init(role: String, content: String, files: [AgentFile] = []) {
+        self.role = role
+        self.content = content
+        self.files = files
+    }
+}
+
+struct AgentFile: Codable {
+    let url: String
+    let filename: String
+    let format: String?
+}
+
+struct AgentResponse: Codable {
+    let response: String
+    let tool_calls: [AgentToolCall]?
+    let files: [AgentFile]?
+
+    struct AgentToolCall: Codable {
+        let tool: String?
+        enum CodingKeys: String, CodingKey { case tool }
+        init(from decoder: Decoder) throws {
+            let container = try? decoder.container(keyedBy: CodingKeys.self)
+            tool = try? container?.decode(String.self, forKey: .tool)
+        }
+    }
 }
 
 @MainActor
@@ -11,11 +41,21 @@ class PalmAgentViewModel: ObservableObject {
     @Published var messages: [PalmAgentMessage] = []
     @Published var input = ""
     @Published var isLoading = false
+    @Published var isListening = false
+    @Published var isSpeaking = false
+    @Published var ttsEnabled = true
+
+    private var audioPlayer: AVAudioPlayer?
+    private var speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
+    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    private var recognitionTask: SFSpeechRecognitionTask?
+    private var audioEngine = AVAudioEngine()
 
     func send(api: APIService) async {
         let text = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isLoading else { return }
         input = ""
+        if isListening { stopListening() }
         messages.append(PalmAgentMessage(role: "user", content: text))
         isLoading = true
         defer { isLoading = false }
@@ -24,32 +64,107 @@ class PalmAgentViewModel: ObservableObject {
         let body: [String: Any] = ["message": text, "history": history]
 
         do {
-            let result: AgentResponse = try await api.request(
-                "POST",
-                path: "/platform/agent/chat",
-                body: body
-            )
-            messages.append(PalmAgentMessage(role: "assistant", content: result.response))
+            let result: AgentResponse = try await api.request("POST", path: "/platform/agent/chat", body: body)
+            let files = result.files ?? []
+            messages.append(PalmAgentMessage(role: "assistant", content: result.response, files: files))
+            if ttsEnabled { await speak(text: result.response, api: api) }
         } catch {
             messages.append(PalmAgentMessage(role: "assistant", content: "Something went wrong: \(error.localizedDescription)"))
         }
     }
-}
 
-struct AgentResponse: Codable {
-    let response: String
-    let tool_calls: [AnyCodable]?
+    func speak(text: String, api: APIService) async {
+        let clean = text.replacingOccurrences(of: "[*#|`_\\[\\]()]", with: "", options: .regularExpression)
+        guard clean.count > 5 else { return }
+        let trimmed = String(clean.prefix(4096))
+        isSpeaking = true
+        defer { isSpeaking = false }
 
-    struct AnyCodable: Codable {
-        init(from decoder: Decoder) throws {
-            let _ = try decoder.singleValueContainer()
-        }
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.singleValueContainer()
-            try container.encodeNil()
+        do {
+            let audioData = try await api.rawRequest("POST", path: "/platform/agent/tts",
+                                                      jsonBody: ["text": trimmed, "voice": "nova"])
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default)
+            try session.setActive(true)
+            audioPlayer = try AVAudioPlayer(data: audioData)
+            audioPlayer?.play()
+            while audioPlayer?.isPlaying == true {
+                try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+        } catch {
+            // TTS failed silently — text is still visible
         }
     }
+
+    func stopSpeaking() {
+        audioPlayer?.stop()
+        audioPlayer = nil
+        isSpeaking = false
+    }
+
+    func toggleListening() {
+        if isListening {
+            stopListening()
+        } else {
+            startListening()
+        }
+    }
+
+    private func startListening() {
+        SFSpeechRecognizer.requestAuthorization { [weak self] status in
+            Task { @MainActor in
+                guard status == .authorized else { return }
+                self?.beginRecognition()
+            }
+        }
+    }
+
+    private func beginRecognition() {
+        recognitionTask?.cancel()
+        recognitionTask = nil
+
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.record, mode: .measurement, options: .duckOthers)
+        try? session.setActive(true, options: .notifyOthersOnDeactivation)
+
+        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+        guard let recognitionRequest = recognitionRequest, let speechRecognizer = speechRecognizer else { return }
+        recognitionRequest.shouldReportPartialResults = true
+
+        let inputNode = audioEngine.inputNode
+        let recordingFormat = inputNode.outputFormat(forBus: 0)
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
+            self?.recognitionRequest?.append(buffer)
+        }
+
+        audioEngine.prepare()
+        try? audioEngine.start()
+        isListening = true
+
+        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+            Task { @MainActor in
+                if let result = result {
+                    self?.input = result.bestTranscription.formattedString
+                }
+                if error != nil || (result?.isFinal == true) {
+                    self?.stopListening()
+                }
+            }
+        }
+    }
+
+    func stopListening() {
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        recognitionRequest = nil
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        isListening = false
+    }
 }
+
+// MARK: - Views
 
 struct PalmAgentButton: View {
     @Binding var isOpen: Bool
@@ -84,10 +199,9 @@ struct PalmAgentSheet: View {
     let isAdmin: Bool
 
     private var suggestions: [String] {
-        if isAdmin {
-            return ["What are my outreach stats?", "Send all agency emails", "Show me pending work", "List my callbacks"]
-        }
-        return ["List my clients", "Show my pending tasks", "How many assessments this week?", "Create a note"]
+        isAdmin
+            ? ["What are my outreach stats?", "Send all agency emails", "Export billing report", "Generate a summary document"]
+            : ["List my clients", "Show my pending tasks", "Export a contract", "Create a care plan document"]
     }
 
     var body: some View {
@@ -101,12 +215,21 @@ struct PalmAgentSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") { isPresented = false }
+                    Button("Close") { isPresented = false; vm.stopSpeaking(); vm.stopListening() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Clear") { vm.messages.removeAll() }
-                        .foregroundColor(.red)
-                        .disabled(vm.messages.isEmpty)
+                    HStack(spacing: 12) {
+                        Button {
+                            vm.ttsEnabled.toggle()
+                            if !vm.ttsEnabled { vm.stopSpeaking() }
+                        } label: {
+                            Image(systemName: vm.ttsEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                                .foregroundColor(vm.ttsEnabled ? .palmPrimary : .palmSecondary)
+                        }
+                        Button("Clear") { vm.messages.removeAll(); vm.stopSpeaking() }
+                            .foregroundColor(.red)
+                            .disabled(vm.messages.isEmpty)
+                    }
                 }
             }
         }
@@ -116,19 +239,15 @@ struct PalmAgentSheet: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    if vm.messages.isEmpty {
-                        welcomeView
-                    }
+                    if vm.messages.isEmpty { welcomeView }
 
                     ForEach(vm.messages) { msg in
-                        messageBubble(msg)
-                            .id(msg.id)
+                        messageBubble(msg).id(msg.id)
                     }
 
                     if vm.isLoading {
                         HStack(spacing: 6) {
-                            ProgressView()
-                                .tint(.palmPrimary)
+                            ProgressView().tint(.palmPrimary)
                             Text("Thinking...")
                                 .font(.caption)
                                 .foregroundColor(.palmSecondary)
@@ -142,9 +261,7 @@ struct PalmAgentSheet: View {
             }
             .onChange(of: vm.messages.count) { _ in
                 withAnimation {
-                    if let last = vm.messages.last {
-                        proxy.scrollTo(last.id, anchor: .bottom)
-                    }
+                    if let last = vm.messages.last { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
             }
         }
@@ -161,7 +278,7 @@ struct PalmAgentSheet: View {
                 .font(.headline)
                 .foregroundColor(.primary)
 
-            Text("Your intelligent assistant. Ask me anything about your workspace.")
+            Text("Type or tap the mic to talk. I can generate documents, manage clients, and more.")
                 .font(.subheadline)
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
@@ -169,9 +286,7 @@ struct PalmAgentSheet: View {
 
             FlowLayout(spacing: 8) {
                 ForEach(suggestions, id: \.self) { s in
-                    Button {
-                        vm.input = s
-                    } label: {
+                    Button { vm.input = s } label: {
                         Text(s)
                             .font(.caption)
                             .padding(.horizontal, 12)
@@ -184,7 +299,6 @@ struct PalmAgentSheet: View {
                 }
             }
             .padding(.horizontal, 24)
-
             Spacer().frame(height: 24)
         }
     }
@@ -204,13 +318,34 @@ struct PalmAgentSheet: View {
                     )
             }
 
-            Text(LocalizedStringKey(msg.content))
-                .font(.subheadline)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(msg.role == "user" ? Color.palmPrimary : Color(UIColor.tertiarySystemGroupedBackground))
-                .foregroundColor(msg.role == "user" ? .white : .primary)
-                .cornerRadius(16)
+            VStack(alignment: msg.role == "user" ? .trailing : .leading, spacing: 6) {
+                Text(LocalizedStringKey(msg.content))
+                    .font(.subheadline)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(msg.role == "user" ? Color.palmPrimary : Color(UIColor.tertiarySystemGroupedBackground))
+                    .foregroundColor(msg.role == "user" ? .white : .primary)
+                    .cornerRadius(16)
+
+                ForEach(msg.files, id: \.filename) { file in
+                    HStack(spacing: 8) {
+                        Image(systemName: "doc.fill")
+                            .foregroundColor(.palmPrimary)
+                        Text(file.filename)
+                            .font(.caption)
+                            .foregroundColor(.palmPrimary)
+                            .lineLimit(1)
+                        Spacer()
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundColor(.palmPrimary)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.palmPrimary.opacity(0.08))
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmPrimary.opacity(0.2), lineWidth: 1))
+                }
+            }
 
             if msg.role == "assistant" { Spacer(minLength: 48) }
         }
@@ -219,9 +354,37 @@ struct PalmAgentSheet: View {
 
     private var inputBar: some View {
         VStack(spacing: 0) {
+            if vm.isSpeaking {
+                HStack(spacing: 8) {
+                    ForEach(0..<4, id: \.self) { i in
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.palmPrimary)
+                            .frame(width: 3, height: CGFloat.random(in: 6...16))
+                    }
+                    Text("Speaking...")
+                        .font(.caption2)
+                        .foregroundColor(.palmPrimary)
+                    Spacer()
+                    Button("Stop") { vm.stopSpeaking() }
+                        .font(.caption2)
+                        .foregroundColor(.red)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+            }
+
             Divider()
             HStack(spacing: 10) {
-                TextField("Ask Palm anything...", text: $vm.input)
+                Button { vm.toggleListening() } label: {
+                    Image(systemName: vm.isListening ? "mic.fill" : "mic")
+                        .font(.system(size: 20))
+                        .foregroundColor(vm.isListening ? .white : .palmSecondary)
+                        .frame(width: 36, height: 36)
+                        .background(vm.isListening ? Color.red : Color(UIColor.tertiarySystemGroupedBackground))
+                        .cornerRadius(18)
+                }
+
+                TextField(vm.isListening ? "Listening..." : "Ask Palm anything...", text: $vm.input)
                     .textFieldStyle(.plain)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
@@ -247,14 +410,13 @@ struct PalmAgentSheet: View {
     }
 }
 
-// MARK: - Flow Layout for suggestion chips
+// MARK: - Flow Layout
 
 struct FlowLayout: Layout {
     var spacing: CGFloat = 8
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = layoutSubviews(proposal: proposal, subviews: subviews)
-        return result.size
+        layoutSubviews(proposal: proposal, subviews: subviews).size
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
@@ -267,25 +429,15 @@ struct FlowLayout: Layout {
     private func layoutSubviews(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, positions: [CGPoint]) {
         let maxWidth = proposal.width ?? .infinity
         var positions: [CGPoint] = []
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var rowHeight: CGFloat = 0
-        var totalHeight: CGFloat = 0
-
+        var x: CGFloat = 0, y: CGFloat = 0, rowHeight: CGFloat = 0, totalHeight: CGFloat = 0
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
-            if x + size.width > maxWidth, x > 0 {
-                x = 0
-                y += rowHeight + spacing
-                rowHeight = 0
-            }
+            if x + size.width > maxWidth, x > 0 { x = 0; y += rowHeight + spacing; rowHeight = 0 }
             positions.append(CGPoint(x: x, y: y))
             rowHeight = max(rowHeight, size.height)
             x += size.width + spacing
             totalHeight = y + rowHeight
         }
-
         return (CGSize(width: maxWidth, height: totalHeight), positions)
     }
 }
-

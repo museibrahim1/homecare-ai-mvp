@@ -375,6 +375,81 @@ SHARED_TOOLS = [
             "required": [],
         },
     },
+    {
+        "name": "export_contract",
+        "description": "Generate and return a downloadable contract document (PDF or DOCX) for a client. The user gets a download link.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client name."},
+                "format": {"type": "string", "enum": ["pdf", "docx"], "description": "Document format. Default: pdf."},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "export_note",
+        "description": "Generate and return a downloadable visit note document (PDF or DOCX) for a client's latest visit.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client name."},
+                "format": {"type": "string", "enum": ["pdf", "docx"], "description": "Default: pdf."},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "export_timesheet",
+        "description": "Generate and return a downloadable timesheet CSV for a client's latest visit billables.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client name."},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "export_billing_report",
+        "description": "Generate and return a downloadable billing report CSV for the user's recent activity.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "days": {"type": "integer", "description": "Number of days (default 30)."},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "generate_document",
+        "description": "Generate a custom document from scratch using AI. Creates professional PDFs for: letters, summaries, care plans, reports, memos, etc. Specify the type and what to include.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string", "description": "Document title."},
+                "doc_type": {"type": "string", "description": "Type: letter, summary, care_plan, report, memo, custom."},
+                "instructions": {"type": "string", "description": "What the document should contain. Be specific."},
+                "client_name": {"type": "string", "description": "Optional: link to a client for context."},
+            },
+            "required": ["title", "doc_type", "instructions"],
+        },
+    },
+    {
+        "name": "email_document",
+        "description": "Email a contract or note PDF to a specific email address for a client.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string"},
+                "doc_type": {"type": "string", "enum": ["contract", "note"], "description": "Which document to email."},
+                "recipient_email": {"type": "string"},
+                "recipient_name": {"type": "string"},
+                "message": {"type": "string", "description": "Optional message to include in the email."},
+            },
+            "required": ["client_name", "doc_type", "recipient_email"],
+        },
+    },
 ]
 
 
@@ -892,6 +967,214 @@ def _tool_get_usage(db: Session, user: User) -> dict:
     return {"completed_assessments": completed, "plan": "Free (50 max)" if completed < 50 else "Check subscription", "remaining": max(50 - completed, 0)}
 
 
+# ── Document tool implementations ────────────────────────────────────
+
+_GENERATED_FILES: dict = {}  # token -> {"path": str, "filename": str, "content_type": str, "created": datetime}
+
+def _make_file_token(file_bytes: bytes, filename: str, content_type: str) -> str:
+    import hashlib
+    token = hashlib.sha256(file_bytes[:256] + filename.encode() + str(_time.time()).encode()).hexdigest()[:24]
+    import tempfile
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=f"_{filename}")
+    tmp.write(file_bytes)
+    tmp.close()
+    _GENERATED_FILES[token] = {"path": tmp.name, "filename": filename, "content_type": content_type, "created": datetime.now(timezone.utc)}
+    # Cleanup old files (>1 hour)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
+    for k in list(_GENERATED_FILES.keys()):
+        if _GENERATED_FILES[k]["created"] < cutoff:
+            try:
+                import os as _os
+                _os.remove(_GENERATED_FILES[k]["path"])
+            except OSError:
+                pass
+            del _GENERATED_FILES[k]
+    return token
+
+
+def _tool_export_contract(db: Session, user: User, client_name: str, fmt: str = "pdf") -> dict:
+    from app.models.contract import Contract
+    client = _find_client(db, user, client_name)
+    if not client:
+        return {"error": f"No client found matching '{client_name}'"}
+    contract = db.query(Contract).filter(Contract.client_id == client.id).order_by(Contract.created_at.desc()).first()
+    if not contract:
+        return {"error": f"No contract found for {client.full_name}"}
+    from app.services.document_generation import generate_contract_pdf, generate_contract_docx
+    if fmt == "docx":
+        doc_bytes = generate_contract_docx(contract, client)
+        fname = f"{client.full_name.replace(' ', '_')}_Contract.docx"
+        ctype = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    else:
+        doc_bytes = generate_contract_pdf(contract, client)
+        fname = f"{client.full_name.replace(' ', '_')}_Contract.pdf"
+        ctype = "application/pdf"
+    token = _make_file_token(doc_bytes, fname, ctype)
+    return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": fmt}
+
+
+def _tool_export_note(db: Session, user: User, client_name: str, fmt: str = "pdf") -> dict:
+    from app.models.note import Note
+    client, visit = _find_latest_visit(db, user, client_name)
+    if not visit:
+        return {"error": f"No visit found for '{client_name}'"}
+    note = db.query(Note).filter(Note.visit_id == visit.id).first()
+    if not note:
+        return {"error": f"No note generated yet for {client.full_name}"}
+    from app.services.document_generation import generate_note_pdf, generate_note_docx
+    if fmt == "docx":
+        doc_bytes = generate_note_docx(note, client)
+        fname = f"{client.full_name.replace(' ', '_')}_Note.docx"
+        ctype = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    else:
+        doc_bytes = generate_note_pdf(note, client)
+        fname = f"{client.full_name.replace(' ', '_')}_Note.pdf"
+        ctype = "application/pdf"
+    token = _make_file_token(doc_bytes, fname, ctype)
+    return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": fmt}
+
+
+def _tool_export_timesheet(db: Session, user: User, client_name: str) -> dict:
+    from app.models.billable import BillableItem
+    import csv, io
+    client, visit = _find_latest_visit(db, user, client_name)
+    if not visit:
+        return {"error": f"No visit found for '{client_name}'"}
+    items = db.query(BillableItem).filter(BillableItem.visit_id == visit.id).all()
+    if not items:
+        return {"error": f"No billable items for {client.full_name}"}
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["Service", "Category", "Minutes", "Approved", "Flagged"])
+    for i in items:
+        w.writerow([getattr(i, 'service_description', '') or getattr(i, 'description', ''),
+                     getattr(i, 'category', ''),
+                     getattr(i, 'adjusted_minutes', None) or getattr(i, 'duration_minutes', 0),
+                     getattr(i, 'is_approved', False), getattr(i, 'is_flagged', False)])
+    csv_bytes = buf.getvalue().encode('utf-8')
+    fname = f"{client.full_name.replace(' ', '_')}_Timesheet.csv"
+    token = _make_file_token(csv_bytes, fname, "text/csv")
+    return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": "csv", "rows": len(items)}
+
+
+def _tool_export_billing_report(db: Session, user: User, days: int = 30) -> dict:
+    from app.models.client import Client
+    from app.models.visit import Visit
+    from app.models.billable import BillableItem
+    import csv, io
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    items = (
+        db.query(BillableItem, Client.full_name, Visit.visit_date)
+        .join(Visit, BillableItem.visit_id == Visit.id)
+        .join(Client, Visit.client_id == Client.id)
+        .filter(Client.created_by == user.id, BillableItem.created_at >= since)
+        .all()
+    )
+    if not items:
+        return {"error": "No billing data found for that period"}
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["Client", "Visit Date", "Service", "Category", "Minutes", "Approved"])
+    for item, client_name, visit_date in items:
+        w.writerow([client_name, visit_date.isoformat() if visit_date else "",
+                     getattr(item, 'service_description', '') or getattr(item, 'description', ''),
+                     getattr(item, 'category', ''),
+                     getattr(item, 'adjusted_minutes', None) or getattr(item, 'duration_minutes', 0),
+                     getattr(item, 'is_approved', False)])
+    csv_bytes = buf.getvalue().encode('utf-8')
+    fname = f"Billing_Report_{days}d.csv"
+    token = _make_file_token(csv_bytes, fname, "text/csv")
+    return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": "csv", "rows": len(items)}
+
+
+def _tool_generate_document(db: Session, user: User, title: str, doc_type: str, instructions: str, client_name: str = "") -> dict:
+    import anthropic
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return {"error": "AI not configured"}
+    client_data = None
+    if client_name:
+        c = _find_client(db, user, client_name)
+        if c:
+            client_data = f"Client: {c.full_name}, DOB: {c.date_of_birth}, Diagnosis: {c.primary_diagnosis}, Care Level: {c.care_level}, Address: {c.address} {c.city} {c.state}"
+    ai = anthropic.Anthropic(api_key=api_key)
+    prompt = f"Generate a professional {doc_type} document.\nTitle: {title}\nInstructions: {instructions}"
+    if client_data:
+        prompt += f"\nClient Information: {client_data}"
+    prompt += "\n\nWrite the complete document content in clean, professional prose. Use markdown formatting."
+    resp = ai.messages.create(model="claude-sonnet-4-20250514", max_tokens=4096, messages=[{"role": "user", "content": prompt}])
+    content = resp.content[0].text if resp.content else ""
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    import io
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=letter, topMargin=1*inch, bottomMargin=1*inch, leftMargin=1*inch, rightMargin=1*inch)
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontSize=18, spaceAfter=20)
+    body_style = ParagraphStyle('DocBody', parent=styles['Normal'], fontSize=11, leading=16, spaceAfter=8)
+    story = [Paragraph(title, title_style), Spacer(1, 12)]
+    for line in content.split('\n'):
+        line = line.strip()
+        if not line:
+            story.append(Spacer(1, 8))
+        elif line.startswith('# '):
+            story.append(Paragraph(line[2:], ParagraphStyle('H1', parent=styles['Heading1'], fontSize=16, spaceAfter=10)))
+        elif line.startswith('## '):
+            story.append(Paragraph(line[3:], ParagraphStyle('H2', parent=styles['Heading2'], fontSize=14, spaceAfter=8)))
+        elif line.startswith('### '):
+            story.append(Paragraph(line[4:], ParagraphStyle('H3', parent=styles['Heading3'], fontSize=12, spaceAfter=6)))
+        elif line.startswith('- ') or line.startswith('* '):
+            story.append(Paragraph(f"• {line[2:]}", body_style))
+        else:
+            clean = line.replace('**', '').replace('*', '')
+            story.append(Paragraph(clean, body_style))
+    doc.build(story)
+    pdf_bytes = buf.getvalue()
+    fname = f"{title.replace(' ', '_')}.pdf"
+    token = _make_file_token(pdf_bytes, fname, "application/pdf")
+    return {"ok": True, "download_url": f"/platform/agent/download/{token}", "filename": fname, "format": "pdf", "pages": "~" + str(max(1, len(content) // 3000))}
+
+
+def _tool_email_document(db: Session, user: User, client_name: str, doc_type: str, recipient_email: str, recipient_name: str = "", message: str = "") -> dict:
+    client = _find_client(db, user, client_name)
+    if not client:
+        return {"error": f"No client found matching '{client_name}'"}
+    from app.models.contract import Contract
+    from app.models.note import Note
+    if doc_type == "contract":
+        contract = db.query(Contract).filter(Contract.client_id == client.id).order_by(Contract.created_at.desc()).first()
+        if not contract:
+            return {"error": f"No contract for {client.full_name}"}
+        from app.services.document_generation import generate_contract_pdf
+        pdf = generate_contract_pdf(contract, client)
+        fname = f"{client.full_name}_Contract.pdf"
+        subject = f"Service Contract - {client.full_name}"
+    else:
+        _, visit = _find_latest_visit(db, user, client_name)
+        if not visit:
+            return {"error": f"No visit found for {client.full_name}"}
+        note = db.query(Note).filter(Note.visit_id == visit.id).first()
+        if not note:
+            return {"error": f"No note for {client.full_name}"}
+        from app.services.document_generation import generate_note_pdf
+        pdf = generate_note_pdf(note, client)
+        fname = f"{client.full_name}_Note.pdf"
+        subject = f"Visit Note - {client.full_name}"
+    import base64
+    from app.services.email_service import email_service
+    result = email_service.send_email(
+        to=recipient_email, subject=subject,
+        html=f"<p>Hi {recipient_name or 'there'},</p><p>{message or f'Please find the attached {doc_type} for {client.full_name}.'}</p><p>Best regards,<br/>{user.full_name or 'PalmCare AI'}</p>",
+        reply_to=user.email,
+        attachments=[{"filename": fname, "content": base64.b64encode(pdf).decode(), "type": "application/pdf"}],
+    )
+    if result.get("success"):
+        return {"ok": True, "sent_to": recipient_email, "document": fname}
+    return {"error": f"Failed to send: {result.get('error', 'unknown')}"}
+
+
 # ── Admin tool implementations (reuse from previous version) ─────────
 
 def _tool_get_outreach_stats(db: Session) -> dict:
@@ -1153,6 +1436,19 @@ def _execute_tool(tool_name: str, tool_input: dict, db: Session, user: User) -> 
             result = _tool_get_calendar_events(db, user, tool_input.get("days", 7))
         elif tool_name == "get_usage":
             result = _tool_get_usage(db, user)
+        # Document tools
+        elif tool_name == "export_contract":
+            result = _tool_export_contract(db, user, tool_input["client_name"], tool_input.get("format", "pdf"))
+        elif tool_name == "export_note":
+            result = _tool_export_note(db, user, tool_input["client_name"], tool_input.get("format", "pdf"))
+        elif tool_name == "export_timesheet":
+            result = _tool_export_timesheet(db, user, tool_input["client_name"])
+        elif tool_name == "export_billing_report":
+            result = _tool_export_billing_report(db, user, tool_input.get("days", 30))
+        elif tool_name == "generate_document":
+            result = _tool_generate_document(db, user, tool_input["title"], tool_input["doc_type"], tool_input["instructions"], tool_input.get("client_name", ""))
+        elif tool_name == "email_document":
+            result = _tool_email_document(db, user, tool_input["client_name"], tool_input["doc_type"], tool_input["recipient_email"], tool_input.get("recipient_name", ""), tool_input.get("message", ""))
         # Admin tools
         elif tool_name == "get_outreach_stats":
             result = _tool_get_outreach_stats(db)
@@ -1202,6 +1498,7 @@ class AgentChatRequest(BaseModel):
 class AgentChatResponse(BaseModel):
     response: str
     tool_calls: List[dict] = []
+    files: List[dict] = []
 
 
 @router.post("/chat", response_model=AgentChatResponse)
@@ -1270,7 +1567,75 @@ async def agent_chat(
             continue
 
         text_parts = [b.text for b in response.content if b.type == "text"]
-        return AgentChatResponse(response="\n".join(text_parts), tool_calls=tool_calls_log)
+        files = [{"url": tc["result"]["download_url"], "filename": tc["result"]["filename"], "format": tc["result"].get("format", "")}
+                 for tc in tool_calls_log if tc.get("result", {}).get("download_url")]
+        return AgentChatResponse(response="\n".join(text_parts), tool_calls=tool_calls_log, files=files)
 
     text_parts = [b.text for b in response.content if b.type == "text"]
-    return AgentChatResponse(response="\n".join(text_parts) or "Done.", tool_calls=tool_calls_log)
+    files = [{"url": tc["result"]["download_url"], "filename": tc["result"]["filename"], "format": tc["result"].get("format", "")}
+             for tc in tool_calls_log if tc.get("result", {}).get("download_url")]
+    return AgentChatResponse(response="\n".join(text_parts) or "Done.", tool_calls=tool_calls_log, files=files)
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  FILE DOWNLOAD ENDPOINT
+# ══════════════════════════════════════════════════════════════════════
+
+@router.get("/download/{token}")
+async def download_file(token: str, user: User = Depends(get_current_user)):
+    """Download a file generated by the agent."""
+    from fastapi.responses import StreamingResponse
+    info = _GENERATED_FILES.get(token)
+    if not info:
+        raise HTTPException(status_code=404, detail="File not found or expired")
+    try:
+        with open(info["path"], "rb") as f:
+            content = f.read()
+        return StreamingResponse(
+            iter([content]),
+            media_type=info["content_type"],
+            headers={"Content-Disposition": f'attachment; filename="{info["filename"]}"'},
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="File expired")
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  TEXT-TO-SPEECH ENDPOINT
+# ══════════════════════════════════════════════════════════════════════
+
+class TTSRequest(BaseModel):
+    text: str
+    voice: str = "nova"
+
+
+@router.post("/tts")
+async def text_to_speech(body: TTSRequest, user: User = Depends(get_current_user)):
+    """Convert text to speech using OpenAI TTS. Returns MP3 audio."""
+    from fastapi.responses import StreamingResponse
+    import openai
+
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="TTS not configured")
+
+    text = body.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Empty text")
+    if len(text) > 4096:
+        text = text[:4096]
+
+    client = openai.OpenAI(api_key=api_key)
+    response = client.audio.speech.create(
+        model="tts-1",
+        voice=body.voice,
+        input=text,
+        response_format="mp3",
+    )
+
+    audio_bytes = response.content
+    return StreamingResponse(
+        iter([audio_bytes]),
+        media_type="audio/mpeg",
+        headers={"Content-Disposition": 'inline; filename="palm_speech.mp3"'},
+    )

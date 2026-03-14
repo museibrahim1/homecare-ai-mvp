@@ -45,6 +45,7 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         NSMicrophoneUsageDescription: "PalmCareAI needs microphone access to record client visits and assessments."
+        NSSpeechRecognitionUsageDescription: "PalmCareAI uses speech recognition for voice commands with the Palm AI assistant."
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: false
           NSExceptionDomains:
