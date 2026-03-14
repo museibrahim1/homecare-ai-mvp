@@ -643,9 +643,38 @@ def get_weekly_plan(
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("command_center")),
 ):
-    """Return weekly plan with pre-generated drafts. Flows Mon-Fri across weeks until everyone is reached."""
+    """Return weekly plan with pre-generated drafts. Flows Mon-Fri across weeks until everyone is reached.
+
+    STABILITY RULE: Past days always show actual data (sent emails, made calls)
+    based on timestamps. Future days show planned data from the sorted pool.
+    Adding/removing leads will NEVER shift past day data.
+    """
     today = _today_eastern()
     work_days = _week_work_days(week_offset)
+
+    unsent_agencies = (
+        db.query(SalesLead)
+        .filter(
+            SalesLead.contact_email.isnot(None),
+            SalesLead.contact_email != "",
+            SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+            (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+        )
+        .order_by(PRIORITY_ORDER, SalesLead.created_at)
+        .all()
+    )
+
+    unsent_investors = (
+        db.query(Investor)
+        .filter(
+            Investor.contact_email.isnot(None),
+            Investor.contact_email != "",
+            Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+            (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
+        )
+        .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+        .all()
+    )
 
     all_agencies = (
         db.query(SalesLead)
@@ -669,7 +698,6 @@ def get_weekly_plan(
         .all()
     )
 
-    # Uncalled leads pool for today + future (timezone-ordered)
     uncalled_pool = (
         db.query(SalesLead)
         .filter(
@@ -698,18 +726,38 @@ def get_weekly_plan(
 
     days: List[WeeklyDayPlan] = []
     uncalled_idx = 0
+    unsent_agency_idx = 0
+    unsent_investor_idx = 0
+
     for i, (day_name, day_date) in enumerate(work_days):
         global_idx = global_day_offset + i
 
-        a_start = global_idx * EMAILS_PER_DAY
-        day_agencies = all_agencies[a_start:a_start + EMAILS_PER_DAY]
-
-        inv_start = global_idx * INVESTORS_PER_DAY
-        day_investors = all_investors[inv_start:inv_start + INVESTORS_PER_DAY]
+        day_start_utc = datetime.combine(day_date, datetime.min.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+        day_end_utc = datetime.combine(day_date, datetime.max.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
 
         if day_date < today:
-            day_start_utc = datetime.combine(day_date, datetime.min.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
-            day_end_utc = datetime.combine(day_date, datetime.max.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+            day_agencies = (
+                db.query(SalesLead)
+                .filter(
+                    SalesLead.last_email_sent_at >= day_start_utc,
+                    SalesLead.last_email_sent_at <= day_end_utc,
+                    SalesLead.contact_email.isnot(None),
+                    SalesLead.contact_email != "",
+                )
+                .order_by(SalesLead.last_email_sent_at)
+                .all()
+            )
+            day_investors = (
+                db.query(Investor)
+                .filter(
+                    Investor.last_email_sent_at >= day_start_utc,
+                    Investor.last_email_sent_at <= day_end_utc,
+                    Investor.contact_email.isnot(None),
+                    Investor.contact_email != "",
+                )
+                .order_by(Investor.last_email_sent_at)
+                .all()
+            )
             day_calls = (
                 db.query(SalesLead)
                 .filter(
@@ -721,8 +769,50 @@ def get_weekly_plan(
                 .all()
             )
         elif day_date == today:
-            day_start_utc = datetime.combine(day_date, datetime.min.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
-            day_end_utc = datetime.combine(day_date, datetime.max.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+            sent_today_agencies = (
+                db.query(SalesLead)
+                .filter(
+                    SalesLead.last_email_sent_at >= day_start_utc,
+                    SalesLead.last_email_sent_at <= day_end_utc,
+                    SalesLead.contact_email.isnot(None),
+                    SalesLead.contact_email != "",
+                )
+                .order_by(SalesLead.last_email_sent_at)
+                .all()
+            )
+            sent_today_ids = {l.id for l in sent_today_agencies}
+            fill_a = max(EMAILS_PER_DAY - len(sent_today_agencies), 0)
+            fill_agencies = []
+            while fill_a > 0 and unsent_agency_idx < len(unsent_agencies):
+                cand = unsent_agencies[unsent_agency_idx]
+                unsent_agency_idx += 1
+                if cand.id not in sent_today_ids:
+                    fill_agencies.append(cand)
+                    fill_a -= 1
+            day_agencies = list(sent_today_agencies) + fill_agencies
+
+            sent_today_investors = (
+                db.query(Investor)
+                .filter(
+                    Investor.last_email_sent_at >= day_start_utc,
+                    Investor.last_email_sent_at <= day_end_utc,
+                    Investor.contact_email.isnot(None),
+                    Investor.contact_email != "",
+                )
+                .order_by(Investor.last_email_sent_at)
+                .all()
+            )
+            sent_today_inv_ids = {inv.id for inv in sent_today_investors}
+            fill_i = max(INVESTORS_PER_DAY - len(sent_today_investors), 0)
+            fill_investors = []
+            while fill_i > 0 and unsent_investor_idx < len(unsent_investors):
+                cand = unsent_investors[unsent_investor_idx]
+                unsent_investor_idx += 1
+                if cand.id not in sent_today_inv_ids:
+                    fill_investors.append(cand)
+                    fill_i -= 1
+            day_investors = list(sent_today_investors) + fill_investors
+
             today_calls = (
                 db.query(SalesLead)
                 .filter(
@@ -737,6 +827,12 @@ def get_weekly_plan(
             day_calls = list(today_calls) + uncalled_pool[uncalled_idx:uncalled_idx + fill]
             uncalled_idx += fill
         else:
+            day_agencies = unsent_agencies[unsent_agency_idx:unsent_agency_idx + EMAILS_PER_DAY]
+            unsent_agency_idx += len(day_agencies)
+
+            day_investors = unsent_investors[unsent_investor_idx:unsent_investor_idx + INVESTORS_PER_DAY]
+            unsent_investor_idx += len(day_investors)
+
             day_calls = uncalled_pool[uncalled_idx:uncalled_idx + CALLS_PER_DAY]
             uncalled_idx += CALLS_PER_DAY
 
