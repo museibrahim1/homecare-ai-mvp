@@ -1581,14 +1581,18 @@ def batch_send_day(
     now = datetime.now(timezone.utc)
 
     if "agency" in body.types:
-        all_agencies = (
+        unsent_agencies = (
             db.query(SalesLead)
-            .filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
-                    SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES))
+            .filter(
+                SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+                SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+                (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+            )
             .order_by(PRIORITY_ORDER, SalesLead.created_at)
+            .limit(EMAILS_PER_DAY)
             .all()
         )
-        day_agencies = all_agencies[global_idx * EMAILS_PER_DAY:(global_idx + 1) * EMAILS_PER_DAY]
+        day_agencies = unsent_agencies
 
         for lead in day_agencies:
             if lead.last_email_sent_at and lead.last_email_sent_at.date() >= day_date:
@@ -1622,14 +1626,18 @@ def batch_send_day(
             _time.sleep(0.6)
 
     if "investor" in body.types:
-        all_investors = (
+        unsent_investors = (
             db.query(Investor)
-            .filter(Investor.contact_email.isnot(None), Investor.contact_email != "",
-                    Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES))
+            .filter(
+                Investor.contact_email.isnot(None), Investor.contact_email != "",
+                Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+                (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
+            )
             .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+            .limit(INVESTORS_PER_DAY)
             .all()
         )
-        day_investors = all_investors[global_idx * INVESTORS_PER_DAY:(global_idx + 1) * INVESTORS_PER_DAY]
+        day_investors = unsent_investors
 
         for inv in day_investors:
             if inv.last_email_sent_at and inv.last_email_sent_at.date() >= day_date:
@@ -1721,10 +1729,10 @@ CEO_EMAILS = ["museibrahim@palmtai.com"]
 
 
 def _get_todays_plan_data(db: Session) -> dict:
-    """Extract today's calls, emails, and investor emails from the weekly plan."""
+    """Extract today's calls, emails, and investor emails.
+    Uses timestamp-based queries for accurate data."""
     today = _today_eastern()
     work_days = _week_work_days(0)
-    global_day_offset = _cumulative_days_before(0)
 
     today_idx = None
     for i, (day_name, day_date) in enumerate(work_days):
@@ -1735,60 +1743,79 @@ def _get_todays_plan_data(db: Session) -> dict:
     if today_idx is None:
         return {"calls": [], "agencies": [], "investors": [], "day_name": today.strftime("%A"), "date": today.isoformat()}
 
-    global_idx = global_day_offset + today_idx
+    day_start_utc = datetime.combine(today, datetime.min.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+    day_end_utc = datetime.combine(today, datetime.max.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
 
-    # Count contacted leads assigned to past days
-    all_contacted = (
+    today_calls = (
         db.query(SalesLead)
         .filter(
             SalesLead.is_contacted == True,  # noqa: E712
-            SalesLead.phone.isnot(None),
-            SalesLead.phone != "",
+            SalesLead.called_at >= day_start_utc,
+            SalesLead.called_at <= day_end_utc,
         )
-        .order_by(SalesLead.created_at)
+        .order_by(SalesLead.called_at)
         .all()
     )
-    past_days_count = sum(1 for _, d in work_days[:today_idx] if d < today)
-    past_slots = past_days_count * CALLS_PER_DAY
-    remaining_contacted = all_contacted[past_slots:]
-
     uncalled = (
         db.query(SalesLead)
         .filter(
             (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
-            SalesLead.phone.isnot(None),
-            SalesLead.phone != "",
+            SalesLead.phone.isnot(None), SalesLead.phone != "",
             SalesLead.is_contacted != True,  # noqa: E712
         )
         .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
+        .limit(max(CALLS_PER_DAY - len(today_calls), 0))
         .all()
     )
-    fill = max(CALLS_PER_DAY - len(remaining_contacted), 0)
-    day_calls = list(remaining_contacted) + uncalled[:fill]
+    day_calls = list(today_calls) + list(uncalled)
 
-    agencies = (
+    sent_today_agencies = (
         db.query(SalesLead)
         .filter(
-            SalesLead.contact_email.isnot(None),
-            SalesLead.contact_email != "",
+            SalesLead.last_email_sent_at >= day_start_utc,
+            SalesLead.last_email_sent_at <= day_end_utc,
+            SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+        )
+        .order_by(SalesLead.last_email_sent_at)
+        .all()
+    )
+    fill_a = max(EMAILS_PER_DAY - len(sent_today_agencies), 0)
+    unsent_agencies = (
+        db.query(SalesLead)
+        .filter(
+            SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
             SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+            (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
         )
         .order_by(PRIORITY_ORDER, SalesLead.created_at)
+        .limit(fill_a)
         .all()
     )
-    day_agencies = agencies[global_idx * EMAILS_PER_DAY:(global_idx + 1) * EMAILS_PER_DAY]
+    day_agencies = list(sent_today_agencies) + list(unsent_agencies)
 
-    investors = (
+    sent_today_investors = (
         db.query(Investor)
         .filter(
-            Investor.contact_email.isnot(None),
-            Investor.contact_email != "",
-            Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+            Investor.last_email_sent_at >= day_start_utc,
+            Investor.last_email_sent_at <= day_end_utc,
+            Investor.contact_email.isnot(None), Investor.contact_email != "",
         )
-        .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+        .order_by(Investor.last_email_sent_at)
         .all()
     )
-    day_investors = investors[global_idx * INVESTORS_PER_DAY:(global_idx + 1) * INVESTORS_PER_DAY]
+    fill_i = max(INVESTORS_PER_DAY - len(sent_today_investors), 0)
+    unsent_investors = (
+        db.query(Investor)
+        .filter(
+            Investor.contact_email.isnot(None), Investor.contact_email != "",
+            Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+            (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
+        )
+        .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+        .limit(fill_i)
+        .all()
+    )
+    day_investors = list(sent_today_investors) + list(unsent_investors)
 
     return {
         "calls": day_calls,
@@ -2068,28 +2095,71 @@ def cron_daily_data(
 
     if day_index is not None:
         work_days = _week_work_days(0)
-        global_day_offset = _cumulative_days_before(0)
         if day_index < 0 or day_index >= len(work_days):
             raise HTTPException(status_code=400, detail="Invalid day_index")
         day_name, day_date = work_days[day_index]
-        global_idx = global_day_offset + day_index
-        agencies = (
-            db.query(SalesLead)
-            .filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
-                    SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES))
-            .order_by(PRIORITY_ORDER, SalesLead.created_at)
-            .all()
-        )
-        day_agencies = agencies[global_idx * EMAILS_PER_DAY:(global_idx + 1) * EMAILS_PER_DAY]
-        investors = (
-            db.query(Investor)
-            .filter(Investor.contact_email.isnot(None), Investor.contact_email != "",
-                    Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES))
-            .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
-            .all()
-        )
-        day_investors = investors[global_idx * INVESTORS_PER_DAY:(global_idx + 1) * INVESTORS_PER_DAY]
-        data = {"calls": [], "agencies": day_agencies, "investors": day_investors,
+        today = _today_eastern()
+
+        day_start_utc = datetime.combine(day_date, datetime.min.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+        day_end_utc = datetime.combine(day_date, datetime.max.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
+
+        if day_date < today:
+            day_agencies = (
+                db.query(SalesLead)
+                .filter(
+                    SalesLead.last_email_sent_at >= day_start_utc,
+                    SalesLead.last_email_sent_at <= day_end_utc,
+                    SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+                )
+                .order_by(SalesLead.last_email_sent_at)
+                .all()
+            )
+            day_investors = (
+                db.query(Investor)
+                .filter(
+                    Investor.last_email_sent_at >= day_start_utc,
+                    Investor.last_email_sent_at <= day_end_utc,
+                    Investor.contact_email.isnot(None), Investor.contact_email != "",
+                )
+                .order_by(Investor.last_email_sent_at)
+                .all()
+            )
+            day_calls = (
+                db.query(SalesLead)
+                .filter(
+                    SalesLead.is_contacted == True,  # noqa: E712
+                    SalesLead.called_at >= day_start_utc,
+                    SalesLead.called_at <= day_end_utc,
+                )
+                .order_by(SalesLead.called_at)
+                .all()
+            )
+        else:
+            day_agencies = (
+                db.query(SalesLead)
+                .filter(
+                    SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+                    SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+                    (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+                )
+                .order_by(PRIORITY_ORDER, SalesLead.created_at)
+                .limit(EMAILS_PER_DAY)
+                .all()
+            )
+            day_investors = (
+                db.query(Investor)
+                .filter(
+                    Investor.contact_email.isnot(None), Investor.contact_email != "",
+                    Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+                    (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
+                )
+                .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
+                .limit(INVESTORS_PER_DAY)
+                .all()
+            )
+            day_calls = []
+
+        data = {"calls": day_calls, "agencies": day_agencies, "investors": day_investors,
                 "day_name": day_name, "date": day_date.isoformat()}
     else:
         data = _get_todays_plan_data(db)
