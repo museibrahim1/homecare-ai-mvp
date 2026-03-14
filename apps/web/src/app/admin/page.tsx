@@ -2,6 +2,7 @@
 
 import { getStoredToken, useAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
+import PalmAgent from '@/components/PalmAgent';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -419,6 +420,7 @@ export default function AdminDashboardPage() {
         )}
       </div>
       </main>
+      <PalmAgent isAdmin />
     </div>
   );
 }

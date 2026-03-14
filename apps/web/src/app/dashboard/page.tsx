@@ -8,6 +8,7 @@ import {
   Plus, Trash2, Circle, CheckCircle2, X, GripVertical, Settings2,
   LayoutGrid, Target, Zap, ArrowRight
 } from 'lucide-react';
+import PalmAgent from '@/components/PalmAgent';
 import { useRequireAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
@@ -856,6 +857,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      <PalmAgent />
     </div>
   );
 }

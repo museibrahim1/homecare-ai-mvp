@@ -7,6 +7,7 @@ struct MainTabView: View {
         0: UUID(), 1: UUID(), 2: UUID(), 3: UUID(), 4: UUID()
     ]
     @State private var currentUser: User?
+    @State private var palmAgentOpen = false
 
     private var isAdmin: Bool {
         currentUser?.isAdmin ?? false
@@ -30,6 +31,16 @@ struct MainTabView: View {
                     navigationResetIds[tab] = UUID()
                 }
             )
+
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    PalmAgentButton(isOpen: $palmAgentOpen)
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 90)
+                }
+            }
         }
         .edgesIgnoringSafeArea(.bottom)
         .task {
@@ -39,6 +50,10 @@ struct MainTabView: View {
         }
         .onChange(of: currentUser?.isAdmin) { _ in
             selectedTab = 0
+        }
+        .sheet(isPresented: $palmAgentOpen) {
+            PalmAgentSheet(isPresented: $palmAgentOpen, isAdmin: isAdmin)
+                .environmentObject(api)
         }
     }
 

@@ -27,6 +27,7 @@ import { api, formatLocalDate } from '@/lib/api';
 import { Visit } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 import UpgradeModal from '@/components/UpgradeModal';
+import PalmAgent from '@/components/PalmAgent';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -706,6 +707,8 @@ export default function VisitsPage() {
         usedCount={usage?.total_assessments || 0}
         maxCount={usage?.max_allowed || 2}
       />
+
+      <PalmAgent />
     </div>
   );
 }

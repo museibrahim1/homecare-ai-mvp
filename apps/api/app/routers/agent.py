@@ -1,8 +1,10 @@
 """
-PalmCare AI Agent — Claude-powered command center automation.
+PalmCare AI Agent — Claude-powered assistant for the entire platform.
 
-Accepts natural language instructions and executes outreach operations:
-send emails, mark calls, assign leads, check stats, search, etc.
+Two modes:
+  - Admin/CEO: outreach tools (emails, calls, investors, team assignments)
+  - Normal user: workspace tools (clients, assessments, billing, contracts, notes, scheduling)
+  - Shared: search, reports, settings
 """
 
 import os
@@ -13,15 +15,13 @@ from datetime import datetime, timezone, date, timedelta
 from typing import Optional, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
-from app.core.deps import get_db, get_current_user, require_permission
-from app.models.user import User
-from app.models.sales_lead import SalesLead
-from app.models.investor import Investor
+from app.core.deps import get_db, get_current_user
+from app.models.user import User, UserRole
 
 logger = logging.getLogger(__name__)
 
@@ -29,32 +29,315 @@ router = APIRouter()
 
 AGENT_MODEL = "claude-sonnet-4-20250514"
 
-SYSTEM_PROMPT = """You are Palm, the AI operations agent for PalmCare AI — a voice-to-contract platform for home healthcare agencies.
 
-You help the CEO (Muse) manage daily outreach operations: sending emails to agencies and investors, tracking phone calls, managing callbacks, assigning work to team members, and monitoring progress.
+# ══════════════════════════════════════════════════════════════════════
+#  SYSTEM PROMPT — teaches the agent EVERYTHING about PalmCare AI
+# ══════════════════════════════════════════════════════════════════════
 
-CURRENT CONTEXT:
-- Today is {today}
-- The outreach system runs Mon-Fri. Week 1 started Tuesday March 10, 2026.
-- Agencies are home healthcare providers we're selling to (50 emails/day, 25 calls/day).
-- Investors are VCs/angels we're fundraising from (10 emails/day).
-- Past days show actual data. Future days show planned work from unsent/uncalled pools.
+SYSTEM_PROMPT = """You are **Palm**, the AI assistant built into PalmCare AI — a voice-to-contract platform for home healthcare agencies.
 
-RULES:
-1. Always confirm before sending emails or making bulk changes. Say what you'll do first.
-2. When asked to "send emails", use the batch_send tool with the right types.
-3. Be concise but informative. Show counts and key details.
-4. If something fails, explain the error clearly and suggest a fix.
-5. Use markdown for formatting responses.
-6. Never expose API keys, passwords, or internal system details.
-7. For stats, always pull fresh data — don't guess.
+## What PalmCare AI Does
+PalmCare AI lets home care agencies record patient assessments by voice, then automatically generates:
+1. **Transcription** — speech to text using Deepgram Nova-3
+2. **Speaker Diarization** — identifies who said what (nurse vs patient)
+3. **Billable Line Items** — extracts services, durations, and billing codes
+4. **Clinical Notes** — generates SOAP-style visit notes
+5. **Service Contracts** — produces state-compliant care plans with 50-state rules
+
+## The Full Workflow
+1. **Add a Client** → name, DOB, address, diagnosis, emergency contacts, care level
+2. **Create a Visit/Assessment** → link to client, set date/time, assign caregiver
+3. **Record or Import Audio** → the assessment conversation
+4. **Run the Pipeline** → transcribe → diarize → generate billables → generate note → generate contract
+5. **Review & Approve** → check billables, edit note, review contract
+6. **Export & Send** → download PDF/DOCX, email to client or payer
+
+## Today's Date
+{today}
+
+## Your User
+- **Name**: {user_name}
+- **Email**: {user_email}
+- **Role**: {user_role}
+{role_context}
+
+## How to Behave
+1. Be concise, helpful, and proactive. Use markdown for formatting.
+2. Always confirm before destructive actions (deleting, sending emails, bulk operations).
+3. When asked about billing or costs, pull real data — don't guess.
+4. If something fails, explain the error and suggest a fix.
+5. Never expose API keys, passwords, or PHI in your responses.
+6. For tasks you can't do with tools, explain how the user can do it in the app.
+7. When creating clients or visits, ask for required fields if not provided.
+
+## Features You Can Help With
+
+### For All Users
+- **Client Management**: Add, search, update, view clients and their details
+- **Assessments/Visits**: Create visits, check pipeline status, restart if needed
+- **Billing**: View billable line items, approve/flag items, check totals
+- **Contracts**: View contracts, check status
+- **Notes**: Create smart notes, manage tasks and reminders
+- **Caregivers**: Search caregivers, match to clients by skills/availability
+- **Reports**: Get overview stats, timesheet data, billing summaries
+- **Calendar**: View upcoming events
+- **Documents**: Find contracts, notes, audio files
+- **Settings**: Check agency configuration
+
+### For Admin/CEO Only
+- **Outreach**: Send agency and investor emails, track calls, manage callbacks
+- **Sales Leads**: Search and manage 9,000+ agency leads
+- **Investors**: Search investor CRM, track fundraising outreach
+- **Team**: Assign work to team members, manage permissions
+- **Analytics**: Dashboard stats, weekly summaries, call data
+"""
+
+ADMIN_ROLE_CONTEXT = """
+### Admin Context
+You have access to the CEO/admin command center with outreach automation:
+- 9,000+ home care agency leads for sales outreach
+- 150+ investor contacts for fundraising
+- Weekly outreach plan: 50 agency emails + 10 investor emails + 25 calls per day
+- Team management: assign work, set permissions
+- Callbacks, lead notes, geographic filters
+"""
+
+USER_ROLE_CONTEXT = """
+### User Context
+You have access to the full workspace for managing home care operations:
+- Client roster, assessments, billing, contracts, and notes
+- Voice-to-contract pipeline for recording and processing assessments
+- Caregiver management and matching
+- Calendar and scheduling
+- Reports and exports
 """
 
 
-TOOLS = [
+# ══════════════════════════════════════════════════════════════════════
+#  TOOL DEFINITIONS — organized by category
+# ══════════════════════════════════════════════════════════════════════
+
+# ── Shared Tools (all users) ─────────────────────────────────────────
+
+SHARED_TOOLS = [
     {
-        "name": "get_outreach_stats",
-        "description": "Get current outreach statistics: total leads, emails sent, calls made, investors contacted, callbacks pending, team assignments.",
+        "name": "list_clients",
+        "description": "List the user's clients. Returns name, status, care level, diagnosis, phone, and city/state for each.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "search": {"type": "string", "description": "Search by name, phone, or diagnosis."},
+                "status": {"type": "string", "description": "Filter: active, inactive, pending, discharged."},
+                "limit": {"type": "integer", "description": "Max results (default 20)."},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "get_client",
+        "description": "Get full details for a specific client by name (partial match). Includes demographics, diagnosis, care level, emergency contacts, preferences.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "description": "Client name or partial name."},
+            },
+            "required": ["name"],
+        },
+    },
+    {
+        "name": "create_client",
+        "description": "Add a new client to the roster. Required: full_name. Optional: date_of_birth, gender, phone, email, address, city, state, zip_code, primary_diagnosis, care_level (LOW/MODERATE/HIGH), emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, notes.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "full_name": {"type": "string"},
+                "date_of_birth": {"type": "string", "description": "YYYY-MM-DD format."},
+                "gender": {"type": "string"},
+                "phone": {"type": "string"},
+                "email": {"type": "string"},
+                "address": {"type": "string"},
+                "city": {"type": "string"},
+                "state": {"type": "string"},
+                "zip_code": {"type": "string"},
+                "primary_diagnosis": {"type": "string"},
+                "care_level": {"type": "string", "enum": ["LOW", "MODERATE", "HIGH"]},
+                "mobility_status": {"type": "string"},
+                "cognitive_status": {"type": "string"},
+                "living_situation": {"type": "string"},
+                "emergency_contact_name": {"type": "string"},
+                "emergency_contact_phone": {"type": "string"},
+                "emergency_contact_relationship": {"type": "string"},
+                "notes": {"type": "string"},
+            },
+            "required": ["full_name"],
+        },
+    },
+    {
+        "name": "update_client",
+        "description": "Update a client's information. Specify the client name and any fields to change.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "description": "Client name to find (partial match)."},
+                "updates": {
+                    "type": "object",
+                    "description": "Fields to update. Keys: full_name, phone, email, address, city, state, zip_code, primary_diagnosis, care_level, status, notes, mobility_status, cognitive_status, living_situation.",
+                },
+            },
+            "required": ["name", "updates"],
+        },
+    },
+    {
+        "name": "list_visits",
+        "description": "List assessments/visits. Shows visit date, client name, status, and pipeline state.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Filter by client name."},
+                "status": {"type": "string", "description": "Filter: scheduled, in_progress, completed, cancelled."},
+                "limit": {"type": "integer", "description": "Max results (default 10)."},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "create_visit",
+        "description": "Create a new assessment/visit for a client.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client name (partial match)."},
+                "visit_date": {"type": "string", "description": "YYYY-MM-DD format. Defaults to today."},
+                "visit_type": {"type": "string", "description": "E.g. 'initial_assessment', 'follow_up', 'recertification'. Default: initial_assessment."},
+                "notes": {"type": "string"},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "get_visit_status",
+        "description": "Get the pipeline status for a visit — which steps are done (transcription, diarization, billing, note, contract).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client name to find the latest visit for."},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "get_billables",
+        "description": "Get billable line items for a client's latest visit. Shows services, durations, amounts, and approval status.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client name."},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "get_visit_note",
+        "description": "Get the clinical note for a client's latest visit.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client name."},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "get_contract",
+        "description": "Get the latest contract for a client — care plan, schedule, services, and status.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client name."},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "create_note",
+        "description": "Create a smart note (with optional AI task extraction). Can be linked to a client.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string"},
+                "content": {"type": "string", "description": "Note text. AI will extract tasks and reminders if present."},
+                "client_name": {"type": "string", "description": "Optional: link to a client."},
+                "tags": {"type": "array", "items": {"type": "string"}, "description": "Optional tags."},
+                "pinned": {"type": "boolean"},
+            },
+            "required": ["title", "content"],
+        },
+    },
+    {
+        "name": "list_notes",
+        "description": "List smart notes, optionally filtered by search term, tag, or client.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "search": {"type": "string"},
+                "tag": {"type": "string"},
+                "client_name": {"type": "string"},
+                "limit": {"type": "integer"},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "list_tasks",
+        "description": "List tasks (from smart notes). Filter by status, priority, or due date.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "status": {"type": "string", "description": "pending, in_progress, completed, cancelled."},
+                "priority": {"type": "string", "description": "low, medium, high, urgent."},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "complete_task",
+        "description": "Mark a task as completed by its title (partial match).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "task_title": {"type": "string"},
+            },
+            "required": ["task_title"],
+        },
+    },
+    {
+        "name": "list_caregivers",
+        "description": "List caregivers. Filter by certification, status, or search by name.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "search": {"type": "string"},
+                "certification": {"type": "string", "description": "E.g. CNA, RN, LPN."},
+                "status": {"type": "string", "description": "active, inactive, on_leave."},
+                "limit": {"type": "integer"},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "match_caregiver",
+        "description": "Find the best caregiver match for a client based on care level, skills, and availability.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "client_name": {"type": "string", "description": "Client to match for."},
+            },
+            "required": ["client_name"],
+        },
+    },
+    {
+        "name": "get_reports_overview",
+        "description": "Get overview report: assessments this week, total services, contracts generated, active clients.",
         "input_schema": {
             "type": "object",
             "properties": {},
@@ -62,244 +345,578 @@ TOOLS = [
         },
     },
     {
-        "name": "get_weekly_summary",
-        "description": "Get a summary of the current week's outreach: emails sent/pending per day, calls made/pending per day, investor emails sent/pending.",
+        "name": "get_billing_report",
+        "description": "Get billing report: total hours, amounts, and category breakdown for recent days.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "week_offset": {
-                    "type": "integer",
-                    "description": "0 = current week, 1 = next week, -1 = last week. Default 0.",
-                },
+                "days": {"type": "integer", "description": "Number of days to look back (default 30)."},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "get_calendar_events",
+        "description": "Get upcoming calendar events (if Google Calendar is connected).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "days": {"type": "integer", "description": "Number of days ahead to look (default 7)."},
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "get_usage",
+        "description": "Check assessment usage and plan limits — how many assessments used vs allowed.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+    },
+]
+
+
+# ── Admin-Only Tools ─────────────────────────────────────────────────
+
+ADMIN_TOOLS = [
+    {
+        "name": "get_outreach_stats",
+        "description": "Get current outreach statistics: total leads, emails sent, calls made, investors contacted, callbacks pending.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "get_weekly_summary",
+        "description": "Get a summary of the outreach week: emails sent/pending per day, calls made/pending, investor emails.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "week_offset": {"type": "integer", "description": "0=current week, 1=next. Default 0."},
             },
             "required": [],
         },
     },
     {
         "name": "batch_send_emails",
-        "description": "Send all pending emails for today. Types: 'agency' (outreach to home care agencies), 'investor' (pitch to VCs/angels). Can send one or both.",
+        "description": "Send all pending outreach emails. Types: 'agency' and/or 'investor'.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "types": {
-                    "type": "array",
-                    "items": {"type": "string", "enum": ["agency", "investor"]},
-                    "description": "Which email types to send. E.g. ['agency', 'investor'] for both.",
-                },
+                "types": {"type": "array", "items": {"type": "string", "enum": ["agency", "investor"]}},
             },
             "required": ["types"],
         },
     },
     {
         "name": "mark_call_done",
-        "description": "Mark a specific lead as called with optional notes.",
+        "description": "Mark a sales lead as called with optional notes and callback flag.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "lead_name": {
-                    "type": "string",
-                    "description": "Name (or partial name) of the agency/lead to mark as called.",
-                },
-                "notes": {
-                    "type": "string",
-                    "description": "Call notes to record.",
-                },
-                "callback": {
-                    "type": "boolean",
-                    "description": "If true, also mark this lead for a callback.",
-                },
+                "lead_name": {"type": "string"},
+                "notes": {"type": "string"},
+                "callback": {"type": "boolean"},
             },
             "required": ["lead_name"],
         },
     },
     {
         "name": "search_leads",
-        "description": "Search sales leads (agencies) by name, state, status, or other criteria.",
+        "description": "Search sales leads (agencies) by name, state, or status.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search term — matches against provider name, city, state, notes.",
-                },
-                "state": {
-                    "type": "string",
-                    "description": "Filter by US state abbreviation (e.g. 'FL', 'TX').",
-                },
-                "status": {
-                    "type": "string",
-                    "description": "Filter by status: 'new', 'contacted', 'email_sent', 'interested', 'demo_scheduled'.",
-                },
-                "limit": {
-                    "type": "integer",
-                    "description": "Max results to return (default 10).",
-                },
+                "query": {"type": "string"},
+                "state": {"type": "string"},
+                "status": {"type": "string"},
+                "limit": {"type": "integer"},
             },
             "required": [],
         },
     },
     {
         "name": "search_investors",
-        "description": "Search investors by fund name, type, location, or focus area.",
+        "description": "Search investor CRM by fund name, type, or focus area.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search term — matches fund name, contact name, location, sectors.",
-                },
-                "has_email": {
-                    "type": "boolean",
-                    "description": "If true, only return investors with contact emails.",
-                },
-                "limit": {
-                    "type": "integer",
-                    "description": "Max results (default 10).",
-                },
+                "query": {"type": "string"},
+                "has_email": {"type": "boolean"},
+                "limit": {"type": "integer"},
             },
             "required": [],
         },
     },
     {
         "name": "get_callbacks",
-        "description": "Get all leads marked for callback, with their phone numbers and notes.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
-            "required": [],
-        },
+        "description": "Get all leads marked for callback.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
     },
     {
-        "name": "add_lead_notes",
-        "description": "Add notes to a specific lead (by name search).",
+        "name": "get_pending_work",
+        "description": "Get summary of all pending outreach work.",
+        "input_schema": {"type": "object", "properties": {}, "required": []},
+    },
+    {
+        "name": "send_single_email",
+        "description": "Send an outreach email to a single agency or investor by name.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "lead_name": {
-                    "type": "string",
-                    "description": "Name (or partial name) of the agency/lead.",
-                },
-                "notes": {
-                    "type": "string",
-                    "description": "Notes to append.",
-                },
+                "name": {"type": "string"},
+                "type": {"type": "string", "enum": ["agency", "investor"]},
             },
-            "required": ["lead_name", "notes"],
+            "required": ["name", "type"],
         },
     },
     {
         "name": "assign_leads_to_team",
-        "description": "Assign a batch of leads (calls or emails) to a team member.",
+        "description": "Assign a batch of leads to a team member for calls or emails.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "team_member_email": {
-                    "type": "string",
-                    "description": "Email of the team member to assign to.",
-                },
-                "assign_type": {
-                    "type": "string",
-                    "enum": ["call", "email"],
-                    "description": "Type of assignment.",
-                },
-                "count": {
-                    "type": "integer",
-                    "description": "Number of leads to assign (default 20).",
-                },
-                "states": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Filter by US states (e.g. ['FL', 'TX', 'CA']).",
-                },
+                "team_member_email": {"type": "string"},
+                "assign_type": {"type": "string", "enum": ["call", "email"]},
+                "count": {"type": "integer"},
+                "states": {"type": "array", "items": {"type": "string"}},
             },
             "required": ["team_member_email", "assign_type"],
         },
     },
     {
-        "name": "get_pending_work",
-        "description": "Get a summary of all pending work: unsent emails, uncalled leads, callbacks, assignments.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
-            "required": [],
-        },
-    },
-    {
-        "name": "send_single_email",
-        "description": "Send an email to a single specific agency or investor by name.",
+        "name": "add_lead_notes",
+        "description": "Add notes to a sales lead.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "Name of the agency or investor fund.",
-                },
-                "type": {
-                    "type": "string",
-                    "enum": ["agency", "investor"],
-                    "description": "Whether this is an agency or investor.",
-                },
+                "lead_name": {"type": "string"},
+                "notes": {"type": "string"},
             },
-            "required": ["name", "type"],
+            "required": ["lead_name", "notes"],
         },
     },
 ]
 
 
-# ── Tool Implementations ──────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════
+#  TOOL IMPLEMENTATIONS
+# ══════════════════════════════════════════════════════════════════════
 
 def _today_eastern() -> date:
     from zoneinfo import ZoneInfo
     return datetime.now(ZoneInfo("America/New_York")).date()
 
 
+def _find_client(db: Session, user: User, name: str):
+    from app.models.client import Client
+    return (
+        db.query(Client)
+        .filter(Client.created_by == user.id, Client.full_name.ilike(f"%{name}%"))
+        .first()
+    )
+
+
+def _find_latest_visit(db: Session, user: User, client_name: str):
+    from app.models.client import Client
+    from app.models.visit import Visit
+    client = _find_client(db, user, client_name)
+    if not client:
+        return None, None
+    visit = (
+        db.query(Visit)
+        .filter(Visit.client_id == client.id)
+        .order_by(Visit.created_at.desc())
+        .first()
+    )
+    return client, visit
+
+
+# ── Shared tool implementations ──────────────────────────────────────
+
+def _tool_list_clients(db: Session, user: User, search: str = "", status: str = "", limit: int = 20) -> dict:
+    from app.models.client import Client
+    q = db.query(Client).filter(Client.created_by == user.id)
+    if search:
+        pattern = f"%{search}%"
+        q = q.filter(or_(Client.full_name.ilike(pattern), Client.phone.ilike(pattern), Client.primary_diagnosis.ilike(pattern)))
+    if status:
+        q = q.filter(Client.status == status)
+    clients = q.order_by(Client.full_name).limit(limit).all()
+    return {
+        "count": len(clients),
+        "clients": [
+            {"id": str(c.id), "name": c.full_name, "status": c.status, "care_level": c.care_level,
+             "diagnosis": c.primary_diagnosis, "phone": c.phone, "city": c.city, "state": c.state,
+             "age": (date.today().year - c.date_of_birth.year) if c.date_of_birth else None}
+            for c in clients
+        ],
+    }
+
+
+def _tool_get_client(db: Session, user: User, name: str) -> dict:
+    client = _find_client(db, user, name)
+    if not client:
+        return {"error": f"No client found matching '{name}'"}
+    return {
+        "id": str(client.id), "name": client.full_name, "status": client.status,
+        "care_level": client.care_level, "diagnosis": client.primary_diagnosis,
+        "phone": client.phone, "email": client.email,
+        "address": client.address, "city": client.city, "state": client.state, "zip": client.zip_code,
+        "dob": client.date_of_birth.isoformat() if client.date_of_birth else None,
+        "gender": client.gender, "mobility": client.mobility_status, "cognitive": client.cognitive_status,
+        "living_situation": client.living_situation,
+        "emergency_contact": client.emergency_contact_name,
+        "emergency_phone": client.emergency_contact_phone,
+        "emergency_relationship": client.emergency_contact_relationship,
+        "notes": client.notes,
+        "preferred_days": client.preferred_days, "preferred_times": client.preferred_times,
+    }
+
+
+def _tool_create_client(db: Session, user: User, data: dict) -> dict:
+    from app.models.client import Client
+    client = Client(created_by=user.id, **{k: v for k, v in data.items() if v is not None})
+    db.add(client)
+    db.commit()
+    db.refresh(client)
+    return {"ok": True, "id": str(client.id), "name": client.full_name, "status": client.status}
+
+
+def _tool_update_client(db: Session, user: User, name: str, updates: dict) -> dict:
+    client = _find_client(db, user, name)
+    if not client:
+        return {"error": f"No client found matching '{name}'"}
+    for k, v in updates.items():
+        if hasattr(client, k) and v is not None:
+            setattr(client, k, v)
+    db.commit()
+    return {"ok": True, "name": client.full_name, "updated_fields": list(updates.keys())}
+
+
+def _tool_list_visits(db: Session, user: User, client_name: str = "", status: str = "", limit: int = 10) -> dict:
+    from app.models.client import Client
+    from app.models.visit import Visit
+    q = db.query(Visit).join(Client).filter(Client.created_by == user.id)
+    if client_name:
+        q = q.filter(Client.full_name.ilike(f"%{client_name}%"))
+    if status:
+        q = q.filter(Visit.status == status)
+    visits = q.order_by(Visit.created_at.desc()).limit(limit).all()
+    return {
+        "count": len(visits),
+        "visits": [
+            {"id": str(v.id), "client": v.client.full_name if v.client else "?",
+             "date": v.visit_date.isoformat() if v.visit_date else None,
+             "status": v.status, "visit_type": v.visit_type,
+             "has_transcript": bool(v.transcript_id), "has_note": bool(v.note_id)}
+            for v in visits
+        ],
+    }
+
+
+def _tool_create_visit(db: Session, user: User, client_name: str, visit_date: str = "", visit_type: str = "initial_assessment", notes: str = "") -> dict:
+    from app.models.client import Client
+    from app.models.visit import Visit
+    client = _find_client(db, user, client_name)
+    if not client:
+        return {"error": f"No client found matching '{client_name}'"}
+    vd = None
+    if visit_date:
+        try:
+            vd = datetime.strptime(visit_date, "%Y-%m-%d").date()
+        except ValueError:
+            vd = _today_eastern()
+    else:
+        vd = _today_eastern()
+    visit = Visit(client_id=client.id, visit_date=vd, visit_type=visit_type, status="scheduled", notes=notes)
+    db.add(visit)
+    db.commit()
+    db.refresh(visit)
+    return {"ok": True, "id": str(visit.id), "client": client.full_name, "date": vd.isoformat(), "type": visit_type}
+
+
+def _tool_get_visit_status(db: Session, user: User, client_name: str) -> dict:
+    client, visit = _find_latest_visit(db, user, client_name)
+    if not client:
+        return {"error": f"No client found matching '{client_name}'"}
+    if not visit:
+        return {"error": f"No visits found for {client.full_name}"}
+    ps = visit.pipeline_state or {}
+    return {
+        "client": client.full_name, "visit_id": str(visit.id),
+        "visit_date": visit.visit_date.isoformat() if visit.visit_date else None,
+        "status": visit.status,
+        "pipeline": {
+            "transcription": ps.get("transcribe_status", "not_started"),
+            "diarization": ps.get("diarize_status", "not_started"),
+            "billing": ps.get("bill_status", "not_started"),
+            "note": ps.get("note_status", "not_started"),
+            "contract": ps.get("contract_status", "not_started"),
+        },
+        "has_audio": bool(visit.audio_key),
+        "has_transcript": bool(visit.transcript_id),
+    }
+
+
+def _tool_get_billables(db: Session, user: User, client_name: str) -> dict:
+    from app.models.billable import BillableItem
+    client, visit = _find_latest_visit(db, user, client_name)
+    if not visit:
+        return {"error": f"No visit found for '{client_name}'"}
+    items = db.query(BillableItem).filter(BillableItem.visit_id == visit.id).all()
+    total_mins = sum(getattr(i, 'adjusted_minutes', None) or getattr(i, 'duration_minutes', 0) or 0 for i in items)
+    approved = [i for i in items if getattr(i, 'is_approved', False)]
+    return {
+        "client": client.full_name, "visit_date": visit.visit_date.isoformat() if visit.visit_date else None,
+        "total_items": len(items), "approved": len(approved), "total_minutes": total_mins,
+        "items": [
+            {"service": getattr(i, 'service_description', '') or getattr(i, 'description', ''),
+             "category": getattr(i, 'category', ''),
+             "minutes": getattr(i, 'adjusted_minutes', None) or getattr(i, 'duration_minutes', 0),
+             "approved": getattr(i, 'is_approved', False),
+             "flagged": getattr(i, 'is_flagged', False),
+             "flag_reason": getattr(i, 'flag_reason', None)}
+            for i in items[:20]
+        ],
+    }
+
+
+def _tool_get_visit_note(db: Session, user: User, client_name: str) -> dict:
+    from app.models.note import Note
+    client, visit = _find_latest_visit(db, user, client_name)
+    if not visit:
+        return {"error": f"No visit found for '{client_name}'"}
+    note = db.query(Note).filter(Note.visit_id == visit.id).first()
+    if not note:
+        return {"error": f"No note generated yet for {client.full_name}'s visit"}
+    content = getattr(note, 'content', '') or getattr(note, 'note_text', '') or ''
+    return {
+        "client": client.full_name,
+        "note_preview": content[:1000],
+        "is_approved": getattr(note, 'is_approved', False),
+        "note_type": getattr(note, 'note_type', 'clinical'),
+    }
+
+
+def _tool_get_contract(db: Session, user: User, client_name: str) -> dict:
+    from app.models.contract import Contract
+    client = _find_client(db, user, client_name)
+    if not client:
+        return {"error": f"No client found matching '{client_name}'"}
+    contract = db.query(Contract).filter(Contract.client_id == client.id).order_by(Contract.created_at.desc()).first()
+    if not contract:
+        return {"error": f"No contract found for {client.full_name}"}
+    content = getattr(contract, 'content', '') or getattr(contract, 'contract_text', '') or ''
+    return {
+        "client": client.full_name, "status": getattr(contract, 'status', 'draft'),
+        "contract_preview": content[:1000],
+        "created": contract.created_at.isoformat() if contract.created_at else None,
+        "is_active": getattr(contract, 'is_active', False),
+    }
+
+
+def _tool_create_note(db: Session, user: User, title: str, content: str, client_name: str = "", tags: list = None, pinned: bool = False) -> dict:
+    from app.models.smart_note import SmartNote
+    client_id = None
+    if client_name:
+        client = _find_client(db, user, client_name)
+        if client:
+            client_id = client.id
+    note = SmartNote(user_id=user.id, title=title, content=content, client_id=client_id, tags=tags or [], is_pinned=pinned)
+    db.add(note)
+    db.commit()
+    db.refresh(note)
+    return {"ok": True, "id": str(note.id), "title": note.title, "client_id": str(client_id) if client_id else None}
+
+
+def _tool_list_notes(db: Session, user: User, search: str = "", tag: str = "", client_name: str = "", limit: int = 10) -> dict:
+    from app.models.smart_note import SmartNote
+    q = db.query(SmartNote).filter(SmartNote.user_id == user.id)
+    if search:
+        pattern = f"%{search}%"
+        q = q.filter(or_(SmartNote.title.ilike(pattern), SmartNote.content.ilike(pattern)))
+    if tag:
+        q = q.filter(SmartNote.tags.contains([tag]))
+    if client_name:
+        client = _find_client(db, user, client_name)
+        if client:
+            q = q.filter(SmartNote.client_id == client.id)
+    notes = q.order_by(SmartNote.created_at.desc()).limit(limit).all()
+    return {
+        "count": len(notes),
+        "notes": [
+            {"id": str(n.id), "title": n.title, "pinned": n.is_pinned,
+             "tags": n.tags or [], "preview": (n.content or "")[:100],
+             "created": n.created_at.isoformat() if n.created_at else None}
+            for n in notes
+        ],
+    }
+
+
+def _tool_list_tasks(db: Session, user: User, status: str = "", priority: str = "") -> dict:
+    from app.models.smart_note import Task
+    q = db.query(Task).filter(Task.user_id == user.id)
+    if status:
+        q = q.filter(Task.status == status)
+    if priority:
+        q = q.filter(Task.priority == priority)
+    tasks = q.order_by(Task.due_date.asc().nullslast(), Task.created_at.desc()).limit(20).all()
+    return {
+        "count": len(tasks),
+        "tasks": [
+            {"id": str(t.id), "title": t.title, "status": t.status, "priority": t.priority,
+             "due": t.due_date.isoformat() if t.due_date else None}
+            for t in tasks
+        ],
+    }
+
+
+def _tool_complete_task(db: Session, user: User, task_title: str) -> dict:
+    from app.models.smart_note import Task
+    task = db.query(Task).filter(Task.user_id == user.id, Task.title.ilike(f"%{task_title}%")).first()
+    if not task:
+        return {"error": f"No task found matching '{task_title}'"}
+    task.status = "completed"
+    task.completed_at = datetime.now(timezone.utc)
+    db.commit()
+    return {"ok": True, "task": task.title, "status": "completed"}
+
+
+def _tool_list_caregivers(db: Session, user: User, search: str = "", certification: str = "", status: str = "", limit: int = 10) -> dict:
+    from app.models.caregiver import Caregiver
+    q = db.query(Caregiver).filter(Caregiver.created_by == user.id)
+    if search:
+        q = q.filter(Caregiver.full_name.ilike(f"%{search}%"))
+    if status:
+        q = q.filter(Caregiver.status == status)
+    cgs = q.order_by(Caregiver.full_name).limit(limit).all()
+    return {
+        "count": len(cgs),
+        "caregivers": [
+            {"id": str(c.id), "name": c.full_name, "status": c.status,
+             "certifications": c.certifications or [], "phone": c.phone,
+             "rating": c.rating, "experience_years": c.years_experience}
+            for c in cgs
+        ],
+    }
+
+
+def _tool_match_caregiver(db: Session, user: User, client_name: str) -> dict:
+    from app.models.client import Client
+    from app.models.caregiver import Caregiver
+    client = _find_client(db, user, client_name)
+    if not client:
+        return {"error": f"No client found matching '{client_name}'"}
+    caregivers = db.query(Caregiver).filter(Caregiver.created_by == user.id, Caregiver.status == "active").all()
+    if not caregivers:
+        return {"error": "No active caregivers found"}
+
+    scored = []
+    for cg in caregivers:
+        score = 50
+        if client.care_level == "HIGH" and getattr(cg, 'can_handle_high_care', False):
+            score += 20
+        if cg.rating:
+            score += int(cg.rating * 5)
+        if cg.years_experience and cg.years_experience > 3:
+            score += 10
+        scored.append((score, cg))
+    scored.sort(key=lambda x: -x[0])
+
+    return {
+        "client": client.full_name, "care_level": client.care_level,
+        "matches": [
+            {"name": cg.full_name, "score": s, "certifications": cg.certifications or [],
+             "rating": cg.rating, "experience": cg.years_experience, "phone": cg.phone}
+            for s, cg in scored[:5]
+        ],
+    }
+
+
+def _tool_get_reports_overview(db: Session, user: User) -> dict:
+    from app.models.client import Client
+    from app.models.visit import Visit
+    from app.models.contract import Contract
+    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    total_clients = db.query(func.count(Client.id)).filter(Client.created_by == user.id).scalar() or 0
+    active_clients = db.query(func.count(Client.id)).filter(Client.created_by == user.id, Client.status == "active").scalar() or 0
+    total_visits = db.query(func.count(Visit.id)).join(Client).filter(Client.created_by == user.id).scalar() or 0
+    recent_visits = db.query(func.count(Visit.id)).join(Client).filter(Client.created_by == user.id, Visit.created_at >= week_ago).scalar() or 0
+    total_contracts = db.query(func.count(Contract.id)).join(Client).filter(Client.created_by == user.id).scalar() or 0
+    return {
+        "total_clients": total_clients, "active_clients": active_clients,
+        "total_assessments": total_visits, "assessments_this_week": recent_visits,
+        "total_contracts": total_contracts,
+    }
+
+
+def _tool_get_billing_report(db: Session, user: User, days: int = 30) -> dict:
+    from app.models.client import Client
+    from app.models.visit import Visit
+    from app.models.billable import BillableItem
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    items = (
+        db.query(BillableItem)
+        .join(Visit).join(Client)
+        .filter(Client.created_by == user.id, BillableItem.created_at >= since)
+        .all()
+    )
+    total_mins = sum(getattr(i, 'adjusted_minutes', None) or getattr(i, 'duration_minutes', 0) or 0 for i in items)
+    cats = {}
+    for i in items:
+        cat = getattr(i, 'category', 'other') or 'other'
+        cats[cat] = cats.get(cat, 0) + (getattr(i, 'adjusted_minutes', None) or getattr(i, 'duration_minutes', 0) or 0)
+    return {
+        "period_days": days, "total_items": len(items),
+        "total_minutes": total_mins, "total_hours": round(total_mins / 60, 1),
+        "by_category": cats,
+    }
+
+
+def _tool_get_calendar_events(db: Session, user: User, days: int = 7) -> dict:
+    if not getattr(user, 'google_calendar_connected', False):
+        return {"error": "Google Calendar is not connected. Connect it in Settings > Calendar."}
+    return {"info": "Calendar events are fetched live from Google. Use the Calendar tab in the app to view your schedule."}
+
+
+def _tool_get_usage(db: Session, user: User) -> dict:
+    from app.models.client import Client
+    from app.models.visit import Visit
+    completed = (
+        db.query(func.count(Visit.id))
+        .join(Client)
+        .filter(Client.created_by == user.id, Visit.status == "completed")
+        .scalar() or 0
+    )
+    return {"completed_assessments": completed, "plan": "Free (50 max)" if completed < 50 else "Check subscription", "remaining": max(50 - completed, 0)}
+
+
+# ── Admin tool implementations (reuse from previous version) ─────────
+
 def _tool_get_outreach_stats(db: Session) -> dict:
+    from app.models.sales_lead import SalesLead
+    from app.models.investor import Investor
     total_leads = db.query(func.count(SalesLead.id)).scalar() or 0
-    leads_with_email = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
-    ).scalar() or 0
-    leads_emailed = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.email_send_count > 0,
-    ).scalar() or 0
-    leads_contacted = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.is_contacted == True,
-    ).scalar() or 0
-    leads_uncalled = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.phone.isnot(None), SalesLead.phone != "",
-        SalesLead.is_contacted != True,
-    ).scalar() or 0
+    leads_emailed = db.query(func.count(SalesLead.id)).filter(SalesLead.email_send_count > 0).scalar() or 0
+    leads_contacted = db.query(func.count(SalesLead.id)).filter(SalesLead.is_contacted == True).scalar() or 0
     unsent_agencies = db.query(func.count(SalesLead.id)).filter(
         SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
         (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
     ).scalar() or 0
-
     total_investors = db.query(func.count(Investor.id)).scalar() or 0
-    investors_with_email = db.query(func.count(Investor.id)).filter(
-        Investor.contact_email.isnot(None), Investor.contact_email != "",
-    ).scalar() or 0
-    investors_emailed = db.query(func.count(Investor.id)).filter(
-        Investor.email_send_count > 0,
-    ).scalar() or 0
+    investors_with_email = db.query(func.count(Investor.id)).filter(Investor.contact_email.isnot(None), Investor.contact_email != "").scalar() or 0
+    investors_emailed = db.query(func.count(Investor.id)).filter(Investor.email_send_count > 0).scalar() or 0
     unsent_investors = db.query(func.count(Investor.id)).filter(
         Investor.contact_email.isnot(None), Investor.contact_email != "",
         (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
     ).scalar() or 0
-
-    callbacks = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.callback_requested == True,
-    ).scalar() or 0
-
+    callbacks = db.query(func.count(SalesLead.id)).filter(SalesLead.callback_requested == True).scalar() or 0
     return {
-        "total_leads": total_leads,
-        "leads_with_email": leads_with_email,
-        "leads_emailed": leads_emailed,
-        "leads_contacted_by_phone": leads_contacted,
-        "leads_uncalled": leads_uncalled,
-        "unsent_agency_emails": unsent_agencies,
-        "total_investors": total_investors,
-        "investors_with_email": investors_with_email,
-        "investors_emailed": investors_emailed,
-        "unsent_investor_emails": unsent_investors,
+        "total_leads": total_leads, "leads_emailed": leads_emailed,
+        "leads_contacted_by_phone": leads_contacted, "unsent_agency_emails": unsent_agencies,
+        "total_investors": total_investors, "investors_with_email": investors_with_email,
+        "investors_emailed": investors_emailed, "unsent_investor_emails": unsent_investors,
         "callbacks_pending": callbacks,
     }
 
@@ -309,396 +926,235 @@ def _tool_get_weekly_summary(db: Session, week_offset: int = 0) -> dict:
     today = _today_eastern()
     work_days = _week_work_days(week_offset)
     days_summary = []
-
     for day_name, day_date in work_days:
         day_start_utc = datetime.combine(day_date, datetime.min.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
         day_end_utc = datetime.combine(day_date, datetime.max.time()).replace(tzinfo=BUSINESS_TZ).astimezone(timezone.utc)
-
-        agencies_sent = db.query(func.count(SalesLead.id)).filter(
-            SalesLead.last_email_sent_at >= day_start_utc,
-            SalesLead.last_email_sent_at <= day_end_utc,
-        ).scalar() or 0
-
-        investors_sent = db.query(func.count(Investor.id)).filter(
-            Investor.last_email_sent_at >= day_start_utc,
-            Investor.last_email_sent_at <= day_end_utc,
-        ).scalar() or 0
-
-        calls_made = db.query(func.count(SalesLead.id)).filter(
-            SalesLead.is_contacted == True,
-            SalesLead.called_at >= day_start_utc,
-            SalesLead.called_at <= day_end_utc,
-        ).scalar() or 0
-
+        from app.models.sales_lead import SalesLead
+        from app.models.investor import Investor
+        a_sent = db.query(func.count(SalesLead.id)).filter(SalesLead.last_email_sent_at >= day_start_utc, SalesLead.last_email_sent_at <= day_end_utc).scalar() or 0
+        i_sent = db.query(func.count(Investor.id)).filter(Investor.last_email_sent_at >= day_start_utc, Investor.last_email_sent_at <= day_end_utc).scalar() or 0
+        calls = db.query(func.count(SalesLead.id)).filter(SalesLead.is_contacted == True, SalesLead.called_at >= day_start_utc, SalesLead.called_at <= day_end_utc).scalar() or 0
         is_past = day_date < today
-        is_today = day_date == today
-        days_summary.append({
-            "day": day_name,
-            "date": day_date.isoformat(),
-            "is_past": is_past,
-            "is_today": is_today,
-            "agencies_sent": agencies_sent,
-            "agencies_target": EMAILS_PER_DAY if not is_past else agencies_sent,
-            "investors_sent": investors_sent,
-            "investors_target": INVESTORS_PER_DAY if not is_past else investors_sent,
-            "calls_made": calls_made,
-            "calls_target": CALLS_PER_DAY if not is_past else calls_made,
-        })
-
-    return {
-        "week_offset": week_offset,
-        "week_start": work_days[0][1].isoformat() if work_days else None,
-        "week_end": work_days[-1][1].isoformat() if work_days else None,
-        "days": days_summary,
-    }
+        days_summary.append({"day": day_name, "date": day_date.isoformat(), "is_past": is_past,
+                             "agencies_sent": a_sent, "investors_sent": i_sent, "calls_made": calls,
+                             "targets": {"agencies": EMAILS_PER_DAY, "investors": INVESTORS_PER_DAY, "calls": CALLS_PER_DAY}})
+    return {"week_offset": week_offset, "days": days_summary}
 
 
 def _tool_batch_send_emails(db: Session, user: User, types: list) -> dict:
-    from app.routers.outreach import (
-        EMAILS_PER_DAY, INVESTORS_PER_DAY,
-        EXCLUDED_LEAD_STATUSES, EXCLUDED_INVESTOR_STATUSES,
-        PRIORITY_ORDER, INVESTOR_PRIORITY_ORDER,
-        _build_agency_html, _build_investor_text,
-    )
+    from app.routers.outreach import (EMAILS_PER_DAY, INVESTORS_PER_DAY, EXCLUDED_LEAD_STATUSES, EXCLUDED_INVESTOR_STATUSES,
+                                       PRIORITY_ORDER, INVESTOR_PRIORITY_ORDER, _build_agency_html, _build_investor_text)
     from app.services.email_service import email_service
-
+    from app.models.sales_lead import SalesLead
+    from app.models.investor import Investor
     today = _today_eastern()
     now = datetime.now(timezone.utc)
     results = {"agencies": {"sent": 0, "skipped": 0, "failed": 0}, "investors": {"sent": 0, "skipped": 0, "failed": 0}}
-
     if "agency" in types:
-        unsent = (
-            db.query(SalesLead)
-            .filter(
-                SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
-                SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
-                (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
-            )
-            .order_by(PRIORITY_ORDER, SalesLead.created_at)
-            .limit(EMAILS_PER_DAY)
-            .all()
-        )
+        unsent = db.query(SalesLead).filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+                                             SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+                                             (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None))).order_by(PRIORITY_ORDER, SalesLead.created_at).limit(EMAILS_PER_DAY).all()
         for lead in unsent:
             if lead.last_email_sent_at and lead.last_email_sent_at.date() >= today:
-                results["agencies"]["skipped"] += 1
-                continue
-            subj, body_html = _build_agency_html(lead.provider_name, lead.city or "your area", lead.state or "US")
-            result = email_service.send_email(
-                to=lead.contact_email, subject=subj, html=body_html,
-                reply_to="sales@palmtai.com", sender="Muse Ibrahim <sales@send.palmtai.com>",
-            )
-            if result.get("success"):
-                lead.last_email_sent_at = now
-                lead.last_email_subject = subj
-                lead.email_send_count = (lead.email_send_count or 0) + 1
-                lead.status = "email_sent"
-                lead.updated_at = now
-                activity = list(lead.activity_log or [])
-                activity.append({"action": "email_sent", "timestamp": now.isoformat(), "subject": subj, "by": user.email})
-                lead.activity_log = activity
+                results["agencies"]["skipped"] += 1; continue
+            subj, html = _build_agency_html(lead.provider_name, lead.city or "your area", lead.state or "US")
+            r = email_service.send_email(to=lead.contact_email, subject=subj, html=html, reply_to="sales@palmtai.com", sender="Muse Ibrahim <sales@send.palmtai.com>")
+            if r.get("success"):
+                lead.last_email_sent_at = now; lead.email_send_count = (lead.email_send_count or 0) + 1; lead.status = "email_sent"; lead.updated_at = now
+                activity = list(lead.activity_log or []); activity.append({"action": "email_sent", "timestamp": now.isoformat(), "by": user.email}); lead.activity_log = activity
                 results["agencies"]["sent"] += 1
             else:
                 results["agencies"]["failed"] += 1
             _time.sleep(0.6)
-
     if "investor" in types:
-        unsent_inv = (
-            db.query(Investor)
-            .filter(
-                Investor.contact_email.isnot(None), Investor.contact_email != "",
-                Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
-                (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
-            )
-            .order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at)
-            .limit(INVESTORS_PER_DAY)
-            .all()
-        )
+        unsent_inv = db.query(Investor).filter(Investor.contact_email.isnot(None), Investor.contact_email != "",
+                                               Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+                                               (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None))).order_by(INVESTOR_PRIORITY_ORDER, Investor.created_at).limit(INVESTORS_PER_DAY).all()
         for inv in unsent_inv:
             if inv.last_email_sent_at and inv.last_email_sent_at.date() >= today:
-                results["investors"]["skipped"] += 1
-                continue
+                results["investors"]["skipped"] += 1; continue
             focus = ", ".join(inv.focus_sectors or []) or "early-stage technology"
-            subj, body_text = _build_investor_text(inv.fund_name, inv.contact_name or "", focus)
-            html = f"<pre style='font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;'>{body_text}</pre>"
-            result = email_service.send_email(
-                to=inv.contact_email, subject=subj, html=html, text=body_text,
-                reply_to="invest@palmtai.com", sender="Muse Ibrahim <invest@send.palmtai.com>",
-            )
-            if result.get("success"):
-                inv.last_email_sent_at = now
-                inv.last_email_subject = subj
-                inv.email_send_count = (inv.email_send_count or 0) + 1
-                inv.status = "email_sent"
-                inv.updated_at = now
-                activity = list(inv.activity_log or [])
-                activity.append({"action": "email_sent", "timestamp": now.isoformat(), "subject": subj, "by": user.email})
-                inv.activity_log = activity
+            subj, text = _build_investor_text(inv.fund_name, inv.contact_name or "", focus)
+            html = f"<pre style='font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;'>{text}</pre>"
+            r = email_service.send_email(to=inv.contact_email, subject=subj, html=html, text=text, reply_to="invest@palmtai.com", sender="Muse Ibrahim <invest@send.palmtai.com>")
+            if r.get("success"):
+                inv.last_email_sent_at = now; inv.email_send_count = (inv.email_send_count or 0) + 1; inv.status = "email_sent"; inv.updated_at = now
+                activity = list(inv.activity_log or []); activity.append({"action": "email_sent", "timestamp": now.isoformat(), "by": user.email}); inv.activity_log = activity
                 results["investors"]["sent"] += 1
             else:
                 results["investors"]["failed"] += 1
             _time.sleep(0.6)
-
     db.commit()
     return results
 
 
 def _tool_mark_call_done(db: Session, user: User, lead_name: str, notes: str = "", callback: bool = False) -> dict:
+    from app.models.sales_lead import SalesLead
     lead = db.query(SalesLead).filter(SalesLead.provider_name.ilike(f"%{lead_name}%")).first()
     if not lead:
         return {"error": f"No lead found matching '{lead_name}'"}
-
     now = datetime.now(timezone.utc)
-    lead.is_contacted = True
-    lead.status = "contacted"
-    lead.called_at = now
-    lead.updated_at = now
+    lead.is_contacted = True; lead.status = "contacted"; lead.called_at = now; lead.updated_at = now
     if notes:
-        existing = lead.notes or ""
-        timestamp = now.strftime("[%Y-%m-%d %H:%M]")
-        lead.notes = f"{existing}\n{timestamp} Call: {notes}".strip()
+        ts = now.strftime("[%Y-%m-%d %H:%M]"); lead.notes = f"{lead.notes or ''}\n{ts} Call: {notes}".strip()
     if callback:
-        lead.callback_requested = True
-        lead.callback_notes = notes
-
-    activity = list(lead.activity_log or [])
-    activity.append({"action": "called", "timestamp": now.isoformat(), "notes": notes, "by": user.email})
-    lead.activity_log = activity
+        lead.callback_requested = True; lead.callback_notes = notes
+    activity = list(lead.activity_log or []); activity.append({"action": "called", "timestamp": now.isoformat(), "notes": notes, "by": user.email}); lead.activity_log = activity
     db.commit()
-
-    return {"ok": True, "lead": lead.provider_name, "phone": lead.phone, "state": lead.state, "callback": callback}
+    return {"ok": True, "lead": lead.provider_name, "phone": lead.phone, "callback": callback}
 
 
 def _tool_search_leads(db: Session, query: str = "", state: str = "", status: str = "", limit: int = 10) -> dict:
+    from app.models.sales_lead import SalesLead
     q = db.query(SalesLead)
     if query:
-        pattern = f"%{query}%"
-        q = q.filter(
-            SalesLead.provider_name.ilike(pattern)
-            | SalesLead.city.ilike(pattern)
-            | SalesLead.notes.ilike(pattern)
-        )
+        p = f"%{query}%"; q = q.filter(or_(SalesLead.provider_name.ilike(p), SalesLead.city.ilike(p), SalesLead.notes.ilike(p)))
     if state:
         q = q.filter(SalesLead.state == state.upper())
     if status:
         q = q.filter(SalesLead.status == status)
     leads = q.limit(limit).all()
-    return {
-        "count": len(leads),
-        "leads": [
-            {
-                "name": l.provider_name, "state": l.state, "city": l.city,
-                "phone": l.phone, "email": l.contact_email, "status": l.status,
-                "priority": l.priority, "contacted": l.is_contacted,
-                "emails_sent": l.email_send_count or 0,
-                "notes": (l.notes or "")[:200],
-            }
-            for l in leads
-        ],
-    }
+    return {"count": len(leads), "leads": [{"name": l.provider_name, "state": l.state, "phone": l.phone, "email": l.contact_email, "status": l.status, "contacted": l.is_contacted, "emails_sent": l.email_send_count or 0} for l in leads]}
 
 
 def _tool_search_investors(db: Session, query: str = "", has_email: bool = False, limit: int = 10) -> dict:
+    from app.models.investor import Investor
     q = db.query(Investor)
     if query:
-        pattern = f"%{query}%"
-        q = q.filter(
-            Investor.fund_name.ilike(pattern)
-            | Investor.contact_name.ilike(pattern)
-            | Investor.location.ilike(pattern)
-        )
+        p = f"%{query}%"; q = q.filter(or_(Investor.fund_name.ilike(p), Investor.contact_name.ilike(p), Investor.location.ilike(p)))
     if has_email:
         q = q.filter(Investor.contact_email.isnot(None), Investor.contact_email != "")
-    investors = q.limit(limit).all()
-    return {
-        "count": len(investors),
-        "investors": [
-            {
-                "fund_name": i.fund_name, "type": i.investor_type,
-                "contact_name": i.contact_name, "email": i.contact_email,
-                "location": i.location, "stages": i.focus_stages or [],
-                "sectors": i.focus_sectors or [], "status": i.status,
-                "emails_sent": i.email_send_count or 0,
-                "check_size": i.check_size_display,
-            }
-            for i in investors
-        ],
-    }
+    return {"count": q.count(), "investors": [{"fund": i.fund_name, "type": i.investor_type, "email": i.contact_email, "status": i.status, "emails_sent": i.email_send_count or 0} for i in q.limit(limit).all()]}
 
 
 def _tool_get_callbacks(db: Session) -> dict:
-    leads = (
-        db.query(SalesLead)
-        .filter(SalesLead.callback_requested == True)
-        .order_by(SalesLead.callback_date.asc().nullslast(), SalesLead.updated_at.desc())
-        .all()
-    )
-    return {
-        "count": len(leads),
-        "callbacks": [
-            {
-                "name": l.provider_name, "phone": l.phone,
-                "state": l.state, "city": l.city,
-                "callback_notes": l.callback_notes,
-                "notes": (l.notes or "")[:200],
-                "callback_date": l.callback_date.isoformat() if l.callback_date else None,
-            }
-            for l in leads
-        ],
-    }
-
-
-def _tool_add_lead_notes(db: Session, user: User, lead_name: str, notes: str) -> dict:
-    lead = db.query(SalesLead).filter(SalesLead.provider_name.ilike(f"%{lead_name}%")).first()
-    if not lead:
-        return {"error": f"No lead found matching '{lead_name}'"}
-
-    now = datetime.now(timezone.utc)
-    timestamp = now.strftime("[%Y-%m-%d %H:%M]")
-    existing = lead.notes or ""
-    lead.notes = f"{existing}\n{timestamp} Note: {notes}".strip()
-    lead.updated_at = now
-
-    activity = list(lead.activity_log or [])
-    activity.append({"action": "note_added", "timestamp": now.isoformat(), "notes": notes, "by": user.email})
-    lead.activity_log = activity
-    db.commit()
-
-    return {"ok": True, "lead": lead.provider_name, "notes_added": notes}
-
-
-def _tool_assign_leads(db: Session, user: User, team_member_email: str, assign_type: str, count: int = 20, states: list = None) -> dict:
-    team_member = db.query(User).filter(User.email == team_member_email, User.is_active == True).first()
-    if not team_member:
-        return {"error": f"No active team member found with email '{team_member_email}'"}
-
-    q = db.query(SalesLead).filter(SalesLead.assigned_to.is_(None))
-
-    if assign_type == "call":
-        q = q.filter(SalesLead.phone.isnot(None), SalesLead.phone != "", SalesLead.is_contacted != True)
-    else:
-        q = q.filter(
-            SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
-            (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
-        )
-
-    if states:
-        q = q.filter(SalesLead.state.in_([s.upper() for s in states]))
-
-    leads = q.limit(count).all()
-    now = datetime.now(timezone.utc)
-    for lead in leads:
-        lead.assigned_to = str(team_member.id)
-        lead.assigned_type = assign_type
-        lead.updated_at = now
-
-    db.commit()
-    return {
-        "ok": True,
-        "assigned": len(leads),
-        "to": team_member.full_name or team_member.email,
-        "type": assign_type,
-        "states": states,
-    }
+    from app.models.sales_lead import SalesLead
+    leads = db.query(SalesLead).filter(SalesLead.callback_requested == True).order_by(SalesLead.updated_at.desc()).all()
+    return {"count": len(leads), "callbacks": [{"name": l.provider_name, "phone": l.phone, "state": l.state, "callback_notes": l.callback_notes, "notes": (l.notes or "")[:200]} for l in leads]}
 
 
 def _tool_get_pending_work(db: Session) -> dict:
-    unsent_agencies = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
-        (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
-    ).scalar() or 0
-
-    unsent_investors = db.query(func.count(Investor.id)).filter(
-        Investor.contact_email.isnot(None), Investor.contact_email != "",
-        (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
-    ).scalar() or 0
-
-    uncalled = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.phone.isnot(None), SalesLead.phone != "",
-        SalesLead.is_contacted != True,
-    ).scalar() or 0
-
-    callbacks = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.callback_requested == True,
-    ).scalar() or 0
-
-    unassigned_calls = db.query(func.count(SalesLead.id)).filter(
-        SalesLead.phone.isnot(None), SalesLead.phone != "",
-        SalesLead.is_contacted != True,
-        SalesLead.assigned_to.is_(None),
-    ).scalar() or 0
-
-    return {
-        "unsent_agency_emails": unsent_agencies,
-        "unsent_investor_emails": unsent_investors,
-        "uncalled_leads": uncalled,
-        "callbacks_pending": callbacks,
-        "unassigned_calls": unassigned_calls,
-    }
+    from app.models.sales_lead import SalesLead
+    from app.models.investor import Investor
+    unsent_a = db.query(func.count(SalesLead.id)).filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "", (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None))).scalar() or 0
+    unsent_i = db.query(func.count(Investor.id)).filter(Investor.contact_email.isnot(None), Investor.contact_email != "", (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None))).scalar() or 0
+    uncalled = db.query(func.count(SalesLead.id)).filter(SalesLead.phone.isnot(None), SalesLead.phone != "", SalesLead.is_contacted != True).scalar() or 0
+    cbs = db.query(func.count(SalesLead.id)).filter(SalesLead.callback_requested == True).scalar() or 0
+    return {"unsent_agency_emails": unsent_a, "unsent_investor_emails": unsent_i, "uncalled_leads": uncalled, "callbacks_pending": cbs}
 
 
 def _tool_send_single_email(db: Session, user: User, name: str, entity_type: str) -> dict:
     from app.routers.outreach import _build_agency_html, _build_investor_text
     from app.services.email_service import email_service
-
+    from app.models.sales_lead import SalesLead
+    from app.models.investor import Investor
     now = datetime.now(timezone.utc)
-
     if entity_type == "agency":
         lead = db.query(SalesLead).filter(SalesLead.provider_name.ilike(f"%{name}%")).first()
-        if not lead:
-            return {"error": f"No agency found matching '{name}'"}
-        if not lead.contact_email:
-            return {"error": f"{lead.provider_name} has no contact email"}
-
-        subj, body_html = _build_agency_html(lead.provider_name, lead.city or "your area", lead.state or "US")
-        result = email_service.send_email(
-            to=lead.contact_email, subject=subj, html=body_html,
-            reply_to="sales@palmtai.com", sender="Muse Ibrahim <sales@send.palmtai.com>",
-        )
-        if result.get("success"):
-            lead.last_email_sent_at = now
-            lead.email_send_count = (lead.email_send_count or 0) + 1
-            lead.status = "email_sent"
-            lead.updated_at = now
-            activity = list(lead.activity_log or [])
-            activity.append({"action": "email_sent", "timestamp": now.isoformat(), "subject": subj, "by": user.email})
-            lead.activity_log = activity
-            db.commit()
-            return {"ok": True, "sent_to": lead.contact_email, "name": lead.provider_name, "subject": subj}
-        return {"error": f"Failed to send: {result.get('error', 'unknown')}"}
-
+        if not lead: return {"error": f"No agency matching '{name}'"}
+        if not lead.contact_email: return {"error": f"{lead.provider_name} has no email"}
+        subj, html = _build_agency_html(lead.provider_name, lead.city or "your area", lead.state or "US")
+        r = email_service.send_email(to=lead.contact_email, subject=subj, html=html, reply_to="sales@palmtai.com", sender="Muse Ibrahim <sales@send.palmtai.com>")
+        if r.get("success"):
+            lead.last_email_sent_at = now; lead.email_send_count = (lead.email_send_count or 0) + 1; lead.status = "email_sent"; lead.updated_at = now; db.commit()
+            return {"ok": True, "sent_to": lead.contact_email, "name": lead.provider_name}
+        return {"error": f"Failed: {r.get('error', 'unknown')}"}
     elif entity_type == "investor":
         inv = db.query(Investor).filter(Investor.fund_name.ilike(f"%{name}%")).first()
-        if not inv:
-            return {"error": f"No investor found matching '{name}'"}
-        if not inv.contact_email:
-            return {"error": f"{inv.fund_name} has no contact email"}
-
+        if not inv: return {"error": f"No investor matching '{name}'"}
+        if not inv.contact_email: return {"error": f"{inv.fund_name} has no email"}
         focus = ", ".join(inv.focus_sectors or []) or "early-stage technology"
-        subj, body_text = _build_investor_text(inv.fund_name, inv.contact_name or "", focus)
-        html = f"<pre style='font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;'>{body_text}</pre>"
-        result = email_service.send_email(
-            to=inv.contact_email, subject=subj, html=html, text=body_text,
-            reply_to="invest@palmtai.com", sender="Muse Ibrahim <invest@send.palmtai.com>",
-        )
-        if result.get("success"):
-            inv.last_email_sent_at = now
-            inv.email_send_count = (inv.email_send_count or 0) + 1
-            inv.status = "email_sent"
-            inv.updated_at = now
-            activity = list(inv.activity_log or [])
-            activity.append({"action": "email_sent", "timestamp": now.isoformat(), "subject": subj, "by": user.email})
-            inv.activity_log = activity
-            db.commit()
-            return {"ok": True, "sent_to": inv.contact_email, "name": inv.fund_name, "subject": subj}
-        return {"error": f"Failed to send: {result.get('error', 'unknown')}"}
-
+        subj, text = _build_investor_text(inv.fund_name, inv.contact_name or "", focus)
+        html = f"<pre style='font-family:-apple-system,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;'>{text}</pre>"
+        r = email_service.send_email(to=inv.contact_email, subject=subj, html=html, text=text, reply_to="invest@palmtai.com", sender="Muse Ibrahim <invest@send.palmtai.com>")
+        if r.get("success"):
+            inv.last_email_sent_at = now; inv.email_send_count = (inv.email_send_count or 0) + 1; inv.status = "email_sent"; inv.updated_at = now; db.commit()
+            return {"ok": True, "sent_to": inv.contact_email, "name": inv.fund_name}
+        return {"error": f"Failed: {r.get('error', 'unknown')}"}
     return {"error": f"Unknown type: {entity_type}"}
 
 
+def _tool_assign_leads(db: Session, user: User, team_member_email: str, assign_type: str, count: int = 20, states: list = None) -> dict:
+    from app.models.sales_lead import SalesLead
+    member = db.query(User).filter(User.email == team_member_email, User.is_active == True).first()
+    if not member: return {"error": f"No active member: {team_member_email}"}
+    q = db.query(SalesLead).filter(SalesLead.assigned_to.is_(None))
+    if assign_type == "call":
+        q = q.filter(SalesLead.phone.isnot(None), SalesLead.phone != "", SalesLead.is_contacted != True)
+    else:
+        q = q.filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "", (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)))
+    if states:
+        q = q.filter(SalesLead.state.in_([s.upper() for s in states]))
+    leads = q.limit(count).all()
+    now = datetime.now(timezone.utc)
+    for lead in leads:
+        lead.assigned_to = str(member.id); lead.assigned_type = assign_type; lead.updated_at = now
+    db.commit()
+    return {"ok": True, "assigned": len(leads), "to": member.full_name or member.email, "type": assign_type}
+
+
+def _tool_add_lead_notes(db: Session, user: User, lead_name: str, notes: str) -> dict:
+    from app.models.sales_lead import SalesLead
+    lead = db.query(SalesLead).filter(SalesLead.provider_name.ilike(f"%{lead_name}%")).first()
+    if not lead: return {"error": f"No lead matching '{lead_name}'"}
+    now = datetime.now(timezone.utc)
+    ts = now.strftime("[%Y-%m-%d %H:%M]")
+    lead.notes = f"{lead.notes or ''}\n{ts} Note: {notes}".strip(); lead.updated_at = now
+    activity = list(lead.activity_log or []); activity.append({"action": "note_added", "timestamp": now.isoformat(), "notes": notes, "by": user.email}); lead.activity_log = activity
+    db.commit()
+    return {"ok": True, "lead": lead.provider_name}
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  TOOL ROUTER
+# ══════════════════════════════════════════════════════════════════════
+
 def _execute_tool(tool_name: str, tool_input: dict, db: Session, user: User) -> str:
-    """Route tool calls to implementations and return JSON string."""
     try:
-        if tool_name == "get_outreach_stats":
+        # Shared tools
+        if tool_name == "list_clients":
+            result = _tool_list_clients(db, user, tool_input.get("search", ""), tool_input.get("status", ""), tool_input.get("limit", 20))
+        elif tool_name == "get_client":
+            result = _tool_get_client(db, user, tool_input["name"])
+        elif tool_name == "create_client":
+            fields = {k: v for k, v in tool_input.items() if k != "name" and v is not None}
+            result = _tool_create_client(db, user, fields)
+        elif tool_name == "update_client":
+            result = _tool_update_client(db, user, tool_input["name"], tool_input.get("updates", {}))
+        elif tool_name == "list_visits":
+            result = _tool_list_visits(db, user, tool_input.get("client_name", ""), tool_input.get("status", ""), tool_input.get("limit", 10))
+        elif tool_name == "create_visit":
+            result = _tool_create_visit(db, user, tool_input["client_name"], tool_input.get("visit_date", ""), tool_input.get("visit_type", "initial_assessment"), tool_input.get("notes", ""))
+        elif tool_name == "get_visit_status":
+            result = _tool_get_visit_status(db, user, tool_input["client_name"])
+        elif tool_name == "get_billables":
+            result = _tool_get_billables(db, user, tool_input["client_name"])
+        elif tool_name == "get_visit_note":
+            result = _tool_get_visit_note(db, user, tool_input["client_name"])
+        elif tool_name == "get_contract":
+            result = _tool_get_contract(db, user, tool_input["client_name"])
+        elif tool_name == "create_note":
+            result = _tool_create_note(db, user, tool_input["title"], tool_input["content"], tool_input.get("client_name", ""), tool_input.get("tags"), tool_input.get("pinned", False))
+        elif tool_name == "list_notes":
+            result = _tool_list_notes(db, user, tool_input.get("search", ""), tool_input.get("tag", ""), tool_input.get("client_name", ""), tool_input.get("limit", 10))
+        elif tool_name == "list_tasks":
+            result = _tool_list_tasks(db, user, tool_input.get("status", ""), tool_input.get("priority", ""))
+        elif tool_name == "complete_task":
+            result = _tool_complete_task(db, user, tool_input["task_title"])
+        elif tool_name == "list_caregivers":
+            result = _tool_list_caregivers(db, user, tool_input.get("search", ""), tool_input.get("certification", ""), tool_input.get("status", ""), tool_input.get("limit", 10))
+        elif tool_name == "match_caregiver":
+            result = _tool_match_caregiver(db, user, tool_input["client_name"])
+        elif tool_name == "get_reports_overview":
+            result = _tool_get_reports_overview(db, user)
+        elif tool_name == "get_billing_report":
+            result = _tool_get_billing_report(db, user, tool_input.get("days", 30))
+        elif tool_name == "get_calendar_events":
+            result = _tool_get_calendar_events(db, user, tool_input.get("days", 7))
+        elif tool_name == "get_usage":
+            result = _tool_get_usage(db, user)
+        # Admin tools
+        elif tool_name == "get_outreach_stats":
             result = _tool_get_outreach_stats(db)
         elif tool_name == "get_weekly_summary":
             result = _tool_get_weekly_summary(db, tool_input.get("week_offset", 0))
@@ -712,24 +1168,26 @@ def _execute_tool(tool_name: str, tool_input: dict, db: Session, user: User) -> 
             result = _tool_search_investors(db, tool_input.get("query", ""), tool_input.get("has_email", False), tool_input.get("limit", 10))
         elif tool_name == "get_callbacks":
             result = _tool_get_callbacks(db)
-        elif tool_name == "add_lead_notes":
-            result = _tool_add_lead_notes(db, user, tool_input["lead_name"], tool_input["notes"])
-        elif tool_name == "assign_leads_to_team":
-            result = _tool_assign_leads(db, user, tool_input["team_member_email"], tool_input["assign_type"], tool_input.get("count", 20), tool_input.get("states"))
         elif tool_name == "get_pending_work":
             result = _tool_get_pending_work(db)
         elif tool_name == "send_single_email":
             result = _tool_send_single_email(db, user, tool_input["name"], tool_input["type"])
+        elif tool_name == "assign_leads_to_team":
+            result = _tool_assign_leads(db, user, tool_input["team_member_email"], tool_input["assign_type"], tool_input.get("count", 20), tool_input.get("states"))
+        elif tool_name == "add_lead_notes":
+            result = _tool_add_lead_notes(db, user, tool_input["lead_name"], tool_input["notes"])
         else:
             result = {"error": f"Unknown tool: {tool_name}"}
     except Exception as e:
-        logger.error(f"Tool execution error [{tool_name}]: {e}")
+        logger.error(f"Tool error [{tool_name}]: {e}")
         result = {"error": str(e)}
 
     return json.dumps(result, default=str)
 
 
-# ── API Models ────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════
+#  API MODELS & ENDPOINT
+# ══════════════════════════════════════════════════════════════════════
 
 class AgentMessage(BaseModel):
     role: str
@@ -746,16 +1204,14 @@ class AgentChatResponse(BaseModel):
     tool_calls: List[dict] = []
 
 
-# ── Main Chat Endpoint ───────────────────────────────────────────────
-
 @router.post("/chat", response_model=AgentChatResponse)
 async def agent_chat(
     body: AgentChatRequest,
     db: Session = Depends(get_db),
-    user: User = Depends(require_permission("command_center")),
+    user: User = Depends(get_current_user),
 ):
-    """Chat with the PalmCare AI agent. Supports natural language commands
-    for outreach automation: send emails, track calls, manage team, etc."""
+    """Chat with the Palm AI agent. Available to all authenticated users.
+    Admin users get outreach tools; normal users get workspace tools."""
     import anthropic
 
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
@@ -764,8 +1220,22 @@ async def agent_chat(
 
     client = anthropic.Anthropic(api_key=api_key)
     today = _today_eastern()
+    user_role = getattr(user, 'role', '')
+    is_admin = user_role in ('admin', 'admin_team', UserRole.admin)
 
-    system = SYSTEM_PROMPT.format(today=today.strftime("%A, %B %d, %Y"))
+    tools = list(SHARED_TOOLS)
+    role_context = USER_ROLE_CONTEXT
+    if is_admin:
+        tools.extend(ADMIN_TOOLS)
+        role_context = ADMIN_ROLE_CONTEXT
+
+    system = SYSTEM_PROMPT.format(
+        today=today.strftime("%A, %B %d, %Y"),
+        user_name=user.full_name or "User",
+        user_email=user.email,
+        user_role="Admin / CEO" if is_admin else "Team Member",
+        role_context=role_context,
+    )
 
     messages = []
     for msg in body.history[-20:]:
@@ -773,52 +1243,34 @@ async def agent_chat(
     messages.append({"role": "user", "content": body.message})
 
     tool_calls_log = []
-    max_iterations = 5
 
-    for _ in range(max_iterations):
+    for _ in range(6):
         response = client.messages.create(
             model=AGENT_MODEL,
             max_tokens=4096,
             system=system,
-            tools=TOOLS,
+            tools=tools,
             messages=messages,
         )
 
         if response.stop_reason == "tool_use":
             tool_results = []
             assistant_content = []
-
             for block in response.content:
                 if block.type == "text":
                     assistant_content.append({"type": "text", "text": block.text})
                 elif block.type == "tool_use":
-                    assistant_content.append({
-                        "type": "tool_use",
-                        "id": block.id,
-                        "name": block.name,
-                        "input": block.input,
-                    })
-                    logger.info(f"Agent tool call: {block.name}({json.dumps(block.input, default=str)[:200]})")
-
+                    assistant_content.append({"type": "tool_use", "id": block.id, "name": block.name, "input": block.input})
+                    logger.info(f"Agent tool: {block.name}({json.dumps(block.input, default=str)[:200]})")
                     result_str = _execute_tool(block.name, block.input, db, user)
                     tool_calls_log.append({"tool": block.name, "input": block.input, "result": json.loads(result_str)})
-
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result_str,
-                    })
-
+                    tool_results.append({"type": "tool_result", "tool_use_id": block.id, "content": result_str})
             messages.append({"role": "assistant", "content": assistant_content})
             messages.append({"role": "user", "content": tool_results})
             continue
 
-        text_parts = [block.text for block in response.content if block.type == "text"]
-        final_response = "\n".join(text_parts)
-        return AgentChatResponse(response=final_response, tool_calls=tool_calls_log)
+        text_parts = [b.text for b in response.content if b.type == "text"]
+        return AgentChatResponse(response="\n".join(text_parts), tool_calls=tool_calls_log)
 
-    text_parts = [block.text for block in response.content if block.type == "text"]
-    return AgentChatResponse(
-        response="\n".join(text_parts) or "I've completed the requested operations.",
-        tool_calls=tool_calls_log,
-    )
+    text_parts = [b.text for b in response.content if b.type == "text"]
+    return AgentChatResponse(response="\n".join(text_parts) or "Done.", tool_calls=tool_calls_log)

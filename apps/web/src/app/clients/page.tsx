@@ -30,6 +30,7 @@ import { api } from '@/lib/api';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 import ClientModal from '@/components/ClientModal';
+import PalmAgent from '@/components/PalmAgent';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -1450,6 +1451,8 @@ export default function ClientsPage() {
           </div>
         </div>
       )}
+
+      <PalmAgent />
     </div>
   );
 }
