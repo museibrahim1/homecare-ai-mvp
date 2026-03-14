@@ -10,11 +10,12 @@ Usage:
   python scripts/add_investors_batch2.py
 """
 
+import os
 import sys
 import requests
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-INTERNAL_KEY = "palmcare-cron-2026"
+INTERNAL_KEY = os.getenv("CRON_SECRET", "")
 HEADERS = {"X-Internal-Key": INTERNAL_KEY, "Content-Type": "application/json"}
 
 INVESTORS = [

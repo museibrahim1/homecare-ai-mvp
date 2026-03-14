@@ -407,8 +407,9 @@ async def redis_health_check():
     import redis
 
     try:
-        r = redis.from_url(settings.redis_url)
+        r = redis.from_url(settings.redis_url, socket_connect_timeout=3)
         r.ping()
+        r.close()
         connected = True
     except Exception:
         connected = False

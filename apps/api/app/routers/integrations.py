@@ -623,7 +623,7 @@ async def fetch_from_monday(
     }
     """
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
             "https://api.monday.com/v2",
             json={"query": query, "variables": {"boardId": board_id}},

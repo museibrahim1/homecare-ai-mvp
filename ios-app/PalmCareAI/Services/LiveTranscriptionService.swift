@@ -74,17 +74,22 @@ class LiveTranscriptionService: ObservableObject {
             let minBytes: UInt64 = 64_000
             guard fileSize > minBytes, fileSize > lastByteOffset + minBytes else { return }
 
-            let audioData = try Data(contentsOf: recordingURL)
-            guard audioData.count > Int(minBytes) else { return }
+            let fileHandle = try FileHandle(forReadingFrom: recordingURL)
+            defer { fileHandle.closeFile() }
 
             let cappedData: Data
-            if audioData.count > maxChunkBytes {
-                cappedData = audioData.prefix(maxChunkBytes)
+            if fileSize > UInt64(maxChunkBytes) {
+                // Send the most recent audio so long recordings keep transcribing
+                let offset = fileSize - UInt64(maxChunkBytes)
+                fileHandle.seek(toFileOffset: offset)
+                cappedData = fileHandle.readData(ofLength: maxChunkBytes)
             } else {
-                cappedData = audioData
+                cappedData = fileHandle.readData(ofLength: Int(fileSize))
             }
 
-            lastByteOffset = UInt64(audioData.count)
+            guard cappedData.count > Int(minBytes) else { return }
+
+            lastByteOffset = fileSize
             lastError = nil
 
             let response = try await api.liveTranscribe(audioData: cappedData, diarize: true)

@@ -35,7 +35,7 @@ if not resend.api_key:
     sys.exit(1)
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-HEADERS = {"X-Internal-Key": "palmcare-cron-2026", "Content-Type": "application/json"}
+HEADERS = {"X-Internal-Key": os.getenv("CRON_SECRET", ""), "Content-Type": "application/json"}
 SITE = "https://palmcareai.com"
 GH_MARKETING = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing"
 

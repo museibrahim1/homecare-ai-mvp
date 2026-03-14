@@ -14,7 +14,7 @@ import resend
 resend.api_key = os.getenv("RESEND_API_KEY", "").strip()
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-INTERNAL_KEY = "palmcare-cron-2026"
+INTERNAL_KEY = os.getenv("CRON_SECRET", "")
 SITE_URL = "https://palmcareai.com"
 PITCH_DECK_URL = f"{SITE_URL}/PalmCare_Full_v4.pdf"
 

@@ -72,7 +72,7 @@ async def connect_gmail(
     logger.info(f"OAuth configured: client_id={bool(settings.google_client_id)}, client_secret={bool(settings.google_client_secret)}")
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 "https://oauth2.googleapis.com/token",
                 data={
@@ -148,7 +148,7 @@ async def get_valid_access_token(user: User, db: Session) -> str:
                     detail="Token expired and no refresh token available",
                 )
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     "https://oauth2.googleapis.com/token",
                     data={
@@ -218,7 +218,7 @@ async def list_messages(
     
     messages = []
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         # Get message list
         list_response = await client.get(
             "https://gmail.googleapis.com/gmail/v1/users/me/messages",
@@ -306,7 +306,7 @@ async def send_email(
     # Encode message
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
             "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
             headers={
@@ -334,7 +334,7 @@ async def get_message(
     """Get a specific email message."""
     access_token = await get_valid_access_token(current_user, db)
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.get(
             f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{message_id}",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -367,7 +367,7 @@ async def toggle_star(
     else:
         modify_data = {"removeLabelIds": ["STARRED"]}
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
             f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{message_id}/modify",
             headers={
@@ -402,7 +402,7 @@ async def mark_as_read(
     else:
         modify_data = {"addLabelIds": ["UNREAD"]}
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
             f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{message_id}/modify",
             headers={

@@ -7,12 +7,13 @@ Uses production API internal endpoints with cron key auth.
 """
 
 import json
+import os
 import sys
 import requests
 from datetime import datetime
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-HEADERS = {"X-Internal-Key": "palmcare-cron-2026", "Content-Type": "application/json"}
+HEADERS = {"X-Internal-Key": os.getenv("CRON_SECRET", ""), "Content-Type": "application/json"}
 
 
 def mark_calls():

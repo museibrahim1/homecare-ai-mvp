@@ -453,7 +453,7 @@ async def import_transcript_srt(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse SRT content: {str(e)}"
+            detail="Failed to parse SRT content. Check the file format."
         )
     
     if not segments:
@@ -499,7 +499,7 @@ async def import_transcript_vtt(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse VTT content: {str(e)}"
+            detail="Failed to parse VTT content. Check the file format."
         )
     
     if not segments:
@@ -552,7 +552,7 @@ async def import_transcript_text(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse text content: {str(e)}"
+            detail="Failed to parse text content. Check the file format."
         )
     
     if not segments:
@@ -704,7 +704,7 @@ async def import_transcript_auto(
         logger.error(f"Failed to parse transcript: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse transcript: {str(e)}"
+            detail="Failed to parse transcript. Check the file format."
         )
     
     if not segments:

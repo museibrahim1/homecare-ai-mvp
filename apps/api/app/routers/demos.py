@@ -93,7 +93,7 @@ _funnel_events: list[dict] = []
 
 @router.post("/funnel-event")
 @limiter.limit("30/minute")
-def track_funnel_event(event: DemoFunnelEvent, request: Request):
+def track_funnel_event(request: Request, event: DemoFunnelEvent):
     """Track demo booking funnel progression (lightweight, in-memory)."""
     ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
     _funnel_events.append({
@@ -147,7 +147,7 @@ async def _refresh_token_if_needed(user: User, db: Session) -> str:
             if not user.google_calendar_refresh_token:
                 raise RuntimeError("Token expired, no refresh token")
 
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 resp = await client.post(
                     "https://oauth2.googleapis.com/token",
                     data={
@@ -219,7 +219,7 @@ async def _create_calendar_event(
     if not zoom_link:
         params["conferenceDataVersion"] = 1
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
             headers={"Authorization": f"Bearer {access_token}"},

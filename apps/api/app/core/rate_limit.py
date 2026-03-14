@@ -35,6 +35,7 @@ def _build_limiter() -> Limiter:
             import redis
             r = redis.from_url(redis_url, socket_connect_timeout=2)
             r.ping()
+            r.close()
             storage_uri = redis_url
             logger.info("Rate limiter using Redis backend")
         except Exception:
@@ -50,8 +51,26 @@ limiter = _build_limiter()
 
 
 def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    retry_seconds = "60"
+    try:
+        detail = str(exc.detail)
+        if " per " in detail:
+            window = detail.split(" per ")[1].strip()
+            if "second" in window:
+                retry_seconds = "1"
+            elif "minute" in window:
+                retry_seconds = "60"
+            elif "hour" in window:
+                retry_seconds = "3600"
+            else:
+                import re
+                nums = re.findall(r'\d+', window)
+                if nums:
+                    retry_seconds = str(int(nums[0]) * 60)
+    except Exception:
+        pass
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests. Please try again later."},
-        headers={"Retry-After": str(exc.detail.split(" per ")[1] if " per " in str(exc.detail) else "60")},
+        headers={"Retry-After": retry_seconds},
     )

@@ -62,7 +62,7 @@ def get_today_index():
     return None, today.strftime("%A"), today
 
 
-CRON_SECRET = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+CRON_SECRET = os.getenv("CRON_SECRET", "")
 
 
 def fetch_daily_data():

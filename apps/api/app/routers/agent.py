@@ -16,7 +16,7 @@ from typing import Optional, List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 from app.core.rate_limit import limiter
 from sqlalchemy import func, or_
@@ -1505,14 +1505,16 @@ class AgentMessage(BaseModel):
     role: str
     content: str
 
-    @validator("role")
-    def validate_role(cls, v):
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, v: str) -> str:
         if v not in ALLOWED_AGENT_ROLES:
             raise ValueError("role must be 'user' or 'assistant'")
         return v
 
-    @validator("content")
-    def validate_content(cls, v):
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, v: str) -> str:
         if len(v) > 50_000:
             raise ValueError("message too long (max 50000 chars)")
         return v
@@ -1522,16 +1524,18 @@ class AgentChatRequest(BaseModel):
     message: str
     history: List[AgentMessage] = []
 
-    @validator("message")
-    def validate_message(cls, v):
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("message cannot be empty")
         if len(v) > 10_000:
             raise ValueError("message too long (max 10000 chars)")
         return v
 
-    @validator("history")
-    def validate_history(cls, v):
+    @field_validator("history")
+    @classmethod
+    def validate_history(cls, v: List) -> List:
         if len(v) > 40:
             return v[-40:]
         return v
@@ -1648,6 +1652,7 @@ async def download_file(token: str, user: User = Depends(get_current_user)):
             headers={"Content-Disposition": f'attachment; filename="{info["filename"]}"'},
         )
     except FileNotFoundError:
+        _GENERATED_FILES.pop(token, None)
         raise HTTPException(status_code=404, detail="File expired")
 
 
@@ -1659,14 +1664,16 @@ class TTSRequest(BaseModel):
     text: str
     voice: str = "nova"
 
-    @validator("voice")
-    def validate_voice(cls, v):
+    @field_validator("voice")
+    @classmethod
+    def validate_voice(cls, v: str) -> str:
         if v not in ALLOWED_TTS_VOICES:
             raise ValueError(f"voice must be one of: {', '.join(sorted(ALLOWED_TTS_VOICES))}")
         return v
 
-    @validator("text")
-    def validate_text(cls, v):
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, v: str) -> str:
         if len(v) > 4096:
             raise ValueError("text too long (max 4096 chars)")
         return v

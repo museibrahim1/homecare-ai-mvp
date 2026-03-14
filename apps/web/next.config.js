@@ -27,7 +27,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://api-production-a0a2.up.railway.app https://www.google-analytics.com https://www.googletagmanager.com",
+              "connect-src 'self' https://api-production-a0a2.up.railway.app https://www.google-analytics.com https://www.googletagmanager.com https://formspree.io https://accounts.google.com https://api.qrserver.com http://localhost:8000 http://localhost:3000",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

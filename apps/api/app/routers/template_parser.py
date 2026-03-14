@@ -217,7 +217,7 @@ Extract the agency/company information and return as JSON."""
         if anthropic_key:
             import httpx
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     "https://api.anthropic.com/v1/messages",
                     headers={

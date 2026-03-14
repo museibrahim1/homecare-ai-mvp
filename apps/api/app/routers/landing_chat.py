@@ -86,7 +86,7 @@ class ChatResponse(BaseModel):
 
 @router.post("/message", response_model=ChatResponse)
 @limiter.limit("20/minute")
-async def chat_message(body: ChatRequest, request: Request):
+async def chat_message(request: Request, body: ChatRequest):
     """Public chat endpoint for landing page visitors."""
     client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
 

@@ -56,7 +56,7 @@ async def connect_drive(
 ):
     """Exchange OAuth code for tokens and save to user."""
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 "https://oauth2.googleapis.com/token",
                 data={
@@ -131,7 +131,7 @@ async def get_valid_access_token(user: User, db: Session) -> str:
                     detail="Token expired and no refresh token available",
                 )
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     "https://oauth2.googleapis.com/token",
                     data={
@@ -169,7 +169,7 @@ async def list_drive_files(
     """List files from user's Google Drive."""
     access_token = await get_valid_access_token(current_user, db)
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.get(
             "https://www.googleapis.com/drive/v3/files",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -212,7 +212,7 @@ async def get_drive_file(
     """Get metadata for a specific file."""
     access_token = await get_valid_access_token(current_user, db)
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.get(
             f"https://www.googleapis.com/drive/v3/files/{file_id}",
             headers={"Authorization": f"Bearer {access_token}"},

@@ -3,11 +3,12 @@
 Update investor contact emails in PalmCare AI CRM.
 Uses the internal batch-update-emails endpoint with cron key auth.
 """
+import os
 import requests
 import sys
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-CRON_KEY = "palmcare-cron-2026"
+CRON_KEY = os.getenv("CRON_SECRET", "")
 
 # Researched VC contact/pitch emails (March 2026)
 # Sources: official websites, contact pages, pitch submission pages

@@ -970,11 +970,12 @@ async def get_system_health(
     # Redis check
     try:
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-        r = redis.from_url(redis_url)
+        r = redis.from_url(redis_url, socket_connect_timeout=3)
         r.ping()
+        r.close()
         redis_status = "healthy"
-    except Exception as e:
-        redis_status = f"unhealthy: {str(e)}"
+    except Exception:
+        redis_status = "unhealthy"
     
     # S3/MinIO check - use head_bucket instead of list_buckets (doesn't require ListAllMyBuckets permission)
     try:
@@ -1086,9 +1087,9 @@ async def get_system_metrics(
     worker_tasks_pending = 0
     try:
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-        r = redis.from_url(redis_url)
-        # Celery uses 'celery' as default queue name
+        r = redis.from_url(redis_url, socket_connect_timeout=3)
         worker_tasks_pending = r.llen("celery") or 0
+        r.close()
     except Exception:
         pass
     

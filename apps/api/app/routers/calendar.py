@@ -122,7 +122,7 @@ async def connect_google_calendar(
         )
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 "https://oauth2.googleapis.com/token",
                 data={
@@ -211,7 +211,7 @@ async def get_valid_access_token(user: User, db: Session) -> str:
                     detail="Token expired and no refresh token available",
                 )
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     "https://oauth2.googleapis.com/token",
                     data={
@@ -267,7 +267,7 @@ async def create_calendar_event(
         },
     }
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -305,7 +305,7 @@ async def get_calendar_events(
     if not time_max:
         time_max = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.get(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -351,7 +351,7 @@ async def update_calendar_event(
         },
     }
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.put(
             f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event.event_id}",
             headers={"Authorization": f"Bearer {access_token}"},
@@ -378,7 +378,7 @@ async def delete_calendar_event(
     """Delete an event from user's Google Calendar."""
     access_token = await get_valid_access_token(current_user, db)
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.delete(
             f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{event_id}",
             headers={"Authorization": f"Bearer {access_token}"},
