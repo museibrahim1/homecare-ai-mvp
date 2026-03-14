@@ -164,6 +164,8 @@ struct RecordView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var recorder = AudioRecorderService()
     @State private var liveTranscription: LiveTranscriptionService?
+    @State private var liveSegments: [TranscriptSegment] = []
+    @State private var liveFullTranscript = ""
     #if DEBUG
     @StateObject private var demoTranscription = DemoTranscriptionService()
     @State private var isDemoMode = false
@@ -326,6 +328,13 @@ struct RecordView: View {
                 }
                 assessmentInProgress = recorder.isRecording || isProcessing
             }
+            .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { _ in
+                guard let lt = liveTranscription, lt.isTranscribing else { return }
+                if lt.segments.count != liveSegments.count || lt.fullTranscript != liveFullTranscript {
+                    liveSegments = lt.segments
+                    liveFullTranscript = lt.fullTranscript
+                }
+            }
             .onDisappear {
                 if !recorder.isRecording && !isProcessing {
                     assessmentInProgress = false
@@ -343,7 +352,7 @@ struct RecordView: View {
         #if DEBUG
         if isDemoMode { return demoTranscription.segments }
         #endif
-        return liveTranscription?.segments ?? []
+        return liveSegments
     }
 
     // MARK: - Top Bar
@@ -600,6 +609,8 @@ struct RecordView: View {
 
             await MainActor.run {
                 liveTranscription?.segments = []
+                liveSegments = []
+                liveFullTranscript = ""
                 do {
                     try recorder.startRecording()
                     if let url = recorder.recordingURL {

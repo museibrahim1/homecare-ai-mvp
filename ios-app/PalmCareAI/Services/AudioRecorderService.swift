@@ -40,15 +40,19 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         )
 
         let timestamp = Int(Date().timeIntervalSince1970)
-        let url = recordingsDir.appendingPathComponent("recording_\(timestamp).m4a")
+        let url = recordingsDir.appendingPathComponent("recording_\(timestamp).wav")
         try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: recordingsDir.path)
 
+        // WAV (Linear PCM) is used instead of AAC/M4A so the file can be
+        // read mid-recording for live transcription. M4A writes its moov
+        // atom only on stop(), making it unreadable while recording.
         let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 44100.0,
+            AVFormatIDKey: Int(kAudioFormatLinearPCM),
+            AVSampleRateKey: 16000.0,
             AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue,
-            AVEncoderBitRateKey: 128000,
+            AVLinearPCMBitDepthKey: 16,
+            AVLinearPCMIsBigEndianKey: false,
+            AVLinearPCMIsFloatKey: false,
         ]
 
         audioRecorder = try AVAudioRecorder(url: url, settings: settings)

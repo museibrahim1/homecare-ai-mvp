@@ -415,8 +415,8 @@ class APIService: ObservableObject {
 
         var body = Data()
         body.appendString("--\(boundary)\r\n")
-        body.appendString("Content-Disposition: form-data; name=\"file\"; filename=\"chunk.m4a\"\r\n")
-        body.appendString("Content-Type: audio/m4a\r\n\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"file\"; filename=\"chunk.wav\"\r\n")
+        body.appendString("Content-Type: audio/wav\r\n\r\n")
         body.append(audioData)
         body.appendString("\r\n--\(boundary)--\r\n")
 

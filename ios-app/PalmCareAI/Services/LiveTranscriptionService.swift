@@ -11,8 +11,9 @@ class LiveTranscriptionService: ObservableObject {
     private var chunkTimer: Timer?
     private var lastChunkEnd: TimeInterval = 0
     private var lastByteOffset: UInt64 = 0
-    private let chunkInterval: TimeInterval = 8
-    private let maxChunkBytes: Int = 2 * 1024 * 1024 // 2 MB cap per request
+    private let chunkInterval: TimeInterval = 5
+    private let maxChunkBytes: Int = 5 * 1024 * 1024 // 5 MB cap (WAV files are larger than AAC)
+    @Published var lastError: String?
 
     private static let medicalKeywords: Set<String> = [
         "fever", "fatigue", "headache", "headaches", "diabetes", "hypertension",
@@ -60,18 +61,21 @@ class LiveTranscriptionService: ObservableObject {
     }
 
     private func sendChunk(recordingURL: URL) async {
-        guard FileManager.default.fileExists(atPath: recordingURL.path) else { return }
+        guard FileManager.default.fileExists(atPath: recordingURL.path) else {
+            lastError = "File not found"
+            return
+        }
 
         do {
             let attrs = try FileManager.default.attributesOfItem(atPath: recordingURL.path)
             let fileSize = (attrs[.size] as? UInt64) ?? 0
 
-            guard fileSize > lastByteOffset + 4000 else { return }
+            // WAV at 16kHz/16bit/mono = ~32KB/sec. Need at least ~2 sec of audio.
+            let minBytes: UInt64 = 64_000
+            guard fileSize > minBytes, fileSize > lastByteOffset + minBytes else { return }
 
-            // Always read from byte 0 to send a complete, valid audio file.
-            // AAC/M4A chunks without headers are invalid and will fail transcription.
             let audioData = try Data(contentsOf: recordingURL)
-            guard audioData.count > 4000 else { return }
+            guard audioData.count > Int(minBytes) else { return }
 
             let cappedData: Data
             if audioData.count > maxChunkBytes {
@@ -81,6 +85,7 @@ class LiveTranscriptionService: ObservableObject {
             }
 
             lastByteOffset = UInt64(audioData.count)
+            lastError = nil
 
             let response = try await api.liveTranscribe(audioData: cappedData, diarize: true)
 
@@ -91,7 +96,7 @@ class LiveTranscriptionService: ObservableObject {
             self.fullTranscript = response.transcript
             self.lastChunkEnd = response.duration
         } catch {
-            // Transient network errors are expected during live recording; skip this chunk
+            lastError = error.localizedDescription
         }
     }
 
