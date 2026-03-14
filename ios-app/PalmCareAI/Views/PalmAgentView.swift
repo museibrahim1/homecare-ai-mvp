@@ -68,7 +68,7 @@ struct PalmAgentButton: View {
                     .frame(width: 56, height: 56)
                     .shadow(color: Color.palmPrimary.opacity(0.35), radius: 8, y: 4)
 
-                Image(systemName: "brain.head.profile")
+                Image(systemName: "sparkles")
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(.white)
             }
@@ -198,7 +198,7 @@ struct PalmAgentSheet: View {
                     .fill(Color.palmPrimary.opacity(0.12))
                     .frame(width: 28, height: 28)
                     .overlay(
-                        Image(systemName: "brain.head.profile")
+                        Image(systemName: "sparkles")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.palmPrimary)
                     )
@@ -211,7 +211,6 @@ struct PalmAgentSheet: View {
                 .background(msg.role == "user" ? Color.palmPrimary : Color(UIColor.tertiarySystemGroupedBackground))
                 .foregroundColor(msg.role == "user" ? .white : .primary)
                 .cornerRadius(16)
-                .cornerRadius(msg.role == "user" ? 16 : 4, corners: msg.role == "user" ? [.bottomTrailing] : [.bottomLeading])
 
             if msg.role == "assistant" { Spacer(minLength: 48) }
         }
@@ -290,22 +289,3 @@ struct FlowLayout: Layout {
     }
 }
 
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-struct RoundedCorner: Shape {
-    var radius: CGFloat
-    var corners: UIRectCorner
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
-    }
-}
