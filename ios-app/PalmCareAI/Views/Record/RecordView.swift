@@ -293,8 +293,8 @@ struct RecordView: View {
                 }
             }
             .task {
-                await loadClients()
                 permissionGranted = await recorder.requestPermission()
+                await loadClients()
             }
             #if DEBUG
             .task {
@@ -579,15 +579,15 @@ struct RecordView: View {
     }
 
     private func startRecording() {
-        if !permissionGranted {
-            permissionGranted = recorder.checkPermissionStatus()
-        }
-        guard permissionGranted else {
-            showPermissionAlert = true
-            return
-        }
-
         Task {
+            if !permissionGranted {
+                permissionGranted = await recorder.requestPermission()
+            }
+            guard permissionGranted else {
+                await MainActor.run { showPermissionAlert = true }
+                return
+            }
+
             do {
                 let usage = try await api.fetchUsage()
                 if usage.isAtLimit {

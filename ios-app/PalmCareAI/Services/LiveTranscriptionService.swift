@@ -50,6 +50,7 @@ class LiveTranscriptionService: ObservableObject {
                 await self.sendChunk(recordingURL: recordingURL)
             }
         }
+        if let t = chunkTimer { RunLoop.current.add(t, forMode: .common) }
     }
 
     func stopTranscribing() {
@@ -65,22 +66,23 @@ class LiveTranscriptionService: ObservableObject {
             let attrs = try FileManager.default.attributesOfItem(atPath: recordingURL.path)
             let fileSize = (attrs[.size] as? UInt64) ?? 0
 
-            guard fileSize > lastByteOffset + 1000 else { return }
+            guard fileSize > lastByteOffset + 4000 else { return }
 
-            let handle = try FileHandle(forReadingFrom: recordingURL)
-            defer { try? handle.close() }
+            // Always read from byte 0 to send a complete, valid audio file.
+            // AAC/M4A chunks without headers are invalid and will fail transcription.
+            let audioData = try Data(contentsOf: recordingURL)
+            guard audioData.count > 4000 else { return }
 
-            handle.seek(toFileOffset: lastByteOffset)
-            let bytesToRead = min(Int(fileSize - lastByteOffset), maxChunkBytes)
-            let chunkData = handle.readData(ofLength: bytesToRead)
+            let cappedData: Data
+            if audioData.count > maxChunkBytes {
+                cappedData = audioData.prefix(maxChunkBytes)
+            } else {
+                cappedData = audioData
+            }
 
-            guard chunkData.count > 1000 else { return }
+            lastByteOffset = UInt64(audioData.count)
 
-            let newOffset = lastByteOffset + UInt64(chunkData.count)
-
-            let response = try await api.liveTranscribe(audioData: chunkData, diarize: true)
-
-            lastByteOffset = newOffset
+            let response = try await api.liveTranscribe(audioData: cappedData, diarize: true)
 
             guard !response.transcript.isEmpty else { return }
 
