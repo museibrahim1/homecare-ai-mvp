@@ -964,8 +964,8 @@ async def get_system_health(
     try:
         db.execute(text("SELECT 1"))
         db_status = "healthy"
-    except Exception as e:
-        db_status = f"unhealthy: {str(e)}"
+    except Exception:
+        db_status = "unhealthy"
     
     # Redis check
     try:
@@ -988,8 +988,8 @@ async def get_system_health(
         bucket_name = os.getenv("S3_BUCKET", "palmcare-audio")
         s3.head_bucket(Bucket=bucket_name)
         storage_status = "healthy"
-    except Exception as e:
-        storage_status = f"unhealthy: {str(e)}"
+    except Exception:
+        storage_status = "unhealthy"
     
     # Worker check via Celery inspect
     try:
@@ -1002,8 +1002,8 @@ async def get_system_health(
             worker_status = f"healthy ({len(active)} workers)"
         else:
             worker_status = "no workers connected"
-    except Exception as e:
-        worker_status = f"unknown: {str(e)}"
+    except Exception:
+        worker_status = "unknown"
     
     return SystemHealthStatus(
         api_status="healthy",

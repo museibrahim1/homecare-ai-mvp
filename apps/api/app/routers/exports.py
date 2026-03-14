@@ -98,8 +98,8 @@ async def get_template_status(
                         result["template_name"] = doc.get("name")
                         result["template_type"] = doc.get("type")
                         break
-            except Exception as e:
-                result["error"] = str(e)
+            except Exception:
+                result["error"] = "Failed to check template"
         
         # Check legacy field
         if not result["has_template"] and agency_settings.contract_template:

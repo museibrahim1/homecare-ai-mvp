@@ -350,7 +350,8 @@ async def upload_document(
     )
     
     if not success:
-        raise HTTPException(status_code=400, detail=result)
+        logger.error(f"Document upload failed: {result}")
+        raise HTTPException(status_code=400, detail="Document upload failed. Please try again.")
     
     # Parse expiration date
     exp_date = None

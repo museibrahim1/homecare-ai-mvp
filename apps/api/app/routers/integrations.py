@@ -276,10 +276,11 @@ async def bulk_import_clients(
             imported += 1
             
         except Exception as e:
+            logger.error(f"Client import error at index {idx}: {e}")
             errors.append({
                 "index": idx,
                 "client_name": client_data.full_name,
-                "error": str(e),
+                "error": "Import failed",
             })
     
     db.commit()
@@ -396,9 +397,10 @@ async def import_clients_from_csv(
             imported += 1
             
         except Exception as e:
+            logger.error(f"CSV import error at row {idx + 2}: {e}")
             errors.append({
                 "row": idx + 2,
-                "error": str(e),
+                "error": "Import failed",
             })
     
     db.commit()
@@ -573,7 +575,8 @@ async def generic_webhook(
             imported += 1
             
         except Exception as e:
-            errors.append({"item": item.get("name", "unknown"), "error": str(e)})
+            logger.error(f"Monday.com import error for {item.get('name', 'unknown')}: {e}")
+            errors.append({"item": item.get("name", "unknown"), "error": "Import failed"})
     
     db.commit()
     

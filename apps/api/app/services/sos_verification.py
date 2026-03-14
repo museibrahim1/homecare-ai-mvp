@@ -87,7 +87,7 @@ class SOSVerificationService:
             logger.error(f"SOS verification error: {e}")
             return {
                 "found": False,
-                "error": str(e),
+                "error": "Verification service temporarily unavailable",
                 "requires_manual_review": True,
             }
     
@@ -107,7 +107,7 @@ class SOSVerificationService:
         last_error = None
         for attempt in range(1, max_retries + 1):
             try:
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(timeout=30.0) as client:
                     response = await client.get(url, params=params, timeout=30.0)
                     
                     if response.status_code == 200:
@@ -164,7 +164,7 @@ class SOSVerificationService:
         last_error = None
         for attempt in range(1, max_retries + 1):
             try:
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(timeout=30.0) as client:
                     response = await client.get(url, params=params, timeout=30.0)
                     
                     if response.status_code == 200:

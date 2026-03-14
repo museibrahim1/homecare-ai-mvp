@@ -42,7 +42,7 @@ function markdownToHtml(md: string): string {
     .replace(/^\d+\. \*\*(.+?)\*\* — (.+)$/gm, '<li class="text-dark-300 mb-2"><strong class="text-white">$1</strong> — $2</li>')
     .replace(/^\d+\. (.+)$/gm, '<li class="text-dark-300 mb-1">$1</li>')
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary-400 hover:text-primary-300 underline underline-offset-2">$1</a>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" class="text-primary-400 hover:text-primary-300 underline underline-offset-2" rel="noopener noreferrer">$1</a>')
     .replace(/^(?!<[hluoa])((?!^\s*$).+)$/gm, '<p class="text-dark-300 leading-relaxed mb-4">$1</p>');
 }
 

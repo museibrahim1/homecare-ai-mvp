@@ -331,7 +331,8 @@ async def import_caregivers_from_csv(
             db.add(caregiver)
             imported += 1
         except Exception as e:
-            errors.append(f"Error importing row: {str(e)}")
+            logger.error(f"Caregiver CSV import row error: {e}")
+            errors.append(f"Error importing row {imported + len(errors) + 1}")
     
     db.commit()
     
@@ -370,7 +371,8 @@ async def import_caregivers_bulk(
             db.add(caregiver)
             imported += 1
         except Exception as e:
-            errors.append(str(e))
+            logger.error(f"Caregiver batch import error: {e}")
+            errors.append(f"Error importing caregiver {imported + len(errors) + 1}")
     
     db.commit()
     
