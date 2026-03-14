@@ -498,6 +498,53 @@ def batch_import_investors(
     return {"added": added, "skipped": skipped, "results": results}
 
 
+@router.post("/batch-update-emails")
+def batch_update_emails(
+    request: Request,
+    updates: List[dict],
+    db: Session = Depends(get_db),
+):
+    """Batch update investor contact emails via internal API key."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+
+    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
+    if not key_valid:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+    updated, skipped, not_found = 0, 0, 0
+    results = []
+    for item in updates:
+        fund_name = item.get("fund_name", "")
+        contact_email = item.get("contact_email", "")
+        if not fund_name or not contact_email:
+            skipped += 1
+            results.append({"fund_name": fund_name, "status": "skipped", "reason": "missing_data"})
+            continue
+
+        inv = db.query(Investor).filter(Investor.fund_name == fund_name).first()
+        if not inv:
+            not_found += 1
+            results.append({"fund_name": fund_name, "status": "not_found"})
+            continue
+
+        if inv.contact_email and inv.contact_email.strip():
+            skipped += 1
+            results.append({"fund_name": fund_name, "status": "skipped", "reason": "already_has_email", "existing": inv.contact_email})
+            continue
+
+        inv.contact_email = contact_email
+        if item.get("contact_name"):
+            inv.contact_name = item["contact_name"]
+        inv.updated_at = datetime.now(timezone.utc)
+        updated += 1
+        results.append({"fund_name": fund_name, "status": "updated", "email": contact_email})
+
+    db.commit()
+    return {"updated": updated, "skipped": skipped, "not_found": not_found, "results": results}
+
+
 @router.post("/bulk-status")
 def bulk_update_status(data: BulkStatusUpdate, db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     updated = db.query(Investor).filter(Investor.id.in_(data.investor_ids)).update(
