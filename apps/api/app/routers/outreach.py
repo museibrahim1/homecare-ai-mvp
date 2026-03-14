@@ -2287,3 +2287,168 @@ def fix_thursday_data(
 
     db.commit()
     return {"ok": True, "fixed": fixed, "checked": len(falsely_marked)}
+
+
+@router.post("/cron/fix-all-call-data")
+def cron_fix_all_call_data(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Comprehensive fix: recalculate called_at for ALL contacted leads using activity_log.
+    Also detects callbacks from notes and marks callback_requested.
+    Accessible via cron key."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+    all_contacted = (
+        db.query(SalesLead)
+        .filter(SalesLead.is_contacted == True)  # noqa: E712
+        .all()
+    )
+
+    fixed_called_at = 0
+    cleared_called_at = 0
+    callbacks_found = 0
+    details = []
+
+    for lead in all_contacted:
+        activity = lead.activity_log or []
+
+        call_entries = [
+            e for e in activity
+            if e.get("action") == "called" and e.get("timestamp")
+        ]
+
+        if call_entries:
+            try:
+                first_call = min(
+                    call_entries,
+                    key=lambda e: datetime.fromisoformat(e["timestamp"]),
+                )
+                correct_time = datetime.fromisoformat(first_call["timestamp"])
+                if not correct_time.tzinfo:
+                    correct_time = correct_time.replace(tzinfo=timezone.utc)
+
+                if lead.called_at != correct_time:
+                    old_val = lead.called_at.isoformat() if lead.called_at else "None"
+                    lead.called_at = correct_time
+                    fixed_called_at += 1
+                    details.append({
+                        "provider_name": lead.provider_name,
+                        "action": "fixed_called_at",
+                        "old": old_val,
+                        "new": correct_time.isoformat(),
+                    })
+            except (ValueError, KeyError):
+                pass
+        else:
+            if lead.called_at:
+                details.append({
+                    "provider_name": lead.provider_name,
+                    "action": "cleared_called_at",
+                    "reason": "no call entries in activity_log",
+                    "old": lead.called_at.isoformat(),
+                })
+                lead.called_at = None
+                cleared_called_at += 1
+
+        notes_lower = (lead.notes or "").lower()
+        callback_notes_lower = (lead.callback_notes or "").lower()
+        has_callback_mention = any(phrase in notes_lower for phrase in [
+            "call back", "callback", "call me back", "wants info",
+            "send info", "follow up", "interested",
+        ])
+
+        if has_callback_mention and not lead.callback_requested:
+            lead.callback_requested = True
+            if not lead.callback_notes:
+                for line in (lead.notes or "").split("\n"):
+                    line_lower = line.lower()
+                    if any(p in line_lower for p in ["call back", "callback", "send info", "follow up", "interested"]):
+                        lead.callback_notes = line.strip()
+                        break
+            callbacks_found += 1
+            details.append({
+                "provider_name": lead.provider_name,
+                "phone": lead.phone,
+                "action": "marked_callback",
+                "notes_excerpt": (lead.callback_notes or lead.notes or "")[:100],
+            })
+
+    db.commit()
+
+    return {
+        "ok": True,
+        "total_contacted": len(all_contacted),
+        "fixed_called_at": fixed_called_at,
+        "cleared_called_at": cleared_called_at,
+        "callbacks_found": callbacks_found,
+        "details": details,
+    }
+
+
+@router.get("/cron/call-data-audit")
+def cron_call_data_audit(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Audit called_at data — shows how many calls per day and flags issues."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "palmcare-cron-2026")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+    all_contacted = (
+        db.query(SalesLead)
+        .filter(SalesLead.is_contacted == True)  # noqa: E712
+        .all()
+    )
+
+    calls_by_date = {}
+    no_called_at = []
+    no_activity = []
+
+    for lead in all_contacted:
+        if lead.called_at:
+            day = lead.called_at.strftime("%Y-%m-%d")
+            calls_by_date.setdefault(day, [])
+            calls_by_date[day].append(lead.provider_name)
+        else:
+            no_called_at.append(lead.provider_name)
+
+        activity = lead.activity_log or []
+        call_entries = [e for e in activity if e.get("action") == "called"]
+        if not call_entries:
+            no_activity.append(lead.provider_name)
+
+    investors_with_email = db.query(func.count(Investor.id)).filter(
+        Investor.contact_email.isnot(None), Investor.contact_email != "",
+    ).scalar() or 0
+    investors_no_email = db.query(func.count(Investor.id)).filter(
+        (Investor.contact_email.is_(None)) | (Investor.contact_email == ""),
+    ).scalar() or 0
+
+    callbacks = db.query(SalesLead).filter(
+        SalesLead.callback_requested == True  # noqa: E712
+    ).count()
+
+    callback_in_notes = 0
+    for lead in all_contacted:
+        notes_lower = (lead.notes or "").lower()
+        if any(p in notes_lower for p in ["call back", "callback", "send info", "follow up"]):
+            callback_in_notes += 1
+
+    return {
+        "total_contacted": len(all_contacted),
+        "calls_by_date": {k: {"count": len(v), "leads": v[:5]} for k, v in sorted(calls_by_date.items())},
+        "no_called_at": {"count": len(no_called_at), "leads": no_called_at[:10]},
+        "no_call_in_activity_log": {"count": len(no_activity), "leads": no_activity[:10]},
+        "callbacks_flagged": callbacks,
+        "callback_mentions_in_notes": callback_in_notes,
+        "investors_with_email": investors_with_email,
+        "investors_no_email": investors_no_email,
+    }
