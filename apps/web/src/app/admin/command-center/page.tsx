@@ -12,6 +12,7 @@ import {
   ChevronDown, ChevronUp, FileText, Calendar,
   ChevronLeft, ChevronRight as ChevronRightIcon,
   Eye, PhoneForwarded, Users, MapPin,
+  Bot, Sparkles, MessageSquare,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -206,6 +207,14 @@ export default function CommandCenterPage() {
   const [yesterdaySummary, setYesterdaySummary] = useState('');
   const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // AI Agent
+  const [agentOpen, setAgentOpen] = useState(false);
+  const [agentInput, setAgentInput] = useState('');
+  const [agentMessages, setAgentMessages] = useState<Array<{ role: string; content: string }>>([]);
+  const [agentLoading, setAgentLoading] = useState(false);
+  const agentScrollRef = useRef<HTMLDivElement | null>(null);
+  const agentInputRef = useRef<HTMLInputElement | null>(null);
+
   // ── API helpers ────────────────────────────────────────────────────
 
   const apiFetch = useCallback(async (path: string, options?: RequestInit) => {
@@ -346,6 +355,39 @@ export default function CommandCenterPage() {
     notesTimerRef.current = setTimeout(() => {
       localStorage.setItem(`ceo-notes-${new Date().toISOString().slice(0, 10)}`, value);
     }, 500);
+  };
+
+  // ── AI Agent send ─────────────────────────────────────────────
+  const handleAgentSend = async () => {
+    const msg = agentInput.trim();
+    if (!msg || agentLoading) return;
+    setAgentInput('');
+
+    const userMsg = { role: 'user', content: msg };
+    setAgentMessages(prev => [...prev, userMsg]);
+    setAgentLoading(true);
+
+    try {
+      const history = agentMessages.slice(-20);
+      const data = await apiFetch('/platform/agent/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message: msg, history }),
+      });
+      const assistantMsg = { role: 'assistant', content: data.response };
+      setAgentMessages(prev => [...prev, assistantMsg]);
+
+      if (data.tool_calls?.some((tc: { tool: string }) =>
+        ['batch_send_emails', 'mark_call_done', 'assign_leads_to_team', 'send_single_email'].includes(tc.tool)
+      )) {
+        loadWeeklyPlan(true);
+        loadCallbacks();
+      }
+    } catch (e) {
+      setAgentMessages(prev => [...prev, { role: 'assistant', content: `Error: ${e instanceof Error ? e.message : 'Something went wrong'}` }]);
+    } finally {
+      setAgentLoading(false);
+      setTimeout(() => agentScrollRef.current?.scrollTo({ top: agentScrollRef.current.scrollHeight, behavior: 'smooth' }), 100);
+    }
   };
 
   // ── Batch send state ────────────────────────────────────────────
@@ -899,6 +941,111 @@ export default function CommandCenterPage() {
           )}
           {!currentDay && !loading && activeTab !== 'callbacks' && activeTab !== 'assignments' && (
             <div className="px-4 py-12 text-center text-slate-400">No data loaded</div>
+          )}
+        </div>
+
+        {/* ── Palm AI Agent ──────────────────────────────── */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <button
+            onClick={() => { setAgentOpen(o => !o); setTimeout(() => agentInputRef.current?.focus(), 100); }}
+            className="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-sm">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-left">
+                <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+                  Palm AI Agent
+                  <span className="text-[10px] font-bold bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full">BETA</span>
+                </h2>
+                <p className="text-xs text-slate-400">Ask me to send emails, check stats, assign leads, mark calls...</p>
+              </div>
+            </div>
+            {agentOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+          </button>
+
+          {agentOpen && (
+            <div className="border-t border-slate-100">
+              <div ref={agentScrollRef} className="h-80 overflow-y-auto px-5 py-4 space-y-3 bg-slate-50/30">
+                {agentMessages.length === 0 && (
+                  <div className="text-center py-8">
+                    <Sparkles className="w-8 h-8 mx-auto mb-3 text-teal-400" />
+                    <p className="text-sm font-medium text-slate-600 mb-1">What can I help with?</p>
+                    <div className="flex flex-wrap justify-center gap-2 mt-3">
+                      {[
+                        'Send all agency emails',
+                        'How many callbacks pending?',
+                        'Show me investor stats',
+                        'Search leads in Florida',
+                        'What work is pending?',
+                      ].map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          onClick={() => { setAgentInput(suggestion); setTimeout(() => agentInputRef.current?.focus(), 50); }}
+                          className="text-xs px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-full hover:bg-teal-50 hover:border-teal-200 hover:text-teal-700 transition-colors"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {agentMessages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'bg-teal-600 text-white rounded-br-md'
+                        : 'bg-white border border-slate-200 text-slate-700 rounded-bl-md shadow-sm'
+                    }`}>
+                      {msg.role === 'assistant' ? (
+                        <div className="prose prose-sm prose-slate max-w-none [&>p]:mb-1 [&>ul]:my-1 [&>ol]:my-1 [&_li]:my-0" dangerouslySetInnerHTML={{
+                          __html: msg.content
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                            .replace(/`(.*?)`/g, '<code class="bg-slate-100 px-1 py-0.5 rounded text-xs">$1</code>')
+                            .replace(/^- (.*)/gm, '<li>$1</li>')
+                            .replace(/(<li>.*<\/li>)/s, '<ul class="list-disc pl-4">$1</ul>')
+                            .replace(/\n/g, '<br/>')
+                        }} />
+                      ) : msg.content}
+                    </div>
+                  </div>
+                ))}
+                {agentLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-xs">Thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-4 py-3 border-t border-slate-100 bg-white">
+                <div className="flex gap-2">
+                  <input
+                    ref={agentInputRef}
+                    type="text"
+                    value={agentInput}
+                    onChange={(e) => setAgentInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleAgentSend(); }}
+                    placeholder="Ask Palm to do something..."
+                    className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400"
+                    disabled={agentLoading}
+                  />
+                  <button
+                    onClick={handleAgentSend}
+                    disabled={agentLoading || !agentInput.trim()}
+                    className="px-4 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 

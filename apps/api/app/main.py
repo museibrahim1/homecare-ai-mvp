@@ -96,6 +96,7 @@ from app.routers import (
     live_transcribe,
     live_stream,
     team,
+    agent,
 )
 
 @asynccontextmanager
@@ -204,6 +205,7 @@ app.include_router(smart_notes.router, prefix="/notes", tags=["Smart Notes & Tas
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics & Churn"])
 app.include_router(landing_chat.router, prefix="/chat", tags=["Landing Page Chat"])
 app.include_router(team.router, prefix="/admin", tags=["Team Management"])
+app.include_router(agent.router, prefix="/platform/agent", tags=["AI Agent"])
 
 
 async def seed_database():
