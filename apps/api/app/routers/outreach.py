@@ -2378,6 +2378,28 @@ def cron_fix_all_call_data(
                 "notes_excerpt": (lead.callback_notes or lead.notes or "")[:100],
             })
 
+    ghost_contacted = 0
+    ghost_leads = (
+        db.query(SalesLead)
+        .filter(
+            SalesLead.is_contacted == True,  # noqa: E712
+            SalesLead.called_at.is_(None),
+        )
+        .all()
+    )
+    for lead in ghost_leads:
+        activity = lead.activity_log or []
+        has_any_call = any(e.get("action") == "called" for e in activity)
+        if not has_any_call:
+            lead.is_contacted = False
+            lead.status = "new" if lead.status == "contacted" else lead.status
+            ghost_contacted += 1
+            details.append({
+                "provider_name": lead.provider_name,
+                "action": "reset_is_contacted",
+                "reason": "no call activity and no called_at",
+            })
+
     db.commit()
 
     return {
@@ -2385,6 +2407,7 @@ def cron_fix_all_call_data(
         "total_contacted": len(all_contacted),
         "fixed_called_at": fixed_called_at,
         "cleared_called_at": cleared_called_at,
+        "ghost_contacted_reset": ghost_contacted,
         "callbacks_found": callbacks_found,
         "details": details,
     }
