@@ -18,11 +18,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from app.db.session import get_db
+from app.core.deps import get_db, get_current_user, require_permission
 from app.models.user import User
 from app.models.sales_lead import SalesLead
 from app.models.investor import Investor
-from app.core.deps import get_current_user, require_permission
 
 logger = logging.getLogger(__name__)
 
