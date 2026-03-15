@@ -48,22 +48,6 @@
     "email": "info@ehab.com"
   },
   {
-    "ccn": "017106",
-    "provider_name": "Evergreen Home Care",
-    "state": "AL",
-    "city": "Evergreen",
-    "phone": "(251) 578-6800",
-    "email": "hello@evergreen.com"
-  },
-  {
-    "ccn": "017135",
-    "provider_name": "Community Home Health",
-    "state": "AL",
-    "city": "Tallassee",
-    "phone": "(334) 283-6541",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "017155",
     "provider_name": "Enhabit Home Health",
     "state": "AL",
@@ -78,14 +62,6 @@
     "city": "Valley",
     "phone": "(334) 768-6225",
     "email": "info@ehab.com"
-  },
-  {
-    "ccn": "017146",
-    "provider_name": "Northwest Home Health",
-    "state": "AL",
-    "city": "Russellville",
-    "phone": "(256) 331-0006",
-    "email": "service@atom.com"
   },
   {
     "ccn": "017177",
@@ -152,36 +128,12 @@
     "email": "wehearyou@interimhealthcare.com"
   },
   {
-    "ccn": "027036",
-    "provider_name": "Wellspring Home Health Center",
-    "state": "AK",
-    "city": "Wasilla",
-    "phone": "(907) 357-3655",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "037245",
-    "provider_name": "Valley Home Care, Llc",
-    "state": "AZ",
-    "city": "Phoenix",
-    "phone": "(623) 842-0900",
-    "email": "encompassadmin@valley.com"
-  },
-  {
     "ccn": "037243",
     "provider_name": "Mga Homecare",
     "state": "AZ",
     "city": "Scottsdale",
     "phone": "(602) 508-1883",
     "email": "info@mgahomecare.com"
-  },
-  {
-    "ccn": "037230",
-    "provider_name": "Victory Home Care Agency",
-    "state": "AZ",
-    "city": "Mesa",
-    "phone": "(480) 726-6553",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "037280",
@@ -256,14 +208,6 @@
     "email": "info@ehab.com"
   },
   {
-    "ccn": "037439",
-    "provider_name": "Dependable Nurses, Inc",
-    "state": "AZ",
-    "city": "Tucson",
-    "phone": "(520) 795-1290",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "037443",
     "provider_name": "Aventas Home Health Llc",
     "state": "AZ",
@@ -286,14 +230,6 @@
     "city": "Mesa",
     "phone": "(480) 773-6837",
     "email": "john.joseph@premierone.com"
-  },
-  {
-    "ccn": "037468",
-    "provider_name": "Strong Hold Home Health, Inc.",
-    "state": "AZ",
-    "city": "Phoenix",
-    "phone": "(602) 944-1790",
-    "email": "sales@brandforce.com"
   },
   {
     "ccn": "037476",
@@ -336,28 +272,12 @@
     "email": "hiring@truepromisehomehealth.com"
   },
   {
-    "ccn": "037462",
-    "provider_name": "Advance Home Health Care, Llc",
-    "state": "AZ",
-    "city": "Mesa",
-    "phone": "(480) 264-7866",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "037815",
     "provider_name": "Home Health Safford, Llc",
     "state": "AZ",
     "city": "Safford",
     "phone": "(888) 891-0786",
     "email": "firstname@safford.com"
-  },
-  {
-    "ccn": "037807",
-    "provider_name": "Desert Family Home Health",
-    "state": "AZ",
-    "city": "Fountain Hills",
-    "phone": "(480) 637-0900",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "037830",
@@ -384,14 +304,6 @@
     "email": "srmc-childbirth-education-classes@mercy.com"
   },
   {
-    "ccn": "047020",
-    "provider_name": "Northwest Home Health",
-    "state": "AR",
-    "city": "Springdale",
-    "phone": "(479) 751-1601",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "047028",
     "provider_name": "Elite Home Health",
     "state": "AR",
@@ -406,14 +318,6 @@
     "city": "Calico Rock",
     "phone": "(870) 297-3738",
     "email": "hello@thekey.care"
-  },
-  {
-    "ccn": "047021",
-    "provider_name": "South Arkansas Home Health",
-    "state": "AR",
-    "city": "El Dorado",
-    "phone": "(870) 863-2250",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "047115",
@@ -502,14 +406,6 @@
     "city": "Springdale",
     "phone": "(479) 442-6363",
     "email": "info@ehab.com"
-  },
-  {
-    "ccn": "047175",
-    "provider_name": "Community Home Health",
-    "state": "AR",
-    "city": "Highland",
-    "phone": "(870) 856-2671",
-    "email": "support@community.com"
   },
   {
     "ccn": "047176",
@@ -664,14 +560,6 @@
     "email": "abumin@guardianangelseniorservices.com"
   },
   {
-    "ccn": "053169",
-    "provider_name": "Oaks Home Health",
-    "state": "CA",
-    "city": "Woodland Hills",
-    "phone": "(818) 397-0440",
-    "email": "admin@telepathy.com"
-  },
-  {
     "ccn": "053167",
     "provider_name": "A & G Home Health Care, Inc",
     "state": "CA",
@@ -728,14 +616,6 @@
     "email": "wehearyou@interimhealthcare.com"
   },
   {
-    "ccn": "057248",
-    "provider_name": "Community Home Care",
-    "state": "CA",
-    "city": "Fresno",
-    "phone": "(559) 459-1615",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "057252",
     "provider_name": "Bella Terra Home Health",
     "state": "CA",
@@ -784,14 +664,6 @@
     "email": "contact@betterhelp.com"
   },
   {
-    "ccn": "058018",
-    "provider_name": "Spirit Home Health Care",
-    "state": "CA",
-    "city": "Los Angeles",
-    "phone": "(310) 641-4100",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "058033",
     "provider_name": "East West Home Health",
     "state": "CA",
@@ -824,28 +696,12 @@
     "email": "info@genushomecare.com"
   },
   {
-    "ccn": "058082",
-    "provider_name": "Ace Home Health, Inc.",
-    "state": "CA",
-    "city": "Los Angeles",
-    "phone": "(213) 383-9678",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "058094",
     "provider_name": "Premium Home Health, Inc",
     "state": "CA",
     "city": "Norwalk",
     "phone": "(562) 929-2880",
     "email": "info@bwin.com"
-  },
-  {
-    "ccn": "058132",
-    "provider_name": "Evergreen Home Health",
-    "state": "CA",
-    "city": "Cerritos",
-    "phone": "(562) 860-9444",
-    "email": "hello@evergreen.com"
   },
   {
     "ccn": "058124",
@@ -880,14 +736,6 @@
     "email": "branch1@comfortcare.com"
   },
   {
-    "ccn": "058158",
-    "provider_name": "Valley Home Health, Inc",
-    "state": "CA",
-    "city": "N Hollywood",
-    "phone": "(818) 509-6764",
-    "email": "encompassadmin@valley.com"
-  },
-  {
     "ccn": "058172",
     "provider_name": "Mc Home Health Services, Inc",
     "state": "CA",
@@ -910,14 +758,6 @@
     "city": "Glendale",
     "phone": "(818) 241-6470",
     "email": "info@relyablecare.com"
-  },
-  {
-    "ccn": "058190",
-    "provider_name": "Victory Home Health Agency",
-    "state": "CA",
-    "city": "Moreno Valley",
-    "phone": "(951) 924-5114",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "058205",
@@ -952,14 +792,6 @@
     "email": "tryon2@mac.com"
   },
   {
-    "ccn": "058228",
-    "provider_name": "Star Home Health Services, Inc",
-    "state": "CA",
-    "city": "Montclair",
-    "phone": "(909) 920-0675",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "058244",
     "provider_name": "Sun-Triune Healthcare, Inc",
     "state": "CA",
@@ -990,22 +822,6 @@
     "city": "Glendale",
     "phone": "(818) 980-0505",
     "email": "marc.morrison2@hotmail.com"
-  },
-  {
-    "ccn": "058283",
-    "provider_name": "Majesty Home Health",
-    "state": "CA",
-    "city": "Northridge",
-    "phone": "(818) 775-9447",
-    "email": "example@mysite.com"
-  },
-  {
-    "ccn": "058286",
-    "provider_name": "Provident Home Health, Inc",
-    "state": "CA",
-    "city": "Los Angeles",
-    "phone": "(818) 241-9500",
-    "email": "micah@micahrich.com"
   },
   {
     "ccn": "058315",
@@ -1096,28 +912,12 @@
     "email": "info@global.com"
   },
   {
-    "ccn": "058426",
-    "provider_name": "Advanced Home Health, Inc",
-    "state": "CA",
-    "city": "Sacramento",
-    "phone": "(916) 978-0744",
-    "email": "info@advanced.com"
-  },
-  {
     "ccn": "058438",
     "provider_name": "Kindness Care Home Health",
     "state": "CA",
     "city": "Santa Ana",
     "phone": "(949) 777-9500",
     "email": "info@kindnesscare.com"
-  },
-  {
-    "ccn": "058422",
-    "provider_name": "Specialized Home Health Services",
-    "state": "CA",
-    "city": "Costa Mesa",
-    "phone": "(818) 500-3929",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "058432",
@@ -1240,14 +1040,6 @@
     "email": "info@cchh08.com"
   },
   {
-    "ccn": "059023",
-    "provider_name": "The Doctors Choice Home Health",
-    "state": "CA",
-    "city": "Riverside",
-    "phone": "(951) 279-7877",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "059027",
     "provider_name": "A Flying Eagle Home Health",
     "state": "CA",
@@ -1318,22 +1110,6 @@
     "city": "Glendale",
     "phone": "(818) 553-1511",
     "email": "dorothy@progressivecare.com"
-  },
-  {
-    "ccn": "059120",
-    "provider_name": "The Doctor'S Choice Home Health",
-    "state": "CA",
-    "city": "Woodland Hills",
-    "phone": "(818) 341-8551",
-    "email": "service@atom.com"
-  },
-  {
-    "ccn": "059130",
-    "provider_name": "Exceptional Home Health Services Inc",
-    "state": "CA",
-    "city": "Simi Valley",
-    "phone": "(805) 527-3527",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "059156",
@@ -1408,22 +1184,6 @@
     "email": "info@prestigioushomehealth.com"
   },
   {
-    "ccn": "059182",
-    "provider_name": "Grapevine Home Health Services Inc",
-    "state": "CA",
-    "city": "Corona",
-    "phone": "(909) 483-6505",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "059227",
-    "provider_name": "Valley Home Health",
-    "state": "CA",
-    "city": "Fresno",
-    "phone": "(559) 222-4060",
-    "email": "encompassadmin@valley.com"
-  },
-  {
     "ccn": "059224",
     "provider_name": "Carewell Home Health, Inc",
     "state": "CA",
@@ -1464,22 +1224,6 @@
     "email": "intake@camarilloskilledhomehealth.com"
   },
   {
-    "ccn": "059242",
-    "provider_name": "All-Access Home Health, Inc",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(818) 240-4663",
-    "email": "micah@micahrich.com"
-  },
-  {
-    "ccn": "059253",
-    "provider_name": "Metropolitan Healthcare, Inc",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(323) 960-2533",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "059259",
     "provider_name": "Suncrest Home Health Services Inc",
     "state": "CA",
@@ -1504,36 +1248,12 @@
     "email": "recruiting@advance.com"
   },
   {
-    "ccn": "059234",
-    "provider_name": "Guardian Home Health, Inc",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(818) 291-8444",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "059271",
-    "provider_name": "Independence Home Health, Inc",
-    "state": "CA",
-    "city": "Tujunga",
-    "phone": "(818) 764-0997",
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "059266",
     "provider_name": "Matrix Home Health",
     "state": "CA",
     "city": "Encino",
     "phone": "(818) 343-7800",
     "email": "referral@matrixhomecare.com"
-  },
-  {
-    "ccn": "059281",
-    "provider_name": "Diamond Home Health, Inc",
-    "state": "CA",
-    "city": "Tarzana",
-    "phone": "(909) 396-9888",
-    "email": "micah@micahrich.com"
   },
   {
     "ccn": "059280",
@@ -1616,14 +1336,6 @@
     "email": "info@crosscare.com"
   },
   {
-    "ccn": "059406",
-    "provider_name": "We Care Home Health, Inc",
-    "state": "CA",
-    "city": "Van Nuys",
-    "phone": "(818) 802-8343",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "059411",
     "provider_name": "Valley Care Home Health, Inc.",
     "state": "CA",
@@ -1638,14 +1350,6 @@
     "city": "Van Nuys",
     "phone": "(818) 782-2939",
     "email": "hello@thinkargus.com"
-  },
-  {
-    "ccn": "059416",
-    "provider_name": "Advanced Home Care Services, Inc",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": "(626) 850-5060",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "059436",
@@ -1688,28 +1392,12 @@
     "email": "___for_help_with_changing_this_key_please_contact_info@ag-grid.com"
   },
   {
-    "ccn": "059452",
-    "provider_name": "Alpha Home Health",
-    "state": "CA",
-    "city": "Ontario",
-    "phone": "(909) 466-8200",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "059462",
     "provider_name": "Vital Home Health Care",
     "state": "CA",
     "city": "Hayward",
     "phone": "(650) 779-4700",
     "email": "info@vitalcarehomecare.com"
-  },
-  {
-    "ccn": "059477",
-    "provider_name": "Crown Home Health Corporation",
-    "state": "CA",
-    "city": "Corona",
-    "phone": "(951) 734-1200",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "059499",
@@ -1750,14 +1438,6 @@
     "city": "Milpitas",
     "phone": "(408) 262-8801",
     "email": "admin@pchha.com"
-  },
-  {
-    "ccn": "059514",
-    "provider_name": "California Home Health",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": "(818) 238-9995",
-    "email": "john@doe.com"
   },
   {
     "ccn": "059528",
@@ -1830,14 +1510,6 @@
     "city": "Fremont",
     "phone": "(510) 770-9810",
     "email": "tplonsey@goprimeliving.com"
-  },
-  {
-    "ccn": "059573",
-    "provider_name": "Kna Home Health, Inc",
-    "state": "CA",
-    "city": "Mission Hills",
-    "phone": "(818) 574-7855",
-    "email": "admin@telepathy.com"
   },
   {
     "ccn": "059564",
@@ -2048,14 +1720,6 @@
     "email": "contact@revive.de"
   },
   {
-    "ccn": "053150",
-    "provider_name": "Zion Nursing Services, Inc",
-    "state": "CA",
-    "city": "North Hollywood",
-    "phone": "(818) 736-5358",
-    "email": "zion_park_information@nps.gov"
-  },
-  {
     "ccn": "053140",
     "provider_name": "Alaphia Care Home Health Services, Inc.",
     "state": "CA",
@@ -2096,14 +1760,6 @@
     "email": "jboyd.ghhh@gmail.com"
   },
   {
-    "ccn": "058056",
-    "provider_name": "Home Health Services Of California, Inc",
-    "state": "CA",
-    "city": "Los Angeles",
-    "phone": "(213) 385-9949",
-    "email": "john@doe.com"
-  },
-  {
     "ccn": "058087",
     "provider_name": "Attentive Services Home Health Inc",
     "state": "CA",
@@ -2142,14 +1798,6 @@
     "city": "Los Angeles",
     "phone": "(213) 387-4663",
     "email": "customerservice@mission.com"
-  },
-  {
-    "ccn": "058146",
-    "provider_name": "Valley Care Home Health Services, Inc",
-    "state": "CA",
-    "city": "Temecula",
-    "phone": "(951) 676-6438",
-    "email": "myhealth@3x.png.transform"
   },
   {
     "ccn": "058150",
@@ -2320,14 +1968,6 @@
     "email": "office@imperialhomehealthvv.com"
   },
   {
-    "ccn": "059050",
-    "provider_name": "Renaissance Home Health Services",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(213) 252-8981",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "059076",
     "provider_name": "Bonum Home Health Services",
     "state": "CA",
@@ -2366,22 +2006,6 @@
     "city": "Long Beach",
     "phone": "(562) 285-0432",
     "email": "info@totalcarehomecare.com"
-  },
-  {
-    "ccn": "059165",
-    "provider_name": "Magnolia Home Health Care Services, Inc",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": "(818) 566-4411",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "059173",
-    "provider_name": "Happy Home Health Services",
-    "state": "CA",
-    "city": "Arcadia",
-    "phone": "(626) 254-9999",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "059178",
@@ -2648,14 +2272,6 @@
     "email": "care@neogencare.com"
   },
   {
-    "ccn": "059723",
-    "provider_name": "Vida Care Home Health",
-    "state": "CA",
-    "city": "Fresno",
-    "phone": "(559) 248-0277",
-    "email": "team@latofonts.com"
-  },
-  {
     "ccn": "059725",
     "provider_name": "21St Century Home Health Services Inc.",
     "state": "CA",
@@ -2800,14 +2416,6 @@
     "email": "ardenhomehealth@gmail.com"
   },
   {
-    "ccn": "553112",
-    "provider_name": "California Home Health",
-    "state": "CA",
-    "city": "Fresno",
-    "phone": "(559) 432-8700",
-    "email": "john@doe.com"
-  },
-  {
     "ccn": "553120",
     "provider_name": "Royal Crown Home Health Care, Inc",
     "state": "CA",
@@ -2920,14 +2528,6 @@
     "email": "info@unityproviders.com"
   },
   {
-    "ccn": "553194",
-    "provider_name": "Wecare Home Health Llc",
-    "state": "CA",
-    "city": "Sacramento",
-    "phone": "(916) 706-2713",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "553197",
     "provider_name": "Starlight Home Health Services",
     "state": "CA",
@@ -3032,14 +2632,6 @@
     "email": "info@pegasuscare.com"
   },
   {
-    "ccn": "557490",
-    "provider_name": "Unique Home Health Services Inc",
-    "state": "CA",
-    "city": "Pasadena",
-    "phone": "(626) 577-7596",
-    "email": "sales@brandforce.com"
-  },
-  {
     "ccn": "557478",
     "provider_name": "Quality Home Health Care, Inc",
     "state": "CA",
@@ -3070,14 +2662,6 @@
     "city": "Los Angeles",
     "phone": "(213) 572-0600",
     "email": "info@americannursing.com"
-  },
-  {
-    "ccn": "557559",
-    "provider_name": "Agape Home Care",
-    "state": "CA",
-    "city": "Upland",
-    "phone": "(909) 949-7666",
-    "email": "service@atom.com"
   },
   {
     "ccn": "557603",
@@ -3118,14 +2702,6 @@
     "city": "Fresno",
     "phone": "(559) 255-9300",
     "email": "firstname.lastname@avance.com"
-  },
-  {
-    "ccn": "557619",
-    "provider_name": "Bethany Home Care",
-    "state": "CA",
-    "city": "Riverside",
-    "phone": "(951) 924-7751",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "557716",
@@ -3312,14 +2888,6 @@
     "email": "info@samaritancare.com"
   },
   {
-    "ccn": "559062",
-    "provider_name": "Pro Nursing Home Care, Inc",
-    "state": "CA",
-    "city": "Bakersfield",
-    "phone": "(661) 840-8721",
-    "email": "team@latofonts.com"
-  },
-  {
     "ccn": "559066",
     "provider_name": "Luga Home Health Care Services, Inc",
     "state": "CA",
@@ -3350,22 +2918,6 @@
     "city": "Burbank",
     "phone": "(818) 299-2609",
     "email": "help@primary.com"
-  },
-  {
-    "ccn": "559080",
-    "provider_name": "Ability Home Health Services Inc",
-    "state": "CA",
-    "city": "San Diego",
-    "phone": "(760) 534-5683",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "559095",
-    "provider_name": "Concierge Home Care, Inc",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(626) 862-7494",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "559098",
@@ -3400,22 +2952,6 @@
     "email": "info@daylighthomehealth.com"
   },
   {
-    "ccn": "559114",
-    "provider_name": "Like Family Home Health Care, Inc",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": "(747) 241-8299",
-    "email": "team@latofonts.com"
-  },
-  {
-    "ccn": "559056",
-    "provider_name": "Compassionate Home Health, Ltd",
-    "state": "CA",
-    "city": "Roseville",
-    "phone": "(916) 677-1711",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "559115",
     "provider_name": "First Care Home Health, Inc",
     "state": "CA",
@@ -3424,28 +2960,12 @@
     "email": "webmaster@firstcarehh.com"
   },
   {
-    "ccn": "559118",
-    "provider_name": "Express Home Care",
-    "state": "CA",
-    "city": "Van Nuys",
-    "phone": "(661) 522-3331",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "559124",
     "provider_name": "Care Home Health Inc",
     "state": "CA",
     "city": "Sun Valley",
     "phone": "(818) 859-5734",
     "email": "support@care.com"
-  },
-  {
-    "ccn": "559123",
-    "provider_name": "Home Health Of California Inc",
-    "state": "CA",
-    "city": "Stockton",
-    "phone": "(209) 463-8005",
-    "email": "john@doe.com"
   },
   {
     "ccn": "559133",
@@ -3462,14 +2982,6 @@
     "city": "Glendale",
     "phone": "(747) 609-1000",
     "email": "webmaster@alphaagency.com"
-  },
-  {
-    "ccn": "559142",
-    "provider_name": "Allure Homecare, Inc",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(323) 739-6680",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "559170",
@@ -3502,14 +3014,6 @@
     "city": "Van Nuys",
     "phone": "(818) 616-3568",
     "email": "greenlightcare23@gmail.com"
-  },
-  {
-    "ccn": "559166",
-    "provider_name": "Arrowhead Home Health, Inc",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(818) 514-0918",
-    "email": "sales@brandforce.com"
   },
   {
     "ccn": "559172",
@@ -3560,36 +3064,12 @@
     "email": "branch2@comfortcare.com"
   },
   {
-    "ccn": "559185",
-    "provider_name": "Sunset Healthcare Inc",
-    "state": "CA",
-    "city": "Los Angeles",
-    "phone": "(323) 480-4313",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "559196",
     "provider_name": "Blessed Home Health Care Inc",
     "state": "CA",
     "city": "Bakersfield",
     "phone": "(661) 490-9433",
     "email": "info@blessedcarenurse.com"
-  },
-  {
-    "ccn": "559188",
-    "provider_name": "Regional Healthcare, Inc",
-    "state": "CA",
-    "city": "North Hollywood",
-    "phone": "(818) 942-7172",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "559195",
-    "provider_name": "Devoted Home Health Care, Inc",
-    "state": "CA",
-    "city": "Van Nuys",
-    "phone": "(818) 290-3001",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "559202",
@@ -3654,14 +3134,6 @@
     "city": "Glendale",
     "phone": "(747) 215-9766",
     "email": "safewayhealthcare@gmail.com"
-  },
-  {
-    "ccn": "559225",
-    "provider_name": "Luxury Home Health, Inc",
-    "state": "CA",
-    "city": "Tujunga",
-    "phone": "(818) 875-4083",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "559243",
@@ -3768,14 +3240,6 @@
     "email": "info@tiger.trade"
   },
   {
-    "ccn": "559270",
-    "provider_name": "Pink Cross Home Health Inc.",
-    "state": "CA",
-    "city": "Van Nuys",
-    "phone": "(626) 331-0708",
-    "email": "info@ndiscovered.com"
-  },
-  {
     "ccn": "559280",
     "provider_name": "Heal Home Health Inc",
     "state": "CA",
@@ -3792,36 +3256,12 @@
     "email": "calendarbooking@distinctivehh.com"
   },
   {
-    "ccn": "559269",
-    "provider_name": "Vida Care Home Health, Inc",
-    "state": "CA",
-    "city": "Tujunga",
-    "phone": "(747) 210-0141",
-    "email": "team@latofonts.com"
-  },
-  {
     "ccn": "559293",
     "provider_name": "Nika Home Health, Inc",
     "state": "CA",
     "city": "Glendale",
     "phone": "(818) 306-7577",
     "email": "ken@nika.com"
-  },
-  {
-    "ccn": "559290",
-    "provider_name": "Saint Francis Healthcare Inc",
-    "state": "CA",
-    "city": "La Mesa",
-    "phone": "(619) 439-7840",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "559294",
-    "provider_name": "Magic Care Home Health, Inc",
-    "state": "CA",
-    "city": "North Hollywood",
-    "phone": "(818) 650-2727",
-    "email": "example@mysite.com"
   },
   {
     "ccn": "559304",
@@ -4032,14 +3472,6 @@
     "email": "info@harvard.com"
   },
   {
-    "ccn": "559381",
-    "provider_name": "Wellcare Home Health, Inc.",
-    "state": "CA",
-    "city": "Northridge",
-    "phone": "(818) 564-6080",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "559394",
     "provider_name": "Orange County Home Health, Inc",
     "state": "CA",
@@ -4064,14 +3496,6 @@
     "email": "wishcarehomehealth@gmail.com"
   },
   {
-    "ccn": "559407",
-    "provider_name": "Queen Of The Valley Home Health, Inc",
-    "state": "CA",
-    "city": "Sun Valley",
-    "phone": "(747) 240-3727",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "559412",
     "provider_name": "Ares Home Health Inc",
     "state": "CA",
@@ -4086,14 +3510,6 @@
     "city": "Chatsworth",
     "phone": "(818) 369-6477",
     "email": "beachwoodhomehealth@outlook.com"
-  },
-  {
-    "ccn": "559418",
-    "provider_name": "Comfort Home Health Inc",
-    "state": "CA",
-    "city": "Simi Valley",
-    "phone": "(818) 235-9216",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "559429",
@@ -4126,14 +3542,6 @@
     "city": "Pasadena",
     "phone": "(747) 225-3729",
     "email": "info@yourhomecare.com"
-  },
-  {
-    "ccn": "559427",
-    "provider_name": "Skilled Home Health, Inc",
-    "state": "CA",
-    "city": "Downey",
-    "phone": "(310) 857-8218",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "559439",
@@ -4296,14 +3704,6 @@
     "email": "info@devotionhomehealth.com"
   },
   {
-    "ccn": "559493",
-    "provider_name": "Constant Care Home Health Agency, Inc",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(818) 246-1133",
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "559497",
     "provider_name": "Cardea Home Health",
     "state": "CA",
@@ -4440,14 +3840,6 @@
     "email": "providers@purehh.com"
   },
   {
-    "ccn": "559554",
-    "provider_name": "Focus Home Health Inc",
-    "state": "CA",
-    "city": "Garden Grove",
-    "phone": "(626) 344-0037",
-    "email": "admin@telepathy.com"
-  },
-  {
     "ccn": "559548",
     "provider_name": "Silverline Staff Home Health",
     "state": "CA",
@@ -4478,14 +3870,6 @@
     "city": "Reseda",
     "phone": "(818) 740-1991",
     "email": "compassioncarehc@gmail.com"
-  },
-  {
-    "ccn": "559568",
-    "provider_name": "Bloom Home Health, Inc",
-    "state": "CA",
-    "city": "Van Nuys",
-    "phone": "(818) 465-3001",
-    "email": "sales@brandforce.com"
   },
   {
     "ccn": "559573",
@@ -4534,14 +3918,6 @@
     "city": "Santa Clarita",
     "phone": "(818) 293-7497",
     "email": "contact@guidinghopehh.com"
-  },
-  {
-    "ccn": "559590",
-    "provider_name": "Nest Home Health, Inc.",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": "(818) 457-1346",
-    "email": "team@latofonts.com"
   },
   {
     "ccn": "559599",
@@ -4608,14 +3984,6 @@
     "email": "ardentcare@gmail.com"
   },
   {
-    "ccn": "559637",
-    "provider_name": "Cherub Home Health, Inc",
-    "state": "CA",
-    "city": "Encino",
-    "phone": "(818) 473-5448",
-    "email": "admin@telepathy.com"
-  },
-  {
     "ccn": "559638",
     "provider_name": "Wise Home Health Inc",
     "state": "CA",
@@ -4630,14 +3998,6 @@
     "city": "N Hollywood",
     "phone": "(818) 579-4012",
     "email": "branch2@comfortcare.com"
-  },
-  {
-    "ccn": "559630",
-    "provider_name": "Bright Future Home Health, Inc",
-    "state": "CA",
-    "city": "Woodland Hills",
-    "phone": "(818) 914-4416",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "559635",
@@ -4776,14 +4136,6 @@
     "email": "info@santabarbarahomehealth.com"
   },
   {
-    "ccn": "559719",
-    "provider_name": "Comfortzone Home Health Inc",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": null,
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "559718",
     "provider_name": "Transition Care Telemetry, Inc",
     "state": "CA",
@@ -4792,28 +4144,12 @@
     "email": "contactus@tcthealth.com"
   },
   {
-    "ccn": "559666",
-    "provider_name": "Compassionate Home Health",
-    "state": "CA",
-    "city": "Walnut Creek",
-    "phone": "(925) 425-7104",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "559756",
     "provider_name": "Premier Infusion And Healthcare Services Inc",
     "state": "CA",
     "city": "Torrance",
     "phone": "(310) 974-4080",
     "email": "help@premier.one"
-  },
-  {
-    "ccn": "559732",
-    "provider_name": "Express Home Health, Inc",
-    "state": "CA",
-    "city": "Los Alamitos",
-    "phone": "(562) 684-3748",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "559749",
@@ -4926,14 +4262,6 @@
     "city": "Burbank",
     "phone": "(818) 736-5582",
     "email": "help@primary.com"
-  },
-  {
-    "ccn": "753101",
-    "provider_name": "St. Theresa Home Health, Inc.",
-    "state": "CA",
-    "city": "Van Nuys",
-    "phone": "(818) 812-0328",
-    "email": "service@atom.com"
   },
   {
     "ccn": "559799",
@@ -5184,14 +4512,6 @@
     "email": "hollie@rainbowcare.com"
   },
   {
-    "ccn": "753194",
-    "provider_name": "Bright Future Home Care Services",
-    "state": "CA",
-    "city": "Granada Hills",
-    "phone": "(818) 640-0102",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "753197",
     "provider_name": "Skye Home Health",
     "state": "CA",
@@ -5206,14 +4526,6 @@
     "city": "Encino",
     "phone": "(818) 650-8099",
     "email": "caring@thoughtfulhomecare.com"
-  },
-  {
-    "ccn": "757020",
-    "provider_name": "Caring 4 You Home Health Inc",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": null,
-    "email": "info@ndiscovered.com"
   },
   {
     "ccn": "757019",
@@ -5246,14 +4558,6 @@
     "city": "El Monte",
     "phone": "(626) 532-8957",
     "email": "anita-shop.us@anita.net"
-  },
-  {
-    "ccn": "757032",
-    "provider_name": "Oak Tree Home Health, Inc.",
-    "state": "CA",
-    "city": "Van Nuys",
-    "phone": "(818) 650-1607",
-    "email": "sales@brandforce.com"
   },
   {
     "ccn": "757039",
@@ -5472,22 +4776,6 @@
     "email": "info@astracare.com"
   },
   {
-    "ccn": "757129",
-    "provider_name": "California Home Health Services, Inc.",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": null,
-    "email": "john@doe.com"
-  },
-  {
-    "ccn": "757132",
-    "provider_name": "Best Of Home Health, Inc.",
-    "state": "CA",
-    "city": "La Crescenta",
-    "phone": "(213) 205-2525",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "757137",
     "provider_name": "Prestige Home Care, Inc.",
     "state": "CA",
@@ -5592,14 +4880,6 @@
     "email": "purehandshh@gmail.com"
   },
   {
-    "ccn": "757193",
-    "provider_name": "Skilled Services Home Health",
-    "state": "CA",
-    "city": "Encino",
-    "phone": null,
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "757201",
     "provider_name": "Milano Home Health",
     "state": "CA",
@@ -5638,14 +4918,6 @@
     "city": "Reseda",
     "phone": null,
     "email": "wellnesscare.hh@gmail.com"
-  },
-  {
-    "ccn": "757228",
-    "provider_name": "Immense Home Health Inc",
-    "state": "CA",
-    "city": "Pasadena",
-    "phone": "(747) 895-5063",
-    "email": "micah@micahrich.com"
   },
   {
     "ccn": "757238",
@@ -5760,14 +5032,6 @@
     "email": "info@admirablehc.com"
   },
   {
-    "ccn": "757296",
-    "provider_name": "Community Home Health, Inc.",
-    "state": "CA",
-    "city": "Arroyo Grande",
-    "phone": "(805) 602-2932",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "757298",
     "provider_name": "Lonestar Home Health Inc.",
     "state": "CA",
@@ -5832,14 +5096,6 @@
     "email": "caringhands1185@gmail.com"
   },
   {
-    "ccn": "757326",
-    "provider_name": "Rapid Home Health Care Inc.",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": null,
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "757331",
     "provider_name": "All Elite Home Health, Inc.",
     "state": "CA",
@@ -5854,14 +5110,6 @@
     "city": "Los Angeles",
     "phone": null,
     "email": "atencionalcliente@marvi.com"
-  },
-  {
-    "ccn": "757338",
-    "provider_name": "Red Star Home Health Care, Inc",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": "(747) 477-1138",
-    "email": "service@atom.com"
   },
   {
     "ccn": "757348",
@@ -6112,28 +5360,12 @@
     "email": "info@procarefirsthomehealth.com"
   },
   {
-    "ccn": "757457",
-    "provider_name": "Zion Healthcare, Inc.",
-    "state": "CA",
-    "city": "North Hollywood",
-    "phone": "(747) 247-1870",
-    "email": "zion_park_information@nps.gov"
-  },
-  {
     "ccn": "757436",
     "provider_name": "Care Advisors, Inc.",
     "state": "CA",
     "city": "Van Nuys",
     "phone": null,
     "email": "info@h2o.ca"
-  },
-  {
-    "ccn": "757442",
-    "provider_name": "Avery Care Home Health Inc",
-    "state": "CA",
-    "city": "El Monte",
-    "phone": "(626) 234-2238",
-    "email": "service@atom.com"
   },
   {
     "ccn": "757451",
@@ -6176,14 +5408,6 @@
     "email": "info@aveon.com"
   },
   {
-    "ccn": "757475",
-    "provider_name": "Trustful Home Health Inc",
-    "state": "CA",
-    "city": "Buena Park",
-    "phone": "(714) 788-5582",
-    "email": "admin@telepathy.com"
-  },
-  {
     "ccn": "757465",
     "provider_name": "Millennium Home Health, Inc",
     "state": "CA",
@@ -6214,14 +5438,6 @@
     "city": "Los Angeles",
     "phone": "(323) 819-8648",
     "email": "info@spirithomehealth.com"
-  },
-  {
-    "ccn": "757493",
-    "provider_name": "Master Home Health, Inc.",
-    "state": "CA",
-    "city": "Garden Grove",
-    "phone": "(714) 594-6987",
-    "email": "sales@brandforce.com"
   },
   {
     "ccn": "757512",
@@ -6544,14 +5760,6 @@
     "email": "info@angelwingshomehealth.com"
   },
   {
-    "ccn": "757707",
-    "provider_name": "Beloved Home Health Care, Inc.",
-    "state": "CA",
-    "city": "Burbank",
-    "phone": "(818) 697-4712",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "757714",
     "provider_name": "Amici Care",
     "state": "CA",
@@ -6576,22 +5784,6 @@
     "email": "sales@citydoor.com"
   },
   {
-    "ccn": "757715",
-    "provider_name": "Dignified Home Health Care, Inc",
-    "state": "CA",
-    "city": "Panorama City",
-    "phone": "(818) 616-3557",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "757721",
-    "provider_name": "Homeaid Home Health Care, Inc.",
-    "state": "CA",
-    "city": "Westlake Village",
-    "phone": "(818) 660-5664",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "757720",
     "provider_name": "Care For Health Services Inc",
     "state": "CA",
@@ -6606,22 +5798,6 @@
     "city": "Pasadena",
     "phone": "(747) 247-8790",
     "email": "info@athenahealthcare.com"
-  },
-  {
-    "ccn": "757727",
-    "provider_name": "Crest Health Services, Inc.",
-    "state": "CA",
-    "city": "Valley Village",
-    "phone": "(818) 639-9195",
-    "email": "service@atom.com"
-  },
-  {
-    "ccn": "757729",
-    "provider_name": "Extensive Home Health Care Inc",
-    "state": "CA",
-    "city": "Temple City",
-    "phone": "(626) 631-2011",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "757735",
@@ -6704,14 +5880,6 @@
     "email": "info@nextlevel.com"
   },
   {
-    "ccn": "757775",
-    "provider_name": "Wecare Inc",
-    "state": "CA",
-    "city": "Van Nuys",
-    "phone": "(818) 658-9966",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "757781",
     "provider_name": "Assurity Home Health",
     "state": "CA",
@@ -6760,14 +5928,6 @@
     "email": "goldspringshha@gmail.com"
   },
   {
-    "ccn": "757808",
-    "provider_name": "Silent Home Health Inc.",
-    "state": "CA",
-    "city": "Valley Village",
-    "phone": "(818) 748-6006",
-    "email": "admin@telepathy.com"
-  },
-  {
     "ccn": "757799",
     "provider_name": "Health Hub Home Health Inc",
     "state": "CA",
@@ -6798,14 +5958,6 @@
     "city": "Upland",
     "phone": "(909) 532-8755",
     "email": "contact@homebridgehomehealth.com"
-  },
-  {
-    "ccn": "757846",
-    "provider_name": "Cor Meum Home Health Care, Inc.",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(323) 486-7860",
-    "email": "adacoordinator@cor.gov"
   },
   {
     "ccn": "757825",
@@ -6888,14 +6040,6 @@
     "email": "jimhoyd@gmail.com"
   },
   {
-    "ccn": "757857",
-    "provider_name": "Unity Home Health",
-    "state": "CA",
-    "city": "Glendale",
-    "phone": "(818) 683-7007",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "757858",
     "provider_name": "With Love Home Health",
     "state": "CA",
@@ -6974,14 +6118,6 @@
     "city": "Van Nuys",
     "phone": "(818) 794-0071",
     "email": "support@lighthhc.com"
-  },
-  {
-    "ccn": "757886",
-    "provider_name": "Extended Life Home Health",
-    "state": "CA",
-    "city": "Agoura Hills",
-    "phone": "(800) 273-2585",
-    "email": "team@latofonts.com"
   },
   {
     "ccn": "757887",
@@ -7064,28 +6200,12 @@
     "email": "info@a1prohomehealth.com"
   },
   {
-    "ccn": "757925",
-    "provider_name": "Shine Care Home Health, Inc.",
-    "state": "CA",
-    "city": "Canoga Park",
-    "phone": "(818) 807-0087",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "757937",
     "provider_name": "Day And Night Home Health Services, Inc.",
     "state": "CA",
     "city": "Sun Valley",
     "phone": "(818) 479-7262",
     "email": "info@mydomain.com"
-  },
-  {
-    "ccn": "757938",
-    "provider_name": "Alpine Home Health Services Llc",
-    "state": "CA",
-    "city": "Sacramento",
-    "phone": "(916) 426-7410",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "757944",
@@ -7264,28 +6384,12 @@
     "email": "info@preferred.com"
   },
   {
-    "ccn": "067219",
-    "provider_name": "Homecare Of The Valley",
-    "state": "CO",
-    "city": "Glenwood Springs",
-    "phone": "(970) 930-6008",
-    "email": "encompassadmin@valley.com"
-  },
-  {
     "ccn": "067224",
     "provider_name": "Enhabit Home Health",
     "state": "CO",
     "city": "Greenwood Village",
     "phone": "(303) 722-0857",
     "email": "info@ehab.com"
-  },
-  {
-    "ccn": "067338",
-    "provider_name": "Complete Home Health Care Llc",
-    "state": "CO",
-    "city": "Pueblo",
-    "phone": "(719) 546-2610",
-    "email": "example@mysite.com"
   },
   {
     "ccn": "067402",
@@ -7302,14 +6406,6 @@
     "city": "Aurora",
     "phone": "(303) 758-2000",
     "email": "admin@berkleyhh.com"
-  },
-  {
-    "ccn": "067415",
-    "provider_name": "Complete Home Health Care Llc",
-    "state": "CO",
-    "city": "Longmont",
-    "phone": "(720) 457-3200",
-    "email": "example@mysite.com"
   },
   {
     "ccn": "067418",
@@ -7576,14 +6672,6 @@
     "email": "info@caretoyouhh.com"
   },
   {
-    "ccn": "067619",
-    "provider_name": "Dunamis Home Health Services Llc",
-    "state": "CO",
-    "city": "Aurora",
-    "phone": "(720) 277-3806",
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "067616",
     "provider_name": "Omega Home Health Inc",
     "state": "CO",
@@ -7640,14 +6728,6 @@
     "email": "admin@2ndhomeskilledcare.com"
   },
   {
-    "ccn": "067630",
-    "provider_name": "Uc Home Health Care Inc",
-    "state": "CO",
-    "city": "Denver",
-    "phone": "(303) 815-6285",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "067631",
     "provider_name": "Pivot Home Health Llc",
     "state": "CO",
@@ -7680,14 +6760,6 @@
     "email": "1stophomehealth@gmail.com"
   },
   {
-    "ccn": "067634",
-    "provider_name": "We Care Home Health",
-    "state": "CO",
-    "city": "Firestone",
-    "phone": "(720) 727-1141",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "067638",
     "provider_name": "Ageless Living Home Health",
     "state": "CO",
@@ -7702,14 +6774,6 @@
     "city": "Greenwood Village",
     "phone": "(720) 398-9219",
     "email": "administrator@alfabesthomecare.com"
-  },
-  {
-    "ccn": "067644",
-    "provider_name": "Advanced Home Health Services Inc",
-    "state": "CO",
-    "city": "Centennial",
-    "phone": "(720) 327-1966",
-    "email": "info@advanced.com"
   },
   {
     "ccn": "077134",
@@ -7806,14 +6870,6 @@
     "city": "Hartford",
     "phone": "(860) 904-9045",
     "email": "info@harriotthomehealth.com"
-  },
-  {
-    "ccn": "077274",
-    "provider_name": "Home Health Professionals Network",
-    "state": "CT",
-    "city": "Hamden",
-    "phone": "(203) 543-9679",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "077246",
@@ -7920,14 +6976,6 @@
     "email": "info@atlantic.com"
   },
   {
-    "ccn": "103188",
-    "provider_name": "First At Home Inc",
-    "state": "FL",
-    "city": "Atlantis",
-    "phone": "(561) 963-8109",
-    "email": "john@doe.com"
-  },
-  {
     "ccn": "107073",
     "provider_name": "Independent Living Home Health",
     "state": "FL",
@@ -7950,14 +6998,6 @@
     "city": "St Augustine",
     "phone": "(904) 810-5474",
     "email": "administrator@westunity.org"
-  },
-  {
-    "ccn": "107103",
-    "provider_name": "Community Home Health Services",
-    "state": "FL",
-    "city": "Fort Lauderdale",
-    "phone": "(954) 973-9400",
-    "email": "support@community.com"
   },
   {
     "ccn": "103195",
@@ -8000,14 +7040,6 @@
     "email": "serialization@healthfirst.com"
   },
   {
-    "ccn": "107325",
-    "provider_name": "Community Home Health Services",
-    "state": "FL",
-    "city": "Lake Worth",
-    "phone": "(561) 641-3141",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "107446",
     "provider_name": "Enhabit Home Health",
     "state": "FL",
@@ -8022,14 +7054,6 @@
     "city": "Hollywood",
     "phone": "(954) 985-0770",
     "email": "hosting@gabia.com"
-  },
-  {
-    "ccn": "107444",
-    "provider_name": "Memorial Home Health Services",
-    "state": "FL",
-    "city": "Hollywood",
-    "phone": "(954) 333-5205",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "107540",
@@ -8054,22 +7078,6 @@
     "city": "Miami",
     "phone": "(305) 223-0150",
     "email": "consumer@firstquality.com"
-  },
-  {
-    "ccn": "107618",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Clearwater",
-    "phone": null,
-    "email": "help@newyorker.com"
-  },
-  {
-    "ccn": "107635",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Panama City",
-    "phone": "(850) 553-4002",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "107636",
@@ -8176,28 +7184,12 @@
     "email": "info@ehab.com"
   },
   {
-    "ccn": "107747",
-    "provider_name": "Anchor Home Health Services, Llc",
-    "state": "FL",
-    "city": "Stuart",
-    "phone": "(772) 463-6016",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "107772",
     "provider_name": "Exclusive Services, Inc.",
     "state": "FL",
     "city": "Miami",
     "phone": "(305) 667-4848",
     "email": "dave.evanson@sedo.com"
-  },
-  {
-    "ccn": "107761",
-    "provider_name": "Home Bound Care Inc",
-    "state": "FL",
-    "city": "Miami",
-    "phone": "(305) 652-3100",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "107762",
@@ -8238,14 +7230,6 @@
     "city": "Trinity",
     "phone": "(727) 846-1919",
     "email": "info@pinnaclehh.com"
-  },
-  {
-    "ccn": "108019",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Tampa",
-    "phone": "(813) 636-5017",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "108022",
@@ -8336,22 +7320,6 @@
     "email": "support@riiwards.com"
   },
   {
-    "ccn": "108220",
-    "provider_name": "Tendra Home Health Inc",
-    "state": "FL",
-    "city": "Miami",
-    "phone": "(720) 207-7600",
-    "email": "example@mysite.com"
-  },
-  {
-    "ccn": "108223",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Spring Hill",
-    "phone": null,
-    "email": "help@newyorker.com"
-  },
-  {
     "ccn": "108235",
     "provider_name": "Better @ Home",
     "state": "FL",
@@ -8392,28 +7360,12 @@
     "email": "info@pinnaclehh.com"
   },
   {
-    "ccn": "108320",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "The Villages",
-    "phone": "(352) 435-0101",
-    "email": "help@newyorker.com"
-  },
-  {
     "ccn": "108323",
     "provider_name": "Vital Health Services Inc",
     "state": "FL",
     "city": "Medley",
     "phone": "(305) 817-8799",
     "email": "melissa@vitalhealth.com"
-  },
-  {
-    "ccn": "108325",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Fort Lauderdale",
-    "phone": null,
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "108384",
@@ -8472,22 +7424,6 @@
     "email": "info@intercare.com"
   },
   {
-    "ccn": "108398",
-    "provider_name": "Grand Opportunity Home Health Inc",
-    "state": "FL",
-    "city": "Miami",
-    "phone": "(305) 221-9090",
-    "email": "service@atom.com"
-  },
-  {
-    "ccn": "108403",
-    "provider_name": "Innovation Home Health Inc",
-    "state": "FL",
-    "city": "Miami",
-    "phone": "(305) 592-3192",
-    "email": "admin@telepathy.com"
-  },
-  {
     "ccn": "108410",
     "provider_name": "Premier Care Homecare Llc",
     "state": "FL",
@@ -8502,14 +7438,6 @@
     "city": "Jacksonville",
     "phone": "(904) 448-8670",
     "email": "service@precisehh.com"
-  },
-  {
-    "ccn": "108428",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Odessa",
-    "phone": "(727) 844-5600",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "108445",
@@ -8552,14 +7480,6 @@
     "email": "jed@americanagency.com"
   },
   {
-    "ccn": "108469",
-    "provider_name": "Keystone Home Health Inc",
-    "state": "FL",
-    "city": "St Petersburg",
-    "phone": "(727) 669-2755",
-    "email": "team@latofonts.com"
-  },
-  {
     "ccn": "109002",
     "provider_name": "Ready Care Home Health, Inc",
     "state": "FL",
@@ -8590,14 +7510,6 @@
     "city": "Lake Worth",
     "phone": "(561) 795-5315",
     "email": "info@lifecaresolutions.com"
-  },
-  {
-    "ccn": "109029",
-    "provider_name": "Rainbow Home Health Services, Llc",
-    "state": "FL",
-    "city": "Miami Gardens",
-    "phone": "(305) 698-1161",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "109044",
@@ -8670,14 +7582,6 @@
     "city": "Lauderdale Lakes",
     "phone": null,
     "email": "info@allcountyhealthcare.com"
-  },
-  {
-    "ccn": "109269",
-    "provider_name": "Alpha Home Care Services Llc",
-    "state": "FL",
-    "city": "Fort Myers",
-    "phone": null,
-    "email": "service@atom.com"
   },
   {
     "ccn": "109263",
@@ -8768,14 +7672,6 @@
     "email": "customer-relations@utopia.com"
   },
   {
-    "ccn": "109435",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Spring Hill",
-    "phone": null,
-    "email": "help@newyorker.com"
-  },
-  {
     "ccn": "109437",
     "provider_name": "Supreme Home Health Care, Llc",
     "state": "FL",
@@ -8830,22 +7726,6 @@
     "city": "Orlando",
     "phone": "(407) 846-2252",
     "email": "info@ehab.com"
-  },
-  {
-    "ccn": "109507",
-    "provider_name": "Tendra Home Health, Inc.",
-    "state": "FL",
-    "city": "Pembroke Pines",
-    "phone": "(954) 538-8588",
-    "email": "example@mysite.com"
-  },
-  {
-    "ccn": "109509",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Sarasota",
-    "phone": "(941) 342-9400",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "109532",
@@ -8918,14 +7798,6 @@
     "city": "Boca Raton",
     "phone": null,
     "email": "care@apexcare.com"
-  },
-  {
-    "ccn": "109658",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "West Palm Beach",
-    "phone": "(561) 447-6602",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "109660",
@@ -9032,30 +7904,6 @@
     "email": "clientcare@accessnursecare.com"
   },
   {
-    "ccn": "109725",
-    "provider_name": "Aloha Home Health Services Inc",
-    "state": "FL",
-    "city": "Miami",
-    "phone": null,
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "109742",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Jacksonville",
-    "phone": null,
-    "email": "help@newyorker.com"
-  },
-  {
-    "ccn": "109771",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Orange Park",
-    "phone": null,
-    "email": "help@newyorker.com"
-  },
-  {
     "ccn": "109775",
     "provider_name": "Enhabit Home Health",
     "state": "FL",
@@ -9112,14 +7960,6 @@
     "email": "webmaster@truehelphomecare.com"
   },
   {
-    "ccn": "683148",
-    "provider_name": "Advanced Home Health Inc",
-    "state": "FL",
-    "city": "Wesley Chapel",
-    "phone": null,
-    "email": "info@advanced.com"
-  },
-  {
     "ccn": "683149",
     "provider_name": "Pinnacle Home Care",
     "state": "FL",
@@ -9160,22 +8000,6 @@
     "email": "info@bestcare.com"
   },
   {
-    "ccn": "683171",
-    "provider_name": "Royalty Care Home Health Services Llc",
-    "state": "FL",
-    "city": "Fort Myers",
-    "phone": "(239) 243-0512",
-    "email": "service@atom.com"
-  },
-  {
-    "ccn": "683177",
-    "provider_name": "J & J Home Health Care Llc",
-    "state": "FL",
-    "city": "Leesburg",
-    "phone": "(352) 399-6886",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "683190",
     "provider_name": "Southeast Homecare",
     "state": "FL",
@@ -9200,14 +8024,6 @@
     "email": "info@accuratecarehh.com"
   },
   {
-    "ccn": "687011",
-    "provider_name": "Allure Home Health Corp",
-    "state": "FL",
-    "city": "Tampa",
-    "phone": null,
-    "email": "help@newyorker.com"
-  },
-  {
     "ccn": "687030",
     "provider_name": "Seaside Home Health Llc",
     "state": "FL",
@@ -9222,14 +8038,6 @@
     "city": "Plant City",
     "phone": "(813) 261-0130",
     "email": "interiumsoftware@gmail.com"
-  },
-  {
-    "ccn": "687040",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Melbourne",
-    "phone": "(321) 306-2551",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "687041",
@@ -9304,36 +8112,12 @@
     "email": "info@atlantic.com"
   },
   {
-    "ccn": "687069",
-    "provider_name": "Allday Home Health Corp",
-    "state": "FL",
-    "city": "Oldsmar",
-    "phone": null,
-    "email": "micah@micahrich.com"
-  },
-  {
     "ccn": "687071",
     "provider_name": "Better Home Health Inc",
     "state": "FL",
     "city": "Fort Myers",
     "phone": "(239) 800-4579",
     "email": "hello@better.com"
-  },
-  {
-    "ccn": "687084",
-    "provider_name": "Physical 4U Inc",
-    "state": "FL",
-    "city": "Miami Lakes",
-    "phone": "(786) 558-7122",
-    "email": "team@latofonts.com"
-  },
-  {
-    "ccn": "687086",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Lakeland",
-    "phone": "(863) 644-5991",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "687102",
@@ -9384,44 +8168,12 @@
     "email": "branch2@comfortcare.com"
   },
   {
-    "ccn": "687130",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "St. Augustine",
-    "phone": "(904) 224-8025",
-    "email": "help@newyorker.com"
-  },
-  {
-    "ccn": "687131",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Jacksonville",
-    "phone": "(904) 224-8026",
-    "email": "help@newyorker.com"
-  },
-  {
-    "ccn": "687134",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Heathrow",
-    "phone": "(407) 792-1213",
-    "email": "help@newyorker.com"
-  },
-  {
     "ccn": "687126",
     "provider_name": "Patient Resources",
     "state": "FL",
     "city": "Plantation",
     "phone": "(954) 999-0983",
     "email": "info@qualitycarehh.com"
-  },
-  {
-    "ccn": "687137",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Port Orange",
-    "phone": "(386) 257-6601",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "687135",
@@ -9438,22 +8190,6 @@
     "city": "Tampa",
     "phone": "(813) 570-7384",
     "email": "magnetcarehomehealth@gmail.com"
-  },
-  {
-    "ccn": "687141",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Tallahassee",
-    "phone": null,
-    "email": "help@newyorker.com"
-  },
-  {
-    "ccn": "687144",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Lake City",
-    "phone": "(386) 626-0220",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "687143",
@@ -9488,14 +8224,6 @@
     "email": "efty@contentamerica.com"
   },
   {
-    "ccn": "687152",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Ocala",
-    "phone": "(352) 435-0101",
-    "email": "help@newyorker.com"
-  },
-  {
     "ccn": "687150",
     "provider_name": "Home Care Plus Inc",
     "state": "FL",
@@ -9526,14 +8254,6 @@
     "city": "Hillsborough",
     "phone": "(800) 610-7042",
     "email": "info@alanahhomes.com"
-  },
-  {
-    "ccn": "687163",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Port Saint Lucie",
-    "phone": "(772) 777-2749",
-    "email": "help@newyorker.com"
   },
   {
     "ccn": "687164",
@@ -9592,28 +8312,12 @@
     "email": "janetguerra@pediatricrcg.com"
   },
   {
-    "ccn": "687196",
-    "provider_name": "Concierge Home Care",
-    "state": "FL",
-    "city": "Gainesville",
-    "phone": "(352) 435-0101",
-    "email": "help@newyorker.com"
-  },
-  {
     "ccn": "687197",
     "provider_name": "Holistic Wellness Home Health Care Llc",
     "state": "FL",
     "city": "Palmetto Bay",
     "phone": "(786) 701-8879",
     "email": "okimes13@gmail.com"
-  },
-  {
-    "ccn": "687198",
-    "provider_name": "Allcare Home Health Llc",
-    "state": "FL",
-    "city": "Miramar",
-    "phone": "(954) 361-7119",
-    "email": "service@atom.com"
   },
   {
     "ccn": "687214",
@@ -9750,14 +8454,6 @@
     "city": "Davie",
     "phone": "(954) 893-9499",
     "email": "tclc@tricountylifecare.com"
-  },
-  {
-    "ccn": "687237",
-    "provider_name": "Healing Hands Health Services Llc",
-    "state": "FL",
-    "city": "Lake Worth",
-    "phone": "(561) 473-5723",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "687255",
@@ -9904,14 +8600,6 @@
     "email": "admissions@legacyhomehealth.com"
   },
   {
-    "ccn": "687331",
-    "provider_name": "Vitahealth Home Care Inc",
-    "state": "FL",
-    "city": "Oldsmar",
-    "phone": "(727) 440-4212",
-    "email": "sales@brandforce.com"
-  },
-  {
     "ccn": "687336",
     "provider_name": "Ambassadore Health Care Inc",
     "state": "FL",
@@ -9944,14 +8632,6 @@
     "email": "esterh@firstoptionhh.com"
   },
   {
-    "ccn": "687346",
-    "provider_name": "Simply Home Care",
-    "state": "FL",
-    "city": "Miramar",
-    "phone": "(305) 998-2075",
-    "email": "team@latofonts.com"
-  },
-  {
     "ccn": "687351",
     "provider_name": "Splendid Medical Staffing Llc",
     "state": "FL",
@@ -9974,14 +8654,6 @@
     "city": "Medley",
     "phone": "(305) 985-6105",
     "email": "healthtrust.info@healthtrustpg.com"
-  },
-  {
-    "ccn": "687356",
-    "provider_name": "Bloom Home Care Corp",
-    "state": "FL",
-    "city": "Hialeah",
-    "phone": null,
-    "email": "sales@brandforce.com"
   },
   {
     "ccn": "687355",
@@ -10022,14 +8694,6 @@
     "city": "Rome",
     "phone": "(706) 802-4600",
     "email": "firstname@floyd.com"
-  },
-  {
-    "ccn": "117012",
-    "provider_name": "Community Home Care",
-    "state": "GA",
-    "city": "Jesup",
-    "phone": "(912) 427-8051",
-    "email": "support@community.com"
   },
   {
     "ccn": "117009",
@@ -10208,14 +8872,6 @@
     "email": "info@aspencares.com"
   },
   {
-    "ccn": "137116",
-    "provider_name": "Advanced Home Health",
-    "state": "ID",
-    "city": "Idaho Falls",
-    "phone": "(208) 346-7807",
-    "email": "info@advanced.com"
-  },
-  {
     "ccn": "137121",
     "provider_name": "All Care Health Solutions",
     "state": "ID",
@@ -10286,14 +8942,6 @@
     "city": "Quincy",
     "phone": "(217) 223-8400",
     "email": "firstname@blessing.com"
-  },
-  {
-    "ccn": "137139",
-    "provider_name": "Ability Home Health",
-    "state": "ID",
-    "city": "Coeur D'Alene",
-    "phone": "(208) 930-1819",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "147224",
@@ -10392,22 +9040,6 @@
     "email": "info@bestcare.com"
   },
   {
-    "ccn": "147624",
-    "provider_name": "Dependable Nursing Home Health Services, Inc.",
-    "state": "IL",
-    "city": "Downers Grove",
-    "phone": "(847) 565-4150",
-    "email": "team@latofonts.com"
-  },
-  {
-    "ccn": "147619",
-    "provider_name": "Northwestern Illinois Home Health",
-    "state": "IL",
-    "city": "Moline",
-    "phone": "(309) 623-4022",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "147658",
     "provider_name": "Ardent Home Health Care",
     "state": "IL",
@@ -10472,14 +9104,6 @@
     "email": "info@innovacare.co"
   },
   {
-    "ccn": "147736",
-    "provider_name": "We Care Home Health, Inc",
-    "state": "IL",
-    "city": "Chicago",
-    "phone": "(630) 380-3599",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "147742",
     "provider_name": "Prestige Home Health Services, Inc",
     "state": "IL",
@@ -10504,14 +9128,6 @@
     "email": "info@allamericanhomecare.com"
   },
   {
-    "ccn": "147774",
-    "provider_name": "Community Homecare, Inc",
-    "state": "IL",
-    "city": "Sullivan",
-    "phone": "(217) 728-2320",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "147768",
     "provider_name": "Golden Haven Care, Inc",
     "state": "IL",
@@ -10528,28 +9144,12 @@
     "email": "care@carechoicehomecare.com"
   },
   {
-    "ccn": "147769",
-    "provider_name": "Advance Home Health Care, Ltd",
-    "state": "IL",
-    "city": "Chicago",
-    "phone": "(773) 850-3000",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "147778",
     "provider_name": "Orion Home Health Inc",
     "state": "IL",
     "city": "Morton Grove",
     "phone": "(847) 410-0240",
     "email": "orionhhinfo@gmail.com"
-  },
-  {
-    "ccn": "147815",
-    "provider_name": "Advanced Home Health Services, Inc",
-    "state": "IL",
-    "city": "Northbrook",
-    "phone": "(847) 803-6993",
-    "email": "info@advanced.com"
   },
   {
     "ccn": "147807",
@@ -10576,14 +9176,6 @@
     "email": "referral@associateshh.com"
   },
   {
-    "ccn": "147835",
-    "provider_name": "Wellcare Home Health, Inc",
-    "state": "IL",
-    "city": "Northbrook",
-    "phone": "(847) 562-4041",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "147855",
     "provider_name": "Care Solutions, Inc",
     "state": "IL",
@@ -10606,14 +9198,6 @@
     "city": "Oak Brook",
     "phone": "(630) 645-9200",
     "email": "nichelle@supremehomehealth.com"
-  },
-  {
-    "ccn": "147866",
-    "provider_name": "Advance Care Home Health, Inc",
-    "state": "IL",
-    "city": "Niles",
-    "phone": "(847) 588-7700",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "147901",
@@ -10670,14 +9254,6 @@
     "city": "Oakbrook Ter",
     "phone": "(630) 963-9096",
     "email": "press@nothing.tech"
-  },
-  {
-    "ccn": "147937",
-    "provider_name": "Nurse Experts Llc",
-    "state": "IL",
-    "city": "Park Ridge",
-    "phone": "(847) 583-8710",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "147933",
@@ -10864,14 +9440,6 @@
     "email": "info@connecthh.com"
   },
   {
-    "ccn": "148094",
-    "provider_name": "Alpha Home Health, Inc",
-    "state": "IL",
-    "city": "Chicago",
-    "phone": "(773) 685-2220",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "148098",
     "provider_name": "A-Cure Healthcare Solutions, Inc",
     "state": "IL",
@@ -10982,14 +9550,6 @@
     "city": "Chicago",
     "phone": "(630) 323-0906",
     "email": "support@alphacarehomehealth.com"
-  },
-  {
-    "ccn": "148192",
-    "provider_name": "Alternative Home Health + Care, Inc",
-    "state": "IL",
-    "city": "Westmont",
-    "phone": "(630) 971-0778",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "148198",
@@ -11184,14 +9744,6 @@
     "email": "rmshomehealth@gmail.com"
   },
   {
-    "ccn": "148328",
-    "provider_name": "Complete Home Health Care, Llc",
-    "state": "IL",
-    "city": "Chicago",
-    "phone": "(312) 808-1288",
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "148336",
     "provider_name": "Excelcare Home Health",
     "state": "IL",
@@ -11368,14 +9920,6 @@
     "email": "info@indana-allergynetwork.org"
   },
   {
-    "ccn": "157078",
-    "provider_name": "Community Home Care Services Inc",
-    "state": "IN",
-    "city": "Knox",
-    "phone": "(574) 772-3157",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "157095",
     "provider_name": "Elara Caring",
     "state": "IN",
@@ -11422,14 +9966,6 @@
     "city": "New Haven",
     "phone": "(260) 493-1401",
     "email": "info@newhorizons.com"
-  },
-  {
-    "ccn": "157487",
-    "provider_name": "Community Home Health Services",
-    "state": "IN",
-    "city": "Munster",
-    "phone": "(219) 836-6716",
-    "email": "support@community.com"
   },
   {
     "ccn": "157553",
@@ -11560,22 +10096,6 @@
     "email": "cornerstonehomehealth@yahoo.com"
   },
   {
-    "ccn": "157621",
-    "provider_name": "Better Living Home Health Care, Inc",
-    "state": "IN",
-    "city": "Evansville",
-    "phone": "(812) 491-2273",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "157647",
-    "provider_name": "Independence Home Health Llc",
-    "state": "IN",
-    "city": "Nineveh",
-    "phone": "(317) 933-3310",
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "157648",
     "provider_name": "Star Home Health Inc",
     "state": "IN",
@@ -11616,28 +10136,12 @@
     "email": "rchc@rescare.com"
   },
   {
-    "ccn": "157678",
-    "provider_name": "Passionate Care Inc",
-    "state": "IN",
-    "city": "Munster",
-    "phone": "(219) 595-5338",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "157701",
     "provider_name": "Remedy Home Healthcare, Llc",
     "state": "IN",
     "city": "Brookville",
     "phone": "(844) 843-7843",
     "email": "admin@remedyhhcare.com"
-  },
-  {
-    "ccn": "157711",
-    "provider_name": "Ability Home Health Llc",
-    "state": "IN",
-    "city": "Zionsville",
-    "phone": "(317) 669-2880",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "157724",
@@ -11736,14 +10240,6 @@
     "email": "lee.coffee@torescue.com"
   },
   {
-    "ccn": "167427",
-    "provider_name": "Keystone Home Health",
-    "state": "IA",
-    "city": "Keystone",
-    "phone": "(319) 442-3650",
-    "email": "team@latofonts.com"
-  },
-  {
     "ccn": "177087",
     "provider_name": "Interim Healthcare Of Kansas City",
     "state": "KS",
@@ -11768,14 +10264,6 @@
     "email": "customerservice@hometownhealth.com"
   },
   {
-    "ccn": "177159",
-    "provider_name": "Community Homehealth",
-    "state": "KS",
-    "city": "Onaga",
-    "phone": "(785) 889-7200",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "177195",
     "provider_name": "Wildcat Pt Home Health",
     "state": "KS",
@@ -11798,14 +10286,6 @@
     "city": "Topeka",
     "phone": "(785) 354-0767",
     "email": "info@elara.com"
-  },
-  {
-    "ccn": "177234",
-    "provider_name": "Spectrum Home Health, Inc",
-    "state": "KS",
-    "city": "Kansas City",
-    "phone": "(913) 831-2979",
-    "email": "example@mysite.com"
   },
   {
     "ccn": "178069",
@@ -11944,14 +10424,6 @@
     "email": "admissions@legacyhomehealth.com"
   },
   {
-    "ccn": "178121",
-    "provider_name": "Guardian Home Care, Llc",
-    "state": "KS",
-    "city": "Norton",
-    "phone": "(785) 622-4254",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "178133",
     "provider_name": "Clearpath Home Health",
     "state": "KS",
@@ -11990,14 +10462,6 @@
     "city": "Marion",
     "phone": "(270) 965-2550",
     "email": "cindyledbetter@gmail.com"
-  },
-  {
-    "ccn": "187188",
-    "provider_name": "Rainbow, Llc",
-    "state": "KY",
-    "city": "Bowling Green",
-    "phone": "(270) 745-0033",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "197019",
@@ -12046,14 +10510,6 @@
     "city": "Natchitoches",
     "phone": "(318) 238-3933",
     "email": "info@elara.com"
-  },
-  {
-    "ccn": "197086",
-    "provider_name": "Best Home Health",
-    "state": "LA",
-    "city": "West Monroe",
-    "phone": "(318) 323-5594",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "197142",
@@ -12176,14 +10632,6 @@
     "email": "info@superiorcarehomehealth.com"
   },
   {
-    "ccn": "197447",
-    "provider_name": "Magnolia Home Health Care, Inc",
-    "state": "LA",
-    "city": "Arcadia",
-    "phone": "(318) 263-2100",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "197454",
     "provider_name": "First Option Home Health",
     "state": "LA",
@@ -12280,14 +10728,6 @@
     "email": "administrator@westunity.org"
   },
   {
-    "ccn": "197766",
-    "provider_name": "Southern Home Health",
-    "state": "LA",
-    "city": "Lake Charles",
-    "phone": "(337) 479-2233",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "197777",
     "provider_name": "Grace Home Health",
     "state": "LA",
@@ -12304,28 +10744,12 @@
     "email": "info@elara.com"
   },
   {
-    "ccn": "197779",
-    "provider_name": "Central Home Health, Llc",
-    "state": "LA",
-    "city": "Metairie",
-    "phone": "(504) 455-5959",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "197789",
     "provider_name": "Lakeshore Home Health",
     "state": "LA",
     "city": "Breaux Bridge",
     "phone": "(337) 228-1045",
     "email": "care@lakeshorehh.com"
-  },
-  {
-    "ccn": "197795",
-    "provider_name": "Unity Home Health",
-    "state": "LA",
-    "city": "Breaux Bridge",
-    "phone": "(337) 414-6037",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "197889",
@@ -12342,22 +10766,6 @@
     "city": "Bangor",
     "phone": "(207) 907-1810",
     "email": "info@stjoseph.com"
-  },
-  {
-    "ccn": "207026",
-    "provider_name": "Community Health & Counseling Services",
-    "state": "ME",
-    "city": "Bangor",
-    "phone": "(207) 947-0366",
-    "email": "info@mysite.com"
-  },
-  {
-    "ccn": "207054",
-    "provider_name": "Valley Home Health Services",
-    "state": "ME",
-    "city": "Caribou",
-    "phone": "(207) 492-1149",
-    "email": "encompassadmin@valley.com"
   },
   {
     "ccn": "207080",
@@ -12480,14 +10888,6 @@
     "email": "info@elara.com"
   },
   {
-    "ccn": "227505",
-    "provider_name": "Comfort Home Care, Llc",
-    "state": "MA",
-    "city": "Methuen",
-    "phone": "(978) 685-4700",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "227520",
     "provider_name": "Relief Home Health Services, Inc",
     "state": "MA",
@@ -12496,36 +10896,12 @@
     "email": "info@reliefhomecare.com"
   },
   {
-    "ccn": "227522",
-    "provider_name": "Allied Home Health Care, Inc",
-    "state": "MA",
-    "city": "Quincy",
-    "phone": "(617) 934-4473",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "227536",
     "provider_name": "At Home Senior Care, Inc",
     "state": "MA",
     "city": "Newton",
     "phone": "(617) 663-4881",
     "email": "info@athomeseniorcare.com"
-  },
-  {
-    "ccn": "227538",
-    "provider_name": "Alternative Home Health Care, Llc",
-    "state": "MA",
-    "city": "Methuen",
-    "phone": "(978) 657-7444",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "227546",
-    "provider_name": "New England Homecare Solutions Inc",
-    "state": "MA",
-    "city": "Dracut",
-    "phone": "(978) 455-4035",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "227567",
@@ -12608,14 +10984,6 @@
     "email": "info@gentlehomehealth.com"
   },
   {
-    "ccn": "227592",
-    "provider_name": "Caring Hearts Homecare Inc",
-    "state": "MA",
-    "city": "Wilmington",
-    "phone": "(781) 526-1125",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "227597",
     "provider_name": "Convenient Homecare Services, Inc",
     "state": "MA",
@@ -12638,14 +11006,6 @@
     "city": "Tewksbury",
     "phone": "(978) 851-7775",
     "email": "info@horizonhh.com"
-  },
-  {
-    "ccn": "227604",
-    "provider_name": "Radiance Home Health Care Inc",
-    "state": "MA",
-    "city": "Chicopee",
-    "phone": "(413) 592-0101",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "227612",
@@ -12960,14 +11320,6 @@
     "email": "info@elara.com"
   },
   {
-    "ccn": "237446",
-    "provider_name": "Advanced Home Care, Inc",
-    "state": "MI",
-    "city": "Sterling Heights",
-    "phone": "(248) 588-0069",
-    "email": "info@advanced.com"
-  },
-  {
     "ccn": "237445",
     "provider_name": "Dynamic Home Care, Inc",
     "state": "MI",
@@ -13014,14 +11366,6 @@
     "city": "Canton",
     "phone": "(248) 559-5661",
     "email": "sales@carebridge.com"
-  },
-  {
-    "ccn": "237493",
-    "provider_name": "Diamond Home Health Services",
-    "state": "MI",
-    "city": "Southfield",
-    "phone": "(248) 569-7900",
-    "email": "micah@micahrich.com"
   },
   {
     "ccn": "237480",
@@ -13072,14 +11416,6 @@
     "email": "info@yourcompany.com"
   },
   {
-    "ccn": "237550",
-    "provider_name": "Happy Home Care",
-    "state": "MI",
-    "city": "Saint Joseph",
-    "phone": "(269) 556-9910",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "237617",
     "provider_name": "Omni Home Health Care, Inc",
     "state": "MI",
@@ -13110,14 +11446,6 @@
     "city": "Madison Heights",
     "phone": "(248) 336-8999",
     "email": "info@synergycare.com"
-  },
-  {
-    "ccn": "237638",
-    "provider_name": "Complete Home Health Care, Llc",
-    "state": "MI",
-    "city": "Brownstown Twp.",
-    "phone": "(734) 672-7765",
-    "email": "example@mysite.com"
   },
   {
     "ccn": "237592",
@@ -13248,22 +11576,6 @@
     "email": "colorose@usa.net"
   },
   {
-    "ccn": "239034",
-    "provider_name": "Aquarius Home Care, Llc",
-    "state": "MI",
-    "city": "Warren",
-    "phone": "(586) 576-1955",
-    "email": "micah@micahrich.com"
-  },
-  {
-    "ccn": "239018",
-    "provider_name": "Axiom Home Care",
-    "state": "MI",
-    "city": "Southgate",
-    "phone": "(734) 324-3166",
-    "email": "sales@brandforce.com"
-  },
-  {
     "ccn": "239100",
     "provider_name": "Community Home Health Care Of West Michigan, Inc",
     "state": "MI",
@@ -13328,14 +11640,6 @@
     "email": "info@longlife.com"
   },
   {
-    "ccn": "239148",
-    "provider_name": "Extracare Home Health Services",
-    "state": "MI",
-    "city": "Troy",
-    "phone": "(248) 649-6380",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "239158",
     "provider_name": "Ideal Home Health Services, Llc",
     "state": "MI",
@@ -13366,14 +11670,6 @@
     "city": "Oak Park",
     "phone": "(248) 307-7689",
     "email": "info@ablecarehomecare.com"
-  },
-  {
-    "ccn": "239181",
-    "provider_name": "Alpha Home Care",
-    "state": "MI",
-    "city": "Rochester",
-    "phone": "(248) 650-7992",
-    "email": "service@atom.com"
   },
   {
     "ccn": "239170",
@@ -13512,14 +11808,6 @@
     "email": "info@parallelhomecare.com"
   },
   {
-    "ccn": "239199",
-    "provider_name": "Compassionate Home Health Services",
-    "state": "MI",
-    "city": "Pontiac",
-    "phone": "(248) 681-1211",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "239324",
     "provider_name": "University Home Care, Inc",
     "state": "MI",
@@ -13542,14 +11830,6 @@
     "city": "Saginaw",
     "phone": "(989) 401-1978",
     "email": "hello@allvalleycare.com"
-  },
-  {
-    "ccn": "239315",
-    "provider_name": "Bethesda Home Health",
-    "state": "MI",
-    "city": "Farmington Hills",
-    "phone": "(248) 982-7574",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "239335",
@@ -13584,14 +11864,6 @@
     "email": "connect@orianasolutions.com"
   },
   {
-    "ccn": "239350",
-    "provider_name": "Evergreen Home Health",
-    "state": "MI",
-    "city": "Gaylord",
-    "phone": "(989) 448-2778",
-    "email": "hello@evergreen.com"
-  },
-  {
     "ccn": "239351",
     "provider_name": "Ampower Home Health Care, Llc",
     "state": "MI",
@@ -13616,28 +11888,12 @@
     "email": "info@oshkoshpresbyterians.org"
   },
   {
-    "ccn": "239363",
-    "provider_name": "Spirit Home Health Care",
-    "state": "MI",
-    "city": "Southfield",
-    "phone": "(248) 996-9202",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "247071",
     "provider_name": "Caring Hands Home Care",
     "state": "MN",
     "city": "Sebeka",
     "phone": "(218) 837-5572",
     "email": "caringhands1185@gmail.com"
-  },
-  {
-    "ccn": "247019",
-    "provider_name": "Bethesda Home Health",
-    "state": "MN",
-    "city": "Willmar",
-    "phone": "(320) 235-8364",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "239366",
@@ -13688,14 +11944,6 @@
     "email": "info@bestcare.com"
   },
   {
-    "ccn": "248005",
-    "provider_name": "Community Home Health Inc",
-    "state": "MN",
-    "city": "Savage",
-    "phone": "(952) 440-3955",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "248037",
     "provider_name": "Home Health Care Inc",
     "state": "MN",
@@ -13710,14 +11958,6 @@
     "city": "Red Wing",
     "phone": "(651) 388-2223",
     "email": "info@hiawathahomecare.com"
-  },
-  {
-    "ccn": "248048",
-    "provider_name": "Barnabas Health Care Services",
-    "state": "MN",
-    "city": "Brainerd",
-    "phone": "(218) 829-0901",
-    "email": "info@ndiscovered.com"
   },
   {
     "ccn": "248078",
@@ -13768,14 +12008,6 @@
     "email": "interiumsoftware@gmail.com"
   },
   {
-    "ccn": "248137",
-    "provider_name": "Advanced Medical Home Care, Llc",
-    "state": "MN",
-    "city": "White Bear Lake",
-    "phone": "(612) 267-6154",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "248166",
     "provider_name": "Carextra Home Health Llc",
     "state": "MN",
@@ -13806,14 +12038,6 @@
     "city": "Springfield",
     "phone": "(417) 269-4663",
     "email": "athome@coxhealth.com"
-  },
-  {
-    "ccn": "248165",
-    "provider_name": "Compassionate Home Care Ltd",
-    "state": "MN",
-    "city": "Zimmerman",
-    "phone": "(763) 230-5215",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "267196",
@@ -13894,14 +12118,6 @@
     "city": "Saint Louis",
     "phone": "(314) 726-5600",
     "email": "i.bursak@awhealthcare.com"
-  },
-  {
-    "ccn": "267579",
-    "provider_name": "Alternative Home Health Care",
-    "state": "MO",
-    "city": "Washington",
-    "phone": "(636) 432-0008",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "267589",
@@ -14152,14 +12368,6 @@
     "email": "info@saguarocare.com"
   },
   {
-    "ccn": "297078",
-    "provider_name": "All Care Home Health",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 222-0605",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "297100",
     "provider_name": "Perspective Home Health Inc",
     "state": "NV",
@@ -14174,14 +12382,6 @@
     "city": "Las Vegas",
     "phone": "(702) 384-1962",
     "email": "info@ehab.com"
-  },
-  {
-    "ccn": "297113",
-    "provider_name": "We Care Home Health Services",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 312-7000",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "297125",
@@ -14272,36 +12472,12 @@
     "email": "mtcrest408@gmail.com"
   },
   {
-    "ccn": "297183",
-    "provider_name": "Allied Home Health Care Services",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 395-4848",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "297191",
     "provider_name": "Good Shepherd Home Health Services",
     "state": "NV",
     "city": "Henderson",
     "phone": "(702) 893-3333",
     "email": "office@goodshepherd.com"
-  },
-  {
-    "ccn": "297198",
-    "provider_name": "Advanced Home Care",
-    "state": "NV",
-    "city": "Henderson",
-    "phone": "(702) 967-6160",
-    "email": "info@advanced.com"
-  },
-  {
-    "ccn": "297199",
-    "provider_name": "Accessible Healthcare, Llc",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 476-8853",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "297205",
@@ -14328,14 +12504,6 @@
     "email": "compassioncarehc@gmail.com"
   },
   {
-    "ccn": "297227",
-    "provider_name": "Angel'S Hope Home Health, Inc.",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 489-9102",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "297204",
     "provider_name": "Advocare Home Health, Llc",
     "state": "NV",
@@ -14360,28 +12528,12 @@
     "email": "customerservice@executivecarehomehealth.com"
   },
   {
-    "ccn": "297235",
-    "provider_name": "Brilliant Health System, Inc",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 834-5692",
-    "email": "info@mysite.com"
-  },
-  {
     "ccn": "297237",
     "provider_name": "Care Options For Kids",
     "state": "NV",
     "city": "Las Vegas",
     "phone": "(702) 982-3292",
     "email": "hotline@cofk.com"
-  },
-  {
-    "ccn": "297246",
-    "provider_name": "Alpine Home Health, Inc",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 586-0785",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "297250",
@@ -14480,14 +12632,6 @@
     "email": "admin@creekviewhh.com"
   },
   {
-    "ccn": "297319",
-    "provider_name": "Omnia Home Care Llc",
-    "state": "NV",
-    "city": "Mesquite",
-    "phone": "(435) 817-0247",
-    "email": "sales@brandforce.com"
-  },
-  {
     "ccn": "297321",
     "provider_name": "Apex Home Health Care, Inc",
     "state": "NV",
@@ -14518,14 +12662,6 @@
     "city": "Las Vegas",
     "phone": "(702) 787-3044",
     "email": "support@riiwards.com"
-  },
-  {
-    "ccn": "297331",
-    "provider_name": "Caring Hearts Home Health, Llc",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(775) 233-5409",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "297333",
@@ -14568,28 +12704,12 @@
     "email": "info@averyhh.com"
   },
   {
-    "ccn": "297343",
-    "provider_name": "Community Home Health, Inc.",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(818) 807-7616",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "297341",
     "provider_name": "True Harmony Home Health Llc",
     "state": "NV",
     "city": "Las Vegas",
     "phone": null,
     "email": "jonpinhorn.typedesign@gmail.com"
-  },
-  {
-    "ccn": "297347",
-    "provider_name": "Valley Home Health Care Inc",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 888-1386",
-    "email": "myhealth@3x.png.transform"
   },
   {
     "ccn": "297344",
@@ -14648,14 +12768,6 @@
     "email": "wecare@gentleheartshomehealth.com"
   },
   {
-    "ccn": "297357",
-    "provider_name": "Reliant Home Health Care Llc",
-    "state": "NV",
-    "city": "Las Vegas",
-    "phone": "(702) 821-6314",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "297364",
     "provider_name": "Unicare Homehealth Llc",
     "state": "NV",
@@ -14704,14 +12816,6 @@
     "email": "escrow@k-v.com"
   },
   {
-    "ccn": "317008",
-    "provider_name": "Valley Home Care Inc.",
-    "state": "NJ",
-    "city": "Paramus",
-    "phone": "(201) 291-6000",
-    "email": "encompassadmin@valley.com"
-  },
-  {
     "ccn": "317009",
     "provider_name": "Promise Care Nj",
     "state": "NJ",
@@ -14758,14 +12862,6 @@
     "city": "Rochelle Park",
     "phone": "(201) 358-2666",
     "email": "amiller@atmholdings.com"
-  },
-  {
-    "ccn": "327140",
-    "provider_name": "Community Homecare",
-    "state": "NM",
-    "city": "Clovis",
-    "phone": "(575) 769-2243",
-    "email": "support@community.com"
   },
   {
     "ccn": "327148",
@@ -14888,14 +12984,6 @@
     "email": "support@medisource.com"
   },
   {
-    "ccn": "337024",
-    "provider_name": "Hcr / Hcr Home Care Chha (Plattsburgh)",
-    "state": "NY",
-    "city": "Plattsburgh",
-    "phone": "(518) 310-0900",
-    "email": "psu@hcr.ny.gov"
-  },
-  {
     "ccn": "327231",
     "provider_name": "Angels Above Home Care, Llc",
     "state": "NM",
@@ -14920,28 +13008,12 @@
     "email": "welcome@lvbhh.com"
   },
   {
-    "ccn": "337083",
-    "provider_name": "Hcr / Hcr Home Care Chha (Oneonta)",
-    "state": "NY",
-    "city": "Oneonta",
-    "phone": "(518) 254-7092",
-    "email": "psu@hcr.ny.gov"
-  },
-  {
     "ccn": "327805",
     "provider_name": "Osalta Home Health Llc",
     "state": "NM",
     "city": "Albuquerque",
     "phone": "(505) 717-1324",
     "email": "support@osaltanm.com"
-  },
-  {
-    "ccn": "337257",
-    "provider_name": "Hcr / Hcr Home Care Chha (Rochester)",
-    "state": "NY",
-    "city": "Rochester",
-    "phone": "(585) 272-1930",
-    "email": "psu@hcr.ny.gov"
   },
   {
     "ccn": "337254",
@@ -14984,14 +13056,6 @@
     "email": "info@mountain.com"
   },
   {
-    "ccn": "347002",
-    "provider_name": "Well Care Home Health",
-    "state": "NC",
-    "city": "Wilmington",
-    "phone": "(910) 362-9405",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "347033",
     "provider_name": "Mountain Home Health Services",
     "state": "NC",
@@ -15022,14 +13086,6 @@
     "city": "Elizabethtown",
     "phone": null,
     "email": "rchc@rescare.com"
-  },
-  {
-    "ccn": "347085",
-    "provider_name": "Guardian Home Health",
-    "state": "NC",
-    "city": "Hickory",
-    "phone": null,
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "347114",
@@ -15096,14 +13152,6 @@
     "email": "rchc@rescare.com"
   },
   {
-    "ccn": "347169",
-    "provider_name": "Carolina Home Care",
-    "state": "NC",
-    "city": "Spindale",
-    "phone": null,
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "347232",
     "provider_name": "Interim Healthcare Of The Triad",
     "state": "NC",
@@ -15134,14 +13182,6 @@
     "city": "Lexington",
     "phone": "(336) 249-7813",
     "email": "info@ehab.com"
-  },
-  {
-    "ccn": "347192",
-    "provider_name": "Well Care Home Health, Inc",
-    "state": "NC",
-    "city": "Raleigh",
-    "phone": "(919) 846-1018",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "357040",
@@ -15248,22 +13288,6 @@
     "email": "info@wilsoncare.com"
   },
   {
-    "ccn": "367262",
-    "provider_name": "Alpine Home Health",
-    "state": "OH",
-    "city": "Toledo",
-    "phone": "(419) 472-5350",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "367433",
-    "provider_name": "Southeastern Home Care, Llc",
-    "state": "OH",
-    "city": "Cambridge",
-    "phone": "(740) 432-0220",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "367533",
     "provider_name": "Integrity Home Care",
     "state": "OH",
@@ -15310,14 +13334,6 @@
     "city": "Dublin",
     "phone": "(614) 764-0960",
     "email": "info@primarycarenursing.com"
-  },
-  {
-    "ccn": "367625",
-    "provider_name": "Advanced Home Care Inc",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 231-0099",
-    "email": "info@advanced.com"
   },
   {
     "ccn": "367730",
@@ -15368,14 +13384,6 @@
     "email": "info@stagheaddesigns.com"
   },
   {
-    "ccn": "367761",
-    "provider_name": "Heart To Heart Home Health Care",
-    "state": "OH",
-    "city": "Medina",
-    "phone": "(330) 335-9999",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "367762",
     "provider_name": "Ohio Valley Home Health, Inc",
     "state": "OH",
@@ -15384,28 +13392,12 @@
     "email": "info@ohiovalleyhh.com"
   },
   {
-    "ccn": "367775",
-    "provider_name": "Southwest Ohio Home Care Llc",
-    "state": "OH",
-    "city": "Brookville",
-    "phone": "(937) 974-1911",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "367798",
     "provider_name": "High Point Home Health, Ltd",
     "state": "OH",
     "city": "Bellefontaine",
     "phone": "(937) 592-9800",
     "email": "info@highpoint.com"
-  },
-  {
-    "ccn": "367786",
-    "provider_name": "Wellcare Home Health, Inc",
-    "state": "OH",
-    "city": "Dayton",
-    "phone": "(937) 254-4453",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "367793",
@@ -15440,22 +13432,6 @@
     "email": "info@betterworldhealthcare.com"
   },
   {
-    "ccn": "368039",
-    "provider_name": "Able Support Services, Inc",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 436-3791",
-    "email": "service@atom.com"
-  },
-  {
-    "ccn": "368052",
-    "provider_name": "Caring Hearts Home Health Services, Inc",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 863-6950",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "368044",
     "provider_name": "Excel Health Services",
     "state": "OH",
@@ -15486,14 +13462,6 @@
     "city": "Saint Clairsville",
     "phone": "(740) 635-0045",
     "email": "interiumsoftware@gmail.com"
-  },
-  {
-    "ccn": "368106",
-    "provider_name": "Valley Home Health Care, Llc",
-    "state": "OH",
-    "city": "Boardman",
-    "phone": "(330) 758-5727",
-    "email": "myhealth@3x.png.transform"
   },
   {
     "ccn": "368109",
@@ -15560,14 +13528,6 @@
     "email": "info@holistichh.com"
   },
   {
-    "ccn": "368159",
-    "provider_name": "Alpine Home Health",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 759-2273",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "368175",
     "provider_name": "Spirit Homecare, Inc",
     "state": "OH",
@@ -15582,14 +13542,6 @@
     "city": "Westerville",
     "phone": "(614) 891-7480",
     "email": "office@advancedseniorsupport.com"
-  },
-  {
-    "ccn": "368213",
-    "provider_name": "Diamond Home Care Llc",
-    "state": "OH",
-    "city": "Grove City",
-    "phone": "(614) 594-2430",
-    "email": "micah@micahrich.com"
   },
   {
     "ccn": "368201",
@@ -15632,14 +13584,6 @@
     "email": "garret.bohl@gmail.com"
   },
   {
-    "ccn": "368254",
-    "provider_name": "Alpine Home Health",
-    "state": "OH",
-    "city": "Ravenna",
-    "phone": "(800) 372-3905",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "368266",
     "provider_name": "Franklin Home Health Care Llc",
     "state": "OH",
@@ -15654,14 +13598,6 @@
     "city": "Columbus",
     "phone": "(614) 476-8310",
     "email": "info@fullcarehh.com"
-  },
-  {
-    "ccn": "368268",
-    "provider_name": "Housecalls Home Health",
-    "state": "OH",
-    "city": "Belpre",
-    "phone": "(740) 423-5901",
-    "email": "info@ndiscovered.com"
   },
   {
     "ccn": "368253",
@@ -15816,14 +13752,6 @@
     "email": "nicklowe@ukonline.co.uk"
   },
   {
-    "ccn": "368367",
-    "provider_name": "Kings And Queens Home Health Care, Llc",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 987-5785",
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "368409",
     "provider_name": "Prochoice Health Care Services Llc",
     "state": "OH",
@@ -15838,14 +13766,6 @@
     "city": "Massillon",
     "phone": "(330) 833-7286",
     "email": "info@completehealthcare.com"
-  },
-  {
-    "ccn": "368385",
-    "provider_name": "Alpine Home Health",
-    "state": "OH",
-    "city": "Toledo",
-    "phone": "(419) 408-6605",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "368400",
@@ -15872,14 +13792,6 @@
     "email": "info@americarehomecare.com"
   },
   {
-    "ccn": "368417",
-    "provider_name": "Extended Life Home Care, Ltd",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 476-4400",
-    "email": "team@latofonts.com"
-  },
-  {
     "ccn": "368427",
     "provider_name": "Guiding Hands Home Health Services, Inc",
     "state": "OH",
@@ -15894,14 +13806,6 @@
     "city": "Hilliard",
     "phone": "(614) 327-7630",
     "email": "info@pinnaclehh.com"
-  },
-  {
-    "ccn": "368442",
-    "provider_name": "Columbus Home Health Services, Llc",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 985-1464",
-    "email": "service@atom.com"
   },
   {
     "ccn": "368455",
@@ -15952,14 +13856,6 @@
     "email": "info@classichomehealth.com"
   },
   {
-    "ccn": "368480",
-    "provider_name": "Ivory Home Health Services Inc",
-    "state": "OH",
-    "city": "Reynoldsburg",
-    "phone": "(614) 221-5035",
-    "email": "micah@micahrich.com"
-  },
-  {
     "ccn": "368486",
     "provider_name": "Premium Healthcare Services Llc",
     "state": "OH",
@@ -16008,28 +13904,12 @@
     "email": "info@ehab.com"
   },
   {
-    "ccn": "369004",
-    "provider_name": "Devoted Home Health Care, Llc",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 396-6026",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "369024",
     "provider_name": "Premier Nursing, Llc Home Health Service",
     "state": "OH",
     "city": "Middletown",
     "phone": "(513) 433-1856",
     "email": "help@premier.one"
-  },
-  {
-    "ccn": "369010",
-    "provider_name": "Royal Health Services, Llc",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 826-1316",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "368494",
@@ -16112,36 +13992,12 @@
     "email": "info@wellspringcare.com"
   },
   {
-    "ccn": "369077",
-    "provider_name": "Northeast Home Health Services",
-    "state": "OH",
-    "city": "Shaker Heights",
-    "phone": "(216) 938-9911",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "369102",
     "provider_name": "Living Life Homecare Llc",
     "state": "OH",
     "city": "Columbus",
     "phone": "(614) 322-9210",
     "email": "info@homecareofmn.com"
-  },
-  {
-    "ccn": "369091",
-    "provider_name": "Better Living Home Health Care Services",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 601-6013",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "369110",
-    "provider_name": "Safe Home Care Llc",
-    "state": "OH",
-    "city": "Toledo",
-    "phone": "(567) 742-7700",
-    "email": "example@mysite.com"
   },
   {
     "ccn": "369130",
@@ -16166,14 +14022,6 @@
     "city": "Chillicothe",
     "phone": "(740) 775-4108",
     "email": "info@wisemedicalstaffing.com"
-  },
-  {
-    "ccn": "369157",
-    "provider_name": "Solution Home Health Care Inc",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 522-1535",
-    "email": "service@atom.com"
   },
   {
     "ccn": "369170",
@@ -16408,14 +14256,6 @@
     "email": "info@peacefulhh.com"
   },
   {
-    "ccn": "369330",
-    "provider_name": "Sunset Healthcare Services Inc.",
-    "state": "OH",
-    "city": "Columbus",
-    "phone": "(614) 397-7251",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "369338",
     "provider_name": "Luxe Home Health Care Llc",
     "state": "OH",
@@ -16454,14 +14294,6 @@
     "city": "Bedford Heights",
     "phone": "(937) 725-9629",
     "email": "info@harshamassistedliving.com"
-  },
-  {
-    "ccn": "369361",
-    "provider_name": "Evergreen Home Care",
-    "state": "OH",
-    "city": "Cincinnati",
-    "phone": "(614) 592-8678",
-    "email": "hello@evergreen.com"
   },
   {
     "ccn": "369383",
@@ -16552,22 +14384,6 @@
     "email": "srmc-childbirth-education-classes@mercy.com"
   },
   {
-    "ccn": "377011",
-    "provider_name": "Hilltop Healthcare, Llc",
-    "state": "OK",
-    "city": "Seminole",
-    "phone": "(580) 332-1892",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "377177",
-    "provider_name": "Community Home Health, Inc.",
-    "state": "OK",
-    "city": "Claremore",
-    "phone": "(918) 342-3621",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "377199",
     "provider_name": "Marshall County Home Health, Inc",
     "state": "OK",
@@ -16590,14 +14406,6 @@
     "city": "Muskogee",
     "phone": "(918) 255-0047",
     "email": "office@caringconnectionhomecare.com"
-  },
-  {
-    "ccn": "377286",
-    "provider_name": "Completecare Home Health, Llc",
-    "state": "OK",
-    "city": "Norman",
-    "phone": "(405) 701-7085",
-    "email": "example@mysite.com"
   },
   {
     "ccn": "377437",
@@ -16640,14 +14448,6 @@
     "email": "info@carepros.ca"
   },
   {
-    "ccn": "377630",
-    "provider_name": "Rainbow Home Health, Inc",
-    "state": "OK",
-    "city": "Antlers",
-    "phone": "(580) 298-3272",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "377645",
     "provider_name": "Providence Home Care",
     "state": "OK",
@@ -16688,14 +14488,6 @@
     "email": "mail@vialifecare.com"
   },
   {
-    "ccn": "377694",
-    "provider_name": "Rainbow Home Health",
-    "state": "OK",
-    "city": "Talihina",
-    "phone": "(918) 567-4070",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "377698",
     "provider_name": "Best Home Health Care, Inc",
     "state": "OK",
@@ -16720,14 +14512,6 @@
     "email": "contact@ricehomehealth.com"
   },
   {
-    "ccn": "377710",
-    "provider_name": "Cornerstone Home Health, Inc.",
-    "state": "OK",
-    "city": "Bethany",
-    "phone": "(405) 354-5454",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "377721",
     "provider_name": "Innova Home Health",
     "state": "OK",
@@ -16744,28 +14528,12 @@
     "email": "intake@apexhh.com"
   },
   {
-    "ccn": "377729",
-    "provider_name": "Grayson Home Health, Inc",
-    "state": "OK",
-    "city": "Durant",
-    "phone": "(580) 745-9470",
-    "email": "vendors@template.product"
-  },
-  {
     "ccn": "377719",
     "provider_name": "Family Choice Home Care",
     "state": "OK",
     "city": "Elk City",
     "phone": "(580) 225-4140",
     "email": "familychoicehh@gmail.com"
-  },
-  {
-    "ccn": "377723",
-    "provider_name": "Unity Home Health Llc",
-    "state": "OK",
-    "city": "Durant",
-    "phone": "(580) 931-0995",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "377733",
@@ -16960,14 +14728,6 @@
     "email": "divinemercyhomehealthcare@gmail.com"
   },
   {
-    "ccn": "387316",
-    "provider_name": "Home Health Of Northwest, Llc",
-    "state": "OR",
-    "city": "Bend",
-    "phone": "(541) 640-2518",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "397015",
     "provider_name": "Mercy Home Health",
     "state": "PA",
@@ -17016,14 +14776,6 @@
     "email": "interiumsoftware@gmail.com"
   },
   {
-    "ccn": "397449",
-    "provider_name": "All Care Home Care, Inc",
-    "state": "PA",
-    "city": "Hazleton",
-    "phone": "(570) 459-3002",
-    "email": "service@atom.com"
-  },
-  {
     "ccn": "397547",
     "provider_name": "Lifeline Home Health Inc",
     "state": "PA",
@@ -17054,14 +14806,6 @@
     "city": "Broomall",
     "phone": "(610) 353-7360",
     "email": "accucarehomecare@aol.com"
-  },
-  {
-    "ccn": "397668",
-    "provider_name": "Community Home Health Inc",
-    "state": "PA",
-    "city": "Feasterville Trevose",
-    "phone": "(215) 396-8252",
-    "email": "support@community.com"
   },
   {
     "ccn": "397679",
@@ -17096,14 +14840,6 @@
     "email": "info@starmulticare.com"
   },
   {
-    "ccn": "397759",
-    "provider_name": "Advanced Home Health",
-    "state": "PA",
-    "city": "Pittsburgh",
-    "phone": "(412) 344-4100",
-    "email": "info@advanced.com"
-  },
-  {
     "ccn": "397767",
     "provider_name": "Omni Home Care",
     "state": "PA",
@@ -17120,36 +14856,12 @@
     "email": "frontdesk@caregivershealth.com"
   },
   {
-    "ccn": "397747",
-    "provider_name": "Expert Home Care",
-    "state": "PA",
-    "city": "Feasterville",
-    "phone": "(215) 364-0340",
-    "email": "interested@domainmarket.com"
-  },
-  {
-    "ccn": "397754",
-    "provider_name": "Comfort Home Care Inc",
-    "state": "PA",
-    "city": "Feasterville",
-    "phone": "(610) 203-2684",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "397796",
     "provider_name": "Omni Home Care",
     "state": "PA",
     "city": "Tyrone",
     "phone": "(814) 684-7366",
     "email": "info@omni.com"
-  },
-  {
-    "ccn": "397774",
-    "provider_name": "Traditional Home Health Care",
-    "state": "PA",
-    "city": "Dunmore",
-    "phone": "(570) 207-9286",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "398003",
@@ -17230,14 +14942,6 @@
     "city": "Bala Cynwyd",
     "phone": "(610) 667-0600",
     "email": "hotline@cofk.com"
-  },
-  {
-    "ccn": "398093",
-    "provider_name": "Allcare Home Health Inc",
-    "state": "PA",
-    "city": "Moosic",
-    "phone": "(570) 589-2112",
-    "email": "service@atom.com"
   },
   {
     "ccn": "398131",
@@ -17416,14 +15120,6 @@
     "email": "info@latonas.com"
   },
   {
-    "ccn": "398274",
-    "provider_name": "Shadai Home Health Services",
-    "state": "PA",
-    "city": "Camp Hill",
-    "phone": "(717) 303-7272",
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "398283",
     "provider_name": "Huntingdon Valley Home Care Llc",
     "state": "PA",
@@ -17560,14 +15256,6 @@
     "email": "info@thrivehomecare.com"
   },
   {
-    "ccn": "398387",
-    "provider_name": "Asap Healthcare Services, Inc.",
-    "state": "PA",
-    "city": "Darby",
-    "phone": "(215) 668-1408",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "417023",
     "provider_name": "South County Home Health",
     "state": "RI",
@@ -17646,14 +15334,6 @@
     "city": "Rock Hill",
     "phone": "(502) 630-7249",
     "email": "rchc@rescare.com"
-  },
-  {
-    "ccn": "427861",
-    "provider_name": "Grove Park Pharmacy Home Care, Llc",
-    "state": "SC",
-    "city": "Orangeburg",
-    "phone": "(803) 536-6644",
-    "email": "team@latofonts.com"
   },
   {
     "ccn": "437047",
@@ -17824,14 +15504,6 @@
     "email": "customerservice@newlife.com"
   },
   {
-    "ccn": "453174",
-    "provider_name": "Unity Homecare",
-    "state": "TX",
-    "city": "El Paso",
-    "phone": "(915) 781-1882",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "457174",
     "provider_name": "Interim Healthcare Of Austin",
     "state": "TX",
@@ -17902,22 +15574,6 @@
     "city": "Round Rock",
     "phone": "(512) 733-1515",
     "email": "info@elara.com"
-  },
-  {
-    "ccn": "457646",
-    "provider_name": "Shannon Home Health Services",
-    "state": "TX",
-    "city": "San Angelo",
-    "phone": "(325) 659-7480",
-    "email": "example@mysite.com"
-  },
-  {
-    "ccn": "457743",
-    "provider_name": "Southern Touch Home Health",
-    "state": "TX",
-    "city": "Houston",
-    "phone": "(713) 526-3482",
-    "email": "info@ndiscovered.com"
   },
   {
     "ccn": "457789",
@@ -18160,14 +15816,6 @@
     "email": "wehearyou@interimhealthcare.com"
   },
   {
-    "ccn": "458154",
-    "provider_name": "Agape Home Healthcare",
-    "state": "TX",
-    "city": "Mesquite",
-    "phone": "(972) 681-2247",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "458285",
     "provider_name": "Enhabit Home Health",
     "state": "TX",
@@ -18248,14 +15896,6 @@
     "email": "info@elara.com"
   },
   {
-    "ccn": "459052",
-    "provider_name": "Champion Care, Inc.",
-    "state": "TX",
-    "city": "Laredo",
-    "phone": "(956) 712-2156",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "459088",
     "provider_name": "Tender Home Health Care Inc",
     "state": "TX",
@@ -18310,14 +15950,6 @@
     "city": "Houston",
     "phone": "(281) 661-5900",
     "email": "hello@vesta.com"
-  },
-  {
-    "ccn": "459319",
-    "provider_name": "Del Cielo Home Care Services",
-    "state": "TX",
-    "city": "Alice",
-    "phone": "(361) 664-3484",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "459381",
@@ -18528,14 +16160,6 @@
     "email": "hello@thekey.care"
   },
   {
-    "ccn": "677247",
-    "provider_name": "Advanced Home Health Services",
-    "state": "TX",
-    "city": "Seguin",
-    "phone": "(830) 379-6171",
-    "email": "info@advanced.com"
-  },
-  {
     "ccn": "677248",
     "provider_name": "Theracare Home Health",
     "state": "TX",
@@ -18680,14 +16304,6 @@
     "email": "info@embassyhomehealthcare.com"
   },
   {
-    "ccn": "677808",
-    "provider_name": "We Care Home Health Services Inc",
-    "state": "TX",
-    "city": "Mesquite",
-    "phone": "(972) 289-5800",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "677809",
     "provider_name": "Committed Home Health Care Inc",
     "state": "TX",
@@ -18752,14 +16368,6 @@
     "email": "info@starhomecare.com"
   },
   {
-    "ccn": "677887",
-    "provider_name": "Country Home Care",
-    "state": "TX",
-    "city": "Clarksville",
-    "phone": "(903) 427-8366",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "677907",
     "provider_name": "Majestik Care Providers Inc",
     "state": "TX",
@@ -18800,14 +16408,6 @@
     "email": "info@ivana.com"
   },
   {
-    "ccn": "677898",
-    "provider_name": "Spectrum Home Health",
-    "state": "TX",
-    "city": "Carrollton",
-    "phone": "(972) 805-4666",
-    "email": "example@mysite.com"
-  },
-  {
     "ccn": "677958",
     "provider_name": "Maritona Health Services Inc",
     "state": "TX",
@@ -18840,14 +16440,6 @@
     "email": "info@primecarehh.com"
   },
   {
-    "ccn": "677953",
-    "provider_name": "Extracare Home Health Services",
-    "state": "TX",
-    "city": "Houston",
-    "phone": "(832) 484-8203",
-    "email": "interested@domainmarket.com"
-  },
-  {
     "ccn": "677955",
     "provider_name": "Lucent Health Group",
     "state": "TX",
@@ -18856,28 +16448,12 @@
     "email": "contact@lhghealth.com"
   },
   {
-    "ccn": "677968",
-    "provider_name": "Community Home Care Inc",
-    "state": "TX",
-    "city": "Laredo",
-    "phone": "(956) 725-3888",
-    "email": "support@community.com"
-  },
-  {
     "ccn": "677952",
     "provider_name": "Enhabit Home Health",
     "state": "TX",
     "city": "Prosper",
     "phone": "(972) 529-4340",
     "email": "info@ehab.com"
-  },
-  {
-    "ccn": "677967",
-    "provider_name": "Rapid Home Health Care",
-    "state": "TX",
-    "city": "Stafford",
-    "phone": "(281) 240-0658",
-    "email": "service@atom.com"
   },
   {
     "ccn": "677964",
@@ -18902,14 +16478,6 @@
     "city": "Houston",
     "phone": "(713) 917-0600",
     "email": "info@convenienthomehealth.com"
-  },
-  {
-    "ccn": "677961",
-    "provider_name": "Advance Home Health Care Services",
-    "state": "TX",
-    "city": "Plano",
-    "phone": "(972) 472-2006",
-    "email": "interested@domainmarket.com"
   },
   {
     "ccn": "678027",
@@ -18942,14 +16510,6 @@
     "city": "San Antonio",
     "phone": "(210) 696-2626",
     "email": "info@dimensions.com"
-  },
-  {
-    "ccn": "678169",
-    "provider_name": "Doctor'S Choice Home Care",
-    "state": "TX",
-    "city": "Houston",
-    "phone": "(833) 365-2464",
-    "email": "service@atom.com"
   },
   {
     "ccn": "678243",
@@ -19768,14 +17328,6 @@
     "email": "admin@dependablehh.com"
   },
   {
-    "ccn": "679382",
-    "provider_name": "Vamos Home Health",
-    "state": "TX",
-    "city": "Mcallen",
-    "phone": "(956) 971-0981",
-    "email": "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com"
-  },
-  {
     "ccn": "679389",
     "provider_name": "Trans-American Healthcare, Inc",
     "state": "TX",
@@ -19886,14 +17438,6 @@
     "city": "Sugar Land",
     "phone": "(281) 495-4845",
     "email": "jim@axishomecare.com"
-  },
-  {
-    "ccn": "679472",
-    "provider_name": "Trinity Inspired Home Health Care Agency",
-    "state": "TX",
-    "city": "Dallas",
-    "phone": "(214) 421-0035",
-    "email": "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com"
   },
   {
     "ccn": "679474",
@@ -20128,14 +17672,6 @@
     "email": "bdnl@ascensia.com"
   },
   {
-    "ccn": "679569",
-    "provider_name": "Redeem Home Health Inc",
-    "state": "TX",
-    "city": "Lewisville",
-    "phone": "(972) 221-9200",
-    "email": "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
-  },
-  {
     "ccn": "679587",
     "provider_name": "Corazon Health Care Services Llc",
     "state": "TX",
@@ -20256,14 +17792,6 @@
     "email": "emran.bd.08@gmail.com"
   },
   {
-    "ccn": "679671",
-    "provider_name": "Advanced Home Health Services",
-    "state": "TX",
-    "city": "Irving",
-    "phone": "(972) 445-9117",
-    "email": "info@advanced.com"
-  },
-  {
     "ccn": "679652",
     "provider_name": "Lucent Health Group",
     "state": "TX",
@@ -20374,14 +17902,6 @@
     "city": "Mission",
     "phone": "(956) 271-4755",
     "email": "heavenlyheat@heavenlyheatsaunas.com"
-  },
-  {
-    "ccn": "679672",
-    "provider_name": "Custom Care Home Health",
-    "state": "TX",
-    "city": "Dallas",
-    "phone": "(972) 242-5959",
-    "email": "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
   },
   {
     "ccn": "679710",
@@ -20622,14 +18142,6 @@
     "city": "Houston",
     "phone": "(713) 773-0999",
     "email": "jarrett.stepman@dailysignal.com"
-  },
-  {
-    "ccn": "743135",
-    "provider_name": "Advanced Home Health Services",
-    "state": "TX",
-    "city": "Houston",
-    "phone": "(713) 426-0313",
-    "email": "info@advanced.com"
   },
   {
     "ccn": "743104",
@@ -20968,14 +18480,6 @@
     "email": "regency@regencyhomehealthcare.com"
   },
   {
-    "ccn": "747137",
-    "provider_name": "Holiness Home Healthcare Corp",
-    "state": "TX",
-    "city": "Katy",
-    "phone": "(713) 589-6416",
-    "email": "1eeb89147c984dc6bc3ffafd9e6cd089@sentry.wixpress.com"
-  },
-  {
     "ccn": "747136",
     "provider_name": "Life Home Health Care Inc",
     "state": "TX",
@@ -21168,14 +18672,6 @@
     "email": "info@americanchoicehealthcare.com"
   },
   {
-    "ccn": "747278",
-    "provider_name": "Livelong Health Care Services Inc",
-    "state": "TX",
-    "city": "Houston",
-    "phone": "(281) 809-5190",
-    "email": "1eeb89147c984dc6bc3ffafd9e6cd089@sentry.wixpress.com"
-  },
-  {
     "ccn": "747301",
     "provider_name": "Aviator Home Health",
     "state": "TX",
@@ -21310,14 +18806,6 @@
     "city": "Dallas",
     "phone": "(469) 779-3643",
     "email": "info@lmcllc.us"
-  },
-  {
-    "ccn": "747340",
-    "provider_name": "Spectrum Health Care Services",
-    "state": "TX",
-    "city": "Donna",
-    "phone": "(956) 464-5898",
-    "email": "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com"
   },
   {
     "ccn": "747404",
@@ -21560,14 +19048,6 @@
     "email": "info@bethelamerica.com"
   },
   {
-    "ccn": "747314",
-    "provider_name": "Allheal Home Health, Inc",
-    "state": "TX",
-    "city": "Houston",
-    "phone": "(936) 756-2277",
-    "email": "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com"
-  },
-  {
     "ccn": "747533",
     "provider_name": "Best Choice Home Care Inc",
     "state": "TX",
@@ -21752,14 +19232,6 @@
     "email": "office@arbortrinity.com"
   },
   {
-    "ccn": "747571",
-    "provider_name": "Spectrum Home Health",
-    "state": "TX",
-    "city": "Carrollton",
-    "phone": "(972) 798-8525",
-    "email": "9a65e97ebe8141fca0c4fd686f70996b@sentry.wixpress.com"
-  },
-  {
     "ccn": "747625",
     "provider_name": "Caraday Home Health",
     "state": "TX",
@@ -21888,14 +19360,6 @@
     "email": "info@triumphhomehealth.com"
   },
   {
-    "ccn": "747701",
-    "provider_name": "Guiding Home Care Inc",
-    "state": "TX",
-    "city": "Dallas",
-    "phone": "(469) 543-0500",
-    "email": "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com"
-  },
-  {
     "ccn": "747747",
     "provider_name": "Cordial Care Home Health Services Inc",
     "state": "TX",
@@ -21982,14 +19446,6 @@
     "city": "Tyler",
     "phone": "(903) 525-9037",
     "email": "bbc@rtmc.net"
-  },
-  {
-    "ccn": "747799",
-    "provider_name": "Jojemar Home Health Inc",
-    "state": "TX",
-    "city": "Pharr",
-    "phone": "(956) 621-1715",
-    "email": "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com"
   },
   {
     "ccn": "747793",
@@ -22168,14 +19624,6 @@
     "email": "info@regionshealth.ng"
   },
   {
-    "ccn": "747858",
-    "provider_name": "Golden Years Health Services Inc",
-    "state": "TX",
-    "city": "Harlingen",
-    "phone": "(956) 627-4090",
-    "email": "79baaa8e09c746d2b7401643b99792e0@sentry.wixpress.com"
-  },
-  {
     "ccn": "747875",
     "provider_name": "Guidance Home Health Services Inc",
     "state": "TX",
@@ -22328,14 +19776,6 @@
     "email": "admin@tenderhomehealth.com"
   },
   {
-    "ccn": "747993",
-    "provider_name": "Independence Home Health Llc",
-    "state": "TX",
-    "city": "Lewisville",
-    "phone": "(469) 455-1797",
-    "email": "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com"
-  },
-  {
     "ccn": "747992",
     "provider_name": "Theracare Services, Llc",
     "state": "TX",
@@ -22390,22 +19830,6 @@
     "city": "Dallas",
     "phone": "(972) 707-0924",
     "email": "firstname@scarlett.com"
-  },
-  {
-    "ccn": "748006",
-    "provider_name": "Advanced Care Home Health, Llc.",
-    "state": "TX",
-    "city": "Houston",
-    "phone": "(713) 239-1141",
-    "email": "info@advanced.com"
-  },
-  {
-    "ccn": "748003",
-    "provider_name": "Care At Heart Home Health Services",
-    "state": "TX",
-    "city": "El Paso",
-    "phone": "(915) 304-1030",
-    "email": "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com"
   },
   {
     "ccn": "748007",
@@ -22600,14 +20024,6 @@
     "email": "marketing@ussignal.com"
   },
   {
-    "ccn": "748035",
-    "provider_name": "Oracle Home Health Inc",
-    "state": "TX",
-    "city": "Dallas",
-    "phone": "(214) 334-2209",
-    "email": "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
-  },
-  {
     "ccn": "748024",
     "provider_name": "Vizo Home Health Services Llc",
     "state": "TX",
@@ -22654,14 +20070,6 @@
     "city": "Bay City",
     "phone": "(979) 201-8674",
     "email": "info@goldstandardhomehealth.com"
-  },
-  {
-    "ccn": "748044",
-    "provider_name": "Golden Care Home Health, Llc",
-    "state": "TX",
-    "city": "Paris",
-    "phone": "(903) 737-6990",
-    "email": "dd0a55ccb8124b9c9d938e3acf41f8aa@sentry.wixpress.com"
   },
   {
     "ccn": "748079",
@@ -23112,14 +20520,6 @@
     "email": "info@renewpower.in"
   },
   {
-    "ccn": "467337",
-    "provider_name": "Independence Home Health",
-    "state": "UT",
-    "city": "Woods Cross",
-    "phone": "(801) 298-1100",
-    "email": "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com"
-  },
-  {
     "ccn": "467343",
     "provider_name": "Solstice Home Health, Llc",
     "state": "UT",
@@ -23134,14 +20534,6 @@
     "city": "Draper",
     "phone": "(801) 327-2295",
     "email": "contactach@auburncrest.com"
-  },
-  {
-    "ccn": "748141",
-    "provider_name": "24-7 Homehealth Llc",
-    "state": "TX",
-    "city": "Dallas",
-    "phone": "(972) 803-3433",
-    "email": "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
   },
   {
     "ccn": "467334",
@@ -23352,14 +20744,6 @@
     "email": "support@riiwards.com"
   },
   {
-    "ccn": "497546",
-    "provider_name": "Advanced Health Services",
-    "state": "VA",
-    "city": "Roanoke",
-    "phone": "(540) 994-9811",
-    "email": "info@advanced.com"
-  },
-  {
     "ccn": "497550",
     "provider_name": "Medstar Health Home Care",
     "state": "VA",
@@ -23502,14 +20886,6 @@
     "city": "Virginia Beach",
     "phone": "(757) 822-6991",
     "email": "inquiries@generations.com"
-  },
-  {
-    "ccn": "497656",
-    "provider_name": "Pro Healthcare Servicing Llc",
-    "state": "VA",
-    "city": "Fairfax",
-    "phone": "(703) 352-1939",
-    "email": "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
   },
   {
     "ccn": "497665",
@@ -24296,14 +21672,6 @@
     "email": "contact@anshomecare.com"
   },
   {
-    "ccn": "527321",
-    "provider_name": "Evergreen At Home",
-    "state": "WI",
-    "city": "Oshkosh",
-    "phone": "(920) 237-6242",
-    "email": "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
-  },
-  {
     "ccn": "527324",
     "provider_name": "Atlantic Home Health Care",
     "state": "WI",
@@ -24342,14 +21710,6 @@
     "city": "Eau Claire",
     "phone": "(715) 598-5600",
     "email": "compliance@aveanna.com"
-  },
-  {
-    "ccn": "527346",
-    "provider_name": "Avid At Home, Llc",
-    "state": "WI",
-    "city": "Hartland",
-    "phone": "(262) 361-0688",
-    "email": "2062d0a4929b45348643784b5cb39c36@sentry.wixpress.com"
   },
   {
     "ccn": "537041",
@@ -24584,14 +21944,6 @@
     "email": "luzesperanzahomecare@yahoo.com"
   },
   {
-    "ccn": "407037",
-    "provider_name": "Advanced Home Care Service West Inc",
-    "state": "PR",
-    "city": "Bo Palmas",
-    "phone": "(787) 783-2245",
-    "email": "8eb368c655b84e029ed79ad7a5c1718e@sentry.wixpress.com"
-  },
-  {
     "ccn": "407333",
     "provider_name": "Primary Home Care",
     "state": "PR",
@@ -24638,13 +21990,5 @@
     "city": "Saipan",
     "phone": "(670) 233-4646",
     "email": "u003enewstips@mhshealth.com"
-  },
-  {
-    "ccn": "537081",
-    "provider_name": "All About Family Inc",
-    "state": "WY",
-    "city": "Casper",
-    "phone": "(307) 232-6459",
-    "email": "463991d7bca24f02a0baf16f9e6eda73@sentry.wixpress.com"
   }
 ]

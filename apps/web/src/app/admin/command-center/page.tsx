@@ -594,7 +594,7 @@ export default function CommandCenterPage() {
 
             {/* ── Day Picker ─────────────────────────────────── */}
             {!loading && weeklyPlan && (
-              <div className={`grid gap-2 grid-cols-2 sm:grid-cols-4 ${weeklyPlan.days.length <= 4 ? 'md:grid-cols-4' : weeklyPlan.days.length <= 5 ? 'md:grid-cols-5' : weeklyPlan.days.length <= 6 ? 'md:grid-cols-6' : 'md:grid-cols-7'}`}>
+              <div className={`grid gap-2 grid-cols-2 sm:grid-cols-3 ${weeklyPlan.days.length <= 4 ? 'md:grid-cols-4' : 'md:grid-cols-5'}`}>
                 {weeklyPlan.days.map((day, idx) => {
                   const daySent = day.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length;
                   const dayInvSent = day.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length;
@@ -659,8 +659,8 @@ export default function CommandCenterPage() {
             )}
 
             {loading && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 animate-pulse">
-                {[0,1,2,3,4,5,6].map(i => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 animate-pulse">
+                {[0,1,2,3,4].map(i => (
                   <div key={i} className="h-32 bg-slate-100 rounded-xl" />
                 ))}
               </div>
@@ -1825,9 +1825,9 @@ function mockWeeklyPlan(): WeeklyPlan {
     'Andreessen Horowitz', 'General Catalyst', 'Founders Fund', 'Lux Capital',
     'NEA', 'Khosla Ventures', 'SignalFire', 'First Round', 'Bessemer', 'GV',
   ];
-  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const todayDow = new Date().getDay();
-  const todayIdx = todayDow === 0 ? 6 : todayDow - 1;
+  const todayIdx = todayDow >= 1 && todayDow <= 5 ? todayDow - 1 : 0;
 
   const now = new Date();
   const monday = new Date(now);

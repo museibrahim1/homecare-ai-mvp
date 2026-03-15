@@ -574,8 +574,8 @@ def get_daily_plan(
         total_with_phone=total_with_phone,
     )
 
-    # --- Week progress (Mon–Sun) ---
-    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    # --- Week progress (Mon–Fri) ---
+    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri"]
     week_progress: List[WeekDayProgress] = []
     for i, day_name in enumerate(day_names):
         day_start = week_start + timedelta(days=i)
@@ -614,7 +614,7 @@ def get_daily_plan(
 EMAILS_PER_DAY = 50
 INVESTORS_PER_DAY = 10
 CALLS_PER_DAY = 25
-FULL_WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+FULL_WORK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]
 
 # Week 0 (launched Mar 10 2026) starts on Tuesday since Monday was off.
 # All subsequent weeks are normal Mon-Fri.
@@ -636,7 +636,7 @@ TZ_ORDER = case(
 
 
 def _week_work_days(week_offset: int) -> list[tuple[str, date]]:
-    """Return list of (day_name, date) for ALL 7 days in the given week (Mon-Sun)."""
+    """Return list of (day_name, date) for working days in the given week (Mon-Fri)."""
     today = _today_eastern()
     days_since_monday = today.weekday()
     this_monday = today - timedelta(days=days_since_monday)
@@ -644,14 +644,14 @@ def _week_work_days(week_offset: int) -> list[tuple[str, date]]:
 
     if week_offset == 0 and target_monday <= LAUNCH_DATE:
         return [
-            (FULL_WEEK_DAYS[i], target_monday + timedelta(days=i))
-            for i in range(7)
+            (FULL_WORK_DAYS[i], target_monday + timedelta(days=i))
+            for i in range(5)
             if (target_monday + timedelta(days=i)) >= LAUNCH_DATE
         ]
 
     return [
-        (FULL_WEEK_DAYS[i], target_monday + timedelta(days=i))
-        for i in range(7)
+        (FULL_WORK_DAYS[i], target_monday + timedelta(days=i))
+        for i in range(5)
     ]
 
 
@@ -746,7 +746,7 @@ def get_weekly_plan(
     total_weeks = 1
     while days_accum < total_days_needed:
         total_weeks += 1
-        days_accum += 7
+        days_accum += 5
 
     global_day_offset = _cumulative_days_before(week_offset)
 
