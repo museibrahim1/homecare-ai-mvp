@@ -79,6 +79,12 @@ JUNK_DOMAINS = frozenset({
     "ndiscovered.com", "newyorker.com", "latofonts.com",
     # Government
     "medicare.gov", "cms.gov", "hcai.ca.gov", "calrecycle.ca.gov",
+    # Brave search artifacts & unrelated sites
+    "mlb.com", "cntraveler.com", "eyebytes.com", "company.com",
+    "vanityfair.com", "wired.com", "vogue.com", "allure.com",
+    "glamour.com", "architecturaldigest.com", "bonappetit.com",
+    "epicurious.com", "gq.com", "self.com", "teenvogue.com",
+    "pitchfork.com", "them.us", "condenast.com",
 })
 
 SKIP_HOSTS = frozenset({
@@ -123,6 +129,10 @@ def is_valid(email):
     local, domain = email.rsplit("@", 1)
     if domain in JUNK_DOMAINS:
         return False
+    # Also check subdomains (e.g. sentry.wixpress.com → wixpress.com)
+    for jd in JUNK_DOMAINS:
+        if domain.endswith("." + jd):
+            return False
     # Reject .gov emails (not the agency's own email)
     if domain.endswith(".gov"):
         return False
