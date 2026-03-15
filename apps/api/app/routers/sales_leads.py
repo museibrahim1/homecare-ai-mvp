@@ -2133,6 +2133,67 @@ async def internal_batch_enrich(
     return {"updated": updated, "not_found": not_found, "skipped_no_change": skipped, "total": len(items)}
 
 
+class BatchAddEntry(BaseModel):
+    provider_name: str
+    state: str
+    city: Optional[str] = None
+    address: Optional[str] = None
+    zip_code: Optional[str] = None
+    phone: Optional[str] = None
+    ccn: Optional[str] = None
+    ownership_type: Optional[str] = None
+
+
+@router.post("/leads/internal/batch-add")
+async def internal_batch_add(
+    request: Request,
+    items: List[BatchAddEntry],
+    db: Session = Depends(get_db),
+):
+    """Add new leads in bulk (no email required). Deduplicates by CCN.
+    For CMS data import where agencies have phones but no emails."""
+    _require_internal_key(request)
+
+    added = 0
+    skipped = 0
+
+    for item in items:
+        if item.ccn:
+            existing = db.query(SalesLead).filter(SalesLead.ccn == item.ccn).first()
+            if existing:
+                skipped += 1
+                continue
+        else:
+            existing = db.query(SalesLead).filter(
+                SalesLead.provider_name.ilike(f"%{item.provider_name}%"),
+                SalesLead.state == item.state.upper(),
+            ).first()
+            if existing:
+                skipped += 1
+                continue
+
+        lead = SalesLead(
+            provider_name=item.provider_name.strip().title(),
+            state=item.state.upper(),
+            city=(item.city or "").strip().title() or None,
+            address=(item.address or "").strip().title() or None,
+            zip_code=(item.zip_code or "").strip() or None,
+            phone=item.phone,
+            ccn=item.ccn,
+            ownership_type=(item.ownership_type or "").strip().title() or None,
+            priority="medium",
+            source="cms_provider_data",
+        )
+        db.add(lead)
+        added += 1
+
+        if added % 500 == 0:
+            db.flush()
+
+    db.commit()
+    return {"added": added, "skipped_duplicates": skipped, "total": len(items)}
+
+
 @router.post("/leads/internal/add-and-email")
 async def internal_add_lead_and_email(
     request: Request,
