@@ -8,6 +8,7 @@ import { PalmCareAd } from "./compositions/PalmCareAd";
 import { AppFlowAd } from "./compositions/AppFlowAd";
 import { ProductAd } from "./compositions/ProductAd";
 import { ReelsAd } from "./compositions/ReelsAd";
+import { ReelsAdV2 } from "./compositions/ReelsAdV2";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -213,6 +214,33 @@ export const RemotionRoot: React.FC = () => {
         id="ReelsAdWithAudio"
         component={ReelsAd}
         durationInFrames={1350}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          showAudio: true,
+        }}
+      />
+
+      {/* ===== REELS AD V2 — PRO QUALITY ===== */}
+      {/* MotionCue-style: Kling cinematic, 3D mockups, kinetic text — 37s */}
+      <Composition
+        id="ReelsAdV2"
+        component={ReelsAdV2}
+        durationInFrames={1100}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          showAudio: false,
+        }}
+      />
+
+      {/* Pro Reels with Audio */}
+      <Composition
+        id="ReelsAdV2WithAudio"
+        component={ReelsAdV2}
+        durationInFrames={1100}
         fps={30}
         width={1080}
         height={1920}
