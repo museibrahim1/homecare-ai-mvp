@@ -67,6 +67,18 @@ JUNK_DOMAINS = frozenset({
     "mailchimp.com", "constantcontact.com", "hubspot.com",
     "squarespace.com", "wix.com", "godaddy.com", "weebly.com",
     "sentry-next.wixpress.com", "placeholder.local", "noreply.com",
+    # Search engine page artifacts — NOT real agency emails
+    "startmail.com", "startpage.com", "mastodon.social",
+    "domainmarket.com", "mysite.com", "doe.com", "atom.com",
+    "brandforce.com", "telepathy.com", "community.com", "valley.com",
+    "evergreen.com", "micahrich.com", "ndiscovered.com",
+    "sentry.wixpress.com", "calrecycle.ca.gov", "hcai.ca.gov",
+    # Aggregator/directory sites (not specific agency emails)
+    "seniorcarefinder.com", "providerwire.com", "helpforcare.com",
+    "caring.com", "agingcare.com",
+    # More false positives from search engine pages/ads
+    "newyorker.com", "latofonts.com", "advanced.com",
+    "homecarefla.org", "nursa.com",
 })
 
 SKIP_HOSTS = frozenset({
@@ -107,6 +119,13 @@ def is_valid(email):
         return False
     domain = email.rsplit("@", 1)[1]
     if domain in JUNK_DOMAINS:
+        return False
+    # Reject broken/garbage domains
+    tld = domain.rsplit(".", 1)[-1] if "." in domain else ""
+    if not tld or len(tld) > 6 or not tld.isalpha():
+        return False
+    # Must have at least one dot in domain
+    if "." not in domain:
         return False
     if any(email.endswith(ext) for ext in (".png", ".jpg", ".gif", ".svg", ".css", ".js")):
         return False
@@ -226,14 +245,10 @@ def find_email(agency):
         if not html:
             continue
 
-        # Quick check: emails right in search results
-        emails = extract_emails(html)
-        if emails:
-            return ccn, sorted(emails, key=rank)[0]
-
-        # Visit top result websites
+        # ONLY extract links from search results — never emails
+        # (search pages contain junk emails like startmail.com, mastodon.social)
         urls = extract_links(html)
-        for url in urls[:2]:
+        for url in urls[:3]:
             page, final = fetch(url, timeout=7)
             if not page:
                 continue
@@ -241,11 +256,11 @@ def find_email(agency):
             if emails:
                 return ccn, sorted(emails, key=rank)[0]
 
-            # Try /contact page
+            # Try /contact and /about pages on the same domain
             if final:
                 base = re.match(r'(https?://[^/]+)', final)
                 if base:
-                    for p in CONTACT_PATHS[:2]:
+                    for p in CONTACT_PATHS:
                         cp, _ = fetch(base.group(1) + p, timeout=5)
                         if cp:
                             emails = extract_emails(cp)
