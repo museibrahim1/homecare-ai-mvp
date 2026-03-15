@@ -1,0 +1,3402 @@
+[
+  {
+    "fund_name": "Recode Ventures",
+    "contact_email": "vishal@recodeventures.com",
+    "contact_name": "Vishal Gulati",
+    "location": "San Francisco, CA / London, UK",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "World's first AI healthcare VC, investing in AI-first healthcare startups at the intersection of deep tech and medicine",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Stone Mountain Ventures",
+    "contact_email": "john@stonemountainventures.com",
+    "contact_name": "John Diaz",
+    "location": "Dallas, TX",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$300K",
+    "description": "Dallas-based micro fund specializing in early-stage healthcare and AI investments",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Dria Ventures",
+    "contact_email": "megan@driaventures.com",
+    "contact_name": "Megan Maloney",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "First-time fund ($8M Fund I) focused on healthcare and Main Street startups, ex-General Catalyst principal",
+    "priority": "high"
+  },
+  {
+    "fund_name": "SpringTide Ventures",
+    "contact_email": "brad@springtide.com",
+    "contact_name": "Brad Otto",
+    "location": "Boston, MA / Salt Lake City, UT",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Healthcare-focused early-stage VC led by repeat health-tech entrepreneurs with clinical operators embedded",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Create Health Ventures",
+    "contact_email": "emma@createhealth.vc",
+    "contact_name": "Emma Cartmell",
+    "location": "Austin, TX",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "Digital health fund ($21M Fund I) focused on B2B solutions for payers and providers, led by healthcare operators",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Healthier Capital",
+    "contact_email": "info@healthiercapital.com",
+    "contact_name": "Amir Dan Rubin",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "$220M oversubscribed health-tech fund led by former One Medical CEO with deep operator expertise",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Informed Ventures",
+    "contact_email": "info@informedventures.com",
+    "contact_name": "Richard Lim",
+    "location": "Menlo Park, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "Digital health and vertical AI fund managing $300M+, formerly GSR Ventures US operations",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Catalpa Ventures",
+    "contact_email": "info@catalpa.vc",
+    "contact_name": "Dr. Thomas Goergen",
+    "location": "Luxembourg",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$300K-$1.5M",
+    "description": "European healthtech fund targeting aging, workforce shortages, and healthcare cost containment in operations software",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "GoAhead Ventures",
+    "contact_email": "pitch@goaheadvc.com",
+    "contact_name": "Phil Brady",
+    "location": "Menlo Park, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$1.5M",
+    "description": "Silicon Valley seed fund with streamlined 4-minute video pitch process, reviewed within 6 days by all 3 partners",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Calm/Storm Ventures",
+    "contact_email": "hello@calmstorm.vc",
+    "contact_name": "Lucanus Polagnoli",
+    "location": "Vienna, Austria",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K-$300K",
+    "description": "\u20ac30M healthtech-only fund with 75+ portfolio companies across preventive care, mental health, and chronic conditions",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "GIMIC Ventures",
+    "contact_email": "startup@gameforge.com",
+    "contact_name": "Mi Le",
+    "location": "Karlsruhe, Germany",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$200K-$2M",
+    "description": "\u20ac100M fund for disruptive B2B models in Health, DeepTech, and SaaS across DACH/EU and USA",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Cascade Seed Fund",
+    "contact_email": "hello@cascadeseedfund.com",
+    "contact_name": "Julie Harrelson",
+    "location": "Bend, OR",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$300K",
+    "description": "Pacific Northwest seed fund with 60+ investments, focused on AI-driven companies solving complex problems at scale",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Pacific 8 Ventures",
+    "contact_email": "info@pac8.com",
+    "contact_name": "Ser-Chen Fu",
+    "location": "Menlo Park, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$1M",
+    "description": "Seed-stage VC at intersection of technology and medicine, including digital therapeutics and AI in healthcare",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Beantown Venture Capital",
+    "contact_email": "info@beantown.vc",
+    "contact_name": "Team",
+    "location": "Boston, MA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "New England seed fund (founded 2023) investing in technology, healthcare, energy across the region",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Magpie MedTech Ventures",
+    "contact_email": "info@magpiemedtechventures.com",
+    "contact_name": "Team",
+    "location": "New England",
+    "focus_stages": [
+      "Pre-Seed"
+    ],
+    "check_size_display": "$50K-$150K",
+    "description": "Pre-seed capital for medical device and digital health startups, partnered with New England Medical Innovation Center",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "VentureSouth",
+    "contact_email": "info@venturesouth.vc",
+    "contact_name": "Matt Dunbar",
+    "location": "Greenville, SC",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$1M",
+    "description": "Southeast US early-stage fund investing $250K-$1M in high-growth companies across the southern states",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "RollingSouth Fund",
+    "contact_email": "david@rollingsouth.vc",
+    "contact_name": "David Grisell",
+    "location": "Greenville, SC",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Southern US seed fund co-founded by physician-investor who has backed 50+ startups, launching ATDC Fund 2025",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Intersouth Partners",
+    "contact_email": "info@intersouth.com",
+    "contact_name": "Team",
+    "location": "Durham, NC",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Largest VC in North Carolina ($780M across 7 funds), invests in technology and life science companies in the Southeast",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Esplanade Ventures",
+    "contact_email": "info@esplanadeventures.com",
+    "contact_name": "Team",
+    "location": "Toronto, ON / Montreal, QC",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "Canada's leading digital health VC investing in AI-enabled healthcare solutions across North America",
+    "priority": "high"
+  },
+  {
+    "fund_name": "iGan Partners",
+    "contact_email": "info@iganpartners.com",
+    "contact_name": "Sam Ifergan",
+    "location": "Toronto, ON",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Leading Canadian healthcare VC ($100M Fund I) investing in digital health, medical devices, healthcare IT, and AI",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Panache Ventures",
+    "contact_email": "info@panache.vc",
+    "contact_name": "Patrick Lor",
+    "location": "Montreal / Toronto / Calgary / Vancouver",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K-$1.5M",
+    "description": "Canada's leading pre-seed/seed fund ($100M Fund II), portfolio companies raised $3.3B+ collectively",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "One Six 8 Ventures",
+    "contact_email": "judyanna@onesix8ventures.com",
+    "contact_name": "Judyanna",
+    "location": "Canada",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Operator-led MedTech VC fund investing in AI-MedTech and early-stage healthcare companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "SE Impact Ventures",
+    "contact_email": "hadi@seimpactventures.com",
+    "contact_name": "Hadi Salah",
+    "location": "Toronto, ON",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Impact-oriented fund focused on home-based care, care coordination, workforce training, and caregiver support",
+    "priority": "high"
+  },
+  {
+    "fund_name": "ANOVA Ventures",
+    "contact_email": "info@anovaventures.vc",
+    "contact_name": "Team",
+    "location": "Tel Aviv, Israel",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Operator-driven micro fund at the intersection of healthcare and technology in Israel",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Scaling Care",
+    "contact_email": "laurenmtaylor@scalingcare.fund",
+    "contact_name": "Lauren M Taylor",
+    "location": "United States",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$160K",
+    "description": "Health/biotech fund that turns $160K investments into $1.6M runway through non-dilutive capital unlocking",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "The Sparrow Fund",
+    "contact_email": "info@thesparrowfund.com",
+    "contact_name": "Vanessa Villaverde",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "$50M seed fund for US health tech startups focused on accessible and affordable healthcare",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Catalyst by Wellstar",
+    "contact_email": "catalyst@wellstar.org",
+    "contact_name": "Team",
+    "location": "Atlanta, GA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$150K-$2M",
+    "description": "$100M corporate VC from Georgia's largest health system, investing in healthcare AI and care innovation",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Florida Funders",
+    "contact_email": "info@floridafunders.com",
+    "contact_name": "Tom Wallace",
+    "location": "Tampa, FL",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$2M",
+    "description": "Southeast's leading venture firm with $300M+ deployed, invests in Digital Health and AI verticals",
+    "priority": "high"
+  },
+  {
+    "fund_name": "DeepWork Capital",
+    "contact_email": "inbound@deepworkcapital.com",
+    "contact_name": "Mitchel Laskey",
+    "location": "Orlando, FL",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Orlando-based early-stage VC investing in life sciences and tech in underserved US regions",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Kaiser Permanente Ventures",
+    "contact_email": "jin.zhang@kpventures.com",
+    "contact_name": "Jin Zhang",
+    "location": "Oakland, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "Corporate VC of Kaiser Permanente investing in health IT, digital health, and healthcare services innovations",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Cencora Ventures",
+    "contact_email": "info@cencora.com",
+    "contact_name": "Jason Dinger",
+    "location": "Conshohocken, PA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "$150M corporate venture fund from AmerisourceBergen investing in emerging healthcare startups",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Caduceus Capital Partners",
+    "contact_email": "info@caduceus.vc",
+    "contact_name": "Dave Vreeland",
+    "location": "Nashville, TN",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$1M",
+    "description": "Nashville-based healthcare VC with pre-seed accelerator (LAUNCH) and offices in 16+ cities",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Cannage Capital",
+    "contact_email": "shelley@cannagecap.com",
+    "contact_name": "Shelley Zhuang",
+    "location": "Las Vegas, NV",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Early-stage fund backing AI/Data and Data-Driven Health companies, invested in Hinge Health and home health deals",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Founders' Co-op",
+    "contact_email": "chris@founderscoop.com",
+    "contact_name": "Chris DeVore",
+    "location": "Seattle, WA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$1M-$1.5M",
+    "description": "Pacific Northwest's leading seed-stage fund ($50M Fund VI), first institutional check in PNW companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "SeedTwo Capital",
+    "contact_email": "roger@seedtwo.com",
+    "contact_name": "Roger Sholanki",
+    "location": "Toronto, ON",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "Vertical SaaS + AI fund between Seed and Series A, founder had $200M exit, targets $2M+ ARR companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "J2 Ventures",
+    "contact_email": "info@j2vp.com",
+    "contact_name": "Alexander Harstrick",
+    "location": "Boston, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Early-stage fund investing in biomedical engineering, advanced computing, and healthcare defense tech",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Next Ventures",
+    "contact_email": "info@nextventures.com",
+    "contact_name": "Team",
+    "location": "Austin, TX",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "Austin-based fund ($60M Fund II) focused on health, performance, fitness, and human optimization",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Ascenta Capital",
+    "contact_email": "info@ascentacap.com",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "New $325M early-stage fund focused on biotech and healthcare innovation",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "MVP Ventures",
+    "contact_email": "info@mvp.vc",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "NYC-based pre-seed/seed fund ($125M Fund II) investing in tech-enabled services and SaaS",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Evantic Capital",
+    "contact_email": "matt@evanticcapital.com",
+    "contact_name": "Matt Miller",
+    "location": "London, UK",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "\u20ac340M B2B AI fund from ex-Sequoia partner with 150+ 'Legends' network for operational support",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Crane Venture Partners",
+    "contact_email": "info@crane.vc",
+    "contact_name": "Team",
+    "location": "London, UK",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$1M-$5M",
+    "description": "B2B SaaS and developer tools seed fund with >75% seed-to-Series A graduation rate across 50+ companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Boost VC",
+    "contact_email": "apply@boost.vc",
+    "contact_name": "Adam Draper",
+    "location": "San Mateo, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K-$500K",
+    "description": "Deep tech pre-seed fund including bio/health, invests in Deepgram \u2014 $5B+ follow-on capital across portfolio",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Upfront Ventures",
+    "contact_email": "info@upfront.com",
+    "contact_name": "Christina Fattore",
+    "location": "Los Angeles, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$8M",
+    "description": "LA-based $2B+ AUM fund with dedicated healthtech thesis covering digital health, diagnostics, and care delivery",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "TQ Ventures",
+    "contact_email": "info@tqventures.com",
+    "contact_name": "Andrew Marks",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "NYC-based fund that backed Zingage (home care AI platform) and invests across software and e-commerce",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Industry Ventures",
+    "contact_email": "info@industryventures.com",
+    "contact_name": "Ira Simkhovitch",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "Led Olli Health's $10M round (home health AI), with offices in SF, DC, Boston, and London",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "4K Ventures",
+    "contact_email": "chris@4kventures.com",
+    "contact_name": "Chris Gibas",
+    "location": "Remote / EU",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K-$500K",
+    "description": "Pre-seed fund investing exclusively in solo founders building AI-native companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "100Unicorns",
+    "contact_email": "rajesh@100unicorns.in",
+    "contact_name": "Rajesh",
+    "location": "India",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Global seed fund open to cold pitches, invests $250K-$2M checks across technology sectors",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "468 Capital",
+    "contact_email": "alexander@468cap.com",
+    "contact_name": "Alexander",
+    "location": "Berlin, Germany",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$2M",
+    "description": "European early-stage fund open to cold pitches, invests in pre-seed through seed across technology sectors",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Acquired Wisdom Fund",
+    "contact_email": "mendel@awf.vc",
+    "contact_name": "Mendel",
+    "location": "United States",
+    "focus_stages": [
+      "Pre-Seed"
+    ],
+    "check_size_display": "$25K-$75K",
+    "description": "Micro pre-seed fund writing small checks, open to cold pitches from early-stage founders",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Tenity Digital Health Accelerator",
+    "contact_email": "info@tenity.com",
+    "contact_name": "Team",
+    "location": "Zurich, Switzerland",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K-$100K",
+    "description": "Digital health accelerator with zero upfront fees, access to hospitals and health insurers for proof-of-concept",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Morphosis Capital",
+    "contact_email": "info@morphosiscapital.com",
+    "contact_name": "Team",
+    "location": "Bucharest, Romania",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "\u20ac130M Fund II focused on healthcare, B2B services, and specialized manufacturing in Central/Eastern Europe",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "FIRSTPICK",
+    "contact_email": "info@firstpick.vc",
+    "contact_name": "Team",
+    "location": "Vilnius, Lithuania",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Emerging Baltic manager launching \u20ac25M fund for AI-enabled software companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Auxxo Female Catalyst Fund",
+    "contact_email": "info@auxxo.de",
+    "contact_name": "Team",
+    "location": "Berlin, Germany",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "\u20ac26M fund focused on female-led startups in consumer, SaaS, and tech sectors",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "byFounders",
+    "contact_email": "hello@byfounders.vc",
+    "contact_name": "Team",
+    "location": "Copenhagen, Denmark",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$200K-$2M",
+    "description": "\u20ac100M Nordic/Baltic tech fund backed by 100+ successful founders investing in SaaS, climate, and AI",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Credo Ventures",
+    "contact_email": "info@credoventures.com",
+    "contact_name": "Team",
+    "location": "Prague, Czech Republic",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "\u20ac75M Fund IV investing in Central European SaaS, deep tech, and AI startups",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Florent Venture Partners",
+    "contact_email": "nolan@florent.vc",
+    "contact_name": "Nolan Gray",
+    "location": "Copenhagen, Denmark",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "\u00a350M fund focused specifically on agentic AI and applied AI startups",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Origin Ventures",
+    "contact_email": "info@originventures.com",
+    "contact_name": "Team",
+    "location": "Chicago, IL",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "$140M Chicago-based fund investing in consumer software, marketplaces, and technology",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "InnovateHealth Ventures",
+    "contact_email": "info@innovatehealth.vc",
+    "contact_name": "Team",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Seed-stage B2B healthcare tech fund with 100+ hospital connections and C-suite network access",
+    "priority": "high"
+  },
+  {
+    "fund_name": "17.5 VC",
+    "contact_email": "info@17point5.vc",
+    "contact_name": "Team",
+    "location": "United States",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Healthcare 5.0 fund of funds investing in health technology innovation across multiple stages",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "BioVentures MedTech Funds",
+    "contact_email": "info@bioventuresinvestors.com",
+    "contact_name": "Team",
+    "location": "Wellesley, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "New England-based medtech investment fund focused on medical devices and digital health",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "CVS Health Ventures",
+    "contact_email": "ventures@cvshealth.com",
+    "contact_name": "Team",
+    "location": "Woonsocket, RI",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "Corporate VC (est. 2021) investing in care delivery transformation, consumer-centric health, and disruptive technology",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Optum Ventures",
+    "contact_email": "info@optumventures.com",
+    "contact_name": "Team",
+    "location": "Boston, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$1M-$15M",
+    "description": "UnitedHealth Group's $600M+ venture arm investing in healthcare innovation and technology",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Notion Capital",
+    "contact_email": "info@notion.vc",
+    "contact_name": "Team",
+    "location": "London, UK",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$5M",
+    "description": "Early-stage B2B SaaS and cloud infrastructure fund with \u00a3130M Growth Opportunities III",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Concept Ventures",
+    "contact_email": "hello@concept.vc",
+    "contact_name": "Team",
+    "location": "London, UK",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$1M",
+    "description": "$88M UK tech seed fund investing in fintech, SaaS, gaming, consumer, and AI",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "F2 Venture Capital",
+    "contact_email": "info@f2vc.com",
+    "contact_name": "Team",
+    "location": "Tel Aviv, Israel",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "$100M Israeli seed fund investing in deep tech, AI, cloud infrastructure, and cybersecurity",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Glilot Capital Partners",
+    "contact_email": "info@glilotcapital.com",
+    "contact_name": "Team",
+    "location": "Tel Aviv, Israel",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "$500M fund investing in cybersecurity, enterprise software, data/AI infrastructure at seed stage",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Creator Fund",
+    "contact_email": "hello@thecreatorfund.com",
+    "contact_name": "Team",
+    "location": "London, UK",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "\u00a335M+ fund focused on deep tech, biotech, AI, and engineering startups from UK universities",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Eagle Venture Fund",
+    "contact_email": "info@eagleventurefund.com",
+    "contact_name": "Team",
+    "location": "Midland, TX",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "$50M Texas-based early-stage fund investing in patriotic tech, defense tech, and American manufacturing",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Arkitekt Ventures",
+    "contact_email": "info@arkitektventures.com",
+    "contact_name": "Team",
+    "location": "United States",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Backed Olli Health's home health AI platform alongside Equitage Ventures, active in healthcare AI",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Alt Capital",
+    "contact_email": "info@altcap.com",
+    "contact_name": "Jack Altman",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "~$275M fund from former Lattice CEO investing in future of work, SaaS, and AI companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Armilar Venture Partners",
+    "contact_email": "info@armilar.com",
+    "contact_name": "Team",
+    "location": "Lisbon, Portugal",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "\u20ac120M European deep tech fund investing in enterprise software, IoT, and cybersecurity",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Balnord",
+    "contact_email": "info@balnord.vc",
+    "contact_name": "Team",
+    "location": "Luxembourg",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "\u20ac70M Luxembourg-based early-stage technology fund",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Italian Founders Fund",
+    "contact_email": "info@italianfoundersfund.com",
+    "contact_name": "Team",
+    "location": "Milan, Italy",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$200K-$2M",
+    "description": "\u20ac90M fund investing in Italian tech ecosystem including SaaS, consumer, and marketplaces",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "The Healthcare Syndicate",
+    "contact_email": "wendell@thehealthcaresyndicate.com",
+    "contact_name": "Wendell Su",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$100K",
+    "description": "AngelList syndicate with 350+ investors focused on early-stage healthcare companies, 1-3 deals per quarter",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Intelligence Ventures",
+    "contact_email": "doug@intelligenceventures.com",
+    "contact_name": "Doug Nissinoff",
+    "location": "Fort Myers, FL",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "VC fund investing at the intersection of healthcare and AI, 300+ startups in pipeline",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "AI Innovators Syndicate",
+    "contact_email": "rob@halfcourtventures.com",
+    "contact_name": "Rob May",
+    "location": "United States",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K-$100K",
+    "description": "Angel syndicate reviewing 1000+ AI deals yearly, 15-25 investments per year, typical $97.9K check",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Sherwani Capital",
+    "contact_email": "yusuf@sherwani.capital",
+    "contact_name": "Yusuf Sherwani",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$100K",
+    "description": "AngelList syndicate with ~50% digital health, ~20% SaaS/AI focus, 5 deals per year",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Esther Dyson / EDventure Holdings",
+    "contact_email": "edyson@edventure.com",
+    "contact_name": "Esther Dyson",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$25K-$100K",
+    "description": "Prolific healthcare angel with 23+ investments including Abridge.ai, Omada Health, Hinge Health",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Springboard Health Angels",
+    "contact_email": "hello@springboardangels.com",
+    "contact_name": "Dr. Yoni Goldwasser",
+    "location": "Berlin, Germany (invests US/EU/Israel)",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$15K-$100K",
+    "description": "Healthcare angel group with 400+ years combined health/tech experience, founded 2022",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Angels4Health",
+    "contact_email": "info@angels4health.com",
+    "contact_name": "Caroline Amblard-Sai",
+    "location": "Europe (invests globally)",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$200K",
+    "description": "Network of 30+ seasoned angels in life science/healthcare including digital health and AI",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Mass Medical Angels",
+    "contact_email": "info@massmedangels.com",
+    "contact_name": "Membership Team",
+    "location": "Boston, MA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$3M",
+    "description": "Seed-stage life science and healthcare exclusive angel group, health IT and services focus",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "New York Angels",
+    "contact_email": "info@newyorkangels.com",
+    "contact_name": "Membership Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$1.5M",
+    "description": "125+ active members, $167M invested in 330+ companies, includes medical professionals",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Band of Angels",
+    "contact_email": "BandHQ@bandangels.com",
+    "contact_name": "Membership Team",
+    "location": "Silicon Valley, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Premier Silicon Valley angel group, seed stage high technology and life science companies",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Life Science Angels",
+    "contact_email": "info@lifescienceangels.com",
+    "contact_name": "Membership Team",
+    "location": "Sunnyvale, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$500K",
+    "description": "Dedicated life science investment group with MD/PhD fellowship program",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Robin Hood Ventures",
+    "contact_email": "info@robinhoodventures.com",
+    "contact_name": "Membership Team",
+    "location": "Philadelphia, PA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Philadelphia angel group with dedicated Life Science office hours every Thursday",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Tech Coast Angels / NuFund Venture Group",
+    "contact_email": "ashok@nufund.com",
+    "contact_name": "Ashok Kamal",
+    "location": "San Diego, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$300K-$1M",
+    "description": "300+ active investors, $10M+ annual investment in healthcare, biotech, digital health",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Alliance of Angels",
+    "contact_email": "updates@allianceofangels.com",
+    "contact_name": "Membership Team",
+    "location": "Seattle, WA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Largest PNW angel group, 180+ members, $10M+ annual investment in tech and life sciences",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "NW Angel Fund",
+    "contact_email": "nathan@nwangel.com",
+    "contact_name": "Nathan",
+    "location": "Seattle, WA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "Pacific Northwest angel fund connecting investors with innovative early-stage companies",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Central Texas Angel Network (CTAN)",
+    "contact_email": "info@ctan.com",
+    "contact_name": "Membership Team",
+    "location": "Austin, TX",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "140 accredited investors, $142.4M invested in 233 companies, 4.2x return on cash",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Houston Angel Network",
+    "contact_email": "info@houstonangelnetwork.org",
+    "contact_name": "Samia Ahsan",
+    "location": "Houston, TX",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Oldest angel network in Texas, 100+ members, $100M+ invested in 400+ deals, Life Science Committee",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Desert Angels",
+    "contact_email": "info@desertangels.org",
+    "contact_name": "Membership Team",
+    "location": "Tucson, AZ",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "#1 SW angel group, $65M invested in 165+ companies, MedTech and biotech focus",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Canyon Angels",
+    "contact_email": "tim.kelley@gcu.edu",
+    "contact_name": "Tim Kelley",
+    "location": "Phoenix, AZ",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$200K",
+    "description": "40+ investors, $7.5M+ invested in 70+ companies, powered by GCU",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Rockies Venture Club",
+    "contact_email": "info@rockiesventureclub.org",
+    "contact_name": "Membership Team",
+    "location": "Denver, CO",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$200K-$500K",
+    "description": "Denver angel network investing in cleantech, life science/healthcare, and technology",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Charlotte Angel Fund",
+    "contact_email": "gbrown@cltangelfund.com",
+    "contact_name": "Greg Brown",
+    "location": "Charlotte, NC",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "NC's most active angel group, largest capital source for early-stage startups in Charlotte region",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Carolina Angel Network",
+    "contact_email": "info@carolinaangelnetwork.com",
+    "contact_name": "Membership Team",
+    "location": "Chapel Hill, NC",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$300K",
+    "description": "UNC alumni angel network curating 4-6 early-stage investments per year via SPVs",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Atlanta Technology Angels",
+    "contact_email": "info@angelatlanta.com",
+    "contact_name": "Membership Team",
+    "location": "Atlanta, GA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$300K",
+    "description": "Southeast-focused angel group, 6-8 deals/year, ACA member, technology-oriented startups",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Cane Angel Network (University of Miami)",
+    "contact_email": "caneangelinfo@miami.edu",
+    "contact_name": "Membership Team",
+    "location": "Miami, FL",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "UM-affiliated angel network, accredited investors connected to University of Miami",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Tamiami Angel Funds",
+    "contact_email": "info@tamiamiangels.com",
+    "contact_name": "Heather Matjasic",
+    "location": "Naples, FL",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K-$300K",
+    "description": "Florida angel network with 90+ partner companies, medtech and software focus",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "MEDA Angels",
+    "contact_email": "info@medaangels.com",
+    "contact_name": "Membership Team",
+    "location": "Washington, DC",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$130K-$350K",
+    "description": "Physician and scientist-founded healthcare investor group, digital health/SaaS/AI focus",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Mid Atlantic Bio Angels (MABA)",
+    "contact_email": "admin@bioangels.net",
+    "contact_name": "Membership Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$1M",
+    "description": "Life science angel group investing in therapeutics, devices, diagnostics, and digital health",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "1891 Angels (Johns Hopkins)",
+    "contact_email": "jeff@1891angels.com",
+    "contact_name": "Jeff Spitz",
+    "location": "Baltimore, MD",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Hopkins alumni angel network, 200+ investors, 6+ deals annually, all industries",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "BlueTree Allied Angels",
+    "contact_email": "info@bluetreecapital.com",
+    "contact_name": "Membership Team",
+    "location": "Pittsburgh, PA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Pittsburgh angel network for life sciences, IT, and hardware companies, 8-10 deals/year",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "VisionTech Partners / VisionTech Angels",
+    "contact_email": "bpidgeon@visiontech-partners.com",
+    "contact_name": "Ben Pidgeon",
+    "location": "Indianapolis, IN",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$300K",
+    "description": "130 angel investors across Indiana and Ohio, 60+ portfolio companies, life science and tech",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Cirque Ventures",
+    "contact_email": "inquiries@cirqueventures.com",
+    "contact_name": "Membership Team",
+    "location": "Salt Lake City, UT",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "SLC venture firm investing in seed-stage life sciences and technology companies",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Intermountain Ventures",
+    "contact_email": "dustin@intermountainventures.com",
+    "contact_name": "Dustin Cook",
+    "location": "Salt Lake City, UT",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Intermountain Healthcare investment arm, 44 investments, partners with early-stage healthcare companies",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Oregon Angel Fund",
+    "contact_email": "julieb@oen.org",
+    "contact_name": "Julie Brown",
+    "location": "Portland, OR",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$850K",
+    "description": "Most active Portland angel fund, $5M annual fund, 4-7 investments per year",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Golden Seeds",
+    "contact_email": "info@goldenseeds.com",
+    "contact_name": "Loretta McCarthy",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Largest US angel network for women-led companies, $170M+ invested, healthcare is top sector",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Howard L. Morgan (B Capital / First Round)",
+    "contact_email": "howard@firstround.com",
+    "contact_name": "Howard L. Morgan",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Angel investor focused on health care, AI, elder care, home care, and mHealth",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Ernest H. Pomerantz (Stonewater Capital)",
+    "contact_email": "epomerantz@stonewatercapital.com",
+    "contact_name": "Ernest H. Pomerantz",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "Angel investor in elder care, home care, assistive technology, invested in Avanlee Care",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Alfonso Zubizarreta",
+    "contact_email": "azubizarreta@gmail.com",
+    "contact_name": "Alfonso Zubizarreta",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$100K",
+    "description": "Angel investor focused on elder care, home care, nursing homes, invested in MoviCare",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Elliot Menschik",
+    "contact_email": "emenschik@gmail.com",
+    "contact_name": "Elliot Menschik",
+    "location": "Philadelphia, PA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$100K",
+    "description": "Philly angel investor in health IT, digital health, life science, invested in Redox and emocha",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Dr. Pitou Devgon (Penn Health-Tech)",
+    "contact_email": "pitou@pennmedicine.upenn.edu",
+    "contact_name": "Dr. Pitou Devgon",
+    "location": "Philadelphia, PA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$100K",
+    "description": "Physician angel investor, co-founded Velano Vascular (acquired by BD), early-stage healthcare",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Jesse Courtier, MD",
+    "contact_email": "jesse@courtierinvesting.com",
+    "contact_name": "Jesse Courtier",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$300K",
+    "description": "Physician angel investing in medical device and digital health, 15 years clinical background",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Keith Winter (Teal Ventures / Tech Coast Angels)",
+    "contact_email": "keith@tealventures.com",
+    "contact_name": "Keith Winter",
+    "location": "San Diego, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$100K",
+    "description": "15+ years AI/ML expertise, specializes in AI and software for healthcare",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Bruce Bower",
+    "contact_email": "bruce@brucebower.co",
+    "contact_name": "Bruce Bower",
+    "location": "London, UK (invests globally)",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$10K-$100K",
+    "description": "B2B SaaS and healthcare combined focus, targets <$10M valuation, <$2M rounds",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Vishal Gulati / Cambridge Angels",
+    "contact_email": "vishal@healthtech.vc",
+    "contact_name": "Vishal Gulati",
+    "location": "Cambridge, UK (invests globally)",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "Healthcare tech angel and venture leader, AI-applied drug discovery and healthcare",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Jason Lemkin / SaaStr Fund",
+    "contact_email": "jason@saastr.com",
+    "contact_name": "Jason Lemkin",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Premier SaaS angel, EchoSign founder, requires $10K+ MRR, reads all cold emails",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Christoph Janz / Point Nine Capital",
+    "contact_email": "christoph@pointnine.com",
+    "contact_name": "Christoph Janz",
+    "location": "Berlin, Germany (invests globally)",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "SaaS metrics expert, B2B SaaS focused angel investor, Point Nine Capital founder",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Edward Lando / Pareto Holdings",
+    "contact_email": "edward@paretoholdings.com",
+    "contact_name": "Edward Lando",
+    "location": "Miami, FL",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K-$500K",
+    "description": "39 healthcare investments, manages early-stage fund, DMs open on Twitter",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "K2 Health Ventures",
+    "contact_email": "contact@k2hv.com",
+    "contact_name": "Investment Team",
+    "location": "Boston/New York",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Healthcare-focused venture firm with offices in Boston and NYC",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Medicus Ventures",
+    "contact_email": "info@medicusventures.com",
+    "contact_name": "Investment Team",
+    "location": "Tampa, FL",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$25K-$200K",
+    "description": "Healthcare, e-commerce, and SaaS angel investor group of founders, since 2013",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "MF7 Ventures",
+    "contact_email": "info@mf7ventures.com",
+    "contact_name": "Investment Team",
+    "location": "Miami, FL",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "Miami healthcare VC since 2014, prescription digital therapeutics and early disease detection",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Apis Health Angels (WTIA)",
+    "contact_email": "info@washingtontechnology.org",
+    "contact_name": "Membership Team",
+    "location": "Seattle, WA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "Seattle health sector angel network with accelerator programs for early-stage healthcare",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "RTP Angel Fund",
+    "contact_email": "info@rtpangelfund.com",
+    "contact_name": "Investment Team",
+    "location": "Research Triangle, NC",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K-$300K",
+    "description": "Early-stage ventures in NC and Southeast, focus on Research Triangle Park region",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Dingman Center Angels (Univ. of Maryland)",
+    "contact_email": "dca@rhsmith.umd.edu",
+    "contact_name": "Investment Team",
+    "location": "College Park, MD",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$250K",
+    "description": "Maryland-based angel group serving mid-Atlantic, seed/early-stage with demonstrated traction",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "The Physician Syndicate",
+    "contact_email": "info@thephysiciansyndicate.com",
+    "contact_name": "Dr. Gregory Hanson",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$200K",
+    "description": "Physician-only angel community on AngelList, pooled capital for early-stage healthcare startups",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Angel Physicians Fund",
+    "contact_email": "info@angelphysiciansfund.com",
+    "contact_name": "Clay Willmott",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$5K-$50K",
+    "description": "Physician investor network investing in medical devices, health IT, digital health",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Healthcare Angels (SF/Silicon Valley)",
+    "contact_email": "info@healthcareangels.com",
+    "contact_name": "Investment Team",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$300K",
+    "description": "SF/SV based, curates healthcare investment opportunities with global syndicate partners",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Jumpstart Nova",
+    "contact_email": "info@jumpstartnova.com",
+    "contact_name": "Marcus Whitney",
+    "location": "Nashville, TN",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "First Black-led healthcare VC, invests in 30-50 healthcare tech companies annually",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Gold Coast Angel Investors",
+    "contact_email": "info@goldcoastangels.vc",
+    "contact_name": "Investment Team",
+    "location": "Miami, FL",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$300K",
+    "description": "Miami early-stage investment group, monthly review meetings, $1-2M revenue sweet spot",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "SLC Angels",
+    "contact_email": "info@slcangels.com",
+    "contact_name": "Membership Team",
+    "location": "Salt Lake City, UT",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "35 accredited investors, healthcare services and medical devices among preferred industries",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "xCap Angels",
+    "contact_email": "info@xcapangels.com",
+    "contact_name": "Membership Team",
+    "location": "Indianapolis, IN",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "Seed and early-stage investment group investing across North America",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Half Court Ventures (Rob May & Todd Earwood)",
+    "contact_email": "hello@halfcourtventures.com",
+    "contact_name": "Todd Earwood",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$200K",
+    "description": "Seed fund with 45+ investments, 85% AI/ML focus, digital health in portfolio",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Matt Abrams / Atypical Ventures",
+    "contact_email": "matt@atypicalventures.com",
+    "contact_name": "Matt Abrams",
+    "location": "Bend, OR",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$1.5M",
+    "description": "30+ years in enterprise data, AI/ML, and healthcare, seed to Series A digital health",
+    "priority": "high",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Echo Health Ventures",
+    "contact_email": "info@echohealthventures.com",
+    "contact_name": "Dusty Lieb",
+    "location": "Portland/Spokane",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Healthcare IT and services investment firm, Managing Partner and Head of Investments",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Dr. Frederick J. Duffy Jr.",
+    "contact_email": "fduffy@drfredduffy.com",
+    "contact_name": "Frederick Duffy",
+    "location": "Dallas, TX",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$200K",
+    "description": "Dallas physician angel investing in pharma, medical devices, and digital health",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Samuel Whitaker / Project Mayhem Ventures",
+    "contact_email": "sam@muralhealth.com",
+    "contact_name": "Samuel Whitaker",
+    "location": "Philadelphia, PA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$100K",
+    "description": "Philly angel, co-founder of Mural Health (clinical trials), seed-stage companies",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "2048 Ventures",
+    "contact_email": "pitch@2048.vc",
+    "contact_name": "Investment Team",
+    "location": "New York/Boston",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K-$3M",
+    "description": "Pre-Seed Fast Track in 10 days, Vertical AI and Health focus, no warm intro required",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Abraham Thomas Syndicate",
+    "contact_email": "at@abrahamthomas.info",
+    "contact_name": "Abraham Thomas",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$132K",
+    "description": "B2B SaaS and AI-Data focus, 27 LPs, 2-meeting process, welcomes cold email",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "UpStart Ventures",
+    "contact_email": "info@upstartventures.com",
+    "contact_name": "Investment Team",
+    "location": "Salt Lake City, UT",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "SLC firm investing in breakthrough healthcare technology from research universities since 2009",
+    "priority": "medium",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Greg Bines (Digital Health Angel)",
+    "contact_email": "greg@gregbines.com",
+    "contact_name": "Greg Bines",
+    "location": "Indianapolis, IN",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$10K-$50K",
+    "description": "Digital health angel investor investing in pre-seed to pre-Series A healthcare companies",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Jamie Beckland",
+    "contact_email": "jamie@jamiebeckland.com",
+    "contact_name": "Jamie Beckland",
+    "location": "Portland, OR",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$10K-$50K",
+    "description": "Angel investor in healthcare and enterprise software, portfolio includes Validic",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Angel Capital Group (ACG)",
+    "contact_email": "info@angelcapitalgroup.com",
+    "contact_name": "Investment Team",
+    "location": "Maryville, TN (Nashville region)",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "195 active angels, 8-11 deals/year, Nashville HealthIT microfund, two seed round approach",
+    "priority": "high",
+    "investor_type": "syndicate"
+  },
+  {
+    "fund_name": "Daniel Michel",
+    "contact_email": "daniel@danielmichel.com",
+    "contact_name": "Daniel Michel",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$25K-$100K",
+    "description": "Angel investor focused on healthcare AI and machine learning applications",
+    "priority": "medium",
+    "investor_type": "angel"
+  },
+  {
+    "fund_name": "Blue Venture Fund (BCBS + Sandbox Industries)",
+    "contact_email": "emir@blueventurefund.com",
+    "contact_name": "Dr. Emir Sandhu, Managing Director",
+    "location": "Chicago, IL",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M-$20M",
+    "description": "Collaborative fund of 32 Blue Cross Blue Shield plans investing in healthcare tech, services, and clinical sciences \u2014 115M lives covered",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Blue Venture Fund (Sandbox Industries - General)",
+    "contact_email": "info@sandboxindustries.com",
+    "contact_name": "Sandbox Industries Team",
+    "location": "Chicago, IL",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M-$20M",
+    "description": "Investment management firm behind Blue Venture Funds with $900M+ committed from 35 BCBS companies",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Highmark Ventures",
+    "contact_email": "HMVentures@HighmarkHealth.org",
+    "contact_name": "Matt Feczko, Managing Partner",
+    "location": "Pittsburgh, PA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Highmark Health's CVC arm investing in 20+ innovative healthcare companies across social determinants, behavioral health, and value-based care",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Cigna Ventures (The Cigna Group)",
+    "contact_email": "info@cignaventures.com",
+    "contact_name": "Cigna Ventures Team",
+    "location": "Bloomfield, CT",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$1M-$20M",
+    "description": "The Cigna Group's VC platform investing in healthcare startups broadening access to care for 170M+ customers globally",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Humana Ventures",
+    "contact_email": "thomas.liston@humana.com",
+    "contact_name": "Thomas J. Liston, Partner",
+    "location": "Louisville, KY",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$1M-$15M",
+    "description": "Humana's venture arm with 14 investments; focuses on healthcare technology and value-based care innovation",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "MultiCare Capital Partners",
+    "contact_email": "info@multicarecapitalpartners.org",
+    "contact_name": "Jason Parks, Managing Director",
+    "location": "Seattle, WA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$750K-$4M",
+    "description": "MultiCare Health System's innovation arm investing in seed/early-stage healthcare tech companies with $100K+ ARR",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Providence Ventures",
+    "contact_email": "info@providenceventures.org",
+    "contact_name": "Aaron Martin, Managing General Partner",
+    "location": "Seattle, WA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$5M-$15M",
+    "description": "$300M fund across two funds from Providence Saint Joseph Health \u2014 one of the largest US health system venture arms",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "UPMC Enterprises",
+    "contact_email": "enterprises@upmc.edu",
+    "contact_name": "Jeanne Cunicelli, President",
+    "location": "Pittsburgh, PA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$1M-$50M",
+    "description": "UPMC's innovation and commercialization arm; $800M committed for translational sciences and digital health investments",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "OSF Ventures",
+    "contact_email": "ventures@osfhealthcare.org",
+    "contact_name": "Mayank Taneja, VP Venture Investments",
+    "location": "Peoria, IL",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "OSF HealthCare's CVC with $250M across 3 funds; 40 investments, 11 exits \u2014 invests in healthcare IT, diagnostics, devices",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Mass General Brigham Ventures",
+    "contact_email": "mgbv@partners.org",
+    "contact_name": "MGB Ventures Team",
+    "location": "Somerville, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K-$5M",
+    "description": "Early-stage VC investing in life science/healthtech ventures from Mass General Brigham \u2014 one of the largest US medical research enterprises",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Cleveland Clinic Innovations",
+    "contact_email": "innovations@ccf.org",
+    "contact_name": "Cleveland Clinic Innovations Team",
+    "location": "Cleveland, OH",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K-$5M",
+    "description": "53 spin-off companies, $644M in equity financing, 2400+ patents \u2014 invests in healthcare IT, devices, diagnostics",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Northwell Ventures",
+    "contact_email": "ventures@northwell.edu",
+    "contact_name": "Richard Mulry, President & CEO",
+    "location": "New Hyde Park, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$500K-$10M",
+    "description": "Northwell Health's CVC investing in clinical/non-clinical joint ventures, direct equity, and new company creation",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "CommonSpirit Ventures",
+    "contact_email": "ventures@commonspirit.org",
+    "contact_name": "Rich Roth, SVP & Chief Strategic Innovation Officer",
+    "location": "Chicago, IL",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Investment arm of CommonSpirit Health (140+ hospitals) funding novel services, programs, and technologies in healthcare",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Geisinger Steele Institute for Health Innovation",
+    "contact_email": "steeleinnovation@geisinger.edu",
+    "contact_name": "Steele Institute Team",
+    "location": "Danville, PA",
+    "focus_stages": [
+      "Seed",
+      "Pilot"
+    ],
+    "check_size_display": "$100K-$2M",
+    "description": "Geisinger Health's innovation hub seeking healthcare tech collaborations \u2014 strong focus on care delivery transformation",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "McKesson Ventures",
+    "contact_email": "steve.darrow@mckessonventures.com",
+    "contact_name": "Steve Darrow, CEO",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$1M-$15M",
+    "description": "McKesson Corporation's CVC arm investing in healthcare technology and distribution innovation",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Flare Capital Partners",
+    "contact_email": "flare@flarecapital.com",
+    "contact_name": "Flare Capital Team",
+    "location": "Boston, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$1M-$15M",
+    "description": "One of the largest dedicated healthcare tech VCs with ~$1B AUM; 70+ investments including Bright Health, Iora Health",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Right at Home Ventures",
+    "contact_email": "ventures@rightathome.net",
+    "contact_name": "Bailey Paxton, Director of Venture Investment",
+    "location": "Omaha, NE",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "$5M seed-stage CVC from Right at Home (600+ home care franchises) \u2014 invests in AgeTech, B2B SaaS, operational software",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Philips Ventures",
+    "contact_email": "ventures@philips.com",
+    "contact_name": "Philips Ventures Team",
+    "location": "Eindhoven, Netherlands / Cambridge, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$2M-$5M",
+    "description": "Philips' early-stage innovation arm investing in digital health software, analytics, and tech-enabled services \u2014 10+ direct investments",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Novartis Venture Fund",
+    "contact_email": "info@nvfund.com",
+    "contact_name": "Novartis Venture Fund Team",
+    "location": "Basel, Switzerland / Cambridge, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$30M",
+    "description": "$750M+ fund investing in innovative life science and healthcare companies \u2014 258 total investments, 71 exits",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Bayer G4A Digital Health Accelerator",
+    "contact_email": "g4a@bayer.com",
+    "contact_name": "G4A Team",
+    "location": "Berlin, Germany / Global",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$2M",
+    "description": "Bayer's digital health accelerator with Growth and Advance tracks for early-stage startups seeking investment and commercial partnerships",
+    "priority": "medium",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "Rock Health Capital",
+    "contact_email": "hello@rockhealth.org",
+    "contact_name": "Bill Evans, Founder & GP",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "Leading digital health VC \u2014 leads Seed and Series A rounds in health tech, AI, and consumer health startups",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Define Ventures",
+    "contact_email": "info@definevc.com",
+    "contact_name": "Lynne Chou O'Keeffe, Founder & Managing Partner",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$15M",
+    "description": "$800M AUM healthcare-focused VC; backed Hims & Hers (NYSE), Unite Us, Cohere Health \u2014 reimagining healthcare through innovation",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Tau Ventures",
+    "contact_email": "info@tauventures.com",
+    "contact_name": "Amit Garg, Co-Founder & Managing Partner",
+    "location": "Palo Alto, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$500K",
+    "description": "AI-first early-stage fund with $20M+ AUM investing in healthcare, enterprise, and automation at seed stage",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "SteelSky Ventures",
+    "contact_email": "info@steelskyventures.com",
+    "contact_name": "Maria Toler, Founding & Managing Partner",
+    "location": "Atlanta, GA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$5M",
+    "description": "AI-powered healthcare tech fund with $73M AUM; 15+ portfolio companies \u2014 focus on women's health, digital health, medical devices",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Windham Venture Partners",
+    "contact_email": "info@windhamventures.com",
+    "contact_name": "Adam Fine, Co-Founder & CEO",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Healthcare-focused VC specializing in medical technology and digital health seed/startup investments since 2006",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Heal Ventures",
+    "contact_email": "pitch@heal.vc",
+    "contact_name": "Sahil Arora, Partner",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "Doctor-led seed fund (100+ years combined clinical experience) investing in healthcare, healthtech, and biotech at ideation/seed stage",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "CU Healthcare Innovation Fund",
+    "contact_email": "cuinnovations@cuanschutz.edu",
+    "contact_name": "CU Innovations Team",
+    "location": "Aurora, CO",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "$100M AUM strategic healthcare fund affiliated with CU Anschutz; invests in top 1% of pipeline companies across healthcare IT and services",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "UCM Ventures (University of Chicago Medicine)",
+    "contact_email": "ventures@uchicagomedicine.org",
+    "contact_name": "UCM Ventures Team",
+    "location": "Chicago, IL",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "UChicago Medicine investment program for growth-stage healthcare companies \u2014 up to $2M total support including follow-on",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Healthcare Innovation Venture Fund (Hatteras)",
+    "contact_email": "info@hatterasvp.com",
+    "contact_name": "Hatteras Venture Partners Team",
+    "location": "Durham, NC",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Collaborative partnership between Hatteras Venture Partners and 6-8 community health systems investing in 15-20 early-stage healthcare companies",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "BRIIA Healthcare AI Accelerator",
+    "contact_email": "info@briia.io",
+    "contact_name": "Les Schmidt, Program Director",
+    "location": "Tri-Valley, CA (Silicon Valley)",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$50K-$250K",
+    "description": "Cohort-based accelerator for AI-powered healthcare solutions \u2014 moves companies from MVP to minimum viable repeatability",
+    "priority": "high",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "Mayo Clinic & ASU Health Care Accelerator",
+    "contact_email": "info@healthcareaccel.com",
+    "contact_name": "Health Care Accelerator Team",
+    "location": "Phoenix, AZ",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "No direct investment",
+    "description": "Joint Mayo Clinic & ASU program for early-to-mid stage digital health/healthcare IT companies with $500K+ raised",
+    "priority": "high",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "Mayo Clinic Platform_Accelerate",
+    "contact_email": "accelerate@mayo.edu",
+    "contact_name": "Mayo Clinic Platform Team",
+    "location": "Rochester, MN",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "No direct investment",
+    "description": "30-week accelerator with access to de-identified clinical data; 51 graduates, $500M+ raised by alumni, 99% portfolio viability",
+    "priority": "high",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "Cedars-Sinai Accelerator (powered by Techstars)",
+    "contact_email": "info@csaccelerator.com",
+    "contact_name": "CS Accelerator Team",
+    "location": "Los Angeles, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$120K (Techstars standard)",
+    "description": "13-week healthcare accelerator embedded in Cedars-Sinai; 10-12 startups per cohort; access to 300+ clinicians and executives",
+    "priority": "high",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "Techstars Healthcare Accelerator (Permanente Medicine)",
+    "contact_email": "healthcare@techstars.com",
+    "contact_name": "Techstars Healthcare Team",
+    "location": "Washington, DC",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$220K",
+    "description": "Techstars healthcare program focused on value-based care; $220K per company; apps open March 2026, program starts Sept 2026",
+    "priority": "high",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "Health Incubator Helsinki",
+    "contact_email": "christian.lardot@hel.fi",
+    "contact_name": "Christian Lardot, Incubator Leader",
+    "location": "Helsinki, Finland",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$0 (equity-free)",
+    "description": "Up to 3 years of equity-free support; office space at Terkko Health Hub; biannual demo days and investor presentations",
+    "priority": "medium",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "Springboard Enterprises Healthcare Accelerator",
+    "contact_email": "info@sb.co",
+    "contact_name": "Springboard Enterprises Team",
+    "location": "Washington, DC / National",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "Network-facilitated",
+    "description": "Healthcare & Technology accelerator for women entrepreneurs; also runs Women's Health Innovation Program",
+    "priority": "medium",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "AVIA Health Innovation",
+    "contact_email": "contact@aviahealthinnovation.com",
+    "contact_name": "AVIA Team",
+    "location": "Chicago, IL",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "Strategic partnerships",
+    "description": "Health system accelerator helping providers implement digital health products; backed by 7wire Ventures, Jump Capital, OSF Healthcare",
+    "priority": "medium",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "StartX (Stanford Healthcare Accelerator)",
+    "contact_email": "marketing@startx.com",
+    "contact_name": "StartX Team",
+    "location": "Stanford, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "Stanford $200M fund support",
+    "description": "Stanford-affiliated accelerator with $7M+ in grants; Stanford Healthcare deployed $200M \u2014 requires Stanford affiliation",
+    "priority": "medium",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "NIH SBIR/STTR Program (Healthcare AI)",
+    "contact_email": "stephanie.fertig@nih.gov",
+    "contact_name": "Stephanie Fertig, HHS Small Business Program Lead",
+    "location": "Bethesda, MD",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$314K (Phase I) / $2M (Phase II)",
+    "description": "Federal grant program for healthcare AI \u2014 Phase I $314K, Phase II $2M, Commercialization Readiness up to $4.2M (awaiting reauthorization)",
+    "priority": "high",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "ARPA-H (Advanced Research Projects Agency for Health)",
+    "contact_email": "info@arpa-h.gov",
+    "contact_name": "ARPA-H Program Office",
+    "location": "Washington, DC",
+    "focus_stages": [
+      "Seed",
+      "R&D"
+    ],
+    "check_size_display": "$500K-$10M+",
+    "description": "$1.5B federal agency funding breakthrough health technologies; SBIR/STTR and mission-specific programs available",
+    "priority": "medium",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "NIMH SBIR/STTR (Mental Health AI)",
+    "contact_email": "mgrabb@mail.nih.gov",
+    "contact_name": "Margaret C. Grabb, SBIR/STTR Program Coordinator",
+    "location": "Bethesda, MD",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$314K-$2M",
+    "description": "NIH National Institute of Mental Health small business grants for mental health AI and behavioral health technology",
+    "priority": "medium",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "NIDA SBIR/STTR (Healthcare Technology)",
+    "contact_email": "NIDASBIR@mail.nih.gov",
+    "contact_name": "NIDA SBIR Team",
+    "location": "Bethesda, MD",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$314K-$2M",
+    "description": "National Institute on Drug Abuse small business innovation research grants for healthcare technology",
+    "priority": "low",
+    "investor_type": "accelerator"
+  },
+  {
+    "fund_name": "Crista Galli Ventures",
+    "contact_email": "info@cristagalli.com",
+    "contact_name": "Dr. Fiona Pathiraja, Founder & Managing Partner",
+    "location": "London, UK",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$2M",
+    "description": "Physician-led family office investing in TechBio, DeepTech Healthcare, and Digital Health \u2014 scientific rigor approach",
+    "priority": "medium",
+    "investor_type": "family_office"
+  },
+  {
+    "fund_name": "M4Capital / YZR Capital",
+    "contact_email": "info@m4capital.de",
+    "contact_name": "Reinhard Meier, MD MBA, Founder & Managing Partner",
+    "location": "Munich, Germany",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K-$5M",
+    "description": "Munich family office with dedicated HealthTech VC (YZR Capital) investing in digital health, AI diagnostics, virtual care across Europe",
+    "priority": "medium",
+    "investor_type": "family_office"
+  },
+  {
+    "fund_name": "Cedar Holdings",
+    "contact_email": "info@cedarhold.com",
+    "contact_name": "Cedar Holdings Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M-$25M",
+    "description": "Institutional-quality family office with $750M+ AUM specializing in Healthcare and Technology investments across lifecycle stages",
+    "priority": "high",
+    "investor_type": "family_office"
+  },
+  {
+    "fund_name": "MFO Ventures",
+    "contact_email": "info@mfoventures.com",
+    "contact_name": "MFO Ventures Team",
+    "location": "Delray Beach, FL",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$10M",
+    "description": "Single-family office investing in early-stage and middle-market healthcare services and technology companies since 2022",
+    "priority": "high",
+    "investor_type": "family_office"
+  },
+  {
+    "fund_name": "SeedtoB Capital",
+    "contact_email": "info@seedtob.com",
+    "contact_name": "SeedtoB Capital Team",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$500K-$1.5M",
+    "description": "Invests in early-stage healthcare tech with $500K+ ARR or clear path to it; seeks US-based companies with product-market fit using AI",
+    "priority": "high",
+    "investor_type": "family_office"
+  },
+  {
+    "fund_name": "Magnify Ventures",
+    "contact_email": "joanna@magnify.vc",
+    "contact_name": "Joanna Drake, Co-Founder & Managing Partner",
+    "location": "Santa Monica, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Early-stage fund investing in families, aging innovation, and wellness \u2014 co-founder from Pivotal Ventures (Melinda French Gates)",
+    "priority": "high",
+    "investor_type": "family_office"
+  },
+  {
+    "fund_name": "AXA Venture Partners (AVP)",
+    "contact_email": "info@axavp.com",
+    "contact_name": "Fran\u00e7ois Robinet, Managing Partner",
+    "location": "Paris / New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M-$20M",
+    "description": "\u20ac1B+ VC backed by AXA insurance; invests in digital health, fintech, enterprise software \u2014 60+ early/growth equity deals",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "CereNexis Ventures",
+    "contact_email": "info@cerenexis.com",
+    "contact_name": "CereNexis Team",
+    "location": "United States",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$2M",
+    "description": "Early healthcare innovation VC across biotech, medtech, and digital health \u2014 operator-led learning engine model",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "GSR Ventures (Healthcare)",
+    "contact_email": "info@gsrventures.com",
+    "contact_name": "Sunny Kumar / Justin Norden, Healthcare Partners",
+    "location": "Menlo Park, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M-$10M",
+    "description": "Global early-stage VC with $3.7B AUM; dedicated healthcare team investing in AI-enabled health tech companies",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Mercy Health Innovation",
+    "contact_email": "innovation@mercy.com",
+    "contact_name": "Megan Reichert, Director of Innovation",
+    "location": "Toledo, OH",
+    "focus_stages": [
+      "Seed",
+      "Pilot"
+    ],
+    "check_size_display": "$100K-$1M",
+    "description": "Mercy Health's innovation hub with direct early-stage investments, innovation fund investments, and $7M+ in grants attracted",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Cedars-Sinai Coronet Ventures",
+    "contact_email": "innovations@csmc.edu",
+    "contact_name": "Cedars-Sinai Innovation Team",
+    "location": "Los Angeles, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Cedars-Sinai's $50M venture fund investing in early-stage health technology and biomedical startups (3rd international fund)",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Heritage Provider Network Innovation Fund",
+    "contact_email": "info@heritageprovidernetwork.com",
+    "contact_name": "HPN Innovation Team",
+    "location": "Northridge, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$1M-$15M",
+    "description": "Physician-led value-based care organization with 11 healthcare venture investments; partnered with Google Ventures and Amgen Ventures",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "1824 Health Ventures (MUSC)",
+    "contact_email": "innovation@musc.edu",
+    "contact_name": "Bob Crutchfield, Fund Manager",
+    "location": "Charleston, SC",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$500K",
+    "description": "MUSC's early-stage venture fund investing in digital health, medical devices, and therapeutics from the university ecosystem",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "NYU Langone Health Venture Fund",
+    "contact_email": "ventures@nyulangone.org",
+    "contact_name": "NYU Langone Ventures Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$100K-$1M",
+    "description": "Strategic seed-stage investments in biomedical startups leveraging NYU technologies \u2014 drugs, diagnostics, devices, and healthtech",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "University Hospitals Ventures",
+    "contact_email": "ventures@UHhospitals.org",
+    "contact_name": "UH Ventures Team",
+    "location": "Cleveland, OH",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K-$1M",
+    "description": "University Hospitals (Cleveland) venture arm investing in pre-seed to Series C; typically <$1M in Seed to Series A",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Digital Health Venture Partners (DHVP)",
+    "contact_email": "arvin@dhvp.io",
+    "contact_name": "Arvin Grover, Founder & General Partner",
+    "location": "Washington, DC",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K-$2M",
+    "description": "Seed-stage VC founded by former policymakers investing in healthcare AI & SaaS, AI-enabled services; 50%+ portfolio companies get intro'd commercial contracts",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Leavitt Equity Partners",
+    "contact_email": "team@leavittequity.com",
+    "contact_name": "Leavitt Equity Partners Team",
+    "location": "Salt Lake City, UT",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$5M-$50M",
+    "description": "Healthcare-focused PE firm with $300M+ in capital; led by former HHS Secretary Mike Leavitt; backed Zing Health and other healthcare innovators",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Activate Venture Partners",
+    "contact_email": "info@activatevp.com",
+    "contact_name": "Activate VP Team",
+    "location": "Bethlehem, PA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Early-stage VC specializing in tech-enabled healthcare; 100+ portfolio companies (50 in healthcare), 10 IPOs, $10B+ in exit value",
+    "priority": "high",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Bright Success Capital",
+    "contact_email": "info@bright-success.com",
+    "contact_name": "Hilton Tam, CEO & Founder",
+    "location": "Hong Kong / Global",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$11M",
+    "description": "Family office investing in healthcare AI, digital health, robotics, biotech; 30+ years manufacturing/supply chain experience",
+    "priority": "medium",
+    "investor_type": "family_office"
+  },
+  {
+    "fund_name": "Waud Capital Partners",
+    "contact_email": "bd@waudcapital.com",
+    "contact_name": "Waud Capital Business Development",
+    "location": "Chicago, IL",
+    "focus_stages": [
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$10M-$100M",
+    "description": "Growth-oriented PE with $4.6B in capital; healthcare services and technology specialist with 300+ investments since 1993",
+    "priority": "medium",
+    "investor_type": "corporate_vc"
+  },
+  {
+    "fund_name": "Evio Venture Capital",
+    "contact_email": "saki@evio.vc",
+    "contact_name": "Saki Georgiadis",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K - $500K",
+    "description": "Mental and behavioral health seed-stage VC. 10+ years backing mental health winners (early investors in Calm and BetterUp). Focus on behavioral health, brain health, and wellness.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "SevenFive Ventures",
+    "contact_email": "info@sevenfivevc.com",
+    "contact_name": "Team",
+    "location": "Albuquerque, NM",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "Up to $300K",
+    "description": "Health equity VC investing in health tech for historically underserved communities. Focus areas include Medicaid/Medicare beneficiaries, behavioral health, value-based care tech.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Gonzalez Capital Group",
+    "contact_email": "Steve@Gonzalezcapitalgrp.com",
+    "contact_name": "Steven F. Gonzalez",
+    "location": "Irvine, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K - $5M",
+    "description": "Post-acute investment firm specializing in home health, hospice, assisted living, and healthcare technology. 18 years of healthcare industry leadership in post-acute care.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "A2Z Venture",
+    "contact_email": "info@a2zventure.com",
+    "contact_name": "Chris Anderson",
+    "location": "Toronto, Canada",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K - $1M",
+    "description": "Seed-stage VC dedicated to AI in healthcare. Focus areas include ML for diagnosis, digital pathology, and healthcare accessibility. Hands-on partnership model with 50+ years collective experience.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Woodard Investments",
+    "contact_email": "pitch@woodardinvestments.com",
+    "contact_name": "Jon Woodard",
+    "location": "New Haven, CT",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$50K - $250K",
+    "description": "Early-stage investor in vertical applied-AI and healthcare innovation. Portfolio includes Eo-Vision (clinician decision-support) and Ethermed (prior authorization). Focus on AI embedded in real workflows.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Ainsley & Born Capital",
+    "contact_email": "info@ainsleyandborncapital.com",
+    "contact_name": "Ainsley MacLean",
+    "location": "Washington, DC / Nashville, TN",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M - $10M",
+    "description": "Operator-led PE fund for AI transformation of healthcare. Led by former Kaiser Permanente CAIO and Change Healthcare M&A exec. Deep healthcare AI deployment expertise.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Exponential Capital",
+    "contact_email": "info@exponentialcap.com",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M - $10M",
+    "description": "Specializes in Healthcare AI and Bioscience investing. $100M+ invested across 10+ companies. Focus on precision medicine, AI-native workflows, and healthcare data platforms.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Xcellerant Ventures",
+    "contact_email": "info@xcellerantventures.com",
+    "contact_name": "John Shufeldt",
+    "location": "Scottsdale, AZ",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K - $500K",
+    "description": "HealthTech and MedTech focused VC. Founded 2020 with 12 portfolio companies. Partners bring 70+ years combined experience in medical technologies, law, and entrepreneurship.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Shoni Health Ventures",
+    "contact_email": "info@shonihealth.com",
+    "contact_name": "Team",
+    "location": "Ramat Gan, Israel",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K - $2M",
+    "description": "HealthTech VC affiliated with Sheba Medical Center (Newsweek World's Best Hospitals). Provides access to hospital data, clinical studies, and global provider connections.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "PartnersHCC",
+    "contact_email": "pitch@partnershcc.com",
+    "contact_name": "Team",
+    "location": "Nashville, TN",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K - $5M",
+    "description": "Operator-led healthcare investment firm. Focus on post-acute, behavioral, virtual, and diagnostic care. $50M+ collected, 200+ facilities managed. 100% operator-led approach.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "MMC Ventures Fund",
+    "contact_email": "info@mmcvinc.com",
+    "contact_name": "Team",
+    "location": "Nashville, TN",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K - $3M",
+    "description": "Meharry Medical College's healthcare VC fund. Invests in health IT, AI, diagnostics, genomics, and primary/preventive care. Purpose-built for health equity investments.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Altitude Ventures",
+    "contact_email": "info@altvc.com",
+    "contact_name": "Richard Bovender",
+    "location": "Nashville, TN",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K - $3M",
+    "description": "Nashville-based VC investing in early-stage healthcare services and digital health. Roots in HCA family office. 16 investments, 3 exits. Has 'Pitch Us' portal.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Sequoia Capital",
+    "contact_email": "info@sequoiacap.com",
+    "contact_name": "Team",
+    "location": "Menlo Park, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$500K - $100M+",
+    "description": "Top-tier VC actively investing in healthcare AI. Backed Anterior (clinical workflow AI). Recognizes $300B healthcare admin operations as ripe for AI disruption. Apply via website.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Oak HC/FT",
+    "contact_email": "info@oakhcft.com",
+    "contact_name": "Andrew Adams",
+    "location": "Greenwich, CT",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$2M - $50M",
+    "description": "Growth equity firm managing $5.3B+ in healthcare and fintech. 100+ portfolio investments, 39 companies valued at $1B+. Deep healthcare technology expertise.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Homera Capital Partners",
+    "contact_email": "info@homeracapitalpartners.com",
+    "contact_name": "Team",
+    "location": "United States",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K - $5M",
+    "description": "Operator-led investment firm targeting the $83B senior care market (projected $115B by 2028). Focus on operational improvement and technology for senior care businesses.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Thynk Capital",
+    "contact_email": "info@thynkcapital.com",
+    "contact_name": "Jim Plante",
+    "location": "San Diego, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K - $5M",
+    "description": "Longevity-focused VC with top 1% historical fund performance. Early-stage therapeutics, healthcare, and technology. 75% healthcare investments, 31% at seed stage.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Continuum Health Ventures",
+    "contact_email": "info@continuumhealth.vc",
+    "contact_name": "Team",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K - $1M",
+    "description": "Early-stage VC focused on Healthtech, Techbio, and Healthspan Extension startups. Invests in companies advancing longevity and wellness tech.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "MBX Capital",
+    "contact_email": "info@mbxcapital.com",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M - $4M",
+    "description": "Deep Health VC focused on early-stage ventures. Invests in first or second institutional rounds (before $50M valuation). Seeks at least 5% ownership. Can lead or co-lead.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Everywhere VC",
+    "contact_email": "hello@everywhere.vc",
+    "contact_name": "Jenny Fielding",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Pre-Seed"
+    ],
+    "check_size_display": "$250K",
+    "description": "Pre-seed fund with 300 portfolio companies in 30 countries. Healthcare portfolio includes Adonis (AI-driven revenue cycle management). Co-founded by Jenny Fielding and Scott Hartley.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Ludlow Ventures",
+    "contact_email": "hello@ludlowventures.com",
+    "contact_name": "Jonathon Triest",
+    "location": "Detroit, MI",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K - $1M",
+    "description": "Seed-stage VC investing with conviction and speed. Based in Detroit with NYC presence. Backed Keebler Health (AI risk adjustment for value-based care). Founded 2009.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "5AM Ventures",
+    "contact_email": "info@5amventures.com",
+    "contact_name": "Andy Schwab",
+    "location": "San Francisco, CA / Boston, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M - $10M+",
+    "description": "Early-stage life science and healthcare VC since 2002. Focus on biopharmaceutical therapeutics, platform technologies, and products with shorter development cycles.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "OrbiMed",
+    "contact_email": "info@orbimed.com",
+    "contact_name": "Jonathan Silverstein",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M - $75M",
+    "description": "$17B AUM healthcare-focused VC. One of the world's largest healthcare investment firms. Invests globally across digital health and biotech. 100+ professionals.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "ARCH Venture Partners",
+    "contact_email": "info@archventure.com",
+    "contact_name": "Team",
+    "location": "Chicago, IL",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M - $25M",
+    "description": "Early-stage VC since 1986 focused on life science discoveries to prevent, detect, and cure disease. Offices in Chicago, Seattle, SF, Austin, LA.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Versant Ventures",
+    "contact_email": "info@versantventures.com",
+    "contact_name": "Brad Bolzon",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$5M - $50M",
+    "description": "$2.4B under management in biotech and healthcare. 70+ successful acquisitions/IPOs. Seeds ~half of portfolio companies from scratch. Operates own discovery labs.",
+    "priority": "low"
+  },
+  {
+    "fund_name": "Aurora Forge",
+    "contact_email": "info@theauroraforge.com",
+    "contact_name": "Ricky Caplin",
+    "location": "Jacksonville, FL",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K - $5M",
+    "description": "GovTech and Health IT venture studio. Founded by former CEO of HCI Group (largest healthcare IT consulting firm). Focus on Health IT, Digital Health, and GovTech in Southeast US.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Health Catalyst Capital",
+    "contact_email": "IR@healthcatalystcapital.com",
+    "contact_name": "Elizabeth Neely",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Series B",
+      "Growth"
+    ],
+    "check_size_display": "$10M - $20M",
+    "description": "VC investing in healthcare IT and tech-enabled service businesses. Founded 2015 with 33 portfolio companies across healthcare, enterprise apps, and life sciences.",
+    "priority": "low"
+  },
+  {
+    "fund_name": "Greylock Partners",
+    "contact_email": "info@greylock.com",
+    "contact_name": "John Lilly",
+    "location": "Menlo Park, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Series B"
+    ],
+    "check_size_display": "$500K - $200M",
+    "description": "Top-tier VC with active Health IT investing. John Lilly (Venture Partner) has $25M sweet spot. Active in seed through Series B across Health IT and SaaS.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Venrock",
+    "contact_email": "info@venrock.com",
+    "contact_name": "Bryan Roberts",
+    "location": "Palo Alto, CA / New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K - $20M",
+    "description": "Healthcare and technology focused VC. Rockefeller family-backed since 1969. Active in digital health, healthcare IT, and AI-driven clinical solutions. One of healthcare's most respected investors.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Kindred Ventures",
+    "contact_email": "hello@kindredventures.com",
+    "contact_name": "Steve Jang",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "$250K - $2M",
+    "description": "Seed-stage fund backing visionary founders in technology and science. Portfolio includes Uber, Coinbase, Perplexity, and Color (healthcare genomics).",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Index Ventures",
+    "contact_email": "info@indexventures.com",
+    "contact_name": "Team",
+    "location": "San Francisco, CA / London, UK",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$100K - $500M",
+    "description": "Global VC firm active in digital health from pre-seed to growth. Known for backing disruptive SaaS and healthcare tech companies.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "IVP (Institutional Venture Partners)",
+    "contact_email": "info@ivp.com",
+    "contact_name": "Team",
+    "location": "Menlo Park, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M - $100M",
+    "description": "Co-led Abridge's $250M Series D for AI clinical documentation. Active in healthcare AI and enterprise SaaS investing since 1980.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "WndrCo",
+    "contact_email": "info@wndrco.com",
+    "contact_name": "Jeffrey Katzenberg",
+    "location": "Los Angeles, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M - $25M",
+    "description": "Founded by Jeffrey Katzenberg. Co-invested in Zingage ($12.5M for AI home care platform). Focus on media, technology, and healthcare innovation.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "South Park Commons",
+    "contact_email": "info@southparkcommons.com",
+    "contact_name": "Team",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K - $500K",
+    "description": "Community fund for founders exploring new ideas. Co-invested in Zingage (AI home care) and active in healthcare AI seed deals.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Nexus Venture Partners",
+    "contact_email": "info@nexusvp.com",
+    "contact_name": "Team",
+    "location": "Menlo Park, CA / Mumbai, India",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K - $10M",
+    "description": "Led $4.3M seed round for Ember (automated medical coding and denial prevention). Active in healthcare AI and enterprise software investing.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Redstone",
+    "contact_email": "info@redstone.vc",
+    "contact_name": "Team",
+    "location": "Berlin, Germany",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$500K - $5M",
+    "description": "European VC that led seed round for Noteless (AI clinical documentation). Active in healthcare AI and enterprise automation investments.",
+    "priority": "low"
+  },
+  {
+    "fund_name": "Kinnevik",
+    "contact_email": "info@kinnevik.com",
+    "contact_name": "Team",
+    "location": "Stockholm, Sweden",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$5M - $100M",
+    "description": "Invested in Anterior (clinical workflow AI for healthcare). Long-term growth investor in healthcare technology and digital health.",
+    "priority": "low"
+  },
+  {
+    "fund_name": "FPV (First Point Ventures)",
+    "contact_email": "info@fpv.vc",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$1M - $10M",
+    "description": "Backed Anterior (clinical workflow automation for health insurers). Focus on enterprise software and healthcare AI.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "XB Ventures",
+    "contact_email": "info@xbventures.com",
+    "contact_name": "Team",
+    "location": "United States",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K - $5M",
+    "description": "Manages the XBV Healthcare Fund. Focused on healthcare innovation and technology-enabled health services.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Anorak Ventures",
+    "contact_email": "info@anorak.vc",
+    "contact_name": "Team",
+    "location": "Los Angeles, CA / San Francisco, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K - $2M",
+    "description": "Seed-stage VC since 2016. 120+ seed investments representing $125B aggregate market cap. Helps companies achieve product-market fit and follow-on financing.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Heartcore Capital",
+    "contact_email": "info@heartcore.com",
+    "contact_name": "Team",
+    "location": "Copenhagen, Denmark",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$300K - $6M",
+    "description": "European VC active in digital health from pre-seed to Series A. Invests in consumer and enterprise tech including healthcare SaaS and AI solutions.",
+    "priority": "low"
+  },
+  {
+    "fund_name": "Elad Gil",
+    "contact_email": "elad@eladgil.com",
+    "contact_name": "Elad Gil",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K - $50M",
+    "description": "Prolific angel/seed investor. Co-led Abridge's $250M Series D (AI clinical documentation). Former VP at Twitter, active in healthcare AI and enterprise SaaS seed deals.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Conexus Venture Capital",
+    "contact_email": "info@conexusventurecapital.ca",
+    "contact_name": "Team",
+    "location": "Saskatchewan, Canada",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K - $500K",
+    "description": "Led pre-seed in Alto Technologies (home care marketplace that reduces care costs by 40%). Active in healthcare and aging technology investments.",
+    "priority": "low"
+  },
+  {
+    "fund_name": "Maverick Ventures",
+    "contact_email": "ab@maverickcap.com",
+    "contact_name": "Ambar Bhattacharyya",
+    "location": "San Francisco, CA / New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M - $25M",
+    "description": "Venture arm of Maverick Capital. 194 investments. Healthcare portfolio includes CityBlock, Devoted Health, Hims, One Medical, Chapter. Partners with founders from inception through IPO.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Third Culture Capital (3CC)",
+    "contact_email": "jpham@thirdculturecapital.com",
+    "contact_name": "Dr. Julien Pham, MD, MPH",
+    "location": "Boston, MA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K - $1M",
+    "description": "Physician-led healthcare seed VC investing at intersection of equity and care delivery. Backs founders with unique cross-cultural approaches to healthcare innovation. Prefers to lead rounds.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Alumni Ventures (Healthtech Fund)",
+    "contact_email": "info@av.vc",
+    "contact_name": "Team",
+    "location": "Manchester, NH",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K - $2M",
+    "description": "America's largest venture firm for individuals, ranked Time's Top 20 VCs of 2025. Healthtech Fund invests in digital health, telemedicine, genomics, and computational biology. 20-30 companies per fund.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Lightspeed Venture Partners",
+    "contact_email": "info@lsvp.com",
+    "contact_name": "Gaurav Gupta",
+    "location": "Menlo Park, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$25K - $20M",
+    "description": "Multi-stage firm managing $18B globally. Invests in healthcare, enterprise, consumer, and fintech. Active seed-stage health investor. Gaurav Gupta leads health investments.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "UCSF Health Hub",
+    "contact_email": "healthhub@ucsf.edu",
+    "contact_name": "Team",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$50K - $250K",
+    "description": "UCSF's digital health accelerator and investor. Provides access to leading academic medical center, clinical validation, and health system partnerships for healthcare startups.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Deerfield Management",
+    "contact_email": "info@deerfield.com",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M - $50M",
+    "description": "$14B+ healthcare investment firm. Deerfield invests across healthcare including digital health, health IT, and AI-driven clinical solutions. Strong payer and provider network.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Tectonic Ventures",
+    "contact_email": "info@tectonicventures.com",
+    "contact_name": "Team",
+    "location": "Philadelphia, PA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K - $1M",
+    "description": "Philadelphia-based early-stage VC investing in healthcare, enterprise, and deep tech. Focus on AI applications in healthcare operations and clinical workflow.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "BIOS Partners",
+    "contact_email": "info@biospartners.com",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$250K - $2M",
+    "description": "Healthcare-focused fund investing in digital health, health IT, and clinical AI. Founded by healthcare operators with deep provider and payer network access.",
+    "priority": "medium"
+  }
+]
