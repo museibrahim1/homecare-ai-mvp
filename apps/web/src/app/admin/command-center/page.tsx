@@ -7,7 +7,7 @@ import { getStoredToken } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 import {
   Mail, Phone, Send, Check, X, Loader2, RefreshCw,
-  CheckCircle2, Edit3,
+  CheckCircle2, Edit3, Search,
   DollarSign, StickyNote,
   Sun, Coffee, Moon,
   ChevronDown, ChevronUp, FileText, Calendar,
@@ -180,6 +180,9 @@ export default function CommandCenterPage() {
 
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
+
+  // Search
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Per-entity state
   const [agencyStatuses, setAgencyStatuses] = useState<Record<string, string>>({});
@@ -466,6 +469,16 @@ export default function CommandCenterPage() {
   const currentDay = weeklyPlan?.days[selectedDayIdx] || null;
   const greeting = greetingByTime();
 
+  const sq = searchQuery.toLowerCase().trim();
+  const matchSearch = (...fields: (string | null | undefined)[]) => {
+    if (!sq) return true;
+    return fields.some(f => f?.toLowerCase().includes(sq));
+  };
+  const filteredAgencies = currentDay?.agency_drafts.filter(a => matchSearch(a.provider_name, a.phone, a.contact_email, a.contact_name, a.city, a.state)) || [];
+  const filteredCalls = currentDay?.calls.filter(c => matchSearch(c.provider_name, c.phone, c.contact_name, c.contact_email, c.city, c.state)) || [];
+  const filteredInvestors = currentDay?.investor_drafts.filter(i => matchSearch(i.fund_name, i.contact_name, i.contact_email)) || [];
+  const filteredCallbacks = callbacks.filter(cb => matchSearch(cb.provider_name, cb.phone, cb.contact_name, cb.contact_email, cb.city, cb.state, cb.callback_notes, cb.notes));
+
   const agencySentCount = currentDay?.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length || 0;
   const agencyTotal = currentDay?.agency_drafts.length || 0;
   const callsMadeCount = currentDay?.calls.filter(c => callStatuses[c.id]).length || 0;
@@ -662,13 +675,33 @@ export default function CommandCenterPage() {
           </div>
         )}
 
-        {/* ── Tab Navigation ──────────────────────────────── */}
+        {/* ── Search + Tab Navigation ──────────────────────── */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+          <div className="relative flex-shrink-0 w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search phone, name, email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:border-teal-400 focus:ring-1 focus:ring-teal-400 focus:outline-none shadow-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
         <div className="flex gap-1 mb-4 bg-white rounded-xl p-1 shadow-sm border border-slate-100 w-full sm:w-fit overflow-x-auto">
           {([
             { key: 'agencies' as TabKey, label: 'Agency Emails', Icon: Mail, count: `${agencySentCount}/${agencyTotal}` },
             { key: 'calls' as TabKey, label: 'Phone Calls', Icon: Phone, count: `${callsMadeCount}/${callsTotal}` },
             { key: 'investors' as TabKey, label: 'Investor Emails', Icon: DollarSign, count: `${investorSentCount}/${investorTotal}` },
-            { key: 'callbacks' as TabKey, label: 'Callbacks', Icon: PhoneForwarded, count: `${callbacks.length}` },
+            { key: 'callbacks' as TabKey, label: 'Callbacks', Icon: PhoneForwarded, count: sq ? `${filteredCallbacks.length}/${callbacks.length}` : `${callbacks.length}` },
             { key: 'assignments' as TabKey, label: 'Team Assign', Icon: Users, count: `${teamMembers.filter(t => t.is_active).length}` },
           ]).map(({ key, label, Icon, count }) => (
             <button
@@ -711,7 +744,7 @@ export default function CommandCenterPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
           {activeTab === 'agencies' && currentDay && (
             <AgencyDraftTable
-              rows={currentDay.agency_drafts}
+              rows={filteredAgencies}
               statuses={agencyStatuses}
               loading={loading}
               expandedDraft={expandedDraft}
@@ -727,7 +760,7 @@ export default function CommandCenterPage() {
             <>
               <PhoneScriptsPanel />
               <CallsTable
-                rows={currentDay.calls}
+                rows={filteredCalls}
                 statuses={callStatuses}
                 notes={callNotes}
                 loading={loading}
@@ -739,7 +772,7 @@ export default function CommandCenterPage() {
           )}
           {activeTab === 'investors' && currentDay && (
             <InvestorDraftTable
-              rows={currentDay.investor_drafts}
+              rows={filteredInvestors}
               statuses={investorStatuses}
               loading={loading}
               expandedDraft={expandedDraft}
@@ -756,20 +789,20 @@ export default function CommandCenterPage() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                   <PhoneForwarded className="w-5 h-5 text-amber-500" />
-                  Callbacks ({callbacks.length})
+                  Callbacks ({filteredCallbacks.length}{sq ? ` of ${callbacks.length}` : ''})
                 </h3>
                 <button onClick={loadCallbacks} className="text-xs text-teal-600 hover:text-teal-700 font-medium">
                   <RefreshCw className="w-3.5 h-3.5 inline mr-1" />Refresh
                 </button>
               </div>
-              {callbacks.length === 0 ? (
+              {filteredCallbacks.length === 0 ? (
                 <div className="text-center py-12 text-slate-400">
                   <PhoneForwarded className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                  No callbacks pending
+                  {sq ? 'No callbacks match your search' : 'No callbacks pending'}
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {callbacks.map((cb) => (
+                  {filteredCallbacks.map((cb) => (
                     <div key={cb.id} className="border border-amber-200 bg-amber-50/50 rounded-xl p-4">
                       <div className="flex items-start justify-between">
                         <div>

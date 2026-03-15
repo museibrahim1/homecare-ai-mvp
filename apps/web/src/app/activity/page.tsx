@@ -26,6 +26,7 @@ const typeConfig: Record<string, { color: string; bgColor: string }> = {
 
 export default function ActivityPage() {
   const [activities] = useState(mockActivities);
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -86,6 +87,8 @@ export default function ActivityPage() {
             <input
               type="text"
               placeholder="Search activity..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
             />
           </div>
@@ -101,7 +104,11 @@ export default function ActivityPage() {
             <h2 className="font-semibold text-slate-900">Recent Activity</h2>
           </div>
           <div className="divide-y divide-slate-200/30">
-            {activities.map(activity => {
+            {activities.filter(a => {
+              if (!searchQuery.trim()) return true;
+              const q = searchQuery.toLowerCase();
+              return a.user.toLowerCase().includes(q) || a.action.toLowerCase().includes(q) || a.target.toLowerCase().includes(q) || a.time.toLowerCase().includes(q);
+            }).map(activity => {
               const config = typeConfig[activity.type];
               return (
                 <div key={activity.id} className="p-4 hover:bg-slate-50/20 transition-colors">

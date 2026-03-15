@@ -29,6 +29,7 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [showNewConvoModal, setShowNewConvoModal] = useState(false);
   const [clients, setClients] = useState<any[]>([]);
@@ -168,6 +169,8 @@ export default function MessagesPage() {
               <input
                 type="text"
                 placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
               />
             </div>
@@ -185,7 +188,11 @@ export default function MessagesPage() {
                 </button>
               </div>
             ) : (
-              conversations.map(conv => (
+              conversations.filter(conv => {
+                if (!searchQuery.trim()) return true;
+                const q = searchQuery.toLowerCase();
+                return conv.name.toLowerCase().includes(q) || conv.lastMessage.toLowerCase().includes(q);
+              }).map(conv => (
                 <button
                   key={conv.id}
                   onClick={() => handleSelectConversation(conv)}
