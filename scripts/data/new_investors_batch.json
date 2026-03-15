@@ -4,7 +4,10 @@
     "contact_email": "vivien@pear.vc",
     "contact_name": "Vivien Tsao",
     "location": "Palo Alto, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$250K-$2M",
     "description": "Early-stage VC with dedicated healthcare practice investing in healthcare AI and tech-enabled care delivery",
     "priority": "high"
@@ -14,7 +17,10 @@
     "contact_email": "info@7wireventures.com",
     "contact_name": "General Inquiries",
     "location": "Chicago, IL",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$5M",
     "description": "Early-stage healthcare VC focused on empowering informed, connected health consumers",
     "priority": "high"
@@ -24,7 +30,10 @@
     "contact_email": "sd@virtuevc.com",
     "contact_name": "Sean Doolan",
     "location": "Austin, TX",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$250K-$1.5M",
     "description": "Exclusively pre-seed/seed healthcare VC with $31.25M Fund I, 7-10 day decisions, backed by CareFirst BCBS",
     "priority": "high"
@@ -34,7 +43,10 @@
     "contact_email": "dave@pioneerfund.vc",
     "contact_name": "Dave Messina",
     "location": "San Francisco, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$50K-$200K",
     "description": "World's most active seed fund per Pitchbook, 130+ bio/health companies, led by 100+ YC alumni",
     "priority": "high"
@@ -44,7 +56,10 @@
     "contact_email": "max@thirdact.vc",
     "contact_name": "Max Zamkow",
     "location": "New York, NY",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$25K-$200K",
     "description": "Seed-stage agetech VC with 37 portfolio companies, <8% failure rate, Top Healthtech Seed Fund 2025",
     "priority": "high"
@@ -54,7 +69,10 @@
     "contact_email": "info@longevitytech.fund",
     "contact_name": "General Inquiries",
     "location": "Global",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$100K-$1M",
     "description": "Top 5 longevity VC worldwide, 40+ portfolio companies investing in healthy lifespan extension",
     "priority": "medium"
@@ -64,7 +82,10 @@
     "contact_email": "info@healthspancapital.vc",
     "contact_name": "General Inquiries",
     "location": "El Cerrito, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$50K-$500K",
     "description": "Longevity VC with AngelList rolling fund focused on healthspan extension",
     "priority": "medium"
@@ -74,9 +95,12 @@
     "contact_email": "info@rhiaventures.org",
     "contact_name": "General Inquiries",
     "location": "San Francisco, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$250K-$2M",
-    "description": "Impact VC at intersection of racial equity, women's health, and capital — 91.67% healthcare focus",
+    "description": "Impact VC at intersection of racial equity, women's health, and capital \u2014 91.67% healthcare focus",
     "priority": "medium"
   },
   {
@@ -84,7 +108,10 @@
     "contact_email": "ir@townhallventures.com",
     "contact_name": "Andy Slavitt",
     "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$5M",
     "description": "Healthcare VC by former CMS head, investing in digital health for underserved communities and frail seniors",
     "priority": "high"
@@ -94,7 +121,10 @@
     "contact_email": "info@sequentialvc.com",
     "contact_name": "Roberto Rodriguez",
     "location": "San Diego, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$250K-$2M",
     "description": "Healthcare VC investing in overlooked founders incorporating Social Determinants of Health into value-based care",
     "priority": "high"
@@ -104,9 +134,12 @@
     "contact_email": "partnering@valtruis.com",
     "contact_name": "Partnerships Team",
     "location": "Chicago, IL",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "Backed by WCAS, transforms value-based care — 80% of partners have strategic payor/provider relationships",
+    "description": "Backed by WCAS, transforms value-based care \u2014 80% of partners have strategic payor/provider relationships",
     "priority": "high"
   },
   {
@@ -114,7 +147,10 @@
     "contact_email": "investments@pavehealthventures.com",
     "contact_name": "Jacob Ritter Myers",
     "location": "New York, NY",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$250K-$2M",
     "description": "NYC VC investing in root causes of illness, chronic condition management, and healthcare infrastructure",
     "priority": "high"
@@ -124,9 +160,12 @@
     "contact_email": "contact@406ventures.com",
     "contact_name": "General Inquiries",
     "location": "Boston, MA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$2M-$10M",
-    "description": "$1.4B AUM healthcare VC — full-risk care, novel care delivery, enterprise healthcare. 30+ founders backed",
+    "description": "$1.4B AUM healthcare VC \u2014 full-risk care, novel care delivery, enterprise healthcare. 30+ founders backed",
     "priority": "high"
   },
   {
@@ -134,7 +173,10 @@
     "contact_email": "info@chv.vc",
     "contact_name": "General Inquiries",
     "location": "Boston, MA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$5M",
     "description": "Boston VC investing in transformative medtech and digital health since 2008",
     "priority": "medium"
@@ -144,7 +186,10 @@
     "contact_email": "info@ascensionventures.org",
     "contact_name": "John Kuelper",
     "location": "St. Louis, MO",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$5M",
     "description": "$1B+ AUM healthcare VC backed by 450+ hospitals and 13 health systems as LPs",
     "priority": "high"
@@ -154,9 +199,12 @@
     "contact_email": "kschmitz@ziegler.com",
     "contact_name": "Katie Schmitz",
     "location": "Milwaukee, WI",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$5M",
-    "description": "$110M+ aging/post-acute VC backed by 160 senior living providers — healthcare IT and services",
+    "description": "$110M+ aging/post-acute VC backed by 160 senior living providers \u2014 healthcare IT and services",
     "priority": "high"
   },
   {
@@ -164,7 +212,10 @@
     "contact_email": "info@woodlawnhv.com",
     "contact_name": "Brian Lang",
     "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$750K-$3M",
     "description": "Digital health VC focused on aging-in-place, senior housing, and behavioral health",
     "priority": "high"
@@ -174,7 +225,10 @@
     "contact_email": "devin@martinventures.com",
     "contact_name": "Devin Carty",
     "location": "Nashville, TN",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$2M-$4M",
     "description": "Nashville healthcare family office (Vanguard Health Systems founder), 50+ portfolio companies in health tech",
     "priority": "high"
@@ -184,7 +238,11 @@
     "contact_email": "info@digitalisventures.com",
     "contact_name": "Geoffrey Smith",
     "location": "New York, NY",
-    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$100K-$10M",
     "description": "Healthcare VC investing in biotech, digital health, and animal health with deep technical expertise",
     "priority": "medium"
@@ -194,9 +252,12 @@
     "contact_email": "jessica@coyote.ventures",
     "contact_name": "Jessica Karr",
     "location": "USA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$100K-$500K",
-    "description": "Early-stage VC investing in health equity and women's health tech — 80% healthcare focus",
+    "description": "Early-stage VC investing in health equity and women's health tech \u2014 80% healthcare focus",
     "priority": "medium"
   },
   {
@@ -204,9 +265,12 @@
     "contact_email": "info@epsilonhi.com",
     "contact_name": "Steven Epstein",
     "location": "Washington, DC",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$500K-$3M",
-    "description": "Digital healthcare VC backed by health system LPs — clinical AI, data networks, cybersecurity, patient engagement",
+    "description": "Digital healthcare VC backed by health system LPs \u2014 clinical AI, data networks, cybersecurity, patient engagement",
     "priority": "high"
   },
   {
@@ -214,7 +278,10 @@
     "contact_email": "entrepreneurs@exceleratehealth.com",
     "contact_name": "Andrew Schwab",
     "location": "Durham, NC",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$5M",
     "description": "Healthcare VC led by experienced entrepreneurs with hands-on operational support for portfolio companies",
     "priority": "medium"
@@ -224,7 +291,10 @@
     "contact_email": "info@fcventures.com",
     "contact_name": "Navid Farzad",
     "location": "Nashville, TN",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$500K-$20M",
     "description": "Nashville healthcare VC investing in digital health SaaS, AI, data services, and insurtech",
     "priority": "high"
@@ -234,7 +304,10 @@
     "contact_email": "info@fprimecapital.com",
     "contact_name": "Nikhil Marathe",
     "location": "Cambridge, MA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
     "description": "Fidelity-backed VC with 483+ investments in healthcare technology and life sciences",
     "priority": "medium"
@@ -244,7 +317,10 @@
     "contact_email": "info@globalhealthimpactfund.com",
     "contact_name": "Martyn Eeles",
     "location": "Walnut Creek, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$250K-$1.5M",
     "description": "Clinician-driven healthcare VC with 2,000+ medical expert network, investing in digital health and telemedicine",
     "priority": "high"
@@ -254,9 +330,12 @@
     "contact_email": "info@lrvhealth.com",
     "contact_name": "General Inquiries",
     "location": "Boston, MA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$3M-$5M",
-    "description": "Healthcare VC since 2000, first institutional investor in many companies — Phreesia, IntelyCare portfolio",
+    "description": "Healthcare VC since 2000, first institutional investor in many companies \u2014 Phreesia, IntelyCare portfolio",
     "priority": "medium"
   },
   {
@@ -264,7 +343,10 @@
     "contact_email": "info@jumpstarthealth.co",
     "contact_name": "General Inquiries",
     "location": "Nashville, TN",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$100K-$1M",
     "description": "Early-stage health VC with 150+ portfolio companies, dedicated to health/healthcare/wellness investments",
     "priority": "high"
@@ -274,7 +356,10 @@
     "contact_email": "seaevc@seaeventures.com",
     "contact_name": "Tuoyo Louis",
     "location": "Boston, MA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$100K-$5M",
     "description": "$107M fund investing in women and BIPOC-led healthtech companies addressing healthcare equity gaps",
     "priority": "high"
@@ -284,9 +369,12 @@
     "contact_email": "founders@primary.vc",
     "contact_name": "Sam Toole",
     "location": "New York, NY",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$100K-$3M",
-    "description": "NYC seed fund with dedicated healthcare practice — $1B AUM, high-conviction approach, full Portfolio Impact team",
+    "description": "NYC seed fund with dedicated healthcare practice \u2014 $1B AUM, high-conviction approach, full Portfolio Impact team",
     "priority": "high"
   },
   {
@@ -294,7 +382,10 @@
     "contact_email": "hello@storyventures.vc",
     "contact_name": "Jacob Yormak",
     "location": "New York, NY",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$250K-$2M",
     "description": "NYC early-stage fund backing data and AI companies with 9+ healthcare portfolio investments",
     "priority": "high"
@@ -304,19 +395,11 @@
     "contact_email": "hello@mavenventures.com",
     "contact_name": "Sara Deshpande",
     "location": "San Francisco, CA",
-    "focus_stages": ["Seed"],
+    "focus_stages": [
+      "Seed"
+    ],
     "check_size_display": "$750K-$1M",
-    "description": "Seed-stage VC with digital health expertise — Hello Heart, Carrot Fertility in portfolio, 4-5 unicorn exits",
-    "priority": "high"
-  },
-  {
-    "fund_name": "AlleyCorp",
-    "contact_email": "info@alleycorp.com",
-    "contact_name": "Kevin Ryan",
-    "location": "New York, NY",
-    "focus_stages": ["Pre-Seed", "Seed"],
-    "check_size_display": "$1M-$4M",
-    "description": "$100M physician-led healthcare fund — value-based care, healthcare fintech, 20 healthcare startups raising $500M+",
+    "description": "Seed-stage VC with digital health expertise \u2014 Hello Heart, Carrot Fertility in portfolio, 4-5 unicorn exits",
     "priority": "high"
   },
   {
@@ -324,9 +407,12 @@
     "contact_email": "kv@khoslaventures.com",
     "contact_name": "General Inquiries",
     "location": "Menlo Park, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$500K-$5M",
-    "description": "Major VC with dedicated Seed Fund and digital health portfolio — Abridge, Curai, Headspace Health",
+    "description": "Major VC with dedicated Seed Fund and digital health portfolio \u2014 Abridge, Curai, Headspace Health",
     "priority": "high"
   },
   {
@@ -334,9 +420,12 @@
     "contact_email": "info@8vc.com",
     "contact_name": "Sebastian Caliri",
     "location": "Palo Alto, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$3M-$30M",
-    "description": "Healthcare VC focused on value-based care and reinventing care delivery from ground up — not just digitizing legacy",
+    "description": "Healthcare VC focused on value-based care and reinventing care delivery from ground up \u2014 not just digitizing legacy",
     "priority": "medium"
   },
   {
@@ -344,9 +433,12 @@
     "contact_email": "bd@nea.com",
     "contact_name": "Perry Wallack",
     "location": "Menlo Park, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "$25B AUM with dedicated digital health seed team — 270+ IPOs, deep healthcare expertise",
+    "description": "$25B AUM with dedicated digital health seed team \u2014 270+ IPOs, deep healthcare expertise",
     "priority": "medium"
   },
   {
@@ -354,7 +446,10 @@
     "contact_email": "info@luxcapital.com",
     "contact_name": "General Inquiries",
     "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$100K-$10M",
     "description": "$5B+ AUM deep tech VC investing in life sciences, neuroscience, and healthcare AI",
     "priority": "medium"
@@ -364,9 +459,12 @@
     "contact_email": "pitch@twosigmaventures.com",
     "contact_name": "General Inquiries",
     "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "Tech VC backed by Two Sigma's 1,700+ employees and 200+ PhDs — Carbon Health, Recursion in portfolio",
+    "description": "Tech VC backed by Two Sigma's 1,700+ employees and 200+ PhDs \u2014 Carbon Health, Recursion in portfolio",
     "priority": "medium"
   },
   {
@@ -374,9 +472,12 @@
     "contact_email": "flare@flarecapital.com",
     "contact_name": "Michael Greeley",
     "location": "Boston, MA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$5M",
-    "description": "Healthcare tech VC with ~$1B AUM, 70+ portfolio companies — strategic partnership with Rock Health",
+    "description": "Healthcare tech VC with ~$1B AUM, 70+ portfolio companies \u2014 strategic partnership with Rock Health",
     "priority": "high"
   },
   {
@@ -384,9 +485,12 @@
     "contact_email": "press@redesignhealth.com",
     "contact_name": "General Inquiries",
     "location": "New York, NY",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$1M-$5M",
-    "description": "Healthcare venture builder — 60+ companies launched, $1.5B+ raised, partners with Mayo Clinic and OpenAI",
+    "description": "Healthcare venture builder \u2014 60+ companies launched, $1.5B+ raised, partners with Mayo Clinic and OpenAI",
     "priority": "medium"
   },
   {
@@ -394,9 +498,12 @@
     "contact_email": "info@olivetree.vc",
     "contact_name": "General Inquiries",
     "location": "Tel Aviv, Israel / New York, NY",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "Israel's specialist digital health VC — $170M fund, $4B+ exit value, TytoCare in portfolio",
+    "description": "Israel's specialist digital health VC \u2014 $170M fund, $4B+ exit value, TytoCare in portfolio",
     "priority": "medium"
   },
   {
@@ -404,9 +511,12 @@
     "contact_email": "info@heritagegroupusa.com",
     "contact_name": "General Inquiries",
     "location": "Nashville, TN",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$2M-$10M",
-    "description": "Nashville healthcare VC founded 1986 — $1.5B+ deployed, 50+ companies, recently closed $370M fund",
+    "description": "Nashville healthcare VC founded 1986 \u2014 $1.5B+ deployed, 50+ companies, recently closed $370M fund",
     "priority": "medium"
   },
   {
@@ -414,9 +524,12 @@
     "contact_email": "info@chrysalisventures.com",
     "contact_name": "General Inquiries",
     "location": "Louisville, KY",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$2M-$10M",
-    "description": "$400M AUM healthcare and tech VC — 70+ portfolio companies, invests in markets underserved by technology",
+    "description": "$400M AUM healthcare and tech VC \u2014 70+ portfolio companies, invests in markets underserved by technology",
     "priority": "medium"
   },
   {
@@ -424,9 +537,12 @@
     "contact_email": "info@healthtechcapital.com",
     "contact_name": "Anne DeGheest",
     "location": "Los Altos, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$100K-$1M",
-    "description": "Angel investor network vertically focused on healthtech since 2010 — helped portfolio raise $1B+ in follow-on",
+    "description": "Angel investor network vertically focused on healthtech since 2010 \u2014 helped portfolio raise $1B+ in follow-on",
     "priority": "medium"
   },
   {
@@ -434,29 +550,25 @@
     "contact_email": "pitch@kaporcapital.com",
     "contact_name": "Brian Dixon",
     "location": "Oakland, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$250K-$2M",
-    "description": "Impact VC investing in tech closing gaps for low-income and communities of color — health is key theme",
+    "description": "Impact VC investing in tech closing gaps for low-income and communities of color \u2014 health is key theme",
     "priority": "high"
-  },
-  {
-    "fund_name": "City Light Capital",
-    "contact_email": "info@citylight.vc",
-    "contact_name": "Josh Cohen",
-    "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
-    "check_size_display": "$1M-$6M",
-    "description": "Impact VC in care sector — 11.4M patients treated, Headspace Health and Bicycle Health in portfolio",
-    "priority": "medium"
   },
   {
     "fund_name": "Noro-Moseley Partners",
     "contact_email": "info@noromoseley.com",
     "contact_name": "General Inquiries",
     "location": "Atlanta, GA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$5M-$20M",
-    "description": "Atlanta VC since 1983 — $634M AUM, healthcare IT focus, Contessa Health in portfolio, $5B+ aggregate exits",
+    "description": "Atlanta VC since 1983 \u2014 $634M AUM, healthcare IT focus, Contessa Health in portfolio, $5B+ aggregate exits",
     "priority": "medium"
   },
   {
@@ -464,9 +576,12 @@
     "contact_email": "comms@healthworx.com",
     "contact_name": "General Inquiries",
     "location": "Baltimore, MD",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$100K-$1M",
-    "description": "Innovation arm of CareFirst BCBS — accelerator + venture fund connecting startups to health systems",
+    "description": "Innovation arm of CareFirst BCBS \u2014 accelerator + venture fund connecting startups to health systems",
     "priority": "high"
   },
   {
@@ -474,9 +589,12 @@
     "contact_email": "info@agetechcapital.com",
     "contact_name": "Lyne Landry",
     "location": "Montreal, Canada",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$500K-$5M",
-    "description": "$50M purpose-driven agetech VC — caregiving, independent living, financial wellbeing for aging population",
+    "description": "$50M purpose-driven agetech VC \u2014 caregiving, independent living, financial wellbeing for aging population",
     "priority": "high"
   },
   {
@@ -484,9 +602,12 @@
     "contact_email": "info@lifexventures.com",
     "contact_name": "General Inquiries",
     "location": "Pittsburgh, PA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$500K-$3M",
-    "description": "$100M longevity fund investing where Software meets Science — digital health, diagnostics, biotech",
+    "description": "$100M longevity fund investing where Software meets Science \u2014 digital health, diagnostics, biotech",
     "priority": "medium"
   },
   {
@@ -494,9 +615,12 @@
     "contact_email": "menlopark-info@a16z.com",
     "contact_name": "Julie Yoo",
     "location": "Menlo Park, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$50M",
-    "description": "Major VC with dedicated Bio+Health practice — Health Builders program for healthcare tech founders",
+    "description": "Major VC with dedicated Bio+Health practice \u2014 Health Builders program for healthcare tech founders",
     "priority": "medium"
   },
   {
@@ -504,9 +628,12 @@
     "contact_email": "info@bioadvance.com",
     "contact_name": "General Inquiries",
     "location": "Conshohocken, PA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$500K-$5M",
-    "description": "Mid-Atlantic digital health + medtech VC — 120+ investments, 28 exits, 12 FDA approvals",
+    "description": "Mid-Atlantic digital health + medtech VC \u2014 120+ investments, 28 exits, 12 FDA approvals",
     "priority": "medium"
   },
   {
@@ -514,9 +641,12 @@
     "contact_email": "info@omegafunds.net",
     "contact_name": "Otello Stampacchia",
     "location": "Boston, MA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "Life sciences VC with $1B+ AUM — 52 products to patients, digital health and precision medicine",
+    "description": "Life sciences VC with $1B+ AUM \u2014 52 products to patients, digital health and precision medicine",
     "priority": "medium"
   },
   {
@@ -524,29 +654,24 @@
     "contact_email": "ccappella@svhealthinvestors.com",
     "contact_name": "Healthcare Growth Team",
     "location": "Boston, MA / London, UK",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$15M",
     "description": "Global healthcare investment firm with dedicated medtech, therapeutics, and healthcare growth teams",
     "priority": "medium"
-  },
-  {
-    "fund_name": "Digital Health Venture Partners (DHVP)",
-    "contact_email": "info@dhvp.io",
-    "contact_name": "General Inquiries",
-    "location": "USA",
-    "focus_stages": ["Pre-Seed", "Seed"],
-    "check_size_display": "$250K-$2M",
-    "description": "Value-add healthcare VC — 50%+ portfolio companies signed commercial contracts through network intros",
-    "priority": "high"
   },
   {
     "fund_name": "Tera Ventures",
     "contact_email": "info@tera.vc",
     "contact_name": "General Inquiries",
     "location": "Tallinn, Estonia",
-    "focus_stages": ["Seed"],
+    "focus_stages": [
+      "Seed"
+    ],
     "check_size_display": "$200K-$1M",
-    "description": "European seed VC with healthcare investments — led CARÁ Health and Transformative AI seed rounds",
+    "description": "European seed VC with healthcare investments \u2014 led CAR\u00c1 Health and Transformative AI seed rounds",
     "priority": "medium"
   },
   {
@@ -554,29 +679,25 @@
     "contact_email": "inquiry@wrencapital.com",
     "contact_name": "General Inquiries",
     "location": "San Francisco, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$500K-$5M",
     "description": "Alternative asset advisory investing in healthcare and digital health opportunities",
     "priority": "medium"
-  },
-  {
-    "fund_name": "Healthy Ventures",
-    "contact_email": "team@healthy.vc",
-    "contact_name": "General Inquiries",
-    "location": "USA",
-    "focus_stages": ["Seed"],
-    "check_size_display": "$1M-$2M",
-    "description": "Purpose-built early-stage health tech investor leading seed rounds with GTM acceleration resources",
-    "priority": "high"
   },
   {
     "fund_name": "Define Ventures",
     "contact_email": "info@definevc.com",
     "contact_name": "Lynne Chou O'Keeffe",
     "location": "San Francisco, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$5M",
-    "description": "Largest early-stage digital health VC — $800M AUM, $23B exit value, Hims & Hers/Livongo in portfolio",
+    "description": "Largest early-stage digital health VC \u2014 $800M AUM, $23B exit value, Hims & Hers/Livongo in portfolio",
     "priority": "high"
   },
   {
@@ -584,9 +705,12 @@
     "contact_email": "info@longitudecapital.com",
     "contact_name": "General Inquiries",
     "location": "Menlo Park, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "Biotech and health solutions VC — improving clinical outcomes and reducing system costs",
+    "description": "Biotech and health solutions VC \u2014 improving clinical outcomes and reducing system costs",
     "priority": "medium"
   },
   {
@@ -594,19 +718,12 @@
     "contact_email": "innovation@aarp.org",
     "contact_name": "Innovation Team",
     "location": "Washington, DC",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$500K-$5M",
-    "description": "$40M fund with JP Morgan for companies serving 50+ population — aging, care tech, health products",
-    "priority": "high"
-  },
-  {
-    "fund_name": "Rock Health Capital",
-    "contact_email": "info@rockhealthcapital.com",
-    "contact_name": "Bill Evans",
-    "location": "San Francisco, CA",
-    "focus_stages": ["Seed", "Series A"],
-    "check_size_display": "$500K-$3M",
-    "description": "Pioneer digital health VC since 2010 — 73 portfolio companies in digital health",
+    "description": "$40M fund with JP Morgan for companies serving 50+ population \u2014 aging, care tech, health products",
     "priority": "high"
   },
   {
@@ -614,9 +731,12 @@
     "contact_email": "info@generalcatalyst.com",
     "contact_name": "Chris Bischoff",
     "location": "San Francisco, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$20M",
-    "description": "$600M Health Assurance Fund — home hospital care, workforce transformation, digital health",
+    "description": "$600M Health Assurance Fund \u2014 home hospital care, workforce transformation, digital health",
     "priority": "medium"
   },
   {
@@ -624,9 +744,11 @@
     "contact_email": "info@oxeon.com",
     "contact_name": "General Inquiries",
     "location": "New York, NY",
-    "focus_stages": ["Seed"],
+    "focus_stages": [
+      "Seed"
+    ],
     "check_size_display": "$250K-$2M",
-    "description": "Healthcare-focused seed investor — 11 unicorns, $110M+ returns, executive search + venture studio",
+    "description": "Healthcare-focused seed investor \u2014 11 unicorns, $110M+ returns, executive search + venture studio",
     "priority": "high"
   },
   {
@@ -634,9 +756,12 @@
     "contact_email": "info@avenirgrowth.com",
     "contact_name": "General Inquiries",
     "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$5M-$50M",
-    "description": "Growth equity in AI-powered senior living and care technology — led Inspiren $35M Series A",
+    "description": "Growth equity in AI-powered senior living and care technology \u2014 led Inspiren $35M Series A",
     "priority": "medium"
   },
   {
@@ -644,9 +769,12 @@
     "contact_email": "info@canaan.com",
     "contact_name": "General Inquiries",
     "location": "Menlo Park, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$30M",
-    "description": "Multi-stage VC with senior care portfolio including Papa ($91M raised) — care coordination focus",
+    "description": "Multi-stage VC with senior care portfolio including Papa ($91M raised) \u2014 care coordination focus",
     "priority": "medium"
   },
   {
@@ -654,7 +782,10 @@
     "contact_email": "info@cambiahealth.com",
     "contact_name": "Strategic Investing",
     "location": "Portland, OR",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$500K-$5M",
     "description": "Health plan innovation arm investing in consumer-oriented, cost-reducing healthcare technology",
     "priority": "medium"
@@ -664,9 +795,12 @@
     "contact_email": "info@aging2.com",
     "contact_name": "General Inquiries",
     "location": "San Francisco, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$50K-$500K",
-    "description": "Global aging technology accelerator with 31+ portfolio companies — connects startups to senior living operators",
+    "description": "Global aging technology accelerator with 31+ portfolio companies \u2014 connects startups to senior living operators",
     "priority": "high"
   },
   {
@@ -674,9 +808,12 @@
     "contact_email": "info@apollo.vc",
     "contact_name": "General Inquiries",
     "location": "Berlin, Germany",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$500K-$3M",
-    "description": "Transatlantic early-stage VC targeting age-related diseases — Alzheimer's, heart disease, sarcopenia",
+    "description": "Transatlantic early-stage VC targeting age-related diseases \u2014 Alzheimer's, heart disease, sarcopenia",
     "priority": "medium"
   },
   {
@@ -684,9 +821,12 @@
     "contact_email": "info@longevity.vc",
     "contact_name": "Laura Deming",
     "location": "San Francisco, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$100K-$1M",
-    "description": "Founded by Laura Deming in 2011 — early-stage funding for longevity companies with mission-oriented founders",
+    "description": "Founded by Laura Deming in 2011 \u2014 early-stage funding for longevity companies with mission-oriented founders",
     "priority": "medium"
   },
   {
@@ -694,9 +834,12 @@
     "contact_email": "info@primetimepartners.com",
     "contact_name": "Alan Patricof",
     "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "Early-stage agetech fund by legendary VC Alan Patricof — healthcare, finserv, consumer products for older adults",
+    "description": "Early-stage agetech fund by legendary VC Alan Patricof \u2014 healthcare, finserv, consumer products for older adults",
     "priority": "high"
   },
   {
@@ -704,29 +847,25 @@
     "contact_email": "info@healthquestcapital.com",
     "contact_name": "Sam Brasch",
     "location": "USA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "Healthcare technology VC with 25+ years experience — serves on boards of healthcare companies",
+    "description": "Healthcare technology VC with 25+ years experience \u2014 serves on boards of healthcare companies",
     "priority": "medium"
-  },
-  {
-    "fund_name": "Fusion Fund",
-    "contact_email": "luzhang@fusionfund.com",
-    "contact_name": "Lu Zhang",
-    "location": "Palo Alto, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
-    "check_size_display": "$500K-$2.5M",
-    "description": "AI-first early-stage VC with $500M+ AUM — founder is medical device entrepreneur and Stanford AI researcher",
-    "priority": "high"
   },
   {
     "fund_name": "Plug and Play Health",
     "contact_email": "health@pnptc.com",
     "contact_name": "Health Team",
     "location": "Sunnyvale, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$25K-$500K",
-    "description": "Silicon Valley accelerator with dedicated health vertical — connects startups to 500+ corporate partners",
+    "description": "Silicon Valley accelerator with dedicated health vertical \u2014 connects startups to 500+ corporate partners",
     "priority": "high"
   },
   {
@@ -734,9 +873,12 @@
     "contact_email": "hello@signalfire.com",
     "contact_name": "General Inquiries",
     "location": "San Francisco, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$10M",
-    "description": "Data-driven VC with healthcare investments — uses proprietary data platform to identify opportunities",
+    "description": "Data-driven VC with healthcare investments \u2014 uses proprietary data platform to identify opportunities",
     "priority": "medium"
   },
   {
@@ -744,9 +886,12 @@
     "contact_email": "info@gv.com",
     "contact_name": "General Inquiries",
     "location": "Mountain View, CA",
-    "focus_stages": ["Seed", "Series A"],
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
     "check_size_display": "$1M-$20M",
-    "description": "$13B+ AUM with 20 AI healthcare companies — Flatiron Health, One Medical in portfolio",
+    "description": "$13B+ AUM with 20 AI healthcare companies \u2014 Flatiron Health, One Medical in portfolio",
     "priority": "medium"
   },
   {
@@ -754,9 +899,11 @@
     "contact_email": "hello@dormroomfund.com",
     "contact_name": "General Inquiries",
     "location": "Philadelphia, PA",
-    "focus_stages": ["Pre-Seed"],
+    "focus_stages": [
+      "Pre-Seed"
+    ],
     "check_size_display": "$20K-$50K",
-    "description": "Student-run VC backed by First Round Capital — invests in student/recent grad founders across healthcare",
+    "description": "Student-run VC backed by First Round Capital \u2014 invests in student/recent grad founders across healthcare",
     "priority": "medium"
   },
   {
@@ -764,9 +911,12 @@
     "contact_email": "apply@ycombinator.com",
     "contact_name": "Admissions",
     "location": "San Francisco, CA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$500K",
-    "description": "Top accelerator with 50+ healthcare/digital health alumni — $500K standard deal for 7% equity",
+    "description": "Top accelerator with 50+ healthcare/digital health alumni \u2014 $500K standard deal for 7% equity",
     "priority": "high"
   },
   {
@@ -774,9 +924,12 @@
     "contact_email": "healthtech@masschallenge.org",
     "contact_name": "HealthTech Team",
     "location": "Boston, MA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$0-$100K",
-    "description": "Healthcare accelerator with aging track — zero-equity program connecting startups to industry partners",
+    "description": "Healthcare accelerator with aging track \u2014 zero-equity program connecting startups to industry partners",
     "priority": "medium"
   },
   {
@@ -784,29 +937,129 @@
     "contact_email": "health@hax.co",
     "contact_name": "General Inquiries",
     "location": "Newark, NJ",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$100K-$250K",
-    "description": "World's first hardtech accelerator with dedicated health track — SOSV backed with $1B+ AUM",
+    "description": "World's first hardtech accelerator with dedicated health track \u2014 SOSV backed with $1B+ AUM",
     "priority": "medium"
-  },
-  {
-    "fund_name": "StartUp Health Moonshots",
-    "contact_email": "hello@startuphealth.com",
-    "contact_name": "General Inquiries",
-    "location": "New York, NY",
-    "focus_stages": ["Pre-Seed", "Seed"],
-    "check_size_display": "$250K-$2M",
-    "description": "392 health investments at 75% seed stage — healthy longevity moonshot including aging and home care",
-    "priority": "high"
   },
   {
     "fund_name": "Techstars Future of Longevity",
     "contact_email": "longevity@techstars.com",
     "contact_name": "Program Team",
     "location": "USA",
-    "focus_stages": ["Pre-Seed", "Seed"],
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
     "check_size_display": "$120K for 6%",
-    "description": "Accelerator program dedicated to all aspects of longevity and aging — annual cohorts of aging startups",
+    "description": "Accelerator program dedicated to all aspects of longevity and aging \u2014 annual cohorts of aging startups",
     "priority": "high"
+  },
+  {
+    "fund_name": "Transformation Capital",
+    "contact_email": "contact@transformcap.com",
+    "contact_name": "Team",
+    "location": "Boston, MA",
+    "focus_stages": [
+      "Seed",
+      "Series A",
+      "Growth"
+    ],
+    "check_size_display": "$1M-$20M",
+    "description": "Digital healthcare investor. Portfolio: Sword Health, Datavant, CareRev, Capital RX.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "LAUNCH Accelerator",
+    "contact_email": "apply@launch.co",
+    "contact_name": "Jason Calacanis",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$100K-$1.5M",
+    "description": "12-week accelerator. 11,000+ member angel syndicate. $140M+ deployed across 300+ deals.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Village Global",
+    "contact_email": "hello@villageglobal.com",
+    "contact_name": "Team",
+    "location": "San Francisco, CA",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$500K-$3M",
+    "description": "Seed investor backed by Bezos, Zuckerberg, Gates, Hoffman. Velocity pre-seed program. 400+ founder network.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Laconia Capital Group",
+    "contact_email": "info@laconiacapitalgroup.com",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$250K-$1M",
+    "description": "Anti-chaos seed investing in B2B software for mission-critical industries. Happy to lead rounds.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "SpringRock Ventures",
+    "contact_email": "info@springrockventures.com",
+    "contact_name": "Eric Bell",
+    "location": "Seattle, WA",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$2M-$5M",
+    "description": "Digital health, SaaS, tech-enabled services. 40+ venture-backed companies, 25+ exits. Syndicate-friendly.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "NextGen Venture Partners",
+    "contact_email": "info@nextgenvp.com",
+    "contact_name": "Team",
+    "location": "United States",
+    "focus_stages": [
+      "Pre-Seed",
+      "Seed"
+    ],
+    "check_size_display": "$500K-$2M",
+    "description": "B2B including healthtech. VP Engine provides warm intros to thousands of executives.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "HealthTech 4 Medicaid",
+    "contact_email": "info@ht4m.org",
+    "contact_name": "Team",
+    "location": "United States",
+    "focus_stages": [
+      "Seed"
+    ],
+    "check_size_display": "Network/Accelerator",
+    "description": "Mission-based Medicaid innovation org. 40+ health tech CEOs, $1B+ VC backing. 30K+ newsletter subscribers.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Able Partners",
+    "contact_email": "info@able.partners",
+    "contact_name": "Team",
+    "location": "Florida",
+    "focus_stages": [
+      "Seed",
+      "Series A"
+    ],
+    "check_size_display": "$500K-$5M",
+    "description": "Family office incubating healthcare companies. Pharmacy, medical devices, healthcare technology, logistics.",
+    "priority": "medium"
   }
 ]
