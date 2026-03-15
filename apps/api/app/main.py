@@ -99,6 +99,7 @@ from app.routers import (
     live_stream,
     team,
     agent,
+    resend_webhooks,
 )
 
 @asynccontextmanager
@@ -212,6 +213,7 @@ app.include_router(analytics.router, prefix="/analytics", tags=["Analytics & Chu
 app.include_router(landing_chat.router, prefix="/chat", tags=["Landing Page Chat"])
 app.include_router(team.router, prefix="/admin", tags=["Team Management"])
 app.include_router(agent.router, prefix="/platform/agent", tags=["AI Agent"])
+app.include_router(resend_webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 
 
 async def seed_database():
