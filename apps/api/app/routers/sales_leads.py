@@ -2053,6 +2053,86 @@ class InternalAddLeadAndEmail(BaseModel):
     campaign_name: str = "cold-outreach-mar-2026"
 
 
+class BatchEnrichEntry(BaseModel):
+    ccn: Optional[str] = None
+    provider_name: Optional[str] = None
+    state: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    zip_code: Optional[str] = None
+    website: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_name: Optional[str] = None
+
+
+@router.post("/leads/internal/batch-enrich")
+async def internal_batch_enrich(
+    request: Request,
+    items: List[BatchEnrichEntry],
+    db: Session = Depends(get_db),
+):
+    """Batch-enrich existing leads with missing contact data.
+    Matches by CCN (preferred) or provider_name+state fallback.
+    Only fills in fields that are currently null/empty — never overwrites."""
+    _require_internal_key(request)
+
+    updated = 0
+    not_found = 0
+    skipped = 0
+
+    for item in items:
+        lead = None
+        if item.ccn:
+            lead = db.query(SalesLead).filter(SalesLead.ccn == item.ccn).first()
+        if not lead and item.provider_name and item.state:
+            lead = db.query(SalesLead).filter(
+                SalesLead.provider_name.ilike(f"%{item.provider_name}%"),
+                SalesLead.state == item.state.upper(),
+            ).first()
+
+        if not lead:
+            not_found += 1
+            continue
+
+        changed = False
+        if item.phone and not lead.phone:
+            lead.phone = item.phone
+            changed = True
+        if item.address and not lead.address:
+            lead.address = item.address
+            changed = True
+        if item.city and not lead.city:
+            lead.city = item.city
+            changed = True
+        if item.zip_code and not lead.zip_code:
+            lead.zip_code = item.zip_code
+            changed = True
+        if item.website and not lead.website:
+            lead.website = item.website
+            changed = True
+        if item.contact_email and not lead.contact_email:
+            lead.contact_email = item.contact_email
+            changed = True
+        if item.contact_name and not lead.contact_name:
+            lead.contact_name = item.contact_name
+            changed = True
+
+        if changed:
+            activity = lead.activity_log or []
+            activity.append({
+                "action": "Batch enrichment",
+                "at": datetime.now(timezone.utc).isoformat(),
+            })
+            lead.activity_log = activity
+            updated += 1
+        else:
+            skipped += 1
+
+    db.commit()
+    return {"updated": updated, "not_found": not_found, "skipped_no_change": skipped, "total": len(items)}
+
+
 @router.post("/leads/internal/add-and-email")
 async def internal_add_lead_and_email(
     request: Request,
