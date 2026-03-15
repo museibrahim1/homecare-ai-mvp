@@ -547,6 +547,45 @@ def batch_update_emails(
     return {"updated": updated, "skipped": skipped, "not_found": not_found, "results": results}
 
 
+@router.post("/batch-mark-sent")
+def batch_mark_emails_sent(
+    request: Request,
+    updates: List[dict],
+    db: Session = Depends(get_db),
+):
+    """Batch mark investors as emailed via internal API key.
+    Each item: {"contact_email": "...", "subject": "...", "send_count": 1}
+    """
+    cron_secret = os.getenv("CRON_SECRET", "")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    if not (cron_secret and provided_key == cron_secret):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+    updated, not_found = 0, 0
+    now = datetime.now(timezone.utc)
+    for item in updates:
+        email = item.get("contact_email", "").strip().lower()
+        if not email:
+            continue
+        inv = db.query(Investor).filter(
+            func.lower(Investor.contact_email) == email
+        ).first()
+        if not inv:
+            not_found += 1
+            continue
+        send_count = item.get("send_count", 1)
+        inv.email_send_count = (inv.email_send_count or 0) + send_count
+        inv.last_email_sent_at = now
+        inv.last_email_subject = item.get("subject", inv.last_email_subject)
+        if inv.status in ("new", "researched"):
+            inv.status = "email_sent"
+        inv.updated_at = now
+        updated += 1
+
+    db.commit()
+    return {"updated": updated, "not_found": not_found, "total": len(updates)}
+
+
 @router.post("/bulk-status")
 def bulk_update_status(data: BulkStatusUpdate, db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     updated = db.query(Investor).filter(Investor.id.in_(data.investor_ids)).update(
