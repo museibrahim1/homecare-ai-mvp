@@ -19,7 +19,7 @@ import time
 import json
 import requests
 
-WAVESPEED_API_KEY = os.environ.get("WAVESPEED_API_KEY", "***REDACTED***")
+WAVESPEED_API_KEY = os.environ.get("WAVESPEED_API_KEY", "")
 
 SEGMENTS = [
     ("01-hook",     "Still doing care assessments the old way?"),
