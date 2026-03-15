@@ -76,3 +76,4 @@ ios-app/preview_*.png
 .wrangler/
 marketing/screen-recordings/*.mp4
 marketing/screenshots/*.png
+videos/public/screen-recordings/

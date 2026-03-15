@@ -110,6 +110,10 @@ class OutreachStats(BaseModel):
     investors_with_email: int
     investors_contacted: int
     investors_remaining: int
+    unsent_agency_emails: int = 0
+    unsent_investor_emails: int = 0
+    total_called: int = 0
+    total_with_phone: int = 0
 
 
 class WeekDayProgress(BaseModel):
@@ -524,9 +528,9 @@ def get_daily_plan(
         (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
     ).scalar() or 0
     calls_remaining = db.query(func.count(SalesLead.id)).filter(
-        (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
         SalesLead.phone.isnot(None), SalesLead.phone != "",
         SalesLead.is_contacted != True,  # noqa: E712
+        SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
     ).scalar() or 0
     total_investors = db.query(func.count(Investor.id)).scalar() or 0
     investors_with_email = db.query(func.count(Investor.id)).filter(
@@ -540,16 +544,38 @@ def get_daily_plan(
         Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
     ).scalar() or 0
 
+    unsent_agency_emails = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+        SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+        (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+    ).scalar() or 0
+    unsent_investor_emails = db.query(func.count(Investor.id)).filter(
+        Investor.contact_email.isnot(None), Investor.contact_email != "",
+        Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+        (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
+    ).scalar() or 0
+    total_called = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.is_contacted == True,  # noqa: E712
+        SalesLead.phone.isnot(None), SalesLead.phone != "",
+    ).scalar() or 0
+    total_with_phone = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.phone.isnot(None), SalesLead.phone != "",
+    ).scalar() or 0
+
     stats = OutreachStats(
         total_leads=total_leads, leads_with_email=leads_with_email,
         leads_contacted=leads_contacted, leads_remaining_email=leads_remaining_email,
         leads_no_email=leads_no_email, calls_remaining=calls_remaining,
         total_investors=total_investors, investors_with_email=investors_with_email,
         investors_contacted=investors_contacted, investors_remaining=investors_remaining,
+        unsent_agency_emails=unsent_agency_emails,
+        unsent_investor_emails=unsent_investor_emails,
+        total_called=total_called,
+        total_with_phone=total_with_phone,
     )
 
-    # --- Week progress (Mon–Fri) ---
-    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+    # --- Week progress (Mon–Sun) ---
+    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     week_progress: List[WeekDayProgress] = []
     for i, day_name in enumerate(day_names):
         day_start = week_start + timedelta(days=i)
@@ -588,7 +614,7 @@ def get_daily_plan(
 EMAILS_PER_DAY = 50
 INVESTORS_PER_DAY = 10
 CALLS_PER_DAY = 25
-FULL_WORK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+FULL_WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 # Week 0 (launched Mar 10 2026) starts on Tuesday since Monday was off.
 # All subsequent weeks are normal Mon-Fri.
@@ -610,7 +636,7 @@ TZ_ORDER = case(
 
 
 def _week_work_days(week_offset: int) -> list[tuple[str, date]]:
-    """Return list of (day_name, date) for working days in the given week."""
+    """Return list of (day_name, date) for ALL 7 days in the given week (Mon-Sun)."""
     today = _today_eastern()
     days_since_monday = today.weekday()
     this_monday = today - timedelta(days=days_since_monday)
@@ -618,14 +644,14 @@ def _week_work_days(week_offset: int) -> list[tuple[str, date]]:
 
     if week_offset == 0 and target_monday <= LAUNCH_DATE:
         return [
-            (FULL_WORK_DAYS[i], target_monday + timedelta(days=i))
-            for i in range(5)
+            (FULL_WEEK_DAYS[i], target_monday + timedelta(days=i))
+            for i in range(7)
             if (target_monday + timedelta(days=i)) >= LAUNCH_DATE
         ]
 
     return [
-        (FULL_WORK_DAYS[i], target_monday + timedelta(days=i))
-        for i in range(5)
+        (FULL_WEEK_DAYS[i], target_monday + timedelta(days=i))
+        for i in range(7)
     ]
 
 
@@ -701,10 +727,10 @@ def get_weekly_plan(
     uncalled_pool = (
         db.query(SalesLead)
         .filter(
-            (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
             SalesLead.phone.isnot(None),
             SalesLead.phone != "",
             SalesLead.is_contacted != True,  # noqa: E712
+            SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
         )
         .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
         .all()
@@ -720,7 +746,7 @@ def get_weekly_plan(
     total_weeks = 1
     while days_accum < total_days_needed:
         total_weeks += 1
-        days_accum += 5
+        days_accum += 7
 
     global_day_offset = _cumulative_days_before(week_offset)
 
@@ -913,9 +939,9 @@ def get_weekly_plan(
         (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
     ).scalar() or 0
     calls_remaining = db.query(func.count(SalesLead.id)).filter(
-        (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
         SalesLead.phone.isnot(None), SalesLead.phone != "",
         SalesLead.is_contacted != True,  # noqa: E712
+        SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
     ).scalar() or 0
     total_investors = db.query(func.count(Investor.id)).scalar() or 0
     investors_with_email = db.query(func.count(Investor.id)).filter(
@@ -929,12 +955,34 @@ def get_weekly_plan(
         Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
     ).scalar() or 0
 
+    unsent_agency_emails = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+        SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+        (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+    ).scalar() or 0
+    unsent_investor_emails = db.query(func.count(Investor.id)).filter(
+        Investor.contact_email.isnot(None), Investor.contact_email != "",
+        Investor.status.notin_(EXCLUDED_INVESTOR_STATUSES),
+        (Investor.email_send_count == 0) | (Investor.email_send_count.is_(None)),
+    ).scalar() or 0
+    total_called = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.is_contacted == True,  # noqa: E712
+        SalesLead.phone.isnot(None), SalesLead.phone != "",
+    ).scalar() or 0
+    total_with_phone = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.phone.isnot(None), SalesLead.phone != "",
+    ).scalar() or 0
+
     stats = OutreachStats(
         total_leads=total_leads, leads_with_email=leads_with_email,
         leads_contacted=leads_contacted, leads_remaining_email=leads_remaining_email,
         leads_no_email=leads_no_email, calls_remaining=calls_remaining,
         total_investors=total_investors, investors_with_email=investors_with_email,
         investors_contacted=investors_contacted, investors_remaining=investors_remaining,
+        unsent_agency_emails=unsent_agency_emails,
+        unsent_investor_emails=unsent_investor_emails,
+        total_called=total_called,
+        total_with_phone=total_with_phone,
     )
 
     all_covered = (
@@ -1759,9 +1807,9 @@ def _get_todays_plan_data(db: Session) -> dict:
     uncalled = (
         db.query(SalesLead)
         .filter(
-            (SalesLead.contact_email.is_(None)) | (SalesLead.contact_email == ""),
             SalesLead.phone.isnot(None), SalesLead.phone != "",
             SalesLead.is_contacted != True,  # noqa: E712
+            SalesLead.status.notin_(EXCLUDED_CALL_STATUSES),
         )
         .order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at)
         .limit(max(CALLS_PER_DAY - len(today_calls), 0))

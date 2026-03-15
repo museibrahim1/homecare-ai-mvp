@@ -14,6 +14,7 @@ import {
   ChevronLeft, ChevronRight as ChevronRightIcon,
   Eye, PhoneForwarded, Users, MapPin,
   Bot, Sparkles, MessageSquare,
+  ListChecks, MailX, PhoneCall, Target,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -121,6 +122,10 @@ interface WeeklyPlan {
     investors_with_email: number;
     investors_contacted: number;
     investors_remaining: number;
+    unsent_agency_emails: number;
+    unsent_investor_emails: number;
+    total_called: number;
+    total_with_phone: number;
   };
   week_start: string;
   week_end: string;
@@ -560,9 +565,36 @@ export default function CommandCenterPage() {
               </div>
             )}
 
+            {/* Unsent Emails & Call Tracking */}
+            {!loading && weeklyPlan && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                <div className="bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">
+                  <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider">Unsent Agency Emails</p>
+                  <p className="text-lg font-bold text-amber-700">{weeklyPlan.stats.unsent_agency_emails}</p>
+                </div>
+                <div className="bg-violet-50 rounded-lg px-3 py-2 border border-violet-200">
+                  <p className="text-[10px] font-semibold text-violet-500 uppercase tracking-wider">Unsent Investor Emails</p>
+                  <p className="text-lg font-bold text-violet-700">{weeklyPlan.stats.unsent_investor_emails}</p>
+                </div>
+                <div className="bg-emerald-50 rounded-lg px-3 py-2 border border-emerald-200">
+                  <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider">Numbers Called</p>
+                  <p className="text-lg font-bold text-emerald-700">{weeklyPlan.stats.total_called} / {weeklyPlan.stats.total_with_phone}</p>
+                </div>
+                <div className="bg-indigo-50 rounded-lg px-3 py-2 border border-indigo-200">
+                  <p className="text-[10px] font-semibold text-indigo-500 uppercase tracking-wider">Calls Remaining</p>
+                  <p className="text-lg font-bold text-indigo-700">{weeklyPlan.stats.calls_remaining}</p>
+                </div>
+              </div>
+            )}
+
+            {/* ── Weekly TODO ──────────────────────────────────── */}
+            {!loading && weeklyPlan && (
+              <WeeklyTodoSection weekOffset={weekOffset} weekStart={weeklyPlan.week_start} weekEnd={weeklyPlan.week_end} totalWeeks={weeklyPlan.total_weeks} stats={weeklyPlan.stats} />
+            )}
+
             {/* ── Day Picker ─────────────────────────────────── */}
             {!loading && weeklyPlan && (
-              <div className={`grid gap-2 grid-cols-2 sm:grid-cols-3 ${weeklyPlan.days.length <= 4 ? 'md:grid-cols-4' : 'md:grid-cols-5'}`}>
+              <div className={`grid gap-2 grid-cols-2 sm:grid-cols-4 ${weeklyPlan.days.length <= 4 ? 'md:grid-cols-4' : weeklyPlan.days.length <= 5 ? 'md:grid-cols-5' : weeklyPlan.days.length <= 6 ? 'md:grid-cols-6' : 'md:grid-cols-7'}`}>
                 {weeklyPlan.days.map((day, idx) => {
                   const daySent = day.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length;
                   const dayInvSent = day.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length;
@@ -627,8 +659,8 @@ export default function CommandCenterPage() {
             )}
 
             {loading && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 animate-pulse">
-                {[0,1,2,3,4].map(i => (
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 animate-pulse">
+                {[0,1,2,3,4,5,6].map(i => (
                   <div key={i} className="h-32 bg-slate-100 rounded-xl" />
                 ))}
               </div>
@@ -1107,6 +1139,143 @@ export default function CommandCenterPage() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+// ── Weekly TODO Section ──────────────────────────────────────────────
+
+interface WeeklyTodoItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+function getWeekKey(weekOffset: number, weekStart: string) {
+  return `weekly-todo-${weekStart || weekOffset}`;
+}
+
+function defaultTodosForWeek(weekOffset: number, stats: WeeklyPlan['stats']): WeeklyTodoItem[] {
+  const items: WeeklyTodoItem[] = [];
+  if (stats.unsent_agency_emails > 0) {
+    items.push({ id: `a-emails-${weekOffset}`, text: `Send ${stats.unsent_agency_emails} unsent agency emails`, done: false });
+  }
+  if (stats.unsent_investor_emails > 0) {
+    items.push({ id: `i-emails-${weekOffset}`, text: `Send ${stats.unsent_investor_emails} unsent investor emails`, done: false });
+  }
+  if (stats.calls_remaining > 0) {
+    items.push({ id: `calls-${weekOffset}`, text: `Call ${stats.calls_remaining} remaining leads with phone numbers`, done: false });
+  }
+  items.push(
+    { id: `followup-${weekOffset}`, text: 'Follow up on callbacks and warm leads', done: false },
+    { id: `crm-${weekOffset}`, text: 'Review CRM — update statuses, add notes', done: false },
+  );
+  return items;
+}
+
+function WeeklyTodoSection({ weekOffset, weekStart, weekEnd, totalWeeks, stats }: {
+  weekOffset: number;
+  weekStart: string;
+  weekEnd: string;
+  totalWeeks: number;
+  stats: WeeklyPlan['stats'];
+}) {
+  const weekKey = getWeekKey(weekOffset, weekStart);
+  const [todos, setTodos] = useState<WeeklyTodoItem[]>([]);
+  const [newTodo, setNewTodo] = useState('');
+
+  useEffect(() => {
+    const saved = localStorage.getItem(weekKey);
+    if (saved) {
+      try { setTodos(JSON.parse(saved)); } catch { setTodos(defaultTodosForWeek(weekOffset, stats)); }
+    } else {
+      setTodos(defaultTodosForWeek(weekOffset, stats));
+    }
+  }, [weekKey, weekOffset, stats]);
+
+  const saveTodos = (updated: WeeklyTodoItem[]) => {
+    setTodos(updated);
+    localStorage.setItem(weekKey, JSON.stringify(updated));
+  };
+
+  const toggleTodo = (id: string) => {
+    saveTodos(todos.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  };
+
+  const addTodo = () => {
+    const text = newTodo.trim();
+    if (!text) return;
+    saveTodos([...todos, { id: `custom-${Date.now()}`, text, done: false }]);
+    setNewTodo('');
+  };
+
+  const removeTodo = (id: string) => {
+    saveTodos(todos.filter(t => t.id !== id));
+  };
+
+  const doneCount = todos.filter(t => t.done).length;
+  const totalCount = todos.length;
+  const pct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+  return (
+    <div className="mb-5 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-xl border border-teal-200 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Target className="w-5 h-5 text-teal-600" />
+          <h3 className="font-bold text-slate-900">
+            Week {weekOffset + 1} TODO
+          </h3>
+          <span className="text-xs text-slate-500">
+            {weekStart && new Date(weekStart + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — {weekEnd && new Date(weekEnd + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-teal-700">{doneCount}/{totalCount}</span>
+          <div className="w-20 h-2 bg-teal-200 rounded-full overflow-hidden">
+            <div className="h-full bg-teal-600 rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        {todos.map(todo => (
+          <div key={todo.id} className="flex items-center gap-2 group">
+            <button
+              onClick={() => toggleTodo(todo.id)}
+              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                todo.done ? 'bg-teal-500 border-teal-500' : 'border-slate-300 hover:border-teal-400'
+              }`}
+            >
+              {todo.done && <Check className="w-3 h-3 text-white" />}
+            </button>
+            <span className={`text-sm flex-1 ${todo.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+              {todo.text}
+            </span>
+            <button
+              onClick={() => removeTodo(todo.id)}
+              className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-red-50 text-slate-300 hover:text-red-400 transition-all"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2 mt-3">
+        <input
+          type="text"
+          value={newTodo}
+          onChange={(e) => setNewTodo(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') addTodo(); }}
+          placeholder="Add a task..."
+          className="flex-1 px-3 py-1.5 bg-white/80 border border-teal-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-400 focus:border-teal-400"
+        />
+        <button
+          onClick={addTodo}
+          disabled={!newTodo.trim()}
+          className="px-3 py-1.5 bg-teal-500 text-white rounded-lg text-sm font-medium hover:bg-teal-600 transition-colors disabled:opacity-40"
+        >
+          Add
+        </button>
+      </div>
     </div>
   );
 }
@@ -1656,9 +1825,9 @@ function mockWeeklyPlan(): WeeklyPlan {
     'Andreessen Horowitz', 'General Catalyst', 'Founders Fund', 'Lux Capital',
     'NEA', 'Khosla Ventures', 'SignalFire', 'First Round', 'Bessemer', 'GV',
   ];
-  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const todayDow = new Date().getDay();
-  const todayIdx = todayDow >= 1 && todayDow <= 5 ? todayDow - 1 : 0;
+  const todayIdx = todayDow === 0 ? 6 : todayDow - 1;
 
   const now = new Date();
   const monday = new Date(now);
@@ -1703,11 +1872,11 @@ function mockWeeklyPlan(): WeeklyPlan {
         draft_body: `Dear Partner ${i + 1},\n\nI'm Muse Ibrahim, CEO of PalmCare AI...`,
         is_html: false,
       })),
-      calls: Array.from({ length: 10 }, (_, i) => ({
+      calls: Array.from({ length: 25 }, (_, i) => ({
         id: `c-${idx}-${i}`,
-        provider_name: `${cities[i]} Care Services`,
-        city: cities[i],
-        state: states[i],
+        provider_name: `${cities[i % 10]} Care Services`,
+        city: cities[i % 10],
+        state: states[i % 10],
         phone: `(${500 + i}) 555-${String(1000 + i).slice(1)}`,
         priority: priorities[i % 3],
         notes: '',
@@ -1724,11 +1893,15 @@ function mockWeeklyPlan(): WeeklyPlan {
       leads_contacted: 0,
       leads_remaining_email: 120,
       leads_no_email: 43,
-      calls_remaining: 43,
+      calls_remaining: 163,
       total_investors: 63,
       investors_with_email: 60,
       investors_contacted: 0,
       investors_remaining: 60,
+      unsent_agency_emails: 120,
+      unsent_investor_emails: 60,
+      total_called: 0,
+      total_with_phone: 163,
     },
     week_start: days[0].date,
     week_end: days[days.length - 1].date,

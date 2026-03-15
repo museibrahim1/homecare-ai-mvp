@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Agency Email Finder v4 — Fast Google-powered scraper.
+Agency Email Finder v5 — Brave Search + website crawl.
 
-Uses Startpage (Google proxy), Bing, and DuckDuckGo with connection pooling,
-load distribution, and minimal HTTP calls per agency.
+Uses Brave Search (works reliably, returns real Google-quality results)
+with deep website crawling and strict email validation.
 
 Usage:
     python3 -u scripts/find_agency_emails.py
@@ -49,52 +49,55 @@ UAS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 ]
 
 EMAIL_RE = re.compile(r'[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}')
 
 JUNK_DOMAINS = frozenset({
-    "example.com", "test.com", "email.com", "domain.com", "sentry.io",
-    "wixpress.com", "googleapis.com", "googlemail.com", "w3.org",
-    "schema.org", "gravatar.com", "wordpress.org", "wordpress.com",
+    # Search engine / tech artifacts
+    "startmail.com", "startpage.com", "mastodon.social", "brave.com",
+    "sentry.io", "wixpress.com", "sentry-next.wixpress.com",
+    "googleapis.com", "googlemail.com", "gstatic.com", "google.com",
+    "cloudflare.com", "jquery.com", "bootstrapcdn.com", "fontawesome.com",
+    "apache.org", "github.com", "wordpress.org", "wordpress.com",
+    "w3.org", "schema.org", "gravatar.com",
+    # Social / general
     "facebook.com", "twitter.com", "instagram.com", "linkedin.com",
-    "jquery.com", "cloudflare.com", "google.com", "gstatic.com",
-    "bootstrapcdn.com", "fontawesome.com", "apache.org", "github.com",
-    "youtube.com", "yelp.com", "bbb.org", "healthgrades.com",
-    "medicare.gov", "cms.gov", "your-email.com", "youremail.com",
-    "mailchimp.com", "constantcontact.com", "hubspot.com",
-    "squarespace.com", "wix.com", "godaddy.com", "weebly.com",
-    "sentry-next.wixpress.com", "placeholder.local", "noreply.com",
-    # Search engine page artifacts — NOT real agency emails
-    "startmail.com", "startpage.com", "mastodon.social",
-    "domainmarket.com", "mysite.com", "doe.com", "atom.com",
-    "brandforce.com", "telepathy.com", "community.com", "valley.com",
-    "evergreen.com", "micahrich.com", "ndiscovered.com",
-    "sentry.wixpress.com", "calrecycle.ca.gov", "hcai.ca.gov",
-    # Aggregator/directory sites (not specific agency emails)
+    "youtube.com", "pinterest.com", "tiktok.com", "reddit.com",
+    # Directories / aggregators
+    "yelp.com", "bbb.org", "healthgrades.com", "caring.com", "agingcare.com",
     "seniorcarefinder.com", "providerwire.com", "helpforcare.com",
-    "caring.com", "agingcare.com",
-    # More false positives from search engine pages/ads
-    "newyorker.com", "latofonts.com", "advanced.com",
-    "homecarefla.org", "nursa.com",
+    "yellowpages.com", "manta.com", "indeed.com", "glassdoor.com",
+    "ziprecruiter.com",
+    # Placeholder / junk
+    "example.com", "test.com", "email.com", "domain.com", "placeholder.local",
+    "your-email.com", "youremail.com", "noreply.com", "mailchimp.com",
+    "constantcontact.com", "hubspot.com", "squarespace.com", "wix.com",
+    "godaddy.com", "weebly.com", "domainmarket.com", "mysite.com",
+    "doe.com", "atom.com", "brandforce.com", "telepathy.com",
+    "community.com", "valley.com", "evergreen.com", "micahrich.com",
+    "ndiscovered.com", "newyorker.com", "latofonts.com",
+    # Government
+    "medicare.gov", "cms.gov", "hcai.ca.gov", "calrecycle.ca.gov",
 })
 
 SKIP_HOSTS = frozenset({
     "google.com", "bing.com", "microsoft.com", "duckduckgo.com",
-    "startpage.com", "facebook.com", "twitter.com", "linkedin.com",
-    "youtube.com", "yelp.com", "bbb.org", "wikipedia.org",
-    "instagram.com", "indeed.com", "glassdoor.com", "ziprecruiter.com",
-    "yellowpages.com", "manta.com", "mapquest.com", "apple.com",
-    "pinterest.com", "tiktok.com", "reddit.com", "amazon.com",
-    "medicare.gov", "cms.gov", "caring.com", "agingcare.com",
+    "startpage.com", "brave.com", "facebook.com", "twitter.com",
+    "linkedin.com", "youtube.com", "yelp.com", "bbb.org",
+    "wikipedia.org", "instagram.com", "indeed.com", "glassdoor.com",
+    "ziprecruiter.com", "yellowpages.com", "manta.com", "mapquest.com",
+    "apple.com", "pinterest.com", "tiktok.com", "reddit.com",
+    "amazon.com", "medicare.gov", "cms.gov", "caring.com",
+    "agingcare.com", "healthgrades.com", "seniorcarefinder.com",
 })
 
 GOV_KW = ["government", "county", "federal", "veterans"]
-CONTACT_PATHS = ["/contact", "/contact-us", "/about-us", "/about"]
+CONTACT_PATHS = ["/contact", "/contact-us", "/contactus", "/about-us",
+                 "/about", "/contact.html", "/about.html"]
 
-# Thread-local sessions for connection reuse
+# ── Thread-local sessions ─────────────────────────────────────────────
+
 _local = threading.local()
 
 def get_session():
@@ -102,7 +105,7 @@ def get_session():
         s = requests.Session()
         adapter = HTTPAdapter(
             pool_connections=10, pool_maxsize=10,
-            max_retries=Retry(total=1, backoff_factor=0.2))
+            max_retries=Retry(total=1, backoff_factor=0.3))
         s.mount("https://", adapter)
         s.mount("http://", adapter)
         s.verify = False
@@ -115,22 +118,32 @@ def get_session():
 
 def is_valid(email):
     email = email.lower().strip()
-    if len(email) < 6 or len(email) > 80 or "@" not in email:
+    if len(email) < 6 or len(email) > 70 or "@" not in email:
         return False
-    domain = email.rsplit("@", 1)[1]
+    local, domain = email.rsplit("@", 1)
     if domain in JUNK_DOMAINS:
         return False
-    # Reject broken/garbage domains
+    # Reject .gov emails (not the agency's own email)
+    if domain.endswith(".gov"):
+        return False
+    # Reject broken TLDs / file extensions caught by regex
     tld = domain.rsplit(".", 1)[-1] if "." in domain else ""
     if not tld or len(tld) > 6 or not tld.isalpha():
         return False
+    bad_tlds = {"png", "jpg", "gif", "svg", "css", "js", "webp", "ico", "pdf", "doc"}
+    if tld in bad_tlds:
+        return False
+    # Reject system/marketing emails
+    bad_prefixes = ("noreply", "no-reply", "donotreply", "mailer-daemon",
+                    "postmaster", "unsubscribe", "bounce", "automated",
+                    "test@", "webmaster", "root@", "abuse@")
+    if any(email.startswith(p) for p in bad_prefixes):
+        return False
+    # Reject placeholder patterns
+    if "sample" in email or "placeholder" in email or "example" in domain:
+        return False
     # Must have at least one dot in domain
     if "." not in domain:
-        return False
-    if any(email.endswith(ext) for ext in (".png", ".jpg", ".gif", ".svg", ".css", ".js")):
-        return False
-    if any(x in email for x in ("noreply", "no-reply", "donotreply", "mailer-daemon",
-                                 "postmaster", "unsubscribe", "bounce", "automated")):
         return False
     return True
 
@@ -161,50 +174,41 @@ def fetch(url, timeout=TIMEOUT):
     return None, None
 
 
-def url_domain(url):
-    return urllib.parse.urlparse(url).netloc.lower().replace("www.", "")
+def get_base(url):
+    m = re.match(r'(https?://[^/]+)', url)
+    return m.group(1) if m else None
 
 
 def filter_urls(urls):
     seen = set()
     out = []
     for u in urls:
-        d = url_domain(u)
+        d = urllib.parse.urlparse(u).netloc.lower().replace("www.", "")
         if d in seen or any(s in d for s in SKIP_HOSTS):
             continue
         seen.add(d)
         out.append(u)
-    return out[:4]
+    return out[:5]
 
 
 def extract_links(html):
+    """Extract real website URLs from search results HTML."""
     if not html:
         return []
     urls = []
     for u in re.findall(r'href="(https?://[^"]+)"', html):
         urls.append(u)
-    for u in re.findall(r'/url\?q=(https?://[^&"]+)', html):
-        urls.append(urllib.parse.unquote(u))
     return filter_urls(urls)
 
 
-# ── Search engines ────────────────────────────────────────────────────
+# ── Search engine ─────────────────────────────────────────────────────
 
-_engine_counter = 0
-_counter_lock = threading.Lock()
-
-def next_engine():
-    """Round-robin across engines to distribute load."""
-    global _engine_counter
-    with _counter_lock:
-        _engine_counter += 1
-        return _engine_counter % 3  # 0=startpage, 1=bing, 2=ddg
-
-
-def search_startpage(q):
+def search_brave(q):
+    """Brave Search returns real results as HTML."""
     try:
-        r = get_session().post("https://www.startpage.com/sp/search",
-                               data={"query": q, "cat": "web"}, timeout=TIMEOUT)
+        r = get_session().get(
+            f"https://search.brave.com/search?q={urllib.parse.quote_plus(q)}",
+            timeout=TIMEOUT)
         return r.text if r.status_code == 200 else None
     except Exception:
         return None
@@ -220,8 +224,31 @@ def search_ddg(q):
     return html
 
 
-ENGINES = [search_startpage, search_bing, search_ddg]
-ENGINE_NAMES = ["startpage", "bing", "ddg"]
+# ── Website crawl ─────────────────────────────────────────────────────
+
+def crawl_site(url):
+    """Visit homepage and contact/about pages, extract emails."""
+    emails = set()
+    html, final = fetch(url, timeout=7)
+    if not html:
+        return emails
+
+    emails.update(extract_emails(html))
+    if emails:
+        return emails
+
+    base = get_base(final or url)
+    if not base:
+        return emails
+
+    for path in CONTACT_PATHS:
+        cp, _ = fetch(base + path, timeout=5)
+        if cp:
+            emails.update(extract_emails(cp))
+        if emails:
+            break
+
+    return emails
 
 
 # ── Per-agency search ─────────────────────────────────────────────────
@@ -234,42 +261,39 @@ def find_email(agency):
     if not name:
         return ccn, None
 
-    q = f'"{name}" {city} {state} email contact'
+    q1 = f'{name} {city} {state} home health email contact'
+    q2 = f'"{name}" {state} email'
 
-    # Pick primary engine via round-robin to spread load
-    primary = next_engine()
-    order = [primary, (primary + 1) % 3, (primary + 2) % 3]
+    # === Brave Search (primary) ===
+    for q in [q1, q2]:
+        html = search_brave(q)
+        if html:
+            urls = extract_links(html)
+            for url in urls[:3]:
+                emails = crawl_site(url)
+                if emails:
+                    return ccn, sorted(emails, key=rank)[0]
+        time.sleep(random.uniform(0.2, 0.5))
 
-    for eng_idx in order:
-        html = ENGINES[eng_idx](q)
-        if not html:
-            continue
-
-        # ONLY extract links from search results — never emails
-        # (search pages contain junk emails like startmail.com, mastodon.social)
+    # === Bing (fallback) ===
+    html = search_bing(q1)
+    if html:
         urls = extract_links(html)
-        for url in urls[:3]:
-            page, final = fetch(url, timeout=7)
-            if not page:
-                continue
-            emails = extract_emails(page)
+        for url in urls[:2]:
+            emails = crawl_site(url)
             if emails:
                 return ccn, sorted(emails, key=rank)[0]
 
-            # Try /contact and /about pages on the same domain
-            if final:
-                base = re.match(r'(https?://[^/]+)', final)
-                if base:
-                    for p in CONTACT_PATHS:
-                        cp, _ = fetch(base.group(1) + p, timeout=5)
-                        if cp:
-                            emails = extract_emails(cp)
-                            if emails:
-                                return ccn, sorted(emails, key=rank)[0]
+    # === DuckDuckGo (last resort) ===
+    html = search_ddg(q1)
+    if html:
+        urls = extract_links(html)
+        for url in urls[:2]:
+            emails = crawl_site(url)
+            if emails:
+                return ccn, sorted(emails, key=rank)[0]
 
-        time.sleep(random.uniform(0.1, 0.3))
-
-    # Last resort: domain guessing
+    # === Domain guessing ===
     cleaned = re.sub(
         r'\b(llc|inc|corp|ltd|co|home health|homehealth|home care|homecare|'
         r'of|the|and|&|services?|agency|group|care|health)\b',
@@ -277,20 +301,13 @@ def find_email(agency):
     slug = re.sub(r'[^a-z0-9]', '', cleaned).strip()
     if slug and len(slug) >= 3:
         for tpl in [f"https://www.{slug}.com", f"https://{slug}.com",
-                    f"https://www.{slug}homehealth.com", f"https://www.{slug}homecare.com"]:
-            page, final = fetch(tpl, timeout=5)
-            if page and len(page) > 1000:
-                emails = extract_emails(page)
-                if emails:
-                    return ccn, sorted(emails, key=rank)[0]
-                if final:
-                    base = re.match(r'(https?://[^/]+)', final)
-                    if base:
-                        cp, _ = fetch(base.group(1) + "/contact", timeout=5)
-                        if cp:
-                            emails = extract_emails(cp)
-                            if emails:
-                                return ccn, sorted(emails, key=rank)[0]
+                    f"https://www.{slug}homehealth.com",
+                    f"https://www.{slug}homecare.com",
+                    f"https://www.{slug}hh.com",
+                    f"https://www.{slug}health.com"]:
+            emails = crawl_site(tpl)
+            if emails:
+                return ccn, sorted(emails, key=rank)[0]
 
     return ccn, None
 
@@ -320,9 +337,9 @@ def push_to_crm(found):
 
 def main():
     print("=" * 70)
-    print("PALMCARE AI — Agency Email Finder v4 (fast)")
-    print("  Engines: Startpage/Bing/DDG round-robin + website crawl")
-    print("  Workers: 25, connection pooling, minimal HTTP calls")
+    print("PALMCARE AI — Agency Email Finder v5")
+    print("  Engine: Brave Search → Bing → DDG → domain guess")
+    print("  Validation: strict (no search page emails, no .gov, no placeholders)")
     print("=" * 70)
 
     if not os.path.exists(CMS_FILE):

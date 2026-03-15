@@ -7,6 +7,7 @@ import { AdVideo } from "./compositions/AdVideo";
 import { PalmCareAd } from "./compositions/PalmCareAd";
 import { AppFlowAd } from "./compositions/AppFlowAd";
 import { ProductAd } from "./compositions/ProductAd";
+import { ReelsAd } from "./compositions/ReelsAd";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -188,6 +189,33 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+        defaultProps={{
+          showAudio: true,
+        }}
+      />
+
+      {/* ===== REELS / STORIES AD ===== */}
+      {/* 9:16 vertical video for Instagram Reels, Facebook Reels, TikTok — 45s */}
+      <Composition
+        id="ReelsAd"
+        component={ReelsAd}
+        durationInFrames={1350}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          showAudio: false,
+        }}
+      />
+
+      {/* Reels Ad with Audio */}
+      <Composition
+        id="ReelsAdWithAudio"
+        component={ReelsAd}
+        durationInFrames={1350}
+        fps={30}
+        width={1080}
+        height={1920}
         defaultProps={{
           showAudio: true,
         }}
