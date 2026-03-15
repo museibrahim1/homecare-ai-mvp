@@ -250,16 +250,6 @@
     "priority": "high"
   },
   {
-    "fund_name": "LOUD Ventures (Catalyst Health Fund)",
-    "contact_email": "info@loud.vc",
-    "contact_name": "Navin Goyal, M.D.",
-    "location": "Columbus, OH",
-    "focus_stages": ["Seed", "Series A"],
-    "check_size_display": "$250K - $2M",
-    "description": "Healthcare VC managing the Catalyst Health Fund. Focus on alternative care models, tech-enabled health and AI, precision medicine. Led by clinicians and operators.",
-    "priority": "high"
-  },
-  {
     "fund_name": "Thynk Capital",
     "contact_email": "info@thynkcapital.com",
     "contact_name": "Jim Plante",
@@ -328,16 +318,6 @@
     "check_size_display": "$1M - $10M+",
     "description": "Early-stage life science and healthcare VC since 2002. Focus on biopharmaceutical therapeutics, platform technologies, and products with shorter development cycles.",
     "priority": "medium"
-  },
-  {
-    "fund_name": "Freestyle Capital",
-    "contact_email": "info@freestyle.vc",
-    "contact_name": "David Bill",
-    "location": "San Francisco, CA",
-    "focus_stages": ["Seed"],
-    "check_size_display": "$1M - $4M",
-    "description": "Seed-stage VC. David Bill (CTO) focuses on digital health, digital therapeutics, and ML/AI in healthcare. Led seed in Keebler Health (AI for healthcare coding).",
-    "priority": "high"
   },
   {
     "fund_name": "OrbiMed",
@@ -550,26 +530,6 @@
     "priority": "medium"
   },
   {
-    "fund_name": "Digitalis Ventures",
-    "contact_email": "info@digitalisventures.com",
-    "contact_name": "Team",
-    "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
-    "check_size_display": "$1M - $10M",
-    "description": "Invests in early-stage healthcare solutions across health technologies & services, life sciences, and animal health. Located at 11 Times Square.",
-    "priority": "medium"
-  },
-  {
-    "fund_name": "Primetime Partners",
-    "contact_email": "info@primetimepartners.com",
-    "contact_name": "Alan Patricof",
-    "location": "New York, NY",
-    "focus_stages": ["Seed", "Series A"],
-    "check_size_display": "$1M - $10M",
-    "description": "Co-founded by VC pioneer Alan Patricof. Focus on aging-related healthcare, financial services, and consumer products. Seed to Series A investments.",
-    "priority": "high"
-  },
-  {
     "fund_name": "Anorak Ventures",
     "contact_email": "info@anorak.vc",
     "contact_name": "Team",
@@ -630,23 +590,113 @@
     "priority": "high"
   },
   {
-    "fund_name": "Saltgrass Capital",
-    "contact_email": "info@saltgrasscapital.com",
-    "contact_name": "Team",
-    "location": "United States",
-    "focus_stages": ["Seed", "Series A"],
-    "check_size_display": "$500K - $3M",
-    "description": "Backs B2B SaaS healthcare AI founders focused on clinical workflows, operations, and real-world impact. Emphasis on data-rich, clinically integrated, operationally scalable solutions.",
+    "fund_name": "Maverick Ventures",
+    "contact_email": "ab@maverickcap.com",
+    "contact_name": "Ambar Bhattacharyya",
+    "location": "San Francisco, CA / New York, NY",
+    "focus_stages": ["Seed", "Series A", "Growth"],
+    "check_size_display": "$1M - $25M",
+    "description": "Venture arm of Maverick Capital. 194 investments. Healthcare portfolio includes CityBlock, Devoted Health, Hims, One Medical, Chapter. Partners with founders from inception through IPO.",
     "priority": "high"
   },
   {
-    "fund_name": "Healthcare VC List (Directory)",
-    "contact_email": "info@healthcarevclist.com",
-    "contact_name": "Directory Service",
-    "location": "United States",
-    "focus_stages": ["All"],
-    "check_size_display": "N/A - Directory",
-    "description": "Manually curated database of 447 active healthcare VC firms (March 2026). Export filtered lists by sector, stage, and geography. Inactive firms removed monthly.",
-    "priority": "low"
+    "fund_name": "Third Culture Capital (3CC)",
+    "contact_email": "jpham@thirdculturecapital.com",
+    "contact_name": "Dr. Julien Pham, MD, MPH",
+    "location": "Boston, MA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$250K - $1M",
+    "description": "Physician-led healthcare seed VC investing at intersection of equity and care delivery. Backs founders with unique cross-cultural approaches to healthcare innovation. Prefers to lead rounds.",
+    "priority": "high"
   },
+  {
+    "fund_name": "Alumni Ventures (Healthtech Fund)",
+    "contact_email": "info@av.vc",
+    "contact_name": "Team",
+    "location": "Manchester, NH",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$250K - $2M",
+    "description": "America's largest venture firm for individuals, ranked Time's Top 20 VCs of 2025. Healthtech Fund invests in digital health, telemedicine, genomics, and computational biology. 20-30 companies per fund.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Providence Ventures",
+    "contact_email": "info@providenceventures.org",
+    "contact_name": "Team",
+    "location": "Seattle, WA",
+    "focus_stages": ["Seed", "Series A", "Growth"],
+    "check_size_display": "$1M - $15M",
+    "description": "$300M managed for Providence Saint Joseph Health (one of largest US health systems). Invests in digital health, tech-enabled healthcare services, and MedTech. Offers enterprise-level customer insight.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Lightspeed Venture Partners",
+    "contact_email": "info@lsvp.com",
+    "contact_name": "Gaurav Gupta",
+    "location": "Menlo Park, CA",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$25K - $20M",
+    "description": "Multi-stage firm managing $18B globally. Invests in healthcare, enterprise, consumer, and fintech. Active seed-stage health investor. Gaurav Gupta leads health investments.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Cigna Ventures",
+    "contact_email": "ventures@cigna.com",
+    "contact_name": "Team",
+    "location": "Bloomfield, CT",
+    "focus_stages": ["Seed", "Series A", "Growth"],
+    "check_size_display": "$1M - $15M",
+    "description": "Cigna Group's strategic venture arm. Invests in digital health, behavioral health, and care delivery transformation. Access to one of the largest US health insurers.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "UCSF Health Hub",
+    "contact_email": "healthhub@ucsf.edu",
+    "contact_name": "Team",
+    "location": "San Francisco, CA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$50K - $250K",
+    "description": "UCSF's digital health accelerator and investor. Provides access to leading academic medical center, clinical validation, and health system partnerships for healthcare startups.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Recode Ventures",
+    "contact_email": "vishal@recodeventures.com",
+    "contact_name": "Vishal Gulati, MD",
+    "location": "San Francisco, CA / London, UK",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$250K - $5M",
+    "description": "World's first specialist AI healthcare VC. Founded 2022. Recode Edge program with Eli Lilly for pre-seed AI healthcare startups. Team of doctors, engineers, and scientists.",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Deerfield Management",
+    "contact_email": "info@deerfield.com",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": ["Seed", "Series A", "Growth"],
+    "check_size_display": "$1M - $50M",
+    "description": "$14B+ healthcare investment firm. Deerfield invests across healthcare including digital health, health IT, and AI-driven clinical solutions. Strong payer and provider network.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Tectonic Ventures",
+    "contact_email": "info@tectonicventures.com",
+    "contact_name": "Team",
+    "location": "Philadelphia, PA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$100K - $1M",
+    "description": "Philadelphia-based early-stage VC investing in healthcare, enterprise, and deep tech. Focus on AI applications in healthcare operations and clinical workflow.",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "BIOS Partners",
+    "contact_email": "info@biospartners.com",
+    "contact_name": "Team",
+    "location": "New York, NY",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K - $2M",
+    "description": "Healthcare-focused fund investing in digital health, health IT, and clinical AI. Founded by healthcare operators with deep provider and payer network access.",
+    "priority": "medium"
+  }
 ]
