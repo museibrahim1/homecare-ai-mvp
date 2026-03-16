@@ -2133,6 +2133,38 @@ async def internal_batch_enrich(
     return {"updated": updated, "not_found": not_found, "skipped_no_change": skipped, "total": len(items)}
 
 
+class BatchClearBadEmailsRequest(BaseModel):
+    bad_domains: List[str]
+
+
+@router.post("/leads/internal/clear-bad-emails")
+async def clear_bad_emails(
+    request: Request,
+    body: BatchClearBadEmailsRequest,
+    db: Session = Depends(get_db),
+):
+    """Clear contact_email on leads whose email domain matches a bad domain list.
+    Also checks subdomains (e.g. sentry.wixpress.com for wixpress.com)."""
+    _require_internal_key(request)
+
+    leads = db.query(SalesLead).filter(SalesLead.contact_email.isnot(None)).all()
+    cleared = 0
+    bad_set = {d.lower() for d in body.bad_domains}
+
+    for lead in leads:
+        email = (lead.contact_email or "").lower().strip()
+        if not email or "@" not in email:
+            continue
+        domain = email.rsplit("@", 1)[1]
+        is_bad = domain in bad_set or any(domain.endswith("." + bd) for bd in bad_set)
+        if is_bad:
+            lead.contact_email = None
+            cleared += 1
+
+    db.commit()
+    return {"cleared": cleared, "total_checked": len(leads)}
+
+
 class BatchAddEntry(BaseModel):
     provider_name: str
     state: str

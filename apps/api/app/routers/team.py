@@ -279,9 +279,13 @@ def _send_invite_email(member: User, password: str, is_reset: bool = False):
     </div>
     """
 
-    email_svc.send_email(
-        to=member.email,
-        subject=subject,
-        html=html,
-        sender="PalmCare AI <sales@send.palmtai.com>",
-    )
+    try:
+        email_svc.send_email(
+            to=member.email,
+            subject=subject,
+            html=html,
+            sender="PalmCare AI <onboarding@resend.dev>",
+            reply_to="sales@palmtai.com",
+        )
+    except Exception as e:
+        logger.error(f"Failed to send team invite email to {member.email}: {e}")
