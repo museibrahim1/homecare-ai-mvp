@@ -240,6 +240,25 @@ async def seed_database():
         logger.error(f"Failed to create database session during startup: {e}")
         return
 
+    # Auto-add new columns if they don't exist yet
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        existing_cols = {c["name"] for c in inspector.get_columns("users")}
+        new_cols = {
+            "last_login": "TIMESTAMP WITH TIME ZONE",
+            "last_active": "TIMESTAMP WITH TIME ZONE",
+            "total_session_minutes": "JSONB DEFAULT '{}'::jsonb",
+        }
+        for col_name, col_type in new_cols.items():
+            if col_name not in existing_cols:
+                db.execute(sa_text(f'ALTER TABLE users ADD COLUMN "{col_name}" {col_type}'))
+                logger.info(f"Added column users.{col_name}")
+        db.commit()
+    except Exception as e:
+        logger.warning(f"Column migration check: {e}")
+        db.rollback()
+
     try:
         admin_exists = db.query(User).filter(User.email == "admin@palmtai.com").first()
         if not admin_exists:

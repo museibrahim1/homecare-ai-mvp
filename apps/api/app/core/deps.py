@@ -73,6 +73,17 @@ async def get_current_user(
                     headers={"WWW-Authenticate": "Bearer"},
                 )
     
+    # Track last_active for admin team members (throttled to once per minute)
+    if getattr(user, "role", "") == "admin_team":
+        now = datetime.now(timezone.utc)
+        last = getattr(user, "last_active", None)
+        if last is None or (now - (last.replace(tzinfo=timezone.utc) if last.tzinfo is None else last)).total_seconds() > 60:
+            user.last_active = now
+            try:
+                db.commit()
+            except Exception:
+                db.rollback()
+
     return user
 
 

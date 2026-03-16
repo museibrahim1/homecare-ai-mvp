@@ -169,8 +169,17 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
             mfa_token=mfa_token,
         )
     
-    access_token = create_access_token(data={"sub": str(user.id)})
-    
+    # Admin team members get longer sessions (7 days) for activity tracking
+    if getattr(user, "role", "") == "admin_team":
+        expires = timedelta(days=7)
+    else:
+        expires = None  # uses default from settings
+    access_token = create_access_token(data={"sub": str(user.id)}, expires_delta=expires)
+
+    # Track last login time
+    user.last_login = datetime.now(timezone.utc)
+    db.commit()
+
     # HIPAA: Audit log successful login
     log_action(
         db=db, user_id=user.id, action="user_login", 

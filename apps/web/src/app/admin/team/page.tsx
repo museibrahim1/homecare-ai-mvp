@@ -30,6 +30,8 @@ interface TeamMember {
   phone: string | null;
   temp_password: boolean;
   created_at: string | null;
+  last_login: string | null;
+  last_active: string | null;
 }
 
 export default function TeamManagementPage() {
@@ -132,6 +134,31 @@ export default function TeamManagementPage() {
     setActionLoading(null);
   };
 
+  const resendInvite = async (member: TeamMember) => {
+    setActionLoading(member.id);
+    try {
+      const res = await fetch(`${API}/admin/team/${member.id}/resend-invite`, { method: 'POST', headers: authHeaders() });
+      if (res.ok) {
+        setToast(`Invite resent to ${member.email} with new credentials`);
+        setTimeout(() => setToast(''), 4000);
+        loadMembers();
+      }
+    } catch { /* ignore */ }
+    setActionLoading(null);
+  };
+
+  const formatTimeAgo = (iso: string | null) => {
+    if (!iso) return 'Never';
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  };
+
   const updatePermissions = async (member: TeamMember, permissions: string[]) => {
     try {
       await fetch(`${API}/admin/team/${member.id}/permissions`, {
@@ -191,6 +218,7 @@ export default function TeamManagementPage() {
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <th className="px-5 py-3 text-left text-slate-500 font-semibold">Member</th>
                     <th className="px-5 py-3 text-left text-slate-500 font-semibold">Permissions</th>
+                    <th className="px-5 py-3 text-left text-slate-500 font-semibold">Activity</th>
                     <th className="px-5 py-3 text-left text-slate-500 font-semibold">Status</th>
                     <th className="px-5 py-3 text-right text-slate-500 font-semibold">Actions</th>
                   </tr>
@@ -212,6 +240,12 @@ export default function TeamManagementPage() {
                         </div>
                       </td>
                       <td className="px-5 py-4">
+                        <div className="text-xs text-slate-500">
+                          <div>Login: <span className="font-medium text-slate-700">{formatTimeAgo(m.last_login)}</span></div>
+                          <div>Active: <span className={`font-medium ${m.last_active && (Date.now() - new Date(m.last_active).getTime()) < 300000 ? 'text-green-600' : 'text-slate-700'}`}>{formatTimeAgo(m.last_active)}</span></div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
                         {m.is_active ? (
                           <span className="flex items-center gap-1 text-green-600 text-xs font-semibold">
                             <CheckCircle className="w-3.5 h-3.5" /> Active
@@ -226,7 +260,16 @@ export default function TeamManagementPage() {
                         )}
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => resendInvite(m)}
+                            disabled={actionLoading === m.id}
+                            className="text-slate-400 hover:text-teal-600 transition p-1.5 rounded-lg hover:bg-teal-50"
+                            title="Resend invite email"
+                            aria-label={`Resend invite to ${m.full_name}`}
+                          >
+                            <Mail className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => resetPassword(m)}
                             disabled={actionLoading === m.id}

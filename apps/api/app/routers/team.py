@@ -62,9 +62,27 @@ class TeamMemberResponse(BaseModel):
     phone: Optional[str] = None
     temp_password: bool = False
     created_at: Optional[str] = None
+    last_login: Optional[str] = None
+    last_active: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+def _member_response(m: User) -> TeamMemberResponse:
+    return TeamMemberResponse(
+        id=str(m.id),
+        full_name=m.full_name,
+        email=m.email,
+        role=m.role,
+        permissions=m.permissions or [],
+        is_active=m.is_active,
+        phone=m.phone,
+        temp_password=m.temp_password,
+        created_at=m.created_at.isoformat() if m.created_at else None,
+        last_login=m.last_login.isoformat() if getattr(m, "last_login", None) else None,
+        last_active=m.last_active.isoformat() if getattr(m, "last_active", None) else None,
+    )
 
 
 # ── Endpoints ────────────────────────────────────────────────
@@ -94,6 +112,8 @@ def list_team_members(
             phone=m.phone,
             temp_password=m.temp_password,
             created_at=m.created_at.isoformat() if m.created_at else None,
+            last_login=m.last_login.isoformat() if getattr(m, "last_login", None) else None,
+            last_active=m.last_active.isoformat() if getattr(m, "last_active", None) else None,
         )
         for m in members
     ]
@@ -135,17 +155,7 @@ def invite_team_member(
 
     logger.info(f"Team member invited: {body.email} by {ceo.email}")
 
-    return TeamMemberResponse(
-        id=str(member.id),
-        full_name=member.full_name,
-        email=member.email,
-        role=member.role,
-        permissions=member.permissions or [],
-        is_active=member.is_active,
-        phone=member.phone,
-        temp_password=member.temp_password,
-        created_at=member.created_at.isoformat() if member.created_at else None,
-    )
+    return _member_response(member)
 
 
 @router.put("/team/{user_id}/permissions", response_model=TeamMemberResponse)
@@ -170,17 +180,7 @@ def update_team_permissions(
 
     logger.info(f"Permissions updated for {member.email}: {body.permissions}")
 
-    return TeamMemberResponse(
-        id=str(member.id),
-        full_name=member.full_name,
-        email=member.email,
-        role=member.role,
-        permissions=member.permissions or [],
-        is_active=member.is_active,
-        phone=member.phone,
-        temp_password=member.temp_password,
-        created_at=member.created_at.isoformat() if member.created_at else None,
-    )
+    return _member_response(member)
 
 
 @router.delete("/team/{user_id}")
@@ -221,6 +221,28 @@ def reset_team_password(
     _send_invite_email(member, temp_pw, is_reset=True)
 
     logger.info(f"Password reset for team member: {member.email}")
+    return {"ok": True}
+
+
+@router.post("/team/{user_id}/resend-invite")
+def resend_team_invite(
+    user_id: str,
+    db: Session = Depends(get_db),
+    ceo: User = Depends(require_ceo_only),
+):
+    """Resend invite email with a fresh password for a team member."""
+    member = db.query(User).filter(User.id == user_id, User.invited_by.isnot(None)).first()
+    if not member:
+        raise HTTPException(404, "Team member not found")
+
+    temp_pw = _generate_temp_password()
+    member.hashed_password = get_password_hash(temp_pw)
+    member.temp_password = True
+    db.commit()
+
+    _send_invite_email(member, temp_pw, is_reset=False)
+
+    logger.info(f"Invite resent for team member: {member.email}")
     return {"ok": True}
 
 

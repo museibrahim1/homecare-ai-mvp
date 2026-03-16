@@ -53,6 +53,11 @@ class User(Base, TimestampMixin):
     permissions = Column(JSONB, default=list, server_default="[]")
     invited_by = Column(String(36), nullable=True)
     temp_password = Column(Boolean, default=False, nullable=False, server_default="false")
+
+    # Activity tracking for admin team members
+    last_login = Column(DateTime(timezone=True), nullable=True)
+    last_active = Column(DateTime(timezone=True), nullable=True)
+    total_session_minutes = Column(JSONB, default=dict, server_default="{}")
     
     @property
     def voiceprint(self):
