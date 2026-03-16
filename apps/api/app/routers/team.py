@@ -324,7 +324,7 @@ def _require_internal_key(request: Request):
         raise HTTPException(401, "Invalid or missing API key")
 
 
-@router.get("/team/internal/list")
+@router.get("/team-internal/list")
 def internal_list_team(request: Request, db: Session = Depends(get_db)):
     """List team members (internal key auth, no JWT)."""
     _require_internal_key(request)
@@ -332,7 +332,7 @@ def internal_list_team(request: Request, db: Session = Depends(get_db)):
     return [{"id": str(m.id), "email": m.email, "full_name": m.full_name, "role": m.role, "is_active": m.is_active, "permissions": m.permissions or []} for m in members]
 
 
-@router.post("/team/internal/{user_id}/resend-invite")
+@router.post("/team-internal/{user_id}/resend-invite")
 def internal_resend_invite(user_id: str, request: Request, db: Session = Depends(get_db)):
     """Resend invite (internal key auth)."""
     _require_internal_key(request)
