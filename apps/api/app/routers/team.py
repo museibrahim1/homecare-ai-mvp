@@ -7,11 +7,12 @@ marketing, and analytics workspaces.
 """
 
 import logging
+import os
 import secrets
 import string
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -311,3 +312,36 @@ def _send_invite_email(member: User, password: str, is_reset: bool = False):
         )
     except Exception as e:
         logger.error(f"Failed to send team invite email to {member.email}: {e}")
+
+
+# ── Internal Endpoints (key-auth) ────────────────────────────
+
+def _require_internal_key(request: Request):
+    expected = os.getenv("INTERNAL_API_KEY", "")
+    cron = os.getenv("CRON_SECRET", "")
+    provided = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    if not ((expected and provided == expected) or (provided == cron)):
+        raise HTTPException(401, "Invalid or missing API key")
+
+
+@router.get("/team/internal/list")
+def internal_list_team(request: Request, db: Session = Depends(get_db)):
+    """List team members (internal key auth, no JWT)."""
+    _require_internal_key(request)
+    members = db.query(User).filter(User.invited_by.isnot(None)).all()
+    return [{"id": str(m.id), "email": m.email, "full_name": m.full_name, "role": m.role, "is_active": m.is_active, "permissions": m.permissions or []} for m in members]
+
+
+@router.post("/team/internal/{user_id}/resend-invite")
+def internal_resend_invite(user_id: str, request: Request, db: Session = Depends(get_db)):
+    """Resend invite (internal key auth)."""
+    _require_internal_key(request)
+    member = db.query(User).filter(User.id == user_id, User.invited_by.isnot(None)).first()
+    if not member:
+        raise HTTPException(404, "Team member not found")
+    temp_pw = _generate_temp_password()
+    member.hashed_password = get_password_hash(temp_pw)
+    member.temp_password = True
+    db.commit()
+    _send_invite_email(member, temp_pw)
+    return {"ok": True, "email": member.email}
