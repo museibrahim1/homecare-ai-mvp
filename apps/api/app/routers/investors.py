@@ -531,7 +531,8 @@ def batch_update_emails(
             results.append({"fund_name": fund_name, "status": "not_found"})
             continue
 
-        if inv.contact_email and inv.contact_email.strip():
+        force = item.get("force", False)
+        if inv.contact_email and inv.contact_email.strip() and not force:
             skipped += 1
             results.append({"fund_name": fund_name, "status": "skipped", "reason": "already_has_email", "existing": inv.contact_email})
             continue
