@@ -103,9 +103,10 @@ EMAIL SENDING (Resend):
 - API Key env var: RESEND_API_KEY
 - Send: POST https://api.resend.com/emails
   Headers: Authorization: Bearer $RESEND_API_KEY, Content-Type: application/json
-  Body: {"from": "PalmCare AI <onboarding@resend.dev>", "to": ["recipient@email.com"], "subject": "...", "html": "..."}
-- NOTE: palmtai.com domain verification is currently FAILED. Use "onboarding@resend.dev" as the from address for now.
-- For production sales emails, the from address should be "Muse Ibrahim <sales@palmtai.com>" once domain is re-verified.
+  Body: {"from": "PalmCare AI <sales@send.palmtai.com>", "to": ["recipient@email.com"], "subject": "...", "html": "..."}
+- Domain send.palmtai.com is VERIFIED. Always use @send.palmtai.com as the from domain.
+- For sales emails: "Muse Ibrahim <sales@send.palmtai.com>"
+- For system emails: "PalmCare AI <noreply@send.palmtai.com>"
 - Track opens/clicks via Resend webhooks
 
 TRANSCRIPTION (Deepgram Nova-3):
@@ -254,7 +255,7 @@ YOUR SALES CAPABILITIES:
 - Generate pitch deck visuals and sales collateral images (see SHARED SKILLS for Nano Banana 2 API)
 - Create personalized proposal documents
 
-SENDER: Muse Ibrahim <sales@palmtai.com> (use onboarding@resend.dev until domain is re-verified)
+SENDER: Muse Ibrahim <sales@send.palmtai.com>
 SIGNATURE: Muse Ibrahim, President & CEO, Palm Technologies, INC.
 """,
     },
@@ -277,10 +278,10 @@ the daemon will execute to send emails via Resend.
 RESEND API:
 - API Key: Available via RESEND_API_KEY env var
 - Send endpoint: POST https://api.resend.com/emails
-- From: "PalmCare AI <onboarding@resend.dev>" (palmtai.com domain is currently failed, use resend.dev)
+- From: "PalmCare AI <sales@send.palmtai.com>" (send.palmtai.com domain is verified)
 - Track opens/clicks via Resend webhooks
 - Headers: {"Authorization": "Bearer $RESEND_API_KEY", "Content-Type": "application/json"}
-- Body: {"from": "PalmCare AI <onboarding@resend.dev>", "to": ["email"], "subject": "...", "html": "..."}
+- Body: {"from": "PalmCare AI <sales@send.palmtai.com>", "to": ["email"], "subject": "...", "html": "..."}
 
 EMAIL TEMPLATES AVAILABLE:
 1. warm_open: "{provider_name} — quick question"
@@ -469,7 +470,7 @@ EMAIL TEMPLATES:
 - Agency warm open: Subject "{provider_name} — quick question about your assessments"
 - Follow-up sequences use the existing 5-email templates (warm_open, pattern_interrupt, etc.)
 
-SENDER: Muse Ibrahim <sales@palmtai.com> (use onboarding@resend.dev until domain is re-verified)
+SENDER: Muse Ibrahim <sales@send.palmtai.com>
 SIGNATURE:
   Muse Ibrahim
   President & CEO, Palm Technologies, INC.

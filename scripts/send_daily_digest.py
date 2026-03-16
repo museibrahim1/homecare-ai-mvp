@@ -242,7 +242,7 @@ def send_via_resend(subject: str, html: str):
             "Content-Type": "application/json",
         },
         json={
-            "from": "PalmCare AI <onboarding@resend.dev>",
+            "from": "PalmCare AI <sales@send.palmtai.com>",
             "to": [CEO_WORK_EMAIL],
             "subject": subject,
             "html": html,

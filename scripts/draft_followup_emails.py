@@ -172,7 +172,7 @@ def send_draft_for_review(f, html):
             "Content-Type": "application/json",
         },
         json={
-            "from": "PalmCare AI <onboarding@resend.dev>",
+            "from": "PalmCare AI <sales@send.palmtai.com>",
             "to": [CEO_EMAIL],
             "subject": review_subject,
             "html": review_html,

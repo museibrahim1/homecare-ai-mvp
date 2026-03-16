@@ -61,10 +61,12 @@ ALLOWED_SENDERS = {
 }
 
 REPLY_TO = "museibrahim@palmtai.com"
-FROM_ADDRESS = "PalmCare AI Agent <onboarding@resend.dev>"
+FROM_ADDRESS = "PalmCare AI Agent <noreply@send.palmtai.com>"
 
 IGNORED_SENDERS = {
     "onboarding@resend.dev",
+    "sales@send.palmtai.com",
+    "noreply@send.palmtai.com",
     "noreply@redditmail.com",
     "noreply@google.com",
     "workspace-noreply@google.com",

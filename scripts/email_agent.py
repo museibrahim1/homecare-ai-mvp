@@ -41,7 +41,7 @@ PROJECT_ROOT = next((p for p in _candidate_roots if (p / ".git").is_dir()), _scr
 DRAFTS_DIR = Path.home() / ".palmcare" / "email-drafts"
 
 PITCH_DECK_PATH = PROJECT_ROOT / "docs" / "PalmCare_Deck_v4.pdf"
-SENDER_EMAIL = "PalmCare AI <onboarding@resend.dev>"
+SENDER_EMAIL = "PalmCare AI <sales@send.palmtai.com>"
 SIGNATURE = """
 Muse Ibrahim
 President & CEO, Palm Technologies, INC.

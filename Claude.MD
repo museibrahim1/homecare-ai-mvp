@@ -24,7 +24,7 @@
 | Transcription | Deepgram | Nova-3 |
 | Transcription fallback | OpenAI | Whisper-1 |
 | AI Analysis | Anthropic | Claude Sonnet 4 |
-| Email sending | Resend | `onboarding@resend.dev` (palmtai.com NOT verified) |
+| Email sending | Resend | `sales@send.palmtai.com` (send.palmtai.com VERIFIED) |
 | Demo booking | `/demos/book` API | Google Calendar + Meet auto-scheduling |
 
 ---

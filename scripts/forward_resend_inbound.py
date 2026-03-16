@@ -13,7 +13,7 @@ from datetime import datetime
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 FORWARD_TO = "museibrahim@palmtai.com"
-FROM_ADDRESS = "PalmCare AI <onboarding@resend.dev>"
+FROM_ADDRESS = "PalmCare AI <noreply@send.palmtai.com>"
 CUTOFF_DATE = datetime(2026, 2, 17)
 MAX_EMAILS = 2000
 MAX_PAGES = 100

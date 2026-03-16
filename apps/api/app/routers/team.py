@@ -284,7 +284,7 @@ def _send_invite_email(member: User, password: str, is_reset: bool = False):
             to=member.email,
             subject=subject,
             html=html,
-            sender="PalmCare AI <onboarding@resend.dev>",
+            sender="PalmCare AI <sales@send.palmtai.com>",
             reply_to="sales@palmtai.com",
         )
     except Exception as e:
