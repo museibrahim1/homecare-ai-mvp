@@ -2157,6 +2157,144 @@ async def clear_bad_emails(
     return {"cleared": cleared, "total_checked": len(leads)}
 
 
+@router.post("/leads/internal/cleanup-hospitals-gov")
+async def cleanup_hospitals_gov(
+    request: Request,
+    dry_run: bool = True,
+    db: Session = Depends(get_db),
+):
+    """Remove hospitals, government agencies, and leads with bad phone/email data.
+
+    Pass ?dry_run=false to actually delete. Default is dry run (report only).
+    """
+    import re
+    _require_internal_key(request)
+
+    HOSPITAL_KEYWORDS = [
+        "hospital", "medical center", "medical ctr", "med ctr", "health system",
+        "health systems", "regional medical", "community hospital", "general hospital",
+        "memorial hospital", "children's hospital", "childrens hospital",
+        "veterans", "va medical", "va health", "department of veterans",
+        "rehabilitation hospital", "rehab hospital", "surgical center",
+        "ambulatory surgical", "dialysis", "hospice", "skilled nursing facility",
+        "snf ", "nursing home", "long term acute", "ltac", "psychiatric",
+        "behavioral health", "mental health center",
+    ]
+
+    GOV_KEYWORDS = [
+        "county", "city of ", "state of ", "department of health",
+        "dept of health", "public health", "government", "municipal",
+        "bureau", "division of ", "office of ",
+        "indian health", "tribal", "military",
+    ]
+
+    GOV_OWNERSHIP = ["Government Operated", "Government", "government"]
+
+    BAD_EMAIL_PATTERNS = [
+        r"^(test|example|fake|noreply|no-reply|donotreply|admin@localhost)",
+        r"@(example\.com|test\.com|localhost|mailinator\.com|guerrillamail\.com|tempmail\.com|throwaway\.email|yopmail\.com)",
+        r"@(startmail\.com|mastodon\.social|sentry\.wixpress\.com|wixpress\.com|shiftdigital\.com)",
+        r"^(support@startmail|mickeymouse@|firstname@|info@info\.)",
+    ]
+
+    BAD_PHONE_PATTERNS = [
+        r"^(\+?1)?[02-9]00",
+        r"^(\+?1)?555",
+        r"^0{7,}",
+        r"^1{10}",
+        r"^(000|111|222|333|444|555|666|777|888|999)",
+    ]
+
+    all_leads = db.query(SalesLead).all()
+
+    hospitals = []
+    gov_agencies = []
+    bad_emails = []
+    bad_phones = []
+    too_short_phones = []
+
+    for lead in all_leads:
+        name_lower = (lead.provider_name or "").lower()
+
+        if any(kw in name_lower for kw in HOSPITAL_KEYWORDS):
+            hospitals.append({"id": str(lead.id), "name": lead.provider_name, "state": lead.state, "reason": "hospital_keyword"})
+            continue
+
+        if lead.ownership_type in GOV_OWNERSHIP or any(kw in name_lower for kw in GOV_KEYWORDS):
+            gov_agencies.append({"id": str(lead.id), "name": lead.provider_name, "state": lead.state,
+                                 "ownership": lead.ownership_type, "reason": "government"})
+            continue
+
+        email = (lead.contact_email or "").strip().lower()
+        if email:
+            is_bad_email = False
+            for pat in BAD_EMAIL_PATTERNS:
+                if re.search(pat, email):
+                    is_bad_email = True
+                    break
+            if not is_bad_email and ("@" not in email or "." not in email.split("@")[-1]):
+                is_bad_email = True
+            if is_bad_email:
+                bad_emails.append({"id": str(lead.id), "name": lead.provider_name, "email": email})
+
+        phone = re.sub(r"[^\d]", "", lead.phone or "")
+        if phone:
+            if len(phone) < 10:
+                too_short_phones.append({"id": str(lead.id), "name": lead.provider_name, "phone": lead.phone})
+            else:
+                for pat in BAD_PHONE_PATTERNS:
+                    if re.match(pat, phone):
+                        bad_phones.append({"id": str(lead.id), "name": lead.provider_name, "phone": lead.phone})
+                        break
+
+    deleted_count = 0
+    email_cleared = 0
+    phone_cleared = 0
+
+    if not dry_run:
+        delete_ids = set()
+        for item in hospitals + gov_agencies:
+            delete_ids.add(item["id"])
+
+        if delete_ids:
+            from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+            deleted_count = db.query(SalesLead).filter(
+                SalesLead.id.in_(list(delete_ids))
+            ).delete(synchronize_session="fetch")
+
+        for item in bad_emails:
+            lead = db.query(SalesLead).filter(SalesLead.id == item["id"]).first()
+            if lead:
+                lead.contact_email = None
+                email_cleared += 1
+
+        for item in bad_phones + too_short_phones:
+            lead = db.query(SalesLead).filter(SalesLead.id == item["id"]).first()
+            if lead:
+                lead.phone = None
+                phone_cleared += 1
+
+        db.commit()
+
+    return {
+        "dry_run": dry_run,
+        "total_leads": len(all_leads),
+        "hospitals_found": len(hospitals),
+        "gov_agencies_found": len(gov_agencies),
+        "bad_emails_found": len(bad_emails),
+        "bad_phones_found": len(bad_phones),
+        "too_short_phones_found": len(too_short_phones),
+        "deleted": deleted_count,
+        "emails_cleared": email_cleared,
+        "phones_cleared": phone_cleared,
+        "hospital_samples": hospitals[:20],
+        "gov_samples": gov_agencies[:20],
+        "bad_email_samples": bad_emails[:20],
+        "bad_phone_samples": bad_phones[:10],
+        "short_phone_samples": too_short_phones[:10],
+    }
+
+
 class BatchAddEntry(BaseModel):
     provider_name: str
     state: str
