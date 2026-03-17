@@ -270,8 +270,13 @@ async def seed_database():
             'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_contact_email ON sales_leads (contact_email)',
             'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_sequence_step ON sales_leads (sequence_step)',
             'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_next_email ON sales_leads (next_email_scheduled_at)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_last_email ON sales_leads (last_email_sent_at)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_is_contacted ON sales_leads (is_contacted)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_email_send ON sales_leads (email_send_count)',
             'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_investors_contact_email ON investors (contact_email)',
             'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_investors_investor_type ON investors (investor_type)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_investors_last_email ON investors (last_email_sent_at)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_investors_email_send ON investors (email_send_count)',
         ]
         for idx_sql in perf_indexes:
             try:

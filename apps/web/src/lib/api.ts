@@ -11,7 +11,7 @@ export function formatLocalDate(date: Date): string {
 class ApiClient {
   private static readonly TIMEOUT_MS = 30000;
   private static readonly MAX_RETRIES = 1;
-  private static readonly CACHE_TTL_MS = 5000; // 5s stale-while-revalidate for GET
+  private static readonly CACHE_TTL_MS = 15000; // 15s stale-while-revalidate for GET
   private cache = new Map<string, { data: any; ts: number }>();
 
   private getCached<T>(key: string): T | null {
