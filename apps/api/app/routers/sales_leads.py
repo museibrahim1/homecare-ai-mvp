@@ -2230,7 +2230,8 @@ async def cleanup_hospitals_gov(
 
         is_gov_ownership = lead.ownership_type in GOV_OWNERSHIP
         is_gov_name = any(kw in name_lower for kw in GOV_KEYWORDS)
-        if is_gov_ownership or (is_gov_name and not is_home_care):
+        is_private = (lead.ownership_type or "").strip() in ("Proprietary", "Non-Profit", "-", "")
+        if is_gov_ownership or (is_gov_name and not is_home_care and not is_private):
             gov_agencies.append({"id": str(lead.id), "name": lead.provider_name, "state": lead.state,
                                  "ownership": lead.ownership_type, "reason": "government"})
             continue
