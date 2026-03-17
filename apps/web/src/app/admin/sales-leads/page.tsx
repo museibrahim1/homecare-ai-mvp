@@ -279,7 +279,10 @@ export default function SalesLeadsPage() {
         const res = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
         if (res.ok) {
           const user = await res.json();
-          if (user.role === 'admin' && user.email?.endsWith('@palmtai.com')) {
+          const isCeo = user.role === 'admin' && user.email?.endsWith('@palmtai.com');
+          const perms: string[] = user.permissions || [];
+          const hasAccess = isCeo || perms.includes('admin_full') || perms.includes('sales_leads');
+          if (hasAccess) {
             setIsAuthorized(true);
             loadData();
           } else {

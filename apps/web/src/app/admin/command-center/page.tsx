@@ -216,6 +216,15 @@ export default function CommandCenterPage() {
   const [yesterdaySummary, setYesterdaySummary] = useState('');
   const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Task creation for team members
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState('high');
+  const [newTaskDueDate, setNewTaskDueDate] = useState('');
+  const [newTaskAssignee, setNewTaskAssignee] = useState('');
+  const [creatingTask, setCreatingTask] = useState(false);
+
   // AI Agent
   const [agentOpen, setAgentOpen] = useState(false);
   const [agentInput, setAgentInput] = useState('');
@@ -223,6 +232,13 @@ export default function CommandCenterPage() {
   const [agentLoading, setAgentLoading] = useState(false);
   const agentScrollRef = useRef<HTMLDivElement | null>(null);
   const agentInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Current user info & tasks
+  const [currentUser, setCurrentUser] = useState<{ full_name?: string; email?: string; role?: string } | null>(null);
+  const [myTasks, setMyTasks] = useState<Array<{
+    id: string; title: string; description?: string; status: string;
+    priority: string; due_date?: string; assigned_by_name?: string;
+  }>>([]);
 
   // ── API helpers ────────────────────────────────────────────────────
 
@@ -305,10 +321,24 @@ export default function CommandCenterPage() {
     } catch { /* ignore */ }
   }, [apiFetch]);
 
+  const loadUserInfo = useCallback(async () => {
+    try {
+      const user = await apiFetch('/auth/me');
+      setCurrentUser(user);
+    } catch { /* ignore */ }
+  }, [apiFetch]);
+
+  const loadMyTasks = useCallback(async () => {
+    try {
+      const tasks = await apiFetch('/notes/tasks?assigned_to_me=true');
+      setMyTasks((tasks || []).filter((t: any) => t.status !== 'done' && t.status !== 'cancelled'));
+    } catch { /* ignore */ }
+  }, [apiFetch]);
+
   // Load everything in parallel on mount
   useEffect(() => {
-    Promise.all([loadWeeklyPlan(), loadCallbacks(), loadTeamAndStates()]);
-  }, [loadWeeklyPlan, loadCallbacks, loadTeamAndStates]);
+    Promise.all([loadWeeklyPlan(), loadCallbacks(), loadTeamAndStates(), loadUserInfo(), loadMyTasks()]);
+  }, [loadWeeklyPlan, loadCallbacks, loadTeamAndStates, loadUserInfo, loadMyTasks]);
 
   const handleMarkCallback = async (leadId: string, callbackNotes: string) => {
     await apiFetch(`/platform/outreach/mark-callback/${leadId}`, {
@@ -346,6 +376,31 @@ export default function CommandCenterPage() {
     } finally {
       setAssigning(false);
     }
+  };
+
+  const handleCreateTask = async () => {
+    if (!newTaskTitle.trim()) return;
+    setCreatingTask(true);
+    try {
+      await apiFetch('/notes/tasks', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: newTaskTitle.trim(),
+          description: newTaskDescription.trim() || null,
+          priority: newTaskPriority,
+          due_date: newTaskDueDate || null,
+          assigned_to_id: newTaskAssignee || null,
+        }),
+      });
+      setTaskModalOpen(false);
+      setNewTaskTitle('');
+      setNewTaskDescription('');
+      setNewTaskPriority('high');
+      setNewTaskDueDate('');
+      setNewTaskAssignee('');
+      loadMyTasks();
+    } catch { /* ignore */ }
+    finally { setCreatingTask(false); }
   };
 
   // ── CEO Notes persistence ─────────────────────────────────────────
@@ -518,7 +573,7 @@ export default function CommandCenterPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <greeting.Icon className="w-5 h-5 text-teal-500 shrink-0" />
-                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">{greeting.text}, Muse</h1>
+                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">{greeting.text}, {currentUser?.full_name?.split(' ')[0] || 'there'}</h1>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <p className="text-slate-500 text-xs sm:text-sm">
@@ -599,6 +654,60 @@ export default function CommandCenterPage() {
             {/* ── Weekly TODO ──────────────────────────────────── */}
             {!loading && weeklyPlan && (
               <WeeklyTodoSection weekOffset={weekOffset} weekStart={weeklyPlan.week_start} weekEnd={weeklyPlan.week_end} totalWeeks={weeklyPlan.total_weeks} stats={weeklyPlan.stats} />
+            )}
+
+            {/* ── Priority Tasks (assigned to this user) ─── */}
+            {!loading && myTasks.length > 0 && (
+              <div className="mb-5 bg-gradient-to-r from-teal-50 to-emerald-50 rounded-xl border border-teal-200 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <ListChecks className="w-5 h-5 text-teal-600" />
+                  <h3 className="text-sm font-bold text-teal-800">Priority Tasks</h3>
+                  <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">{myTasks.length}</span>
+                </div>
+                <div className="space-y-2">
+                  {myTasks.map(task => {
+                    const pCfg: Record<string, string> = {
+                      urgent: 'bg-red-100 text-red-700 border-red-200',
+                      high: 'bg-orange-100 text-orange-700 border-orange-200',
+                      medium: 'bg-amber-100 text-amber-700 border-amber-200',
+                      low: 'bg-slate-100 text-slate-600 border-slate-200',
+                    };
+                    return (
+                      <div key={task.id} className="flex items-center gap-3 bg-white rounded-lg px-3 py-2.5 border border-slate-200 shadow-sm">
+                        <button
+                          onClick={async () => {
+                            try {
+                              await apiFetch(`/notes/tasks/${task.id}/complete`, { method: 'PUT' });
+                              setMyTasks(prev => prev.filter(t => t.id !== task.id));
+                            } catch { /* ignore */ }
+                          }}
+                          className="w-5 h-5 rounded-full border-2 border-teal-400 hover:bg-teal-100 flex items-center justify-center transition-colors shrink-0"
+                          title="Mark complete"
+                        >
+                          <Check className="w-3 h-3 text-teal-500 opacity-0 hover:opacity-100" />
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-800 truncate">{task.title}</p>
+                          {task.description && <p className="text-xs text-slate-500 truncate">{task.description}</p>}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {task.assigned_by_name && (
+                              <span className="text-[10px] text-slate-400">From: {task.assigned_by_name}</span>
+                            )}
+                            {task.due_date && (
+                              <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
+                                <Calendar className="w-3 h-3" /> {task.due_date}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${pCfg[task.priority] || pCfg.medium}`}>
+                          {task.priority}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
 
             {/* ── Day Picker ─────────────────────────────────── */}
@@ -896,12 +1005,20 @@ export default function CommandCenterPage() {
                   <Users className="w-5 h-5 text-indigo-500" />
                   Team Assignments
                 </h3>
-                <button
-                  onClick={() => setAssignModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-medium hover:bg-indigo-600 transition-colors"
-                >
-                  <Users className="w-4 h-4" /> Assign Leads
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setTaskModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm font-medium hover:bg-teal-600 transition-colors"
+                  >
+                    <ListChecks className="w-4 h-4" /> Assign Task
+                  </button>
+                  <button
+                    onClick={() => setAssignModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-medium hover:bg-indigo-600 transition-colors"
+                  >
+                    <Users className="w-4 h-4" /> Assign Leads
+                  </button>
+                </div>
               </div>
 
               {/* Team Members Summary */}
@@ -939,6 +1056,84 @@ export default function CommandCenterPage() {
                   {availableStates.length === 0 && <span className="text-sm text-slate-400">No unassigned leads</span>}
                 </div>
               </div>
+
+              {/* Task Creation Modal */}
+              {taskModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                      <ListChecks className="w-5 h-5 text-teal-500" /> Assign Task to Team Member
+                    </h3>
+
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Task Title *</label>
+                    <input
+                      type="text"
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      placeholder="e.g., Call back ABC Agency, Follow up with investor..."
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm mb-3"
+                    />
+
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                    <textarea
+                      value={newTaskDescription}
+                      onChange={(e) => setNewTaskDescription(e.target.value)}
+                      placeholder="Additional details about the task..."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm mb-3 resize-none"
+                    />
+
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Priority</label>
+                        <select
+                          value={newTaskPriority}
+                          onChange={(e) => setNewTaskPriority(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                        >
+                          <option value="urgent">Urgent</option>
+                          <option value="high">High</option>
+                          <option value="medium">Medium</option>
+                          <option value="low">Low</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Due Date</label>
+                        <input
+                          type="date"
+                          value={newTaskDueDate}
+                          onChange={(e) => setNewTaskDueDate(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Assign To</label>
+                    <select
+                      value={newTaskAssignee}
+                      onChange={(e) => setNewTaskAssignee(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm mb-4"
+                    >
+                      <option value="">Myself</option>
+                      {teamMembers.filter(t => t.is_active).map(m => (
+                        <option key={m.id} value={m.id}>{m.full_name} ({m.email})</option>
+                      ))}
+                    </select>
+
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setTaskModalOpen(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                      <button
+                        onClick={handleCreateTask}
+                        disabled={!newTaskTitle.trim() || creatingTask}
+                        className="px-4 py-2 bg-teal-500 text-white text-sm font-medium rounded-lg hover:bg-teal-600 disabled:opacity-50"
+                      >
+                        {creatingTask ? <Loader2 className="w-4 h-4 animate-spin inline mr-1" /> : null}
+                        Create Task
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Assign Modal */}
               {assignModalOpen && (

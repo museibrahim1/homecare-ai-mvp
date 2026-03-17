@@ -86,6 +86,7 @@ class TaskResponse(BaseModel):
     completed_at: Optional[datetime] = None
     related_client_id: Optional[UUID] = None
     assigned_to_id: Optional[UUID] = None
+    assigned_by_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

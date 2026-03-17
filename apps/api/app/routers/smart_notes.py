@@ -243,10 +243,16 @@ async def list_tasks(
     priority: Optional[str] = None,
     due_before: Optional[str] = None,
     note_id: Optional[UUID] = None,
+    assigned_to_me: Optional[bool] = Query(None, description="Include tasks assigned to me by others"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = db.query(Task).filter(Task.user_id == current_user.id)
+    if assigned_to_me:
+        query = db.query(Task).filter(
+            or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id)
+        )
+    else:
+        query = db.query(Task).filter(Task.user_id == current_user.id)
     if task_status:
         query = query.filter(Task.status == task_status)
     if priority:
@@ -260,7 +266,25 @@ async def list_tasks(
     if note_id:
         query = query.filter(Task.smart_note_id == note_id)
 
-    return query.order_by(Task.due_date.asc().nullslast(), Task.created_at.desc()).all()
+    PRIORITY_RANK = {"urgent": 0, "high": 1, "medium": 2, "low": 3}
+    tasks = query.order_by(Task.due_date.asc().nullslast(), Task.created_at.desc()).all()
+    tasks.sort(key=lambda t: PRIORITY_RANK.get(t.priority, 9))
+
+    if assigned_to_me:
+        creator_ids = {t.user_id for t in tasks if t.user_id != current_user.id}
+        creators = {}
+        if creator_ids:
+            for u in db.query(User).filter(User.id.in_(creator_ids)).all():
+                creators[u.id] = u.full_name or u.email.split("@")[0]
+        results = []
+        for t in tasks:
+            resp = TaskResponse.model_validate(t)
+            if t.assigned_to_id == current_user.id and t.user_id != current_user.id:
+                resp.assigned_by_name = creators.get(t.user_id)
+            results.append(resp)
+        return results
+
+    return tasks
 
 
 @router.put("/tasks/{task_id}", response_model=TaskResponse, tags=["Tasks"])
@@ -270,7 +294,10 @@ async def update_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
+    task = db.query(Task).filter(
+        Task.id == task_id,
+        or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
+    ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -289,7 +316,10 @@ async def complete_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
+    task = db.query(Task).filter(
+        Task.id == task_id,
+        or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
+    ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 

@@ -31,4 +31,5 @@ class Task(Base, TimestampMixin):
         Index("ix_tasks_status", "user_id", "status"),
         Index("ix_tasks_due", "user_id", "due_date"),
         Index("ix_tasks_note", "smart_note_id"),
+        Index("ix_tasks_assigned", "assigned_to_id"),
     )
