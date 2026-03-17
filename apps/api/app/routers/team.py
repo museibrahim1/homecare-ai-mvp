@@ -10,15 +10,18 @@ import logging
 import os
 import secrets
 import string
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from pydantic import BaseModel, EmailStr
+from sqlalchemy import func, desc
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user, require_ceo_only
 from app.core.security import get_password_hash
 from app.models.user import User
+from app.models.audit_log import AuditLog
 from app.services.email import get_email_service
 
 logger = logging.getLogger(__name__)
@@ -168,6 +171,156 @@ def team_roster(
             })
 
     return roster
+
+
+@router.get("/team/activity")
+def team_activity_feed(
+    days: int = Query(7, ge=1, le=90),
+    member_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    ceo: User = Depends(require_ceo_only),
+):
+    """Get team member activity feed for the CEO dashboard.
+
+    Returns login events, actions taken, and session duration summaries.
+    """
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    team_ids_q = db.query(User.id).filter(User.invited_by.isnot(None))
+    if member_id:
+        team_ids_q = team_ids_q.filter(User.id == member_id)
+    team_ids = [str(r[0]) for r in team_ids_q.all()]
+
+    if not team_ids:
+        return {"members": [], "recent_actions": []}
+
+    members_data = []
+    for tid in team_ids:
+        user = db.query(User).filter(User.id == tid).first()
+        if not user:
+            continue
+
+        login_count = db.query(func.count(AuditLog.id)).filter(
+            AuditLog.user_id == tid,
+            AuditLog.action == "user_login",
+            AuditLog.created_at >= since,
+        ).scalar() or 0
+
+        action_count = db.query(func.count(AuditLog.id)).filter(
+            AuditLog.user_id == tid,
+            AuditLog.action != "user_login",
+            AuditLog.created_at >= since,
+        ).scalar() or 0
+
+        last_login_log = db.query(AuditLog).filter(
+            AuditLog.user_id == tid,
+            AuditLog.action == "user_login",
+        ).order_by(desc(AuditLog.created_at)).first()
+
+        session_mins = getattr(user, "total_session_minutes", None) or {}
+        total_mins = sum(session_mins.values()) if isinstance(session_mins, dict) else 0
+
+        members_data.append({
+            "id": str(user.id),
+            "name": user.full_name,
+            "email": user.email,
+            "is_active": user.is_active,
+            "last_login": user.last_login.isoformat() if user.last_login else None,
+            "last_active": user.last_active.isoformat() if user.last_active else None,
+            "login_count": login_count,
+            "action_count": action_count,
+            "total_session_minutes": total_mins,
+            "session_breakdown": session_mins,
+            "permissions": user.permissions or [],
+            "online": _is_online(user),
+        })
+
+    recent_logs = (
+        db.query(AuditLog)
+        .filter(
+            AuditLog.user_id.in_(team_ids),
+            AuditLog.created_at >= since,
+        )
+        .order_by(desc(AuditLog.created_at))
+        .limit(100)
+        .all()
+    )
+
+    user_names = {str(u.id): u.full_name for u in db.query(User).filter(User.id.in_(team_ids)).all()}
+
+    recent_actions = [
+        {
+            "id": str(log.id),
+            "user_name": user_names.get(str(log.user_id), "Unknown"),
+            "user_id": str(log.user_id),
+            "action": log.action,
+            "description": log.description,
+            "entity_type": log.entity_type,
+            "timestamp": log.created_at.isoformat() if log.created_at else None,
+        }
+        for log in recent_logs
+    ]
+
+    return {
+        "members": members_data,
+        "recent_actions": recent_actions,
+        "period_days": days,
+    }
+
+
+class LogActionRequest(BaseModel):
+    action: str = "page_view"
+    page: str = "unknown"
+    details: str = ""
+
+
+@router.post("/team/log-action")
+def log_team_action(
+    body: LogActionRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Log a team member's page visit or action from the frontend."""
+    if current_user.role not in ("admin", "admin_team"):
+        raise HTTPException(403, "Admin access required")
+
+    action_type = body.action
+    page = body.page
+    details = body.details
+
+    from app.services.audit import log_action
+    log_action(
+        db=db,
+        user_id=current_user.id,
+        action=f"team_{action_type}",
+        entity_type="page_view",
+        description=f"{current_user.full_name} visited {page}" if action_type == "page_view" else f"{current_user.full_name}: {details}",
+        changes={"page": page, "action": action_type, "details": details},
+    )
+
+    now = datetime.now(timezone.utc)
+    today_key = now.strftime("%Y-%m-%d")
+    session_mins = getattr(current_user, "total_session_minutes", None) or {}
+    if not isinstance(session_mins, dict):
+        session_mins = {}
+    session_mins[today_key] = session_mins.get(today_key, 0) + 1
+    current_user.total_session_minutes = session_mins
+    current_user.last_active = now
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    return {"ok": True}
+
+
+def _is_online(user: User) -> bool:
+    la = getattr(user, "last_active", None)
+    if la is None:
+        return False
+    if la.tzinfo is None:
+        la = la.replace(tzinfo=timezone.utc)
+    return (datetime.now(timezone.utc) - la).total_seconds() < 300
 
 
 @router.post("/team/invite", response_model=TeamMemberResponse)

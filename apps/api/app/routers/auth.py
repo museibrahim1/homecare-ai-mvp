@@ -187,6 +187,13 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
         description=f"Successful login: {email}",
         ip_address=client_ip
     )
+
+    # Notify CEO when a team member logs in
+    if getattr(user, "role", "") == "admin_team":
+        try:
+            _notify_ceo_team_login(db, user, client_ip)
+        except Exception as e:
+            logger.warning(f"Failed to notify CEO of team login: {e}")
     
     return Token(access_token=access_token)
 
@@ -423,3 +430,56 @@ async def reset_password(
         "success": True,
         "message": "Password has been reset successfully. You can now sign in with your new password.",
     }
+
+
+def _notify_ceo_team_login(db: Session, team_user: User, ip: str):
+    """Send a notification email to the CEO when a team member logs in."""
+    ceo = db.query(User).filter(
+        User.role == "admin", User.email.endswith("@palmtai.com")
+    ).first()
+    if not ceo:
+        return
+
+    now = datetime.now(timezone.utc)
+    et_offset = timedelta(hours=-4)
+    local_time = (now + et_offset).strftime("%I:%M %p ET on %B %d, %Y")
+    perms = ", ".join(team_user.permissions or []) or "None"
+
+    svc = email_service
+    svc.send_email(
+        to=ceo.email,
+        subject=f"Team Login: {team_user.full_name} just signed in",
+        html=f"""
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
+            <div style="background: linear-gradient(135deg, #0d9488, #0f766e); border-radius: 12px; padding: 24px; color: white; margin-bottom: 20px;">
+                <h2 style="margin: 0 0 8px 0; font-size: 18px;">Team Member Login</h2>
+                <p style="margin: 0; font-size: 14px; opacity: 0.9;">{local_time}</p>
+            </div>
+            <div style="background: #f8fafc; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Name</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-weight: 600; font-size: 14px;">{team_user.full_name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Email</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">{team_user.email}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Permissions</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-size: 14px;">{perms}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #64748b; font-size: 13px;">IP Address</td>
+                        <td style="padding: 8px 0; color: #1e293b; font-size: 14px; font-family: monospace;">{ip}</td>
+                    </tr>
+                </table>
+            </div>
+            <p style="text-align: center; color: #94a3b8; font-size: 12px; margin-top: 24px;">
+                View team activity at <a href="https://palmcareai.com/admin/team" style="color: #0d9488;">palmcareai.com/admin/team</a>
+            </p>
+        </div>
+        """,
+        sender="PalmCare AI <noreply@send.palmtai.com>",
+        reply_to="sales@palmtai.com",
+    )

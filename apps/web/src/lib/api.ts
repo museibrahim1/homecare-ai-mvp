@@ -616,6 +616,17 @@ class ApiClient {
     const query = days ? `?days=${days}` : '';
     return this.request<any>(`/analytics/platform/activity${query}`, {}, token);
   }
+
+  async logTeamAction(token: string, action: string, page: string, details?: string) {
+    try {
+      await this.request<any>('/admin/team/log-action', {
+        method: 'POST',
+        body: JSON.stringify({ action, page, details: details || '' }),
+      }, token);
+    } catch {
+      // Silently fail - activity tracking shouldn't block the user
+    }
+  }
 }
 
 export const api = new ApiClient();

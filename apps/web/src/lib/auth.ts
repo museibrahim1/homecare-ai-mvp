@@ -239,3 +239,34 @@ export function useRequireAuth() {
     isReady: auth.hydrated && !!auth.token,
   };
 }
+
+
+const TRACKING_INTERVAL_MS = 60000; // Send heartbeat every 60s
+
+export function useTeamActivityTracker(pageName: string) {
+  const { token, user } = useAuth();
+  const sentRef = useRef(false);
+
+  useEffect(() => {
+    if (!token || !user) return;
+    if (user.role !== 'admin' && user.role !== 'admin_team') return;
+
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+    const sendHeartbeat = () => {
+      fetch(`${API_BASE}/admin/team/log-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'page_view', page: pageName, details: '' }),
+      }).catch(() => {});
+    };
+
+    if (!sentRef.current) {
+      sendHeartbeat();
+      sentRef.current = true;
+    }
+
+    const interval = setInterval(sendHeartbeat, TRACKING_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [token, user, pageName]);
+}
