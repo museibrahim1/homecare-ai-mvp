@@ -2171,38 +2171,44 @@ async def cleanup_hospitals_gov(
     _require_internal_key(request)
 
     HOSPITAL_KEYWORDS = [
-        "hospital", "medical center", "medical ctr", "med ctr", "health system",
-        "health systems", "regional medical", "community hospital", "general hospital",
+        "hospital", "medical center", "medical ctr", "med ctr",
+        "regional medical", "community hospital", "general hospital",
         "memorial hospital", "children's hospital", "childrens hospital",
-        "veterans", "va medical", "va health", "department of veterans",
         "rehabilitation hospital", "rehab hospital", "surgical center",
-        "ambulatory surgical", "dialysis", "hospice", "skilled nursing facility",
-        "snf ", "nursing home", "long term acute", "ltac", "psychiatric",
-        "behavioral health", "mental health center",
+        "ambulatory surgical", "dialysis center", "dialysis clinic",
+        "skilled nursing facility", "snf ",
+        "nursing home", "long term acute", "ltac",
+        "psychiatric hospital", "psychiatric center",
+        "behavioral health center", "mental health center",
+    ]
+
+    HOSPITAL_EXCLUDE = [
+        "home health", "home care", "homecare", "home healthcare",
+        "home hospice", "at home", "in home", "in-home",
     ]
 
     GOV_KEYWORDS = [
-        "county", "city of ", "state of ", "department of health",
-        "dept of health", "public health", "government", "municipal",
-        "bureau", "division of ", "office of ",
-        "indian health", "tribal", "military",
+        "department of health", "dept of health", "public health department",
+        "va medical center", "va health care", "department of veterans",
+        "indian health service", "military health",
+        "state of ", "city of ",
     ]
 
-    GOV_OWNERSHIP = ["Government Operated", "Government", "government"]
+    GOV_OWNERSHIP = ["Government Operated"]
 
     BAD_EMAIL_PATTERNS = [
         r"^(test|example|fake|noreply|no-reply|donotreply|admin@localhost)",
         r"@(example\.com|test\.com|localhost|mailinator\.com|guerrillamail\.com|tempmail\.com|throwaway\.email|yopmail\.com)",
         r"@(startmail\.com|mastodon\.social|sentry\.wixpress\.com|wixpress\.com|shiftdigital\.com)",
         r"^(support@startmail|mickeymouse@|firstname@|info@info\.)",
+        r"@safford\.com$",
     ]
 
     BAD_PHONE_PATTERNS = [
-        r"^(\+?1)?[02-9]00",
-        r"^(\+?1)?555",
-        r"^0{7,}",
-        r"^1{10}",
-        r"^(000|111|222|333|444|555|666|777|888|999)",
+        r"^1?555\d{7}$",
+        r"^0{10}",
+        r"^1{10}$",
+        r"^(123456|000000|999999)",
     ]
 
     all_leads = db.query(SalesLead).all()
@@ -2216,11 +2222,15 @@ async def cleanup_hospitals_gov(
     for lead in all_leads:
         name_lower = (lead.provider_name or "").lower()
 
-        if any(kw in name_lower for kw in HOSPITAL_KEYWORDS):
+        is_hospital = any(kw in name_lower for kw in HOSPITAL_KEYWORDS)
+        is_home_care = any(kw in name_lower for kw in HOSPITAL_EXCLUDE)
+        if is_hospital and not is_home_care:
             hospitals.append({"id": str(lead.id), "name": lead.provider_name, "state": lead.state, "reason": "hospital_keyword"})
             continue
 
-        if lead.ownership_type in GOV_OWNERSHIP or any(kw in name_lower for kw in GOV_KEYWORDS):
+        is_gov_ownership = lead.ownership_type in GOV_OWNERSHIP
+        is_gov_name = any(kw in name_lower for kw in GOV_KEYWORDS)
+        if is_gov_ownership or (is_gov_name and not is_home_care):
             gov_agencies.append({"id": str(lead.id), "name": lead.provider_name, "state": lead.state,
                                  "ownership": lead.ownership_type, "reason": "government"})
             continue
