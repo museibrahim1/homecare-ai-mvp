@@ -2058,6 +2058,22 @@ class BatchEnrichEntry(BaseModel):
     contact_name: Optional[str] = None
 
 
+@router.get("/leads/internal/scan-emails")
+async def scan_all_emails(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Return all leads that have a contact_email, for external scanning."""
+    _require_internal_key(request)
+    leads = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None), SalesLead.contact_email != ""
+    ).all()
+    return [
+        {"id": str(l.id), "name": l.provider_name, "email": l.contact_email, "state": l.state}
+        for l in leads
+    ]
+
+
 @router.post("/leads/internal/batch-enrich")
 async def internal_batch_enrich(
     request: Request,
