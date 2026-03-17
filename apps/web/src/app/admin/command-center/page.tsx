@@ -578,12 +578,14 @@ export default function CommandCenterPage() {
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <p className="text-slate-500 text-xs sm:text-sm">
                     Week of {weeklyPlan?.week_start || '...'} — {weeklyPlan?.week_end || '...'}
-                    {weeklyPlan && <span className="text-slate-400 ml-1">(Week {weekOffset + 1} of {weeklyPlan.total_weeks})</span>}
+                    {weeklyPlan && <span className="text-slate-400 ml-1">
+                      {weekOffset < 0 ? `(${Math.abs(weekOffset)} week${Math.abs(weekOffset) > 1 ? 's' : ''} ago)` : weekOffset === 0 ? '(Current week)' : `(Week ${weekOffset + 1} of ${weeklyPlan.total_weeks})`}
+                    </span>}
                   </p>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => { const w = weekOffset - 1; setWeekOffset(w); loadWeeklyPlan(true, w); }}
-                      disabled={weekOffset <= 0 || refreshing}
+                      disabled={refreshing}
                       className="p-1.5 rounded-md hover:bg-slate-100 disabled:opacity-30 transition-colors"
                       title="Previous week"
                       aria-label="Previous week"
@@ -653,7 +655,7 @@ export default function CommandCenterPage() {
 
             {/* ── Weekly TODO ──────────────────────────────────── */}
             {!loading && weeklyPlan && (
-              <WeeklyTodoSection weekOffset={weekOffset} weekStart={weeklyPlan.week_start} weekEnd={weeklyPlan.week_end} totalWeeks={weeklyPlan.total_weeks} stats={weeklyPlan.stats} />
+              <WeeklyTodoSection weekOffset={weekOffset} weekStart={weeklyPlan.week_start} weekEnd={weeklyPlan.week_end} totalWeeks={weeklyPlan.total_weeks} stats={weeklyPlan.stats} plan={weeklyPlan} />
             )}
 
             {/* ── Priority Tasks (assigned to this user) ─── */}
@@ -1359,17 +1361,45 @@ function getWeekKey(weekOffset: number, weekStart: string) {
   return `weekly-todo-${weekStart || weekOffset}`;
 }
 
-function defaultTodosForWeek(weekOffset: number, stats: WeeklyPlan['stats']): WeeklyTodoItem[] {
+function defaultTodosForWeek(weekOffset: number, stats: WeeklyPlan['stats'], plan?: WeeklyPlan | null): WeeklyTodoItem[] {
   const items: WeeklyTodoItem[] = [];
-  if (stats.unsent_agency_emails > 0) {
-    items.push({ id: `a-emails-${weekOffset}`, text: `Send ${stats.unsent_agency_emails} unsent agency emails`, done: false });
+
+  if (plan?.days) {
+    const weekAgencyEmails = plan.days.reduce((sum, d) => sum + d.agency_drafts.length, 0);
+    const weekInvestorEmails = plan.days.reduce((sum, d) => sum + d.investor_drafts.length, 0);
+    const weekCalls = plan.days.reduce((sum, d) => sum + d.calls.length, 0);
+
+    if (weekAgencyEmails > 0) {
+      items.push({ id: `a-emails-${weekOffset}`, text: `Send ${weekAgencyEmails} agency emails this week`, done: false });
+    }
+    if (weekInvestorEmails > 0) {
+      items.push({ id: `i-emails-${weekOffset}`, text: `Send ${weekInvestorEmails} investor emails this week`, done: false });
+    }
+    if (weekCalls > 0) {
+      items.push({ id: `calls-${weekOffset}`, text: `Make ${weekCalls} calls this week`, done: false });
+    }
+
+    for (const day of plan.days) {
+      if (day.agency_drafts.length > 0 || day.calls.length > 0) {
+        items.push({
+          id: `day-${day.day_name}-${weekOffset}`,
+          text: `${day.day_name}: ${day.agency_drafts.length} emails, ${day.calls.length} calls${day.investor_drafts.length > 0 ? `, ${day.investor_drafts.length} investor emails` : ''}`,
+          done: false,
+        });
+      }
+    }
+  } else {
+    if (stats.unsent_agency_emails > 0) {
+      items.push({ id: `a-emails-${weekOffset}`, text: `Send agency emails (${stats.unsent_agency_emails} unsent total)`, done: false });
+    }
+    if (stats.unsent_investor_emails > 0) {
+      items.push({ id: `i-emails-${weekOffset}`, text: `Send investor emails (${stats.unsent_investor_emails} unsent total)`, done: false });
+    }
+    if (stats.calls_remaining > 0) {
+      items.push({ id: `calls-${weekOffset}`, text: `Make calls (${stats.calls_remaining} remaining total)`, done: false });
+    }
   }
-  if (stats.unsent_investor_emails > 0) {
-    items.push({ id: `i-emails-${weekOffset}`, text: `Send ${stats.unsent_investor_emails} unsent investor emails`, done: false });
-  }
-  if (stats.calls_remaining > 0) {
-    items.push({ id: `calls-${weekOffset}`, text: `Call ${stats.calls_remaining} remaining leads with phone numbers`, done: false });
-  }
+
   items.push(
     { id: `followup-${weekOffset}`, text: 'Follow up on callbacks and warm leads', done: false },
     { id: `crm-${weekOffset}`, text: 'Review CRM — update statuses, add notes', done: false },
@@ -1377,12 +1407,13 @@ function defaultTodosForWeek(weekOffset: number, stats: WeeklyPlan['stats']): We
   return items;
 }
 
-function WeeklyTodoSection({ weekOffset, weekStart, weekEnd, totalWeeks, stats }: {
+function WeeklyTodoSection({ weekOffset, weekStart, weekEnd, totalWeeks, stats, plan }: {
   weekOffset: number;
   weekStart: string;
   weekEnd: string;
   totalWeeks: number;
   stats: WeeklyPlan['stats'];
+  plan?: WeeklyPlan | null;
 }) {
   const weekKey = getWeekKey(weekOffset, weekStart);
   const [todos, setTodos] = useState<WeeklyTodoItem[]>([]);
@@ -1391,11 +1422,11 @@ function WeeklyTodoSection({ weekOffset, weekStart, weekEnd, totalWeeks, stats }
   useEffect(() => {
     const saved = localStorage.getItem(weekKey);
     if (saved) {
-      try { setTodos(JSON.parse(saved)); } catch { setTodos(defaultTodosForWeek(weekOffset, stats)); }
+      try { setTodos(JSON.parse(saved)); } catch { setTodos(defaultTodosForWeek(weekOffset, stats, plan)); }
     } else {
-      setTodos(defaultTodosForWeek(weekOffset, stats));
+      setTodos(defaultTodosForWeek(weekOffset, stats, plan));
     }
-  }, [weekKey, weekOffset, stats]);
+  }, [weekKey, weekOffset, stats, plan]);
 
   const saveTodos = (updated: WeeklyTodoItem[]) => {
     setTodos(updated);
@@ -1427,7 +1458,7 @@ function WeeklyTodoSection({ weekOffset, weekStart, weekEnd, totalWeeks, stats }
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-teal-600" />
           <h3 className="font-bold text-slate-900">
-            Week {weekOffset + 1} TODO
+            {weekOffset < 0 ? `Past Week (${Math.abs(weekOffset)} ago)` : weekOffset === 0 ? 'This Week' : `Week ${weekOffset + 1}`} TODO
           </h3>
           <span className="text-xs text-slate-500">
             {weekStart && new Date(weekStart + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — {weekEnd && new Date(weekEnd + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

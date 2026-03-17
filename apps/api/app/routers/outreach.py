@@ -636,27 +636,25 @@ TZ_ORDER = case(
 
 
 def _week_work_days(week_offset: int) -> list[tuple[str, date]]:
-    """Return list of (day_name, date) for working days in the given week (Mon-Fri)."""
+    """Return list of (day_name, date) for working days in the given week (Mon-Fri).
+    Filters out days before LAUNCH_DATE for any week that overlaps it."""
     today = _today_eastern()
     days_since_monday = today.weekday()
     this_monday = today - timedelta(days=days_since_monday)
     target_monday = this_monday + timedelta(weeks=week_offset)
 
-    if week_offset == 0 and target_monday <= LAUNCH_DATE:
-        return [
-            (FULL_WORK_DAYS[i], target_monday + timedelta(days=i))
-            for i in range(5)
-            if (target_monday + timedelta(days=i)) >= LAUNCH_DATE
-        ]
-
-    return [
+    days = [
         (FULL_WORK_DAYS[i], target_monday + timedelta(days=i))
         for i in range(5)
+        if (target_monday + timedelta(days=i)) >= LAUNCH_DATE
     ]
+    return days
 
 
 def _cumulative_days_before(week_offset: int) -> int:
-    """Count total working days scheduled before this week."""
+    """Count total working days scheduled before this week (only future weeks, offset >= 1)."""
+    if week_offset <= 0:
+        return 0
     total = 0
     for w in range(week_offset):
         total += len(_week_work_days(w))
