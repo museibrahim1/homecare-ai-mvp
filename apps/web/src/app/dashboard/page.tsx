@@ -355,10 +355,16 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [visitsData, clientsData] = await Promise.all([api.getVisits(token!), api.getClients(token!)]);
+      const [visitsData, clientsData, usageData] = await Promise.all([
+        api.getVisits(token!),
+        api.getClients(token!),
+        api.getMyUsage(token!, 30).catch(() => null),
+      ]);
       const items = visitsData?.items || [];
       const clients = Array.isArray(clientsData) ? clientsData : [];
-      setAllVisits(items); setAllClients(clients);
+      setAllVisits(items);
+      setAllClients(clients);
+      if (usageData) setMyUsage(usageData);
 
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -368,7 +374,6 @@ export default function DashboardPage() {
       setStats({ totalVisits: visitsData?.total || 0, pendingReview: proposalList.length, totalClients: clients.length, hoursThisWeek: thisWeekCount });
       setRecentVisits(items.slice(0, 6));
       api.trackUsageEvent(token!, { event_type: 'login', page_path: '/dashboard' }).catch(() => {});
-      api.getMyUsage(token!, 30).then(setMyUsage).catch(() => {});
     } catch (err) { setError(err instanceof Error ? err.message : 'Something went wrong'); }
     finally { setLoading(false); }
   };

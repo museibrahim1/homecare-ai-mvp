@@ -143,6 +143,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         return response
 
+# GZip compression for large JSON responses (>500 bytes)
+from starlette.middleware.gzip import GZipMiddleware
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
 # HIPAA Compliance: Add audit logging middleware for PHI access
 from app.middleware.audit import AuditLoggingMiddleware
 app.add_middleware(AuditLoggingMiddleware)
@@ -257,6 +261,27 @@ async def seed_database():
         db.commit()
     except Exception as e:
         logger.warning(f"Column migration check: {e}")
+        db.rollback()
+
+    # Create missing indexes for performance (idempotent)
+    try:
+        from sqlalchemy import text as sa_text
+        perf_indexes = [
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_contact_email ON sales_leads (contact_email)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_sequence_step ON sales_leads (sequence_step)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_sales_leads_next_email ON sales_leads (next_email_scheduled_at)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_investors_contact_email ON investors (contact_email)',
+            'CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_investors_investor_type ON investors (investor_type)',
+        ]
+        for idx_sql in perf_indexes:
+            try:
+                db.execute(sa_text(idx_sql))
+                db.commit()
+            except Exception:
+                db.rollback()
+        logger.info("Performance indexes verified")
+    except Exception as e:
+        logger.warning(f"Index creation: {e}")
         db.rollback()
 
     try:

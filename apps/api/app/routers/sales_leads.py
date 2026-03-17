@@ -561,48 +561,43 @@ async def get_lead_stats(
     db: Session = Depends(get_db),
     admin: User = Depends(require_permission("sales_leads")),
 ):
-    """Get aggregate stats for sales leads dashboard."""
-    total = db.query(SalesLead).count()
+    """Get aggregate stats for sales leads dashboard (single query)."""
+    from sqlalchemy import case, literal_column
 
-    def count_status(s):
-        return db.query(SalesLead).filter(SalesLead.status == s).count()
-
-    ne_count = db.query(SalesLead).filter(SalesLead.state == "NE").count()
-    ia_count = db.query(SalesLead).filter(SalesLead.state == "IA").count()
-    last_5 = db.query(SalesLead).filter(
-        SalesLead.years_in_operation.isnot(None),
-        SalesLead.years_in_operation <= 5,
-    ).count()
-    last_10 = db.query(SalesLead).filter(
-        SalesLead.years_in_operation.isnot(None),
-        SalesLead.years_in_operation <= 10,
-    ).count()
-
-    has_email_count = db.query(SalesLead).filter(
-        SalesLead.contact_email.isnot(None),
-        SalesLead.contact_email != "",
-    ).count()
-    has_website_count = db.query(SalesLead).filter(
-        SalesLead.website.isnot(None),
-        SalesLead.website != "",
-    ).count()
+    row = db.query(
+        func.count().label("total"),
+        func.sum(case((SalesLead.status == "new", 1), else_=0)).label("new"),
+        func.sum(case((SalesLead.status == "contacted", 1), else_=0)).label("contacted"),
+        func.sum(case((SalesLead.status == "email_sent", 1), else_=0)).label("email_sent"),
+        func.sum(case((SalesLead.status == "email_opened", 1), else_=0)).label("email_opened"),
+        func.sum(case((SalesLead.status == "responded", 1), else_=0)).label("responded"),
+        func.sum(case((SalesLead.status == "converted", 1), else_=0)).label("converted"),
+        func.sum(case((SalesLead.status == "not_interested", 1), else_=0)).label("not_interested"),
+        func.sum(case((SalesLead.status == "no_response", 1), else_=0)).label("no_response"),
+        func.sum(case((SalesLead.state == "NE", 1), else_=0)).label("ne"),
+        func.sum(case((SalesLead.state == "IA", 1), else_=0)).label("ia"),
+        func.sum(case((and_(SalesLead.years_in_operation.isnot(None), SalesLead.years_in_operation <= 5), 1), else_=0)).label("last5"),
+        func.sum(case((and_(SalesLead.years_in_operation.isnot(None), SalesLead.years_in_operation <= 10), 1), else_=0)).label("last10"),
+        func.sum(case((and_(SalesLead.contact_email.isnot(None), SalesLead.contact_email != ""), 1), else_=0)).label("has_email"),
+        func.sum(case((and_(SalesLead.website.isnot(None), SalesLead.website != ""), 1), else_=0)).label("has_website"),
+    ).one()
 
     return LeadStats(
-        total=total,
-        new=count_status("new"),
-        contacted=count_status("contacted"),
-        email_sent=count_status("email_sent"),
-        email_opened=count_status("email_opened"),
-        responded=count_status("responded"),
-        converted=count_status("converted"),
-        not_interested=count_status("not_interested"),
-        no_response=count_status("no_response"),
-        nebraska_count=ne_count,
-        iowa_count=ia_count,
-        last_5_years=last_5,
-        last_10_years=last_10,
-        has_email=has_email_count,
-        has_website=has_website_count,
+        total=row.total or 0,
+        new=row.new or 0,
+        contacted=row.contacted or 0,
+        email_sent=row.email_sent or 0,
+        email_opened=row.email_opened or 0,
+        responded=row.responded or 0,
+        converted=row.converted or 0,
+        not_interested=row.not_interested or 0,
+        no_response=row.no_response or 0,
+        nebraska_count=row.ne or 0,
+        iowa_count=row.ia or 0,
+        last_5_years=row.last5 or 0,
+        last_10_years=row.last10 or 0,
+        has_email=row.has_email or 0,
+        has_website=row.has_website or 0,
     )
 
 
@@ -1433,18 +1428,15 @@ async def bulk_update_status(
     admin: User = Depends(require_permission("sales_leads")),
 ):
     """Bulk update status for multiple leads."""
-    updated = 0
-    for lid in update.lead_ids:
-        lead = db.query(SalesLead).filter(SalesLead.id == lid).first()
-        if lead:
-            lead.status = update.status
-            activity = lead.activity_log or []
-            activity.append({
-                "action": f"Bulk status update to {update.status}",
-                "at": datetime.now(timezone.utc).isoformat(),
-            })
-            lead.activity_log = activity
-            updated += 1
+    from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+    ids = [lid for lid in update.lead_ids if lid]
+    if not ids:
+        return {"message": "No leads to update"}
+    updated = (
+        db.query(SalesLead)
+        .filter(SalesLead.id.in_(ids))
+        .update({SalesLead.status: update.status}, synchronize_session="fetch")
+    )
     db.commit()
     return {"message": f"Updated {updated} leads"}
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import { useRouter } from 'next/navigation';
 import { getStoredToken } from '@/lib/auth';
@@ -287,8 +287,6 @@ export default function CommandCenterPage() {
     }
   }, [apiFetch, weekOffset]);
 
-  useEffect(() => { loadWeeklyPlan(); }, [loadWeeklyPlan]);
-
   const loadCallbacks = useCallback(async () => {
     try {
       const data = await apiFetch('/platform/outreach/callbacks');
@@ -307,7 +305,10 @@ export default function CommandCenterPage() {
     } catch { /* ignore */ }
   }, [apiFetch]);
 
-  useEffect(() => { loadCallbacks(); loadTeamAndStates(); }, [loadCallbacks, loadTeamAndStates]);
+  // Load everything in parallel on mount
+  useEffect(() => {
+    Promise.all([loadWeeklyPlan(), loadCallbacks(), loadTeamAndStates()]);
+  }, [loadWeeklyPlan, loadCallbacks, loadTeamAndStates]);
 
   const handleMarkCallback = async (leadId: string, callbackNotes: string) => {
     await apiFetch(`/platform/outreach/mark-callback/${leadId}`, {
@@ -475,26 +476,34 @@ export default function CommandCenterPage() {
   const greeting = greetingByTime();
 
   const sq = searchQuery.toLowerCase().trim();
-  const matchSearch = (...fields: (string | null | undefined)[]) => {
+  const matchSearch = useCallback((...fields: (string | null | undefined)[]) => {
     if (!sq) return true;
     return fields.some(f => f?.toLowerCase().includes(sq));
-  };
-  const filteredAgencies = currentDay?.agency_drafts.filter(a => matchSearch(a.provider_name, a.phone, a.contact_email, a.contact_name, a.city, a.state)) || [];
-  const filteredCalls = currentDay?.calls.filter(c => matchSearch(c.provider_name, c.phone, c.contact_name, c.contact_email, c.city, c.state)) || [];
-  const filteredInvestors = currentDay?.investor_drafts.filter(i => matchSearch(i.fund_name, i.contact_name, i.contact_email)) || [];
-  const filteredCallbacks = callbacks.filter(cb => matchSearch(cb.provider_name, cb.phone, cb.contact_name, cb.contact_email, cb.city, cb.state, cb.callback_notes, cb.notes));
+  }, [sq]);
 
-  const agencySentCount = currentDay?.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length || 0;
+  const filteredAgencies = useMemo(() =>
+    currentDay?.agency_drafts.filter(a => matchSearch(a.provider_name, a.phone, a.contact_email, a.contact_name, a.city, a.state)) || [],
+    [currentDay, matchSearch]);
+  const filteredCalls = useMemo(() =>
+    currentDay?.calls.filter(c => matchSearch(c.provider_name, c.phone, c.contact_name, c.contact_email, c.city, c.state)) || [],
+    [currentDay, matchSearch]);
+  const filteredInvestors = useMemo(() =>
+    currentDay?.investor_drafts.filter(i => matchSearch(i.fund_name, i.contact_name, i.contact_email)) || [],
+    [currentDay, matchSearch]);
+  const filteredCallbacks = useMemo(() =>
+    callbacks.filter(cb => matchSearch(cb.provider_name, cb.phone, cb.contact_name, cb.contact_email, cb.city, cb.state, cb.callback_notes, cb.notes)),
+    [callbacks, matchSearch]);
+
+  const agencySentCount = useMemo(() => currentDay?.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length || 0, [currentDay, agencyStatuses]);
   const agencyTotal = currentDay?.agency_drafts.length || 0;
-  const callsMadeCount = currentDay?.calls.filter(c => callStatuses[c.id]).length || 0;
+  const callsMadeCount = useMemo(() => currentDay?.calls.filter(c => callStatuses[c.id]).length || 0, [currentDay, callStatuses]);
   const callsTotal = currentDay?.calls.length || 0;
-  const investorSentCount = currentDay?.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length || 0;
+  const investorSentCount = useMemo(() => currentDay?.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length || 0, [currentDay, investorStatuses]);
   const investorTotal = currentDay?.investor_drafts.length || 0;
 
-  // Week totals
-  const weekAgencySent = weeklyPlan?.days.reduce((sum, d) => sum + d.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length, 0) || 0;
-  const weekInvestorSent = weeklyPlan?.days.reduce((sum, d) => sum + d.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length, 0) || 0;
-  const weekCallsMade = weeklyPlan?.days.reduce((sum, d) => sum + d.calls.filter(c => callStatuses[c.id]).length, 0) || 0;
+  const weekAgencySent = useMemo(() => weeklyPlan?.days.reduce((sum, d) => sum + d.agency_drafts.filter(a => agencyStatuses[a.id] === 'sent').length, 0) || 0, [weeklyPlan, agencyStatuses]);
+  const weekInvestorSent = useMemo(() => weeklyPlan?.days.reduce((sum, d) => sum + d.investor_drafts.filter(i => investorStatuses[i.id] === 'sent').length, 0) || 0, [weeklyPlan, investorStatuses]);
+  const weekCallsMade = useMemo(() => weeklyPlan?.days.reduce((sum, d) => sum + d.calls.filter(c => callStatuses[c.id]).length, 0) || 0, [weeklyPlan, callStatuses]);
 
   // ── Render ─────────────────────────────────────────────────────────
 

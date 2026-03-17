@@ -14,7 +14,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, asc, or_, cast
+from sqlalchemy import func, desc, asc, or_, cast, case, and_
 from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import BaseModel
 
@@ -310,24 +310,29 @@ def get_investor_email_template(template_id: str, user: User = Depends(require_p
 
 @router.get("/stats", response_model=InvestorStats)
 def get_investor_stats(db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
-    total = db.query(func.count(Investor.id)).scalar() or 0
-    new = db.query(func.count(Investor.id)).filter(Investor.status == "new").scalar() or 0
-    contacted = db.query(func.count(Investor.id)).filter(Investor.status == "contacted").scalar() or 0
-    email_sent = db.query(func.count(Investor.id)).filter(Investor.status == "email_sent").scalar() or 0
-    responded = db.query(func.count(Investor.id)).filter(Investor.status == "responded").scalar() or 0
-    meeting = db.query(func.count(Investor.id)).filter(Investor.status == "meeting_scheduled").scalar() or 0
-    interested = db.query(func.count(Investor.id)).filter(Investor.status == "interested").scalar() or 0
-    passed = db.query(func.count(Investor.id)).filter(Investor.status == "passed").scalar() or 0
-    committed = db.query(func.count(Investor.id)).filter(Investor.status == "committed").scalar() or 0
-    has_email = db.query(func.count(Investor.id)).filter(Investor.contact_email.isnot(None)).scalar() or 0
-    vc_funds = db.query(func.count(Investor.id)).filter(Investor.investor_type == "vc_fund").scalar() or 0
-    angels = db.query(func.count(Investor.id)).filter(Investor.investor_type == "angel").scalar() or 0
+    """Single-query aggregate stats for investor dashboard."""
+    row = db.query(
+        func.count().label("total"),
+        func.sum(case((Investor.status == "new", 1), else_=0)).label("new"),
+        func.sum(case((Investor.status == "contacted", 1), else_=0)).label("contacted"),
+        func.sum(case((Investor.status == "email_sent", 1), else_=0)).label("email_sent"),
+        func.sum(case((Investor.status == "responded", 1), else_=0)).label("responded"),
+        func.sum(case((Investor.status == "meeting_scheduled", 1), else_=0)).label("meeting"),
+        func.sum(case((Investor.status == "interested", 1), else_=0)).label("interested"),
+        func.sum(case((Investor.status == "passed", 1), else_=0)).label("passed"),
+        func.sum(case((Investor.status == "committed", 1), else_=0)).label("committed"),
+        func.sum(case((Investor.contact_email.isnot(None), 1), else_=0)).label("has_email"),
+        func.sum(case((Investor.investor_type == "vc_fund", 1), else_=0)).label("vc_funds"),
+        func.sum(case((Investor.investor_type == "angel", 1), else_=0)).label("angels"),
+    ).one()
 
     return InvestorStats(
-        total=total, new=new, contacted=contacted, email_sent=email_sent,
-        responded=responded, meeting_scheduled=meeting, interested=interested,
-        passed=passed, committed=committed, has_email=has_email,
-        vc_funds=vc_funds, angels=angels, avg_priority_score=0,
+        total=row.total or 0, new=row.new or 0, contacted=row.contacted or 0,
+        email_sent=row.email_sent or 0, responded=row.responded or 0,
+        meeting_scheduled=row.meeting or 0, interested=row.interested or 0,
+        passed=row.passed or 0, committed=row.committed or 0,
+        has_email=row.has_email or 0, vc_funds=row.vc_funds or 0,
+        angels=row.angels or 0, avg_priority_score=0,
     )
 
 
@@ -343,7 +348,7 @@ def list_investors(
     sort_by: str = "created_at",
     sort_dir: str = "desc",
     skip: int = 0,
-    limit: int = Query(default=100, le=500),
+    limit: int = Query(default=50, le=200),
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("investors")),
 ):

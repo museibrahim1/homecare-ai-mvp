@@ -9,8 +9,23 @@ export function formatLocalDate(date: Date): string {
 }
 
 class ApiClient {
-  private static readonly TIMEOUT_MS = 30000; // 30 second timeout
-  private static readonly MAX_RETRIES = 1; // 1 retry on transient failures
+  private static readonly TIMEOUT_MS = 30000;
+  private static readonly MAX_RETRIES = 1;
+  private static readonly CACHE_TTL_MS = 5000; // 5s stale-while-revalidate for GET
+  private cache = new Map<string, { data: any; ts: number }>();
+
+  private getCached<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (entry && Date.now() - entry.ts < ApiClient.CACHE_TTL_MS) return entry.data as T;
+    return null;
+  }
+  private setCache(key: string, data: any) {
+    this.cache.set(key, { data, ts: Date.now() });
+    if (this.cache.size > 100) {
+      const oldest = this.cache.keys().next().value;
+      if (oldest) this.cache.delete(oldest);
+    }
+  }
 
   private async request<T>(
     endpoint: string,
@@ -24,6 +39,13 @@ class ApiClient {
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const isGet = !options.method || options.method === 'GET';
+    const cacheKey = isGet ? `${endpoint}|${token || ''}` : '';
+    if (isGet && cacheKey) {
+      const cached = this.getCached<T>(cacheKey);
+      if (cached !== null) return cached;
     }
 
     let lastError: Error | null = null;
@@ -65,7 +87,9 @@ class ApiClient {
           throw new Error(errorMessage);
         }
 
-        return response.json();
+        const data = await response.json();
+        if (isGet && cacheKey) this.setCache(cacheKey, data);
+        return data as T;
       } catch (err: any) {
         clearTimeout(timeout);
         // If it's an abort error, convert to a friendlier message

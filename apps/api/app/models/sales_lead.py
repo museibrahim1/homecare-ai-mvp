@@ -60,7 +60,7 @@ class SalesLead(Base, TimestampMixin):
 
     # Contact info (manually added)
     contact_name = Column(String(255), nullable=True)
-    contact_email = Column(String(255), nullable=True)
+    contact_email = Column(String(255), nullable=True, index=True)
     contact_title = Column(String(255), nullable=True)
     website = Column(String(500), nullable=True)
 
@@ -98,10 +98,10 @@ class SalesLead(Base, TimestampMixin):
     assigned_type = Column(String(20), nullable=True)
 
     # Email sequence tracking
-    sequence_step = Column(Integer, default=0)
+    sequence_step = Column(Integer, default=0, index=True)
     sequence_started_at = Column(DateTime(timezone=True), nullable=True)
     sequence_completed = Column(Boolean, default=False)
-    next_email_scheduled_at = Column(DateTime(timezone=True), nullable=True)
+    next_email_scheduled_at = Column(DateTime(timezone=True), nullable=True, index=True)
     last_template_sent = Column(String(100), nullable=True)
 
     # Activity log stored as JSON array

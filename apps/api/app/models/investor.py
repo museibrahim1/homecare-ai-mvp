@@ -41,7 +41,7 @@ class Investor(Base, TimestampMixin):
 
     # Fund / investor info
     fund_name = Column(String(500), nullable=False, index=True)
-    investor_type = Column(String(50), default=InvestorType.vc_fund.value)
+    investor_type = Column(String(50), default=InvestorType.vc_fund.value, index=True)
     website = Column(String(500), nullable=True)
     description = Column(Text, nullable=True)
 
@@ -59,7 +59,7 @@ class Investor(Base, TimestampMixin):
 
     # Contact info
     contact_name = Column(String(255), nullable=True)
-    contact_email = Column(String(255), nullable=True)
+    contact_email = Column(String(255), nullable=True, index=True)
     contact_title = Column(String(255), nullable=True)
     contact_linkedin = Column(String(500), nullable=True)
     contact_twitter = Column(String(255), nullable=True)
