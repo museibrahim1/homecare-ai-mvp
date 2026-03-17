@@ -332,7 +332,7 @@ export default function CommandCenterPage() {
     try {
       const tasks = await apiFetch('/notes/tasks?assigned_to_me=true');
       setMyTasks((tasks || []).filter((t: any) => t.status !== 'done' && t.status !== 'cancelled'));
-    } catch { /* ignore */ }
+    } catch { setMyTasks([]); }
   }, [apiFetch]);
 
   // Load everything in parallel on mount
@@ -1358,7 +1358,7 @@ interface WeeklyTodoItem {
 }
 
 function getWeekKey(weekOffset: number, weekStart: string) {
-  return `weekly-todo-${weekStart || weekOffset}`;
+  return `weekly-todo-v2-${weekStart || weekOffset}`;
 }
 
 function defaultTodosForWeek(weekOffset: number, stats: WeeklyPlan['stats'], plan?: WeeklyPlan | null): WeeklyTodoItem[] {
@@ -1369,39 +1369,17 @@ function defaultTodosForWeek(weekOffset: number, stats: WeeklyPlan['stats'], pla
     const weekInvestorEmails = plan.days.reduce((sum, d) => sum + d.investor_drafts.length, 0);
     const weekCalls = plan.days.reduce((sum, d) => sum + d.calls.length, 0);
 
-    if (weekAgencyEmails > 0) {
-      items.push({ id: `a-emails-${weekOffset}`, text: `Send ${weekAgencyEmails} agency emails this week`, done: false });
-    }
-    if (weekInvestorEmails > 0) {
-      items.push({ id: `i-emails-${weekOffset}`, text: `Send ${weekInvestorEmails} investor emails this week`, done: false });
-    }
-    if (weekCalls > 0) {
-      items.push({ id: `calls-${weekOffset}`, text: `Make ${weekCalls} calls this week`, done: false });
-    }
-
-    for (const day of plan.days) {
-      if (day.agency_drafts.length > 0 || day.calls.length > 0) {
-        items.push({
-          id: `day-${day.day_name}-${weekOffset}`,
-          text: `${day.day_name}: ${day.agency_drafts.length} emails, ${day.calls.length} calls${day.investor_drafts.length > 0 ? `, ${day.investor_drafts.length} investor emails` : ''}`,
-          done: false,
-        });
-      }
-    }
+    if (weekAgencyEmails > 0) items.push({ id: `a-emails-${weekOffset}`, text: `Send ${weekAgencyEmails} agency emails`, done: false });
+    if (weekInvestorEmails > 0) items.push({ id: `i-emails-${weekOffset}`, text: `Send ${weekInvestorEmails} investor emails`, done: false });
+    if (weekCalls > 0) items.push({ id: `calls-${weekOffset}`, text: `Make ${weekCalls} calls`, done: false });
   } else {
-    if (stats.unsent_agency_emails > 0) {
-      items.push({ id: `a-emails-${weekOffset}`, text: `Send agency emails (${stats.unsent_agency_emails} unsent total)`, done: false });
-    }
-    if (stats.unsent_investor_emails > 0) {
-      items.push({ id: `i-emails-${weekOffset}`, text: `Send investor emails (${stats.unsent_investor_emails} unsent total)`, done: false });
-    }
-    if (stats.calls_remaining > 0) {
-      items.push({ id: `calls-${weekOffset}`, text: `Make calls (${stats.calls_remaining} remaining total)`, done: false });
-    }
+    if (stats.unsent_agency_emails > 0) items.push({ id: `a-emails-${weekOffset}`, text: `Send agency emails`, done: false });
+    if (stats.unsent_investor_emails > 0) items.push({ id: `i-emails-${weekOffset}`, text: `Send investor emails`, done: false });
+    if (stats.calls_remaining > 0) items.push({ id: `calls-${weekOffset}`, text: `Make calls`, done: false });
   }
 
   items.push(
-    { id: `followup-${weekOffset}`, text: 'Follow up on callbacks and warm leads', done: false },
+    { id: `callbacks-${weekOffset}`, text: 'Perform callbacks', done: false },
     { id: `crm-${weekOffset}`, text: 'Review CRM — update statuses, add notes', done: false },
   );
   return items;

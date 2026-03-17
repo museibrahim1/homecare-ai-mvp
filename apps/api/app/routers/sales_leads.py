@@ -204,8 +204,7 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         '</div>'
         # Signature
         f'<div style="padding: 0 40px 32px; border-top: 1px solid {_SLATE_200}; padding-top: 24px;">'
-        f'<p style="margin: 0; font-weight: 700; font-size: 15px; color: {_SLATE_900};">Muse Ibrahim</p>'
-        f'<p style="margin: 2px 0 0; font-size: 13px; color: {_TEAL};">President &amp; CEO</p>'
+        f'<p style="margin: 0; font-weight: 700; font-size: 15px; color: {_SLATE_900};">The PalmCare AI Team</p>'
         f'<p style="margin: 2px 0 0; font-size: 13px; color: {_TEAL};">Palm Technologies, Inc.</p>'
         f'<p style="margin: 6px 0 0;"><a href="{_SITE}" '
         f'style="color: {_TEAL}; text-decoration: none; font-size: 13px; font-weight: 500;">'
@@ -296,56 +295,56 @@ EMAIL_TEMPLATES = {
     "warm_open": {
         "id": "warm_open",
         "name": "The Warm Open",
-        "subject": "{provider_name} — quick question",
+        "subject": "{provider_name} — how many systems is your team using?",
         "sequence_day": 1,
-        "description": "Day 1 — Confident intro with PALM IT energy. Genuine curiosity, brand-aware.",
+        "description": "Day 1 — CRM-focused intro. Discovery question about their current tools.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
             + _section(
-                "Why I reached out",
-                "I came across {provider_name} while researching home care agencies in {city}. "
-                "Building something in this industry takes real grit &mdash; I respect it."
+                "Quick question",
+                "How many different systems is {provider_name} using right now to manage client intake, "
+                "assessments, documentation, and billing? If it's more than one, things are probably "
+                "falling through the cracks."
             )
-            + f'<p style="{_P}">Quick question: how is your team handling client assessments and '
-            'documentation right now? Still paper-based, or have you found something digital that '
-            'actually works?</p>'
             + _section(
-                "What we do",
-                "PalmCare AI turns care assessments into signed contracts &mdash; automatically. "
-                "Staff record the interview on their phone. AI transcribes it, generates the care plan, "
-                "and produces a ready-to-sign agreement in seconds."
+                "One platform for everything",
+                "PalmCare AI is a single platform built for home care agencies &mdash; client CRM, "
+                "assessment pipeline, automated care plans, contract generation, billing reports, "
+                "and a mobile app for field staff. Everything your team needs, in one place."
             )
-            + f'<p style="{_P_MUTED}">No pitch today &mdash; just curious how agency owners in '
-            '{state_full} actually run things day to day.</p>',
+            + f'<p style="{_P_MUTED}">Agencies using PalmCare are cutting onboarding time from days '
+            'to minutes and saving 15+ hours a week on documentation.</p>',
             "{provider_name}",
         ),
     },
     "pattern_interrupt": {
         "id": "pattern_interrupt",
         "name": "The Pattern Interrupt",
-        "subject": "this isn't another software pitch",
+        "subject": "what agencies in {state_full} are replacing first",
         "sequence_day": 3,
-        "description": "Day 3 — Self-aware, punchy. One killer stat, one CTA. PALM IT energy.",
+        "description": "Day 3 — CRM-focused stat punch. Shows what agencies are actually switching from.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">Your inbox is full of people selling things. This is different.</p>'
-            + _section(
-                "One number worth knowing",
-                "Agencies using voice-to-documentation tools are cutting "
-                "<strong>12+ hours of admin work per week</strong>. "
-                "That&rsquo;s a nurse and a half worth of time going back to patient care."
-            )
+            f'<p style="{_P}">The #1 thing agencies replace first isn&rsquo;t their scheduling tool. '
+            'It&rsquo;s the patchwork of spreadsheets, paper forms, and disconnected systems they use '
+            'for client intake and documentation.</p>'
             + '<div style="text-align: center; margin: 24px 0;">'
-            + _stat_block("12+", "Hours saved / week")
-            + _stat_block("10x", "Faster assessments")
-            + _stat_block("95%", "Accuracy rate")
+            + _stat_block("80%", "Less onboarding time")
+            + _stat_block("15hrs", "Saved per week")
+            + _stat_block("1", "Platform for everything")
             + '</div>'
-            + f'<p style="{_P}">10 minutes. No slides. Just a live demo of how it works.</p>'
+            + _section(
+                "What PalmCare replaces",
+                "Client management, assessments, care plans, contracts, billing reports, and field "
+                "documentation &mdash; all in one platform with a mobile app. No more copying data "
+                "between systems."
+            )
+            + f'<p style="{_P}">15 minutes. See the full platform live.</p>'
             + f'<div style="text-align: center; margin: 24px 0;">'
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
             f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
             'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Palm It &mdash; Book a Demo</a></div>',
+            'border-radius: 10px;">Book a Demo</a></div>',
             "{provider_name}",
         ),
     },
