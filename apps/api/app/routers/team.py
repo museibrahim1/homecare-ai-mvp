@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_db, require_ceo_only
+from app.core.deps import get_db, get_current_user, require_ceo_only
 from app.core.security import get_password_hash
 from app.models.user import User
 from app.services.email import get_email_service
@@ -118,6 +118,56 @@ def list_team_members(
         )
         for m in members
     ]
+
+
+@router.get("/team/roster")
+def team_roster(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Lightweight team roster for chat/comms. Any authenticated admin or team member."""
+    if current_user.role not in ("admin", "admin_team"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    ceo = db.query(User).filter(
+        User.role == "admin", User.email.endswith("@palmtai.com")
+    ).first()
+
+    team_members = db.query(User).filter(User.invited_by.isnot(None)).all()
+
+    roster = []
+    if ceo:
+        from datetime import datetime, timezone, timedelta
+        now = datetime.now(timezone.utc)
+
+        def _status(u: User) -> str:
+            la = getattr(u, "last_active", None)
+            if la is None:
+                return "offline"
+            if la.tzinfo is None:
+                la = la.replace(tzinfo=timezone.utc)
+            return "online" if (now - la).total_seconds() < 300 else "offline"
+
+        roster.append({
+            "id": str(ceo.id),
+            "name": ceo.full_name or ceo.email.split("@")[0],
+            "email": ceo.email,
+            "role": "CEO",
+            "status": _status(ceo),
+        })
+        for m in team_members:
+            if m.id == current_user.id:
+                continue
+            roster.append({
+                "id": str(m.id),
+                "name": m.full_name or m.email.split("@")[0],
+                "email": m.email,
+                "role": m.role or "Team Member",
+                "status": _status(m),
+                "permissions": m.permissions or [],
+            })
+
+    return roster
 
 
 @router.post("/team/invite", response_model=TeamMemberResponse)

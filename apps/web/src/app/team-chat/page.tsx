@@ -7,9 +7,9 @@ import { useAuth } from '@/lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// Empty defaults - no demo data for new users
+// Empty defaults
 const defaultChannels: { id: string; name: string; unread: number }[] = [];
-const defaultTeamMembers: { id: string; name: string; status: string; role: string }[] = [];
+const defaultTeamMembers: { id: string; name: string; status: string; role: string; email?: string }[] = [];
 
 type Email = {
   id: string;
@@ -26,7 +26,7 @@ type Email = {
 export default function TeamChatPage() {
   const { token, user } = useAuth();
   const [channels, setChannels] = useState<{ id: string; name: string; unread: number }[]>([]);
-  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string; status: string; role: string }[]>([]);
+  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string; status: string; role: string; email?: string }[]>([]);
   const [chatMessages, setChatMessages] = useState<{ id: string; user: string; avatar: string; text: string; time: string; channelId: string }[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<{ id: string; name: string; unread: number } | null>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -64,6 +64,36 @@ export default function TeamChatPage() {
     }
     setChatLoading(false);
   }, [getChatStorageKey]);
+
+  // Fetch team members from API
+  useEffect(() => {
+    const fetchTeamRoster = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`${API_URL}/admin/team/roster`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const roster = await response.json();
+          const mapped = (roster || []).map((m: any) => ({
+            id: m.id,
+            name: m.name || m.email || 'Unknown',
+            status: m.status || 'offline',
+            role: m.role || 'Team Member',
+            email: m.email,
+          }));
+          if (mapped.length > 0) {
+            setTeamMembers(mapped);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch team roster:', error);
+      }
+    };
+    fetchTeamRoster();
+    const interval = setInterval(fetchTeamRoster, 60000);
+    return () => clearInterval(interval);
+  }, [token]);
 
   // Save chat data to localStorage when it changes
   useEffect(() => {
@@ -519,19 +549,21 @@ export default function TeamChatPage() {
                 </div>
                 {teamMembers.length === 0 ? (
                   <div className="text-center py-4">
+                    <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                     <p className="text-slate-400 text-xs">No team members yet</p>
+                    <p className="text-slate-400 text-xs mt-1">Add members in Team settings</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {teamMembers.map(member => (
-                      <div key={member.id} className="flex items-center gap-2 px-2 py-1.5">
+                      <div key={member.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white transition-colors">
                         <div className="relative">
-                          <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
-                            <span className="text-xs text-slate-500">{member.name.split(' ').map(n => n[0]).join('')}</span>
+                          <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
+                            <span className="text-xs text-primary-600 font-medium">{member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
                           </div>
-                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-dark-900 ${
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-50 ${
                             member.status === 'online' ? 'bg-green-500' :
-                            member.status === 'away' ? 'bg-yellow-500' : 'bg-slate-100'
+                            member.status === 'away' ? 'bg-yellow-500' : 'bg-slate-300'
                           }`} />
                         </div>
                         <div className="flex-1 min-w-0">
