@@ -2074,6 +2074,81 @@ async def scan_all_emails(
     ]
 
 
+@router.post("/leads/internal/clear-bad-emails-advanced")
+async def clear_bad_emails_advanced(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Advanced email cleanup: clear webmaster@, junk emails, and deduplicate
+    corporate chain emails (keep only 1 per duplicate email)."""
+    import re as _re
+    _require_internal_key(request)
+
+    body = await request.json()
+    bad_prefixes = body.get("bad_prefixes", [])
+    bad_exact = body.get("bad_exact", [])
+    dedup_threshold = body.get("dedup_threshold", 5)
+
+    leads = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None), SalesLead.contact_email != ""
+    ).all()
+
+    cleared_prefix = 0
+    cleared_exact = 0
+    cleared_dedup = 0
+    cleared_invalid = 0
+    details = []
+
+    bad_exact_set = {e.lower().strip() for e in bad_exact}
+    email_groups = {}
+
+    for lead in leads:
+        email = (lead.contact_email or "").lower().strip()
+        if not email:
+            continue
+
+        should_clear = False
+        reason = ""
+
+        if email in bad_exact_set:
+            should_clear = True
+            reason = "exact_match"
+            cleared_exact += 1
+
+        elif any(email.startswith(p.lower()) for p in bad_prefixes):
+            should_clear = True
+            reason = "prefix_match"
+            cleared_prefix += 1
+
+        elif not _re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+            should_clear = True
+            reason = "invalid_format"
+            cleared_invalid += 1
+
+        if should_clear:
+            details.append({"name": lead.provider_name, "email": email, "reason": reason})
+            lead.contact_email = None
+        else:
+            email_groups.setdefault(email, []).append(lead)
+
+    for email, group in email_groups.items():
+        if len(group) >= dedup_threshold:
+            for lead in group[1:]:
+                lead.contact_email = None
+                cleared_dedup += 1
+                details.append({"name": lead.provider_name, "email": email, "reason": f"dedup({len(group)} copies)"})
+
+    db.commit()
+    return {
+        "cleared_prefix": cleared_prefix,
+        "cleared_exact": cleared_exact,
+        "cleared_invalid": cleared_invalid,
+        "cleared_dedup": cleared_dedup,
+        "total_cleared": cleared_prefix + cleared_exact + cleared_invalid + cleared_dedup,
+        "details_sample": details[:100],
+    }
+
+
 @router.post("/leads/internal/batch-enrich")
 async def internal_batch_enrich(
     request: Request,
