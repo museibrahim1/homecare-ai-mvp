@@ -92,7 +92,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="flex items-center gap-4">
             <Link href="/" className="text-dark-300 hover:text-white transition text-sm">Home</Link>
             <Link href="/blog" className="text-dark-300 hover:text-white transition text-sm">Blog</Link>
-            <a href="/#book-demo" className="btn-primary py-2 px-4 text-sm">Book Demo</a>
+            <a href="/#book-demo" className="btn-primary py-2 px-4 text-sm">Sign Up Free</a>
           </div>
         </div>
       </nav>
@@ -131,7 +131,7 @@ export default async function BlogPostPage({ params }: Props) {
             <h3 className="text-2xl font-bold text-white mb-3">Ready to see PalmCare AI in action?</h3>
             <p className="text-dark-400 mb-6">Book a free 30-minute demo and see how voice-to-contract works for your agency.</p>
             <a href="/#book-demo" className="btn-primary py-3 px-8 text-base inline-block">
-              Book Your Free Demo
+              Start Your 7 Day Free Trial
             </a>
           </div>
         </article>

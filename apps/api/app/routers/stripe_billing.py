@@ -102,32 +102,23 @@ async def get_public_plans(db: Session = Depends(get_db)):
     return result
 
 
-@router.get("/plans/debug")
-async def debug_plans(db: Session = Depends(get_db)):
-    """Debug endpoint to check plans table directly."""
+@router.post("/plans/cleanup")
+async def cleanup_duplicate_plans(db: Session = Depends(get_db)):
+    """Remove duplicate plans with lowercase tier values that break ORM enum mapping."""
     from sqlalchemy import text as sa_text
-    result = {}
-    try:
-        result["raw_count"] = db.execute(sa_text("SELECT count(*) FROM plans")).scalar()
-        rows = db.execute(sa_text(
-            "SELECT id, name, tier, monthly_price, is_active, stripe_product_id FROM plans ORDER BY monthly_price"
-        )).fetchall()
-        result["raw_rows"] = [
-            {"id": str(r[0]), "name": r[1], "tier": r[2], "price": float(r[3]) if r[3] else 0,
-             "is_active": r[4], "stripe_product_id": r[5]}
-            for r in rows
-        ]
-    except Exception as e:
-        result["sql_error"] = f"{type(e).__name__}: {e}"
 
-    try:
-        orm_plans = db.query(Plan).all()
-        result["orm_count"] = len(orm_plans)
-        result["orm_names"] = [p.name for p in orm_plans]
-    except Exception as e:
-        result["orm_error"] = f"{type(e).__name__}: {e}"
+    bad_tiers = ['starter', 'professional', 'enterprise', 'free']
+    deleted = 0
+    for tier in bad_tiers:
+        result = db.execute(
+            sa_text("DELETE FROM plans WHERE tier = :tier"),
+            {"tier": tier},
+        )
+        deleted += result.rowcount
 
-    return result
+    db.commit()
+    remaining = db.execute(sa_text("SELECT count(*) FROM plans")).scalar()
+    return {"deleted": deleted, "remaining": remaining}
 
 
 STRIPE_PRICE_MAP = {

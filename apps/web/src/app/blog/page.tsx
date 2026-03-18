@@ -43,7 +43,7 @@ export default function BlogPage() {
             <Link href="/" className="text-dark-300 hover:text-white transition text-sm">Home</Link>
             <Link href="/features" className="text-dark-300 hover:text-white transition text-sm">Features</Link>
             <Link href="/blog" className="text-white font-medium text-sm">Blog</Link>
-            <a href="/#book-demo" className="btn-primary py-2 px-4 text-sm">Book Demo</a>
+            <a href="/#book-demo" className="btn-primary py-2 px-4 text-sm">Sign Up Free</a>
           </div>
         </div>
       </nav>

@@ -59,7 +59,7 @@ export default function MobileAppPage() {
           </div>
           <div className="ma-topnav-actions">
             <Link href="/login" className="ma-topnav-link">Sign In</Link>
-            <a href="/#book-demo" className="ma-topnav-cta-btn">Schedule Demo</a>
+            <a href="/#book-demo" className="ma-topnav-cta-btn">Sign Up Free</a>
           </div>
         </div>
       </nav>
@@ -84,7 +84,7 @@ export default function MobileAppPage() {
                   <span className="ma-appstore-big">App Store</span>
                 </div>
               </a>
-              <a href="/#book-demo" className="ma-demo-btn">Schedule a Demo <ArrowRight size={16} /></a>
+              <a href="/#book-demo" className="ma-demo-btn">Start Free Trial <ArrowRight size={16} /></a>
             </div>
             <div className="ma-hero-trust">
               <div className="ma-trust-badge ma-trust-hipaa">🛡️ HIPAA Compliant</div>
@@ -213,7 +213,7 @@ export default function MobileAppPage() {
                 <span className="ma-appstore-big">App Store</span>
               </div>
             </a>
-            <a href="/#book-demo" className="ma-demo-btn">Schedule a Demo <ArrowRight size={16} /></a>
+            <a href="/#book-demo" className="ma-demo-btn">Start Free Trial <ArrowRight size={16} /></a>
           </div>
           <div className="ma-download-trust">
             <span className="ma-trust-badge ma-trust-hipaa">🛡️ HIPAA Compliant</span>

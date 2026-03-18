@@ -139,7 +139,7 @@ export default function LandingPageApika({
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <a href="#book-demo" className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition">
-                    Schedule a Demo <ArrowRight className="w-5 h-5" />
+                    Start Your 7 Day Free Trial <ArrowRight className="w-5 h-5" />
                   </a>
                   <button
                     onClick={onWatchDemo}
@@ -262,7 +262,7 @@ export default function LandingPageApika({
                 </ul>
                 <div className="flex gap-4">
                   <a href="#book-demo" className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-600 transition">
-                    Schedule Demo <ArrowRight className="w-4 h-4" />
+                    Start Free Trial <ArrowRight className="w-4 h-4" />
                   </a>
                   <a href="/features" className="text-primary-600 hover:text-primary-700 font-medium">Know More</a>
                 </div>

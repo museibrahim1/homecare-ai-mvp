@@ -164,7 +164,7 @@ export default function FaqPage() {
             <Link href="/features" className="text-dark-300 hover:text-white transition text-sm">Features</Link>
             <Link href="/blog" className="text-dark-300 hover:text-white transition text-sm">Blog</Link>
             <Link href="/faq" className="text-white font-medium text-sm">FAQ</Link>
-            <a href="/#book-demo" className="btn-primary py-2 px-4 text-sm">Book Demo</a>
+            <a href="/#book-demo" className="btn-primary py-2 px-4 text-sm">Sign Up Free</a>
           </div>
         </div>
       </nav>
@@ -203,7 +203,7 @@ export default function FaqPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a href="/#book-demo" className="btn-primary py-3 px-8 text-base inline-flex items-center gap-2">
-                Book Your Free Demo <ArrowRight className="w-4 h-4" />
+                Start Your 7 Day Free Trial <ArrowRight className="w-4 h-4" />
               </a>
               <Link href="/contact" className="py-3 px-8 text-base text-dark-300 hover:text-white border border-dark-600 hover:border-dark-500 rounded-xl transition inline-flex items-center gap-2">
                 Contact Us

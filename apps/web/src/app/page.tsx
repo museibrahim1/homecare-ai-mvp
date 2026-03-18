@@ -516,7 +516,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <button aria-label="Skip" onClick={() => { if (currentStep < DEMO_STEPS.length - 1) { setCurrentStep(s => s + 1); setProgress(0); } }} className="p-2 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition"><SkipForward className="w-5 h-5" /></button>
                 </>
               )}
-              <a href="#book-demo" onClick={onClose} className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition">Schedule a Demo</a>
+              <a href="#book-demo" onClick={onClose} className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition">Sign Up Free</a>
             </div>
           </div>
         </div>
@@ -1582,9 +1582,9 @@ export default function LandingPage() {
             <h2 className="text-4xl font-bold text-white mb-4">Your Next Client is Waiting</h2>
             <p className="text-xl text-dark-300 mb-8">Close faster. Document smarter. Never lose a client to paperwork again.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Book Your Free Demo <ArrowRight className="w-5 h-5" /></a>
+              <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Your 7 Day Free Trial <ArrowRight className="w-5 h-5" /></a>
             </div>
-            <p className="text-dark-400 text-sm mt-6">Free personalized demo &bull; No credit card &bull; No commitment</p>
+            <p className="text-dark-400 text-sm mt-6">No credit card required &bull; Full access &bull; Cancel anytime</p>
           </div>
         </div>
       </section>
@@ -1652,7 +1652,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/features" className="hover:text-white transition">Features</Link></li>
                 <li><Link href="/mobile-app" className="hover:text-white transition">Mobile App</Link></li>
-                <li><a href="#book-demo" className="hover:text-white transition">Book a Demo</a></li>
+                <li><a href="#book-demo" className="hover:text-white transition">Free Trial</a></li>
                 <li><Link href="/blog" className="hover:text-white transition">Blog</Link></li>
                 <li><Link href="/faq" className="hover:text-white transition">FAQ</Link></li>
                 <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
@@ -1663,7 +1663,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
-                <li><a href="#book-demo" className="hover:text-white transition">Book a Demo</a></li>
+                <li><a href="#book-demo" className="hover:text-white transition">Free Trial</a></li>
               </ul>
             </div>
             <div>
@@ -1696,7 +1696,7 @@ export default function LandingPage() {
         <div className="flex items-center justify-between gap-3">
           <p className="text-white text-sm font-medium hidden sm:block">Your next client is waiting</p>
           <div className="flex items-center gap-2 flex-1 sm:flex-none">
-            <a href="#book-demo" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Book Your Free Demo</a>
+            <a href="#book-demo" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Sign Up Free</a>
           </div>
         </div>
       </div>

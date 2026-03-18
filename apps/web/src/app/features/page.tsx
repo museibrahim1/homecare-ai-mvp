@@ -232,12 +232,12 @@ export default function FeaturesPage() {
               </div>
 
               <Link href="/mobile-app" className="px-3 py-2 text-dark-300 hover:text-white transition">Mobile App</Link>
-              <a href="/#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Schedule Demo</a>
+              <a href="/#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Sign Up Free</a>
             </div>
 
             <div className="hidden lg:flex items-center gap-3">
               <Link href="/login" className="text-dark-300 hover:text-white transition px-3 py-2">Sign In</Link>
-              <a href="/#book-demo" className="btn-primary py-2 px-5 text-sm">Schedule Demo</a>
+              <a href="/#book-demo" className="btn-primary py-2 px-5 text-sm">Sign Up Free</a>
             </div>
 
             <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-dark-300 hover:text-white">
@@ -250,10 +250,10 @@ export default function FeaturesPage() {
               <Link href="/features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-primary-400">Features</Link>
               <a href="/#solutions" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Solutions</a>
               <Link href="/mobile-app" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Mobile App</Link>
-              <a href="/#book-demo" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Schedule Demo</a>
+              <a href="/#book-demo" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Sign Up Free</a>
               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Contact</Link>
               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
-              <a href="/#book-demo" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Schedule Demo</a>
+              <a href="/#book-demo" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Sign Up Free</a>
             </div>
           )}
         </div>
@@ -337,7 +337,7 @@ export default function FeaturesPage() {
               <h2 className="text-3xl font-bold text-white mb-4">Ready to Palm It?</h2>
               <p className="text-xl text-dark-300 mb-8">Book a free demo. See how PalmCare AI turns assessments into signed contracts — automatically.</p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Palm It — Book a Demo<ArrowRight className="w-5 h-5" /></Link>
+                <Link href="/#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Your 7 Day Free Trial<ArrowRight className="w-5 h-5" /></Link>
               </div>
               <p className="text-dark-400 text-sm mt-6">Free personalized demo &bull; No commitment required</p>
             </div>
@@ -368,7 +368,7 @@ export default function FeaturesPage() {
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/features" className="hover:text-white transition">Features</Link></li>
                 <li><Link href="/mobile-app" className="hover:text-white transition">Mobile App</Link></li>
-                <li><a href="/#book-demo" className="hover:text-white transition">Schedule Demo</a></li>
+                <li><a href="/#book-demo" className="hover:text-white transition">Sign Up Free</a></li>
                 <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
                 <li><Link href="/status" className="hover:text-white transition">System Status</Link></li>
               </ul>
@@ -378,7 +378,7 @@ export default function FeaturesPage() {
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
-                <li><a href="/#book-demo" className="hover:text-white transition">Book a Demo</a></li>
+                <li><a href="/#book-demo" className="hover:text-white transition">Free Trial</a></li>
               </ul>
             </div>
             <div>
