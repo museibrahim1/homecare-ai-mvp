@@ -325,8 +325,8 @@ EMAIL_TEMPLATES = {
         "description": "Day 3 — CRM-focused stat punch. Shows what agencies are actually switching from.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">The #1 thing agencies replace first isn't their scheduling tool. '
-            'It's the patchwork of spreadsheets, paper forms, and disconnected systems they use '
+            f'<p style="{_P}">The #1 thing agencies replace first is not their scheduling tool. '
+            'It is the patchwork of spreadsheets, paper forms, and disconnected systems they use '
             'for client intake and documentation.</p>'
             + '<div style="text-align: center; margin: 24px 0;">'
             + _stat_block("80%", "Less onboarding time")
@@ -376,7 +376,7 @@ EMAIL_TEMPLATES = {
             '</div>'
             + f'<p style="{_P}">No training manuals. No data entry. No delays.<br>'
             '<strong>Just tap, talk, and Palm It.</strong></p>'
-            + '<p style="' + _P_MUTED + '">Want to see it work with {provider_name}'s actual workflow?</p>'
+            + '<p style="' + _P_MUTED + '">Want to see it work with your actual workflow?</p>'
             + f'<div style="text-align: center; margin: 24px 0;">'
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
             f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
@@ -434,13 +434,13 @@ EMAIL_TEMPLATES = {
         "description": "Day 28 — Short, confident, respectful. Restraint signals strength. Door stays open.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">I've reached out a few times and I know you're busy. '
+            f'<p style="{_P}">We have reached out a few times and know you are busy. '
             'Running {provider_name} in {city} is more than a full-time job.</p>'
-            f'<p style="{_P}">I won't keep filling your inbox.</p>'
+            f'<p style="{_P}">We will not keep filling your inbox.</p>'
             + _section(
-                "When you're ready",
+                "When you are ready",
                 "If the timing is ever right for a faster way to handle assessments, contracts, "
-                "and documentation, we're here. One tap, AI handles the rest."
+                "and documentation, we are here. One tap, AI handles the rest."
             )
             + f'<p style="{_P_MUTED}">Your next client is waiting. So are we.</p>',
             "{provider_name}",
