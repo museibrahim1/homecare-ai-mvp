@@ -102,23 +102,6 @@ async def get_public_plans(db: Session = Depends(get_db)):
     return result
 
 
-@router.post("/plans/cleanup")
-async def cleanup_duplicate_plans(db: Session = Depends(get_db)):
-    """Remove duplicate plans with lowercase tier values that break ORM enum mapping."""
-    from sqlalchemy import text as sa_text
-
-    bad_tiers = ['starter', 'professional', 'enterprise', 'free']
-    deleted = 0
-    for tier in bad_tiers:
-        result = db.execute(
-            sa_text("DELETE FROM plans WHERE tier = :tier"),
-            {"tier": tier},
-        )
-        deleted += result.rowcount
-
-    db.commit()
-    remaining = db.execute(sa_text("SELECT count(*) FROM plans")).scalar()
-    return {"deleted": deleted, "remaining": remaining}
 
 
 STRIPE_PRICE_MAP = {
