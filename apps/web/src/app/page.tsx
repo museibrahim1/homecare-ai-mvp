@@ -1249,7 +1249,7 @@ function HeroOrb() {
 
       <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10">
         <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
-          Book Your Free Demo <ArrowRight className="w-5 h-5" />
+          Start Your 7 Day Free Trial <ArrowRight className="w-5 h-5" />
         </a>
         <a href="#features" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
           See How It Works <ChevronDown className="w-5 h-5" />
@@ -1371,12 +1371,12 @@ export default function LandingPage() {
               </div>
 
               <Link href="/mobile-app" className="px-3 py-2 text-dark-300 hover:text-white transition">Mobile App</Link>
-              <a href="#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Book Demo</a>
+              <a href="#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Free Trial</a>
             </div>
 
             <div className="hidden lg:flex items-center gap-3">
               <Link href="/login" className="text-dark-300 hover:text-white transition px-3 py-2">Sign In</Link>
-              <a href="#book-demo" className="btn-primary py-2 px-5 text-sm">Book Your Free Demo</a>
+              <a href="#book-demo" className="btn-primary py-2 px-5 text-sm">Sign Up Free</a>
             </div>
 
             <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-dark-300 hover:text-white">
@@ -1389,10 +1389,10 @@ export default function LandingPage() {
               <Link href="/features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Features</Link>
               <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Solutions</a>
               <Link href="/mobile-app" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Mobile App</Link>
-              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Book Demo</a>
+              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Free Trial</a>
               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Contact</Link>
               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
-              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Book Your Free Demo</a>
+              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Sign Up Free</a>
             </div>
           )}
         </div>
@@ -1428,9 +1428,9 @@ export default function LandingPage() {
           </div>
           <div className="text-center mt-12">
             <a href="#book-demo" className="btn-primary inline-flex items-center gap-2 py-4 px-8 text-lg">
-              Book Your Free Demo <ArrowRight className="w-5 h-5" />
+              Start Your 7 Day Free Trial <ArrowRight className="w-5 h-5" />
             </a>
-            <p className="text-dark-500 text-sm mt-4">5 minutes is all it takes to see the difference</p>
+            <p className="text-dark-500 text-sm mt-4">No credit card required. Cancel anytime.</p>
           </div>
         </div>
       </section>
@@ -1511,7 +1511,7 @@ export default function LandingPage() {
                     <li key={j} className="flex items-center gap-2 text-dark-300 text-sm"><CheckCircle className="w-4 h-4 text-green-400 shrink-0" />{f}</li>
                   ))}
                 </ul>
-                <a href="#book-demo" className="mt-6 block text-center py-3 rounded-xl font-medium bg-primary-500 text-white hover:bg-primary-600 transition">Book Your Free Demo</a>
+                <a href="#book-demo" className="mt-6 block text-center py-3 rounded-xl font-medium bg-primary-500 text-white hover:bg-primary-600 transition">Start Free Trial</a>
               </div>
             ))}
           </div>

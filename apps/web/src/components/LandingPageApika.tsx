@@ -88,7 +88,7 @@ export default function LandingPageApika({
                 Sign In
               </Link>
               <a href="#book-demo" className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition">
-                Schedule Demo
+                Sign Up Free
               </a>
             </div>
 
@@ -110,7 +110,7 @@ export default function LandingPageApika({
               ))}
               <Link href="/login" className="block py-2 text-slate-600" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
               <a href="#book-demo" className="block bg-primary-500 text-white py-2 px-4 rounded-lg text-center font-medium mt-2" onClick={() => setMobileMenuOpen(false)}>
-                Schedule Demo
+                Sign Up Free
               </a>
             </div>
           )}

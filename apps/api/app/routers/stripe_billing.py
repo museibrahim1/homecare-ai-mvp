@@ -76,10 +76,7 @@ class StripePriceConfig(BaseModel):
 async def get_public_plans(db: Session = Depends(get_db)):
     """Get all active plans (public endpoint for pricing page)."""
     try:
-        from sqlalchemy import text as sa_text
-        row_count = db.execute(sa_text("SELECT count(*) FROM plans")).scalar()
         plans = db.query(Plan).order_by(Plan.monthly_price).all()
-        logger.info(f"Plans query: raw_count={row_count}, orm_count={len(plans)}")
     except Exception as e:
         logger.error(f"Plans query error: {type(e).__name__}: {e}")
         return []
@@ -101,6 +98,34 @@ async def get_public_plans(db: Session = Depends(get_db)):
             })
         except Exception as e:
             logger.error(f"Plan serialization error for {getattr(p, 'name', '?')}: {e}")
+
+    return result
+
+
+@router.get("/plans/debug")
+async def debug_plans(db: Session = Depends(get_db)):
+    """Debug endpoint to check plans table directly."""
+    from sqlalchemy import text as sa_text
+    result = {}
+    try:
+        result["raw_count"] = db.execute(sa_text("SELECT count(*) FROM plans")).scalar()
+        rows = db.execute(sa_text(
+            "SELECT id, name, tier, monthly_price, is_active, stripe_product_id FROM plans ORDER BY monthly_price"
+        )).fetchall()
+        result["raw_rows"] = [
+            {"id": str(r[0]), "name": r[1], "tier": r[2], "price": float(r[3]) if r[3] else 0,
+             "is_active": r[4], "stripe_product_id": r[5]}
+            for r in rows
+        ]
+    except Exception as e:
+        result["sql_error"] = f"{type(e).__name__}: {e}"
+
+    try:
+        orm_plans = db.query(Plan).all()
+        result["orm_count"] = len(orm_plans)
+        result["orm_names"] = [p.name for p in orm_plans]
+    except Exception as e:
+        result["orm_error"] = f"{type(e).__name__}: {e}"
 
     return result
 
