@@ -76,29 +76,33 @@ class StripePriceConfig(BaseModel):
 async def get_public_plans(db: Session = Depends(get_db)):
     """Get all active plans (public endpoint for pricing page)."""
     try:
-        plans = db.query(Plan).filter(
-            (Plan.is_active == True) | (Plan.is_active == None)
-        ).order_by(Plan.monthly_price).all()
-        if not plans:
-            plans = db.query(Plan).order_by(Plan.monthly_price).all()
-    except Exception:
+        from sqlalchemy import text as sa_text
+        row_count = db.execute(sa_text("SELECT count(*) FROM plans")).scalar()
+        plans = db.query(Plan).order_by(Plan.monthly_price).all()
+        logger.info(f"Plans query: raw_count={row_count}, orm_count={len(plans)}")
+    except Exception as e:
+        logger.error(f"Plans query error: {type(e).__name__}: {e}")
         return []
 
-    return [
-        {
-            "id": str(p.id),
-            "name": p.name,
-            "tier": p.tier.value if hasattr(p.tier, "value") else str(p.tier),
-            "description": p.description,
-            "monthly_price": float(p.monthly_price) if p.monthly_price else 0,
-            "annual_price": float(p.annual_price) if p.annual_price else 0,
-            "setup_fee": float(p.setup_fee) if p.setup_fee else 0,
-            "max_users": p.max_users,
-            "is_contact_sales": p.is_contact_sales or False,
-            "features": p.features,
-        }
-        for p in plans
-    ]
+    result = []
+    for p in plans:
+        try:
+            result.append({
+                "id": str(p.id),
+                "name": p.name,
+                "tier": p.tier.value if hasattr(p.tier, "value") else str(p.tier),
+                "description": p.description,
+                "monthly_price": float(p.monthly_price) if p.monthly_price else 0,
+                "annual_price": float(p.annual_price) if p.annual_price else 0,
+                "setup_fee": float(p.setup_fee) if p.setup_fee else 0,
+                "max_users": p.max_users,
+                "is_contact_sales": p.is_contact_sales or False,
+                "features": p.features,
+            })
+        except Exception as e:
+            logger.error(f"Plan serialization error for {getattr(p, 'name', '?')}: {e}")
+
+    return result
 
 
 STRIPE_PRICE_MAP = {
