@@ -255,13 +255,13 @@ def _week_bounds() -> tuple[datetime, datetime]:
 
 AGENCY_SUBJECT_HOOKS = [
     "How many systems is {provider_name} juggling right now?",
-    "{provider_name} — still using separate systems for intake, docs, and billing?",
+    "{provider_name}, still using separate systems for intake, docs, and billing?",
     "What if {provider_name} could onboard a client in 10 minutes?",
-    "One platform for your entire agency — {state} agencies are switching",
+    "One platform for your entire agency. {state} agencies are switching.",
     "The management tool replacing 3-5 disconnected systems",
-    "{provider_name} — your team shouldn't need 5 apps to run an agency",
+    "{provider_name}, your team shouldn't need 5 apps to run an agency",
     "What agencies in {state} are replacing first",
-    "Onboard a client in one visit — here's how",
+    "Onboard a client in one visit. Here's how.",
     "{provider_name} is losing 15 hours a week to this",
     "Everything your agency needs, one platform",
 ]
@@ -272,100 +272,92 @@ IMG = f"{SITE_URL}/screenshots"
 _S = "border-radius:8px;border:1px solid #e5e7eb;"
 
 AGENCY_TEMPLATES = [
-    # Template 0: "Your tools are costing you clients" — CRM platform pitch
+    # Template 0: "Your tools are costing you clients"
     lambda city, state: f"""\
 <p style="font-size:15px;color:#1a1a1a;line-height:1.7;margin:0 0 16px;">Hi there,</p>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Most home care agencies are running 3 to 5 disconnected systems &mdash; one for scheduling, one for documentation, another for billing, maybe a spreadsheet for client intake, and a filing cabinet for contracts.</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Most home care agencies are running 3 to 5 disconnected systems. One for scheduling, one for documentation, another for billing, maybe a spreadsheet for client intake, and a filing cabinet for contracts.</p>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">None of them talk to each other. Things fall through the cracks. Onboarding a new client takes days instead of hours. And every week, your team loses 15+ hours to paperwork that should be automated.</p>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;"><strong>PalmCare AI replaces all of it with one platform:</strong></p>
 
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
-<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Client Management</strong> &mdash; every client, contact, and case in one place</td></tr>
-<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Assessment Pipeline</strong> &mdash; intake to signed contract in minutes, not days</td></tr>
-<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Automated Care Plans</strong> &mdash; generated from the assessment, compliant across all 50 states</td></tr>
-<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Contracts &amp; Signatures</strong> &mdash; service agreements created and sent instantly</td></tr>
-<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Reports &amp; Billing</strong> &mdash; exportable, audit-ready, no manual entry</td></tr>
-<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Mobile App</strong> &mdash; your staff can work from the field, not the office</td></tr>
+<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Client Management</strong>: every client, contact, and case in one place</td></tr>
+<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Assessment Pipeline</strong>: intake to signed contract in minutes, not days</td></tr>
+<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Automated Care Plans</strong>: generated from the assessment, compliant across all 50 states</td></tr>
+<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Contracts &amp; Signatures</strong>: service agreements created and sent instantly</td></tr>
+<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Reports &amp; Billing</strong>: exportable, audit-ready, no manual entry</td></tr>
+<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;">&bull; <strong style="color:#0d9488;">Mobile App</strong>: your staff can work from the field, not the office</td></tr>
 </table>
 
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
-<tr><td style="padding-bottom:6px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_dashboard.png" width="580" style="width:100%;{_S}" alt="PalmCare AI Dashboard" /></a></td></tr>
-<tr><td style="font-size:11px;color:#999;text-align:center;padding-bottom:8px;">Your entire agency &mdash; clients, assessments, revenue &mdash; at a glance</td></tr>
 <tr>
-<td><table cellpadding="0" cellspacing="0" width="100%"><tr>
-<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_clients.png" width="280" style="width:100%;{_S}" alt="Client CRM" /></a></td>
-<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_pipeline.png" width="280" style="width:100%;{_S}" alt="Deals Pipeline" /></a></td>
-</tr></table></td>
+<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_dashboard.png" width="280" style="width:100%;{_S}" alt="Agency Dashboard" /></a></td>
+<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_pipeline.png" width="280" style="width:100%;{_S}" alt="Client Pipeline" /></a></td>
 </tr>
-<tr><td style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Client CRM &amp; pipeline &mdash; track every client from first contact through active care</td></tr>
+<tr><td colspan="2" style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Agency dashboard and client pipeline. Everything at a glance.</td></tr>
 </table>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Agencies using PalmCare are cutting onboarding time by 80% and eliminating the admin bottleneck that costs them clients.</p>""",
 
-    # Template 1: "One dashboard for your entire agency" — CRM features walkthrough
+    # Template 1: "One dashboard for your entire agency"
     lambda city, state: f"""\
 <p style="font-size:15px;color:#1a1a1a;line-height:1.7;margin:0 0 16px;">Hi there,</p>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Quick question &mdash; is your team still copying client info between systems, printing forms for assessments, or chasing signatures by email?</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Quick question. Is your team still copying client info between systems, printing forms for assessments, or chasing signatures by email?</p>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">PalmCare AI is a single platform built specifically for home care agencies in {city or "your area"}, {state}. Everything your office and field staff need, in one place:</p>
 
 <p style="font-size:15px;color:#0d9488;font-weight:700;margin:0 0 8px;">For your office:</p>
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
-<tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Full CRM dashboard &mdash; clients, leads, pipeline, and status tracking</td></tr>
-<tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Assessment and care plan generation &mdash; no templates to fill out manually</td></tr>
+<tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Full CRM dashboard with clients, leads, pipeline, and status tracking</td></tr>
+<tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Assessment and care plan generation with no templates to fill out manually</td></tr>
 <tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Contracts created automatically from each assessment</td></tr>
 <tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; One-click reports for compliance, billing, and internal review</td></tr>
 </table>
 
 <p style="font-size:15px;color:#0d9488;font-weight:700;margin:0 0 8px;">For your field staff:</p>
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
-<tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Mobile app &mdash; record assessments by voice during home visits</td></tr>
+<tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Mobile app to record assessments by voice during home visits</td></tr>
 <tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; AI transcribes the conversation and extracts every care need and billable item</td></tr>
 <tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Care plan and contract ready before your caregiver leaves the home</td></tr>
 </table>
 
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
 <tr>
-<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_assessments.png" width="280" style="width:100%;{_S}" alt="Assessment Pipeline" /></a></td>
-<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_contract.png" width="280" style="width:100%;{_S}" alt="Contract Preview" /></a></td>
+<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_dashboard.png" width="280" style="width:100%;{_S}" alt="Agency Dashboard" /></a></td>
+<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_pipeline.png" width="280" style="width:100%;{_S}" alt="Client Pipeline" /></a></td>
 </tr>
-<tr><td colspan="2" style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Assessment pipeline &amp; auto-generated contracts</td></tr>
+<tr><td colspan="2" style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Agency dashboard and client pipeline. One platform for everything.</td></tr>
 </table>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">No more bouncing between software. No more lost paperwork. No more 3-day onboarding process.</p>""",
 
-    # Template 2: "What if onboarding took 10 minutes?" — Speed/ROI pitch with CRM
+    # Template 2: "What if onboarding took 10 minutes?"
     lambda city, state: f"""\
 <p style="font-size:15px;color:#1a1a1a;line-height:1.7;margin:0 0 16px;">Hi there,</p>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Right now, onboarding a new home care client typically takes 2 to 5 days &mdash; between the intake call, the assessment paperwork, the care plan, getting the contract written up, and collecting a signature.</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Right now, onboarding a new home care client typically takes 2 to 5 days. Between the intake call, the assessment paperwork, the care plan, getting the contract written up, and collecting a signature.</p>
 
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;"><strong>With PalmCare AI, agencies are doing it in one visit:</strong></p>
 
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
 <tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;"><strong style="color:#0d9488;">1.</strong> Open the app during the home visit</td></tr>
-<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;"><strong style="color:#0d9488;">2.</strong> Record the assessment conversation &mdash; AI handles the rest</td></tr>
+<tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;"><strong style="color:#0d9488;">2.</strong> Record the assessment conversation. AI handles the rest.</td></tr>
 <tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;"><strong style="color:#0d9488;">3.</strong> Care plan, billable items, and service contract generated automatically</td></tr>
 <tr><td style="padding:6px 0;font-size:15px;color:#333;line-height:1.5;"><strong style="color:#0d9488;">4.</strong> Client reviews and signs before your caregiver leaves</td></tr>
 </table>
 
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
-<tr><td style="padding-bottom:6px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_dashboard.png" width="580" style="width:100%;{_S}" alt="PalmCare AI CRM Dashboard" /></a></td></tr>
-<tr><td style="font-size:11px;color:#999;text-align:center;padding-bottom:8px;">Full agency management &mdash; not just AI, a complete platform</td></tr>
 <tr>
-<td><table cellpadding="0" cellspacing="0" width="100%"><tr>
-<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/recording_screen.png" width="280" style="width:100%;{_S}" alt="Mobile Assessment" /></a></td>
-<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/contract_view.png" width="280" style="width:100%;{_S}" alt="Generated Contract" /></a></td>
-</tr></table></td>
+<td width="49%" style="padding-right:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_dashboard.png" width="280" style="width:100%;{_S}" alt="Agency Dashboard" /></a></td>
+<td width="49%" style="padding-left:4px;"><a href="{SITE_URL}/features" style="text-decoration:none;"><img src="{IMG}/email/crm_pipeline.png" width="280" style="width:100%;{_S}" alt="Client Pipeline" /></a></td>
 </tr>
-<tr><td style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Record the assessment &rarr; Contract generated automatically</td></tr>
+<tr><td colspan="2" style="padding-top:4px;font-size:11px;color:#999;text-align:center;">Full agency dashboard and client pipeline</td></tr>
 </table>
 
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;">But the platform isn't just the AI &mdash; it's a full agency management system:</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 8px;">The platform is not just AI. It is a full agency management system:</p>
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
 <tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Client CRM with status tracking and notes</td></tr>
 <tr><td style="padding:4px 0;font-size:15px;color:#333;line-height:1.5;">&bull; Assessment pipeline from intake to signed contract</td></tr>
@@ -378,10 +370,10 @@ AGENCY_TEMPLATES = [
 ]
 
 AGENCY_FOOTER = f"""\
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">See it in 15 minutes &mdash; no commitment:</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">Try it free for 7 days, no commitment:</p>
 
 <p style="margin:0 0 24px;">
-<a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book a Demo</a>
+<a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Sign Up and Get Your 7 Day Free Trial</a>
 </p>
 
 <a href="{SITE_URL}/#book-demo" style="text-decoration:none;">

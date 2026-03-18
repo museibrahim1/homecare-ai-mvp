@@ -322,6 +322,34 @@ async def seed_database():
                     demo_user.google_calendar_token_expiry = None
                 db.commit()
         
+        # Seed pricing plans if they don't exist
+        try:
+            from app.models.subscription import Plan, PlanTier
+            import json as _json
+            if db.query(Plan).count() == 0:
+                logger.info("Seeding pricing plans...")
+                _plans = [
+                    Plan(name="Starter", tier=PlanTier.STARTER, description="For small agencies",
+                         monthly_price=179, annual_price=1490, max_users=3, max_clients=50,
+                         max_visits_per_month=200, max_storage_gb=5,
+                         features=_json.dumps(["Up to 3 users","50 clients","200 visits/mo","AI voice-to-contract","Basic reporting","Email support"])),
+                    Plan(name="Growth", tier=PlanTier.PROFESSIONAL, description="For growing agencies",
+                         monthly_price=399, annual_price=3320, max_users=10, max_clients=200,
+                         max_visits_per_month=1000, max_storage_gb=25,
+                         features=_json.dumps(["Up to 10 users","200 clients","1,000 visits/mo","Advanced analytics","Priority support","Custom templates"])),
+                    Plan(name="Enterprise", tier=PlanTier.ENTERPRISE, description="For large agencies",
+                         monthly_price=0, annual_price=0, max_users=999, max_clients=9999,
+                         max_visits_per_month=99999, max_storage_gb=999, is_contact_sales=True,
+                         features=_json.dumps(["Unlimited everything","Dedicated support","HIPAA BAA","Custom integrations","SLA guarantee"])),
+                ]
+                for p in _plans:
+                    db.add(p)
+                db.commit()
+                logger.info(f"Seeded {len(_plans)} pricing plans")
+        except Exception as e:
+            logger.warning(f"Plan seeding skipped: {e}")
+            db.rollback()
+
         # Get admin user for associating seed data
         admin_user = db.query(User).filter(User.email == "admin@palmtai.com").first()
         admin_id = admin_user.id if admin_user else None

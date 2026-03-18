@@ -74,6 +74,10 @@ class BusinessRegistrationStep1(BaseModel):
     owner_email: EmailStr
     owner_password: str = Field(..., min_length=8)
 
+    # Signup tracking
+    signup_source: Optional[str] = None  # "direct", "demo", "referral"
+    selected_plan: Optional[str] = None  # "starter", "growth", "enterprise"
+
 
 class SOSVerificationRequest(BaseModel):
     """Request to verify business with Secretary of State"""

@@ -214,7 +214,7 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         '<div style="padding: 0 40px 32px; text-align: center;">'
         f'<a href="{_SITE}" style="text-decoration: none;">'
         f'<img src="{_GH_MARKETING}/hero_banner.png" '
-        'alt="PalmCare AI — iPhone App + CRM Dashboard" '
+        'alt="PalmCare AI iPhone App and CRM Dashboard" '
         'style="max-width: 520px; width: 100%; border-radius: 12px; '
         f'border: 1px solid {_SLATE_200};" />'
         '</a></div>'
@@ -235,7 +235,7 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         'Record it. Transcribe it. Contract it. All in your palm.</p>'
         f'<a href="{_SITE}/#book-demo" style="display: inline-block; background-color: #ffffff; '
         f'color: {_TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 600; '
-        'padding: 12px 28px; border-radius: 8px;">See It In Action</a>'
+        'padding: 12px 28px; border-radius: 8px;">Sign Up for Your 7 Day Free Trial</a>'
         '</div>'
         # Footer
         f'<div style="padding: 24px 40px; background-color: {_SLATE_100}; '
@@ -295,7 +295,7 @@ EMAIL_TEMPLATES = {
     "warm_open": {
         "id": "warm_open",
         "name": "The Warm Open",
-        "subject": "{provider_name} — how many systems is your team using?",
+        "subject": "{provider_name}, how many systems is your team using?",
         "sequence_day": 1,
         "description": "Day 1 — CRM-focused intro. Discovery question about their current tools.",
         "body": _email_wrap(
@@ -308,7 +308,7 @@ EMAIL_TEMPLATES = {
             )
             + _section(
                 "One platform for everything",
-                "PalmCare AI is a single platform built for home care agencies &mdash; client CRM, "
+                "PalmCare AI is a single platform built for home care agencies. Client CRM, "
                 "assessment pipeline, automated care plans, contract generation, billing reports, "
                 "and a mobile app for field staff. Everything your team needs, in one place."
             )
@@ -325,8 +325,8 @@ EMAIL_TEMPLATES = {
         "description": "Day 3 — CRM-focused stat punch. Shows what agencies are actually switching from.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">The #1 thing agencies replace first isn&rsquo;t their scheduling tool. '
-            'It&rsquo;s the patchwork of spreadsheets, paper forms, and disconnected systems they use '
+            f'<p style="{_P}">The #1 thing agencies replace first isn't their scheduling tool. '
+            'It's the patchwork of spreadsheets, paper forms, and disconnected systems they use '
             'for client intake and documentation.</p>'
             + '<div style="text-align: center; margin: 24px 0;">'
             + _stat_block("80%", "Less onboarding time")
@@ -336,15 +336,15 @@ EMAIL_TEMPLATES = {
             + _section(
                 "What PalmCare replaces",
                 "Client management, assessments, care plans, contracts, billing reports, and field "
-                "documentation &mdash; all in one platform with a mobile app. No more copying data "
+                "documentation, all in one platform with a mobile app. No more copying data "
                 "between systems."
             )
-            + f'<p style="{_P}">15 minutes. See the full platform live.</p>'
+            + f'<p style="{_P}">Try the full platform free for 7 days.</p>'
             + f'<div style="text-align: center; margin: 24px 0;">'
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
             f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
             'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Book a Demo</a></div>',
+            'border-radius: 10px;">Sign Up and Get Your 7 Day Free Trial</a></div>',
             "{provider_name}",
         ),
     },
@@ -359,7 +359,7 @@ EMAIL_TEMPLATES = {
             + _section(
                 "Picture this",
                 "You sit down with a new client. You talk through the assessment on your phone "
-                "for a few minutes. Before you leave their home &mdash; a complete care plan, "
+                "for a few minutes. Before you leave their home, a complete care plan, "
                 "assessment, and service contract are ready to sign."
             )
             + _section(
@@ -367,7 +367,7 @@ EMAIL_TEMPLATES = {
                 "<strong>1.</strong> Record the assessment interview on your phone<br>"
                 "<strong>2.</strong> AI transcribes everything in real time<br>"
                 "<strong>3.</strong> AI generates the care plan + service agreement<br>"
-                "<strong>4.</strong> Contract sent to client &mdash; ready to sign"
+                "<strong>4.</strong> Contract sent to client, ready to sign"
             )
             + '<div style="text-align: center; margin: 24px 0;">'
             f'<img src="{_GH_MARKETING}/fb_ad.png" '
@@ -376,12 +376,12 @@ EMAIL_TEMPLATES = {
             '</div>'
             + f'<p style="{_P}">No training manuals. No data entry. No delays.<br>'
             '<strong>Just tap, talk, and Palm It.</strong></p>'
-            + '<p style="' + _P_MUTED + '">Want to see it work with {provider_name}&rsquo;s actual workflow?</p>'
+            + '<p style="' + _P_MUTED + '">Want to see it work with {provider_name}'s actual workflow?</p>'
             + f'<div style="text-align: center; margin: 24px 0;">'
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
             f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
             'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">See It In Action</a></div>',
+            'border-radius: 10px;">Start Your 7 Day Free Trial</a></div>',
             "{provider_name}",
         ),
     },
@@ -396,7 +396,7 @@ EMAIL_TEMPLATES = {
             + _section(
                 "The paperwork problem",
                 "The average home care agency spends <strong>15+ hours per week</strong> on "
-                "documentation alone. That&rsquo;s time that should go to client visits, "
+                "documentation alone. That's time that should go to client visits, "
                 "caregiver training, or honestly just getting home at a reasonable hour."
             )
             + '<div style="text-align: center; margin: 24px 0;">'
@@ -410,11 +410,11 @@ EMAIL_TEMPLATES = {
                 "<strong>24 active pilot users.</strong> "
                 "<strong>300+ assessments</strong> generated with 68% accuracy improvement. "
                 "No other platform does AI assessment generation, AI contract creation, "
-                "and voice-to-contract &mdash; we&rsquo;re the first."
+                "and voice-to-contract. We're the first."
             )
             + '<div style="text-align: center; margin: 24px 0;">'
             f'<img src="{_GH_MARKETING}/linkedin_crm.png" '
-            'alt="PalmCare AI CRM — Dashboard, Pipeline, Mobile App" '
+            'alt="PalmCare AI CRM Dashboard, Pipeline, Mobile App" '
             f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
             '</div>'
             + '<p style="' + _P + '">For {provider_name}, that could mean 12 hours back. Every single week.</p>'
@@ -422,7 +422,7 @@ EMAIL_TEMPLATES = {
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
             f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
             'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Palm It &mdash; Get Started</a></div>',
+            'border-radius: 10px;">Start Your 7 Day Free Trial</a></div>',
             "{provider_name}",
         ),
     },
@@ -434,13 +434,13 @@ EMAIL_TEMPLATES = {
         "description": "Day 28 — Short, confident, respectful. Restraint signals strength. Door stays open.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">I&rsquo;ve reached out a few times and I know you&rsquo;re busy. '
+            f'<p style="{_P}">I've reached out a few times and I know you're busy. '
             'Running {provider_name} in {city} is more than a full-time job.</p>'
-            f'<p style="{_P}">I won&rsquo;t keep filling your inbox.</p>'
+            f'<p style="{_P}">I won't keep filling your inbox.</p>'
             + _section(
                 "When you're ready",
                 "If the timing is ever right for a faster way to handle assessments, contracts, "
-                "and documentation &mdash; we&rsquo;re here. One tap, AI handles the rest."
+                "and documentation, we're here. One tap, AI handles the rest."
             )
             + f'<p style="{_P_MUTED}">Your next client is waiting. So are we.</p>',
             "{provider_name}",

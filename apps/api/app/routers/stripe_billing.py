@@ -97,6 +97,87 @@ async def get_public_plans(db: Session = Depends(get_db)):
     ]
 
 
+@router.post("/plans/seed")
+async def seed_plans(db: Session = Depends(get_db)):
+    """Seed default pricing plans if they don't exist. Idempotent."""
+    from app.models.subscription import PlanTier
+    import json
+
+    PLANS = [
+        {
+            "name": "Starter",
+            "tier": PlanTier.STARTER,
+            "description": "For small agencies getting started with AI-powered documentation",
+            "monthly_price": 179,
+            "annual_price": 1490,
+            "setup_fee": 0,
+            "max_users": 3,
+            "max_clients": 50,
+            "max_visits_per_month": 200,
+            "max_storage_gb": 5,
+            "is_contact_sales": False,
+            "features": json.dumps([
+                "Up to 3 users", "Up to 50 clients", "200 visits/month",
+                "AI voice-to-contract", "Smart assessments", "Basic reporting",
+                "Email support", "5 GB storage",
+            ]),
+        },
+        {
+            "name": "Growth",
+            "tier": PlanTier.PROFESSIONAL,
+            "description": "For growing agencies that need advanced features and more capacity",
+            "monthly_price": 399,
+            "annual_price": 3320,
+            "setup_fee": 0,
+            "max_users": 10,
+            "max_clients": 200,
+            "max_visits_per_month": 1000,
+            "max_storage_gb": 25,
+            "is_contact_sales": False,
+            "features": json.dumps([
+                "Up to 10 users", "Up to 200 clients", "1,000 visits/month",
+                "AI voice-to-contract", "Smart assessments", "Advanced analytics & reporting",
+                "Priority support", "25 GB storage", "Custom contract templates",
+                "Team management",
+            ]),
+        },
+        {
+            "name": "Enterprise",
+            "tier": PlanTier.ENTERPRISE,
+            "description": "For large agencies with custom requirements and dedicated support",
+            "monthly_price": 0,
+            "annual_price": 0,
+            "setup_fee": 0,
+            "max_users": 999,
+            "max_clients": 9999,
+            "max_visits_per_month": 99999,
+            "max_storage_gb": 999,
+            "is_contact_sales": True,
+            "features": json.dumps([
+                "Unlimited users", "Unlimited clients", "Unlimited visits",
+                "AI voice-to-contract", "Smart assessments", "Custom analytics & dashboards",
+                "Dedicated account manager", "Unlimited storage",
+                "Custom integrations", "HIPAA BAA included",
+                "On-site training", "SLA guarantee",
+            ]),
+        },
+    ]
+
+    created = 0
+    for plan_data in PLANS:
+        existing = db.query(Plan).filter(Plan.tier == plan_data["tier"]).first()
+        if existing:
+            for k, v in plan_data.items():
+                setattr(existing, k, v)
+        else:
+            plan = Plan(**plan_data)
+            db.add(plan)
+            created += 1
+
+    db.commit()
+    return {"created": created, "updated": len(PLANS) - created}
+
+
 # =============================================================================
 # USER-FACING BILLING ENDPOINTS
 # =============================================================================
@@ -549,4 +630,52 @@ async def get_plan_stripe_config(
         "monthly_price": float(plan.monthly_price) if plan.monthly_price else 0,
         "annual_price": float(plan.annual_price) if plan.annual_price else 0,
         "setup_fee": float(plan.setup_fee) if plan.setup_fee else 0,
+    }
+
+
+@router.get("/signup-stats")
+async def get_signup_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Get signup analytics: total signups, by source, trial vs paid, etc."""
+    if (current_user.role.value if hasattr(current_user.role, 'value') else current_user.role) != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    from app.models.audit_log import AuditLog
+    from sqlalchemy import func
+
+    total_businesses = db.query(func.count(Business.id)).scalar() or 0
+    total_subscriptions = db.query(func.count(Subscription.id)).scalar() or 0
+    trial_count = db.query(func.count(Subscription.id)).filter(
+        Subscription.status == "trial"
+    ).scalar() or 0
+    active_count = db.query(func.count(Subscription.id)).filter(
+        Subscription.status == "active"
+    ).scalar() or 0
+
+    signups = db.query(AuditLog).filter(
+        AuditLog.action == "business_registered"
+    ).order_by(AuditLog.created_at.desc()).limit(50).all()
+
+    source_counts: dict = {}
+    for s in signups:
+        src = (s.changes or {}).get("signup_source", "unknown")
+        source_counts[src] = source_counts.get(src, 0) + 1
+
+    return {
+        "total_businesses": total_businesses,
+        "total_subscriptions": total_subscriptions,
+        "trial": trial_count,
+        "active_paid": active_count,
+        "signups_by_source": source_counts,
+        "recent_signups": [
+            {
+                "description": s.description,
+                "source": (s.changes or {}).get("signup_source"),
+                "plan": (s.changes or {}).get("selected_plan"),
+                "date": s.created_at.isoformat() if s.created_at else None,
+            }
+            for s in signups[:20]
+        ],
     }

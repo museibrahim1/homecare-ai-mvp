@@ -241,6 +241,43 @@ async def register_business(
     except Exception as e:
         logger.warning(f"Could not auto-create AgencySettings on registration: {e}")
     
+    # Create 7-day free trial subscription
+    try:
+        from app.models.subscription import Plan, Subscription, SubscriptionStatus
+        plan_tier = (registration.selected_plan or "starter").lower()
+        plan = db.query(Plan).filter(
+            Plan.tier == plan_tier, Plan.is_active == True
+        ).first()
+        if not plan:
+            plan = db.query(Plan).filter(Plan.is_active == True).order_by(Plan.monthly_price).first()
+        if plan:
+            trial_end = datetime.now(timezone.utc) + timedelta(days=7)
+            subscription = Subscription(
+                business_id=business.id,
+                plan_id=plan.id,
+                status=SubscriptionStatus.TRIAL,
+                billing_cycle="monthly",
+                trial_ends_at=trial_end,
+                current_period_start=datetime.now(timezone.utc),
+                current_period_end=trial_end,
+            )
+            db.add(subscription)
+    except Exception as e:
+        logger.warning(f"Could not auto-create trial subscription: {e}")
+
+    # Track signup source
+    signup_source = getattr(registration, "signup_source", None) or "direct"
+    try:
+        from app.services.audit import log_action
+        log_action(
+            db=db, user_id=regular_user.id, action="business_registered",
+            entity_type="business", entity_id=business.id,
+            description=f"New business registered: {registration.name} (source: {signup_source}, plan: {registration.selected_plan or 'starter'})",
+            changes={"signup_source": signup_source, "selected_plan": registration.selected_plan or "starter"},
+        )
+    except Exception:
+        pass
+
     db.commit()
     
     # Send registration confirmation email to the new user
