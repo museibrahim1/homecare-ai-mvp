@@ -325,7 +325,7 @@ export default function LandingPageApika({
                 </ul>
                 <div className="flex gap-4">
                   <a href="#book-demo" className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-600 transition">
-                    Schedule Demo
+                    Start Free Trial
                   </a>
                   <button
                     onClick={onWatchDemo}
