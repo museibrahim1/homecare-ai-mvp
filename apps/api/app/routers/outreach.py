@@ -370,10 +370,10 @@ AGENCY_TEMPLATES = [
 ]
 
 AGENCY_FOOTER = f"""\
-<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">Try it free for 7 days, no commitment:</p>
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 20px;">Try it free for 14 days, no commitment:</p>
 
 <p style="margin:0 0 24px;">
-<a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Sign Up and Get Your 7 Day Free Trial</a>
+<a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Sign Up and Get Your 14 Day Free Trial</a>
 </p>
 
 <a href="{SITE_URL}/#book-demo" style="text-decoration:none;">

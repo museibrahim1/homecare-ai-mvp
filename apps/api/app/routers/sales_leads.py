@@ -235,7 +235,7 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         'Record it. Transcribe it. Contract it. All in your palm.</p>'
         f'<a href="{_SITE}/#book-demo" style="display: inline-block; background-color: #ffffff; '
         f'color: {_TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 600; '
-        'padding: 12px 28px; border-radius: 8px;">Sign Up for Your 7 Day Free Trial</a>'
+        'padding: 12px 28px; border-radius: 8px;">Sign Up for Your 14 Day Free Trial</a>'
         '</div>'
         # Footer
         f'<div style="padding: 24px 40px; background-color: {_SLATE_100}; '
@@ -339,12 +339,12 @@ EMAIL_TEMPLATES = {
                 "documentation, all in one platform with a mobile app. No more copying data "
                 "between systems."
             )
-            + f'<p style="{_P}">Try the full platform free for 7 days.</p>'
+            + f'<p style="{_P}">Try the full platform free for 14 days.</p>'
             + f'<div style="text-align: center; margin: 24px 0;">'
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
             f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
             'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Sign Up and Get Your 7 Day Free Trial</a></div>',
+            'border-radius: 10px;">Sign Up and Get Your 14 Day Free Trial</a></div>',
             "{provider_name}",
         ),
     },
@@ -381,7 +381,7 @@ EMAIL_TEMPLATES = {
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
             f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
             'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Start Your 7 Day Free Trial</a></div>',
+            'border-radius: 10px;">Start Your 14 Day Free Trial</a></div>',
             "{provider_name}",
         ),
     },
@@ -422,7 +422,7 @@ EMAIL_TEMPLATES = {
             f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
             f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
             'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Start Your 7 Day Free Trial</a></div>',
+            'border-radius: 10px;">Start Your 14 Day Free Trial</a></div>',
             "{provider_name}",
         ),
     },

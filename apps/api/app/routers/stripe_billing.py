@@ -51,6 +51,15 @@ class CreateCheckoutRequest(BaseModel):
     business_id: Optional[UUID] = None
 
 
+class SignupCheckoutRequest(BaseModel):
+    """Public checkout request for new signups (no auth required)."""
+    business_id: UUID
+    email: str
+    billing_cycle: str = "monthly"
+    trial_type: str = "standard"  # "standard" (14-day free) or "extended" (30-day for $39.99)
+    plan_tier: str = "starter"
+
+
 class CheckoutResponse(BaseModel):
     checkout_url: str
     session_id: str
@@ -66,6 +75,9 @@ class StripePriceConfig(BaseModel):
     stripe_price_id_monthly: Optional[str] = None
     stripe_price_id_annual: Optional[str] = None
     stripe_price_id_setup: Optional[str] = None
+
+
+EXTENDED_TRIAL_PRICE_ID = "price_1TCTucKWCMHtsHgG8OYyvEvr"
 
 
 # =============================================================================
@@ -232,6 +244,105 @@ async def wire_stripe_ids(db: Session = Depends(get_db)):
 
     db.commit()
     return {"updated": updated, "price_map": STRIPE_PRICE_MAP}
+
+
+# =============================================================================
+# PUBLIC SIGNUP CHECKOUT (no auth required)
+# =============================================================================
+
+@router.post("/signup-checkout", response_model=CheckoutResponse)
+async def create_signup_checkout(
+    request: SignupCheckoutRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Create a Stripe Checkout session for new signups.
+    No auth required -- called right after registration.
+    Collects credit card and sets up trial that auto-converts to paid subscription.
+    """
+    if not STRIPE_AVAILABLE or not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Stripe not configured")
+
+    tier_map = {"starter": "STARTER", "growth": "PROFESSIONAL", "professional": "PROFESSIONAL"}
+    tier_key = tier_map.get(request.plan_tier.lower(), "STARTER")
+    plan = db.query(Plan).filter(Plan.tier == tier_key).first()
+    if not plan:
+        plan = db.query(Plan).order_by(Plan.monthly_price).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="No plans available")
+
+    if request.billing_cycle == "annual":
+        price_id = plan.stripe_price_id_annual
+    else:
+        price_id = plan.stripe_price_id_monthly
+
+    if not price_id:
+        raise HTTPException(status_code=400, detail="Plan not configured for Stripe billing")
+
+    trial_days = 30 if request.trial_type == "extended" else 14
+
+    line_items = [{"price": price_id, "quantity": 1}]
+
+    if request.trial_type == "extended" and EXTENDED_TRIAL_PRICE_ID:
+        line_items.insert(0, {"price": EXTENDED_TRIAL_PRICE_ID, "quantity": 1})
+
+    try:
+        session_params = {
+            "mode": "subscription",
+            "payment_method_types": ["card"],
+            "payment_method_collection": "always",
+            "line_items": [{"price": price_id, "quantity": 1}],
+            "success_url": f"{STRIPE_SUCCESS_URL}?session_id={{CHECKOUT_SESSION_ID}}",
+            "cancel_url": STRIPE_CANCEL_URL,
+            "customer_email": request.email,
+            "metadata": {
+                "plan_id": str(plan.id),
+                "plan_name": plan.name,
+                "business_id": str(request.business_id),
+                "billing_cycle": request.billing_cycle,
+                "trial_type": request.trial_type,
+            },
+            "subscription_data": {
+                "trial_period_days": trial_days,
+                "metadata": {
+                    "plan_id": str(plan.id),
+                    "business_id": str(request.business_id),
+                },
+                "description": (
+                    f"PalmCare AI {plan.name} - {trial_days}-day free trial, "
+                    f"then {'$' + str(int(plan.annual_price)) + '/yr' if request.billing_cycle == 'annual' else '$' + str(int(plan.monthly_price)) + '/mo'}"
+                ),
+            },
+            "consent_collection": {"terms_of_service": "required"},
+            "custom_text": {
+                "terms_of_service_acceptance": {
+                    "message": (
+                        f"By subscribing, you agree that after your {trial_days}-day free trial, "
+                        f"your card will be automatically charged "
+                        f"{'$' + str(int(plan.monthly_price)) + '/month' if request.billing_cycle == 'monthly' else '$' + str(int(plan.annual_price)) + '/year'} "
+                        f"for PalmCare AI {plan.name}. You can cancel anytime before the trial ends."
+                    ),
+                },
+            },
+            "allow_promotion_codes": True,
+        }
+
+        if request.trial_type == "extended" and EXTENDED_TRIAL_PRICE_ID:
+            session_params["invoice_creation"] = {
+                "enabled": True,
+                "invoice_data": {"description": "Extended 30-day trial access fee"},
+            }
+
+        session = stripe.checkout.Session.create(**session_params)
+
+        return CheckoutResponse(
+            checkout_url=session.url,
+            session_id=session.id,
+        )
+
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe signup checkout error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create checkout: {str(e)}")
 
 
 # =============================================================================
@@ -498,41 +609,58 @@ async def stripe_webhook(
 
 
 async def handle_checkout_completed(data: dict, db: Session):
-    """Handle successful checkout."""
+    """Handle successful checkout (both signup trials and direct purchases)."""
+    from datetime import timedelta
+
     metadata = data.get("metadata", {})
     plan_id = metadata.get("plan_id")
     business_id = metadata.get("business_id")
     billing_cycle = metadata.get("billing_cycle", "monthly")
-    
+    trial_type = metadata.get("trial_type")
+
     if not plan_id:
         logger.error("No plan_id in checkout metadata")
         return
-    
-    # Get plan
+
     plan = db.query(Plan).filter(Plan.id == plan_id).first()
     if not plan:
         logger.error(f"Plan not found: {plan_id}")
         return
-    
-    # Create or update subscription
+
     if business_id:
         subscription = db.query(Subscription).filter(
             Subscription.business_id == business_id
         ).first()
-        
+
         if not subscription:
             subscription = Subscription(business_id=business_id)
             db.add(subscription)
-        
+
         subscription.plan_id = plan.id
-        subscription.status = SubscriptionStatus.ACTIVE
         subscription.billing_cycle = billing_cycle
         subscription.stripe_customer_id = data.get("customer")
         subscription.stripe_subscription_id = data.get("subscription")
         subscription.current_period_start = datetime.now(timezone.utc)
-        
+
+        stripe_sub = data.get("subscription")
+        if stripe_sub and STRIPE_AVAILABLE and STRIPE_SECRET_KEY:
+            try:
+                sub_obj = stripe.Subscription.retrieve(stripe_sub)
+                if sub_obj.get("status") == "trialing":
+                    trial_days = 30 if trial_type == "extended" else 14
+                    subscription.status = SubscriptionStatus.TRIAL
+                    subscription.trial_ends_at = datetime.now(timezone.utc) + timedelta(days=trial_days)
+                    subscription.current_period_end = subscription.trial_ends_at
+                else:
+                    subscription.status = SubscriptionStatus.ACTIVE
+            except Exception as e:
+                logger.warning(f"Could not fetch Stripe subscription status: {e}")
+                subscription.status = SubscriptionStatus.TRIAL if trial_type else SubscriptionStatus.ACTIVE
+        else:
+            subscription.status = SubscriptionStatus.TRIAL if trial_type else SubscriptionStatus.ACTIVE
+
         db.commit()
-        logger.info(f"Subscription created/updated for business {business_id}")
+        logger.info(f"Subscription created/updated for business {business_id} (trial_type={trial_type})")
 
 
 async def handle_subscription_updated(data: dict, db: Session):

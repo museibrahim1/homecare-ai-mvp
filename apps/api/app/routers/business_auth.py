@@ -241,17 +241,16 @@ async def register_business(
     except Exception as e:
         logger.warning(f"Could not auto-create AgencySettings on registration: {e}")
     
-    # Create 7-day free trial subscription
+    # Create 14-day trial subscription (card collected via Stripe Checkout after registration)
     try:
         from app.models.subscription import Plan, Subscription, SubscriptionStatus
-        plan_tier = (registration.selected_plan or "starter").lower()
-        plan = db.query(Plan).filter(
-            Plan.tier == plan_tier, Plan.is_active == True
-        ).first()
+        tier_map = {"starter": "STARTER", "growth": "PROFESSIONAL", "professional": "PROFESSIONAL"}
+        plan_tier = tier_map.get((registration.selected_plan or "starter").lower(), "STARTER")
+        plan = db.query(Plan).filter(Plan.tier == plan_tier).first()
         if not plan:
-            plan = db.query(Plan).filter(Plan.is_active == True).order_by(Plan.monthly_price).first()
+            plan = db.query(Plan).order_by(Plan.monthly_price).first()
         if plan:
-            trial_end = datetime.now(timezone.utc) + timedelta(days=7)
+            trial_end = datetime.now(timezone.utc) + timedelta(days=14)
             subscription = Subscription(
                 business_id=business.id,
                 plan_id=plan.id,

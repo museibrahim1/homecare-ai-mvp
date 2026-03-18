@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, ArrowRight, Zap, Building2, Rocket, Phone } from 'lucide-react';
+import { Check, ArrowRight, Zap, Building2, Rocket, Phone, CreditCard, Shield, Clock } from 'lucide-react';
 
 const PLANS = [
   {
@@ -103,8 +103,11 @@ export default function PricingPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
           Simple, transparent pricing
         </h1>
-        <p className="text-lg text-white/60 max-w-2xl mx-auto mb-8">
-          Start with a 7-day free trial. No credit card required. Cancel anytime.
+        <p className="text-lg text-white/60 max-w-2xl mx-auto mb-2">
+          Start with a 14-day free trial. Cancel anytime before your trial ends.
+        </p>
+        <p className="text-sm text-white/40 max-w-xl mx-auto mb-8">
+          Credit card required to start trial. You will not be charged until the trial period ends.
         </p>
 
         {/* Billing Toggle */}
@@ -192,11 +195,20 @@ export default function PricingPage() {
                 </button>
 
                 {plan.price && (
-                  <p className="text-center text-white/30 text-xs mt-3">7-day free trial included</p>
+                  <p className="text-center text-white/30 text-xs mt-3">14-day free trial included</p>
                 )}
               </div>
             );
           })}
+        </div>
+
+        {/* Extended trial banner */}
+        <div className="mt-8 bg-gradient-to-r from-amber-500/10 to-teal-500/10 border border-white/10 rounded-2xl p-6 text-center">
+          <p className="text-white font-semibold text-sm mb-1">Want more time?</p>
+          <p className="text-white/60 text-sm">
+            Get a <span className="text-amber-400 font-semibold">30-day extended trial</span> for just
+            <span className="text-white font-semibold"> $39.99</span>. Choose this option during signup.
+          </p>
         </div>
       </div>
 
@@ -205,11 +217,30 @@ export default function PricingPage() {
         <h2 className="text-2xl font-bold text-white text-center mb-10">Frequently Asked Questions</h2>
         <div className="space-y-4">
           {[
-            { q: 'Do I need a credit card for the free trial?', a: 'No. Sign up and use PalmCare AI for 7 days completely free. We only ask for payment when your trial ends.' },
-            { q: 'Can I change plans later?', a: 'Yes. You can upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle.' },
-            { q: 'What happens after my trial ends?', a: 'You can choose a plan to continue using PalmCare AI. If you don\'t subscribe, your account will be paused but your data is preserved for 30 days.' },
-            { q: 'Is my data secure?', a: 'Absolutely. PalmCare AI is HIPAA-compliant with end-to-end encryption, audit logging, and role-based access controls.' },
-            { q: 'Do you offer discounts for larger teams?', a: 'Yes. Our Enterprise plan is custom-priced for agencies with 10+ users. Contact us for a quote.' },
+            {
+              q: 'Do I need a credit card for the free trial?',
+              a: 'Yes, a credit card is required to start your trial. This helps us prevent abuse and ensures a seamless transition if you decide to continue. You will not be charged during the 14-day trial period.',
+            },
+            {
+              q: 'What happens after the 14-day trial?',
+              a: 'At the end of your 14-day trial, your card will be automatically charged $179/month (Starter) or $399/month (Growth) depending on your selected plan. If you chose annual billing, you\'ll be charged $1,490/year or $3,320/year respectively. You can cancel anytime before the trial ends to avoid any charges.',
+            },
+            {
+              q: 'What is the 30-day extended trial?',
+              a: 'For $39.99, you can extend your trial from 14 days to 30 days. This gives you more time to evaluate PalmCare AI with your team. The $39.99 is a one-time fee — after 30 days, your regular subscription billing begins.',
+            },
+            {
+              q: 'Can I change plans later?',
+              a: 'Yes. You can upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle.',
+            },
+            {
+              q: 'How do I cancel?',
+              a: 'You can cancel anytime from your billing settings or through the Stripe customer portal. If you cancel during your trial, you will not be charged. Your data is preserved for 30 days after cancellation.',
+            },
+            {
+              q: 'Is my data secure?',
+              a: 'Absolutely. PalmCare AI is HIPAA-compliant with end-to-end encryption, audit logging, and role-based access controls.',
+            },
           ].map(({ q, a }) => (
             <details key={q} className="group border border-white/10 rounded-xl overflow-hidden">
               <summary className="px-6 py-4 cursor-pointer text-white font-medium text-sm flex items-center justify-between hover:bg-white/[0.02] transition">
@@ -226,8 +257,8 @@ export default function PricingPage() {
       <div className="max-w-4xl mx-auto px-6 pb-20 text-center">
         <div className="bg-gradient-to-r from-teal-500/20 to-indigo-500/20 rounded-2xl border border-white/10 p-10">
           <h2 className="text-2xl font-bold text-white mb-3">Ready to transform your agency?</h2>
-          <p className="text-white/60 mb-6">Start your 7-day free trial today. No credit card required.</p>
-          <div className="flex items-center justify-center gap-4">
+          <p className="text-white/60 mb-6">Start your 14-day free trial today. Cancel anytime.</p>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             <Link
               href="/register"
               className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-xl text-sm font-semibold transition flex items-center gap-2"
@@ -238,8 +269,13 @@ export default function PricingPage() {
               href="/#book-demo"
               className="bg-white/10 hover:bg-white/15 text-white px-6 py-3 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-white/10"
             >
-              <Phone className="w-4 h-4" /> Start Free Trial
+              <Phone className="w-4 h-4" /> Book a Demo
             </Link>
+          </div>
+          <div className="flex items-center justify-center gap-6 mt-6 text-white/30 text-xs">
+            <div className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> HIPAA Compliant</div>
+            <div className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> Powered by Stripe</div>
+            <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Cancel Anytime</div>
           </div>
         </div>
       </div>
