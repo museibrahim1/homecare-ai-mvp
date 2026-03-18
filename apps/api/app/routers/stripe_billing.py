@@ -97,6 +97,25 @@ async def get_public_plans(db: Session = Depends(get_db)):
     ]
 
 
+STRIPE_PRICE_MAP = {
+    "starter": {
+        "product_id": "prod_UAUR70ymDZTI6E",
+        "monthly": "price_1TC9SSKWCMHtsHgGY0CnGpkS",
+        "annual": "price_1TC9STKWCMHtsHgGJ3y7od0R",
+    },
+    "professional": {
+        "product_id": "prod_UAURUZ6mWT6jr6",
+        "monthly": "price_1TC9STKWCMHtsHgGDo0rDs4o",
+        "annual": "price_1TC9SUKWCMHtsHgGsyFXU91C",
+    },
+    "enterprise": {
+        "product_id": "prod_UAUR71CCudMY5g",
+        "monthly": None,
+        "annual": None,
+    },
+}
+
+
 @router.post("/plans/seed")
 async def seed_plans(db: Session = Depends(get_db)):
     """Seed default pricing plans if they don't exist. Idempotent."""
@@ -116,6 +135,9 @@ async def seed_plans(db: Session = Depends(get_db)):
             "max_visits_per_month": 200,
             "max_storage_gb": 5,
             "is_contact_sales": False,
+            "stripe_product_id": STRIPE_PRICE_MAP["starter"]["product_id"],
+            "stripe_price_id_monthly": STRIPE_PRICE_MAP["starter"]["monthly"],
+            "stripe_price_id_annual": STRIPE_PRICE_MAP["starter"]["annual"],
             "features": json.dumps([
                 "Up to 3 users", "Up to 50 clients", "200 visits/month",
                 "AI voice-to-contract", "Smart assessments", "Basic reporting",
@@ -134,6 +156,9 @@ async def seed_plans(db: Session = Depends(get_db)):
             "max_visits_per_month": 1000,
             "max_storage_gb": 25,
             "is_contact_sales": False,
+            "stripe_product_id": STRIPE_PRICE_MAP["professional"]["product_id"],
+            "stripe_price_id_monthly": STRIPE_PRICE_MAP["professional"]["monthly"],
+            "stripe_price_id_annual": STRIPE_PRICE_MAP["professional"]["annual"],
             "features": json.dumps([
                 "Up to 10 users", "Up to 200 clients", "1,000 visits/month",
                 "AI voice-to-contract", "Smart assessments", "Advanced analytics & reporting",
@@ -153,6 +178,7 @@ async def seed_plans(db: Session = Depends(get_db)):
             "max_visits_per_month": 99999,
             "max_storage_gb": 999,
             "is_contact_sales": True,
+            "stripe_product_id": STRIPE_PRICE_MAP["enterprise"]["product_id"],
             "features": json.dumps([
                 "Unlimited users", "Unlimited clients", "Unlimited visits",
                 "AI voice-to-contract", "Smart assessments", "Custom analytics & dashboards",
@@ -176,6 +202,26 @@ async def seed_plans(db: Session = Depends(get_db)):
 
     db.commit()
     return {"created": created, "updated": len(PLANS) - created}
+
+
+@router.post("/plans/wire-stripe")
+async def wire_stripe_ids(db: Session = Depends(get_db)):
+    """Internal endpoint to wire Stripe price IDs to existing plans."""
+    from app.models.subscription import PlanTier
+
+    updated = 0
+    for tier_value, ids in STRIPE_PRICE_MAP.items():
+        plan = db.query(Plan).filter(Plan.tier == tier_value).first()
+        if plan:
+            plan.stripe_product_id = ids["product_id"]
+            if ids.get("monthly"):
+                plan.stripe_price_id_monthly = ids["monthly"]
+            if ids.get("annual"):
+                plan.stripe_price_id_annual = ids["annual"]
+            updated += 1
+
+    db.commit()
+    return {"updated": updated, "price_map": STRIPE_PRICE_MAP}
 
 
 # =============================================================================

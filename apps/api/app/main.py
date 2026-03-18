@@ -322,30 +322,43 @@ async def seed_database():
                     demo_user.google_calendar_token_expiry = None
                 db.commit()
         
-        # Seed pricing plans if they don't exist
+        # Seed pricing plans and wire Stripe IDs
         try:
             from app.models.subscription import Plan, PlanTier
+            from app.routers.stripe_billing import STRIPE_PRICE_MAP
             import json as _json
-            if db.query(Plan).count() == 0:
-                logger.info("Seeding pricing plans...")
-                _plans = [
-                    Plan(name="Starter", tier=PlanTier.STARTER, description="For small agencies",
-                         monthly_price=179, annual_price=1490, max_users=3, max_clients=50,
-                         max_visits_per_month=200, max_storage_gb=5,
-                         features=_json.dumps(["Up to 3 users","50 clients","200 visits/mo","AI voice-to-contract","Basic reporting","Email support"])),
-                    Plan(name="Growth", tier=PlanTier.PROFESSIONAL, description="For growing agencies",
-                         monthly_price=399, annual_price=3320, max_users=10, max_clients=200,
-                         max_visits_per_month=1000, max_storage_gb=25,
-                         features=_json.dumps(["Up to 10 users","200 clients","1,000 visits/mo","Advanced analytics","Priority support","Custom templates"])),
-                    Plan(name="Enterprise", tier=PlanTier.ENTERPRISE, description="For large agencies",
-                         monthly_price=0, annual_price=0, max_users=999, max_clients=9999,
-                         max_visits_per_month=99999, max_storage_gb=999, is_contact_sales=True,
-                         features=_json.dumps(["Unlimited everything","Dedicated support","HIPAA BAA","Custom integrations","SLA guarantee"])),
-                ]
-                for p in _plans:
-                    db.add(p)
-                db.commit()
-                logger.info(f"Seeded {len(_plans)} pricing plans")
+
+            _plan_defs = [
+                dict(name="Starter", tier=PlanTier.STARTER, description="For small agencies",
+                     monthly_price=179, annual_price=1490, max_users=3, max_clients=50,
+                     max_visits_per_month=200, max_storage_gb=5,
+                     stripe_product_id=STRIPE_PRICE_MAP["starter"]["product_id"],
+                     stripe_price_id_monthly=STRIPE_PRICE_MAP["starter"]["monthly"],
+                     stripe_price_id_annual=STRIPE_PRICE_MAP["starter"]["annual"],
+                     features=_json.dumps(["Up to 3 users","50 clients","200 visits/mo","AI voice-to-contract","Basic reporting","Email support"])),
+                dict(name="Growth", tier=PlanTier.PROFESSIONAL, description="For growing agencies",
+                     monthly_price=399, annual_price=3320, max_users=10, max_clients=200,
+                     max_visits_per_month=1000, max_storage_gb=25,
+                     stripe_product_id=STRIPE_PRICE_MAP["professional"]["product_id"],
+                     stripe_price_id_monthly=STRIPE_PRICE_MAP["professional"]["monthly"],
+                     stripe_price_id_annual=STRIPE_PRICE_MAP["professional"]["annual"],
+                     features=_json.dumps(["Up to 10 users","200 clients","1,000 visits/mo","Advanced analytics","Priority support","Custom templates"])),
+                dict(name="Enterprise", tier=PlanTier.ENTERPRISE, description="For large agencies",
+                     monthly_price=0, annual_price=0, max_users=999, max_clients=9999,
+                     max_visits_per_month=99999, max_storage_gb=999, is_contact_sales=True,
+                     stripe_product_id=STRIPE_PRICE_MAP["enterprise"]["product_id"],
+                     features=_json.dumps(["Unlimited everything","Dedicated support","HIPAA BAA","Custom integrations","SLA guarantee"])),
+            ]
+            for pd in _plan_defs:
+                existing = db.query(Plan).filter(Plan.tier == pd["tier"]).first()
+                if existing:
+                    for k, v in pd.items():
+                        if v is not None:
+                            setattr(existing, k, v)
+                else:
+                    db.add(Plan(**pd))
+            db.commit()
+            logger.info(f"Pricing plans seeded/updated with Stripe IDs")
         except Exception as e:
             logger.warning(f"Plan seeding skipped: {e}")
             db.rollback()
