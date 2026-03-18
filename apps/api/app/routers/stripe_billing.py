@@ -76,7 +76,11 @@ class StripePriceConfig(BaseModel):
 async def get_public_plans(db: Session = Depends(get_db)):
     """Get all active plans (public endpoint for pricing page)."""
     try:
-        plans = db.query(Plan).filter(Plan.is_active == True).order_by(Plan.monthly_price).all()
+        plans = db.query(Plan).filter(
+            (Plan.is_active == True) | (Plan.is_active == None)
+        ).order_by(Plan.monthly_price).all()
+        if not plans:
+            plans = db.query(Plan).order_by(Plan.monthly_price).all()
     except Exception:
         return []
 
@@ -135,6 +139,7 @@ async def seed_plans(db: Session = Depends(get_db)):
             "max_visits_per_month": 200,
             "max_storage_gb": 5,
             "is_contact_sales": False,
+            "is_active": True,
             "stripe_product_id": STRIPE_PRICE_MAP["starter"]["product_id"],
             "stripe_price_id_monthly": STRIPE_PRICE_MAP["starter"]["monthly"],
             "stripe_price_id_annual": STRIPE_PRICE_MAP["starter"]["annual"],
@@ -156,6 +161,7 @@ async def seed_plans(db: Session = Depends(get_db)):
             "max_visits_per_month": 1000,
             "max_storage_gb": 25,
             "is_contact_sales": False,
+            "is_active": True,
             "stripe_product_id": STRIPE_PRICE_MAP["professional"]["product_id"],
             "stripe_price_id_monthly": STRIPE_PRICE_MAP["professional"]["monthly"],
             "stripe_price_id_annual": STRIPE_PRICE_MAP["professional"]["annual"],
@@ -178,6 +184,7 @@ async def seed_plans(db: Session = Depends(get_db)):
             "max_visits_per_month": 99999,
             "max_storage_gb": 999,
             "is_contact_sales": True,
+            "is_active": True,
             "stripe_product_id": STRIPE_PRICE_MAP["enterprise"]["product_id"],
             "features": json.dumps([
                 "Unlimited users", "Unlimited clients", "Unlimited visits",
