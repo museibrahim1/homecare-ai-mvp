@@ -113,8 +113,8 @@ async def register_business(
     existing = db.query(Business).filter(Business.email == registration.email).first()
     if existing:
         raise HTTPException(
-            status_code=400,
-            detail="A business with this email already exists"
+            status_code=409,
+            detail="A business with this email is already registered. Try signing in instead."
         )
     
     # Check if owner email already exists in BusinessUser
@@ -123,8 +123,8 @@ async def register_business(
     ).first()
     if existing_user:
         raise HTTPException(
-            status_code=400,
-            detail="A user with this email already exists"
+            status_code=409,
+            detail="An account with this email already exists. Try signing in or use a different email."
         )
     
     # Check if email already exists in regular User table
@@ -133,8 +133,8 @@ async def register_business(
     ).first()
     if existing_regular_user:
         raise HTTPException(
-            status_code=400,
-            detail="An account with this email already exists"
+            status_code=409,
+            detail="An account with this email already exists. Try signing in or use a different email."
         )
     
     # HIPAA Compliance: Validate password meets security requirements
@@ -278,7 +278,15 @@ async def register_business(
     except Exception:
         pass
 
-    db.commit()
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Registration commit failed for {registration.name}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Registration could not be completed. Please try again in a moment."
+        )
     
     # Send registration confirmation email to the new user
     email_service = get_email_service()

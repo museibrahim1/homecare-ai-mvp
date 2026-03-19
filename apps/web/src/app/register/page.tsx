@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Loader2, Check, ArrowLeft, ArrowRight, Eye, EyeOff,
-  Building2, CreditCard, Shield, Clock, Sparkles,
+  Building2, CreditCard, Shield, Clock, Sparkles, AlertCircle, RefreshCw,
 } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -46,10 +46,42 @@ function RegisterForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [errorHint, setErrorHint] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [trialType, setTrialType] = useState<'standard' | 'extended'>('standard');
   const [businessId, setBusinessId] = useState<string | null>(null);
+
+  const friendlyError = (raw: string): { message: string; hint: string } => {
+    const lower = raw.toLowerCase();
+    if (lower.includes('already exists') && lower.includes('email'))
+      return { message: 'An account with this email already exists.', hint: 'Try signing in instead, or use a different email.' };
+    if (lower.includes('already exists') && lower.includes('business'))
+      return { message: 'This business is already registered.', hint: 'If this is your agency, try signing in or contact support.' };
+    if (lower.includes('password') && (lower.includes('8 char') || lower.includes('security')))
+      return { message: 'Password doesn\'t meet security requirements.', hint: 'Use at least 8 characters with a mix of letters, numbers, and symbols.' };
+    if (lower.includes('rate limit') || lower.includes('too many'))
+      return { message: 'Too many attempts. Please wait a moment.', hint: 'For security, we limit registration attempts. Try again in a few minutes.' };
+    if (lower.includes('not configured') || lower.includes('stripe'))
+      return { message: 'Payment system is temporarily unavailable.', hint: 'Please try again in a few minutes. If this persists, contact sales@palmtai.com.' };
+    if (lower.includes('network') || lower.includes('fetch') || lower.includes('failed to fetch'))
+      return { message: 'Unable to connect to our servers.', hint: 'Check your internet connection and try again.' };
+    if (lower.includes('checkout') || lower.includes('payment'))
+      return { message: 'Could not set up payment. Please try again.', hint: 'If this keeps happening, contact sales@palmtai.com for help.' };
+    if (lower.includes('500') || lower.includes('internal'))
+      return { message: 'Something went wrong on our end.', hint: 'Our team has been notified. Please try again in a few minutes.' };
+    if (raw.length > 120)
+      return { message: 'Something went wrong. Please try again.', hint: 'If this keeps happening, contact sales@palmtai.com.' };
+    return { message: raw, hint: '' };
+  };
+
+  const setFriendlyError = (raw: string) => {
+    const { message, hint } = friendlyError(raw);
+    setError(message);
+    setErrorHint(hint);
+  };
+
+  const clearError = () => { setError(''); setErrorHint(''); };
 
   const [form, setForm] = useState({
     owner_name: '',
@@ -92,15 +124,15 @@ function RegisterForm() {
 
   const handleNext = () => {
     const err = validateStep1();
-    if (err) { setError(err); return; }
-    setError('');
+    if (err) { setError(err); setErrorHint(''); return; }
+    clearError();
     setStep(2);
   };
 
   const handleRegister = async () => {
     const err = validateStep2();
-    if (err) { setError(err); return; }
-    setError('');
+    if (err) { setError(err); setErrorHint(''); return; }
+    clearError();
     setLoading(true);
 
     try {
@@ -118,15 +150,18 @@ function RegisterForm() {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ detail: 'Registration failed' }));
-        throw new Error(typeof data.detail === 'string' ? data.detail : 'Registration failed');
+        const data = await res.json().catch(() => ({ detail: 'Registration failed. Please try again.' }));
+        const detail = typeof data.detail === 'string' ? data.detail
+          : Array.isArray(data.detail) ? data.detail.map((d: any) => d.msg || d).join('. ')
+          : 'Registration failed. Please try again.';
+        throw new Error(detail);
       }
 
       const data = await res.json();
       setBusinessId(data.business_id);
       setStep(3);
     } catch (e: any) {
-      setError(e.message || 'Something went wrong');
+      setFriendlyError(e.message || 'Something went wrong. Please try again.');
     }
     setLoading(false);
   };
@@ -134,7 +169,7 @@ function RegisterForm() {
   const handleStartTrial = async () => {
     if (!businessId) return;
     setLoading(true);
-    setError('');
+    clearError();
 
     try {
       const res = await fetch(`${API}/billing/signup-checkout`, {
@@ -150,14 +185,16 @@ function RegisterForm() {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ detail: 'Failed to start checkout' }));
-        throw new Error(typeof data.detail === 'string' ? data.detail : 'Checkout failed');
+        const data = await res.json().catch(() => ({ detail: 'Could not connect to payment service' }));
+        const detail = typeof data.detail === 'string' ? data.detail : 'Could not set up payment. Please try again.';
+        throw new Error(detail);
       }
 
       const data = await res.json();
+      if (!data.checkout_url) throw new Error('Payment service returned an invalid response.');
       window.location.href = data.checkout_url;
     } catch (e: any) {
-      setError(e.message || 'Failed to connect to payment service');
+      setFriendlyError(e.message || 'Unable to connect to payment service. Please try again.');
       setLoading(false);
     }
   };
@@ -251,8 +288,17 @@ function RegisterForm() {
           )}
 
           {error && (
-            <div className="mb-4 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm">
-              {error}
+            <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3.5">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-red-400 text-sm font-medium">{error}</p>
+                  {errorHint && <p className="text-red-400/60 text-xs mt-1">{errorHint}</p>}
+                </div>
+                <button onClick={clearError} className="text-red-400/40 hover:text-red-400 transition shrink-0">
+                  <span className="sr-only">Dismiss</span>&times;
+                </button>
+              </div>
             </div>
           )}
 
@@ -303,7 +349,7 @@ function RegisterForm() {
           {/* STEP 2: Agency */}
           {step === 2 && (
             <div>
-              <button onClick={() => { setStep(1); setError(''); }}
+              <button onClick={() => { setStep(1); clearError(); }}
                 className="flex items-center gap-1 text-white/40 hover:text-white/70 text-sm mb-4 transition">
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
@@ -371,7 +417,7 @@ function RegisterForm() {
           {/* STEP 3: Choose Trial & Billing, then Stripe Checkout */}
           {step === 3 && (
             <div>
-              <button onClick={() => { setStep(2); setError(''); }}
+              <button onClick={() => { setStep(2); clearError(); }}
                 className="flex items-center gap-1 text-white/40 hover:text-white/70 text-sm mb-4 transition">
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>

@@ -342,9 +342,14 @@ async def create_signup_checkout(
             session_id=session.id,
         )
 
+    except stripe.error.CardError as e:
+        logger.error(f"Stripe card error on signup: {e}")
+        raise HTTPException(status_code=400, detail="There was an issue with the payment method. Please try a different card.")
+    except stripe.error.RateLimitError:
+        raise HTTPException(status_code=429, detail="Too many requests. Please wait a moment and try again.")
     except stripe.error.StripeError as e:
         logger.error(f"Stripe signup checkout error: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to create checkout: {str(e)}")
+        raise HTTPException(status_code=502, detail="Payment service is temporarily unavailable. Please try again in a moment.")
 
 
 # =============================================================================
