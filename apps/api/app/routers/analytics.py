@@ -9,12 +9,13 @@ Serves three audiences:
 
 import hashlib
 import logging
+import time
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, cast, Date, extract, and_
 from pydantic import BaseModel
@@ -484,10 +485,27 @@ def _hash_ip(ip: str) -> str:
     return hashlib.sha256(ip.encode()).hexdigest()[:16]
 
 
+_public_rate_store: dict[str, list[float]] = defaultdict(list)
+_PUBLIC_RATE_WINDOW = 60
+_PUBLIC_RATE_MAX = 120  # 120 requests/min per IP
+
+
+def _check_public_rate_limit(request: Request) -> str:
+    """Rate-limit public analytics endpoints. Returns client IP."""
+    ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip() or "unknown"
+    key = f"analytics:{ip}"
+    now = time.time()
+    _public_rate_store[key] = [t for t in _public_rate_store[key] if t > now - _PUBLIC_RATE_WINDOW]
+    if len(_public_rate_store[key]) >= _PUBLIC_RATE_MAX:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded.")
+    _public_rate_store[key].append(now)
+    return ip
+
+
 @router.post("/public/track")
 async def public_track(req: PublicTrackRequest, request: Request, db: Session = Depends(get_db)):
     """Record a single anonymous site event (no auth required)."""
-    ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+    ip = _check_public_rate_limit(request)
     ev = SiteEvent(
         session_id=req.session_id[:64],
         event_type=req.event_type[:50],
@@ -515,7 +533,7 @@ async def public_track(req: PublicTrackRequest, request: Request, db: Session = 
 @router.post("/public/track-batch")
 async def public_track_batch(req: PublicTrackBatch, request: Request, db: Session = Depends(get_db)):
     """Record a batch of anonymous site events (no auth, max 50 per call)."""
-    ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+    ip = _check_public_rate_limit(request)
     ip_h = _hash_ip(ip)
     ua = (request.headers.get("user-agent") or "")[:1000] or None
     now = datetime.now(timezone.utc)

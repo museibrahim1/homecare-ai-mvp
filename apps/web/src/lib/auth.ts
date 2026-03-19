@@ -106,46 +106,56 @@ let globalHydrated = false;
 // Also track if we've ever had a valid session (prevents flash on navigation)
 let hasEverHadSession = false;
 
+// Selectors — subscribe only to the slices you need to avoid re-renders from lastActivity
+const selectToken = (s: AuthState) => s.token;
+const selectUser = (s: AuthState) => s.user;
+const selectLastActivity = (s: AuthState) => s.lastActivity;
+const selectSetToken = (s: AuthState) => s.setToken;
+const selectSetUser = (s: AuthState) => s.setUser;
+const selectUpdateLastActivity = (s: AuthState) => s.updateLastActivity;
+const selectLogout = (s: AuthState) => s.logout;
+
 // Hook that handles hydration and session timeout
 export function useAuth() {
-  const store = useAuthStore();
-  
-  // Use cached localStorage check instead of parsing JSON on every render
+  const token = useAuthStore(selectToken);
+  const user = useAuthStore(selectUser);
+  const lastActivity = useAuthStore(selectLastActivity);
+  const setToken = useAuthStore(selectSetToken);
+  const setUser = useAuthStore(selectSetUser);
+  const updateLastActivity = useAuthStore(selectUpdateLastActivity);
+  const logout = useAuthStore(selectLogout);
+
   const hasStoredToken = hasStoredTokenCached();
-  
-  // Only show loading if: not hydrated AND no stored token AND never had a session
+
   const shouldShowLoading = !globalHydrated && !hasStoredToken && !hasEverHadSession;
   
   const [isLoading, setIsLoading] = useState(shouldShowLoading);
   const [hydrated, setHydrated] = useState(globalHydrated);
   const [sessionWarning, setSessionWarning] = useState(false);
   const lastActivityUpdateRef = useRef<number>(0);
-  
-  // Track if we've ever had a valid session (moved to useEffect to avoid side-effects in render)
+  const sessionWarningRef = useRef(false);
+  sessionWarningRef.current = sessionWarning;
+
   useEffect(() => {
-    if (store.token && !hasEverHadSession) {
+    if (token && !hasEverHadSession) {
       hasEverHadSession = true;
     }
-  }, [store.token]);
+  }, [token]);
 
-  // Update activity timestamp on user interaction
-  // Uses a ref to track timing WITHOUT causing re-renders
   const handleActivity = useCallback(() => {
-    if (!store.token) return;
+    if (!token) return;
     const now = Date.now();
     if (now - lastActivityUpdateRef.current >= ACTIVITY_THROTTLE_MS) {
       lastActivityUpdateRef.current = now;
-      // Update Zustand state - this triggers re-render, but only every 30s
-      store.updateLastActivity();
-      if (sessionWarning) {
+      updateLastActivity();
+      if (sessionWarningRef.current) {
         setSessionWarning(false);
       }
     }
-  }, [store.token, sessionWarning]);
+  }, [token, updateLastActivity]);
 
-  // Set up activity listeners for session timeout
   useEffect(() => {
-    if (typeof window === 'undefined' || !store.token) return;
+    if (typeof window === 'undefined' || !token) return;
 
     ACTIVITY_EVENTS.forEach(event => {
       window.addEventListener(event, handleActivity, { passive: true });
@@ -156,31 +166,28 @@ export function useAuth() {
         window.removeEventListener(event, handleActivity);
       });
     };
-  }, [store.token, handleActivity]);
+  }, [token, handleActivity]);
 
-  // Check for session timeout periodically
   useEffect(() => {
-    if (!store.token || !store.lastActivity) return;
+    if (!token || !lastActivity) return;
 
     const checkTimeout = () => {
-      if (isSessionExpired(store.lastActivity)) {
-        store.logout();
+      if (isSessionExpired(lastActivity)) {
+        logout();
       } else {
-        const timeLeft = SESSION_TIMEOUT_MS - (Date.now() - (store.lastActivity || 0));
+        const timeLeft = SESSION_TIMEOUT_MS - (Date.now() - (lastActivity || 0));
         if (timeLeft < 2 * 60 * 1000 && timeLeft > 0) {
           setSessionWarning(true);
         }
       }
     };
 
-    // Check every 60 seconds (was 30s - unnecessary frequency)
     const interval = setInterval(checkTimeout, 60000);
     checkTimeout();
 
     return () => clearInterval(interval);
-  }, [store.token, store.lastActivity, store.logout]);
+  }, [token, lastActivity, logout]);
 
-  // Handle hydration
   useEffect(() => {
     if (globalHydrated) {
       setHydrated(true);
@@ -216,7 +223,13 @@ export function useAuth() {
   }, []);
 
   return {
-    ...store,
+    token,
+    user,
+    lastActivity,
+    setToken,
+    setUser,
+    updateLastActivity,
+    logout,
     isLoading,
     hydrated,
     sessionWarning,

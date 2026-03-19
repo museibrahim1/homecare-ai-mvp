@@ -115,7 +115,7 @@ def get_funnel_stats(request: Request):
     """Return demo booking funnel stats. Requires internal key."""
     cron_secret = os.getenv("CRON_SECRET", "")
     key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if key != cron_secret:
+    if not key or not cron_secret or key != cron_secret:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     from collections import Counter
@@ -258,7 +258,7 @@ async def book_demo(
     db: Session = Depends(get_db),
 ):
     """Book a product demo — auto-schedules via Google Calendar when connected."""
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip() or "unknown"
     _check_demo_rate_limit(client_ip)
 
     has_schedule = booking.date and booking.time_slot

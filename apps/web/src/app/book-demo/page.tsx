@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Calendar, Clock, ChevronLeft, ChevronRight, Check,
   Loader2, User, Building2, Mail, Phone, ArrowRight,
@@ -121,7 +122,7 @@ export default function BookDemoPage() {
       {/* Nav */}
       <nav style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/app-logo.png" alt="PalmCare AI" width={36} height={36} style={{ borderRadius: 8 }} />
+          <Image src="/app-logo.png" alt="PalmCare AI" width={36} height={36} style={{ borderRadius: 8 }} />
           <span style={{ fontSize: 20, fontWeight: 700, color: '#0f172a' }}>PalmCare AI</span>
         </Link>
         <Link href="/register" style={{ fontSize: 14, fontWeight: 600, color: '#0d9488', textDecoration: 'none' }}>

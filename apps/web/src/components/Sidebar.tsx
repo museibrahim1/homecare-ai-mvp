@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, memo, useCallback } from 'react';
+import { useState, useEffect, useRef, memo, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -179,10 +179,16 @@ export default function Sidebar() {
   const isTeamAdmin = user?.role === 'admin_team' || (user?.role === 'admin' && !isCeo);
   const isAdmin = isCeo || isTeamAdmin;
   const userPerms: string[] = (user as any)?.permissions || [];
-  const hasPermission = (perm: string) => isCeo || userPerms.includes('admin_full') || userPerms.includes(perm);
-  const visibleAdminItems = adminCoreNavItems.filter(item => !item.permission || hasPermission(item.permission));
-  const executiveTitle = (user as any)?.executive_title as string | undefined;
-  const workspaceLabel = isCeo ? 'CEO Workspace' : executiveTitle ? `${executiveTitle} Workspace` : 'Admin Workspace';
+
+  const visibleAdminItems = useMemo(() => {
+    const hasPerm = (perm: string) => isCeo || userPerms.includes('admin_full') || userPerms.includes(perm);
+    return adminCoreNavItems.filter(item => !item.permission || hasPerm(item.permission));
+  }, [isCeo, userPerms]);
+
+  const workspaceLabel = useMemo(() => {
+    const executiveTitle = (user as any)?.executive_title as string | undefined;
+    return isCeo ? 'CEO Workspace' : executiveTitle ? `${executiveTitle} Workspace` : 'Admin Workspace';
+  }, [isCeo, user]);
 
   const handleNavigate = useCallback((href: string) => {
     if (navRef.current) _sidebarScrollTop = navRef.current.scrollTop;
