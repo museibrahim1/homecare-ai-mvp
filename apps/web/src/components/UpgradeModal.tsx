@@ -13,14 +13,14 @@ interface UpgradeModalProps {
 const PLANS = [
   {
     name: 'Starter',
-    price: 299,
+    price: 179,
     period: '/mo',
-    description: 'For small agencies getting organized',
+    description: 'For small agencies',
     features: [
-      '25 assessments/month',
-      '50 clients in CRM',
-      '25 caregivers',
-      '3 team seats',
+      'Up to 3 users',
+      '50 clients',
+      '200 visits/month',
+      'AI voice-to-contract',
       'Email support',
     ],
     popular: false,
@@ -29,14 +29,14 @@ const PLANS = [
   },
   {
     name: 'Growth',
-    price: 599,
+    price: 399,
     period: '/mo',
-    description: 'For growing teams',
+    description: 'For growing agencies',
     features: [
-      '100 assessments/month',
-      '200 clients in CRM',
-      '100 caregivers',
-      '10 team seats',
+      'Up to 10 users',
+      '200 clients',
+      '1,000 visits/month',
+      'Advanced analytics',
       'Priority support',
     ],
     popular: true,
@@ -44,16 +44,16 @@ const PLANS = [
     borderColor: 'border-primary-500/50',
   },
   {
-    name: 'Pro',
-    price: 1299,
-    period: '/mo',
-    description: 'For high-volume teams',
+    name: 'Enterprise',
+    price: null,
+    period: '',
+    description: 'Custom pricing for large agencies',
     features: [
-      '300 assessments/month',
-      '1,000 clients in CRM',
-      '500 caregivers',
-      'Unlimited seats',
-      'Advanced analytics',
+      'Unlimited users',
+      'Unlimited clients',
+      'Dedicated account manager',
+      'Custom integrations',
+      'HIPAA BAA included',
     ],
     popular: false,
     color: 'from-amber-500 to-orange-500',
@@ -67,8 +67,11 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
   if (!isOpen) return null;
 
   const handleSelectPlan = (planName: string) => {
-    // Navigate to pricing page or open Stripe checkout
-    router.push('/#pricing');
+    if (planName === 'Enterprise') {
+      router.push('/contact?inquiry=enterprise');
+    } else {
+      router.push(`/register?plan=${planName.toLowerCase()}`);
+    }
     onClose();
   };
 
@@ -143,8 +146,14 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
                 <p className="text-slate-500 text-sm mt-1">{plan.description}</p>
 
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-slate-900">${plan.price}</span>
-                  <span className="text-slate-500 text-sm">{plan.period}</span>
+                  {plan.price ? (
+                    <>
+                      <span className="text-3xl font-bold text-slate-900">${plan.price}</span>
+                      <span className="text-slate-500 text-sm">{plan.period}</span>
+                    </>
+                  ) : (
+                    <span className="text-xl font-bold text-slate-900">Contact Sales</span>
+                  )}
                 </div>
 
                 <ul className="mt-4 space-y-2 flex-1">

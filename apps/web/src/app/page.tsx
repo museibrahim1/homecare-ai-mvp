@@ -535,8 +535,8 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   );
 }
 
-/* BookDemoSection removed — signup flow moved to /register */
-function _UNUSED_BookDemoSection() {
+/* BookDemoSection removed — signup flow now at /register */
+function __REMOVED_BookDemoSection() {
   const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);

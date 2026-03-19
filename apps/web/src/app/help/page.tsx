@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import { getStoredToken } from '@/lib/auth';
 import {
   HelpCircle, Send, Loader2, CheckCircle, MessageSquare,
-  AlertCircle, Book, FileQuestion, Bug, Lightbulb, Phone, Mail,
+  AlertCircle, Book, FileQuestion, Bug, Lightbulb, Mail,
   BookOpen, Play, Sparkles, ArrowRight
 } from 'lucide-react';
 import { useWalkthrough } from '@/lib/walkthrough';
