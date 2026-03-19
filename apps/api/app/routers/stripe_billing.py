@@ -313,25 +313,18 @@ async def create_signup_checkout(
                     f"then {'$' + str(int(plan.annual_price)) + '/yr' if request.billing_cycle == 'annual' else '$' + str(int(plan.monthly_price)) + '/mo'}"
                 ),
             },
-            "consent_collection": {"terms_of_service": "required"},
             "custom_text": {
-                "terms_of_service_acceptance": {
+                "submit": {
                     "message": (
-                        f"By subscribing, you agree that after your {trial_days}-day free trial, "
+                        f"After your {trial_days}-day free trial, "
                         f"your card will be automatically charged "
                         f"{'$' + str(int(plan.monthly_price)) + '/month' if request.billing_cycle == 'monthly' else '$' + str(int(plan.annual_price)) + '/year'} "
-                        f"for PalmCare AI {plan.name}. You can cancel anytime before the trial ends."
+                        f"for PalmCare AI {plan.name}. Cancel anytime before the trial ends."
                     ),
                 },
             },
             "allow_promotion_codes": True,
         }
-
-        if request.trial_type == "extended" and EXTENDED_TRIAL_PRICE_ID:
-            session_params["invoice_creation"] = {
-                "enabled": True,
-                "invoice_data": {"description": "Extended 30-day trial access fee"},
-            }
 
         session = stripe.checkout.Session.create(**session_params)
 
