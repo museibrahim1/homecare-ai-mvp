@@ -192,6 +192,7 @@ async def register_business(
         is_active=True,
     )
     db.add(regular_user)
+    db.flush()
     
     # Attempt SOS verification
     sos_service = get_sos_service()
