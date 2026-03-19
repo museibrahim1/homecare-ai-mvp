@@ -77,7 +77,7 @@ class StripePriceConfig(BaseModel):
     stripe_price_id_setup: Optional[str] = None
 
 
-EXTENDED_TRIAL_PRICE_ID = "price_1TCTucKWCMHtsHgG8OYyvEvr"
+EXTENDED_TRIAL_PRICE_ID = "price_1TCWKuKWCMHtsHgGNAxfEnZ0"
 
 
 # =============================================================================
@@ -118,17 +118,17 @@ async def get_public_plans(db: Session = Depends(get_db)):
 
 STRIPE_PRICE_MAP = {
     "starter": {
-        "product_id": "prod_UAUR70ymDZTI6E",
-        "monthly": "price_1TC9SSKWCMHtsHgGY0CnGpkS",
-        "annual": "price_1TC9STKWCMHtsHgGJ3y7od0R",
+        "product_id": "prod_UAs4awY6QzxE92",
+        "monthly": "price_1TCWKsKWCMHtsHgGDZ6UyPPj",
+        "annual": "price_1TCWKsKWCMHtsHgGYol3WChs",
     },
     "professional": {
-        "product_id": "prod_UAURUZ6mWT6jr6",
-        "monthly": "price_1TC9STKWCMHtsHgGDo0rDs4o",
-        "annual": "price_1TC9SUKWCMHtsHgGsyFXU91C",
+        "product_id": "prod_UAs4POX9KcO3hY",
+        "monthly": "price_1TCWKtKWCMHtsHgGHFmBcMpq",
+        "annual": "price_1TCWKtKWCMHtsHgGMaRkEdVO",
     },
     "enterprise": {
-        "product_id": "prod_UAUR71CCudMY5g",
+        "product_id": "prod_UAs4UIxSD3DhtQ",
         "monthly": None,
         "annual": None,
     },
