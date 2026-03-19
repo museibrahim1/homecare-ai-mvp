@@ -263,6 +263,47 @@ async def seed_database():
         logger.warning(f"Column migration check: {e}")
         db.rollback()
 
+    # Auto-create site_events table for public analytics
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        if "site_events" not in inspector.get_table_names():
+            db.execute(sa_text("""
+                CREATE TABLE site_events (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    session_id VARCHAR(64) NOT NULL,
+                    event_type VARCHAR(50) NOT NULL,
+                    page_path VARCHAR(500),
+                    element_id VARCHAR(200),
+                    element_text VARCHAR(500),
+                    element_tag VARCHAR(50),
+                    click_x INTEGER,
+                    click_y INTEGER,
+                    viewport_w INTEGER,
+                    viewport_h INTEGER,
+                    funnel_step INTEGER,
+                    funnel_name VARCHAR(100),
+                    referrer VARCHAR(1000),
+                    user_agent VARCHAR(1000),
+                    ip_hash VARCHAR(64),
+                    metadata JSONB DEFAULT '{}'::jsonb,
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+                )
+            """))
+            db.execute(sa_text("CREATE INDEX ix_site_events_session_id ON site_events (session_id)"))
+            db.execute(sa_text("CREATE INDEX ix_site_events_event_type ON site_events (event_type)"))
+            db.execute(sa_text("CREATE INDEX ix_site_events_page_path ON site_events (page_path)"))
+            db.execute(sa_text("CREATE INDEX ix_site_events_funnel_step ON site_events (funnel_step)"))
+            db.execute(sa_text("CREATE INDEX ix_site_events_funnel_name ON site_events (funnel_name)"))
+            db.execute(sa_text("CREATE INDEX ix_site_events_ip_hash ON site_events (ip_hash)"))
+            db.execute(sa_text("CREATE INDEX ix_site_events_created_at ON site_events (created_at)"))
+            db.execute(sa_text("CREATE INDEX ix_site_events_funnel ON site_events (funnel_name, funnel_step, created_at)"))
+            db.commit()
+            logger.info("Created site_events table for public analytics")
+    except Exception as e:
+        logger.warning(f"site_events table check: {e}")
+        db.rollback()
+
     # Create missing indexes for performance (idempotent)
     try:
         from sqlalchemy import text as sa_text

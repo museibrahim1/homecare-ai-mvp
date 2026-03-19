@@ -1,24 +1,27 @@
 """
 Analytics Router — Platform-wide usage tracking + churn analytics
 
-Serves two audiences:
-1. CEO/Admin: churn risk dashboard, provider engagement scores, lead funnel
-2. Providers: their own usage trends and activity summary
+Serves three audiences:
+1. Public visitors: anonymous event tracking (clicks, page views, funnel steps)
+2. CEO/Admin: churn risk dashboard, provider engagement, registration funnel, click maps
+3. Providers: their own usage trends and activity summary
 """
 
+import hashlib
 import logging
+from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, cast, Date, extract
+from sqlalchemy import func, desc, cast, Date, extract, and_
 from pydantic import BaseModel
 
 from app.core.deps import get_db, get_current_user, require_permission
 from app.models.user import User
-from app.models.analytics import UsageAnalytics, ProviderEngagement
+from app.models.analytics import UsageAnalytics, ProviderEngagement, SiteEvent
 from app.models.sales_lead import SalesLead
 
 logger = logging.getLogger(__name__)
@@ -450,3 +453,314 @@ async def platform_activity(
             for f in top_features
         ],
     }
+
+
+# =============================================================================
+# PUBLIC: ANONYMOUS SITE EVENT TRACKING (no auth)
+# =============================================================================
+
+class PublicTrackRequest(BaseModel):
+    session_id: str
+    event_type: str  # page_view | click | funnel_step | scroll_depth
+    page_path: Optional[str] = None
+    element_id: Optional[str] = None
+    element_text: Optional[str] = None
+    element_tag: Optional[str] = None
+    click_x: Optional[int] = None
+    click_y: Optional[int] = None
+    viewport_w: Optional[int] = None
+    viewport_h: Optional[int] = None
+    funnel_step: Optional[int] = None
+    funnel_name: Optional[str] = None
+    referrer: Optional[str] = None
+    metadata: Optional[dict] = None
+
+
+class PublicTrackBatch(BaseModel):
+    events: List[PublicTrackRequest]
+
+
+def _hash_ip(ip: str) -> str:
+    return hashlib.sha256(ip.encode()).hexdigest()[:16]
+
+
+@router.post("/public/track")
+async def public_track(req: PublicTrackRequest, request: Request, db: Session = Depends(get_db)):
+    """Record a single anonymous site event (no auth required)."""
+    ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+    ev = SiteEvent(
+        session_id=req.session_id[:64],
+        event_type=req.event_type[:50],
+        page_path=(req.page_path or "")[:500] or None,
+        element_id=(req.element_id or "")[:200] or None,
+        element_text=(req.element_text or "")[:500] or None,
+        element_tag=(req.element_tag or "")[:50] or None,
+        click_x=req.click_x,
+        click_y=req.click_y,
+        viewport_w=req.viewport_w,
+        viewport_h=req.viewport_h,
+        funnel_step=req.funnel_step,
+        funnel_name=(req.funnel_name or "")[:100] or None,
+        referrer=(req.referrer or "")[:1000] or None,
+        user_agent=(request.headers.get("user-agent") or "")[:1000] or None,
+        ip_hash=_hash_ip(ip),
+        meta=req.metadata or {},
+        created_at=datetime.now(timezone.utc),
+    )
+    db.add(ev)
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/public/track-batch")
+async def public_track_batch(req: PublicTrackBatch, request: Request, db: Session = Depends(get_db)):
+    """Record a batch of anonymous site events (no auth, max 50 per call)."""
+    ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+    ip_h = _hash_ip(ip)
+    ua = (request.headers.get("user-agent") or "")[:1000] or None
+    now = datetime.now(timezone.utc)
+
+    for e in req.events[:50]:
+        db.add(SiteEvent(
+            session_id=e.session_id[:64],
+            event_type=e.event_type[:50],
+            page_path=(e.page_path or "")[:500] or None,
+            element_id=(e.element_id or "")[:200] or None,
+            element_text=(e.element_text or "")[:500] or None,
+            element_tag=(e.element_tag or "")[:50] or None,
+            click_x=e.click_x, click_y=e.click_y,
+            viewport_w=e.viewport_w, viewport_h=e.viewport_h,
+            funnel_step=e.funnel_step,
+            funnel_name=(e.funnel_name or "")[:100] or None,
+            referrer=(e.referrer or "")[:1000] or None,
+            user_agent=ua, ip_hash=ip_h, meta=e.metadata or {},
+            created_at=now,
+        ))
+    db.commit()
+    return {"ok": True, "count": min(len(req.events), 50)}
+
+
+# =============================================================================
+# ADMIN: REGISTRATION FUNNEL ANALYTICS
+# =============================================================================
+
+@router.get("/registration/funnel")
+async def registration_funnel(
+    days: int = Query(30, ge=1, le=365),
+    funnel_name: str = Query("registration", pattern="^[a-z_]+$"),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_permission("analytics")),
+):
+    """Registration funnel: how many unique sessions reach each step, with drop-off rates."""
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    rows = db.query(
+        SiteEvent.funnel_step,
+        func.count(func.distinct(SiteEvent.session_id)).label("unique_sessions"),
+    ).filter(
+        SiteEvent.event_type == "funnel_step",
+        SiteEvent.funnel_name == funnel_name,
+        SiteEvent.funnel_step.isnot(None),
+        SiteEvent.created_at >= since,
+    ).group_by(SiteEvent.funnel_step).order_by(SiteEvent.funnel_step).all()
+
+    step_labels = {
+        1: "Account Info",
+        2: "Agency Details",
+        3: "Plan Selection",
+        4: "Stripe Checkout",
+        5: "Completed",
+    }
+
+    total_started = rows[0].unique_sessions if rows else 0
+
+    steps = []
+    prev_count = total_started
+    for r in rows:
+        drop = prev_count - r.unique_sessions if prev_count > 0 else 0
+        drop_rate = round(drop / max(prev_count, 1) * 100, 1)
+        steps.append({
+            "step": r.funnel_step,
+            "label": step_labels.get(r.funnel_step, f"Step {r.funnel_step}"),
+            "unique_sessions": r.unique_sessions,
+            "drop_off": drop,
+            "drop_off_rate": drop_rate,
+            "percentage_of_start": round(r.unique_sessions / max(total_started, 1) * 100, 1),
+        })
+        prev_count = r.unique_sessions
+
+    total_page_views = db.query(func.count(SiteEvent.id)).filter(
+        SiteEvent.event_type == "page_view",
+        SiteEvent.page_path.ilike("/register%"),
+        SiteEvent.created_at >= since,
+    ).scalar() or 0
+
+    unique_visitors = db.query(func.count(func.distinct(SiteEvent.session_id))).filter(
+        SiteEvent.event_type == "page_view",
+        SiteEvent.page_path.ilike("/register%"),
+        SiteEvent.created_at >= since,
+    ).scalar() or 0
+
+    completed = next((s["unique_sessions"] for s in steps if s["step"] == 5), 0)
+
+    return {
+        "period_days": days,
+        "funnel_name": funnel_name,
+        "total_page_views": total_page_views,
+        "unique_visitors": unique_visitors,
+        "total_started": total_started,
+        "total_completed": completed,
+        "completion_rate": round(completed / max(total_started, 1) * 100, 1),
+        "steps": steps,
+    }
+
+
+@router.get("/registration/clicks")
+async def registration_clicks(
+    days: int = Query(30, ge=1, le=365),
+    page_path: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_permission("analytics")),
+):
+    """Click analytics: which elements users click on, grouped by element."""
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    filters = [
+        SiteEvent.event_type == "click",
+        SiteEvent.created_at >= since,
+    ]
+    if page_path:
+        filters.append(SiteEvent.page_path == page_path)
+
+    by_element = db.query(
+        SiteEvent.element_id,
+        SiteEvent.element_text,
+        SiteEvent.element_tag,
+        SiteEvent.page_path,
+        func.count().label("clicks"),
+        func.count(func.distinct(SiteEvent.session_id)).label("unique_sessions"),
+    ).filter(*filters).filter(
+        SiteEvent.element_id.isnot(None),
+    ).group_by(
+        SiteEvent.element_id, SiteEvent.element_text, SiteEvent.element_tag, SiteEvent.page_path,
+    ).order_by(desc("clicks")).limit(50).all()
+
+    click_positions = db.query(
+        SiteEvent.click_x, SiteEvent.click_y,
+        SiteEvent.viewport_w, SiteEvent.viewport_h,
+        SiteEvent.page_path,
+    ).filter(*filters).filter(
+        SiteEvent.click_x.isnot(None),
+        SiteEvent.click_y.isnot(None),
+    ).order_by(desc(SiteEvent.created_at)).limit(500).all()
+
+    by_page = db.query(
+        SiteEvent.page_path,
+        func.count().label("clicks"),
+    ).filter(*filters).group_by(SiteEvent.page_path).order_by(desc("clicks")).all()
+
+    return {
+        "period_days": days,
+        "elements": [
+            {
+                "element_id": e.element_id,
+                "text": e.element_text,
+                "tag": e.element_tag,
+                "page": e.page_path,
+                "clicks": e.clicks,
+                "unique_sessions": e.unique_sessions,
+            }
+            for e in by_element
+        ],
+        "positions": [
+            {"x": p.click_x, "y": p.click_y, "vw": p.viewport_w, "vh": p.viewport_h, "page": p.page_path}
+            for p in click_positions
+        ],
+        "by_page": [{"page": p.page_path, "clicks": p.clicks} for p in by_page],
+    }
+
+
+@router.get("/registration/page-views")
+async def registration_page_views(
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_permission("analytics")),
+):
+    """Page view analytics: daily views per page, top pages, unique visitors."""
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    daily = db.query(
+        cast(SiteEvent.created_at, Date).label("day"),
+        func.count().label("views"),
+        func.count(func.distinct(SiteEvent.session_id)).label("unique"),
+    ).filter(
+        SiteEvent.event_type == "page_view",
+        SiteEvent.created_at >= since,
+    ).group_by("day").order_by("day").all()
+
+    top_pages = db.query(
+        SiteEvent.page_path,
+        func.count().label("views"),
+        func.count(func.distinct(SiteEvent.session_id)).label("unique"),
+    ).filter(
+        SiteEvent.event_type == "page_view",
+        SiteEvent.created_at >= since,
+        SiteEvent.page_path.isnot(None),
+    ).group_by(SiteEvent.page_path).order_by(desc("views")).limit(20).all()
+
+    top_referrers = db.query(
+        SiteEvent.referrer,
+        func.count().label("count"),
+    ).filter(
+        SiteEvent.event_type == "page_view",
+        SiteEvent.created_at >= since,
+        SiteEvent.referrer.isnot(None),
+        SiteEvent.referrer != "",
+    ).group_by(SiteEvent.referrer).order_by(desc("count")).limit(15).all()
+
+    return {
+        "period_days": days,
+        "daily": [{"date": str(d.day), "views": d.views, "unique": d.unique} for d in daily],
+        "top_pages": [{"page": p.page_path, "views": p.views, "unique": p.unique} for p in top_pages],
+        "top_referrers": [{"referrer": r.referrer, "count": r.count} for r in top_referrers],
+    }
+
+
+@router.get("/registration/sessions")
+async def registration_sessions(
+    days: int = Query(7, ge=1, le=90),
+    limit: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_permission("analytics")),
+):
+    """Recent visitor sessions with their journey through the registration funnel."""
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    sessions = db.query(
+        SiteEvent.session_id,
+        func.min(SiteEvent.created_at).label("started_at"),
+        func.max(SiteEvent.created_at).label("last_event_at"),
+        func.count().label("total_events"),
+        func.max(SiteEvent.funnel_step).label("max_step"),
+    ).filter(
+        SiteEvent.created_at >= since,
+    ).group_by(SiteEvent.session_id).order_by(desc("last_event_at")).limit(limit).all()
+
+    result = []
+    for s in sessions:
+        pages = db.query(SiteEvent.page_path).filter(
+            SiteEvent.session_id == s.session_id,
+            SiteEvent.event_type == "page_view",
+            SiteEvent.page_path.isnot(None),
+        ).distinct().all()
+
+        result.append({
+            "session_id": s.session_id[:8] + "...",
+            "started_at": s.started_at.isoformat() if s.started_at else None,
+            "last_event": s.last_event_at.isoformat() if s.last_event_at else None,
+            "total_events": s.total_events,
+            "max_funnel_step": s.max_step,
+            "pages_visited": [p.page_path for p in pages],
+        })
+
+    return {"period_days": days, "sessions": result}

@@ -6,6 +6,7 @@ import { NotificationProvider } from '@/lib/notifications';
 import { WalkthroughProvider } from '@/lib/walkthrough';
 import WalkthroughGuide from '@/components/WalkthroughGuide';
 import ReminderPoller from '@/components/ReminderPoller';
+import SiteAnalytics from '@/components/SiteAnalytics';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -173,6 +174,7 @@ export default function RootLayout({
               {children}
               <WalkthroughGuide />
               <ReminderPoller />
+              <SiteAnalytics />
             </WalkthroughProvider>
           </NotificationProvider>
         </ThemeProvider>

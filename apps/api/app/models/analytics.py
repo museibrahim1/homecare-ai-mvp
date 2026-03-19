@@ -32,6 +32,30 @@ class UsageAnalytics(Base):
     created_at = Column(DateTime(timezone=True), nullable=False)
 
 
+class SiteEvent(Base):
+    """Public analytics events — no auth required. Tracks page views, clicks, funnel steps."""
+    __tablename__ = "site_events"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    session_id = Column(String(64), nullable=False, index=True)
+    event_type = Column(String(50), nullable=False, index=True)
+    page_path = Column(String(500), nullable=True, index=True)
+    element_id = Column(String(200), nullable=True)
+    element_text = Column(String(500), nullable=True)
+    element_tag = Column(String(50), nullable=True)
+    click_x = Column(Integer, nullable=True)
+    click_y = Column(Integer, nullable=True)
+    viewport_w = Column(Integer, nullable=True)
+    viewport_h = Column(Integer, nullable=True)
+    funnel_step = Column(Integer, nullable=True, index=True)
+    funnel_name = Column(String(100), nullable=True, index=True)
+    referrer = Column(String(1000), nullable=True)
+    user_agent = Column(String(1000), nullable=True)
+    ip_hash = Column(String(64), nullable=True, index=True)
+    meta = Column("metadata", JSON, default=dict)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+
+
 class ProviderEngagement(Base):
     __tablename__ = "provider_engagement"
 

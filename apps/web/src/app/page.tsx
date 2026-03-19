@@ -1249,10 +1249,10 @@ function HeroOrb() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10">
-        <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
+        <Link href="/register" data-track="hero-cta-trial" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
           Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5" />
         </Link>
-        <a href="#features" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
+        <a href="#features" data-track="hero-cta-features" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
           See How It Works <ChevronDown className="w-5 h-5" />
         </a>
       </div>
@@ -1428,7 +1428,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="text-center mt-12">
-            <Link href="/register" className="btn-primary inline-flex items-center gap-2 py-4 px-8 text-lg">
+            <Link href="/register" data-track="howit-cta-trial" className="btn-primary inline-flex items-center gap-2 py-4 px-8 text-lg">
               Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5" />
             </Link>
             <p className="text-dark-500 text-sm mt-4">Full access for 14 days. Cancel anytime.</p>
@@ -1445,10 +1445,10 @@ export default function LandingPage() {
           <h2 className="text-4xl font-bold text-white mb-4">Ready to Transform Your Agency?</h2>
           <p className="text-xl text-dark-400 mb-8">Sign up in 2 minutes. Get 14 days of full access — no charge until the trial ends.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
+            <Link href="/register" data-track="signup-cta-trial" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
               Start 14-Day Free Trial <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link href="/pricing" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
+            <Link href="/pricing" data-track="signup-cta-pricing" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
               View Pricing <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
@@ -1604,7 +1604,7 @@ export default function LandingPage() {
             <h2 className="text-4xl font-bold text-white mb-4">Your Next Client is Waiting</h2>
             <p className="text-xl text-dark-300 mb-8">Close faster. Document smarter. Never lose a client to paperwork again.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5" /></Link>
+              <Link href="/register" data-track="final-cta-trial" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5" /></Link>
             </div>
             <p className="text-dark-400 text-sm mt-6">Full access for 14 days &bull; Cancel anytime &bull; Powered by Stripe</p>
           </div>

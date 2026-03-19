@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Loader2, Check, ArrowLeft, ArrowRight, Eye, EyeOff,
   Building2, CreditCard, Shield, Clock, Sparkles, AlertCircle, RefreshCw,
 } from 'lucide-react';
+import { trackFunnelStep } from '@/lib/analytics';
 
 const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -83,6 +84,8 @@ function RegisterForm() {
 
   const clearError = () => { setError(''); setErrorHint(''); };
 
+  useEffect(() => { trackFunnelStep(1, 'registration', { plan: selectedPlan }); }, []);
+
   const [form, setForm] = useState({
     owner_name: '',
     owner_email: '',
@@ -127,6 +130,7 @@ function RegisterForm() {
     if (err) { setError(err); setErrorHint(''); return; }
     clearError();
     setStep(2);
+    trackFunnelStep(2, 'registration', { plan: selectedPlan });
   };
 
   const handleRegister = async () => {
@@ -160,6 +164,7 @@ function RegisterForm() {
       const data = await res.json();
       setBusinessId(data.business_id);
       setStep(3);
+      trackFunnelStep(3, 'registration', { plan: selectedPlan });
     } catch (e: any) {
       setFriendlyError(e.message || 'Something went wrong. Please try again.');
     }
@@ -192,6 +197,7 @@ function RegisterForm() {
 
       const data = await res.json();
       if (!data.checkout_url) throw new Error('Payment service returned an invalid response.');
+      trackFunnelStep(4, 'registration', { plan: selectedPlan, billing: billingCycle, trial: trialType });
       window.location.href = data.checkout_url;
     } catch (e: any) {
       setFriendlyError(e.message || 'Unable to connect to payment service. Please try again.');

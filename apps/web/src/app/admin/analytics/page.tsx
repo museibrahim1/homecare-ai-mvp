@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import {
   BarChart3, Users, AlertTriangle, Activity,
   RefreshCw, Loader2, Clock, Target, Zap, CheckCircle2, XCircle,
-  Building2,
+  Building2, MousePointerClick, TrendingDown, Eye, ArrowDown, Globe,
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -20,11 +20,13 @@ const RISK_CONFIG: Record<string, { label: string; color: string; bg: string; ic
   critical: { label: 'Critical', color: 'text-red-600', bg: 'bg-red-50 border-red-500/20', icon: XCircle },
 };
 
+type ViewId = 'registration' | 'clicks' | 'churn' | 'funnel' | 'activity';
+
 export default function AnalyticsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [activeView, setActiveView] = useState<'churn' | 'funnel' | 'activity'>('churn');
+  const [activeView, setActiveView] = useState<ViewId>('registration');
 
   interface ChurnOverview {
     total_users: number;
@@ -66,6 +68,37 @@ export default function AnalyticsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [activityDays, setActivityDays] = useState(30);
 
+  interface RegFunnelData {
+    total_page_views: number;
+    unique_visitors: number;
+    total_started: number;
+    total_completed: number;
+    completion_rate: number;
+    steps: { step: number; label: string; unique_sessions: number; drop_off: number; drop_off_rate: number; percentage_of_start: number }[];
+  }
+  interface ClickData {
+    elements: { element_id: string; text: string; tag: string; page: string; clicks: number; unique_sessions: number }[];
+    by_page: { page: string; clicks: number }[];
+  }
+  interface PageViewData {
+    daily: { date: string; views: number; unique: number }[];
+    top_pages: { page: string; views: number; unique: number }[];
+    top_referrers: { referrer: string; count: number }[];
+  }
+  interface SessionItem {
+    session_id: string;
+    started_at: string;
+    last_event: string;
+    total_events: number;
+    max_funnel_step: number | null;
+    pages_visited: string[];
+  }
+  const [regFunnel, setRegFunnel] = useState<RegFunnelData | null>(null);
+  const [clickData, setClickData] = useState<ClickData | null>(null);
+  const [pageViews, setPageViews] = useState<PageViewData | null>(null);
+  const [sessions, setSessions] = useState<SessionItem[]>([]);
+  const [regDays, setRegDays] = useState(30);
+
   const getToken = () => getStoredToken();
 
   const fetchWithAuth = useCallback(async (url: string, options: RequestInit = {}) => {
@@ -105,16 +138,24 @@ export default function AnalyticsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [overview, providerList, funnelData, activity] = await Promise.all([
+      const [overview, providerList, funnelData, activity, regFunnelData, clicks, pvData, sessData] = await Promise.all([
         fetchWithAuth('/analytics/churn/overview').catch(() => null),
         fetchWithAuth('/analytics/churn/providers?sort_by=engagement_score&sort_order=asc&limit=100').catch(() => []),
         fetchWithAuth('/analytics/leads/funnel').catch(() => null),
         fetchWithAuth(`/analytics/platform/activity?days=${activityDays}`).catch(() => null),
+        fetchWithAuth(`/analytics/registration/funnel?days=${regDays}`).catch(() => null),
+        fetchWithAuth(`/analytics/registration/clicks?days=${regDays}`).catch(() => null),
+        fetchWithAuth(`/analytics/registration/page-views?days=${regDays}`).catch(() => null),
+        fetchWithAuth(`/analytics/registration/sessions?days=7&limit=50`).catch(() => ({ sessions: [] })),
       ]);
       setChurnOverview(overview);
       setProviders(providerList);
       setFunnel(funnelData);
       setPlatformActivity(activity);
+      setRegFunnel(regFunnelData);
+      setClickData(clicks);
+      setPageViews(pvData);
+      setSessions(sessData?.sessions || []);
     } catch {
       // Non-critical: analytics data will show as empty
     } finally {
@@ -141,6 +182,22 @@ export default function AnalyticsPage() {
         .catch(() => {});
     }
   }, [activityDays]);
+
+  useEffect(() => {
+    if (isAuthorized && (activeView === 'registration' || activeView === 'clicks')) {
+      Promise.all([
+        fetchWithAuth(`/analytics/registration/funnel?days=${regDays}`).catch(() => null),
+        fetchWithAuth(`/analytics/registration/clicks?days=${regDays}`).catch(() => null),
+        fetchWithAuth(`/analytics/registration/page-views?days=${regDays}`).catch(() => null),
+        fetchWithAuth(`/analytics/registration/sessions?days=${Math.min(regDays, 14)}&limit=50`).catch(() => ({ sessions: [] })),
+      ]).then(([rf, cd, pv, sess]) => {
+        setRegFunnel(rf);
+        setClickData(cd);
+        setPageViews(pv);
+        setSessions(sess?.sessions || []);
+      });
+    }
+  }, [regDays]);
 
   const filteredProviders = riskFilter
     ? providers.filter((p) => p.churn_risk === riskFilter)
@@ -182,8 +239,10 @@ export default function AnalyticsPage() {
         </div>
 
         {/* View tabs */}
-        <div className="flex gap-1 mb-6 bg-white border border-slate-200 rounded-lg p-1 w-fit">
+        <div className="flex gap-1 mb-6 bg-white border border-slate-200 rounded-lg p-1 w-fit flex-wrap">
           {([
+            { id: 'registration' as const, label: 'Registration Funnel', icon: TrendingDown },
+            { id: 'clicks' as const, label: 'Click Analytics', icon: MousePointerClick },
             { id: 'churn' as const, label: 'Churn Risk', icon: AlertTriangle },
             { id: 'funnel' as const, label: 'Sales Funnel', icon: Target },
             { id: 'activity' as const, label: 'Platform Activity', icon: Activity },
@@ -193,7 +252,7 @@ export default function AnalyticsPage() {
               onClick={() => setActiveView(id)}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-all ${
                 activeView === id
-                  ? 'bg-indigo-50 text-indigo-600 border border-indigo-500/30'
+                  ? 'bg-teal-50 text-teal-700 border border-teal-500/30'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
@@ -209,6 +268,284 @@ export default function AnalyticsPage() {
           </div>
         ) : (
           <>
+            {/* ========== REGISTRATION FUNNEL VIEW ========== */}
+            {activeView === 'registration' && (
+              <div className="space-y-6">
+                {/* Period selector */}
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-slate-900">Registration Funnel</h2>
+                  <select value={regDays} onChange={e => setRegDays(Number(e.target.value))} className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm">
+                    <option value={7}>Last 7 days</option>
+                    <option value={30}>Last 30 days</option>
+                    <option value={90}>Last 90 days</option>
+                  </select>
+                </div>
+
+                {/* Overview cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                  {[
+                    { label: 'Page Views', value: regFunnel?.total_page_views || 0, icon: Eye, color: 'text-blue-600' },
+                    { label: 'Unique Visitors', value: regFunnel?.unique_visitors || 0, icon: Users, color: 'text-indigo-600' },
+                    { label: 'Started Signup', value: regFunnel?.total_started || 0, icon: Target, color: 'text-teal-600' },
+                    { label: 'Completed', value: regFunnel?.total_completed || 0, icon: CheckCircle2, color: 'text-emerald-600' },
+                    { label: 'Completion Rate', value: `${regFunnel?.completion_rate || 0}%`, icon: TrendingDown, color: regFunnel && regFunnel.completion_rate >= 20 ? 'text-emerald-600' : 'text-amber-600' },
+                  ].map(c => {
+                    const Icon = c.icon;
+                    return (
+                      <div key={c.label} className="bg-white border border-slate-200 rounded-xl p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <Icon className={`w-5 h-5 ${c.color}`} />
+                        </div>
+                        <p className="text-3xl font-bold text-slate-900">{c.value}</p>
+                        <p className="text-xs text-slate-400 mt-1">{c.label}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Funnel visualization */}
+                <div className="bg-white border border-slate-200 rounded-xl p-6">
+                  <h3 className="text-sm font-medium text-slate-500 mb-5">Step-by-Step Funnel</h3>
+                  {(regFunnel?.steps?.length ?? 0) > 0 ? (
+                    <div className="space-y-4">
+                      {regFunnel!.steps.map((s, i) => {
+                        const maxSessions = regFunnel!.steps[0]?.unique_sessions || 1;
+                        const barWidth = Math.max((s.unique_sessions / maxSessions) * 100, 4);
+                        const colors = ['bg-teal-500', 'bg-cyan-500', 'bg-indigo-500', 'bg-purple-500', 'bg-emerald-500'];
+                        return (
+                          <div key={s.step}>
+                            <div className="flex items-center gap-4">
+                              <span className="text-xs text-slate-500 w-32 shrink-0">
+                                Step {s.step}: {s.label}
+                              </span>
+                              <div className="flex-1 bg-slate-100 rounded-full h-8 overflow-hidden relative">
+                                <div
+                                  className={`${colors[i] || 'bg-gray-500'} h-full rounded-full transition-all flex items-center justify-end pr-3`}
+                                  style={{ width: `${barWidth}%` }}
+                                >
+                                  <span className="text-xs text-white font-bold">{s.unique_sessions}</span>
+                                </div>
+                              </div>
+                              <span className="text-xs text-slate-500 w-16 text-right">{s.percentage_of_start}%</span>
+                            </div>
+                            {s.drop_off > 0 && (
+                              <div className="ml-36 mt-1 flex items-center gap-1 text-xs text-red-500">
+                                <ArrowDown className="w-3 h-3" />
+                                {s.drop_off} dropped ({s.drop_off_rate}%)
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-slate-400 text-sm text-center py-8">
+                      No registration funnel data yet. Events will appear as visitors start the signup flow.
+                    </p>
+                  )}
+                </div>
+
+                {/* Recent sessions */}
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                  <div className="px-5 py-3 border-b border-slate-200">
+                    <h3 className="text-sm font-medium text-slate-500">Recent Visitor Sessions</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-slate-200">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Session</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Started</th>
+                          <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase">Events</th>
+                          <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase">Max Step</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Pages</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sessions.length === 0 ? (
+                          <tr><td colSpan={5} className="text-center py-12 text-slate-400">No sessions yet</td></tr>
+                        ) : sessions.map((s, i) => {
+                          const stepLabel = s.max_funnel_step ? `Step ${s.max_funnel_step}` : '—';
+                          const stepColor = !s.max_funnel_step ? 'text-slate-400' : s.max_funnel_step >= 4 ? 'text-emerald-600' : s.max_funnel_step >= 2 ? 'text-amber-600' : 'text-red-500';
+                          return (
+                            <tr key={i} className="border-b border-slate-200 hover:bg-slate-50">
+                              <td className="px-4 py-3 text-sm text-slate-600 font-mono">{s.session_id}</td>
+                              <td className="px-4 py-3 text-sm text-slate-600">
+                                {s.started_at ? new Date(s.started_at).toLocaleString() : '—'}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-center text-slate-600">{s.total_events}</td>
+                              <td className={`px-4 py-3 text-sm text-center font-semibold ${stepColor}`}>{stepLabel}</td>
+                              <td className="px-4 py-3 text-xs text-slate-500">
+                                {s.pages_visited.slice(0, 4).join(', ')}
+                                {s.pages_visited.length > 4 && ` +${s.pages_visited.length - 4}`}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Page views chart + top referrers */}
+                {pageViews && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                      <h3 className="text-sm font-medium text-slate-500 mb-4">Daily Page Views</h3>
+                      {pageViews.daily.length > 0 ? (
+                        <div className="flex items-end gap-1 h-40">
+                          {pageViews.daily.map((d, i) => {
+                            const maxVal = Math.max(...pageViews.daily.map(x => x.views), 1);
+                            const height = (d.views / maxVal) * 100;
+                            return (
+                              <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white rounded px-2 py-1 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                  {d.date}: {d.views} views, {d.unique} unique
+                                </div>
+                                <div className="w-full bg-teal-500 rounded-t hover:bg-teal-400 transition-colors" style={{ height: `${Math.max(height, 2)}%` }} />
+                                {pageViews.daily.length <= 14 && (
+                                  <span className="text-[8px] text-slate-500 rotate-45 origin-left mt-1">{d.date.slice(5)}</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-slate-400 text-sm text-center py-8">No data yet</p>
+                      )}
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                      <h3 className="text-sm font-medium text-slate-500 mb-4">Top Referrers</h3>
+                      {pageViews.top_referrers.length > 0 ? (
+                        <div className="space-y-3">
+                          {pageViews.top_referrers.slice(0, 8).map((r, i) => {
+                            const maxCount = pageViews.top_referrers[0]?.count || 1;
+                            let domain = r.referrer;
+                            try { domain = new URL(r.referrer).hostname; } catch {}
+                            return (
+                              <div key={i} className="flex items-center gap-3">
+                                <Globe className="w-4 h-4 text-slate-400 shrink-0" />
+                                <span className="text-sm text-slate-600 w-36 shrink-0 truncate" title={r.referrer}>{domain}</span>
+                                <div className="flex-1 bg-slate-100 rounded-full h-2">
+                                  <div className="bg-teal-500 h-full rounded-full" style={{ width: `${(r.count / maxCount) * 100}%` }} />
+                                </div>
+                                <span className="text-xs text-slate-500 font-mono w-8 text-right">{r.count}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-slate-400 text-sm text-center py-8">No referrer data yet</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ========== CLICK ANALYTICS VIEW ========== */}
+            {activeView === 'clicks' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-slate-900">Click Analytics</h2>
+                  <select value={regDays} onChange={e => setRegDays(Number(e.target.value))} className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm">
+                    <option value={7}>Last 7 days</option>
+                    <option value={30}>Last 30 days</option>
+                    <option value={90}>Last 90 days</option>
+                  </select>
+                </div>
+
+                {/* Clicks by page */}
+                {clickData && clickData.by_page.length > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-xl p-6">
+                    <h3 className="text-sm font-medium text-slate-500 mb-4">Clicks by Page</h3>
+                    <div className="space-y-3">
+                      {clickData.by_page.map((p, i) => {
+                        const maxClicks = clickData.by_page[0]?.clicks || 1;
+                        return (
+                          <div key={i} className="flex items-center gap-4">
+                            <span className="text-sm text-slate-600 w-48 shrink-0 truncate" title={p.page}>{p.page}</span>
+                            <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                              <div className="bg-indigo-500 h-full rounded-full transition-all" style={{ width: `${(p.clicks / maxClicks) * 100}%` }} />
+                            </div>
+                            <span className="text-sm font-mono text-slate-600 w-12 text-right">{p.clicks}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Top clicked elements */}
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                  <div className="px-5 py-3 border-b border-slate-200">
+                    <h3 className="text-sm font-medium text-slate-500">Most Clicked Elements</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-slate-200">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Element</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Text</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Page</th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase">Clicks</th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase">Unique</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(!clickData || clickData.elements.length === 0) ? (
+                          <tr><td colSpan={5} className="text-center py-12 text-slate-400">No click data yet. Clicks will appear as visitors interact with your site.</td></tr>
+                        ) : clickData.elements.map((el, i) => (
+                          <tr key={i} className="border-b border-slate-200 hover:bg-slate-50">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-0.5 bg-slate-100 rounded text-xs font-mono text-slate-600">{el.tag}</span>
+                                <span className="text-sm text-slate-700 font-mono">{el.element_id || '—'}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-slate-600 max-w-48 truncate">{el.text || '—'}</td>
+                            <td className="px-4 py-3 text-sm text-slate-500">{el.page}</td>
+                            <td className="px-4 py-3 text-sm text-right font-semibold text-indigo-600">{el.clicks}</td>
+                            <td className="px-4 py-3 text-sm text-right text-slate-500">{el.unique_sessions}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Top pages table */}
+                {pageViews && pageViews.top_pages.length > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                    <div className="px-5 py-3 border-b border-slate-200">
+                      <h3 className="text-sm font-medium text-slate-500">Top Pages by Views</h3>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-slate-200">
+                            <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Page</th>
+                            <th className="px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase">Views</th>
+                            <th className="px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase">Unique</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pageViews.top_pages.map((p, i) => (
+                            <tr key={i} className="border-b border-slate-200 hover:bg-slate-50">
+                              <td className="px-4 py-3 text-sm text-slate-700">{p.page}</td>
+                              <td className="px-4 py-3 text-sm text-right font-semibold text-teal-600">{p.views}</td>
+                              <td className="px-4 py-3 text-sm text-right text-slate-500">{p.unique}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* ========== CHURN VIEW ========== */}
             {activeView === 'churn' && churnOverview && (
               <div className="space-y-6">
