@@ -34,3 +34,4 @@ class UserResponse(UserBase):
     temp_password: Optional[bool] = None
     mfa_enabled: Optional[bool] = False
     google_calendar_connected: Optional[bool] = False
+    executive_title: Optional[str] = None

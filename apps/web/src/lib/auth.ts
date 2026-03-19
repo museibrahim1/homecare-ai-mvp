@@ -24,6 +24,7 @@ interface AuthUser {
   business_name?: string;
   permissions?: string[];
   temp_password?: boolean;
+  executive_title?: string;
 }
 
 interface AuthState {

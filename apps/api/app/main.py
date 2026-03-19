@@ -304,6 +304,30 @@ async def seed_database():
         logger.warning(f"site_events table check: {e}")
         db.rollback()
 
+    # Auto-add executive_title column to users table
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        user_cols = [c["name"] for c in inspector.get_columns("users")]
+        if "executive_title" not in user_cols:
+            db.execute(sa_text("ALTER TABLE users ADD COLUMN executive_title VARCHAR(100)"))
+            db.commit()
+            logger.info("Added executive_title column to users table")
+
+        # Auto-assign titles for existing team members
+        from sqlalchemy import func as sa_func
+        for name_pattern, title in [("Emanuel%Palga%", "CSO"), ("Okeefe%Cunni%", "CFO")]:
+            member = db.query(User).filter(
+                sa_func.lower(User.full_name).like(name_pattern.lower().replace("%", "%"))
+            ).first()
+            if member and not getattr(member, "executive_title", None):
+                member.executive_title = title
+                db.commit()
+                logger.info(f"Auto-assigned {title} to {member.full_name}")
+    except Exception as e:
+        logger.warning(f"executive_title migration: {e}")
+        db.rollback()
+
     # Create missing indexes for performance (idempotent)
     try:
         from sqlalchemy import text as sa_text

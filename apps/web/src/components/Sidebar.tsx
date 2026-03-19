@@ -74,6 +74,7 @@ const adminCoreNavItems: AdminNavItem[] = [
   { href: '/admin/investors', label: 'Investors', icon: TrendingUp, permission: 'investors' },
   { href: '/admin/marketing', label: 'Marketing Materials', icon: Layers, permission: 'marketing' },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, permission: 'analytics' },
+  { href: '/team-chat', label: 'Communication', icon: MessagesSquare },
 ];
 
 const adminSystemNavItems: NavItemData[] = [
@@ -180,6 +181,8 @@ export default function Sidebar() {
   const userPerms: string[] = (user as any)?.permissions || [];
   const hasPermission = (perm: string) => isCeo || userPerms.includes('admin_full') || userPerms.includes(perm);
   const visibleAdminItems = adminCoreNavItems.filter(item => !item.permission || hasPermission(item.permission));
+  const executiveTitle = (user as any)?.executive_title as string | undefined;
+  const workspaceLabel = isCeo ? 'CEO Workspace' : executiveTitle ? `${executiveTitle} Workspace` : 'Admin Workspace';
 
   const handleNavigate = useCallback((href: string) => {
     if (navRef.current) _sidebarScrollTop = navRef.current.scrollTop;
@@ -273,7 +276,7 @@ export default function Sidebar() {
                 <div className="flex items-center justify-between w-full px-3 py-2">
                   <span className="text-[10px] font-semibold text-primary-500 uppercase tracking-widest flex items-center gap-1.5">
                     <Rocket className="w-3 h-3" />
-                    {isCeo ? 'CEO Workspace' : 'Admin Workspace'}
+                    {workspaceLabel}
                   </span>
                 </div>
                 <div className="space-y-px pb-2">

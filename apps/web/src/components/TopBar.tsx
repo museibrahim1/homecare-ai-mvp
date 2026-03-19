@@ -529,7 +529,12 @@ export default function TopBar() {
             {showUserMenu && (
               <div className="absolute right-0 top-full mt-1 w-56 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 overflow-hidden">
                 <div className="px-4 py-2.5 border-b border-slate-100">
-                  <p className="text-sm font-medium text-slate-800">{user?.full_name || 'User'}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-slate-800">{user?.full_name || 'User'}</p>
+                    {(user as any)?.executive_title && (
+                      <span className="text-[10px] font-semibold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">{(user as any).executive_title}</span>
+                    )}
+                  </div>
                   <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
                 </div>
                 <button

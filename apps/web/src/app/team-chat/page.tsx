@@ -23,17 +23,24 @@ type Email = {
   hasAttachment: boolean;
 };
 
+type DmConversation = { id: string; memberId: string; memberName: string; memberAvatar: string; lastMessage?: string; lastTime?: string; unread: number };
+
 export default function TeamChatPage() {
   const { token, user } = useAuth();
   const [channels, setChannels] = useState<{ id: string; name: string; unread: number }[]>([]);
-  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string; status: string; role: string; email?: string }[]>([]);
+  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string; status: string; role: string; email?: string; executive_title?: string }[]>([]);
   const [chatMessages, setChatMessages] = useState<{ id: string; user: string; avatar: string; text: string; time: string; channelId: string }[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<{ id: string; name: string; unread: number } | null>(null);
   const [newMessage, setNewMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'chat' | 'email'>('email'); // Default to email since chat is empty for new users
+  const [activeTab, setActiveTab] = useState<'chat' | 'email'>('chat');
   const [chatLoading, setChatLoading] = useState(true);
   const [showAddChannelModal, setShowAddChannelModal] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
+
+  // DM state
+  const [dmConversations, setDmConversations] = useState<DmConversation[]>([]);
+  const [selectedDm, setSelectedDm] = useState<DmConversation | null>(null);
+  const [chatView, setChatView] = useState<'channels' | 'dms'>('dms');
 
   // Get user-specific storage key for chat data
   const getChatStorageKey = useCallback(() => {
@@ -51,10 +58,11 @@ export default function TeamChatPage() {
     try {
       const savedData = localStorage.getItem(storageKey);
       if (savedData) {
-        const { channels: savedChannels, teamMembers: savedMembers, messages: savedMessages } = JSON.parse(savedData);
+        const { channels: savedChannels, teamMembers: savedMembers, messages: savedMessages, dms: savedDms } = JSON.parse(savedData);
         setChannels(savedChannels || []);
         setTeamMembers(savedMembers || []);
         setChatMessages(savedMessages || []);
+        setDmConversations(savedDms || []);
         if (savedChannels?.length > 0) {
           setSelectedChannel(savedChannels[0]);
         }
@@ -79,8 +87,9 @@ export default function TeamChatPage() {
             id: m.id,
             name: m.name || m.email || 'Unknown',
             status: m.status || 'offline',
-            role: m.role || 'Team Member',
+            role: m.executive_title || m.role || 'Team Member',
             email: m.email,
+            executive_title: m.executive_title,
           }));
           if (mapped.length > 0) {
             setTeamMembers(mapped);
@@ -104,12 +113,13 @@ export default function TeamChatPage() {
       localStorage.setItem(storageKey, JSON.stringify({ 
         channels, 
         teamMembers, 
-        messages: chatMessages 
+        messages: chatMessages,
+        dms: dmConversations,
       }));
     } catch (error) {
       console.error('Failed to save chat data:', error);
     }
-  }, [channels, teamMembers, chatMessages, getChatStorageKey, chatLoading]);
+  }, [channels, teamMembers, chatMessages, dmConversations, getChatStorageKey, chatLoading]);
 
   const handleAddChannel = () => {
     if (!newChannelName.trim()) return;
@@ -143,6 +153,47 @@ export default function TeamChatPage() {
   const getChannelMessages = () => {
     if (!selectedChannel) return [];
     return chatMessages.filter(m => m.channelId === selectedChannel.id);
+  };
+
+  const getDmMessages = () => {
+    if (!selectedDm) return [];
+    return chatMessages.filter(m => m.channelId === `dm_${selectedDm.memberId}`);
+  };
+
+  const handleStartDm = (member: typeof teamMembers[0]) => {
+    const existing = dmConversations.find(d => d.memberId === member.id);
+    if (existing) {
+      setSelectedDm(existing);
+      setSelectedChannel(null);
+      setChatView('dms');
+      return;
+    }
+    const newDm: DmConversation = {
+      id: `dm_${member.id}`,
+      memberId: member.id,
+      memberName: member.name,
+      memberAvatar: member.name.split(' ').map(n => n[0]).join('').slice(0, 2),
+      unread: 0,
+    };
+    setDmConversations(prev => [...prev, newDm]);
+    setSelectedDm(newDm);
+    setSelectedChannel(null);
+    setChatView('dms');
+  };
+
+  const handleSendDmMessage = () => {
+    if (!newMessage.trim() || !selectedDm || !user) return;
+    const newMsg = {
+      id: `msg_${Date.now()}`,
+      user: user.name || user.email || 'You',
+      avatar: (user.name || user.email || 'U').split(' ').map((n: string) => n[0]).join('').slice(0, 2),
+      text: newMessage,
+      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      channelId: `dm_${selectedDm.memberId}`,
+    };
+    setChatMessages(prev => [...prev, newMsg]);
+    setDmConversations(prev => prev.map(d => d.memberId === selectedDm.memberId ? { ...d, lastMessage: newMessage, lastTime: newMsg.time } : d));
+    setNewMessage('');
   };
   
   // Gmail state
@@ -495,86 +546,100 @@ export default function TeamChatPage() {
           
           {activeTab === 'chat' ? (
             <>
-              {/* Channels */}
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-semibold text-slate-400 uppercase">Channels</span>
-                  <button 
-                    onClick={() => setShowAddChannelModal(true)}
-                    className="p-1 hover:bg-white rounded transition-colors"
-                  >
-                    <Plus className="w-4 h-4 text-slate-500" />
-                  </button>
-                </div>
-                {channels.length === 0 ? (
-                  <div className="text-center py-4">
-                    <p className="text-slate-400 text-xs">No channels yet</p>
-                    <button 
-                      onClick={() => setShowAddChannelModal(true)}
-                      className="text-primary-400 text-xs mt-1 hover:underline"
-                    >
-                      Create one
-                    </button>
-                  </div>
-                ) : (
-                <div className="space-y-1">
-                  {channels.map(channel => (
-                    <button
-                      key={channel.id}
-                      onClick={() => setSelectedChannel(channel)}
-                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                        selectedChannel?.id === channel.id
-                          ? 'bg-primary-50 text-primary-700'
-                          : 'text-slate-500 hover:bg-white hover:text-slate-900'
-                      }`}
-                    >
-                      <Hash className="w-4 h-4" />
-                      <span className="flex-1 text-left text-sm">{channel.name}</span>
-                      {channel.unread > 0 && (
-                        <span className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center text-xs text-slate-500">
-                          {channel.unread}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                )}
+              {/* Chat sub-tabs: DMs / Channels */}
+              <div className="flex border-b border-slate-100">
+                <button onClick={() => setChatView('dms')} className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${chatView === 'dms' ? 'text-primary-500 border-b-2 border-primary-500' : 'text-slate-400 hover:text-slate-600'}`}>
+                  <UserCircle className="w-3.5 h-3.5 inline mr-1" />Direct
+                </button>
+                <button onClick={() => setChatView('channels')} className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${chatView === 'channels' ? 'text-primary-500 border-b-2 border-primary-500' : 'text-slate-400 hover:text-slate-600'}`}>
+                  <Hash className="w-3.5 h-3.5 inline mr-1" />Channels
+                </button>
               </div>
 
-              {/* Team Members */}
-              <div className="p-4 border-t border-slate-200">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-semibold text-slate-400 uppercase">Team</span>
-                  <span className="text-xs text-slate-400">{teamMembers.filter(m => m.status === 'online').length} online</span>
-                </div>
-                {teamMembers.length === 0 ? (
-                  <div className="text-center py-4">
-                    <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-slate-400 text-xs">No team members yet</p>
-                    <p className="text-slate-400 text-xs mt-1">Add members in Team settings</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {teamMembers.map(member => (
-                      <div key={member.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white transition-colors">
-                        <div className="relative">
-                          <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
-                            <span className="text-xs text-primary-600 font-medium">{member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
-                          </div>
-                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-50 ${
-                            member.status === 'online' ? 'bg-green-500' :
-                            member.status === 'away' ? 'bg-yellow-500' : 'bg-slate-300'
-                          }`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-slate-800 truncate">{member.name}</p>
-                          <p className="text-xs text-slate-400 truncate">{member.role}</p>
-                        </div>
+              {chatView === 'dms' ? (
+                <>
+                  {/* DM Conversations */}
+                  {dmConversations.length > 0 && (
+                    <div className="p-3">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Recent</span>
+                      <div className="space-y-1 mt-2">
+                        {dmConversations.map(dm => (
+                          <button key={dm.id} onClick={() => { setSelectedDm(dm); setSelectedChannel(null); }}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors ${selectedDm?.memberId === dm.memberId ? 'bg-primary-50 text-primary-700' : 'text-slate-600 hover:bg-white'}`}>
+                            <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-semibold text-teal-700">{dm.memberAvatar}</span>
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <p className="text-sm font-medium truncate">{dm.memberName}</p>
+                              {dm.lastMessage && <p className="text-xs text-slate-400 truncate">{dm.lastMessage}</p>}
+                            </div>
+                            {dm.unread > 0 && <span className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center text-[10px] text-white">{dm.unread}</span>}
+                          </button>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  )}
+
+                  {/* Team Members */}
+                  <div className="p-3 border-t border-slate-100 flex-1 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Team Members</span>
+                      <span className="text-[10px] text-slate-400">{teamMembers.filter(m => m.status === 'online').length} online</span>
+                    </div>
+                    {teamMembers.length === 0 ? (
+                      <div className="text-center py-6">
+                        <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-slate-400 text-xs">No team members yet</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-0.5">
+                        {teamMembers.map(member => (
+                          <button key={member.id} onClick={() => handleStartDm(member)} className="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white transition-colors text-left">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center">
+                                <span className="text-xs text-primary-600 font-medium">{member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span>
+                              </div>
+                              <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-50 ${member.status === 'online' ? 'bg-green-500' : member.status === 'away' ? 'bg-yellow-500' : 'bg-slate-300'}`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-slate-800 font-medium truncate">{member.name}</p>
+                              <p className="text-[11px] text-slate-400 truncate">{member.role}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </>
+              ) : (
+                <>
+                  {/* Channels list */}
+                  <div className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Channels</span>
+                      <button onClick={() => setShowAddChannelModal(true)} className="p-1 hover:bg-white rounded transition-colors"><Plus className="w-3.5 h-3.5 text-slate-400" /></button>
+                    </div>
+                    {channels.length === 0 ? (
+                      <div className="text-center py-6">
+                        <Hash className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-slate-400 text-xs">No channels yet</p>
+                        <button onClick={() => setShowAddChannelModal(true)} className="text-primary-400 text-xs mt-1 hover:underline">Create one</button>
+                      </div>
+                    ) : (
+                      <div className="space-y-0.5">
+                        {channels.map(channel => (
+                          <button key={channel.id} onClick={() => { setSelectedChannel(channel); setSelectedDm(null); }}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${selectedChannel?.id === channel.id && !selectedDm ? 'bg-primary-50 text-primary-700' : 'text-slate-500 hover:bg-white hover:text-slate-900'}`}>
+                            <Hash className="w-4 h-4" />
+                            <span className="flex-1 text-left text-sm">{channel.name}</span>
+                            {channel.unread > 0 && <span className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center text-[10px] text-white">{channel.unread}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </>
           ) : (
             <>
@@ -660,74 +725,110 @@ export default function TeamChatPage() {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
           {activeTab === 'chat' ? (
-            selectedChannel ? (
+            selectedDm ? (
               <>
-                {/* Chat Header */}
+                {/* DM Header */}
                 <div className="p-4 border-b border-slate-200 flex items-center gap-3">
-                  <Hash className="w-5 h-5 text-slate-500" />
-                  <h2 className="font-medium text-slate-900">{selectedChannel.name}</h2>
+                  <div className="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-teal-700">{selectedDm.memberAvatar}</span>
+                  </div>
+                  <div>
+                    <h2 className="font-medium text-slate-900">{selectedDm.memberName}</h2>
+                    <p className="text-xs text-slate-400">{teamMembers.find(m => m.id === selectedDm.memberId)?.role || 'Team Member'}</p>
+                  </div>
                 </div>
-
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                  {getChannelMessages().length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                      <MessagesSquare className="w-12 h-12 mb-3 opacity-50" />
-                      <p>No messages in #{selectedChannel.name} yet</p>
-                      <p className="text-sm">Be the first to say something!</p>
+                {/* DM Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {getDmMessages().length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                      <UserCircle className="w-16 h-16 mb-3 opacity-40" />
+                      <p className="text-base font-medium text-slate-500">Start a conversation</p>
+                      <p className="text-sm">Send a message to {selectedDm.memberName.split(' ')[0]}</p>
                     </div>
                   ) : (
-                    getChannelMessages().map(msg => (
+                    getDmMessages().map(msg => (
                       <div key={msg.id} className="flex gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary-400 text-sm font-medium">{msg.avatar}</span>
+                        <div className="w-9 h-9 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary-400 text-xs font-medium">{msg.avatar}</span>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-slate-900">{msg.user}</span>
-                            <span className="text-xs text-slate-400">{msg.time}</span>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-medium text-sm text-slate-900">{msg.user}</span>
+                            <span className="text-[11px] text-slate-400">{msg.time}</span>
                           </div>
-                          <p className="text-slate-600">{msg.text}</p>
+                          <p className="text-slate-600 text-sm">{msg.text}</p>
                         </div>
                       </div>
                     ))
                   )}
                 </div>
-
-                {/* Chat Input */}
+                {/* DM Input */}
                 <div className="p-4 border-t border-slate-200">
                   <div className="flex items-center gap-3">
-                    <button className="p-2 hover:bg-white rounded-lg transition-colors">
-                      <AtSign className="w-5 h-5 text-slate-500" />
+                    <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendDmMessage()}
+                      placeholder={`Message ${selectedDm.memberName.split(' ')[0]}...`}
+                      className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none" />
+                    <button onClick={handleSendDmMessage} className="p-2.5 bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
+                      <Send className="w-5 h-5 text-white" />
                     </button>
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
+                  </div>
+                </div>
+              </>
+            ) : selectedChannel ? (
+              <>
+                {/* Channel Header */}
+                <div className="p-4 border-b border-slate-200 flex items-center gap-3">
+                  <Hash className="w-5 h-5 text-slate-500" />
+                  <h2 className="font-medium text-slate-900">{selectedChannel.name}</h2>
+                </div>
+                {/* Channel Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {getChannelMessages().length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                      <Hash className="w-16 h-16 mb-3 opacity-40" />
+                      <p className="text-base font-medium text-slate-500">No messages in #{selectedChannel.name}</p>
+                      <p className="text-sm">Be the first to say something!</p>
+                    </div>
+                  ) : (
+                    getChannelMessages().map(msg => (
+                      <div key={msg.id} className="flex gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary-50 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary-400 text-xs font-medium">{msg.avatar}</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-medium text-sm text-slate-900">{msg.user}</span>
+                            <span className="text-[11px] text-slate-400">{msg.time}</span>
+                          </div>
+                          <p className="text-slate-600 text-sm">{msg.text}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                {/* Channel Input */}
+                <div className="p-4 border-t border-slate-200">
+                  <div className="flex items-center gap-3">
+                    <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendChatMessage()}
                       placeholder={`Message #${selectedChannel.name}`}
-                      className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none"
-                    />
-                    <button 
-                      onClick={handleSendChatMessage}
-                      className="p-2.5 bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors"
-                    >
+                      className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:border-primary-500 focus:outline-none" />
+                    <button onClick={handleSendChatMessage} className="p-2.5 bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
                       <Send className="w-5 h-5 text-white" />
                     </button>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
-                <MessagesSquare className="w-16 h-16 mb-4 opacity-50" />
-                <p className="text-lg mb-2">No channel selected</p>
-                <p className="text-sm mb-4">Create a channel to start chatting</p>
-                <button 
-                  onClick={() => setShowAddChannelModal(true)}
-                  className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-                >
-                  Create Channel
-                </button>
+              <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
+                <MessagesSquare className="w-16 h-16 mb-4 opacity-40" />
+                <p className="text-lg font-medium text-slate-500 mb-1">Start a conversation</p>
+                <p className="text-sm mb-6">Click a team member to send a direct message, or create a channel</p>
+                <div className="flex gap-3">
+                  <button onClick={() => { setChatView('dms'); }} className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm">Browse Team</button>
+                  <button onClick={() => { setChatView('channels'); setShowAddChannelModal(true); }} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors text-sm">Create Channel</button>
+                </div>
               </div>
             )
           ) : (

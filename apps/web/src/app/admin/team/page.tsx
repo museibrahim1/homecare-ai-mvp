@@ -33,7 +33,16 @@ interface TeamMember {
   created_at: string | null;
   last_login: string | null;
   last_active: string | null;
+  executive_title: string | null;
 }
+
+const EXECUTIVE_TITLES = [
+  'CEO', 'CFO', 'CMO', 'CSO', 'CTO', 'COO', 'CIO', 'CPO',
+  'VP Sales', 'VP Marketing', 'VP Engineering', 'VP Operations',
+  'Sales Director', 'Marketing Director', 'Engineering Director',
+  'Director of Operations', 'Director of Finance',
+  'Head of Sales', 'Head of Marketing', 'Head of Product',
+];
 
 export default function TeamManagementPage() {
   const router = useRouter();
@@ -52,6 +61,8 @@ export default function TeamManagementPage() {
   const [activityLoading, setActivityLoading] = useState(false);
   const [showActivity, setShowActivity] = useState(true);
   const [activityDays, setActivityDays] = useState(7);
+  const [editingTitle, setEditingTitle] = useState<string | null>(null);
+  const [titleSelection, setTitleSelection] = useState<string>('');
 
   const token = typeof window !== 'undefined' ? getStoredToken() : null;
 
@@ -232,6 +243,7 @@ export default function TeamManagementPage() {
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <th className="px-5 py-3 text-left text-slate-500 font-semibold">Member</th>
+                    <th className="px-5 py-3 text-left text-slate-500 font-semibold">Title</th>
                     <th className="px-5 py-3 text-left text-slate-500 font-semibold">Permissions</th>
                     <th className="px-5 py-3 text-left text-slate-500 font-semibold">Activity</th>
                     <th className="px-5 py-3 text-left text-slate-500 font-semibold">Status</th>
@@ -244,6 +256,33 @@ export default function TeamManagementPage() {
                       <td className="px-5 py-4">
                         <div className="font-semibold text-slate-800">{m.full_name}</div>
                         <div className="text-slate-400 text-xs">{m.email}</div>
+                      </td>
+                      <td className="px-5 py-4">
+                        {editingTitle === m.id ? (
+                          <div className="flex items-center gap-1.5">
+                            <select value={titleSelection} onChange={e => setTitleSelection(e.target.value)}
+                              className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:border-teal-500 focus:outline-none">
+                              <option value="">No title</option>
+                              {EXECUTIVE_TITLES.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <button onClick={async () => {
+                              try {
+                                const res = await fetch(`${API}/admin/team/${m.id}/title`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ executive_title: titleSelection || null }) });
+                                if (res.ok) {
+                                  setMembers(prev => prev.map(x => x.id === m.id ? { ...x, executive_title: titleSelection || null } : x));
+                                  setToast(`Title updated for ${m.full_name}`);
+                                }
+                              } catch {} finally { setEditingTitle(null); }
+                            }} className="text-teal-600 hover:bg-teal-50 p-1 rounded"><CheckCircle className="w-4 h-4" /></button>
+                            <button onClick={() => setEditingTitle(null)} className="text-slate-400 hover:bg-slate-50 p-1 rounded"><XCircle className="w-4 h-4" /></button>
+                          </div>
+                        ) : (
+                          <button onClick={() => { setEditingTitle(m.id); setTitleSelection(m.executive_title || ''); }}
+                            className="text-xs font-medium px-2.5 py-1 rounded-full transition hover:bg-slate-100"
+                            style={{ background: m.executive_title ? '#f0fdfa' : undefined, color: m.executive_title ? '#0d9488' : '#94a3b8' }}>
+                            {m.executive_title || 'Assign title'}
+                          </button>
+                        )}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex flex-wrap gap-1">

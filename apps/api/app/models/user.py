@@ -54,6 +54,9 @@ class User(Base, TimestampMixin):
     invited_by = Column(String(36), nullable=True)
     temp_password = Column(Boolean, default=False, nullable=False, server_default="false")
 
+    # Executive title for C-suite/leadership team (CEO, CFO, CMO, CSO, CTO, etc.)
+    executive_title = Column(String(100), nullable=True)
+
     # Activity tracking for admin team members
     last_login = Column(DateTime(timezone=True), nullable=True)
     last_active = Column(DateTime(timezone=True), nullable=True)

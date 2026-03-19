@@ -56,6 +56,19 @@ class UpdatePermissionsRequest(BaseModel):
     permissions: List[str]
 
 
+class UpdateTitleRequest(BaseModel):
+    executive_title: Optional[str] = None
+
+
+VALID_EXECUTIVE_TITLES = [
+    "CEO", "CFO", "CMO", "CSO", "CTO", "COO", "CIO", "CPO",
+    "VP Sales", "VP Marketing", "VP Engineering", "VP Operations",
+    "Sales Director", "Marketing Director", "Engineering Director",
+    "Director of Operations", "Director of Finance",
+    "Head of Sales", "Head of Marketing", "Head of Product",
+]
+
+
 class TeamMemberResponse(BaseModel):
     id: str
     full_name: str
@@ -68,6 +81,7 @@ class TeamMemberResponse(BaseModel):
     created_at: Optional[str] = None
     last_login: Optional[str] = None
     last_active: Optional[str] = None
+    executive_title: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -86,6 +100,7 @@ def _member_response(m: User) -> TeamMemberResponse:
         created_at=m.created_at.isoformat() if m.created_at else None,
         last_login=m.last_login.isoformat() if getattr(m, "last_login", None) else None,
         last_active=m.last_active.isoformat() if getattr(m, "last_active", None) else None,
+        executive_title=getattr(m, "executive_title", None),
     )
 
 
@@ -156,16 +171,19 @@ def team_roster(
             "name": ceo.full_name or ceo.email.split("@")[0],
             "email": ceo.email,
             "role": "CEO",
+            "executive_title": "CEO",
             "status": _status(ceo),
         })
         for m in team_members:
             if m.id == current_user.id:
                 continue
+            title = getattr(m, "executive_title", None) or m.role or "Team Member"
             roster.append({
                 "id": str(m.id),
                 "name": m.full_name or m.email.split("@")[0],
                 "email": m.email,
-                "role": m.role or "Team Member",
+                "role": title,
+                "executive_title": getattr(m, "executive_title", None),
                 "status": _status(m),
                 "permissions": m.permissions or [],
             })
@@ -384,6 +402,37 @@ def update_team_permissions(
 
     logger.info(f"Permissions updated for {member.email}: {body.permissions}")
 
+    return _member_response(member)
+
+
+@router.get("/team/titles")
+def list_executive_titles(
+    ceo: User = Depends(require_ceo_only),
+):
+    """List valid executive titles for team assignment."""
+    return {"titles": VALID_EXECUTIVE_TITLES}
+
+
+@router.put("/team/{user_id}/title", response_model=TeamMemberResponse)
+def update_team_title(
+    user_id: str,
+    body: UpdateTitleRequest,
+    db: Session = Depends(get_db),
+    ceo: User = Depends(require_ceo_only),
+):
+    """Assign or update a team member's executive title."""
+    member = db.query(User).filter(User.id == user_id, User.invited_by.isnot(None)).first()
+    if not member:
+        raise HTTPException(404, "Team member not found")
+
+    if body.executive_title and body.executive_title not in VALID_EXECUTIVE_TITLES:
+        raise HTTPException(400, f"Invalid title. Valid options: {', '.join(VALID_EXECUTIVE_TITLES)}")
+
+    member.executive_title = body.executive_title
+    db.commit()
+    db.refresh(member)
+
+    logger.info(f"Title updated for {member.email}: {body.executive_title or 'cleared'}")
     return _member_response(member)
 
 
