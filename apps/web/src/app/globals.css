@@ -936,6 +936,4 @@ html, body {
     word-break: break-word;
   }
 
-  /* Tighten padding on small screens */
-  .px-6 { padding-left: 1rem; padding-right: 1rem; }
 }

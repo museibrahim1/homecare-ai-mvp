@@ -521,12 +521,12 @@ async def change_password(
     if req.current_password == req.new_password:
         raise HTTPException(status_code=400, detail="New password must be different from current password.")
 
-    history_err = check_password_history(current_user, req.new_password)
-    if history_err:
-        raise HTTPException(status_code=400, detail=history_err)
+    if check_password_history(current_user, req.new_password):
+        raise HTTPException(status_code=400, detail="You cannot reuse any of your last 5 passwords.")
 
-    current_user.hashed_password = get_password_hash(req.new_password)
-    record_password_in_history(current_user, req.new_password)
+    new_hash = get_password_hash(req.new_password)
+    current_user.hashed_password = new_hash
+    record_password_in_history(current_user, new_hash)
     db.commit()
 
     log_action(
@@ -563,16 +563,41 @@ async def delete_account(
     user_id = current_user.id
 
     try:
-        from app.models.business import AgencySettings
-        agency = db.query(AgencySettings).filter(AgencySettings.user_id == user_id).first()
-        if agency:
-            db.delete(agency)
+        from sqlalchemy import text as sa_text
+        uid = str(user_id)
 
-        from app.models.analytics import UsageAnalytics
-        db.query(UsageAnalytics).filter(UsageAnalytics.user_id == user_id).delete()
+        # Delete owned rows (non-nullable FK → must delete)
+        for tbl, col in [
+            ("smart_notes", "user_id"),
+            ("reminders", "user_id"),
+            ("contract_templates", "owner_id"),
+            ("visits", "caregiver_id"),
+            ("tasks", "user_id"),
+            ("agency_settings", "user_id"),
+            ("usage_analytics", "user_id"),
+            ("provider_engagement", "user_id"),
+        ]:
+            try:
+                db.execute(sa_text(f"DELETE FROM {tbl} WHERE {col} = :uid"), {"uid": uid})
+            except Exception:
+                pass
 
-        from app.models.analytics import ProviderEngagement
-        db.query(ProviderEngagement).filter(ProviderEngagement.user_id == user_id).delete()
+        # Nullify references (nullable FK → set null)
+        for tbl, col in [
+            ("clients", "created_by"),
+            ("caregivers", "created_by"),
+            ("audit_logs", "user_id"),
+            ("notes", "approved_by_id"),
+            ("tasks", "assigned_to_id"),
+            ("support_tickets", "submitted_by_id"),
+            ("support_tickets", "assigned_to_id"),
+            ("support_tickets", "resolved_by_id"),
+            ("ticket_responses", "responder_id"),
+        ]:
+            try:
+                db.execute(sa_text(f"UPDATE {tbl} SET {col} = NULL WHERE {col} = :uid"), {"uid": uid})
+            except Exception:
+                pass
 
         db.delete(current_user)
         db.commit()
