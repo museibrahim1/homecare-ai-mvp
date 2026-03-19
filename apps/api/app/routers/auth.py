@@ -209,9 +209,12 @@ async def logout(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Logout current user — clears Google tokens so they must reconnect on next login."""
-    # Disconnect Gmail / Google Calendar so user must re-authenticate each session
-    if getattr(current_user, 'google_calendar_connected', False):
+    """Logout current user. Admin Google Calendar stays connected for demo booking."""
+    is_platform_admin = (
+        getattr(current_user, 'role', '') == 'admin'
+        and (current_user.email or '').endswith('@palmtai.com')
+    )
+    if not is_platform_admin and getattr(current_user, 'google_calendar_connected', False):
         current_user.google_calendar_connected = False
         current_user.google_calendar_access_token = None
         current_user.google_calendar_refresh_token = None
@@ -234,16 +237,19 @@ async def logout_all_devices(
     every device.
     """
     current_user.force_logout_at = datetime.now(timezone.utc)
-    
-    # Also clear Google tokens
-    if getattr(current_user, 'google_calendar_connected', False):
+
+    is_platform_admin = (
+        getattr(current_user, 'role', '') == 'admin'
+        and (current_user.email or '').endswith('@palmtai.com')
+    )
+    if not is_platform_admin and getattr(current_user, 'google_calendar_connected', False):
         current_user.google_calendar_connected = False
         current_user.google_calendar_access_token = None
         current_user.google_calendar_refresh_token = None
         current_user.google_calendar_token_expiry = None
-    
+
     db.commit()
-    
+
     return {
         "success": True,
         "message": "All sessions have been invalidated. You will need to sign in again on all devices.",
@@ -483,3 +489,118 @@ def _notify_ceo_team_login(db: Session, team_user: User, ip: str):
         sender="PalmCare AI <noreply@send.palmtai.com>",
         reply_to="sales@palmtai.com",
     )
+
+
+# =============================================================================
+# ACCOUNT MANAGEMENT
+# =============================================================================
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str
+    confirmation: str  # Must be "DELETE MY ACCOUNT"
+
+
+@router.post("/change-password")
+async def change_password(
+    req: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Change password while logged in (requires current password)."""
+    if not verify_password(req.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect.")
+
+    if len(req.new_password) < 8:
+        raise HTTPException(status_code=400, detail="New password must be at least 8 characters.")
+
+    if req.current_password == req.new_password:
+        raise HTTPException(status_code=400, detail="New password must be different from current password.")
+
+    history_err = check_password_history(current_user, req.new_password)
+    if history_err:
+        raise HTTPException(status_code=400, detail=history_err)
+
+    current_user.hashed_password = get_password_hash(req.new_password)
+    record_password_in_history(current_user, req.new_password)
+    db.commit()
+
+    log_action(
+        db=db, user_id=current_user.id, action="password_changed",
+        entity_type="user", entity_id=current_user.id,
+        description="Password changed via settings",
+    )
+
+    return {"success": True, "message": "Password changed successfully."}
+
+
+@router.post("/delete-account")
+async def delete_account(
+    req: DeleteAccountRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Permanently delete user account and all associated data."""
+    if req.confirmation != "DELETE MY ACCOUNT":
+        raise HTTPException(status_code=400, detail='Please type "DELETE MY ACCOUNT" to confirm.')
+
+    if not verify_password(req.password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Password is incorrect.")
+
+    is_platform_admin = (
+        getattr(current_user, 'role', '') == 'admin'
+        and (current_user.email or '').endswith('@palmtai.com')
+    )
+    if is_platform_admin:
+        raise HTTPException(status_code=403, detail="Platform admin accounts cannot be deleted through self-service.")
+
+    user_email = current_user.email
+    user_name = current_user.full_name
+    user_id = current_user.id
+
+    try:
+        from app.models.business import AgencySettings
+        agency = db.query(AgencySettings).filter(AgencySettings.user_id == user_id).first()
+        if agency:
+            db.delete(agency)
+
+        from app.models.analytics import UsageAnalytics
+        db.query(UsageAnalytics).filter(UsageAnalytics.user_id == user_id).delete()
+
+        from app.models.analytics import ProviderEngagement
+        db.query(ProviderEngagement).filter(ProviderEngagement.user_id == user_id).delete()
+
+        db.delete(current_user)
+        db.commit()
+        logger.info(f"Account deleted: {user_email} (id={user_id})")
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Account deletion failed for {user_email}: {e}")
+        raise HTTPException(status_code=500, detail="Account deletion failed. Please contact support@palmtai.com.")
+
+    try:
+        email_service.send_email(
+            to=user_email,
+            subject="Your PalmCare AI Account Has Been Deleted",
+            html=f"""
+            <div style="font-family: -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
+                <h2 style="color: #0f172a;">Account Deleted</h2>
+                <p style="color: #475569;">Hi {user_name},</p>
+                <p style="color: #475569;">Your PalmCare AI account and all associated data have been permanently deleted as requested.</p>
+                <p style="color: #475569;">If this was a mistake or you'd like to come back, you can always create a new account at
+                <a href="https://palmcareai.com/register" style="color: #0d9488;">palmcareai.com/register</a>.</p>
+                <p style="color: #94a3b8; font-size: 13px; margin-top: 24px;">&copy; 2026 Palm Technologies, INC.</p>
+            </div>
+            """,
+            sender="PalmCare AI <support@send.palmtai.com>",
+            reply_to="support@palmtai.com",
+        )
+    except Exception:
+        pass
+
+    return {"success": True, "message": "Your account has been permanently deleted."}

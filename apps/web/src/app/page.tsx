@@ -450,7 +450,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center"><Zap className="w-5 h-5 text-yellow-400" /></div>
                   <span className="text-white font-medium">Extracting Care Needs...</span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-dark-800 rounded-xl p-4 animate-slideIn">
                     <h5 className="text-sm font-semibold text-primary-400 mb-3">Services Identified</h5>
                     <ul className="space-y-2">
@@ -740,7 +740,7 @@ function __REMOVED_BookDemoSection() {
                     className="w-full pl-11 pr-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-slate-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-dark-300 mb-1.5">First Name<span className="text-red-400">*</span></label>
                   <input type="text" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} placeholder="First name"
@@ -1168,6 +1168,7 @@ function HeroOrb() {
           style={{
             width: 320,
             height: 320,
+            maxWidth: '80vw',
             filter: isRecording
               ? 'drop-shadow(0 0 40px rgba(13,148,136,0.5)) drop-shadow(0 0 80px rgba(8,145,178,0.2))'
               : 'drop-shadow(0 0 20px rgba(13,148,136,0.25))',
@@ -1257,7 +1258,7 @@ function HeroOrb() {
         </a>
       </div>
 
-      <div className="flex items-center gap-4 mt-6 relative z-10">
+      <div className="flex items-center flex-wrap gap-4 mt-6 relative z-10">
         <div className="flex items-center gap-2 px-3 py-1.5 border border-green-500/20 rounded-full">
           <Shield className="w-3.5 h-3.5 text-green-500" />
           <span className="text-xs text-green-500/80 font-medium">HIPAA Compliant</span>
@@ -1301,8 +1302,8 @@ export default function LandingPage() {
                   Features <ChevronDown className="w-4 h-4" />
                 </button>
                 {navDropdown === 'features' && (
-                  <div className="absolute top-full left-0 pt-2 w-[520px]">
-                    <div className="bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-4 grid grid-cols-2 gap-3">
+                  <div className="absolute top-full left-0 pt-2 w-[520px] max-w-[calc(100vw-2rem)]">
+                    <div className="bg-dark-800 border border-dark-600 rounded-xl shadow-2xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {[
                         { href: '/features#ai', icon: Brain, label: 'AI Intelligence', desc: 'Voice assessments & smart contracts' },
                         { href: '/features#ops', icon: ClipboardList, label: 'Agency Operations', desc: 'CRM, scheduling & visit management' },
@@ -1452,7 +1453,7 @@ export default function LandingPage() {
               View Pricing <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
-          <div className="flex items-center justify-center gap-6 mt-6 text-dark-500 text-sm">
+          <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 mt-6 text-dark-500 text-sm">
             <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-green-400" /> HIPAA Compliant</div>
             <div className="flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-400" /> Powered by Stripe</div>
             <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary-400" /> Cancel Anytime</div>
@@ -1699,7 +1700,7 @@ export default function LandingPage() {
           </div>
           <div className="pt-8 border-t border-dark-700 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-dark-400 text-sm">&copy; 2026 PalmCare AI. All rights reserved.</p>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center flex-wrap gap-4 sm:gap-6">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-green-400" />
                 <span className="text-dark-400 text-sm">HIPAA Compliant</span>
@@ -1714,7 +1715,7 @@ export default function LandingPage() {
       </footer>
 
       {/* ── STICKY CTA BAR ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 backdrop-blur-sm border-t border-dark-700 py-3 px-6 lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 backdrop-blur-sm border-t border-dark-700 py-3 px-4 sm:px-6 lg:hidden pb-safe">
         <div className="flex items-center justify-between gap-3">
           <p className="text-white text-sm font-medium hidden sm:block">Your next client is waiting</p>
           <div className="flex items-center gap-2 flex-1 sm:flex-none">

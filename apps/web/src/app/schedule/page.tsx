@@ -378,7 +378,8 @@ function WeekView({
 
 /* ─── Main Schedule Content ─── */
 function ScheduleContent() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const isPlatformAdmin = user?.role === 'admin' && (user?.email || '').endsWith('@palmtai.com');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [view, setView] = useState<'day' | 'week' | 'month'>('day');
@@ -608,14 +609,14 @@ function ScheduleContent() {
       )}
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <div className={`grid grid-cols-2 ${isPlatformAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 mb-6`}>
         {[
-          { label: 'Today', value: todayTotal, icon: Sun, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'This Week', value: weekTotal, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Upcoming', value: upcomingCount, icon: Clock, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Google Sync', value: googleConnected ? 'On' : 'Off', icon: Link2, color: googleConnected ? 'text-emerald-600' : 'text-slate-500', bg: googleConnected ? 'bg-emerald-50' : 'bg-slate-100' },
-        ].map((s, i) => (
-          <div key={i} className="card p-3 lg:p-4 flex items-center gap-3" onClick={i === 3 ? () => setShowConnectModal(true) : undefined} role={i === 3 ? 'button' : undefined}>
+          { label: 'Today', value: todayTotal, icon: Sun, color: 'text-amber-600', bg: 'bg-amber-50', show: true },
+          { label: 'This Week', value: weekTotal, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50', show: true },
+          { label: 'Upcoming', value: upcomingCount, icon: Clock, color: 'text-emerald-600', bg: 'bg-emerald-50', show: true },
+          { label: 'Google Sync', value: googleConnected ? 'On' : 'Off', icon: Link2, color: googleConnected ? 'text-emerald-600' : 'text-slate-500', bg: googleConnected ? 'bg-emerald-50' : 'bg-slate-100', show: isPlatformAdmin },
+        ].filter(s => s.show).map((s, i) => (
+          <div key={i} className="card p-3 lg:p-4 flex items-center gap-3" onClick={s.label === 'Google Sync' ? () => setShowConnectModal(true) : undefined} role={s.label === 'Google Sync' ? 'button' : undefined}>
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${s.bg}`}>
               <s.icon className={`w-4 h-4 ${s.color}`} />
             </div>
@@ -813,7 +814,7 @@ function ScheduleContent() {
         />
       )}
 
-      {showConnectModal && (
+      {showConnectModal && isPlatformAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowConnectModal(false)} />
           <div className="relative bg-white border border-slate-200 rounded-2xl shadow-lg w-full max-w-sm overflow-hidden">

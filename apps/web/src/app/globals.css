@@ -899,3 +899,43 @@ html {
   .status-inactive { @apply status-badge bg-slate-100 text-slate-600; }
   .status-error { @apply status-badge bg-red-50 text-red-700; }
 }
+
+/* ============================================================
+   Mobile Responsive Fixes — Safari & Small Screens
+   ============================================================ */
+
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+@media (max-width: 640px) {
+  .page-header { flex-wrap: wrap; gap: 0.5rem; }
+  .period-selector { flex-wrap: wrap; }
+
+  /* Prevent fixed-width dropdowns from overflowing */
+  [class*="w-[520px]"],
+  [class*="w-72"],
+  [class*="w-64"] {
+    max-width: calc(100vw - 2rem) !important;
+  }
+
+  /* Ensure images & canvases respect viewport */
+  img, canvas, video, svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Word-break for long text (FAQ, descriptions) */
+  h1, h2, h3, h4, h5, h6, p, li, td, th, span, a {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Tighten padding on small screens */
+  .px-6 { padding-left: 1rem; padding-right: 1rem; }
+}

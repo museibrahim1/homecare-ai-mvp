@@ -111,9 +111,16 @@ async def connect_google_calendar(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Exchange OAuth code for tokens and save to user."""
+    """Exchange OAuth code for tokens and save to user. Only platform admins can connect."""
     import logging
     logger = logging.getLogger(__name__)
+
+    is_platform_admin = (
+        getattr(current_user, 'role', '') == 'admin'
+        and (current_user.email or '').endswith('@palmtai.com')
+    )
+    if not is_platform_admin:
+        raise HTTPException(status_code=403, detail="Only platform admin accounts can connect Google Calendar.")
 
     if not settings.google_client_id or not settings.google_client_secret:
         raise HTTPException(

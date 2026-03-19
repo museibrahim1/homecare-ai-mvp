@@ -32,3 +32,5 @@ class UserResponse(UserBase):
     updated_at: datetime
     permissions: Optional[List[str]] = None
     temp_password: Optional[bool] = None
+    mfa_enabled: Optional[bool] = False
+    google_calendar_connected: Optional[bool] = False

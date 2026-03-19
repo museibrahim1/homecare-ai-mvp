@@ -182,6 +182,19 @@ export default function SettingsPage() {
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [mfaLoading, setMfaLoading] = useState(false);
   const [mfaError, setMfaError] = useState<string | null>(null);
+
+  // Change password state
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwMsg, setPwMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Account deletion state
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deletePw, setDeletePw] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteForm, setShowDeleteForm] = useState(false);
   
   const defaultNotifications = {
     email_notifications: true,
@@ -209,6 +222,10 @@ export default function SettingsPage() {
   useEffect(() => {
     if (token) {
       loadAgencySettings();
+      fetch(`${API_BASE}/auth/mfa/status`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) setMfaEnabled(!!d.mfa_enabled); })
+        .catch(() => {});
     }
   }, [token]);
   
@@ -1774,12 +1791,40 @@ export default function SettingsPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center justify-between py-3">
-                    <div>
-                      <p className="text-slate-700">Change Password</p>
-                      <p className="text-slate-400 text-sm">Update your account password</p>
+                  <div className="py-3">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-slate-700">Change Password</p>
+                        <p className="text-slate-400 text-sm">Update your account password</p>
+                      </div>
                     </div>
-                    <button onClick={() => router.push('/forgot-password')} className="btn-secondary text-sm">Change</button>
+                    <div className="space-y-3">
+                      <input type="password" placeholder="Current password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none" />
+                      <input type="password" placeholder="New password (min 8 characters)" value={newPw} onChange={e => setNewPw(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none" />
+                      <input type="password" placeholder="Confirm new password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-teal-500 focus:outline-none" />
+                      {pwMsg && <p className={`text-sm ${pwMsg.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>{pwMsg.text}</p>}
+                      <button
+                        disabled={pwLoading || !currentPw || !newPw || newPw !== confirmPw || newPw.length < 8}
+                        onClick={async () => {
+                          setPwLoading(true); setPwMsg(null);
+                          try {
+                            const res = await fetch(`${API_BASE}/auth/change-password`, {
+                              method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ current_password: currentPw, new_password: newPw }),
+                            });
+                            const d = await res.json();
+                            if (!res.ok) throw new Error(d.detail || 'Failed');
+                            setPwMsg({ type: 'success', text: 'Password changed successfully.' });
+                            setCurrentPw(''); setNewPw(''); setConfirmPw('');
+                          } catch (e: any) {
+                            setPwMsg({ type: 'error', text: e.message });
+                          } finally { setPwLoading(false); }
+                        }}
+                        className="btn-secondary text-sm disabled:opacity-50"
+                      >
+                        {pwLoading ? 'Saving...' : 'Update Password'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1829,17 +1874,47 @@ export default function SettingsPage() {
                     <p className="text-slate-700">Delete Account</p>
                     <p className="text-slate-400 text-sm">Permanently delete your account and all data</p>
                   </div>
-                  <button
-                    onClick={() => {
-                      if (confirm('Are you sure you want to delete your account? This action is permanent and cannot be undone.')) {
-                        setError('Account deletion requires contacting support. Please email support for assistance.');
-                      }
-                    }}
-                    className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-500/30 transition"
-                  >
-                    Delete Account
-                  </button>
+                  {!showDeleteForm && (
+                    <button onClick={() => setShowDeleteForm(true)} className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-500/30 transition">
+                      Delete Account
+                    </button>
+                  )}
                 </div>
+                {showDeleteForm && (
+                  <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-200 space-y-3">
+                    <p className="text-sm text-red-700 font-semibold">This action is permanent and cannot be undone.</p>
+                    <p className="text-sm text-red-600">All your data, clients, assessments, contracts, and team members will be permanently deleted.</p>
+                    <input type="password" placeholder="Enter your password" value={deletePw} onChange={e => setDeletePw(e.target.value)} className="w-full bg-white border border-red-200 rounded-xl px-4 py-2.5 text-sm focus:border-red-400 focus:outline-none" />
+                    <input type="text" placeholder='Type "DELETE MY ACCOUNT" to confirm' value={deleteConfirmation} onChange={e => setDeleteConfirmation(e.target.value)} className="w-full bg-white border border-red-200 rounded-xl px-4 py-2.5 text-sm focus:border-red-400 focus:outline-none" />
+                    <div className="flex gap-2">
+                      <button
+                        disabled={deleteLoading || deleteConfirmation !== 'DELETE MY ACCOUNT' || !deletePw}
+                        onClick={async () => {
+                          setDeleteLoading(true);
+                          try {
+                            const res = await fetch(`${API_BASE}/auth/delete-account`, {
+                              method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ password: deletePw, confirmation: deleteConfirmation }),
+                            });
+                            const d = await res.json();
+                            if (!res.ok) throw new Error(d.detail || 'Deletion failed');
+                            localStorage.removeItem('token');
+                            router.push('/login?deleted=1');
+                          } catch (e: any) {
+                            setError(e.message);
+                            setDeleteLoading(false);
+                          }
+                        }}
+                        className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2.5 rounded-lg font-medium disabled:opacity-50 transition"
+                      >
+                        {deleteLoading ? 'Deleting...' : 'Permanently Delete My Account'}
+                      </button>
+                      <button onClick={() => { setShowDeleteForm(false); setDeletePw(''); setDeleteConfirmation(''); }} className="btn-secondary text-sm">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

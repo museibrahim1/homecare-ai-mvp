@@ -20,6 +20,15 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get("/status")
+async def mfa_status(current_user: User = Depends(get_current_user)):
+    """Return the MFA status for the current user."""
+    return {
+        "mfa_enabled": bool(current_user.mfa_enabled),
+        "has_secret": bool(current_user.mfa_secret),
+    }
+
+
 @router.post("/setup", response_model=MFASetupResponse)
 async def mfa_setup(
     db: Session = Depends(get_db),

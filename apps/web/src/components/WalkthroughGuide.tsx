@@ -25,9 +25,9 @@ interface SpotlightStep {
 const STEPS: SpotlightStep[] = [
   {
     id: 'welcome',
-    title: 'Welcome to PalmCare AI — Let\'s Palm It',
-    description: 'Quick tour of your dashboard. We\'ll highlight the key areas you\'ll use every day to record, transcribe, and contract. Takes about a minute.',
-    tip: 'Use arrow keys or click Next to navigate. Press Escape to exit anytime.',
+    title: 'Welcome to PalmCare AI',
+    description: 'Let\'s walk you through everything you need to know. This 2-minute tour covers the **3-step workflow**: add a client, record an assessment, and let AI generate your contract.',
+    tip: 'Use arrow keys or click Next. Press Escape to skip anytime.',
     icon: Sparkles,
     iconBg: 'bg-gradient-to-br from-primary-500 to-accent-cyan',
     iconColor: 'text-white',
@@ -35,9 +35,9 @@ const STEPS: SpotlightStep[] = [
   {
     id: 'sidebar',
     target: 'sidebar-nav',
-    title: 'Navigation Sidebar',
-    description: 'Your main navigation. Jump between Clients, Assessments, Schedule, Pipeline, Team Chat, Reports, and more — organized into clear sections.',
-    tip: 'On mobile, tap the menu icon to open the sidebar.',
+    title: 'Step 1 — Navigation',
+    description: 'This is your command center. The sidebar gives you quick access to **Clients**, **Assessments**, **Schedule**, **Pipeline**, **Reports**, and more. Everything is organized into sections.',
+    tip: 'On mobile, tap the hamburger menu icon to open this sidebar.',
     icon: Home,
     iconBg: 'bg-blue-50',
     iconColor: 'text-blue-600',
@@ -46,39 +46,39 @@ const STEPS: SpotlightStep[] = [
   {
     id: 'stats',
     target: 'stats',
-    title: 'Key Metrics',
-    description: 'Your at-a-glance numbers — total assessments, pending proposals, client count, and weekly activity. These update in real-time as you work.',
+    title: 'Step 2 — Your Key Metrics',
+    description: 'At a glance: total assessments, pending proposals, active clients, and weekly activity. These numbers **update in real-time** as you work — no manual tracking needed.',
     icon: BarChart3,
     iconBg: 'bg-purple-50',
     iconColor: 'text-purple-600',
     preferredSide: 'bottom',
   },
   {
-    id: 'pipeline',
-    target: 'pipeline',
-    title: 'Charts & Pipeline',
-    description: 'Track assessment trends over the last 6 months and see your client pipeline breakdown — from intake through active care.',
-    icon: Activity,
-    iconBg: 'bg-emerald-50',
-    iconColor: 'text-emerald-600',
-    preferredSide: 'bottom',
-  },
-  {
     id: 'quick-actions',
     target: 'quick-actions',
-    title: 'Activity & Quick Actions',
-    description: 'Recent assessments alongside quick-launch buttons — start a new assessment, add a client, or export proposals in one click.',
-    icon: CalendarDays,
-    iconBg: 'bg-amber-50',
-    iconColor: 'text-amber-600',
+    title: 'Step 3 — Record an Assessment',
+    description: 'This is the heart of PalmCare AI. Click **"New Assessment"** to start recording. Speak naturally with your client — our AI transcribes everything, identifies speakers, and extracts billable services automatically.',
+    tip: 'You can also upload pre-recorded audio files if you prefer.',
+    icon: Mic,
+    iconBg: 'bg-teal-50',
+    iconColor: 'text-teal-600',
     preferredSide: 'top',
+  },
+  {
+    id: 'pipeline',
+    target: 'pipeline',
+    title: 'Step 4 — Pipeline & Contracts',
+    description: 'After each assessment, your client moves through the pipeline: **Intake → Assessment → Billables → Contract**. The AI generates a state-compliant service agreement automatically — review, customize, and send for signature.',
+    icon: FileText,
+    iconBg: 'bg-indigo-50',
+    iconColor: 'text-indigo-600',
+    preferredSide: 'bottom',
   },
   {
     id: 'tasks',
     target: 'tasks',
-    title: 'Task Manager',
-    description: 'Create and manage your daily tasks right on the dashboard. Categorize them, set due dates, and track from To Do through Done.',
-    tip: 'Tasks persist locally so you won\'t lose them between sessions.',
+    title: 'Step 5 — Task Manager',
+    description: 'Manage your daily to-dos right from the dashboard. Create tasks, set categories and due dates, and drag them from **To Do → In Progress → Done**. Never forget a follow-up again.',
     icon: Target,
     iconBg: 'bg-pink-500/15',
     iconColor: 'text-pink-600',
@@ -87,9 +87,8 @@ const STEPS: SpotlightStep[] = [
   {
     id: 'notifications',
     target: 'notifications',
-    title: 'Smart Notifications',
-    description: 'This bell aggregates alerts from your schedule, tasks, messages, emails, and follow-ups — sorted by priority so you never miss what matters.',
-    tip: 'Click any notification to jump directly to the relevant page.',
+    title: 'Step 6 — Notifications',
+    description: 'The bell icon collects all your alerts — schedule reminders, task deadlines, team messages, and follow-ups — sorted by priority. Click any notification to jump straight to the action.',
     icon: Bell,
     iconBg: 'bg-red-50',
     iconColor: 'text-red-600',
@@ -98,8 +97,9 @@ const STEPS: SpotlightStep[] = [
   {
     id: 'user-menu',
     target: 'user-menu',
-    title: 'Profile & Settings',
-    description: 'Access your profile, agency settings, and this tour anytime from here. Select "App Tour" to replay this walkthrough whenever you need a refresher.',
+    title: 'Step 7 — Settings & Security',
+    description: 'Access your **agency settings**, **team management**, **billing**, **2FA security**, and this tour anytime from the user menu. You can also change your password, manage notifications, and invite team members here.',
+    tip: 'Select "App Tour" to replay this walkthrough whenever you need it.',
     icon: Settings,
     iconBg: 'bg-slate-100',
     iconColor: 'text-slate-600',
@@ -108,7 +108,7 @@ const STEPS: SpotlightStep[] = [
   {
     id: 'done',
     title: 'You\'re Ready to Palm It!',
-    description: 'You know your way around. Add a client, record an assessment, and let AI handle the rest. Reopen this tour from the user menu or Help & Support anytime.',
+    description: 'Here\'s your quick-start checklist:\n\n**1.** Go to Clients → Add your first client\n**2.** Start an assessment → Record or upload audio\n**3.** Review the AI-generated contract → Send for signature\n\nNeed help? Email **support@palmtai.com** or reopen this tour from the user menu.',
     icon: CheckCircle,
     iconBg: 'bg-gradient-to-br from-green-500 to-emerald-500',
     iconColor: 'text-white',
@@ -121,6 +121,11 @@ interface Rect { top: number; left: number; width: number; height: number }
 const PAD = 10;
 const GAP = 14;
 const TIP_W = 370;
+
+function getTipWidth() {
+  if (typeof window === 'undefined') return TIP_W;
+  return Math.min(TIP_W, window.innerWidth - 24);
+}
 
 function getRect(target?: string): Rect | null {
   if (!target) return null;
@@ -149,6 +154,7 @@ function pickSide(r: Rect, pref?: Side): Side {
 function calcTipPos(r: Rect, side: Side) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
+  const tw = getTipWidth();
   let top = 0, left = 0;
   const cx = r.left + r.width / 2;
   const cy = r.top + r.height / 2;
@@ -156,19 +162,25 @@ function calcTipPos(r: Rect, side: Side) {
   switch (side) {
     case 'bottom':
       top = r.top + r.height + PAD + GAP;
-      left = clamp(cx - TIP_W / 2, 8, vw - TIP_W - 8);
+      left = clamp(cx - tw / 2, 8, vw - tw - 8);
       break;
     case 'top':
       top = r.top - PAD - GAP;
-      left = clamp(cx - TIP_W / 2, 8, vw - TIP_W - 8);
+      left = clamp(cx - tw / 2, 8, vw - tw - 8);
       break;
     case 'right':
       top = clamp(cy - 80, 8, vh - 300);
       left = r.left + r.width + PAD + GAP;
+      if (left + tw > vw - 8) {
+        left = clamp(cx - tw / 2, 8, vw - tw - 8);
+      }
       break;
     case 'left':
       top = clamp(cy - 80, 8, vh - 300);
-      left = r.left - PAD - GAP - TIP_W;
+      left = r.left - PAD - GAP - tw;
+      if (left < 8) {
+        left = clamp(cx - tw / 2, 8, vw - tw - 8);
+      }
       break;
   }
   return { top, left };
@@ -312,13 +324,13 @@ export default function WalkthroughGuide() {
           top: side === 'top' ? undefined : tipPos.top,
           bottom: side === 'top' ? `${window.innerHeight - tipPos.top}px` : undefined,
           left: tipPos.left,
-          width: TIP_W,
+          width: getTipWidth(),
           maxWidth: 'calc(100vw - 16px)',
           zIndex: 102,
         } : {
           top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: TIP_W,
+          width: getTipWidth(),
           maxWidth: 'calc(100vw - 16px)',
           zIndex: 102,
         }}

@@ -18,6 +18,7 @@ const SITE_DESCRIPTION =
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover' as any,
   themeColor: [
     { media: '(prefers-color-scheme: dark)', color: '#0a0f1a' },
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
