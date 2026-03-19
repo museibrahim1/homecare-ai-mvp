@@ -287,6 +287,15 @@ async def create_signup_checkout(
         line_items.insert(0, {"price": EXTENDED_TRIAL_PRICE_ID, "quantity": 1})
 
     try:
+        customer = stripe.Customer.create(
+            email=request.email,
+            metadata={
+                "business_id": str(request.business_id),
+                "plan_tier": request.plan_tier,
+                "source": "signup",
+            },
+        )
+
         session_params = {
             "mode": "subscription",
             "payment_method_types": ["card"],
@@ -294,7 +303,7 @@ async def create_signup_checkout(
             "line_items": [{"price": price_id, "quantity": 1}],
             "success_url": f"{STRIPE_SUCCESS_URL}?session_id={{CHECKOUT_SESSION_ID}}",
             "cancel_url": STRIPE_CANCEL_URL,
-            "customer_email": request.email,
+            "customer": customer.id,
             "metadata": {
                 "plan_id": str(plan.id),
                 "plan_name": plan.name,
@@ -486,15 +495,27 @@ async def create_checkout_session(
             "quantity": 1,
         })
     
-    # Create Stripe checkout session
+    # Create Stripe checkout session (create customer first for Accounts V2 compat)
     try:
+        existing_sub = db.query(Subscription).filter(
+            Subscription.business_id == business_id
+        ).first() if business_id else None
+        customer_id = existing_sub.stripe_customer_id if existing_sub and existing_sub.stripe_customer_id else None
+
+        if not customer_id:
+            customer = stripe.Customer.create(
+                email=current_user.email,
+                metadata={"business_id": str(business_id) if business_id else "", "user_id": str(current_user.id)},
+            )
+            customer_id = customer.id
+
         session = stripe.checkout.Session.create(
             mode="subscription",
             payment_method_types=["card"],
             line_items=line_items,
             success_url=f"{STRIPE_SUCCESS_URL}?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=STRIPE_CANCEL_URL,
-            customer_email=current_user.email,
+            customer=customer_id,
             metadata={
                 "plan_id": str(plan.id),
                 "plan_name": plan.name,
