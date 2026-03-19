@@ -142,9 +142,31 @@ function ContactForm() {
                   <Mail className="w-5 h-5 text-primary-400" />
                 </div>
                 <div>
-                  <p className="text-dark-400 text-sm">Email us at</p>
+                  <p className="text-dark-400 text-sm">Sales & Partnerships</p>
                   <a href="mailto:sales@palmtai.com" className="text-white hover:text-primary-400 transition">
                     sales@palmtai.com
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-dark-400 text-sm">Technical Support</p>
+                  <a href="mailto:support@palmtai.com" className="text-white hover:text-blue-400 transition">
+                    support@palmtai.com
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                  <Mic className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-dark-400 text-sm">General Inquiries</p>
+                  <a href="mailto:info@palmtai.com" className="text-white hover:text-emerald-400 transition">
+                    info@palmtai.com
                   </a>
                 </div>
               </div>

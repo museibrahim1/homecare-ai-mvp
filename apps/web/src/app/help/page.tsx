@@ -193,15 +193,15 @@ export default function HelpPage() {
               </div>
             </a>
             <a
-              href="tel:+18005551234"
+              href="mailto:sales@palmtai.com"
               className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-500/50 transition"
             >
               <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-                <Phone className="w-6 h-6 text-emerald-600" />
+                <Mail className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-slate-900 font-medium">Phone Support</p>
-                <p className="text-slate-500 text-sm">(800) 555-1234</p>
+                <p className="text-slate-900 font-medium">Sales & Billing</p>
+                <p className="text-slate-500 text-sm">sales@palmtai.com</p>
               </div>
             </a>
           </div>

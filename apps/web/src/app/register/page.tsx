@@ -63,15 +63,15 @@ function RegisterForm() {
     if (lower.includes('rate limit') || lower.includes('too many'))
       return { message: 'Too many attempts. Please wait a moment.', hint: 'For security, we limit registration attempts. Try again in a few minutes.' };
     if (lower.includes('not configured') || lower.includes('stripe'))
-      return { message: 'Payment system is temporarily unavailable.', hint: 'Please try again in a few minutes. If this persists, contact sales@palmtai.com.' };
+      return { message: 'Payment system is temporarily unavailable.', hint: 'Please try again in a few minutes. If this persists, contact support@palmtai.com.' };
     if (lower.includes('network') || lower.includes('fetch') || lower.includes('failed to fetch'))
       return { message: 'Unable to connect to our servers.', hint: 'Check your internet connection and try again.' };
     if (lower.includes('checkout') || lower.includes('payment'))
-      return { message: 'Could not set up payment. Please try again.', hint: 'If this keeps happening, contact sales@palmtai.com for help.' };
+      return { message: 'Could not set up payment. Please try again.', hint: 'If this keeps happening, contact support@palmtai.com for help.' };
     if (lower.includes('500') || lower.includes('internal'))
       return { message: 'Something went wrong on our end.', hint: 'Our team has been notified. Please try again in a few minutes.' };
     if (raw.length > 120)
-      return { message: 'Something went wrong. Please try again.', hint: 'If this keeps happening, contact sales@palmtai.com.' };
+      return { message: 'Something went wrong. Please try again.', hint: 'If this keeps happening, contact support@palmtai.com.' };
     return { message: raw, hint: '' };
   };
 

@@ -9,13 +9,13 @@ interface Message {
   content: string;
 }
 
-const GREETING = "Hey! I'm Palm — your AI assistant. Ask me anything about PalmCare AI, or let's get you set up with a free demo. Ready to Palm It?";
+const GREETING = "Hey! I'm Palm — your AI assistant. Ask me anything about PalmCare AI, pricing, or how to get started. Ready to Palm It?";
 
 const QUICK_PROMPTS = [
   'How does Palm It work?',
   'How does voice assessment work?',
   'Is it HIPAA compliant?',
-  'I want to schedule a demo',
+  'How do I get started?',
 ];
 
 export default function ChatWidget() {
@@ -77,7 +77,7 @@ export default function ChatWidget() {
     } catch (e) {
       setMessages(prev => [
         ...prev,
-        { role: 'assistant', content: "Hmm, I'm having a connection issue. Try again in a sec! Or better yet — scroll down and schedule a free demo. Our team will answer everything live." },
+        { role: 'assistant', content: "Hmm, I'm having a connection issue. Try again in a sec! You can also reach our team at support@palmtai.com or start a free trial at palmcareai.com/register." },
       ]);
     } finally {
       setLoading(false);
