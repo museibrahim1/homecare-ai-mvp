@@ -55,11 +55,11 @@ export default function MobileAppPage() {
             <Link href="/" className="ma-topnav-link">Home</Link>
             <Link href="/features" className="ma-topnav-link">Features</Link>
             <Link href="/mobile-app" className="ma-topnav-link ma-topnav-link--active">Mobile App</Link>
-            <a href="/#book-demo" className="ma-topnav-link">Demo</a>
+            <a href="/register" className="ma-topnav-link">Demo</a>
           </div>
           <div className="ma-topnav-actions">
             <Link href="/login" className="ma-topnav-link">Sign In</Link>
-            <a href="/#book-demo" className="ma-topnav-cta-btn">Sign Up Free</a>
+            <a href="/register" className="ma-topnav-cta-btn">Sign Up Free</a>
           </div>
         </div>
       </nav>
@@ -84,7 +84,7 @@ export default function MobileAppPage() {
                   <span className="ma-appstore-big">App Store</span>
                 </div>
               </a>
-              <a href="/#book-demo" className="ma-demo-btn">Start Free Trial <ArrowRight size={16} /></a>
+              <a href="/register" className="ma-demo-btn">Start Free Trial <ArrowRight size={16} /></a>
             </div>
             <div className="ma-hero-trust">
               <div className="ma-trust-badge ma-trust-hipaa">🛡️ HIPAA Compliant</div>
@@ -185,7 +185,7 @@ export default function MobileAppPage() {
               <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer" className="ma-demo-btn">
                 <Download size={16} /> Download App
               </a>
-              <a href="/#book-demo" className="ma-why-ghost">Watch Tutorial <ArrowRight size={14} /></a>
+              <a href="/register" className="ma-why-ghost">Watch Tutorial <ArrowRight size={14} /></a>
             </div>
           </div>
           <div className="ma-why-phone-wrap">
@@ -213,7 +213,7 @@ export default function MobileAppPage() {
                 <span className="ma-appstore-big">App Store</span>
               </div>
             </a>
-            <a href="/#book-demo" className="ma-demo-btn">Start Free Trial <ArrowRight size={16} /></a>
+            <a href="/register" className="ma-demo-btn">Start Free Trial <ArrowRight size={16} /></a>
           </div>
           <div className="ma-download-trust">
             <span className="ma-trust-badge ma-trust-hipaa">🛡️ HIPAA Compliant</span>

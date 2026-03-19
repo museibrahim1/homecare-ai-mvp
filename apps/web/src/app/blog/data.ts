@@ -179,7 +179,7 @@ Technology alone isn't enough. Your team needs regular training:
 
 ## Next Steps
 
-If your agency needs a technology partner that takes HIPAA seriously, [schedule a demo](/) to see how PalmCare AI protects patient data while streamlining your workflow.
+If your agency needs a technology partner that takes HIPAA seriously, [start your free trial](/register) to see how PalmCare AI protects patient data while streamlining your workflow.
 `,
   },
   {

@@ -72,7 +72,7 @@ const PLANS = [
       'SLA guarantee',
     ],
     cta: 'Contact Sales',
-    href: '/#book-demo',
+    href: '/register',
     popular: false,
   },
 ];
@@ -266,7 +266,7 @@ export default function PricingPage() {
               Start Free Trial <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/#book-demo"
+              href="/register"
               className="bg-white/10 hover:bg-white/15 text-white px-6 py-3 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-white/10"
             >
               <Phone className="w-4 h-4" /> Book a Demo

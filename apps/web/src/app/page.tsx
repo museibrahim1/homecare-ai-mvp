@@ -44,7 +44,9 @@ import {
   Settings,
   HelpCircle,
   Plus,
-  Minus
+  Minus,
+  Sparkles,
+  CreditCard,
 } from 'lucide-react';
 
 /* ───────────────────── DATA ───────────────────── */
@@ -299,7 +301,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Do you offer a free trial?',
-    a: 'Yes — every plan comes with a 14-day free trial with full access to all features. No credit card required to start. You can also book a free 30-minute demo with our team to see the platform in action before signing up.',
+    a: 'Yes — every plan comes with a 14-day free trial with full access to all features. A credit card is required to start, but you won\'t be charged until the trial ends. You can cancel anytime during the trial period.',
   },
 ];
 
@@ -516,7 +518,7 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   <button aria-label="Skip" onClick={() => { if (currentStep < DEMO_STEPS.length - 1) { setCurrentStep(s => s + 1); setProgress(0); } }} className="p-2 bg-dark-700 text-white rounded-lg hover:bg-dark-600 transition"><SkipForward className="w-5 h-5" /></button>
                 </>
               )}
-              <a href="#book-demo" onClick={onClose} className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition">Sign Up Free</a>
+              <a href="/register" onClick={onClose} className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition">Sign Up Free</a>
             </div>
           </div>
         </div>
@@ -533,9 +535,8 @@ function DemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   );
 }
 
-/* ───────────────────── SCHEDULE DEMO (Multi-Step) ───────────────────── */
-
-function BookDemoSection() {
+/* BookDemoSection removed — signup flow moved to /register */
+function _UNUSED_BookDemoSection() {
   const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -1248,9 +1249,9 @@ function HeroOrb() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10">
-        <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
-          Start Your 7 Day Free Trial <ArrowRight className="w-5 h-5" />
-        </a>
+        <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
+          Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5" />
+        </Link>
         <a href="#features" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
           See How It Works <ChevronDown className="w-5 h-5" />
         </a>
@@ -1371,12 +1372,12 @@ export default function LandingPage() {
               </div>
 
               <Link href="/mobile-app" className="px-3 py-2 text-dark-300 hover:text-white transition">Mobile App</Link>
-              <a href="#book-demo" className="px-3 py-2 text-dark-300 hover:text-white transition">Free Trial</a>
+              <Link href="/pricing" className="px-3 py-2 text-dark-300 hover:text-white transition">Pricing</Link>
             </div>
 
             <div className="hidden lg:flex items-center gap-3">
               <Link href="/login" className="text-dark-300 hover:text-white transition px-3 py-2">Sign In</Link>
-              <a href="#book-demo" className="btn-primary py-2 px-5 text-sm">Sign Up Free</a>
+              <Link href="/register" className="btn-primary py-2 px-5 text-sm">Sign Up Free</Link>
             </div>
 
             <button aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-dark-300 hover:text-white">
@@ -1389,10 +1390,10 @@ export default function LandingPage() {
               <Link href="/features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Features</Link>
               <a href="#solutions" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Solutions</a>
               <Link href="/mobile-app" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Mobile App</Link>
-              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Free Trial</a>
+              <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Pricing</Link>
               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Contact</Link>
               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-dark-300 hover:text-white">Sign In</Link>
-              <a href="#book-demo" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Sign Up Free</a>
+              <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block btn-primary py-2 px-5 text-sm text-center mt-4">Sign Up Free</Link>
             </div>
           )}
         </div>
@@ -1427,16 +1428,37 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="text-center mt-12">
-            <a href="#book-demo" className="btn-primary inline-flex items-center gap-2 py-4 px-8 text-lg">
-              Start Your 7 Day Free Trial <ArrowRight className="w-5 h-5" />
-            </a>
-            <p className="text-dark-500 text-sm mt-4">No credit card required. Cancel anytime.</p>
+            <Link href="/register" className="btn-primary inline-flex items-center gap-2 py-4 px-8 text-lg">
+              Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5" />
+            </Link>
+            <p className="text-dark-500 text-sm mt-4">Full access for 14 days. Cancel anytime.</p>
           </div>
         </div>
       </section>
 
-      {/* ═══ 3. BOOK DEMO — Primary conversion point ═══ */}
-      <BookDemoSection />
+      {/* ═══ 3. SIGNUP CTA — Primary conversion point ═══ */}
+      <section id="signup" className="py-20 px-6 bg-dark-800/30">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full mb-6">
+            <Sparkles className="w-4 h-4 text-primary-400" /><span className="text-sm text-primary-400">Start Free Today</span>
+          </div>
+          <h2 className="text-4xl font-bold text-white mb-4">Ready to Transform Your Agency?</h2>
+          <p className="text-xl text-dark-400 mb-8">Sign up in 2 minutes. Get 14 days of full access — no charge until the trial ends.</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
+              Start 14-Day Free Trial <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link href="/pricing" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
+              View Pricing <ChevronRight className="w-5 h-5" />
+            </Link>
+          </div>
+          <div className="flex items-center justify-center gap-6 mt-6 text-dark-500 text-sm">
+            <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-green-400" /> HIPAA Compliant</div>
+            <div className="flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-400" /> Powered by Stripe</div>
+            <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary-400" /> Cancel Anytime</div>
+          </div>
+        </div>
+      </section>
 
       {/* ═══ 4. FEATURES — Detail for deeper researchers ═══ */}
       <section id="features" className="py-20 px-6">
@@ -1511,7 +1533,7 @@ export default function LandingPage() {
                     <li key={j} className="flex items-center gap-2 text-dark-300 text-sm"><CheckCircle className="w-4 h-4 text-green-400 shrink-0" />{f}</li>
                   ))}
                 </ul>
-                <a href="#book-demo" className="mt-6 block text-center py-3 rounded-xl font-medium bg-primary-500 text-white hover:bg-primary-600 transition">Start Free Trial</a>
+                <Link href="/register" className="mt-6 block text-center py-3 rounded-xl font-medium bg-primary-500 text-white hover:bg-primary-600 transition">Start Free Trial</Link>
               </div>
             ))}
           </div>
@@ -1558,9 +1580,9 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: '1', title: 'Book a Free Demo', description: 'Fill out a short form. Our team schedules a personalized, no-obligation walkthrough in under 24 hours.', icon: Video },
-              { step: '2', title: 'See It in Action', description: 'Watch a live assessment become a signed contract in real-time. 5 minutes — that\'s all it takes to see the difference.', icon: Play },
-              { step: '3', title: 'Palm It', description: 'Start your trial, onboard your team, and watch paperwork disappear. Your next client is waiting.', icon: TrendingUp },
+              { step: '1', title: 'Sign Up Free', description: 'Create your account in under 2 minutes. Pick your plan and start your 14-day free trial instantly.', icon: Sparkles },
+              { step: '2', title: 'Record Your First Assessment', description: 'Open the mobile app, tap record, and speak naturally. AI transcribes and extracts everything automatically.', icon: Mic },
+              { step: '3', title: 'Palm It', description: 'A complete contract is generated in seconds. Send it, sign it, and watch paperwork disappear forever.', icon: TrendingUp },
             ].map((item, i) => (
               <div key={i} className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-cyan rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary-500/20">
@@ -1582,9 +1604,9 @@ export default function LandingPage() {
             <h2 className="text-4xl font-bold text-white mb-4">Your Next Client is Waiting</h2>
             <p className="text-xl text-dark-300 mb-8">Close faster. Document smarter. Never lose a client to paperwork again.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <a href="#book-demo" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Your 7 Day Free Trial <ArrowRight className="w-5 h-5" /></a>
+              <Link href="/register" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5" /></Link>
             </div>
-            <p className="text-dark-400 text-sm mt-6">No credit card required &bull; Full access &bull; Cancel anytime</p>
+            <p className="text-dark-400 text-sm mt-6">Full access for 14 days &bull; Cancel anytime &bull; Powered by Stripe</p>
           </div>
         </div>
       </section>
@@ -1652,7 +1674,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/features" className="hover:text-white transition">Features</Link></li>
                 <li><Link href="/mobile-app" className="hover:text-white transition">Mobile App</Link></li>
-                <li><a href="#book-demo" className="hover:text-white transition">Free Trial</a></li>
+                <li><Link href="/register" className="hover:text-white transition">Free Trial</Link></li>
                 <li><Link href="/blog" className="hover:text-white transition">Blog</Link></li>
                 <li><Link href="/faq" className="hover:text-white transition">FAQ</Link></li>
                 <li><Link href="/login" className="hover:text-white transition">Sign In</Link></li>
@@ -1663,7 +1685,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-dark-400 text-sm">
                 <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
-                <li><a href="#book-demo" className="hover:text-white transition">Free Trial</a></li>
+                <li><Link href="/register" className="hover:text-white transition">Free Trial</Link></li>
               </ul>
             </div>
             <div>
@@ -1696,7 +1718,7 @@ export default function LandingPage() {
         <div className="flex items-center justify-between gap-3">
           <p className="text-white text-sm font-medium hidden sm:block">Your next client is waiting</p>
           <div className="flex items-center gap-2 flex-1 sm:flex-none">
-            <a href="#book-demo" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Sign Up Free</a>
+            <Link href="/register" className="flex-1 text-center btn-primary py-2.5 px-4 text-sm">Sign Up Free</Link>
           </div>
         </div>
       </div>

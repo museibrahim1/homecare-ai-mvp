@@ -87,7 +87,7 @@ export default function LandingPageApika({
               <Link href="/login" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition">
                 Sign In
               </Link>
-              <a href="#book-demo" className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition">
+              <a href="/register" className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition">
                 Sign Up Free
               </a>
             </div>
@@ -109,7 +109,7 @@ export default function LandingPageApika({
                 </Link>
               ))}
               <Link href="/login" className="block py-2 text-slate-600" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
-              <a href="#book-demo" className="block bg-primary-500 text-white py-2 px-4 rounded-lg text-center font-medium mt-2" onClick={() => setMobileMenuOpen(false)}>
+              <a href="/register" className="block bg-primary-500 text-white py-2 px-4 rounded-lg text-center font-medium mt-2" onClick={() => setMobileMenuOpen(false)}>
                 Sign Up Free
               </a>
             </div>
@@ -138,7 +138,7 @@ export default function LandingPageApika({
                   and manage your home care agency — all from one powerful AI platform.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <a href="#book-demo" className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition">
+                  <a href="/register" className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition">
                     Start Your 7 Day Free Trial <ArrowRight className="w-5 h-5" />
                   </a>
                   <button
@@ -218,7 +218,7 @@ export default function LandingPageApika({
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12">
               <div>
                 <h2 className="text-3xl font-bold text-slate-900 mb-2">We Speak With Our Achievement & Powerful Stats</h2>
-                <a href="#book-demo" className="text-primary-600 hover:text-primary-700 font-medium inline-flex items-center gap-1">
+                <a href="/register" className="text-primary-600 hover:text-primary-700 font-medium inline-flex items-center gap-1">
                   Know More <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
@@ -261,7 +261,7 @@ export default function LandingPageApika({
                   </li>
                 </ul>
                 <div className="flex gap-4">
-                  <a href="#book-demo" className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-600 transition">
+                  <a href="/register" className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-600 transition">
                     Start Free Trial <ArrowRight className="w-4 h-4" />
                   </a>
                   <a href="/features" className="text-primary-600 hover:text-primary-700 font-medium">Know More</a>
@@ -324,7 +324,7 @@ export default function LandingPageApika({
                   ))}
                 </ul>
                 <div className="flex gap-4">
-                  <a href="#book-demo" className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-600 transition">
+                  <a href="/register" className="inline-flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-600 transition">
                     Start Free Trial
                   </a>
                   <button

@@ -216,8 +216,8 @@ export default function LoginPage() {
           <div className="mt-8 text-center">
             <p className="text-slate-400 text-sm">
               Ready to Palm It?{' '}
-              <Link href="/#book-demo" className="text-primary-500 hover:underline font-medium">
-                Schedule a demo
+              <Link href="/register" className="text-primary-500 hover:underline font-medium">
+                Sign up free
               </Link>
             </p>
           </div>
