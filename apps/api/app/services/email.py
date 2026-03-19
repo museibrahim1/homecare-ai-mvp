@@ -190,123 +190,184 @@ class EmailService:
     # ==================== Business Emails ====================
     
     def send_business_registration_received(self, business_email: str, business_name: str):
-        """Send welcome email after registration."""
-        subject = f"Welcome to {BRAND} - Let's Get You to Revenue Faster!"
+        """Send branded welcome email with product screenshots and demo booking CTA."""
+        subject = f"Welcome to {BRAND} — Your 14-Day Free Trial Is Live"
+        app = self.app_url
+        screenshots = f"{app}/screenshots"
         html = f"""
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-            <!-- Header with gradient -->
-            <div style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
-                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 640px; margin: 0 auto; background: #ffffff;">
+
+            <!-- ══ HEADER ══ -->
+            <div style="background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%); padding: 48px 32px 40px; text-align: center;">
+                <img src="{app}/app-logo.png" alt="PalmCare AI" width="52" height="52" style="margin-bottom: 12px; border-radius: 12px;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.3px;">
                     PalmCare AI
                 </h1>
-                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px; font-weight: 500;">
-                    The #1 CRM for Home Healthcare Agencies
+                <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 13px; font-weight: 500; letter-spacing: 0.5px;">
+                    WHERE CARE MEETS INTELLIGENCE
                 </p>
             </div>
-            
-            <!-- Main content -->
-            <div style="padding: 40px 30px;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f389.png" alt="Party" style="width: 50px; height: 50px;">
-                    <h2 style="color: #1f2937; margin: 15px 0 10px 0; font-size: 24px;">Welcome, {business_name}!</h2>
-                    <p style="color: #6b7280; margin: 0; font-size: 16px;">Your account is ready to transform your agency</p>
-                </div>
-                
-                <!-- Value proposition box -->
-                <div style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 16px; padding: 25px; margin: 25px 0; border-left: 4px solid #6366f1;">
-                    <p style="color: #4c1d95; margin: 0; font-size: 18px; font-weight: 600; line-height: 1.5;">
-                        The #1 Complete CRM for Home Healthcare Agencies
-                    </p>
-                    <p style="color: #5b21b6; margin: 12px 0 0 0; font-size: 15px; line-height: 1.6;">
-                        Reduce your workload, save hours every week, and start generating revenue faster with AI-powered assessments and instant contract creation.
-                    </p>
-                </div>
-                
-                <!-- Features grid -->
-                <div style="margin: 30px 0;">
-                    <h3 style="color: #1f2937; margin: 0 0 20px 0; font-size: 18px; text-align: center;">What You Can Do Today</h3>
-                    
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 0 12px;">
-                        <tr>
-                            <td style="background: #faf5ff; border-radius: 12px; padding: 20px;">
-                                <table style="width: 100%;">
-                                    <tr>
-                                        <td style="width: 50px; vertical-align: top;">
-                                            <div style="background: #6366f1; width: 40px; height: 40px; border-radius: 10px; text-align: center; line-height: 40px;">
-                                                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f399.png" alt="Mic" style="width: 20px; height: 20px; vertical-align: middle;">
-                                            </div>
-                                        </td>
-                                        <td style="vertical-align: top; padding-left: 10px;">
-                                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Record or Upload Assessments</p>
-                                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">AI transcribes and extracts billable services automatically</p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="background: #faf5ff; border-radius: 12px; padding: 20px;">
-                                <table style="width: 100%;">
-                                    <tr>
-                                        <td style="width: 50px; vertical-align: top;">
-                                            <div style="background: #8b5cf6; width: 40px; height: 40px; border-radius: 10px; text-align: center; line-height: 40px;">
-                                                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c4.png" alt="Document" style="width: 20px; height: 20px; vertical-align: middle;">
-                                            </div>
-                                        </td>
-                                        <td style="vertical-align: top; padding-left: 10px;">
-                                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Generate Contracts Instantly</p>
-                                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">Professional service agreements created in seconds, not hours</p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="background: #faf5ff; border-radius: 12px; padding: 20px;">
-                                <table style="width: 100%;">
-                                    <tr>
-                                        <td style="width: 50px; vertical-align: top;">
-                                            <div style="background: #a855f7; width: 40px; height: 40px; border-radius: 10px; text-align: center; line-height: 40px;">
-                                                <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4b0.png" alt="Money" style="width: 20px; height: 20px; vertical-align: middle;">
-                                            </div>
-                                        </td>
-                                        <td style="vertical-align: top; padding-left: 10px;">
-                                            <p style="color: #1f2937; margin: 0; font-weight: 600; font-size: 15px;">Get to Revenue Faster</p>
-                                            <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px;">Close deals same-day with ready-to-sign proposals</p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                
-                <!-- CTA Button -->
-                <div style="text-align: center; margin: 35px 0;">
-                    <a href="{self.app_url}" 
-                       style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
-                        Start Your First Assessment →
-                    </a>
-                </div>
-                
-                <p style="color: #9ca3af; font-size: 14px; text-align: center; margin-top: 30px;">
-                    Questions? Reply to this email - we're here to help you succeed.
+
+            <!-- ══ WELCOME ══ -->
+            <div style="padding: 40px 32px 0;">
+                <h2 style="color: #0f172a; margin: 0 0 8px; font-size: 22px; font-weight: 700;">
+                    Welcome aboard, {business_name}!
+                </h2>
+                <p style="color: #475569; margin: 0 0 24px; font-size: 15px; line-height: 1.6;">
+                    Your 14-day free trial is active. You have full access to every feature — AI voice assessments,
+                    instant contract generation, the CRM dashboard, and our iOS mobile app.
+                    Here's a quick look at what you can do right now.
                 </p>
             </div>
-            
-            <!-- Footer -->
-            <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6366f1; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">PalmCare AI</p>
-                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                    AI-Powered CRM for Home Healthcare Agencies
+
+            <!-- ══ STEP 1: RECORD ══ -->
+            <div style="padding: 0 32px;">
+                <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 28px;">
+                    <tr>
+                        <td style="width: 40px; vertical-align: top; padding-top: 2px;">
+                            <div style="background: #0d9488; color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-size: 14px; font-weight: 700;">1</div>
+                        </td>
+                        <td style="vertical-align: top; padding-left: 12px;">
+                            <p style="color: #0f172a; margin: 0 0 4px; font-size: 16px; font-weight: 700;">Record a Client Assessment</p>
+                            <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Open the PalmCare AI mobile app, tap <strong>Record</strong>, and speak naturally with your client.
+                                Our AI transcribes the conversation in real-time using Deepgram Nova-3 and automatically
+                                identifies speakers, care needs, and billable services.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <img src="{screenshots}/email/recording_screen.png" alt="PalmCare AI — Voice Recording"
+                         width="520" style="max-width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;">
+                </div>
+            </div>
+
+            <!-- ══ STEP 2: CRM ══ -->
+            <div style="padding: 0 32px;">
+                <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 28px;">
+                    <tr>
+                        <td style="width: 40px; vertical-align: top; padding-top: 2px;">
+                            <div style="background: #0891b2; color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-size: 14px; font-weight: 700;">2</div>
+                        </td>
+                        <td style="vertical-align: top; padding-left: 12px;">
+                            <p style="color: #0f172a; margin: 0 0 4px; font-size: 16px; font-weight: 700;">Manage Everything in the CRM</p>
+                            <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">
+                                Your web dashboard gives you a complete view of clients, assessments, visits, 
+                                contracts, and billing — all in one place. Track your team, monitor revenue,
+                                and never lose a client to paperwork again.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <img src="{screenshots}/email/crm_dashboard.png" alt="PalmCare AI — CRM Dashboard"
+                         width="520" style="max-width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;">
+                </div>
+            </div>
+
+            <!-- ══ STEP 3: CONTRACT ══ -->
+            <div style="padding: 0 32px;">
+                <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 28px;">
+                    <tr>
+                        <td style="width: 40px; vertical-align: top; padding-top: 2px;">
+                            <div style="background: #0d9488; color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-size: 14px; font-weight: 700;">3</div>
+                        </td>
+                        <td style="vertical-align: top; padding-left: 12px;">
+                            <p style="color: #0f172a; margin: 0 0 4px; font-size: 16px; font-weight: 700;">Generate Contracts Instantly</p>
+                            <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">
+                                After the assessment, a state-compliant service agreement is generated automatically.
+                                Review, customize, send for signature — all within seconds. Our AI knows the
+                                regulations for all 50 states.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <img src="{screenshots}/email/crm_contract.png" alt="PalmCare AI — Contract Generation"
+                         width="520" style="max-width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;">
+                </div>
+            </div>
+
+            <!-- ══ PRIMARY CTA ══ -->
+            <div style="padding: 0 32px 12px; text-align: center;">
+                <a href="{app}/login"
+                   style="display: inline-block; background: linear-gradient(135deg, #0d9488, #0891b2); color: #ffffff; padding: 16px 48px; border-radius: 12px; text-decoration: none; font-size: 16px; font-weight: 700; letter-spacing: 0.3px;">
+                    Log In &amp; Start Your First Assessment
+                </a>
+            </div>
+
+            <!-- ══ DEMO BOOKING ══ -->
+            <div style="margin: 32px; background: linear-gradient(135deg, #f0fdfa, #ecfeff); border: 1px solid #99f6e4; border-radius: 16px; padding: 28px; text-align: center;">
+                <p style="color: #0f172a; margin: 0 0 6px; font-size: 17px; font-weight: 700;">
+                    Want a Personal Walkthrough?
                 </p>
-                <p style="color: #d1d5db; font-size: 11px; margin: 15px 0 0 0;">
-                    © 2026 PalmCare AI. All rights reserved.
+                <p style="color: #475569; margin: 0 0 20px; font-size: 14px; line-height: 1.5;">
+                    Book a free 30-minute demo with our team. We'll show you the full platform live
+                    and answer any questions about your agency's specific needs.
+                </p>
+                <a href="{app}/book-demo"
+                   style="display: inline-block; background: #0f172a; color: #ffffff; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600;">
+                    Schedule a Free Demo
+                </a>
+            </div>
+
+            <!-- ══ QUICK LINKS ══ -->
+            <div style="padding: 0 32px 32px;">
+                <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                    <tr>
+                        <td style="background: #f8fafc; border-radius: 12px; padding: 20px; text-align: center; width: 33%;">
+                            <p style="color: #0d9488; margin: 0 0 4px; font-size: 22px; font-weight: 800;">50</p>
+                            <p style="color: #64748b; margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">States Covered</p>
+                        </td>
+                        <td style="width: 12px;"></td>
+                        <td style="background: #f8fafc; border-radius: 12px; padding: 20px; text-align: center; width: 33%;">
+                            <p style="color: #0d9488; margin: 0 0 4px; font-size: 22px; font-weight: 800;">60s</p>
+                            <p style="color: #64748b; margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Avg Contract Time</p>
+                        </td>
+                        <td style="width: 12px;"></td>
+                        <td style="background: #f8fafc; border-radius: 12px; padding: 20px; text-align: center; width: 33%;">
+                            <p style="color: #0d9488; margin: 0 0 4px; font-size: 22px; font-weight: 800;">HIPAA</p>
+                            <p style="color: #64748b; margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Compliant</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ══ HELP ══ -->
+            <div style="padding: 0 32px 32px; text-align: center;">
+                <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0;">
+                    Questions? Reach us at
+                    <a href="mailto:support@palmtai.com" style="color: #0d9488; text-decoration: none; font-weight: 600;">support@palmtai.com</a>
+                    — we typically respond within a few hours.
+                </p>
+            </div>
+
+            <!-- ══ FOOTER ══ -->
+            <div style="background: #0f172a; padding: 32px; text-align: center;">
+                <img src="{app}/app-logo.png" alt="PalmCare AI" width="28" height="28" style="margin-bottom: 8px; opacity: 0.8; border-radius: 6px;">
+                <p style="color: #94a3b8; margin: 0 0 4px; font-size: 13px; font-weight: 600;">PalmCare AI</p>
+                <p style="color: #64748b; margin: 0 0 16px; font-size: 11px;">Where care meets intelligence</p>
+                <div style="margin-bottom: 16px;">
+                    <a href="{app}" style="color: #0d9488; text-decoration: none; font-size: 12px; margin: 0 8px;">Website</a>
+                    <span style="color: #334155;">|</span>
+                    <a href="{app}/features" style="color: #0d9488; text-decoration: none; font-size: 12px; margin: 0 8px;">Features</a>
+                    <span style="color: #334155;">|</span>
+                    <a href="{app}/pricing" style="color: #0d9488; text-decoration: none; font-size: 12px; margin: 0 8px;">Pricing</a>
+                    <span style="color: #334155;">|</span>
+                    <a href="{app}/privacy" style="color: #0d9488; text-decoration: none; font-size: 12px; margin: 0 8px;">Privacy</a>
+                </div>
+                <p style="color: #475569; font-size: 11px; margin: 0;">
+                    &copy; 2026 Palm Technologies, INC. All rights reserved.
                 </p>
             </div>
         </div>
         """
-        return self.send_email(business_email, subject, html, sender=self.from_onboarding)
+        return self.send_email(
+            business_email, subject, html,
+            sender=self.from_onboarding,
+            reply_to="support@palmtai.com",
+        )
     
     def send_business_approved(self, business_email: str, business_name: str, login_url: str):
         """Send approval notification with login link."""
