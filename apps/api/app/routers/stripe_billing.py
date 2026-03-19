@@ -31,11 +31,11 @@ except ImportError:
     STRIPE_AVAILABLE = False
     logger.warning("Stripe not installed")
 
-# Initialize Stripe
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
-STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "https://palmcareai.com/billing/success")
-STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "https://palmcareai.com/pricing")
+# Initialize Stripe (strip whitespace/newlines from env vars to prevent auth errors)
+STRIPE_SECRET_KEY = (os.getenv("STRIPE_SECRET_KEY") or "").strip() or None
+STRIPE_WEBHOOK_SECRET = (os.getenv("STRIPE_WEBHOOK_SECRET") or "").strip() or None
+STRIPE_SUCCESS_URL = os.getenv("STRIPE_SUCCESS_URL", "https://palmcareai.com/billing/success").strip()
+STRIPE_CANCEL_URL = os.getenv("STRIPE_CANCEL_URL", "https://palmcareai.com/pricing").strip()
 
 if STRIPE_AVAILABLE and STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
