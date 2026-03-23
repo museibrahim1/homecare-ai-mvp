@@ -32,9 +32,9 @@ router = APIRouter()
 # In-memory draft store (keyed by draft_id)
 _drafts: Dict[str, dict] = {}
 
-EXCLUDED_LEAD_STATUSES = ("converted", "not_interested")
+EXCLUDED_LEAD_STATUSES = ("converted", "not_interested", "email_bounced")
 EXCLUDED_CALL_STATUSES = ("converted", "not_interested", "no_response")
-EXCLUDED_INVESTOR_STATUSES = ("passed", "not_relevant", "committed")
+EXCLUDED_INVESTOR_STATUSES = ("passed", "not_relevant", "committed", "email_bounced")
 
 PRIORITY_ORDER = case(
     (SalesLead.priority == "high", 1),
@@ -2305,7 +2305,9 @@ def cron_mark_emails_sent(
     expected_key = os.getenv("INTERNAL_API_KEY", "")
     cron_secret = os.getenv("CRON_SECRET", "")
     provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
+    if not provided_key:
+        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+    key_valid = (expected_key and provided_key == expected_key) or (cron_secret and provided_key == cron_secret)
     if not key_valid:
         raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
 
@@ -2361,6 +2363,54 @@ def cron_mark_emails_sent(
                 updated += 1
     db.commit()
     return {"ok": True, "updated": updated}
+
+
+@router.post("/cron/mark-bounced")
+def cron_mark_bounced(
+    request: Request,
+    body: dict,
+    db: Session = Depends(get_db),
+):
+    """Mark leads/investors with bounced emails as 'email_bounced' so they stop getting retried."""
+    expected_key = os.getenv("INTERNAL_API_KEY", "")
+    cron_secret = os.getenv("CRON_SECRET", "")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    if not provided_key:
+        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+    if not ((expected_key and provided_key == expected_key) or (cron_secret and provided_key == cron_secret)):
+        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+
+    bounced_emails = [e.strip().lower() for e in body.get("emails", []) if e.strip()]
+    now = datetime.now(timezone.utc)
+    updated_leads = 0
+    updated_investors = 0
+
+    for email in bounced_emails:
+        lead = db.query(SalesLead).filter(func.lower(SalesLead.contact_email) == email).first()
+        if lead and lead.status != "email_bounced":
+            lead.status = "email_bounced"
+            lead.updated_at = now
+            activity = list(lead.activity_log or [])
+            activity.append({"action": "email_bounced", "timestamp": now.isoformat()})
+            lead.activity_log = activity
+            updated_leads += 1
+
+        inv = db.query(Investor).filter(func.lower(Investor.contact_email) == email).first()
+        if inv and inv.status != "email_bounced":
+            inv.status = "email_bounced"
+            inv.updated_at = now
+            activity = list(inv.activity_log or [])
+            activity.append({"action": "email_bounced", "timestamp": now.isoformat()})
+            inv.activity_log = activity
+            updated_investors += 1
+
+    db.commit()
+    return {
+        "ok": True,
+        "updated_leads": updated_leads,
+        "updated_investors": updated_investors,
+        "total_processed": len(bounced_emails),
+    }
 
 
 @router.post("/cron/daily-digest")
