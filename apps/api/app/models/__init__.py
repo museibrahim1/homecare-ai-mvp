@@ -17,6 +17,7 @@ from app.models.investor import Investor
 from app.models.smart_note import SmartNote
 from app.models.task import Task
 from app.models.reminder import Reminder
+from app.models.messaging import Channel, Message, Notification
 
 __all__ = [
     "User",
@@ -42,4 +43,7 @@ __all__ = [
     "SmartNote",
     "Task",
     "Reminder",
+    "Channel",
+    "Message",
+    "Notification",
 ]

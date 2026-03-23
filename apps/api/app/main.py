@@ -100,6 +100,7 @@ from app.routers import (
     team,
     agent,
     resend_webhooks,
+    messaging,
 )
 
 @asynccontextmanager
@@ -218,6 +219,7 @@ app.include_router(landing_chat.router, prefix="/chat", tags=["Landing Page Chat
 app.include_router(team.router, prefix="/admin", tags=["Team Management"])
 app.include_router(agent.router, prefix="/platform/agent", tags=["AI Agent"])
 app.include_router(resend_webhooks.router, prefix="/webhooks", tags=["Webhooks"])
+app.include_router(messaging.router, prefix="/messaging", tags=["Team Messaging"])
 
 
 async def seed_database():
@@ -302,6 +304,72 @@ async def seed_database():
             logger.info("Created site_events table for public analytics")
     except Exception as e:
         logger.warning(f"site_events table check: {e}")
+        db.rollback()
+
+    # Auto-create messaging tables (channels, messages, notifications)
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        existing_tables = inspector.get_table_names()
+
+        if "channels" not in existing_tables:
+            db.execute(sa_text("""
+                CREATE TABLE channels (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    name VARCHAR(100) NOT NULL,
+                    description VARCHAR(500),
+                    is_dm BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_by UUID NOT NULL REFERENCES users(id),
+                    members JSONB DEFAULT '[]'::jsonb,
+                    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+                )
+            """))
+            db.commit()
+            logger.info("Created channels table")
+
+        if "messages" not in existing_tables:
+            db.execute(sa_text("""
+                CREATE TABLE messages (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    channel_id UUID NOT NULL REFERENCES channels(id),
+                    sender_id UUID NOT NULL REFERENCES users(id),
+                    sender_name VARCHAR(255) NOT NULL,
+                    sender_avatar VARCHAR(10),
+                    text TEXT NOT NULL,
+                    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+                )
+            """))
+            db.execute(sa_text("CREATE INDEX ix_messages_channel_id ON messages (channel_id)"))
+            db.execute(sa_text("CREATE INDEX ix_messages_sender_id ON messages (sender_id)"))
+            db.execute(sa_text("CREATE INDEX ix_messages_created_at ON messages (created_at)"))
+            db.commit()
+            logger.info("Created messages table")
+
+        if "notifications" not in existing_tables:
+            db.execute(sa_text("""
+                CREATE TABLE notifications (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    user_id UUID NOT NULL REFERENCES users(id),
+                    type VARCHAR(50) NOT NULL,
+                    title VARCHAR(255) NOT NULL,
+                    body TEXT,
+                    link VARCHAR(500),
+                    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+                    metadata JSONB DEFAULT '{}'::jsonb,
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+                )
+            """))
+            db.execute(sa_text("CREATE INDEX ix_notifications_user_id ON notifications (user_id)"))
+            db.execute(sa_text("CREATE INDEX ix_notifications_is_read ON notifications (user_id, is_read)"))
+            db.commit()
+            logger.info("Created notifications table")
+    except Exception as e:
+        logger.warning(f"Messaging tables migration: {e}")
         db.rollback()
 
     # Auto-add executive_title column to users table

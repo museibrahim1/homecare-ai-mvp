@@ -395,17 +395,52 @@ function formatTime12(t: string): string {
   return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
+const API_URL = typeof window !== 'undefined'
+  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
+  : 'http://localhost:8000';
+
 /* ─── Provider ─── */
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const [manualNotifs, setManualNotifs] = useState<AppNotification[]>([]);
+  const [apiNotifs, setApiNotifs] = useState<AppNotification[]>([]);
 
   // Load read/dismissed state from localStorage on mount
   useEffect(() => {
     setReadIds(loadReadSet());
     setDismissedIds(loadDismissed());
+  }, []);
+
+  // Poll API for server-side notifications (messages, etc.)
+  useEffect(() => {
+    const fetchApiNotifs = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('palmcare-token') : null;
+        if (!token) return;
+        const res = await fetch(`${API_URL}/messaging/notifications?unread_only=true&limit=50`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const mapped: AppNotification[] = (data || []).map((n: any) => ({
+          id: `api-${n.id}`,
+          category: 'message' as NotificationCategory,
+          title: n.title,
+          message: n.body || '',
+          timestamp: new Date(n.created_at).getTime(),
+          read: n.is_read,
+          dismissed: false,
+          link: n.link || '/team-chat',
+          priority: 'high' as const,
+        }));
+        setApiNotifs(mapped);
+      } catch { /* silent */ }
+    };
+    fetchApiNotifs();
+    const interval = setInterval(fetchApiNotifs, 10_000);
+    return () => clearInterval(interval);
   }, []);
 
   // Scan all sources and build notification list
@@ -426,6 +461,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       ...messageNotifs,
       ...chatNotifs,
       ...emailNotifs,
+      ...apiNotifs,
       ...manualNotifs.filter(n => !n.dismissed),
     ];
 
@@ -446,7 +482,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     });
 
     setNotifications(withReadState);
-  }, [dismissedIds, readIds, manualNotifs]);
+  }, [dismissedIds, readIds, manualNotifs, apiNotifs]);
 
   // Run scan on mount and on interval
   useEffect(() => {

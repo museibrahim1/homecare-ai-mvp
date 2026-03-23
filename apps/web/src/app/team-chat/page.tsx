@@ -42,36 +42,39 @@ export default function TeamChatPage() {
   const [selectedDm, setSelectedDm] = useState<DmConversation | null>(null);
   const [chatView, setChatView] = useState<'channels' | 'dms'>('dms');
 
-  // Get user-specific storage key for chat data
-  const getChatStorageKey = useCallback(() => {
-    return user?.id ? `palmcare_teamchat_${user.id}` : null;
-  }, [user?.id]);
-
-  // Load chat data from localStorage (user-specific)
-  useEffect(() => {
-    const storageKey = getChatStorageKey();
-    if (!storageKey) {
-      setChatLoading(false);
-      return;
-    }
-    
+  // Load channels and DMs from API
+  const fetchChannels = useCallback(async () => {
+    if (!token) { setChatLoading(false); return; }
     try {
-      const savedData = localStorage.getItem(storageKey);
-      if (savedData) {
-        const { channels: savedChannels, teamMembers: savedMembers, messages: savedMessages, dms: savedDms } = JSON.parse(savedData);
-        setChannels(savedChannels || []);
-        setTeamMembers(savedMembers || []);
-        setChatMessages(savedMessages || []);
-        setDmConversations(savedDms || []);
-        if (savedChannels?.length > 0) {
-          setSelectedChannel(savedChannels[0]);
-        }
+      const res = await fetch(`${API_URL}/messaging/channels`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const chs = data.filter((c: any) => !c.is_dm).map((c: any) => ({ id: c.id, name: c.name, unread: c.unread || 0 }));
+        const dms = data.filter((c: any) => c.is_dm).map((c: any) => {
+          const otherMemberId = (c.members || []).find((m: string) => m !== user?.id) || '';
+          const otherMember = teamMembers.find(tm => tm.id === otherMemberId);
+          return {
+            id: c.id,
+            memberId: otherMemberId,
+            memberName: otherMember?.name || c.name,
+            memberAvatar: (otherMember?.name || c.name || 'U').split(' ').map((n: string) => n[0]).join('').slice(0, 2),
+            lastMessage: '',
+            lastTime: '',
+            unread: c.unread || 0,
+          };
+        });
+        setChannels(chs);
+        setDmConversations(dms);
       }
     } catch (error) {
-      console.error('Failed to load chat data:', error);
+      console.error('Failed to fetch channels:', error);
     }
     setChatLoading(false);
-  }, [getChatStorageKey]);
+  }, [token, user?.id, teamMembers]);
+
+  useEffect(() => { fetchChannels(); }, [fetchChannels]);
 
   // Fetch team members from API
   useEffect(() => {
@@ -104,63 +107,94 @@ export default function TeamChatPage() {
     return () => clearInterval(interval);
   }, [token]);
 
-  // Save chat data to localStorage when it changes
-  useEffect(() => {
-    const storageKey = getChatStorageKey();
-    if (!storageKey || chatLoading) return;
-    
+  // Fetch messages when a channel or DM is selected
+  const fetchMessages = useCallback(async (channelId: string) => {
+    if (!token || !channelId) return;
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ 
-        channels, 
-        teamMembers, 
-        messages: chatMessages,
-        dms: dmConversations,
-      }));
+      const res = await fetch(`${API_URL}/messaging/channels/${channelId}/messages?limit=200`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const msgs = await res.json();
+        setChatMessages(msgs.map((m: any) => ({
+          id: m.id,
+          user: m.sender_name,
+          avatar: m.sender_avatar || '',
+          text: m.text,
+          time: new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+          channelId: m.channel_id,
+        })));
+      }
     } catch (error) {
-      console.error('Failed to save chat data:', error);
+      console.error('Failed to fetch messages:', error);
     }
-  }, [channels, teamMembers, chatMessages, dmConversations, getChatStorageKey, chatLoading]);
+  }, [token]);
 
-  const handleAddChannel = () => {
-    if (!newChannelName.trim()) return;
-    const newChannel = {
-      id: `channel_${Date.now()}`,
-      name: newChannelName.toLowerCase().replace(/\s+/g, '-'),
-      unread: 0,
-    };
-    setChannels([...channels, newChannel]);
-    setSelectedChannel(newChannel);
+  useEffect(() => {
+    const activeChannelId = selectedDm?.id || selectedChannel?.id;
+    if (activeChannelId) fetchMessages(activeChannelId);
+  }, [selectedChannel?.id, selectedDm?.id, fetchMessages]);
+
+  // Poll for new messages every 5 seconds
+  useEffect(() => {
+    const activeChannelId = selectedDm?.id || selectedChannel?.id;
+    if (!activeChannelId) return;
+    const interval = setInterval(() => fetchMessages(activeChannelId), 5000);
+    return () => clearInterval(interval);
+  }, [selectedChannel?.id, selectedDm?.id, fetchMessages]);
+
+  const handleAddChannel = async () => {
+    if (!newChannelName.trim() || !token) return;
+    try {
+      const res = await fetch(`${API_URL}/messaging/channels`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newChannelName.toLowerCase().replace(/\s+/g, '-') }),
+      });
+      if (res.ok) {
+        const ch = await res.json();
+        const newCh = { id: ch.id, name: ch.name, unread: 0 };
+        setChannels(prev => [...prev, newCh]);
+        setSelectedChannel(newCh);
+      }
+    } catch (error) {
+      console.error('Failed to create channel:', error);
+    }
     setNewChannelName('');
     setShowAddChannelModal(false);
   };
 
-  const handleSendChatMessage = () => {
-    if (!newMessage.trim() || !selectedChannel || !user) return;
-    
-    const newMsg = {
-      id: `msg_${Date.now()}`,
-      user: user.name || user.email || 'You',
-      avatar: (user.name || user.email || 'U').split(' ').map((n: string) => n[0]).join('').slice(0, 2),
-      text: newMessage,
-      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      channelId: selectedChannel.id,
-    };
-    
-    setChatMessages([...chatMessages, newMsg]);
+  const handleSendChatMessage = async () => {
+    if (!newMessage.trim() || !selectedChannel || !user || !token) return;
+    const text = newMessage;
     setNewMessage('');
+    try {
+      const res = await fetch(`${API_URL}/messaging/channels/${selectedChannel.id}/messages`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (res.ok) {
+        const m = await res.json();
+        setChatMessages(prev => [...prev, {
+          id: m.id,
+          user: m.sender_name,
+          avatar: m.sender_avatar || '',
+          text: m.text,
+          time: new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+          channelId: m.channel_id,
+        }]);
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
   };
 
-  const getChannelMessages = () => {
-    if (!selectedChannel) return [];
-    return chatMessages.filter(m => m.channelId === selectedChannel.id);
-  };
+  const getChannelMessages = () => chatMessages;
 
-  const getDmMessages = () => {
-    if (!selectedDm) return [];
-    return chatMessages.filter(m => m.channelId === `dm_${selectedDm.memberId}`);
-  };
+  const getDmMessages = () => chatMessages;
 
-  const handleStartDm = (member: typeof teamMembers[0]) => {
+  const handleStartDm = async (member: typeof teamMembers[0]) => {
     const existing = dmConversations.find(d => d.memberId === member.id);
     if (existing) {
       setSelectedDm(existing);
@@ -168,32 +202,57 @@ export default function TeamChatPage() {
       setChatView('dms');
       return;
     }
-    const newDm: DmConversation = {
-      id: `dm_${member.id}`,
-      memberId: member.id,
-      memberName: member.name,
-      memberAvatar: member.name.split(' ').map(n => n[0]).join('').slice(0, 2),
-      unread: 0,
-    };
-    setDmConversations(prev => [...prev, newDm]);
-    setSelectedDm(newDm);
-    setSelectedChannel(null);
-    setChatView('dms');
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/messaging/channels`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: member.name, is_dm: true, member_ids: [member.id] }),
+      });
+      if (res.ok) {
+        const ch = await res.json();
+        const newDm: DmConversation = {
+          id: ch.id,
+          memberId: member.id,
+          memberName: member.name,
+          memberAvatar: member.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2),
+          unread: 0,
+        };
+        setDmConversations(prev => [...prev, newDm]);
+        setSelectedDm(newDm);
+        setSelectedChannel(null);
+        setChatView('dms');
+      }
+    } catch (error) {
+      console.error('Failed to create DM:', error);
+    }
   };
 
-  const handleSendDmMessage = () => {
-    if (!newMessage.trim() || !selectedDm || !user) return;
-    const newMsg = {
-      id: `msg_${Date.now()}`,
-      user: user.name || user.email || 'You',
-      avatar: (user.name || user.email || 'U').split(' ').map((n: string) => n[0]).join('').slice(0, 2),
-      text: newMessage,
-      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      channelId: `dm_${selectedDm.memberId}`,
-    };
-    setChatMessages(prev => [...prev, newMsg]);
-    setDmConversations(prev => prev.map(d => d.memberId === selectedDm.memberId ? { ...d, lastMessage: newMessage, lastTime: newMsg.time } : d));
+  const handleSendDmMessage = async () => {
+    if (!newMessage.trim() || !selectedDm || !user || !token) return;
+    const text = newMessage;
     setNewMessage('');
+    try {
+      const res = await fetch(`${API_URL}/messaging/channels/${selectedDm.id}/messages`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (res.ok) {
+        const m = await res.json();
+        setChatMessages(prev => [...prev, {
+          id: m.id,
+          user: m.sender_name,
+          avatar: m.sender_avatar || '',
+          text: m.text,
+          time: new Date(m.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+          channelId: m.channel_id,
+        }]);
+        setDmConversations(prev => prev.map(d => d.memberId === selectedDm.memberId ? { ...d, lastMessage: text, lastTime: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) } : d));
+      }
+    } catch (error) {
+      console.error('Failed to send DM:', error);
+    }
   };
   
   // Gmail state
