@@ -467,14 +467,18 @@ def permanently_delete_team_member(
             "DELETE FROM tasks WHERE user_id = :uid OR assigned_to_id = :uid",
             "DELETE FROM reminders WHERE user_id = :uid",
             "DELETE FROM smart_notes WHERE user_id = :uid",
+            "UPDATE visits SET caregiver_id = NULL WHERE caregiver_id = :uid",
             "UPDATE visits SET user_id = NULL WHERE user_id = :uid",
             "UPDATE clients SET user_id = NULL WHERE user_id = :uid",
         ]
         for sql in cleanup_tables:
+            savepoint = db.begin_nested()
             try:
                 db.execute(sa_text(sql), {"uid": uid})
-            except Exception:
-                pass
+                savepoint.commit()
+            except Exception as cleanup_err:
+                savepoint.rollback()
+                logger.debug(f"Cleanup skipped ({sql}): {cleanup_err}")
 
         db.delete(member)
         db.commit()
