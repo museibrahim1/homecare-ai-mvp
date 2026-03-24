@@ -522,49 +522,98 @@ def delete_marketing_asset(
     return {"ok": True}
 
 
+class AiGenerateRequest(BaseModel):
+    prompt: str
+    asset_type: str = "email_template"
+    tone: str = "professional"
+    length: str = "medium"
+
+
 @router.post("/marketing-assets/ai-generate")
 def ai_generate_marketing(
-    asset_type: str = Query(...),
-    topic: str = Query(...),
-    audience: str = Query(default="home care agency owners"),
+    body: AiGenerateRequest,
     user: User = Depends(get_current_user),
 ):
-    """Use AI to generate a marketing asset draft."""
+    """Use AI to generate excellent marketing material from a prompt."""
     try:
         import anthropic
         api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("CLAUDE_API_KEY")
         if not api_key:
             raise HTTPException(503, "AI generation unavailable — no API key configured")
 
-        type_instructions = {
-            "email_template": "Write a professional cold outreach email. Keep it under 200 words, conversational, with a clear CTA.",
-            "social_post": "Write a LinkedIn post. Keep it engaging, under 150 words, with relevant hashtags.",
-            "flyer": "Write copy for a marketing flyer. Include a headline, 3 key benefits, and a call to action.",
-            "call_script": "Write a cold call script. Include an opener, value proposition, objection handling, and close.",
+        length_guide = {
+            "short": "Keep it tight — 50-100 words max. Every word must earn its place.",
+            "medium": "Aim for 100-200 words. Enough to persuade without losing attention.",
+            "long": "Go detailed — 200-400 words. Cover objections, benefits, proof points.",
         }
-        instruction = type_instructions.get(asset_type, "Write compelling marketing copy.")
+        tone_guide = {
+            "professional": "Tone: authoritative, clean, boardroom-ready. No fluff.",
+            "conversational": "Tone: warm, human, like talking to a colleague over coffee. Contractions welcome.",
+            "bold": "Tone: punchy, direct, high-energy. Short sentences. Strong verbs. No hedging.",
+            "empathetic": "Tone: understanding, caring, solution-oriented. Acknowledge their pain first.",
+        }
+        format_guide = {
+            "email_template": """FORMAT: Cold outreach email.
+Structure: Subject line (compelling, under 8 words) → Opening hook (1 sentence, personal or provocative) → Pain point (what keeps them up at night) → Solution (what PalmCare AI does, specific) → Proof point (a number, a result, a comparison) → CTA (one clear next step) → Sign-off.
+Do NOT start with "I hope this email finds you well" or any cliché opener. Lead with value or a question.""",
+            "social_post": """FORMAT: LinkedIn post.
+Structure: Hook line (stop-the-scroll first sentence) → Story or insight (2-3 sentences) → Key takeaway → CTA or question to drive engagement.
+Use line breaks between ideas. No wall of text. Hashtags at the end (3-5 relevant ones). No emojis unless they add meaning.""",
+            "call_script": """FORMAT: Cold call script.
+Structure: Opener (who you are, why calling, in 15 seconds) → Permission question ("Did I catch you at a bad time?") → Pain discovery (ask about their documentation burden) → Bridge to solution (how PalmCare AI solves it) → Handle the top 3 objections (cost, switching, "we're fine") → Close (book the demo, get the email, schedule a follow-up).
+Write it as natural dialogue, not a robot script. Include what to say when they say "not interested".""",
+            "flyer": """FORMAT: Marketing flyer copy.
+Structure: Headline (7 words or fewer, benefit-driven) → Subheadline → 3 key benefits with short descriptions → Social proof or stat → CTA with urgency.
+Think Apple ad meets healthcare. Clean. Bold. No clip-art language.""",
+        }
+
+        system_prompt = f"""You are a world-class marketing copywriter working for PalmCare AI.
+
+ABOUT THE PRODUCT:
+PalmCare AI is an AI-powered platform for home healthcare agencies. Core capability: a caregiver records a patient assessment by voice, and the AI automatically generates SOAP notes, care plans, billable items, and legally-compliant service contracts for all 50 states. It eliminates 15-20 hours/week of documentation per agency.
+
+Company: Palm Technologies, INC. Founded by Muse Ibrahim.
+Website: palmcareai.com
+Brand: teal (#0d9488), modern, healthcare-focused.
+Tagline: "Where care meets intelligence"
+
+ABOUT THE AUDIENCE:
+Home care agency owners, administrators, directors of nursing. They're overwhelmed with paperwork, Medicare compliance, staff turnover, and thin margins. They care about: saving time, reducing errors, staying compliant, and keeping caregivers happy.
+
+YOUR STANDARDS:
+- Every piece must have a clear purpose and a single CTA
+- No generic filler. No "In today's fast-paced world..." or "Are you tired of..."
+- Be specific: use real numbers, real scenarios, real pain points
+- Write like a human who understands healthcare, not a marketer who Googled it
+- The reader should feel like you GET their world
+
+{tone_guide.get(body.tone, tone_guide['professional'])}
+{length_guide.get(body.length, length_guide['medium'])}
+
+{format_guide.get(body.asset_type, format_guide['email_template'])}
+
+OUTPUT FORMAT:
+First line: TITLE: [a short, descriptive title for this asset]
+Then a blank line, then the full content.
+No other meta-commentary. Just the title line and the content."""
 
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=1000,
-            messages=[{
-                "role": "user",
-                "content": f"""You are a marketing copywriter for PalmCare AI, an AI-powered CRM for home healthcare agencies.
-
-Product: PalmCare AI turns voice recordings of patient assessments into complete care plans, SOAP notes, and service contracts automatically. It saves agencies 15-20 hours/week on documentation.
-
-Target audience: {audience}
-Topic: {topic}
-Asset type: {asset_type}
-
-{instruction}
-
-Write ONLY the content, no meta-commentary. Brand voice: professional, warm, confident. Brand color: teal."""
-            }],
+            max_tokens=2000,
+            system=system_prompt,
+            messages=[{"role": "user", "content": body.prompt}],
         )
-        content = msg.content[0].text if msg.content else ""
-        return {"ok": True, "content": content, "asset_type": asset_type}
+        raw = msg.content[0].text if msg.content else ""
+
+        title = ""
+        content = raw
+        lines = raw.strip().split("\n")
+        if lines and lines[0].upper().startswith("TITLE:"):
+            title = lines[0].split(":", 1)[1].strip()
+            content = "\n".join(lines[1:]).strip()
+
+        return {"ok": True, "title": title, "content": content, "asset_type": body.asset_type}
 
     except ImportError:
         raise HTTPException(503, "AI generation unavailable — anthropic not installed")
