@@ -57,6 +57,9 @@ class User(Base, TimestampMixin):
     # Executive title for C-suite/leadership team (CEO, CFO, CMO, CSO, CTO, etc.)
     executive_title = Column(String(100), nullable=True)
 
+    # Assigned calling states/territories (e.g. ["FL","TX","CA"])
+    calling_states = Column(JSONB, default=list, server_default="[]")
+
     # Activity tracking for admin team members
     last_login = Column(DateTime(timezone=True), nullable=True)
     last_active = Column(DateTime(timezone=True), nullable=True)

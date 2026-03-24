@@ -398,6 +398,19 @@ async def seed_database():
         logger.warning(f"executive_title migration: {e}")
         db.rollback()
 
+    # Add calling_states column (territory assignments)
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        user_cols = [c["name"] for c in inspector.get_columns("users")]
+        if "calling_states" not in user_cols:
+            db.execute(sa_text("ALTER TABLE users ADD COLUMN calling_states JSONB DEFAULT '[]'"))
+            db.commit()
+            logger.info("Added calling_states column to users table")
+    except Exception as e:
+        logger.warning(f"calling_states migration: {e}")
+        db.rollback()
+
     # Create missing indexes for performance (idempotent)
     try:
         from sqlalchemy import text as sa_text

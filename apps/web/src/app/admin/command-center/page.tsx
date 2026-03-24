@@ -225,6 +225,17 @@ export default function CommandCenterPage() {
   const [newTaskAssignee, setNewTaskAssignee] = useState('');
   const [creatingTask, setCreatingTask] = useState(false);
 
+  // Territory assignment
+  const [territoryOpen, setTerritoryOpen] = useState(false);
+  const [territories, setTerritories] = useState<{
+    team: Array<{ user_id: string; name: string; title: string; states: string[]; lead_count: number }>;
+    all_states: Array<{ code: string; name: string; region: string }>;
+    regions: Record<string, string[]>;
+  } | null>(null);
+  const [selectedTerritoryStates, setSelectedTerritoryStates] = useState<string[]>([]);
+  const [territoryUserId, setTerritoryUserId] = useState('me');
+  const [savingTerritory, setSavingTerritory] = useState(false);
+
   // AI Agent
   const [agentOpen, setAgentOpen] = useState(false);
   const [agentInput, setAgentInput] = useState('');
@@ -335,10 +346,40 @@ export default function CommandCenterPage() {
     } catch { setMyTasks([]); }
   }, [apiFetch]);
 
+  const loadTerritories = useCallback(async () => {
+    try {
+      const data = await apiFetch('/admin/scheduler/territories');
+      setTerritories(data);
+    } catch { /* ignore */ }
+  }, [apiFetch]);
+
+  const saveTerritories = useCallback(async (userId: string, states: string[]) => {
+    setSavingTerritory(true);
+    try {
+      await apiFetch(`/admin/scheduler/territories/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ states }),
+      });
+      await loadTerritories();
+    } catch { /* ignore */ }
+    setSavingTerritory(false);
+  }, [apiFetch, loadTerritories]);
+
   // Load everything in parallel on mount
   useEffect(() => {
-    Promise.all([loadWeeklyPlan(), loadCallbacks(), loadTeamAndStates(), loadUserInfo(), loadMyTasks()]);
-  }, [loadWeeklyPlan, loadCallbacks, loadTeamAndStates, loadUserInfo, loadMyTasks]);
+    Promise.all([loadWeeklyPlan(), loadCallbacks(), loadTeamAndStates(), loadUserInfo(), loadMyTasks(), loadTerritories()]);
+  }, [loadWeeklyPlan, loadCallbacks, loadTeamAndStates, loadUserInfo, loadMyTasks, loadTerritories]);
+
+  // Init selected states when territories load
+  useEffect(() => {
+    if (territories && currentUser) {
+      const me = territories.team.find(t => t.user_id === (currentUser as any)?.id) || territories.team[0];
+      if (me) {
+        setSelectedTerritoryStates(me.states || []);
+        setTerritoryUserId(me.user_id);
+      }
+    }
+  }, [territories, currentUser]);
 
   const handleMarkCallback = async (leadId: string, callbackNotes: string) => {
     await apiFetch(`/platform/outreach/mark-callback/${leadId}`, {
@@ -726,6 +767,150 @@ export default function CommandCenterPage() {
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* ── My Calling Territories ───────────────────── */}
+            {!loading && (
+              <div className="mb-5">
+                <button
+                  onClick={() => { setTerritoryOpen(!territoryOpen); if (!territories) loadTerritories(); }}
+                  className="flex items-center gap-2 w-full text-left"
+                >
+                  <MapPin className="w-5 h-5 text-indigo-600" />
+                  <h3 className="text-sm font-bold text-indigo-800">My Calling Territories</h3>
+                  {territories && (() => {
+                    const me = territories.team.find(t => t.user_id === (currentUser as any)?.id) || territories.team[0];
+                    return me?.states?.length ? (
+                      <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+                        {me.states.length} state{me.states.length !== 1 ? 's' : ''} · {me.lead_count} leads
+                      </span>
+                    ) : null;
+                  })()}
+                  <div className="flex-1" />
+                  {territoryOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                </button>
+
+                {territoryOpen && territories && (
+                  <div className="mt-3 bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                    {/* Who to assign */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Assign to:</label>
+                      <select
+                        value={territoryUserId}
+                        onChange={e => {
+                          setTerritoryUserId(e.target.value);
+                          const member = territories.team.find(t => t.user_id === e.target.value);
+                          setSelectedTerritoryStates(member?.states || []);
+                        }}
+                        className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 outline-none focus:border-indigo-400"
+                      >
+                        <option value="me">Myself</option>
+                        {territories.team.map(t => (
+                          <option key={t.user_id} value={t.user_id}>{t.name}{t.title ? ` (${t.title})` : ''}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Region quick-select buttons */}
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold self-center mr-1">Regions:</span>
+                      {Object.entries(territories.regions).map(([region, states]) => {
+                        const allSelected = states.every(s => selectedTerritoryStates.includes(s));
+                        return (
+                          <button
+                            key={region}
+                            onClick={() => {
+                              if (allSelected) {
+                                setSelectedTerritoryStates(prev => prev.filter(s => !states.includes(s)));
+                              } else {
+                                setSelectedTerritoryStates(prev => [...new Set([...prev, ...states])]);
+                              }
+                            }}
+                            className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                              allSelected
+                                ? 'bg-indigo-500 text-white border-indigo-500'
+                                : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600'
+                            }`}
+                          >
+                            {region.replace('_', ' ')}
+                          </button>
+                        );
+                      })}
+                      <button
+                        onClick={() => setSelectedTerritoryStates(territories.all_states.map(s => s.code))}
+                        className="text-xs px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 font-medium"
+                      >
+                        All States
+                      </button>
+                      <button
+                        onClick={() => setSelectedTerritoryStates([])}
+                        className="text-xs px-2.5 py-1 rounded-full border bg-red-50 text-red-500 border-red-200 hover:bg-red-100 font-medium"
+                      >
+                        Clear
+                      </button>
+                    </div>
+
+                    {/* State grid */}
+                    <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-1.5 mb-4">
+                      {territories.all_states.map(st => {
+                        const selected = selectedTerritoryStates.includes(st.code);
+                        return (
+                          <button
+                            key={st.code}
+                            onClick={() => setSelectedTerritoryStates(prev =>
+                              selected ? prev.filter(s => s !== st.code) : [...prev, st.code]
+                            )}
+                            className={`text-xs font-semibold py-1.5 rounded-lg border transition-all ${
+                              selected
+                                ? 'bg-indigo-500 text-white border-indigo-500 shadow-sm'
+                                : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-indigo-300 hover:text-indigo-500'
+                            }`}
+                            title={st.name}
+                          >
+                            {st.code}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Save button */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-400">
+                        {selectedTerritoryStates.length} state{selectedTerritoryStates.length !== 1 ? 's' : ''} selected
+                      </span>
+                      <button
+                        onClick={() => saveTerritories(territoryUserId, selectedTerritoryStates)}
+                        disabled={savingTerritory}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                      >
+                        {savingTerritory ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                        Save Territories
+                      </button>
+                    </div>
+
+                    {/* Current team assignments */}
+                    {territories.team.filter(t => t.states.length > 0).length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-slate-100">
+                        <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2">Team Assignments</p>
+                        <div className="space-y-1.5">
+                          {territories.team.filter(t => t.states.length > 0).map(t => (
+                            <div key={t.user_id} className="flex items-center gap-2 text-xs">
+                              <span className="font-medium text-slate-700 w-28 truncate">{t.name}</span>
+                              <div className="flex flex-wrap gap-1 flex-1">
+                                {t.states.slice(0, 10).map(s => (
+                                  <span key={s} className="px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded font-medium">{s}</span>
+                                ))}
+                                {t.states.length > 10 && <span className="text-slate-400">+{t.states.length - 10} more</span>}
+                              </div>
+                              <span className="text-slate-400 tabular-nums">{t.lead_count} leads</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

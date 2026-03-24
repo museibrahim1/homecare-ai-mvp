@@ -134,6 +134,114 @@ def _region_for_state(state: str) -> str:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# TERRITORY / STATE ASSIGNMENTS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ALL_STATES = sorted(
+    set(st for states in STATE_REGIONS.values() for st in states)
+)
+
+STATE_NAMES = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
+    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DC": "Washington DC",
+    "DE": "Delaware", "FL": "Florida", "GA": "Georgia", "HI": "Hawaii",
+    "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa",
+    "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine",
+    "MD": "Maryland", "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota",
+    "MS": "Mississippi", "MO": "Missouri", "MT": "Montana", "NE": "Nebraska",
+    "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico",
+    "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio",
+    "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island",
+    "SC": "South Carolina", "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas",
+    "UT": "Utah", "VT": "Vermont", "VA": "Virginia", "WA": "Washington",
+    "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+}
+
+
+class TerritoryAssignment(BaseModel):
+    states: List[str]
+
+
+@router.get("/territories")
+def get_territories(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get calling territories for all team members (and self)."""
+    if user.role not in ("admin", "admin_team"):
+        raise HTTPException(403, "Admin access required")
+
+    members = db.query(User).filter(
+        User.is_active == True,
+        or_(User.role == "admin", User.role == "admin_team"),
+    ).all()
+
+    team = []
+    for m in members:
+        assigned = m.calling_states or []
+        lead_count = 0
+        if assigned:
+            lead_count = db.query(func.count(SalesLead.id)).filter(
+                SalesLead.state.in_(assigned)
+            ).scalar() or 0
+
+        team.append({
+            "user_id": str(m.id),
+            "name": m.full_name,
+            "title": m.executive_title or "",
+            "states": assigned,
+            "lead_count": lead_count,
+        })
+
+    return {
+        "team": team,
+        "all_states": [{
+            "code": s,
+            "name": STATE_NAMES.get(s, s),
+            "region": _region_for_state(s),
+        } for s in ALL_STATES],
+        "regions": {k: v for k, v in STATE_REGIONS.items()},
+    }
+
+
+@router.put("/territories/{user_id}")
+def assign_territories(
+    user_id: str,
+    body: TerritoryAssignment,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Assign calling states to a team member (or self)."""
+    if current_user.role not in ("admin", "admin_team"):
+        raise HTTPException(403, "Admin access required")
+
+    if user_id == "me" or user_id == str(current_user.id):
+        target = current_user
+    else:
+        target = db.query(User).filter(User.id == user_id).first()
+        if not target:
+            raise HTTPException(404, "User not found")
+
+    valid_states = [s.upper().strip() for s in body.states if s.upper().strip() in STATE_NAMES]
+    target.calling_states = valid_states
+    db.commit()
+
+    lead_count = 0
+    if valid_states:
+        lead_count = db.query(func.count(SalesLead.id)).filter(
+            SalesLead.state.in_(valid_states)
+        ).scalar() or 0
+
+    return {
+        "ok": True,
+        "user_id": str(target.id),
+        "name": target.full_name,
+        "states": valid_states,
+        "lead_count": lead_count,
+    }
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # CRM SEARCH (autocomplete)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

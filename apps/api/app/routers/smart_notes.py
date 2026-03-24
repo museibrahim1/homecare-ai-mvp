@@ -316,10 +316,14 @@ async def complete_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    task = db.query(Task).filter(
-        Task.id == task_id,
-        or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
-    ).first()
+    is_admin = current_user.role in ("admin", "admin_team")
+    if is_admin:
+        task = db.query(Task).filter(Task.id == task_id).first()
+    else:
+        task = db.query(Task).filter(
+            Task.id == task_id,
+            or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
+        ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -337,14 +341,34 @@ async def delete_task(
     current_user: User = Depends(get_current_user),
 ):
     is_admin = current_user.role in ("admin", "admin_team")
-    task = db.query(Task).filter(
-        Task.id == task_id,
-        or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id) if not is_admin else True,
-    ).first()
+    if is_admin:
+        task = db.query(Task).filter(Task.id == task_id).first()
+    else:
+        task = db.query(Task).filter(
+            Task.id == task_id,
+            or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
+        ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     db.delete(task)
     db.commit()
+
+
+@router.delete("/tasks/purge/by-title", status_code=status.HTTP_200_OK, tags=["Tasks"])
+async def purge_tasks_by_title(
+    q: str = Query(..., min_length=2),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Admin-only: delete all tasks matching a title substring."""
+    if current_user.role not in ("admin", "admin_team"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    tasks = db.query(Task).filter(Task.title.ilike(f"%{q}%")).all()
+    count = len(tasks)
+    for t in tasks:
+        db.delete(t)
+    db.commit()
+    return {"deleted": count, "query": q}
 
 
 # ─── Reminders CRUD (must be before /{note_id}) ───
