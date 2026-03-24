@@ -101,6 +101,7 @@ from app.routers import (
     agent,
     resend_webhooks,
     messaging,
+    scheduler,
 )
 
 @asynccontextmanager
@@ -220,6 +221,7 @@ app.include_router(team.router, prefix="/admin", tags=["Team Management"])
 app.include_router(agent.router, prefix="/platform/agent", tags=["AI Agent"])
 app.include_router(resend_webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 app.include_router(messaging.router, prefix="/messaging", tags=["Team Messaging"])
+app.include_router(scheduler.router, prefix="/admin/scheduler", tags=["Scheduler & Goals"])
 
 
 async def seed_database():

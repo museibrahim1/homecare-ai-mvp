@@ -70,9 +70,12 @@ interface AdminNavItem extends NavItemData {
 
 const adminCoreNavItems: AdminNavItem[] = [
   { href: '/admin/command-center', label: 'Command Center', icon: Rocket, permission: 'command_center' },
+  { href: '/admin/scheduler', label: 'Demo Scheduler', icon: Phone, permission: 'sales_leads' },
   { href: '/admin/sales-leads', label: 'Sales Leads', icon: Target, permission: 'sales_leads' },
   { href: '/admin/investors', label: 'Investors', icon: TrendingUp, permission: 'investors' },
+  { href: '/admin/marketing-studio', label: 'Marketing Studio', icon: Zap, permission: 'marketing' },
   { href: '/admin/marketing', label: 'Marketing Materials', icon: Layers, permission: 'marketing' },
+  { href: '/admin/goals', label: 'Goals & Tasks', icon: Target, permission: 'sales_leads' },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, permission: 'analytics' },
   { href: '/team-chat', label: 'Communication', icon: MessagesSquare },
 ];

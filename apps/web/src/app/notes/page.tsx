@@ -59,7 +59,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string; bg: string
   low:    { label: 'Low',    color: 'text-emerald-600', bg: 'bg-emerald-50' },
 };
 
-const TAG_OPTIONS = ['meeting', 'call', 'idea', 'follow-up', 'important', 'personal'];
+const TAG_OPTIONS = ['meeting', 'call', 'idea', 'follow-up', 'important', 'personal', 'client', 'research', 'strategy'];
 
 const NOTE_COLORS: Record<string, string> = {
   default: 'border-l-dark-600',
@@ -319,7 +319,7 @@ export default function NotesPage() {
         <div className="flex-1 flex overflow-hidden">
 
           {/* ─── Left Panel: Note List ─── */}
-          <div className="w-80 xl:w-96 border-r border-slate-200 flex flex-col bg-dark-850 shrink-0">
+          <div className={`${selectedNote ? 'hidden lg:flex' : 'flex'} w-full lg:w-80 xl:w-96 border-r border-slate-200 flex-col bg-white shrink-0`}>
             {/* List header */}
             <div className="p-4 border-b border-slate-200 space-y-3">
               <div className="flex items-center justify-between">
@@ -429,7 +429,7 @@ export default function NotesPage() {
           </div>
 
           {/* ─── Right Panel: Editor + Tasks ─── */}
-          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <div className={`${!selectedNote ? 'hidden lg:flex' : 'flex'} flex-1 flex-col min-w-0 overflow-hidden`}>
             {!selectedNote ? (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
@@ -442,8 +442,11 @@ export default function NotesPage() {
             ) : (
               <>
                 {/* Editor toolbar */}
-                <div className="flex items-center justify-between px-6 py-3 border-b border-slate-200 bg-white shrink-0">
+                <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-slate-200 bg-white shrink-0">
                   <div className="flex items-center gap-2">
+                    <button onClick={() => setSelectedNote(null)} className="lg:hidden p-1 text-slate-400 hover:text-slate-700 mr-1" title="Back">
+                      <ChevronRight className="w-4 h-4 rotate-180" />
+                    </button>
                     <span className="text-xs text-slate-400">
                       {saving ? (
                         <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Saving...</span>
@@ -511,7 +514,7 @@ export default function NotesPage() {
                     {selectedNote.ai_summary && (
                       <div className="flex items-start gap-2 px-3 py-2.5 bg-purple-50 border border-purple-500/20 rounded-lg">
                         <Sparkles className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-                        <p className="text-xs text-purple-300">{selectedNote.ai_summary}</p>
+                        <p className="text-xs text-purple-700">{selectedNote.ai_summary}</p>
                       </div>
                     )}
 
@@ -530,9 +533,34 @@ export default function NotesPage() {
                     <textarea
                       value={editContent}
                       onChange={e => handleContentChange(e.target.value)}
-                      className="w-full min-h-[200px] text-sm text-slate-700 bg-transparent border-none outline-none resize-none placeholder-slate-400 leading-relaxed"
-                      placeholder="Start writing your note..."
+                      className="w-full min-h-[300px] text-sm text-slate-700 bg-transparent border-none outline-none resize-none placeholder-slate-400 leading-relaxed"
+                      placeholder="Start writing your note... (Ctrl+S to save)"
                     />
+
+                    {/* Word count + color picker */}
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 -mt-2">
+                      <div className="flex items-center gap-3">
+                        <span>{editContent.split(/\s+/).filter(Boolean).length} words</span>
+                        <span>{editContent.length} chars</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {Object.entries(NOTE_COLORS).map(([color, cls]) => (
+                          <button
+                            key={color}
+                            onClick={async () => {
+                              if (!token || !selectedNote) return;
+                              await api.updateSmartNote(token, selectedNote.id, { color });
+                              setSelectedNote({ ...selectedNote, color });
+                              loadNotes();
+                            }}
+                            className={`w-4 h-4 rounded-full border-2 transition-transform hover:scale-125 ${
+                              selectedNote?.color === color ? 'ring-2 ring-offset-1 ring-primary-400' : ''
+                            } ${color === 'default' ? 'bg-slate-400' : color === 'blue' ? 'bg-blue-500' : color === 'green' ? 'bg-green-500' : color === 'purple' ? 'bg-purple-500' : color === 'orange' ? 'bg-orange-500' : 'bg-red-500'} border-white`}
+                            title={color}
+                          />
+                        ))}
+                      </div>
+                    </div>
 
                     {/* ─── Tasks Section ─── */}
                     <div className="border-t border-slate-200 pt-4">
@@ -597,7 +625,7 @@ export default function NotesPage() {
                                 )}
                               </button>
                               <div className="flex-1 min-w-0">
-                                <p className={`text-xs ${isDone ? 'line-through text-slate-400' : 'text-white'}`}>{task.title}</p>
+                                <p className={`text-xs ${isDone ? 'line-through text-slate-400' : 'text-slate-900'}`}>{task.title}</p>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <span className={`text-[9px] px-1 py-0.5 rounded ${pCfg.bg} ${pCfg.color}`}>{pCfg.label}</span>
                                   {task.due_date && (
