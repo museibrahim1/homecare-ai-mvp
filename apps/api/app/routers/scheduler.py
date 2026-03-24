@@ -620,3 +620,112 @@ No other meta-commentary. Just the title line and the content."""
     except Exception as e:
         logger.error(f"AI generation failed: {e}")
         raise HTTPException(500, f"AI generation failed: {str(e)}")
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# VISUAL FLYER / AD GENERATION (Nano Banana 2 via WaveSpeed)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WAVESPEED_SUBMIT = "https://api.wavespeed.ai/api/v3/google/nano-banana-2/text-to-image"
+WAVESPEED_POLL = "https://api.wavespeed.ai/api/v3/predictions/{task_id}/result"
+
+
+class VisualGenerateRequest(BaseModel):
+    prompt: str
+    aspect_ratio: str = "4:3"
+    resolution: str = "1k"
+    style: str = "modern"
+
+
+@router.post("/marketing-assets/generate-visual")
+def generate_visual_flyer(
+    body: VisualGenerateRequest,
+    user: User = Depends(get_current_user),
+):
+    """Generate a visual flyer/ad image using Nano Banana 2."""
+    import time as _time
+    import httpx
+
+    api_key = os.getenv("WAVESPEED_API_KEY", "")
+    if not api_key:
+        raise HTTPException(503, "Image generation unavailable — no WaveSpeed API key")
+
+    style_modifiers = {
+        "modern": "Clean modern minimalist design, professional, teal (#0d9488) accent color, white background, sans-serif typography",
+        "bold": "Bold high-contrast design, large impactful typography, dark background with teal (#0d9488) highlights, attention-grabbing",
+        "medical": "Healthcare professional design, soft blues and teals, medical imagery, trustworthy and clean, HIPAA-compliant feel",
+        "premium": "Premium luxury design, dark navy background, gold and teal accents, sophisticated typography, executive-level",
+    }
+
+    style_mod = style_modifiers.get(body.style, style_modifiers["modern"])
+    full_prompt = f"""Professional marketing flyer for PalmCare AI, a healthcare technology company.
+
+{body.prompt}
+
+Design style: {style_mod}
+Brand: PalmCare AI logo text in teal (#0d9488), tagline "Where care meets intelligence"
+Include: Clear headline text, professional layout, healthcare/technology imagery
+Quality: High-resolution, print-ready, photorealistic rendering
+Do NOT include: Watermarks, stock photo artifacts, blurry text"""
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        with httpx.Client(timeout=30) as client:
+            resp = client.post(WAVESPEED_SUBMIT, headers=headers, json={
+                "prompt": full_prompt,
+                "resolution": body.resolution,
+                "aspect_ratio": body.aspect_ratio,
+                "enable_web_search": False,
+                "output_format": "png",
+            })
+            resp.raise_for_status()
+            submit_data = resp.json().get("data", {})
+            task_id = submit_data.get("id", "") or resp.json().get("id", "")
+
+        if not task_id:
+            raise HTTPException(500, "No task ID returned from image generator")
+
+        poll_url = WAVESPEED_POLL.format(task_id=task_id)
+        image_url = None
+        start = _time.time()
+
+        with httpx.Client(timeout=20) as client:
+            while _time.time() - start < 90:
+                poll_resp = client.get(poll_url, headers=headers)
+                poll_data = poll_resp.json().get("data", {})
+                status = poll_data.get("status", "")
+
+                if status == "completed":
+                    outputs = poll_data.get("outputs", [])
+                    if outputs:
+                        image_url = outputs[0]
+                    break
+                if status == "failed":
+                    error = poll_data.get("error", "Unknown error")
+                    raise HTTPException(500, f"Image generation failed: {error}")
+
+                _time.sleep(3)
+
+        if not image_url:
+            raise HTTPException(504, "Image generation timed out")
+
+        return {
+            "ok": True,
+            "image_url": image_url,
+            "task_id": task_id,
+            "prompt": body.prompt,
+            "aspect_ratio": body.aspect_ratio,
+        }
+
+    except httpx.HTTPStatusError as e:
+        logger.error(f"WaveSpeed API error: {e.response.status_code} {e.response.text}")
+        raise HTTPException(502, f"Image API error: {e.response.status_code}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Visual generation failed: {e}")
+        raise HTTPException(500, f"Visual generation failed: {str(e)}")

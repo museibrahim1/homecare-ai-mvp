@@ -8,7 +8,8 @@ import TopBar from '@/components/TopBar';
 import {
   Zap, Mail, MessageSquare, FileText, Phone, Trash2,
   Loader2, Copy, Sparkles, Check, Edit3, X, Send,
-  ChevronDown, RotateCcw, ArrowRight, Save
+  ChevronDown, RotateCcw, ArrowRight, Save, Image, Download,
+  Paintbrush, Monitor, Printer
 } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -39,6 +40,29 @@ const LENGTHS = [
   { id: 'long', label: 'Detailed', desc: '200-400 words' },
 ];
 
+const VISUAL_STYLES = [
+  { id: 'modern', label: 'Modern & Clean' },
+  { id: 'bold', label: 'Bold & High-Contrast' },
+  { id: 'medical', label: 'Healthcare Pro' },
+  { id: 'premium', label: 'Premium / Executive' },
+];
+
+const ASPECT_RATIOS = [
+  { id: '4:3', label: '4:3 Flyer' },
+  { id: '1:1', label: '1:1 Square' },
+  { id: '16:9', label: '16:9 Banner' },
+  { id: '9:16', label: '9:16 Story' },
+  { id: '3:2', label: '3:2 Print' },
+];
+
+const VISUAL_EXAMPLES = [
+  'Flyer promoting AI-powered documentation for home care agencies',
+  'Ad showing before/after: paper assessments vs PalmCare AI voice-to-contract',
+  'Social media graphic: "15 hours saved per week" stat highlight',
+  'Trade show banner for home health conference',
+  'Instagram ad targeting agency owners tired of paperwork',
+];
+
 const PROMPT_EXAMPLES = [
   'Write a cold email to agency owners in Florida who are still doing paper assessments',
   'Call script for when an agency says they already have software',
@@ -52,6 +76,7 @@ export default function MarketingStudioPage() {
   const { token, user, isLoading } = useAuth();
   const router = useRouter();
 
+  const [mode, setMode] = useState<'copy' | 'visual'>('copy');
   const [prompt, setPrompt] = useState('');
   const [format, setFormat] = useState('email_template');
   const [tone, setTone] = useState('professional');
@@ -63,6 +88,12 @@ export default function MarketingStudioPage() {
   const [hasGenerated, setHasGenerated] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const [visualStyle, setVisualStyle] = useState('modern');
+  const [aspectRatio, setAspectRatio] = useState('4:3');
+  const [generatedImageUrl, setGeneratedImageUrl] = useState('');
+  const [generatingVisual, setGeneratingVisual] = useState(false);
+  const [hasGeneratedVisual, setHasGeneratedVisual] = useState(false);
 
   const [assets, setAssets] = useState<MarketingAsset[]>([]);
   const [loadingAssets, setLoadingAssets] = useState(true);
@@ -105,6 +136,34 @@ export default function MarketingStudioPage() {
       }
     } catch { /* */ }
     setGenerating(false);
+  };
+
+  const handleGenerateVisual = async () => {
+    if (!prompt.trim()) return;
+    setGeneratingVisual(true);
+    setHasGeneratedVisual(false);
+    setGeneratedImageUrl('');
+    try {
+      const res = await fetch(`${API}/admin/scheduler/marketing-assets/generate-visual`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          aspect_ratio: aspectRatio,
+          resolution: '1k',
+          style: visualStyle,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGeneratedImageUrl(data.image_url || '');
+        setHasGeneratedVisual(true);
+      } else {
+        const err = await res.json().catch(() => ({ detail: 'Generation failed' }));
+        alert(err.detail || 'Image generation failed');
+      }
+    } catch { alert('Network error during image generation'); }
+    setGeneratingVisual(false);
   };
 
   const handleSave = async () => {
@@ -152,6 +211,8 @@ export default function MarketingStudioPage() {
     setGeneratedTitle('');
     setGeneratedContent('');
     setHasGenerated(false);
+    setGeneratedImageUrl('');
+    setHasGeneratedVisual(false);
     promptRef.current?.focus();
   };
 
@@ -180,7 +241,19 @@ export default function MarketingStudioPage() {
                 </div>
                 Marketing Studio
               </h1>
-              <p className="text-sm text-slate-500 mt-1.5">Describe what you need. Claude writes it. You refine and ship.</p>
+              <p className="text-sm text-slate-500 mt-1.5">Describe what you need. AI creates it. You refine and ship.</p>
+            </div>
+
+            {/* Mode Toggle */}
+            <div className="flex items-center bg-slate-100 rounded-xl p-1 mb-6 w-fit">
+              <button onClick={() => setMode('copy')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'copy' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                <FileText className="w-4 h-4" /> Write Copy
+              </button>
+              <button onClick={() => setMode('visual')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'visual' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                <Image className="w-4 h-4" /> Create Visual
+              </button>
             </div>
 
             {/* ━━━ Prompt Section ━━━ */}
@@ -200,47 +273,57 @@ export default function MarketingStudioPage() {
 
               {/* Controls Row */}
               <div className="px-5 pb-4 flex flex-wrap items-center gap-2">
-                {/* Format */}
-                <div className="flex items-center bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
-                  {FORMATS.map(f => (
-                    <button key={f.id} onClick={() => setFormat(f.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${format === f.id ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}>
-                      <f.icon className="w-3 h-3" /> {f.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Tone */}
-                <select value={tone} onChange={e => setTone(e.target.value)}
-                  className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-slate-400">
-                  {TONES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                </select>
-
-                {/* Length */}
-                <select value={length} onChange={e => setLength(e.target.value)}
-                  className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-slate-400">
-                  {LENGTHS.map(l => <option key={l.id} value={l.id}>{l.label} ({l.desc})</option>)}
-                </select>
+                {mode === 'copy' ? (
+                  <>
+                    <div className="flex items-center bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
+                      {FORMATS.map(f => (
+                        <button key={f.id} onClick={() => setFormat(f.id)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${format === f.id ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}>
+                          <f.icon className="w-3 h-3" /> {f.label}
+                        </button>
+                      ))}
+                    </div>
+                    <select value={tone} onChange={e => setTone(e.target.value)}
+                      className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-slate-400">
+                      {TONES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                    </select>
+                    <select value={length} onChange={e => setLength(e.target.value)}
+                      className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-slate-400">
+                      {LENGTHS.map(l => <option key={l.id} value={l.id}>{l.label} ({l.desc})</option>)}
+                    </select>
+                  </>
+                ) : (
+                  <>
+                    <select value={visualStyle} onChange={e => setVisualStyle(e.target.value)}
+                      className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-slate-400">
+                      {VISUAL_STYLES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                    </select>
+                    <select value={aspectRatio} onChange={e => setAspectRatio(e.target.value)}
+                      className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-slate-400">
+                      {ASPECT_RATIOS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
+                    </select>
+                  </>
+                )}
 
                 <div className="flex-1" />
 
-                {/* Generate */}
-                <button onClick={handleGenerate} disabled={generating || !prompt.trim()}
+                <button onClick={mode === 'copy' ? handleGenerate : handleGenerateVisual}
+                  disabled={(mode === 'copy' ? generating : generatingVisual) || !prompt.trim()}
                   className="flex items-center gap-2 px-5 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  {generating ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
+                  {(mode === 'copy' ? generating : generatingVisual) ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> {mode === 'visual' ? 'Creating...' : 'Generating...'}</>
                   ) : (
-                    <><Send className="w-4 h-4" /> Generate</>
+                    <>{mode === 'visual' ? <Paintbrush className="w-4 h-4" /> : <Send className="w-4 h-4" />} {mode === 'visual' ? 'Create Visual' : 'Generate'}</>
                   )}
                 </button>
               </div>
 
               {/* Example Prompts */}
-              {!hasGenerated && !generating && (
+              {!hasGenerated && !generating && !hasGeneratedVisual && !generatingVisual && (
                 <div className="px-5 pb-4">
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2">Try a prompt</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {PROMPT_EXAMPLES.map((ex, i) => (
+                    {(mode === 'copy' ? PROMPT_EXAMPLES : VISUAL_EXAMPLES).map((ex, i) => (
                       <button key={i} onClick={() => insertExample(ex)}
                         className="text-xs text-slate-500 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 transition-colors hover:text-slate-700 text-left">
                         {ex.length > 65 ? ex.slice(0, 65) + '...' : ex}
@@ -251,7 +334,59 @@ export default function MarketingStudioPage() {
               )}
             </div>
 
-            {/* ━━━ Generated Output ━━━ */}
+            {/* ━━━ Visual Output ━━━ */}
+            {generatingVisual && (
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 mb-6 text-center">
+                <div className="inline-flex items-center gap-3 text-slate-500">
+                  <div className="relative w-10 h-10">
+                    <div className="absolute inset-0 rounded-full border-2 border-teal-200" />
+                    <div className="absolute inset-0 rounded-full border-2 border-teal-500 border-t-transparent animate-spin" />
+                    <Paintbrush className="absolute inset-0 m-auto w-4 h-4 text-teal-500" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-slate-700">Creating your visual...</p>
+                    <p className="text-xs text-slate-400">This takes 30-60 seconds. Generating a {ASPECT_RATIOS.find(a => a.id === aspectRatio)?.label || aspectRatio} image.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {hasGeneratedVisual && !generatingVisual && generatedImageUrl && (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6 overflow-hidden">
+                <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-md bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
+                      <Image className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-900">Generated Visual</span>
+                    <span className="text-xs text-slate-400">{aspectRatio} · {VISUAL_STYLES.find(s => s.id === visualStyle)?.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <a href={generatedImageUrl} download target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-white bg-teal-500 hover:bg-teal-600 rounded-md transition-colors">
+                      <Download className="w-3 h-3" /> Download
+                    </a>
+                    <button onClick={handleGenerateVisual} disabled={generatingVisual}
+                      className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors">
+                      <RotateCcw className="w-3 h-3" /> Redo
+                    </button>
+                    <button onClick={handleReset}
+                      className="p-1 text-slate-400 hover:text-slate-600 transition-colors" title="Start over">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="p-5 flex justify-center bg-slate-50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={generatedImageUrl} alt="Generated flyer" className="max-w-full max-h-[600px] rounded-lg shadow-md" />
+                </div>
+                <div className="px-5 py-3 border-t border-slate-100 text-xs text-slate-400">
+                  Prompt: {prompt.length > 100 ? prompt.slice(0, 100) + '...' : prompt}
+                </div>
+              </div>
+            )}
+
+            {/* ━━━ Generated Copy Output ━━━ */}
             {generating && (
               <div className="bg-white rounded-2xl border border-slate-200 p-8 mb-6 text-center">
                 <div className="inline-flex items-center gap-3 text-slate-500">
