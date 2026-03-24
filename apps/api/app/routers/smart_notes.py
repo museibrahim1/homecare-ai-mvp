@@ -334,6 +334,23 @@ async def complete_task(
     return task
 
 
+@router.delete("/tasks/purge/by-title", status_code=status.HTTP_200_OK, tags=["Tasks"])
+async def purge_tasks_by_title(
+    q: str = Query(..., min_length=2),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Admin-only: delete all tasks matching a title substring."""
+    if current_user.role not in ("admin", "admin_team"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    tasks = db.query(Task).filter(Task.title.ilike(f"%{q}%")).all()
+    count = len(tasks)
+    for t in tasks:
+        db.delete(t)
+    db.commit()
+    return {"deleted": count, "query": q}
+
+
 @router.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Tasks"])
 async def delete_task(
     task_id: UUID,
@@ -352,23 +369,6 @@ async def delete_task(
         raise HTTPException(status_code=404, detail="Task not found")
     db.delete(task)
     db.commit()
-
-
-@router.delete("/tasks/purge/by-title", status_code=status.HTTP_200_OK, tags=["Tasks"])
-async def purge_tasks_by_title(
-    q: str = Query(..., min_length=2),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Admin-only: delete all tasks matching a title substring."""
-    if current_user.role not in ("admin", "admin_team"):
-        raise HTTPException(status_code=403, detail="Admin access required")
-    tasks = db.query(Task).filter(Task.title.ilike(f"%{q}%")).all()
-    count = len(tasks)
-    for t in tasks:
-        db.delete(t)
-    db.commit()
-    return {"deleted": count, "query": q}
 
 
 # ─── Reminders CRUD (must be before /{note_id}) ───
