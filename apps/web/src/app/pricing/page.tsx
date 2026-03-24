@@ -3,22 +3,23 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, ArrowRight, Zap, Building2, Rocket, Phone, CreditCard, Shield, Clock } from 'lucide-react';
+import { Check, ArrowRight, Zap, Building2, Rocket, TrendingUp, Phone, CreditCard, Shield, Clock, AlertTriangle, BadgeCheck } from 'lucide-react';
 
 const PLANS = [
   {
     name: 'Starter',
-    price: 179,
-    period: '/mo',
+    tier: 'starter',
+    monthlyPrice: 89.99,
+    annualPrice: 899,
     description: 'For small agencies getting started with AI-powered documentation',
     icon: Zap,
-    color: 'teal',
+    assessments: 5,
+    teamMembers: '5',
     features: [
-      'Up to 3 users',
-      'Up to 50 clients',
-      '200 visits/month',
+      '5 assessments/month',
+      '5 team members',
       'AI voice-to-contract',
-      'Smart assessments',
+      'Smart SOAP notes',
       'Basic reporting',
       'Email support',
       '5 GB storage',
@@ -26,43 +27,73 @@ const PLANS = [
     cta: 'Start Free Trial',
     href: '/register?plan=starter',
     popular: false,
+    hasOverage: true,
   },
   {
     name: 'Growth',
-    price: 399,
-    period: '/mo',
-    description: 'For growing agencies that need advanced features and more capacity',
-    icon: Rocket,
-    color: 'indigo',
+    tier: 'growth',
+    monthlyPrice: 179.99,
+    annualPrice: 1799,
+    description: 'For growing agencies scaling their documentation workflow',
+    icon: TrendingUp,
+    assessments: 25,
+    teamMembers: '15',
     features: [
-      'Up to 10 users',
-      'Up to 200 clients',
-      '1,000 visits/month',
+      '25 assessments/month',
+      '15 team members',
       'AI voice-to-contract',
-      'Smart assessments',
+      'Smart SOAP notes',
       'Advanced analytics & reporting',
       'Priority support',
-      '25 GB storage',
+      '15 GB storage',
       'Custom contract templates',
       'Team management',
     ],
     cta: 'Start Free Trial',
     href: '/register?plan=growth',
     popular: true,
+    hasOverage: true,
+  },
+  {
+    name: 'Professional',
+    tier: 'professional',
+    monthlyPrice: 299.99,
+    annualPrice: 2999,
+    description: 'For established agencies that need maximum capacity',
+    icon: Rocket,
+    assessments: 75,
+    teamMembers: 'Unlimited',
+    features: [
+      '75 assessments/month',
+      'Unlimited team members',
+      'AI voice-to-contract',
+      'Smart SOAP notes',
+      'Advanced analytics & dashboards',
+      'Priority support',
+      '50 GB storage',
+      'Custom contract templates',
+      'Team management',
+      '50-state compliance engine',
+    ],
+    cta: 'Start Free Trial',
+    href: '/register?plan=professional',
+    popular: false,
+    hasOverage: true,
   },
   {
     name: 'Enterprise',
-    price: null,
-    period: '',
+    tier: 'enterprise',
+    monthlyPrice: null,
+    annualPrice: null,
     description: 'For large agencies with custom requirements and dedicated support',
     icon: Building2,
-    color: 'slate',
+    assessments: null,
+    teamMembers: 'Unlimited',
     features: [
-      'Unlimited users',
-      'Unlimited clients',
-      'Unlimited visits',
+      'Unlimited assessments',
+      'Unlimited team members',
       'AI voice-to-contract',
-      'Smart assessments',
+      'Smart SOAP notes',
       'Custom analytics & dashboards',
       'Dedicated account manager',
       'Unlimited storage',
@@ -72,8 +103,9 @@ const PLANS = [
       'SLA guarantee',
     ],
     cta: 'Contact Sales',
-    href: '/register',
+    href: '/contact?inquiry=enterprise',
     popular: false,
+    hasOverage: false,
   },
 ];
 
@@ -120,23 +152,30 @@ export default function PricingPage() {
             <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${annual ? 'translate-x-6' : 'translate-x-0.5'}`} />
           </button>
           <span className={`text-sm font-medium ${annual ? 'text-white' : 'text-white/40'}`}>
-            Annual <span className="text-teal-400 text-xs font-semibold ml-1">Save 17%</span>
+            Annual <span className="text-teal-400 text-xs font-semibold ml-1">Save 2 months free</span>
           </span>
         </div>
       </div>
 
       {/* Plan Cards */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
-            const monthlyPrice = plan.price;
-            const displayPrice = monthlyPrice ? (annual ? Math.round(monthlyPrice * 10 / 12) : monthlyPrice) : null;
+            const monthlyDisplay = plan.monthlyPrice
+              ? annual
+                ? ((plan.annualPrice ?? 0) / 12).toFixed(2)
+                : plan.monthlyPrice.toFixed(2)
+              : null;
+            const annualTotal = plan.annualPrice;
+            const monthlySavings = plan.monthlyPrice && plan.annualPrice
+              ? (plan.monthlyPrice * 12 - plan.annualPrice).toFixed(0)
+              : null;
 
             return (
               <div
                 key={plan.name}
-                className={`relative rounded-2xl border p-8 flex flex-col ${
+                className={`relative rounded-2xl border p-6 flex flex-col ${
                   plan.popular
                     ? 'border-teal-500/50 bg-gradient-to-b from-teal-500/10 to-transparent shadow-lg shadow-teal-500/10'
                     : 'border-white/10 bg-white/[0.02]'
@@ -157,25 +196,72 @@ export default function PricingPage() {
                   <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                 </div>
 
-                <div className="mb-4">
-                  {displayPrice !== null ? (
+                <div className="mb-1">
+                  {monthlyDisplay !== null ? (
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-white">${displayPrice}</span>
+                      <span className="text-3xl font-bold text-white">${monthlyDisplay}</span>
                       <span className="text-white/40 text-sm">/mo</span>
-                      {annual && monthlyPrice && (
-                        <span className="text-white/30 text-sm line-through ml-2">${monthlyPrice}</span>
-                      )}
                     </div>
                   ) : (
                     <div className="text-3xl font-bold text-white">Custom</div>
                   )}
                 </div>
 
-                <p className="text-white/50 text-sm mb-6 leading-relaxed">{plan.description}</p>
+                {annual && monthlySavings && annualTotal ? (
+                  <p className="text-teal-400 text-xs font-medium mb-4">
+                    ${annualTotal.toLocaleString()}/yr — save ${monthlySavings}/yr
+                  </p>
+                ) : plan.monthlyPrice ? (
+                  <p className="text-white/30 text-xs mb-4">
+                    {annual ? '' : `$${((plan.annualPrice ?? 0) / 12).toFixed(2)}/mo billed annually`}
+                  </p>
+                ) : (
+                  <p className="text-white/30 text-xs mb-4">Tailored to your needs</p>
+                )}
 
-                <ul className="space-y-3 mb-8 flex-1">
+                <p className="text-white/50 text-sm mb-4 leading-relaxed">{plan.description}</p>
+
+                {/* Overage / No-overage pill */}
+                {plan.hasOverage ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg mb-4 w-fit">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-xs font-medium text-amber-400">$13/extra assessment</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mb-4 w-fit">
+                    <BadgeCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs font-medium text-emerald-400">No overage fees</span>
+                  </div>
+                )}
+
+                {/* Key metrics */}
+                {plan.assessments !== null ? (
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="bg-white/5 rounded-lg px-3 py-2 text-center">
+                      <p className="text-lg font-bold text-white">{plan.assessments}</p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Assessments</p>
+                    </div>
+                    <div className="bg-white/5 rounded-lg px-3 py-2 text-center">
+                      <p className="text-lg font-bold text-white">{plan.teamMembers}</p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Team Members</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="bg-white/5 rounded-lg px-3 py-2 text-center">
+                      <p className="text-lg font-bold text-white">∞</p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Assessments</p>
+                    </div>
+                    <div className="bg-white/5 rounded-lg px-3 py-2 text-center">
+                      <p className="text-lg font-bold text-white">∞</p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Team Members</p>
+                    </div>
+                  </div>
+                )}
+
+                <ul className="space-y-2.5 mb-6 flex-1">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-white/70">
+                    <li key={f} className="flex items-start gap-2 text-sm text-white/70">
                       <Check className="w-4 h-4 text-teal-400 mt-0.5 shrink-0" />
                       {f}
                     </li>
@@ -194,7 +280,7 @@ export default function PricingPage() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
-                {plan.price && (
+                {plan.monthlyPrice && (
                   <p className="text-center text-white/30 text-xs mt-3">14-day free trial included</p>
                 )}
               </div>
@@ -223,7 +309,11 @@ export default function PricingPage() {
             },
             {
               q: 'What happens after the 14-day trial?',
-              a: 'At the end of your 14-day trial, your card will be automatically charged $179/month (Starter) or $399/month (Growth) depending on your selected plan. If you chose annual billing, you\'ll be charged $1,490/year or $3,320/year respectively. You can cancel anytime before the trial ends to avoid any charges.',
+              a: 'At the end of your 14-day trial, your card will be automatically charged based on your selected plan: Starter ($89.99/mo), Growth ($179.99/mo), or Professional ($299.99/mo). If you chose annual billing, you\'ll save the equivalent of 2 months. Cancel anytime before the trial ends to avoid charges.',
+            },
+            {
+              q: 'What happens if I exceed my assessment limit?',
+              a: 'On Starter, Growth, and Professional plans, each assessment beyond your monthly limit costs $13. Enterprise plans include unlimited assessments with no overage fees.',
             },
             {
               q: 'What is the 30-day extended trial?',
@@ -231,7 +321,11 @@ export default function PricingPage() {
             },
             {
               q: 'Can I change plans later?',
-              a: 'Yes. You can upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle.',
+              a: 'Yes. You can upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle. Upgrading mid-cycle is prorated.',
+            },
+            {
+              q: 'How does annual billing work?',
+              a: 'Annual billing gives you 2 months free — you pay for 10 months instead of 12. For example, Starter is $89.99/mo monthly but only $74.92/mo when billed annually at $899/year.',
             },
             {
               q: 'How do I cancel?',
@@ -266,7 +360,7 @@ export default function PricingPage() {
               Start Free Trial <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/register"
+              href="/book-demo"
               className="bg-white/10 hover:bg-white/15 text-white px-6 py-3 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-white/10"
             >
               <Phone className="w-4 h-4" /> Book a Demo

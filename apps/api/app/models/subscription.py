@@ -17,6 +17,7 @@ from app.db.base import Base
 class PlanTier(str, Enum):
     FREE = "free"
     STARTER = "starter"
+    GROWTH = "growth"
     PROFESSIONAL = "professional"
     ENTERPRISE = "enterprise"
 

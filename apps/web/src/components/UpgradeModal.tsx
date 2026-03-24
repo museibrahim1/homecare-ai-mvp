@@ -13,48 +13,68 @@ interface UpgradeModalProps {
 const PLANS = [
   {
     name: 'Starter',
-    price: 179,
+    price: 89.99,
     period: '/mo',
-    description: 'For small agencies',
+    description: '5 assessments, 5 team members',
     features: [
-      'Up to 3 users',
-      '50 clients',
-      '200 visits/month',
+      '5 assessments/month',
+      '5 team members',
       'AI voice-to-contract',
+      'Smart SOAP notes',
       'Email support',
     ],
+    overage: '$13/extra assessment',
     popular: false,
     color: 'from-blue-500 to-cyan-500',
     borderColor: 'border-blue-200',
   },
   {
     name: 'Growth',
-    price: 399,
+    price: 179.99,
     period: '/mo',
-    description: 'For growing agencies',
+    description: '25 assessments, 15 team members',
     features: [
-      'Up to 10 users',
-      '200 clients',
-      '1,000 visits/month',
+      '25 assessments/month',
+      '15 team members',
       'Advanced analytics',
       'Priority support',
+      'Team management',
     ],
+    overage: '$13/extra assessment',
     popular: true,
     color: 'from-primary-500 to-purple-500',
     borderColor: 'border-primary-500/50',
   },
   {
+    name: 'Professional',
+    price: 299.99,
+    period: '/mo',
+    description: '75 assessments, unlimited team',
+    features: [
+      '75 assessments/month',
+      'Unlimited team members',
+      'Advanced dashboards',
+      '50-state compliance',
+      'Priority support',
+    ],
+    overage: '$13/extra assessment',
+    popular: false,
+    color: 'from-indigo-500 to-violet-500',
+    borderColor: 'border-indigo-200',
+  },
+  {
     name: 'Enterprise',
     price: null,
     period: '',
-    description: 'Custom pricing for large agencies',
+    description: 'Unlimited everything, no overage fees',
     features: [
-      'Unlimited users',
-      'Unlimited clients',
+      'Unlimited assessments',
+      'Unlimited team members',
       'Dedicated account manager',
       'Custom integrations',
       'HIPAA BAA included',
     ],
+    overage: null,
     popular: false,
     color: 'from-amber-500 to-orange-500',
     borderColor: 'border-amber-200',
@@ -125,7 +145,7 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
 
         {/* Plans */}
         <div className="p-8 pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {PLANS.map((plan) => (
               <div
                 key={plan.name}
@@ -155,6 +175,16 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
                     <span className="text-xl font-bold text-slate-900">Contact Sales</span>
                   )}
                 </div>
+
+                {plan.overage ? (
+                  <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-amber-50 border border-amber-200 rounded text-[11px] font-medium text-amber-600">
+                    {plan.overage}
+                  </div>
+                ) : plan.price === null ? (
+                  <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-200 rounded text-[11px] font-medium text-emerald-600">
+                    No overage fees
+                  </div>
+                ) : null}
 
                 <ul className="mt-4 space-y-2 flex-1">
                   {plan.features.map((feature) => (

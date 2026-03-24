@@ -411,6 +411,16 @@ async def seed_database():
         logger.warning(f"calling_states migration: {e}")
         db.rollback()
 
+    # Add 'growth' value to plantier enum if missing
+    try:
+        from sqlalchemy import text as sa_text
+        db.execute(sa_text("ALTER TYPE plantier ADD VALUE IF NOT EXISTS 'growth'"))
+        db.commit()
+        logger.info("Added 'growth' to plantier enum")
+    except Exception as e:
+        logger.debug(f"plantier enum update: {e}")
+        db.rollback()
+
     # Create missing indexes for performance (idempotent)
     try:
         from sqlalchemy import text as sa_text
@@ -477,25 +487,32 @@ async def seed_database():
             import json as _json
 
             _plan_defs = [
-                dict(name="Starter", tier=PlanTier.STARTER, description="For small agencies",
-                     monthly_price=179, annual_price=1490, max_users=3, max_clients=50,
-                     max_visits_per_month=200, max_storage_gb=5,
+                dict(name="Starter", tier=PlanTier.STARTER, description="5 assessments, 5 team members",
+                     monthly_price=89.99, annual_price=899, max_users=5, max_clients=25,
+                     max_visits_per_month=5, max_storage_gb=5,
                      stripe_product_id=STRIPE_PRICE_MAP["starter"]["product_id"],
                      stripe_price_id_monthly=STRIPE_PRICE_MAP["starter"]["monthly"],
                      stripe_price_id_annual=STRIPE_PRICE_MAP["starter"]["annual"],
-                     features=_json.dumps(["Up to 3 users","50 clients","200 visits/mo","AI voice-to-contract","Basic reporting","Email support"])),
-                dict(name="Growth", tier=PlanTier.PROFESSIONAL, description="For growing agencies",
-                     monthly_price=399, annual_price=3320, max_users=10, max_clients=200,
-                     max_visits_per_month=1000, max_storage_gb=25,
+                     features=_json.dumps(["5 assessments/month","5 team members","AI voice-to-contract","Smart SOAP notes","Basic reporting","Email support","$13/extra assessment"])),
+                dict(name="Growth", tier=PlanTier.GROWTH, description="25 assessments, 15 team members",
+                     monthly_price=179.99, annual_price=1799, max_users=15, max_clients=100,
+                     max_visits_per_month=25, max_storage_gb=15,
+                     stripe_product_id=STRIPE_PRICE_MAP["growth"]["product_id"],
+                     stripe_price_id_monthly=STRIPE_PRICE_MAP["growth"]["monthly"],
+                     stripe_price_id_annual=STRIPE_PRICE_MAP["growth"]["annual"],
+                     features=_json.dumps(["25 assessments/month","15 team members","Advanced analytics","Priority support","Custom templates","Team management","$13/extra assessment"])),
+                dict(name="Professional", tier=PlanTier.PROFESSIONAL, description="75 assessments, unlimited team",
+                     monthly_price=299.99, annual_price=2999, max_users=999, max_clients=500,
+                     max_visits_per_month=75, max_storage_gb=50,
                      stripe_product_id=STRIPE_PRICE_MAP["professional"]["product_id"],
                      stripe_price_id_monthly=STRIPE_PRICE_MAP["professional"]["monthly"],
                      stripe_price_id_annual=STRIPE_PRICE_MAP["professional"]["annual"],
-                     features=_json.dumps(["Up to 10 users","200 clients","1,000 visits/mo","Advanced analytics","Priority support","Custom templates"])),
-                dict(name="Enterprise", tier=PlanTier.ENTERPRISE, description="For large agencies",
+                     features=_json.dumps(["75 assessments/month","Unlimited team members","Advanced dashboards","Priority support","50-state compliance","$13/extra assessment"])),
+                dict(name="Enterprise", tier=PlanTier.ENTERPRISE, description="Unlimited everything, no overage fees",
                      monthly_price=0, annual_price=0, max_users=999, max_clients=9999,
                      max_visits_per_month=99999, max_storage_gb=999, is_contact_sales=True,
                      stripe_product_id=STRIPE_PRICE_MAP["enterprise"]["product_id"],
-                     features=_json.dumps(["Unlimited everything","Dedicated support","HIPAA BAA","Custom integrations","SLA guarantee"])),
+                     features=_json.dumps(["Unlimited assessments","Unlimited team members","Dedicated account manager","HIPAA BAA","Custom integrations","SLA guarantee","No overage fees"])),
             ]
             for pd in _plan_defs:
                 existing = db.query(Plan).filter(Plan.tier == pd["tier"]).first()

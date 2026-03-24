@@ -205,10 +205,16 @@ function RegisterForm() {
     }
   };
 
-  const planLabel = selectedPlan === 'growth' ? 'Growth' : 'Starter';
-  const planPrice = selectedPlan === 'growth' ? 399 : 179;
-  const annualPrice = selectedPlan === 'growth' ? 3320 : 1490;
-  const displayPrice = billingCycle === 'annual' ? Math.round(annualPrice / 12) : planPrice;
+  const planConfig: Record<string, { label: string; price: number; annual: number }> = {
+    starter: { label: 'Starter', price: 89.99, annual: 899 },
+    growth: { label: 'Growth', price: 179.99, annual: 1799 },
+    professional: { label: 'Professional', price: 299.99, annual: 2999 },
+  };
+  const activePlan = planConfig[selectedPlan] || planConfig.starter;
+  const planLabel = activePlan.label;
+  const planPrice = activePlan.price;
+  const annualPrice = activePlan.annual;
+  const displayPrice = billingCycle === 'annual' ? +(annualPrice / 12).toFixed(2) : planPrice;
   const trialDays = trialType === 'extended' ? 30 : 14;
 
   const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/30 focus:border-teal-500 focus:outline-none transition";
