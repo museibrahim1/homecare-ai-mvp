@@ -491,37 +491,6 @@ def create_marketing_asset(
     return {"ok": True, "asset": asset}
 
 
-@router.put("/marketing-assets/{asset_id}")
-def update_marketing_asset(
-    asset_id: str,
-    body: MarketingAssetCreate,
-    user: User = Depends(get_current_user),
-):
-    """Update a marketing asset."""
-    if asset_id not in _marketing_assets:
-        raise HTTPException(404, "Asset not found")
-    asset = _marketing_assets[asset_id]
-    asset["title"] = body.title
-    asset["content"] = body.content
-    asset["target_audience"] = body.target_audience
-    asset["tags"] = body.tags
-    asset["asset_type"] = body.asset_type
-    asset["updated_at"] = datetime.now(timezone.utc).isoformat()
-    return {"ok": True, "asset": asset}
-
-
-@router.delete("/marketing-assets/{asset_id}")
-def delete_marketing_asset(
-    asset_id: str,
-    user: User = Depends(get_current_user),
-):
-    """Delete a marketing asset."""
-    if asset_id not in _marketing_assets:
-        raise HTTPException(404, "Asset not found")
-    del _marketing_assets[asset_id]
-    return {"ok": True}
-
-
 class AiGenerateRequest(BaseModel):
     prompt: str
     asset_type: str = "email_template"
@@ -729,3 +698,36 @@ Do NOT include: Watermarks, stock photo artifacts, blurry text"""
     except Exception as e:
         logger.error(f"Visual generation failed: {e}")
         raise HTTPException(500, f"Visual generation failed: {str(e)}")
+
+
+# {asset_id} routes MUST be last — FastAPI matches them as catch-alls.
+
+@router.put("/marketing-assets/{asset_id}")
+def update_marketing_asset(
+    asset_id: str,
+    body: MarketingAssetCreate,
+    user: User = Depends(get_current_user),
+):
+    """Update a marketing asset."""
+    if asset_id not in _marketing_assets:
+        raise HTTPException(404, "Asset not found")
+    asset = _marketing_assets[asset_id]
+    asset["title"] = body.title
+    asset["content"] = body.content
+    asset["target_audience"] = body.target_audience
+    asset["tags"] = body.tags
+    asset["asset_type"] = body.asset_type
+    asset["updated_at"] = datetime.now(timezone.utc).isoformat()
+    return {"ok": True, "asset": asset}
+
+
+@router.delete("/marketing-assets/{asset_id}")
+def delete_marketing_asset(
+    asset_id: str,
+    user: User = Depends(get_current_user),
+):
+    """Delete a marketing asset."""
+    if asset_id not in _marketing_assets:
+        raise HTTPException(404, "Asset not found")
+    del _marketing_assets[asset_id]
+    return {"ok": True}
