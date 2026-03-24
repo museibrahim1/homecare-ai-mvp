@@ -824,7 +824,7 @@ export default function CommandCenterPage() {
                               if (allSelected) {
                                 setSelectedTerritoryStates(prev => prev.filter(s => !states.includes(s)));
                               } else {
-                                setSelectedTerritoryStates(prev => [...new Set([...prev, ...states])]);
+                                setSelectedTerritoryStates(prev => Array.from(new Set([...prev, ...states])));
                               }
                             }}
                             className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
