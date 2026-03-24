@@ -7,7 +7,8 @@ import Sidebar from '@/components/Sidebar';
 import {
   Users, Loader2, Shield, Mail, Key, UserPlus,
   ToggleLeft, ToggleRight, RefreshCw, CheckCircle, XCircle, AlertCircle,
-  Activity, Clock, Eye, LogIn, BarChart3,
+  Activity, Clock, Eye, LogIn, BarChart3, Trash2, LogOut, ListTodo,
+  Plus, X, Phone, Target,
 } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -63,6 +64,10 @@ export default function TeamManagementPage() {
   const [activityDays, setActivityDays] = useState(7);
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
   const [titleSelection, setTitleSelection] = useState<string>('');
+  const [showAssignTask, setShowAssignTask] = useState(false);
+  const [taskForm, setTaskForm] = useState({ title: '', description: '', priority: 'medium', due_date: '', assigned_to_id: '' });
+  const [taskSaving, setTaskSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<TeamMember | null>(null);
 
   const token = typeof window !== 'undefined' ? getStoredToken() : null;
 
@@ -173,6 +178,59 @@ export default function TeamManagementPage() {
     setActionLoading(null);
   };
 
+  const permanentlyDelete = async (member: TeamMember) => {
+    setActionLoading(member.id);
+    try {
+      const res = await fetch(`${API}/admin/team/${member.id}/delete-permanently`, { method: 'POST', headers: authHeaders() });
+      if (res.ok) {
+        setToast(`${member.full_name} permanently deleted`);
+        setTimeout(() => setToast(''), 4000);
+        loadMembers();
+      } else {
+        const data = await res.json();
+        setToast(`Error: ${data.detail || 'Failed to delete'}`);
+      }
+    } catch { setToast('Failed to delete — network error'); }
+    setActionLoading(null);
+    setConfirmDelete(null);
+  };
+
+  const forceLogout = async (member: TeamMember) => {
+    setActionLoading(member.id);
+    try {
+      const res = await fetch(`${API}/admin/team/${member.id}/force-logout`, { method: 'POST', headers: authHeaders() });
+      if (res.ok) {
+        setToast(`${member.full_name} has been forced to log out`);
+        setTimeout(() => setToast(''), 4000);
+      }
+    } catch { /* ignore */ }
+    setActionLoading(null);
+  };
+
+  const assignTask = async () => {
+    if (!taskForm.title.trim()) return;
+    setTaskSaving(true);
+    try {
+      const res = await fetch(`${API}/admin/team/assign-task`, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({
+          title: taskForm.title,
+          description: taskForm.description || null,
+          priority: taskForm.priority,
+          due_date: taskForm.due_date || null,
+          assigned_to_id: taskForm.assigned_to_id || null,
+        }),
+      });
+      if (res.ok) {
+        setShowAssignTask(false);
+        setTaskForm({ title: '', description: '', priority: 'medium', due_date: '', assigned_to_id: '' });
+        setToast('Task assigned successfully');
+        setTimeout(() => setToast(''), 4000);
+      }
+    } catch { /* ignore */ }
+    setTaskSaving(false);
+  };
+
   const formatTimeAgo = (iso: string | null) => {
     if (!iso) return 'Never';
     const diff = Date.now() - new Date(iso).getTime();
@@ -210,12 +268,16 @@ export default function TeamManagementPage() {
               </h1>
               <p className="text-slate-500 mt-1">Create and manage admin team member accounts with granular permissions</p>
             </div>
-            <button
-              onClick={() => setShowInvite(true)}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition"
-            >
-              <UserPlus className="w-4 h-4" /> Invite Member
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowAssignTask(true)}
+                className="flex items-center gap-2 bg-teal-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-teal-600 transition">
+                <ListTodo className="w-4 h-4" /> Assign Task
+              </button>
+              <button onClick={() => setShowInvite(true)}
+                className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">
+                <UserPlus className="w-4 h-4" /> Invite Member
+              </button>
+            </div>
           </div>
 
           {/* Toast */}
@@ -314,41 +376,31 @@ export default function TeamManagementPage() {
                         )}
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => resendInvite(m)}
-                            disabled={actionLoading === m.id}
-                            className="text-slate-400 hover:text-teal-600 transition p-1.5 rounded-lg hover:bg-teal-50"
-                            title="Resend invite email"
-                            aria-label={`Resend invite to ${m.full_name}`}
-                          >
+                        <div className="flex items-center justify-end gap-1">
+                          <button onClick={() => resendInvite(m)} disabled={actionLoading === m.id}
+                            className="text-slate-400 hover:text-teal-600 transition p-1.5 rounded-lg hover:bg-teal-50" title="Resend invite email">
                             <Mail className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => resetPassword(m)}
-                            disabled={actionLoading === m.id}
-                            className="text-slate-400 hover:text-indigo-600 transition p-1.5 rounded-lg hover:bg-indigo-50"
-                            title="Reset password"
-                            aria-label={`Reset password for ${m.full_name}`}
-                          >
+                          <button onClick={() => resetPassword(m)} disabled={actionLoading === m.id}
+                            className="text-slate-400 hover:text-indigo-600 transition p-1.5 rounded-lg hover:bg-indigo-50" title="Reset password">
                             <Key className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => toggleActive(m)}
-                            disabled={actionLoading === m.id}
+                          <button onClick={() => forceLogout(m)} disabled={actionLoading === m.id}
+                            className="text-slate-400 hover:text-amber-600 transition p-1.5 rounded-lg hover:bg-amber-50" title="Force logout">
+                            <LogOut className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => toggleActive(m)} disabled={actionLoading === m.id}
                             className={`p-1.5 rounded-lg transition ${m.is_active ? 'text-green-500 hover:text-red-500 hover:bg-red-50' : 'text-red-400 hover:text-green-500 hover:bg-green-50'}`}
-                            title={m.is_active ? 'Deactivate' : 'Activate'}
-                            aria-label={m.is_active ? `Deactivate ${m.full_name}` : `Activate ${m.full_name}`}
-                          >
+                            title={m.is_active ? 'Deactivate' : 'Activate'}>
                             {m.is_active ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
                           </button>
-                          <button
-                            onClick={() => { setEditingPerms(m); setEditPermsSelection([...(m.permissions || [])]); }}
-                            className="text-slate-400 hover:text-indigo-600 transition p-1.5 rounded-lg hover:bg-indigo-50"
-                            title="Edit permissions"
-                            aria-label={`Edit permissions for ${m.full_name}`}
-                          >
+                          <button onClick={() => { setEditingPerms(m); setEditPermsSelection([...(m.permissions || [])]); }}
+                            className="text-slate-400 hover:text-indigo-600 transition p-1.5 rounded-lg hover:bg-indigo-50" title="Edit permissions">
                             <Shield className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setConfirmDelete(m)} disabled={actionLoading === m.id}
+                            className="text-slate-400 hover:text-red-600 transition p-1.5 rounded-lg hover:bg-red-50" title="Permanently delete">
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -516,6 +568,93 @@ export default function TeamManagementPage() {
                   className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition"
                 >
                   Save Permissions
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirm Delete Modal */}
+        {confirmDelete && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setConfirmDelete(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+              <div className="p-6 text-center">
+                <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trash2 className="w-7 h-7 text-red-500" />
+                </div>
+                <h2 className="text-lg font-bold text-slate-800 mb-2">Permanently Delete?</h2>
+                <p className="text-sm text-slate-500 mb-1">
+                  This will permanently remove <strong>{confirmDelete.full_name}</strong> and all their data.
+                </p>
+                <p className="text-xs text-red-500 font-semibold">This action cannot be undone.</p>
+              </div>
+              <div className="p-4 border-t border-slate-200 flex gap-3">
+                <button onClick={() => setConfirmDelete(null)} className="flex-1 px-4 py-2.5 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium transition">Cancel</button>
+                <button onClick={() => permanentlyDelete(confirmDelete)} disabled={actionLoading === confirmDelete.id}
+                  className="flex-1 px-4 py-2.5 text-sm text-white bg-red-600 hover:bg-red-700 rounded-xl font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2">
+                  {actionLoading === confirmDelete.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  Delete Forever
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Assign Task Modal */}
+        {showAssignTask && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowAssignTask(false)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+              <div className="p-6 border-b border-slate-200">
+                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <ListTodo className="w-5 h-5 text-teal-500" /> Assign Task
+                </h2>
+                <p className="text-slate-500 text-sm mt-1">Create and assign a task to yourself or a team member</p>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Task Title *</label>
+                  <input value={taskForm.title} onChange={e => setTaskForm(f => ({ ...f, title: e.target.value }))}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none"
+                    placeholder="e.g. Call 10 agencies in Florida" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Description</label>
+                  <textarea value={taskForm.description} onChange={e => setTaskForm(f => ({ ...f, description: e.target.value }))}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-teal-500 outline-none" rows={2}
+                    placeholder="Optional details..." />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Priority</label>
+                    <select value={taskForm.priority} onChange={e => setTaskForm(f => ({ ...f, priority: e.target.value }))}
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+                      <option value="low">Low</option><option value="medium">Medium</option>
+                      <option value="high">High</option><option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Due Date</label>
+                    <input type="date" value={taskForm.due_date} onChange={e => setTaskForm(f => ({ ...f, due_date: e.target.value }))}
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Assign To</label>
+                  <select value={taskForm.assigned_to_id} onChange={e => setTaskForm(f => ({ ...f, assigned_to_id: e.target.value }))}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+                    <option value="">Myself (CEO)</option>
+                    {members.filter(m => m.is_active).map(m => (
+                      <option key={m.id} value={m.id}>{m.full_name}{m.executive_title ? ` (${m.executive_title})` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
+                <button onClick={() => setShowAssignTask(false)} className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 transition">Cancel</button>
+                <button onClick={assignTask} disabled={taskSaving || !taskForm.title.trim()}
+                  className="flex items-center gap-2 bg-teal-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-teal-600 transition disabled:opacity-50">
+                  {taskSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Target className="w-4 h-4" />}
+                  Assign Task
                 </button>
               </div>
             </div>

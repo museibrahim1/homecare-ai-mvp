@@ -15,7 +15,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from pydantic import BaseModel, EmailStr
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, text as sa_text
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user, require_ceo_only
@@ -120,22 +120,7 @@ def list_team_members(
         .order_by(User.created_at.desc())
         .all()
     )
-    return [
-        TeamMemberResponse(
-            id=str(m.id),
-            full_name=m.full_name,
-            email=m.email,
-            role=m.role,
-            permissions=m.permissions or [],
-            is_active=m.is_active,
-            phone=m.phone,
-            temp_password=m.temp_password,
-            created_at=m.created_at.isoformat() if m.created_at else None,
-            last_login=m.last_login.isoformat() if getattr(m, "last_login", None) else None,
-            last_active=m.last_active.isoformat() if getattr(m, "last_active", None) else None,
-        )
-        for m in members
-    ]
+    return [_member_response(m) for m in members]
 
 
 @router.get("/team/roster")
@@ -151,11 +136,13 @@ def team_roster(
         User.role == "admin", User.email.endswith("@palmtai.com")
     ).first()
 
-    team_members = db.query(User).filter(User.invited_by.isnot(None)).all()
+    team_members = db.query(User).filter(
+        User.invited_by.isnot(None),
+        User.is_active == True,
+    ).all()
 
     roster = []
     if ceo:
-        from datetime import datetime, timezone, timedelta
         now = datetime.now(timezone.utc)
 
         def _status(u: User) -> str:
@@ -173,6 +160,7 @@ def team_roster(
             "role": "CEO",
             "executive_title": "CEO",
             "status": _status(ceo),
+            "is_active": True,
         })
         for m in team_members:
             if m.id == current_user.id:
@@ -186,6 +174,7 @@ def team_roster(
                 "executive_title": getattr(m, "executive_title", None),
                 "status": _status(m),
                 "permissions": m.permissions or [],
+                "is_active": m.is_active,
             })
 
     return roster
@@ -453,6 +442,118 @@ def deactivate_team_member(
     status = "activated" if member.is_active else "deactivated"
     logger.info(f"Team member {status}: {member.email}")
     return {"ok": True, "status": status}
+
+
+@router.post("/team/{user_id}/delete-permanently")
+def permanently_delete_team_member(
+    user_id: str,
+    db: Session = Depends(get_db),
+    ceo: User = Depends(require_ceo_only),
+):
+    """Permanently delete a team member and all their data."""
+    member = db.query(User).filter(User.id == user_id, User.invited_by.isnot(None)).first()
+    if not member:
+        raise HTTPException(404, "Team member not found")
+
+    uid = str(member.id)
+    member_name = member.full_name
+    member_email = member.email
+
+    try:
+        cleanup_tables = [
+            "DELETE FROM audit_logs WHERE user_id = :uid",
+            "DELETE FROM messages WHERE sender_id = :uid",
+            "DELETE FROM notifications WHERE user_id = :uid",
+            "DELETE FROM tasks WHERE user_id = :uid OR assigned_to_id = :uid",
+            "DELETE FROM reminders WHERE user_id = :uid",
+            "DELETE FROM smart_notes WHERE user_id = :uid",
+            "UPDATE visits SET user_id = NULL WHERE user_id = :uid",
+            "UPDATE clients SET user_id = NULL WHERE user_id = :uid",
+        ]
+        for sql in cleanup_tables:
+            try:
+                db.execute(sa_text(sql), {"uid": uid})
+            except Exception:
+                pass
+
+        db.delete(member)
+        db.commit()
+        logger.info(f"Team member permanently deleted: {member_email} by {ceo.email}")
+        return {"ok": True, "deleted": member_name}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to delete team member {member_email}: {e}")
+        raise HTTPException(500, f"Failed to delete: {str(e)}")
+
+
+@router.post("/team/{user_id}/force-logout")
+def force_logout_team_member(
+    user_id: str,
+    db: Session = Depends(get_db),
+    ceo: User = Depends(require_ceo_only),
+):
+    """Force a team member to log out by invalidating all their sessions."""
+    member = db.query(User).filter(User.id == user_id, User.invited_by.isnot(None)).first()
+    if not member:
+        raise HTTPException(404, "Team member not found")
+
+    member.force_logout_at = datetime.now(timezone.utc)
+    db.commit()
+    logger.info(f"Force logout for {member.email} by {ceo.email}")
+    return {"ok": True, "forced_out": member.full_name}
+
+
+class AssignTaskRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+    priority: str = "medium"
+    due_date: Optional[str] = None
+    assigned_to_id: Optional[str] = None
+
+
+@router.post("/team/assign-task")
+def assign_task_to_member(
+    body: AssignTaskRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Create a task and optionally assign it to a team member (or self)."""
+    if current_user.role not in ("admin", "admin_team"):
+        raise HTTPException(403, "Admin access required")
+
+    from app.models.task import Task
+
+    assignee_id = body.assigned_to_id or str(current_user.id)
+    if assignee_id != str(current_user.id):
+        target = db.query(User).filter(User.id == assignee_id).first()
+        if not target:
+            raise HTTPException(404, "Assignee not found")
+
+    task = Task(
+        user_id=current_user.id,
+        title=body.title,
+        description=body.description,
+        priority=body.priority,
+        due_date=body.due_date,
+        status="todo",
+        assigned_to_id=assignee_id,
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+    return {
+        "ok": True,
+        "task": {
+            "id": str(task.id),
+            "title": task.title,
+            "description": task.description,
+            "priority": task.priority,
+            "due_date": task.due_date,
+            "status": task.status,
+            "assigned_to_id": str(task.assigned_to_id) if task.assigned_to_id else None,
+        },
+    }
 
 
 @router.post("/team/{user_id}/reset-password")

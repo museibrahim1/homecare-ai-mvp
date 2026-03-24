@@ -681,7 +681,12 @@ export default function CommandCenterPage() {
                             try {
                               await apiFetch(`/notes/tasks/${task.id}/complete`, { method: 'PUT' });
                               setMyTasks(prev => prev.filter(t => t.id !== task.id));
-                            } catch { /* ignore */ }
+                            } catch {
+                              try {
+                                await apiFetch(`/notes/tasks/${task.id}`, { method: 'DELETE' });
+                                setMyTasks(prev => prev.filter(t => t.id !== task.id));
+                              } catch { /* last resort: hide locally */ setMyTasks(prev => prev.filter(t => t.id !== task.id)); }
+                            }
                           }}
                           className="w-5 h-5 rounded-full border-2 border-teal-400 hover:bg-teal-100 flex items-center justify-center transition-colors shrink-0"
                           title="Mark complete"
@@ -705,6 +710,18 @@ export default function CommandCenterPage() {
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${pCfg[task.priority] || pCfg.medium}`}>
                           {task.priority}
                         </span>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await apiFetch(`/notes/tasks/${task.id}`, { method: 'DELETE' });
+                            } catch { /* ignore */ }
+                            setMyTasks(prev => prev.filter(t => t.id !== task.id));
+                          }}
+                          className="ml-1 p-1 text-slate-300 hover:text-red-500 transition-colors rounded shrink-0"
+                          title="Remove task"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     );
                   })}

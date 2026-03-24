@@ -336,7 +336,11 @@ async def delete_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    task = db.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
+    is_admin = current_user.role in ("admin", "admin_team")
+    task = db.query(Task).filter(
+        Task.id == task_id,
+        or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id) if not is_admin else True,
+    ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     db.delete(task)
