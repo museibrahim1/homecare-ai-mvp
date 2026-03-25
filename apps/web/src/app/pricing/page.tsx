@@ -143,17 +143,25 @@ export default function PricingPage() {
         </p>
 
         {/* Billing Toggle */}
-        <div className="flex items-center justify-center gap-3 mb-12">
-          <span className={`text-sm font-medium ${!annual ? 'text-white' : 'text-white/40'}`}>Monthly</span>
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <span className={`text-sm font-semibold transition ${!annual ? 'text-white' : 'text-white/40'}`}>Monthly</span>
           <button
             onClick={() => setAnnual(!annual)}
-            className={`relative w-12 h-6 rounded-full transition ${annual ? 'bg-teal-500' : 'bg-white/20'}`}
+            className={`relative w-14 h-7 rounded-full transition-colors ${annual ? 'bg-teal-500' : 'bg-white/20'}`}
+            aria-label="Toggle annual billing"
           >
-            <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${annual ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            <span
+              className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${annual ? 'translate-x-7' : 'translate-x-0'}`}
+            />
           </button>
-          <span className={`text-sm font-medium ${annual ? 'text-white' : 'text-white/40'}`}>
-            Annual <span className="text-teal-400 text-xs font-semibold ml-1">Save 2 months free</span>
+          <span className={`text-sm font-semibold transition ${annual ? 'text-white' : 'text-white/40'}`}>
+            Annual
           </span>
+          {annual && (
+            <span className="text-teal-400 text-xs font-semibold bg-teal-400/10 px-2.5 py-1 rounded-full border border-teal-400/20">
+              2 months free
+            </span>
+          )}
         </div>
       </div>
 
