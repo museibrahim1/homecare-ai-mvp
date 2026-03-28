@@ -245,7 +245,7 @@ export default function CommandCenterPage() {
   const agentInputRef = useRef<HTMLInputElement | null>(null);
 
   // Current user info & tasks
-  const [currentUser, setCurrentUser] = useState<{ full_name?: string; email?: string; role?: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id?: string; full_name?: string; email?: string; role?: string } | null>(null);
   const [myTasks, setMyTasks] = useState<Array<{
     id: string; title: string; description?: string; status: string;
     priority: string; due_date?: string; assigned_by_name?: string;
@@ -1343,15 +1343,18 @@ export default function CommandCenterPage() {
               {assignModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                   <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-4">Assign Leads to Team Member</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-4">Assign Leads</h3>
 
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Team Member</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Assign To</label>
                     <select
                       value={assignUserId}
                       onChange={(e) => setAssignUserId(e.target.value)}
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm mb-4"
                     >
                       <option value="">Select member...</option>
+                      {currentUser?.id && (
+                        <option value={currentUser.id}>Myself ({currentUser.full_name || currentUser.email})</option>
+                      )}
                       {teamMembers.filter(t => t.is_active).map(m => (
                         <option key={m.id} value={m.id}>{m.full_name} ({m.email})</option>
                       ))}

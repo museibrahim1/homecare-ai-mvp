@@ -724,13 +724,24 @@ def get_weekly_plan(
             return q.filter(SalesLead.assigned_to == user_id_str)
         return q
 
+    # ── Actionable email filter: unsent OR due for next drip step ──
+    now_utc = datetime.now(timezone.utc)
+    _actionable_email_filter = or_(
+        (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+        and_(
+            SalesLead.sequence_step < 5,
+            SalesLead.next_email_scheduled_at.isnot(None),
+            SalesLead.next_email_scheduled_at <= now_utc,
+        ),
+    )
+
     # ── Count totals with a single query per table (for pagination math) ──
     unsent_agency_base = _team_agency_filter(
         db.query(func.count(SalesLead.id))
         .filter(
             SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
             SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
-            (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+            _actionable_email_filter,
         )
     )
     unsent_agency_total = unsent_agency_base.scalar() or 0
@@ -841,7 +852,7 @@ def get_weekly_plan(
                 db.query(SalesLead)
                 .filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
                         SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
-                        (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+                        _actionable_email_filter,
                         SalesLead.id.notin_(sent_ids) if sent_ids else True)
             )
             fill_agencies = fill_q.order_by(PRIORITY_ORDER, SalesLead.created_at).limit(fill_a).all() if fill_a > 0 else []
@@ -891,7 +902,7 @@ def get_weekly_plan(
                 db.query(SalesLead)
                 .filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
                         SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
-                        (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)))
+                        _actionable_email_filter)
             ).order_by(PRIORITY_ORDER, SalesLead.created_at).offset(future_agency_offset).limit(EMAILS_PER_DAY).all()
             future_agency_offset += EMAILS_PER_DAY
 
