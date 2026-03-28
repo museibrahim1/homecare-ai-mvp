@@ -2770,3 +2770,88 @@ def cron_call_data_audit(
         "investors_with_email": investors_with_email,
         "investors_no_email": investors_no_email,
     }
+
+
+@router.get("/sequence-status")
+def get_sequence_status(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """Diagnostic: show how many leads are in each sequence state."""
+    total_leads = db.query(func.count(SalesLead.id)).scalar() or 0
+    with_email = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+    ).scalar() or 0
+    emailed_at_least_once = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.email_send_count > 0,
+    ).scalar() or 0
+    in_sequence = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.sequence_step > 0,
+        SalesLead.sequence_completed != True,
+    ).scalar() or 0
+    sequence_completed = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.sequence_completed == True,
+    ).scalar() or 0
+    emailed_no_sequence = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.email_send_count > 0,
+        (SalesLead.sequence_step.is_(None)) | (SalesLead.sequence_step == 0),
+        SalesLead.sequence_completed != True,
+    ).scalar() or 0
+    due_for_next = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.next_email_scheduled_at.isnot(None),
+        SalesLead.next_email_scheduled_at <= datetime.now(timezone.utc),
+        SalesLead.sequence_completed != True,
+    ).scalar() or 0
+    never_emailed = db.query(func.count(SalesLead.id)).filter(
+        SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
+        SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
+        (SalesLead.email_send_count == 0) | (SalesLead.email_send_count.is_(None)),
+    ).scalar() or 0
+
+    by_step = {}
+    for step in range(0, 6):
+        cnt = db.query(func.count(SalesLead.id)).filter(
+            SalesLead.sequence_step == step,
+        ).scalar() or 0
+        by_step[f"step_{step}"] = cnt
+
+    return {
+        "total_leads": total_leads,
+        "with_email": with_email,
+        "emailed_at_least_once": emailed_at_least_once,
+        "in_active_sequence": in_sequence,
+        "sequence_completed": sequence_completed,
+        "emailed_but_no_sequence": emailed_no_sequence,
+        "due_for_next_email": due_for_next,
+        "never_emailed": never_emailed,
+        "by_step": by_step,
+    }
+
+
+@router.post("/fix-sequences")
+def fix_missing_sequences(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("command_center")),
+):
+    """Retroactively start sequences for all emailed leads that aren't in one."""
+    from app.routers.sales_leads import _auto_start_sequence
+
+    leads = db.query(SalesLead).filter(
+        SalesLead.email_send_count > 0,
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+        (SalesLead.sequence_step.is_(None)) | (SalesLead.sequence_step == 0),
+        SalesLead.sequence_completed != True,
+        SalesLead.status.notin_(["not_interested", "converted", "responded", "email_bounced"]),
+    ).all()
+
+    started = 0
+    for lead in leads:
+        _auto_start_sequence(lead, lead.campaign_tag or "retroactive-sequence", db)
+        started += 1
+
+    db.commit()
+    return {
+        "message": f"Started sequences for {started} leads that were emailed but had no active sequence",
+        "started": started,
+    }
