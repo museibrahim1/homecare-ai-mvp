@@ -2772,12 +2772,25 @@ def cron_call_data_audit(
     }
 
 
+def _require_cron_or_auth(request: Request, user=None):
+    """Accept either JWT auth or X-Internal-Key / CRON_SECRET."""
+    if user:
+        return
+    import os as _os
+    cron_secret = _os.getenv("CRON_SECRET", "")
+    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    if not (cron_secret and provided_key == cron_secret):
+        raise HTTPException(status_code=401, detail="Auth required")
+
+
 @router.get("/sequence-status")
 def get_sequence_status(
+    request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(require_permission("command_center")),
 ):
-    """Diagnostic: show how many leads are in each sequence state."""
+    """Diagnostic: show how many leads are in each sequence state.
+    Accepts X-Internal-Key / CRON_SECRET."""
+    _require_cron_or_auth(request)
     total_leads = db.query(func.count(SalesLead.id)).scalar() or 0
     with_email = db.query(func.count(SalesLead.id)).filter(
         SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
@@ -2830,10 +2843,12 @@ def get_sequence_status(
 
 @router.post("/fix-sequences")
 def fix_missing_sequences(
+    request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(require_permission("command_center")),
 ):
-    """Retroactively start sequences for all emailed leads that aren't in one."""
+    """Retroactively start sequences for all emailed leads that aren't in one.
+    Accepts X-Internal-Key / CRON_SECRET."""
+    _require_cron_or_auth(request)
     from app.routers.sales_leads import _auto_start_sequence
 
     leads = db.query(SalesLead).filter(
