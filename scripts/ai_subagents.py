@@ -43,7 +43,7 @@ COMPANY INFO:
 - Company: Palm Technologies, INC. / PalmCare AI
 - Founder: Muse Ibrahim, President & CEO
 - Website: palmcareai.com
-- Email domains: palmtai.com (Google Workspace), send.palmcareai.com (Resend)
+- Email domains: palmtai.com (Google Workspace), palmcareai.com (Resend)
 - AI Agent email: ai@palmcareai.com
 - Brand color: Teal (#0d9488)
 - Tagline: "Where care meets intelligence" / "PALM IT"

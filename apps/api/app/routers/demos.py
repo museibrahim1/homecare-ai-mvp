@@ -355,7 +355,7 @@ async def book_demo(
 
     email_svc = get_email_service()
 
-    verified_sender = "Muse Ibrahim <sales@send.palmcareai.com>"
+    verified_sender = "Muse Ibrahim <sales@palmcareai.com>"
 
     services_list = ', '.join(booking.services or []) or 'Not specified'
 

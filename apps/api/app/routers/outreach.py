@@ -1559,7 +1559,7 @@ def approve_draft(
             subject=subject,
             html=email_body,
             reply_to="sales@palmcareai.com",
-            sender="Muse Ibrahim <sales@send.palmcareai.com>",
+            sender="Muse Ibrahim <sales@palmcareai.com>",
         )
     else:
         html_plain = f"<pre style='font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;'>{email_body}</pre>"
@@ -1573,7 +1573,7 @@ def approve_draft(
             text=email_body,
             reply_to="invest@palmtai.com" if target_type == "investor" else "sales@palmcareai.com",
             attachments=attachments,
-            sender="Muse Ibrahim <invest@send.palmtai.com>" if target_type == "investor" else "Muse Ibrahim <sales@send.palmcareai.com>",
+            sender="Muse Ibrahim <invest@send.palmtai.com>" if target_type == "investor" else "Muse Ibrahim <sales@palmcareai.com>",
         )
 
     if not result.get("success"):
@@ -1684,7 +1684,7 @@ def batch_send_day(
             result = email_service.send_email(
                 to=lead.contact_email, subject=subj, html=body_html,
                 reply_to="sales@palmcareai.com",
-                sender="Muse Ibrahim <sales@send.palmcareai.com>",
+                sender="Muse Ibrahim <sales@palmcareai.com>",
             )
             if result.get("success"):
                 lead.last_email_sent_at = now
@@ -2097,7 +2097,7 @@ def send_daily_digest(
         to=CEO_EMAILS,
         subject=subject,
         html=html,
-        sender="PalmCare AI <sales@send.palmcareai.com>",
+        sender="PalmCare AI <sales@palmcareai.com>",
         reply_to="sales@palmcareai.com",
     )
 
@@ -2456,7 +2456,7 @@ def cron_daily_digest(
         to=CEO_EMAILS,
         subject=subject,
         html=html,
-        sender="PalmCare AI <sales@send.palmcareai.com>",
+        sender="PalmCare AI <sales@palmcareai.com>",
         reply_to="sales@palmcareai.com",
     )
 

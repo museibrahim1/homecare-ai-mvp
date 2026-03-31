@@ -7,9 +7,9 @@ Dual-domain strategy:
   - palmtai.com     → Investor emails (corporate/fundraising identity)
 
 Sender addresses (via Resend-verified subdomains):
-  - sales@send.palmcareai.com    → Agency outreach, demos, contracts
-  - onboarding@send.palmcareai.com → Registration, new user onboarding
-  - support@send.palmcareai.com  → Password resets, support tickets
+  - sales@palmcareai.com    → Agency outreach, demos, contracts
+  - onboarding@palmcareai.com → Registration, new user onboarding
+  - support@palmcareai.com  → Password resets, support tickets
   - invest@send.palmtai.com      → Investor outreach
 """
 
@@ -38,16 +38,16 @@ class EmailService:
 
         # Product/agency emails → palmcareai.com
         self.from_onboarding = os.getenv(
-            "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@send.palmcareai.com>"
+            "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@palmcareai.com>"
         )
         self.from_welcome = os.getenv(
-            "EMAIL_FROM_WELCOME", f"{BRAND} <welcome@send.palmcareai.com>"
+            "EMAIL_FROM_WELCOME", f"{BRAND} <welcome@palmcareai.com>"
         )
         self.from_sales = os.getenv(
-            "EMAIL_FROM_SALES", "Muse Ibrahim <sales@send.palmcareai.com>"
+            "EMAIL_FROM_SALES", "Muse Ibrahim <sales@palmcareai.com>"
         )
         self.from_support = os.getenv(
-            "EMAIL_FROM_SUPPORT", f"{BRAND} <support@send.palmcareai.com>"
+            "EMAIL_FROM_SUPPORT", f"{BRAND} <support@palmcareai.com>"
         )
 
         # Investor emails → palmtai.com (corporate identity)
