@@ -713,7 +713,7 @@ def get_weekly_plan(
     work_days = _week_work_days(week_offset)
     global_day_offset = _cumulative_days_before(week_offset)
 
-    # ── Team members see only their assigned leads ──
+    # ── Team members see only their assigned leads; CEO sees assigned-to-self first ──
     def _team_agency_filter(q):
         if is_team_member:
             return q.filter(SalesLead.assigned_to == user_id_str)
@@ -723,6 +723,12 @@ def get_weekly_plan(
         if is_team_member:
             return q.filter(SalesLead.assigned_to == user_id_str)
         return q
+
+    SELF_ASSIGNED_FIRST = case(
+        (SalesLead.assigned_to == user_id_str, 0),
+        (SalesLead.assigned_to.isnot(None), 1),
+        else_=2,
+    )
 
     # ── Actionable email filter: unsent OR due for next drip step ──
     now_utc = datetime.now(timezone.utc)
@@ -855,7 +861,7 @@ def get_weekly_plan(
                         _actionable_email_filter,
                         SalesLead.id.notin_(sent_ids) if sent_ids else True)
             )
-            fill_agencies = fill_q.order_by(PRIORITY_ORDER, SalesLead.created_at).limit(fill_a).all() if fill_a > 0 else []
+            fill_agencies = fill_q.order_by(SELF_ASSIGNED_FIRST, PRIORITY_ORDER, SalesLead.created_at).limit(fill_a).all() if fill_a > 0 else []
             day_agencies = list(sent_today_agencies) + list(fill_agencies)
 
             if is_ceo:
@@ -893,7 +899,7 @@ def get_weekly_plan(
                         SalesLead.is_contacted != True,  # noqa: E712
                         SalesLead.status.notin_(EXCLUDED_CALL_STATUSES))
             )
-            fill_call_list = fill_call_q.order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at).limit(fill_c).all() if fill_c > 0 else []
+            fill_call_list = fill_call_q.order_by(SELF_ASSIGNED_FIRST, PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at).limit(fill_c).all() if fill_c > 0 else []
             day_calls = list(today_calls) + list(fill_call_list)
 
         else:
@@ -903,7 +909,7 @@ def get_weekly_plan(
                 .filter(SalesLead.contact_email.isnot(None), SalesLead.contact_email != "",
                         SalesLead.status.notin_(EXCLUDED_LEAD_STATUSES),
                         _actionable_email_filter)
-            ).order_by(PRIORITY_ORDER, SalesLead.created_at).offset(future_agency_offset).limit(EMAILS_PER_DAY).all()
+            ).order_by(SELF_ASSIGNED_FIRST, PRIORITY_ORDER, SalesLead.created_at).offset(future_agency_offset).limit(EMAILS_PER_DAY).all()
             future_agency_offset += EMAILS_PER_DAY
 
             if is_ceo:
@@ -924,7 +930,7 @@ def get_weekly_plan(
                 .filter(SalesLead.phone.isnot(None), SalesLead.phone != "",
                         SalesLead.is_contacted != True,  # noqa: E712
                         SalesLead.status.notin_(EXCLUDED_CALL_STATUSES))
-            ).order_by(PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at).offset(future_call_offset).limit(CALLS_PER_DAY).all()
+            ).order_by(SELF_ASSIGNED_FIRST, PRIORITY_ORDER, TZ_ORDER, SalesLead.created_at).offset(future_call_offset).limit(CALLS_PER_DAY).all()
             future_call_offset += CALLS_PER_DAY
 
         # Build response items
