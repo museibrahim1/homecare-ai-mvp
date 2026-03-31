@@ -355,7 +355,7 @@ async def book_demo(
 
     email_svc = get_email_service()
 
-    verified_sender = "Muse Ibrahim <sales@send.palmtai.com>"
+    verified_sender = "Muse Ibrahim <sales@send.palmcareai.com>"
 
     services_list = ', '.join(booking.services or []) or 'Not specified'
 
@@ -424,7 +424,7 @@ async def book_demo(
         to=booking.email,
         subject=subject,
         sender=verified_sender,
-        reply_to="sales@palmtai.com",
+        reply_to="sales@palmcareai.com",
         html=prospect_html,
     )
     if not prospect_result.get("success"):

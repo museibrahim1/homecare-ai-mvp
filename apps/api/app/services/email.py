@@ -2,11 +2,15 @@
 Email Service using Resend
 
 Handles all transactional emails for the platform.
-Each email category uses a dedicated sender address:
-  - onboarding@palmtai.com  → Registration, new user onboarding
-  - welcome@palmtai.com     → Approvals, team invites, account setup
-  - sales@palmtai.com       → Demo bookings, contracts, proposals
-  - support@palmtai.com     → Password resets, support tickets, reminders
+Dual-domain strategy:
+  - palmcareai.com  → Agency outreach, product emails, onboarding, support
+  - palmtai.com     → Investor emails (corporate/fundraising identity)
+
+Sender addresses (via Resend-verified subdomains):
+  - sales@send.palmcareai.com    → Agency outreach, demos, contracts
+  - onboarding@send.palmcareai.com → Registration, new user onboarding
+  - support@send.palmcareai.com  → Password resets, support tickets
+  - invest@send.palmtai.com      → Investor outreach
 """
 
 import os
@@ -32,23 +36,27 @@ class EmailService:
         self.api_key = (os.getenv("RESEND_API_KEY") or "").strip()
         self.app_url = os.getenv("APP_URL", "https://palmcareai.com")
 
-        # Dedicated sender addresses — each maps to a verified Resend identity
+        # Product/agency emails → palmcareai.com
         self.from_onboarding = os.getenv(
-            "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@send.palmtai.com>"
+            "EMAIL_FROM_ONBOARDING", f"{BRAND} <onboarding@send.palmcareai.com>"
         )
         self.from_welcome = os.getenv(
-            "EMAIL_FROM_WELCOME", f"{BRAND} <welcome@send.palmtai.com>"
+            "EMAIL_FROM_WELCOME", f"{BRAND} <welcome@send.palmcareai.com>"
         )
         self.from_sales = os.getenv(
-            "EMAIL_FROM_SALES", "Muse Ibrahim <sales@send.palmtai.com>"
+            "EMAIL_FROM_SALES", "Muse Ibrahim <sales@send.palmcareai.com>"
         )
         self.from_support = os.getenv(
-            "EMAIL_FROM_SUPPORT", f"{BRAND} <support@send.palmtai.com>"
+            "EMAIL_FROM_SUPPORT", f"{BRAND} <support@send.palmcareai.com>"
         )
 
-        # Legacy fallback (used by generic send_email when no sender specified)
+        # Investor emails → palmtai.com (corporate identity)
+        self.from_investor = os.getenv(
+            "EMAIL_FROM_INVESTOR", "Muse Ibrahim <invest@send.palmtai.com>"
+        )
+
         self.from_email = os.getenv("EMAIL_FROM", self.from_onboarding)
-        self.support_email = os.getenv("SUPPORT_EMAIL", "support@palmtai.com")
+        self.support_email = os.getenv("SUPPORT_EMAIL", "support@palmcareai.com")
 
         if self.api_key and RESEND_AVAILABLE:
             resend.api_key = self.api_key
@@ -338,7 +346,7 @@ class EmailService:
             <div style="padding: 0 32px 32px; text-align: center;">
                 <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0;">
                     Questions? Reach us at
-                    <a href="mailto:support@palmtai.com" style="color: #0d9488; text-decoration: none; font-weight: 600;">support@palmtai.com</a>
+                    <a href="mailto:support@palmcareai.com" style="color: #0d9488; text-decoration: none; font-weight: 600;">support@palmcareai.com</a>
                     — we typically respond within a few hours.
                 </p>
             </div>
@@ -366,7 +374,7 @@ class EmailService:
         return self.send_email(
             business_email, subject, html,
             sender=self.from_onboarding,
-            reply_to="support@palmtai.com",
+            reply_to="support@palmcareai.com",
         )
     
     def send_business_approved(self, business_email: str, business_name: str, login_url: str):

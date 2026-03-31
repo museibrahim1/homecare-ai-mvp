@@ -385,7 +385,7 @@ AGENCY_FOOTER = f"""\
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 4px;">Warm regards,</p>
 <p style="font-size:15px;color:#1a1a1a;line-height:1.5;margin:0 0 4px;"><strong>The PalmCare AI Team</strong></p>
 <p style="font-size:13px;color:#888;line-height:1.5;margin:0;">Palm Technologies Inc.<br/>
-<a href="mailto:sales@palmtai.com" style="color:#0d9488;text-decoration:none;">sales@palmtai.com</a></p>"""
+<a href="mailto:sales@palmcareai.com" style="color:#0d9488;text-decoration:none;">sales@palmcareai.com</a></p>"""
 
 
 def _build_agency_html(provider_name: str, city: str, state: str) -> tuple[str, str]:
@@ -1558,8 +1558,8 @@ def approve_draft(
             to=to_email,
             subject=subject,
             html=email_body,
-            reply_to="sales@palmtai.com",
-            sender="Muse Ibrahim <sales@send.palmtai.com>",
+            reply_to="sales@palmcareai.com",
+            sender="Muse Ibrahim <sales@send.palmcareai.com>",
         )
     else:
         html_plain = f"<pre style='font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;'>{email_body}</pre>"
@@ -1571,9 +1571,9 @@ def approve_draft(
             subject=subject,
             html=html_plain,
             text=email_body,
-            reply_to="invest@palmtai.com" if target_type == "investor" else "sales@palmtai.com",
+            reply_to="invest@palmtai.com" if target_type == "investor" else "sales@palmcareai.com",
             attachments=attachments,
-            sender="Muse Ibrahim <invest@send.palmtai.com>" if target_type == "investor" else "Muse Ibrahim <sales@send.palmtai.com>",
+            sender="Muse Ibrahim <invest@send.palmtai.com>" if target_type == "investor" else "Muse Ibrahim <sales@send.palmcareai.com>",
         )
 
     if not result.get("success"):
@@ -1683,8 +1683,8 @@ def batch_send_day(
             )
             result = email_service.send_email(
                 to=lead.contact_email, subject=subj, html=body_html,
-                reply_to="sales@palmtai.com",
-                sender="Muse Ibrahim <sales@send.palmtai.com>",
+                reply_to="sales@palmcareai.com",
+                sender="Muse Ibrahim <sales@send.palmcareai.com>",
             )
             if result.get("success"):
                 lead.last_email_sent_at = now
@@ -2097,8 +2097,8 @@ def send_daily_digest(
         to=CEO_EMAILS,
         subject=subject,
         html=html,
-        sender="PalmCare AI <sales@send.palmtai.com>",
-        reply_to="sales@palmtai.com",
+        sender="PalmCare AI <sales@send.palmcareai.com>",
+        reply_to="sales@palmcareai.com",
     )
 
     return {
@@ -2456,8 +2456,8 @@ def cron_daily_digest(
         to=CEO_EMAILS,
         subject=subject,
         html=html,
-        sender="PalmCare AI <sales@send.palmtai.com>",
-        reply_to="sales@palmtai.com",
+        sender="PalmCare AI <sales@send.palmcareai.com>",
+        reply_to="sales@palmcareai.com",
     )
 
     return {
