@@ -9,12 +9,14 @@ plugins {
 
 android {
     namespace = "com.palmtechnologies.palmcareai"
-    compileSdk = 37
+    // Use an SDK platform installed in Android Studio (SDK Manager).
+    // API 37 only works after installing "Android SDK Platform 37" there.
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.palmtechnologies.palmcareai"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
