@@ -1,0 +1,5 @@
+-keepattributes *Annotation*
+-keepclassmembers class * { @kotlinx.serialization.Serializable *; }
+-keep class com.palmtechnologies.palmcareai.data.models.** { *; }
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
