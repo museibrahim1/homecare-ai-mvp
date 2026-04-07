@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Mic, ArrowLeft, Shield } from 'lucide-react';
 
-const LAST_UPDATED = 'February 22, 2026';
+const LAST_UPDATED = 'March 18, 2026';
 const COMPANY = 'PalmCare AI';
 const WEBSITE = 'palmcareai.com';
 const SUPPORT_EMAIL = 'support@palmtai.com';
@@ -63,7 +63,9 @@ export default function PrivacyPolicyPage() {
             <Subsection title="Information Collected Automatically">
               <ul className="list-disc list-inside space-y-2 text-dark-300">
                 <li><strong className="text-white">Usage & Engagement Data:</strong> Pages visited, features used, timestamps, session duration, login frequency, and interaction patterns used for platform analytics and engagement scoring.</li>
-                <li><strong className="text-white">Device Information:</strong> Browser type, operating system, IP address, and device identifiers.</li>
+                <li><strong className="text-white">Device Information:</strong> Browser type, operating system, IP address, device identifiers, screen resolution, and language preferences.</li>
+                <li><strong className="text-white">Mobile Device Data:</strong> If you access the Service through a mobile application or mobile browser, we may collect your mobile device ID, push notification tokens, device model, mobile operating system version, and mobile carrier information.</li>
+                <li><strong className="text-white">Microphone Access:</strong> The Service requests microphone permission solely for the purpose of recording care assessments. Microphone access is only activated when you explicitly initiate a recording session. We do not access your microphone in the background.</li>
                 <li><strong className="text-white">Cookies:</strong> We use essential cookies for authentication and session management. See Section 8 for details.</li>
               </ul>
             </Subsection>
@@ -199,19 +201,91 @@ export default function PrivacyPolicyPage() {
             <p className="text-dark-300">If you are a California resident, you have the right to know what personal information we collect, request its deletion, and opt out of any sale of personal information. We do not sell personal information. To make a request, contact <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a>.</p>
           </Section>
 
-          <Section title="11. Children&apos;s Privacy">
+          <Section title="11. Account & Data Deletion">
+            <p className="text-dark-300 mb-4">You have the right to delete your account and all associated data at any time. We provide multiple ways to exercise this right:</p>
+            <Subsection title="How to Delete Your Account">
+              <ul className="list-disc list-inside space-y-2 text-dark-300">
+                <li><strong className="text-white">In-App:</strong> Navigate to Settings &gt; Account &gt; Delete Account. This will initiate permanent deletion of your account and all associated data.</li>
+                <li><strong className="text-white">By Email:</strong> Send a deletion request to <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary-400 hover:text-primary-300">{PRIVACY_EMAIL}</a> from the email address associated with your account.</li>
+                <li><strong className="text-white">Via Web:</strong> Log in at {WEBSITE}, go to Settings, and select &quot;Delete Account.&quot;</li>
+              </ul>
+            </Subsection>
+            <Subsection title="What Gets Deleted">
+              <ul className="list-disc list-inside space-y-2 text-dark-300">
+                <li>Your user profile, login credentials, and account settings</li>
+                <li>All client records, assessments, care plans, and contracts you created</li>
+                <li>Audio recordings and transcripts</li>
+                <li>Billing history and subscription data (Stripe retains transaction records per their policy)</li>
+                <li>Push notification tokens and device registrations</li>
+              </ul>
+            </Subsection>
+            <Subsection title="Deletion Timeline">
+              <p className="text-dark-300">Account deletion is processed within 30 days of your request. Some data may be retained for up to 90 days in encrypted backups before permanent removal. Audit logs required by HIPAA or other legal obligations may be retained for up to 6 years as required by law, but will be disassociated from your personal identity.</p>
+            </Subsection>
+          </Section>
+
+          <Section title="12. Sensitive Health Data & Consent">
+            <p className="text-dark-300 mb-4">The Service processes sensitive health-related data including patient assessments, medical conditions, care needs, and clinical documentation. We handle this data with the highest standard of care:</p>
+            <ul className="list-disc list-inside space-y-2 text-dark-300">
+              <li><strong className="text-white">Explicit Consent:</strong> By using the Service to input or record health data, you confirm that you have obtained all necessary consents from the individuals whose health information is being processed.</li>
+              <li><strong className="text-white">Purpose Limitation:</strong> Health data is processed solely for the purpose of generating care documentation, assessments, contracts, and billing records as part of the Service. It is never used for advertising, marketing, or profiling purposes.</li>
+              <li><strong className="text-white">No Sale of Health Data:</strong> We never sell, rent, or trade health data to any third party for any purpose.</li>
+              <li><strong className="text-white">AI Processing:</strong> Health data processed by AI systems (transcription, document generation) is handled in accordance with Section 4 (HIPAA) and Section 5 (Audio Recording) of this policy. AI outputs are tools to assist healthcare professionals and do not constitute medical advice.</li>
+              <li><strong className="text-white">Minimum Necessary:</strong> We only collect and process the minimum amount of health data necessary to provide the specific Service features you use.</li>
+            </ul>
+          </Section>
+
+          <Section title="13. Third-Party Services & SDKs">
+            <p className="text-dark-300 mb-4">The Service integrates with the following third-party services. Each processes data according to their own privacy policies:</p>
+            <ul className="list-disc list-inside space-y-2 text-dark-300">
+              <li><strong className="text-white">Deepgram (Speech-to-Text):</strong> Processes audio recordings for transcription. Audio is transmitted securely and is not retained by Deepgram after processing. <a href="https://deepgram.com/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Deepgram Privacy Policy</a></li>
+              <li><strong className="text-white">Anthropic (AI Analysis):</strong> Processes transcript text for document generation (care plans, contracts, billable items). Data is not used to train Anthropic&apos;s models. <a href="https://www.anthropic.com/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Anthropic Privacy Policy</a></li>
+              <li><strong className="text-white">Stripe (Payments):</strong> Processes payment information. We do not store credit card numbers. <a href="https://stripe.com/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Stripe Privacy Policy</a></li>
+              <li><strong className="text-white">Resend (Email):</strong> Delivers transactional and service emails on our behalf. <a href="https://resend.com/legal/privacy-policy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Resend Privacy Policy</a></li>
+              <li><strong className="text-white">Railway (Hosting):</strong> Hosts our API infrastructure. All data is encrypted in transit and at rest. <a href="https://railway.app/legal/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Railway Privacy Policy</a></li>
+              <li><strong className="text-white">Google (Calendar, OAuth):</strong> Optional integration for demo scheduling and calendar sync. Only activated when you explicitly connect your Google account. <a href="https://policies.google.com/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a></li>
+            </ul>
+            <p className="text-dark-300 mt-4">We vet all third-party service providers for appropriate security and privacy practices. We do not permit any third-party SDK or service to collect data from our users for advertising or unrelated purposes.</p>
+          </Section>
+
+          <Section title="14. AI-Generated Content Disclaimer">
+            <p className="text-dark-300 mb-4">The Service uses artificial intelligence to generate documents including care plans, clinical notes, service contracts, and billable item summaries. Please be aware of the following:</p>
+            <ul className="list-disc list-inside space-y-2 text-dark-300">
+              <li><strong className="text-white">Assistance Tool:</strong> AI-generated content is intended as a professional assistance tool, not a replacement for clinical judgment, legal advice, or medical decision-making.</li>
+              <li><strong className="text-white">Review Required:</strong> All AI-generated documents should be reviewed by a qualified professional before use. You are responsible for verifying the accuracy and appropriateness of generated content.</li>
+              <li><strong className="text-white">No Guarantees:</strong> While we strive for accuracy, AI-generated content may contain errors or omissions. {COMPANY} is not liable for decisions made based on AI-generated output.</li>
+              <li><strong className="text-white">Transparency:</strong> Documents generated by AI are clearly identified as such within the Service.</li>
+            </ul>
+          </Section>
+
+          <Section title="15. International Data Transfers">
+            <p className="text-dark-300">The Service is operated from the United States. If you access the Service from outside the United States, your information may be transferred to, stored, and processed in the United States where our servers are located and our central database is operated. By using the Service, you consent to the transfer of your information to the United States. We ensure that any international data transfers are conducted with appropriate safeguards in compliance with applicable data protection laws.</p>
+          </Section>
+
+          <Section title="16. Permissions We Request">
+            <p className="text-dark-300 mb-4">The Service may request the following device permissions. Each permission is used solely for its stated purpose and can be revoked at any time through your device settings:</p>
+            <ul className="list-disc list-inside space-y-2 text-dark-300">
+              <li><strong className="text-white">Microphone:</strong> Required for recording care assessments via voice. Only active during explicit recording sessions initiated by you.</li>
+              <li><strong className="text-white">Camera:</strong> Optional. Used for document scanning or profile photo capture if you choose to use these features.</li>
+              <li><strong className="text-white">Notifications:</strong> Optional. Used to send reminders, task alerts, and team messages. Can be disabled in settings.</li>
+              <li><strong className="text-white">Internet Access:</strong> Required for core functionality including data sync, AI processing, and real-time collaboration.</li>
+              <li><strong className="text-white">Storage:</strong> Used for caching data offline and storing downloaded reports or exported documents.</li>
+            </ul>
+          </Section>
+
+          <Section title="17. Children&apos;s Privacy">
             <p className="text-dark-300">The Service is not directed to individuals under 18 years of age. We do not knowingly collect personal information from children. If we learn we have collected information from a child under 18, we will promptly delete it.</p>
           </Section>
 
-          <Section title="12. Third-Party Links">
+          <Section title="18. Third-Party Links">
             <p className="text-dark-300">The Service may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies.</p>
           </Section>
 
-          <Section title="13. Changes to This Policy">
+          <Section title="19. Changes to This Policy">
             <p className="text-dark-300">We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy on this page with a new &quot;Last updated&quot; date. For significant changes, we will also send a notification to the email associated with your account.</p>
           </Section>
 
-          <Section title="14. Contact Us">
+          <Section title="20. Contact Us">
             <p className="text-dark-300 mb-4">If you have questions or concerns about this Privacy Policy or our data practices, please contact us:</p>
             <div className="bg-dark-800 rounded-xl border border-dark-700 p-5 space-y-2">
               <p className="text-white font-medium">{COMPANY}</p>
