@@ -37,7 +37,9 @@ class VisitsViewModel @Inject constructor(private val api: PalmCareApi) : ViewMo
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                api.getVisits().body()?.let { _visits.value = it.sortedByDescending { v -> v.createdAt } }
+                api.getVisits().body()?.let { list ->
+                    _visits.value = list.items.sortedByDescending { v -> v.createdAt }
+                }
             } catch (_: Exception) {}
             _isLoading.value = false
         }

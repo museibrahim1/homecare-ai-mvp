@@ -39,7 +39,10 @@ interface PalmCareApi {
 
     // Visits
     @GET("visits")
-    suspend fun getVisits(): Response<List<Visit>>
+    suspend fun getVisits(
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 100
+    ): Response<VisitListResponse>
 
     @POST("visits")
     suspend fun createVisit(@Body visit: VisitCreate): Response<Visit>

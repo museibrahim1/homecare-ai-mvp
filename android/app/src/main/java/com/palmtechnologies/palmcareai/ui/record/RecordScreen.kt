@@ -27,6 +27,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.palmtechnologies.palmcareai.data.models.Client
+import com.palmtechnologies.palmcareai.data.models.pipelineCompleteForUi
+import com.palmtechnologies.palmcareai.data.models.uiCurrentStepLabel
+import com.palmtechnologies.palmcareai.data.models.uiProgress
 import com.palmtechnologies.palmcareai.navigation.NavRoutes
 import com.palmtechnologies.palmcareai.ui.theme.*
 
@@ -94,18 +97,18 @@ fun RecordScreen(navController: NavController, viewModel: RecordViewModel = hilt
                     Text("Processing Assessment", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(modifier = Modifier.height(12.dp))
                     LinearProgressIndicator(
-                        progress = { pipelineStatus?.progress ?: 0f },
+                        progress = { pipelineStatus?.uiProgress() ?: 0f },
                         modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                         color = Teal500,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        pipelineStatus?.currentStep?.replace("_", " ")?.replaceFirstChar { it.uppercase() } ?: "Starting...",
+                        pipelineStatus?.uiCurrentStepLabel() ?: "Starting...",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    if (pipelineStatus?.status == "completed") {
+                    if (pipelineStatus?.pipelineCompleteForUi() == true) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = {

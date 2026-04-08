@@ -210,8 +210,9 @@ class RecordViewModel @Inject constructor(
                 try {
                     val resp = api.getPipelineStatus(visitId)
                     if (resp.isSuccessful) {
-                        _pipelineStatus.value = resp.body()
-                        if (resp.body()?.status == "completed" || resp.body()?.status == "failed") return@withContext
+                        val body = resp.body()
+                        _pipelineStatus.value = body
+                        if (body?.pipelineCompleteForUi() == true || body?.status == "failed") return@withContext
                     }
                 } catch (_: Exception) {}
                 delay(3000)

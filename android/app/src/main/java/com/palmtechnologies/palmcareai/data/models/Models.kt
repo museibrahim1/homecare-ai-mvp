@@ -3,6 +3,8 @@ package com.palmtechnologies.palmcareai.data.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class LoginRequest(
@@ -31,13 +33,18 @@ data class User(
     val id: String,
     val email: String,
     @SerialName("full_name") val fullName: String? = null,
-    @SerialName("agency_name") val agencyName: String? = null,
-    @SerialName("is_admin") val isAdmin: Boolean = false,
+    /** API uses `company_name` on the User model */
+    @SerialName("company_name") val agencyName: String? = null,
+    val role: String? = null,
+    @SerialName("is_admin") val isAdminField: Boolean? = null,
     val state: String? = null,
     val phone: String? = null,
     @SerialName("is_active") val isActive: Boolean = true,
     @SerialName("google_calendar_connected") val googleCalendarConnected: Boolean = false
-)
+) {
+    val isAdmin: Boolean
+        get() = isAdminField == true || role == "admin" || role == "admin_team"
+}
 
 @Serializable
 data class Client(
@@ -91,24 +98,49 @@ data class ClientCreate(
 )
 
 @Serializable
-data class Visit(
-    val id: String,
-    @SerialName("client_id") val clientId: String,
-    @SerialName("client_name") val clientName: String? = null,
-    val status: String? = null,
-    @SerialName("visit_type") val visitType: String? = null,
-    @SerialName("created_at") val createdAt: String? = null,
-    @SerialName("updated_at") val updatedAt: String? = null,
-    @SerialName("has_transcript") val hasTranscript: Boolean = false,
-    @SerialName("has_billables") val hasBillables: Boolean = false,
-    @SerialName("has_note") val hasNote: Boolean = false,
-    @SerialName("has_contract") val hasContract: Boolean = false
+data class VisitListResponse(
+    val items: List<Visit> = emptyList(),
+    val total: Int = 0,
+    val page: Int = 1,
+    @SerialName("page_size") val pageSize: Int = 20
 )
 
 @Serializable
-data class VisitCreate(
+data class Visit(
+    val id: String,
     @SerialName("client_id") val clientId: String,
-    @SerialName("visit_type") val visitType: String = "assessment"
+    @SerialName("caregiver_id") val caregiverId: String? = null,
+    val status: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
+    val client: VisitClientEmbed? = null,
+    val caregiver: JsonElement? = null,
+    @SerialName("pipeline_state") val pipelineState: JsonObject? = null,
+    @SerialName("admin_notes") val adminNotes: String? = null
+) {
+    @Serializable
+    data class VisitClientEmbed(
+        val id: String? = null,
+        @SerialName("full_name") val fullName: String? = null
+    )
+
+    val clientName: String get() = client?.fullName ?: "Unknown"
+    val hasTranscript: Boolean get() = pipelineStepCompleted(pipelineState, "transcription")
+    val hasBillables: Boolean get() = pipelineStepCompleted(pipelineState, "billing")
+    val hasNote: Boolean get() = pipelineStepCompleted(pipelineState, "note")
+    val hasContract: Boolean get() = pipelineStepCompleted(pipelineState, "contract")
+}
+
+private fun pipelineStepCompleted(state: JsonObject?, step: String): Boolean {
+    val el = state?.get(step) ?: return false
+    val obj = el as? JsonObject ?: return false
+    val st = obj["status"]?.jsonPrimitive?.content ?: return false
+    return st == "completed"
+}
+
+@Serializable
+data class VisitCreate(
+    @SerialName("client_id") val clientId: String
 )
 
 @Serializable
@@ -172,18 +204,50 @@ data class ContractResponse(
 
 @Serializable
 data class PipelineStatus(
+    @SerialName("visit_id") val visitId: String? = null,
+    /** Visit row status: scheduled, in_progress, pending_review, approved, exported */
     val status: String? = null,
-    @SerialName("current_step") val currentStep: String? = null,
-    val steps: Map<String, String>? = null,
-    val progress: Float? = null
+    @SerialName("pipeline_state") val pipelineState: JsonObject? = null
 )
+
+private val PIPELINE_STEP_ORDER = listOf(
+    "transcription", "diarization", "alignment", "billing", "note", "contract"
+)
+
+fun PipelineStatus.uiProgress(): Float {
+    if (pipelineCompleteForUi()) return 1f
+    val done = PIPELINE_STEP_ORDER.count { pipelineStepCompleted(pipelineState, it) }
+    return done.coerceAtLeast(0).toFloat() / PIPELINE_STEP_ORDER.size.coerceAtLeast(1)
+}
+
+fun PipelineStatus.uiCurrentStepLabel(): String {
+    if (pipelineCompleteForUi()) return "Complete"
+    for (step in PIPELINE_STEP_ORDER) {
+        if (!pipelineStepCompleted(pipelineState, step)) {
+            return step.replaceFirstChar { it.uppercase() }
+        }
+    }
+    return "Processing"
+}
+
+fun PipelineStatus.pipelineCompleteForUi(): Boolean =
+    status in setOf("pending_review", "approved", "exported")
 
 @Serializable
 data class UsageStats(
-    @SerialName("visits_this_month") val visitsThisMonth: Int = 0,
-    @SerialName("visits_limit") val visitsLimit: Int = 0,
-    @SerialName("visits_remaining") val visitsRemaining: Int = 0
-)
+    @SerialName("completed_assessments") val completedAssessments: Int = 0,
+    @SerialName("total_assessments") val totalAssessments: Int = 0,
+    @SerialName("max_allowed") val maxAllowed: Int = 0,
+    @SerialName("can_create") val canCreate: Boolean = true,
+    @SerialName("plan_name") val planName: String? = null,
+    @SerialName("plan_tier") val planTier: String? = null,
+    @SerialName("has_paid_plan") val hasPaidPlan: Boolean = false,
+    @SerialName("upgrade_required") val upgradeRequired: Boolean = false
+) {
+    val visitsThisMonth: Int get() = totalAssessments
+    val visitsLimit: Int get() = maxAllowed
+    val visitsRemaining: Int get() = (maxAllowed - totalAssessments).coerceAtLeast(0)
+}
 
 @Serializable
 data class CalendarEvent(

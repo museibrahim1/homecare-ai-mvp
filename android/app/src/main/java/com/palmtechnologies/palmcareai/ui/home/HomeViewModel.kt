@@ -39,9 +39,10 @@ class HomeViewModel @Inject constructor(private val api: PalmCareApi) : ViewMode
                     api.getClients().body()?.let { _clientCount.value = it.size }
                 }
                 launch {
-                    api.getVisits().body()?.let {
-                        _visitCount.value = it.size
-                        _recentVisits.value = it.sortedByDescending { v -> v.createdAt }
+                    api.getVisits().body()?.let { list ->
+                        val items = list.items
+                        _visitCount.value = list.total
+                        _recentVisits.value = items.sortedByDescending { v -> v.createdAt }
                     }
                 }
                 launch {
