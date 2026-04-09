@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.palmtechnologies.palmcareai.ui.home.StatCard
+import com.palmtechnologies.palmcareai.ui.home.HomeStatCard
 import com.palmtechnologies.palmcareai.ui.theme.*
 
 @Composable
@@ -43,22 +43,22 @@ fun AnalyticsScreen(viewModel: AdminViewModel = hiltViewModel()) {
 
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(Modifier.weight(1f), "Total Leads", "$totalLeads", Icons.Filled.People, Teal500)
-                StatCard(Modifier.weight(1f), "Investors", "$totalInvestors", Icons.Filled.AttachMoney, Teal400)
+                HomeStatCard(Modifier.weight(1f), "Total Leads", "$totalLeads", Icons.Filled.People, Teal500, Teal500.copy(alpha = 0.08f))
+                HomeStatCard(Modifier.weight(1f), "Investors", "$totalInvestors", Icons.Filled.AttachMoney, Teal400, Teal400.copy(alpha = 0.08f))
             }
         }
 
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(Modifier.weight(1f), "Emails Sent", "$emailsSent", Icons.Filled.Email, Teal600)
-                StatCard(Modifier.weight(1f), "Opens", "$emailsOpened", Icons.Filled.Visibility, SuccessGreen)
+                HomeStatCard(Modifier.weight(1f), "Emails Sent", "$emailsSent", Icons.Filled.Email, Teal600, Teal600.copy(alpha = 0.08f))
+                HomeStatCard(Modifier.weight(1f), "Opens", "$emailsOpened", Icons.Filled.Visibility, SuccessGreen, SuccessGreen.copy(alpha = 0.08f))
             }
         }
 
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(Modifier.weight(1f), "Calls Made", "$totalCalls", Icons.Filled.Phone, WarningAmber)
-                StatCard(Modifier.weight(1f), "Unsent Emails", "${(plan?.unsentAgencyEmails ?: 0) + (plan?.unsentInvestorEmails ?: 0)}", Icons.Filled.MarkEmailUnread, ErrorRed)
+                HomeStatCard(Modifier.weight(1f), "Calls Made", "$totalCalls", Icons.Filled.Phone, WarningAmber, WarningAmber.copy(alpha = 0.08f))
+                HomeStatCard(Modifier.weight(1f), "Unsent Emails", "${(plan?.unsentAgencyEmails ?: 0) + (plan?.unsentInvestorEmails ?: 0)}", Icons.Filled.MarkEmailUnread, ErrorRed, ErrorRed.copy(alpha = 0.08f))
             }
         }
 

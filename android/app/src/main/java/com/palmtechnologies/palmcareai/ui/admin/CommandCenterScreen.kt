@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.palmtechnologies.palmcareai.ui.home.StatCard
+import com.palmtechnologies.palmcareai.ui.home.HomeStatCard
 import com.palmtechnologies.palmcareai.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,15 +70,15 @@ fun CommandCenterScreen(navController: NavController, viewModel: AdminViewModel 
         ) {
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard(Modifier.weight(1f), "Calls", "${weeklyPlan?.totalCalls ?: 0}", Icons.Filled.Phone, Teal500)
-                    StatCard(Modifier.weight(1f), "Emails", "${weeklyPlan?.totalEmails ?: 0}", Icons.Filled.Email, Teal400)
+                    HomeStatCard(Modifier.weight(1f), "Calls", "${weeklyPlan?.totalCalls ?: 0}", Icons.Filled.Phone, Teal500, Teal500.copy(alpha = 0.08f))
+                    HomeStatCard(Modifier.weight(1f), "Emails", "${weeklyPlan?.totalEmails ?: 0}", Icons.Filled.Email, Teal400, Teal400.copy(alpha = 0.08f))
                 }
             }
 
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard(Modifier.weight(1f), "Unsent", "${(weeklyPlan?.unsentAgencyEmails ?: 0) + (weeklyPlan?.unsentInvestorEmails ?: 0)}", Icons.Filled.MarkEmailUnread, WarningAmber)
-                    StatCard(Modifier.weight(1f), "Called", "${weeklyPlan?.totalCalled ?: 0}/${weeklyPlan?.totalWithPhone ?: 0}", Icons.Filled.PhoneCallback, SuccessGreen)
+                    HomeStatCard(Modifier.weight(1f), "Unsent", "${(weeklyPlan?.unsentAgencyEmails ?: 0) + (weeklyPlan?.unsentInvestorEmails ?: 0)}", Icons.Filled.MarkEmailUnread, WarningAmber, WarningAmber.copy(alpha = 0.08f))
+                    HomeStatCard(Modifier.weight(1f), "Called", "${weeklyPlan?.totalCalled ?: 0}/${weeklyPlan?.totalWithPhone ?: 0}", Icons.Filled.PhoneCallback, SuccessGreen, SuccessGreen.copy(alpha = 0.08f))
                 }
             }
 
