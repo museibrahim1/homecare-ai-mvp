@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -130,9 +134,9 @@ fun MainScreen(isAdmin: Boolean, onLogout: () -> Unit) {
     )
 
     val adminTabs = listOf(
-        BottomNavItem(NavRoutes.COMMAND_CENTER, "Command", Icons.Filled.Send, Icons.Outlined.Send),
+        BottomNavItem(NavRoutes.COMMAND_CENTER, "Command", Icons.AutoMirrored.Filled.Send, Icons.AutoMirrored.Outlined.Send),
         BottomNavItem(NavRoutes.SALES_LEADS, "Leads", Icons.Filled.TrackChanges, Icons.Outlined.TrackChanges),
-        BottomNavItem(NavRoutes.INVESTORS, "Investors", Icons.Filled.TrendingUp, Icons.Outlined.TrendingUp),
+        BottomNavItem(NavRoutes.INVESTORS, "Investors", Icons.AutoMirrored.Filled.TrendingUp, Icons.AutoMirrored.Outlined.TrendingUp),
         BottomNavItem(NavRoutes.ANALYTICS, "Analytics", Icons.Filled.BarChart, Icons.Outlined.BarChart),
         BottomNavItem(NavRoutes.SETTINGS, "More", Icons.Filled.GridView, Icons.Outlined.GridView)
     )

@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -68,7 +70,7 @@ private fun DocumentCard(doc: DocumentItem, onOpen: () -> Unit) {
         "transcript" -> Icons.Filled.RecordVoiceOver
         "timesheet", "csv" -> Icons.Filled.TableChart
         "pdf" -> Icons.Filled.PictureAsPdf
-        else -> Icons.Filled.InsertDriveFile
+        else -> Icons.AutoMirrored.Filled.InsertDriveFile
     }
 
     val typeColor = when (doc.type?.lowercase()) {
@@ -96,7 +98,7 @@ private fun DocumentCard(doc: DocumentItem, onOpen: () -> Unit) {
                 }
             }
             if (doc.url != null) {
-                Icon(Icons.Filled.OpenInNew, contentDescription = "Open", tint = Teal500, modifier = Modifier.size(20.dp))
+                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open", tint = Teal500, modifier = Modifier.size(20.dp))
             }
         }
     }

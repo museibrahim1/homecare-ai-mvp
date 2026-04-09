@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -171,7 +172,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                             Text("Start a new assessment", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        Icon(Icons.Filled.ArrowForward, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
                     }
                 }
             }

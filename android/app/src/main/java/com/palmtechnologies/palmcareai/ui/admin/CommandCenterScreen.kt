@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,7 +51,7 @@ fun CommandCenterScreen(navController: NavController, viewModel: AdminViewModel 
                         CircularProgressIndicator(modifier = Modifier.size(24.dp).padding(end = 8.dp), color = Teal500, strokeWidth = 2.dp)
                     } else {
                         IconButton(onClick = { viewModel.batchSendEmails() }) {
-                            Icon(Icons.Filled.Send, contentDescription = "Send All", tint = Teal500)
+                            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send All", tint = Teal500)
                         }
                     }
                 },
@@ -78,7 +79,7 @@ fun CommandCenterScreen(navController: NavController, viewModel: AdminViewModel 
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     HomeStatCard(Modifier.weight(1f), "Unsent", "${(weeklyPlan?.unsentAgencyEmails ?: 0) + (weeklyPlan?.unsentInvestorEmails ?: 0)}", Icons.Filled.MarkEmailUnread, WarningAmber, WarningAmber.copy(alpha = 0.08f))
-                    HomeStatCard(Modifier.weight(1f), "Called", "${weeklyPlan?.totalCalled ?: 0}/${weeklyPlan?.totalWithPhone ?: 0}", Icons.Filled.PhoneCallback, SuccessGreen, SuccessGreen.copy(alpha = 0.08f))
+                    HomeStatCard(Modifier.weight(1f), "Called", "${weeklyPlan?.totalCalled ?: 0}/${weeklyPlan?.totalWithPhone ?: 0}", Icons.Filled.PhoneInTalk, SuccessGreen, SuccessGreen.copy(alpha = 0.08f))
                 }
             }
 

@@ -16,6 +16,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -133,7 +136,7 @@ fun PalmAgentScreen(navController: NavController, isAdmin: Boolean = false, view
                 actions = {
                     IconButton(onClick = { viewModel.toggleTts() }) {
                         Icon(
-                            if (ttsEnabled) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
+                            if (ttsEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
                             contentDescription = "TTS",
                             tint = if (ttsEnabled) Teal500 else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -193,7 +196,7 @@ fun PalmAgentScreen(navController: NavController, isAdmin: Boolean = false, view
                 if (isSpeaking) {
                     item {
                         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.VolumeUp, contentDescription = null, tint = Teal500, modifier = Modifier.size(18.dp))
+                            Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = null, tint = Teal500, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("Speaking...", style = MaterialTheme.typography.bodySmall, color = Teal500)
                         }
@@ -240,7 +243,7 @@ fun PalmAgentScreen(navController: NavController, isAdmin: Boolean = false, view
                     enabled = input.isNotBlank() && !isLoading,
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = Teal600)
                 ) {
-                    Icon(Icons.Filled.Send, contentDescription = "Send")
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
                 }
             }
         }
