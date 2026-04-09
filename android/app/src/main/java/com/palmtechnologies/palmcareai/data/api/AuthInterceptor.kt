@@ -18,11 +18,18 @@ class AuthInterceptor @Inject constructor(
             }
             addHeader("Accept", "application/json")
         }.build()
-        Log.d("AuthInterceptor", "${request.method} ${request.url} auth=${!token.isNullOrBlank()}")
+        Log.d(TAG, "${request.method} ${request.url} auth=${!token.isNullOrBlank()}")
         val response = chain.proceed(request)
-        if (!response.isSuccessful) {
-            Log.w("AuthInterceptor", "${request.method} ${request.url} -> ${response.code}")
+        if (response.code == 401 && !request.url.encodedPath.contains("/auth/")) {
+            Log.w(TAG, "401 on ${request.url} — token expired or invalid, clearing stored token")
+            runBlocking { tokenManager.clear() }
+        } else if (!response.isSuccessful) {
+            Log.w(TAG, "${request.method} ${request.url} -> ${response.code}")
         }
         return response
+    }
+
+    companion object {
+        private const val TAG = "AuthInterceptor"
     }
 }

@@ -44,6 +44,16 @@ class AuthViewModel @Inject constructor(
                 fetchCurrentUser()
             }
         }
+        viewModelScope.launch {
+            tokenManager.tokenFlow.collect { token ->
+                if (token.isNullOrBlank() && _isLoggedIn.value) {
+                    Log.w(TAG, "Token cleared externally (expired/401), forcing logout")
+                    _isLoggedIn.value = false
+                    _isAdmin.value = false
+                    _user.value = null
+                }
+            }
+        }
     }
 
     fun login(email: String, password: String) {
