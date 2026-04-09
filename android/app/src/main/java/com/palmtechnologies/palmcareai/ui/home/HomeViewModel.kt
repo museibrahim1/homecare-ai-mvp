@@ -1,5 +1,6 @@
 package com.palmtechnologies.palmcareai.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
@@ -31,28 +32,78 @@ class HomeViewModel @Inject constructor(private val api: PalmCareApi) : ViewMode
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     fun refresh() {
         viewModelScope.launch {
             _isLoading.value = true
-            try {
-                launch {
-                    api.getClients().body()?.let { _clientCount.value = it.size }
-                }
-                launch {
-                    api.getVisits().body()?.let { list ->
-                        val items = list.items
-                        _visitCount.value = list.total
-                        _recentVisits.value = items.sortedByDescending { v -> v.createdAt }
+            _error.value = null
+            launch {
+                try {
+                    val resp = api.getClients()
+                    Log.d(TAG, "getClients: code=${resp.code()}")
+                    if (resp.isSuccessful) {
+                        _clientCount.value = resp.body()?.size ?: 0
+                    } else {
+                        val err = resp.errorBody()?.string()?.take(200)
+                        Log.w(TAG, "getClients failed: ${resp.code()} $err")
+                        _error.value = "Clients: ${resp.code()} $err"
                     }
+                } catch (e: Exception) {
+                    Log.e(TAG, "getClients error", e)
+                    _error.value = "Clients: ${e.message}"
                 }
-                launch {
-                    api.getUsage().body()?.let { _usage.value = it }
+            }
+            launch {
+                try {
+                    val resp = api.getVisits()
+                    Log.d(TAG, "getVisits: code=${resp.code()}")
+                    if (resp.isSuccessful) {
+                        val list = resp.body()
+                        _visitCount.value = list?.total ?: 0
+                        _recentVisits.value = list?.items?.sortedByDescending { v -> v.createdAt } ?: emptyList()
+                    } else {
+                        val err = resp.errorBody()?.string()?.take(200)
+                        Log.w(TAG, "getVisits failed: ${resp.code()} $err")
+                        if (_error.value == null) _error.value = "Visits: ${resp.code()} $err"
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "getVisits error", e)
+                    if (_error.value == null) _error.value = "Visits: ${e.message}"
                 }
-                launch {
-                    api.getCurrentUser().body()?.let { _userName.value = it.fullName?.split(" ")?.firstOrNull() }
+            }
+            launch {
+                try {
+                    val resp = api.getUsage()
+                    Log.d(TAG, "getUsage: code=${resp.code()}")
+                    if (resp.isSuccessful) {
+                        _usage.value = resp.body()
+                    } else {
+                        Log.w(TAG, "getUsage failed: ${resp.code()} ${resp.errorBody()?.string()?.take(200)}")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "getUsage error", e)
                 }
-            } catch (_: Exception) {}
+            }
+            launch {
+                try {
+                    val resp = api.getCurrentUser()
+                    Log.d(TAG, "getCurrentUser: code=${resp.code()}")
+                    if (resp.isSuccessful) {
+                        _userName.value = resp.body()?.fullName?.split(" ")?.firstOrNull()
+                    } else {
+                        Log.w(TAG, "getCurrentUser failed: ${resp.code()} ${resp.errorBody()?.string()?.take(200)}")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "getCurrentUser error", e)
+                }
+            }
             _isLoading.value = false
         }
+    }
+
+    companion object {
+        private const val TAG = "HomeVM"
     }
 }

@@ -1,5 +1,6 @@
 package com.palmtechnologies.palmcareai.ui.clients
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
@@ -34,11 +35,17 @@ class ClientsViewModel @Inject constructor(private val api: PalmCareApi) : ViewM
             _isLoading.value = true
             try {
                 val response = api.getClients()
+                Log.d("ClientsVM", "getClients: code=${response.code()}")
                 if (response.isSuccessful) {
                     _clients.value = response.body() ?: emptyList()
+                    Log.d("ClientsVM", "getClients: loaded ${_clients.value.size} clients")
+                } else {
+                    Log.w("ClientsVM", "getClients failed: ${response.code()} ${response.errorBody()?.string()?.take(200)}")
+                    _error.value = "Failed to load clients"
                 }
             } catch (e: Exception) {
-                _error.value = "Failed to load clients"
+                Log.e("ClientsVM", "getClients error", e)
+                _error.value = "Failed to load clients: ${e.message}"
             }
             _isLoading.value = false
         }

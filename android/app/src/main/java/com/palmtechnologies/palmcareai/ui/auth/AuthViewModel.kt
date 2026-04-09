@@ -1,5 +1,6 @@
 package com.palmtechnologies.palmcareai.ui.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
@@ -37,6 +38,7 @@ class AuthViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val token = tokenManager.getToken()
+            Log.d(TAG, "init: saved token present=${!token.isNullOrBlank()}")
             if (!token.isNullOrBlank()) {
                 _isLoggedIn.value = true
                 fetchCurrentUser()
@@ -50,19 +52,35 @@ class AuthViewModel @Inject constructor(
             _error.value = null
             try {
                 val request = LoginRequest(email.trim(), password)
+                Log.d(TAG, "login: trying /auth/login for $email")
                 var response = api.login(request)
+                Log.d(TAG, "login: /auth/login code=${response.code()}")
+
                 if (!response.isSuccessful) {
+                    val errBody = response.errorBody()?.string()
+                    Log.d(TAG, "login: /auth/login failed: $errBody, trying /auth/business/login")
                     response = api.businessLogin(request)
+                    Log.d(TAG, "login: /auth/business/login code=${response.code()}")
                 }
+
                 if (response.isSuccessful) {
-                    val auth = response.body()!!
-                    tokenManager.saveToken(auth.accessToken)
-                    _isLoggedIn.value = true
-                    fetchCurrentUser()
+                    val auth = response.body()
+                    Log.d(TAG, "login: success, token length=${auth?.accessToken?.length}")
+                    if (auth != null && auth.accessToken.isNotBlank()) {
+                        tokenManager.saveToken(auth.accessToken)
+                        _isLoggedIn.value = true
+                        fetchCurrentUser()
+                    } else {
+                        _error.value = "Login succeeded but no token received"
+                        Log.w(TAG, "login: empty token in response body")
+                    }
                 } else {
+                    val errBody = response.errorBody()?.string()
+                    Log.w(TAG, "login: both endpoints failed: $errBody")
                     _error.value = "Invalid email or password"
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "login: exception", e)
                 _error.value = "Connection error. Please try again."
             } finally {
                 _isLoading.value = false
@@ -83,16 +101,25 @@ class AuthViewModel @Inject constructor(
                     state = state,
                     phone = phone
                 )
+                Log.d(TAG, "register: attempting for $email")
                 val response = api.register(request)
+                Log.d(TAG, "register: code=${response.code()}")
                 if (response.isSuccessful) {
-                    val auth = response.body()!!
-                    tokenManager.saveToken(auth.accessToken)
-                    _isLoggedIn.value = true
-                    fetchCurrentUser()
+                    val auth = response.body()
+                    if (auth != null && auth.accessToken.isNotBlank()) {
+                        tokenManager.saveToken(auth.accessToken)
+                        _isLoggedIn.value = true
+                        fetchCurrentUser()
+                    } else {
+                        _error.value = "Registration succeeded but no token received"
+                    }
                 } else {
+                    val errBody = response.errorBody()?.string()
+                    Log.w(TAG, "register: failed: $errBody")
                     _error.value = "Registration failed. Email may already be in use."
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "register: exception", e)
                 _error.value = "Connection error. Please try again."
             } finally {
                 _isLoading.value = false
@@ -112,6 +139,7 @@ class AuthViewModel @Inject constructor(
                     _error.value = "Could not send reset email."
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "forgotPassword: exception", e)
                 _error.value = "Connection error. Please try again."
             } finally {
                 _isLoading.value = false
@@ -121,14 +149,20 @@ class AuthViewModel @Inject constructor(
 
     private suspend fun fetchCurrentUser() {
         try {
-            val response = api.getCurrentUser()
-            if (response.isSuccessful) {
-                val u = response.body()!!
+            val resp = api.getCurrentUser()
+            Log.d(TAG, "fetchCurrentUser: code=${resp.code()}")
+            if (resp.isSuccessful) {
+                val u = resp.body()!!
                 _user.value = u
                 _isAdmin.value = u.isAdmin
                 tokenManager.saveUserId(u.id)
+                Log.d(TAG, "fetchCurrentUser: user=${u.fullName}, admin=${u.isAdmin}")
+            } else {
+                Log.w(TAG, "fetchCurrentUser: failed ${resp.code()} ${resp.errorBody()?.string()?.take(200)}")
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.e(TAG, "fetchCurrentUser: exception", e)
+        }
     }
 
     fun logout() {
@@ -142,4 +176,8 @@ class AuthViewModel @Inject constructor(
 
     fun clearError() { _error.value = null }
     fun clearSuccess() { _successMessage.value = null }
+
+    companion object {
+        private const val TAG = "AuthVM"
+    }
 }

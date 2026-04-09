@@ -3,6 +3,7 @@ package com.palmtechnologies.palmcareai.ui.visits
 import android.app.Application
 import android.content.Intent
 import android.os.Environment
+import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -57,10 +58,18 @@ class VisitsViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                api.getVisits().body()?.let { list ->
-                    _visits.value = list.items.sortedByDescending { v -> v.createdAt }
+                val resp = api.getVisits()
+                Log.d(TAG, "getVisits: code=${resp.code()}")
+                if (resp.isSuccessful) {
+                    val list = resp.body()
+                    _visits.value = list?.items?.sortedByDescending { v -> v.createdAt } ?: emptyList()
+                    Log.d(TAG, "getVisits: loaded ${_visits.value.size} visits")
+                } else {
+                    Log.w(TAG, "getVisits failed: ${resp.code()} ${resp.errorBody()?.string()?.take(200)}")
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.e(TAG, "getVisits error", e)
+            }
             _isLoading.value = false
         }
     }
@@ -76,30 +85,54 @@ class VisitsViewModel @Inject constructor(
             _contractResponse.value = null
 
             try {
-                api.getVisit(id).body()?.let { _selectedVisit.value = it }
-                launch {
-                    try { api.getTranscript(id).body()?.let { _transcript.value = it } } catch (_: Exception) {}
-                }
-                launch {
-                    try { api.getBillables(id).body()?.let { _billables.value = it.allItems } } catch (_: Exception) {}
-                }
-                launch {
-                    try {
-                        api.getNote(id).body()?.let {
-                            _noteResponse.value = it
-                            _note.value = it.displayNote
-                        }
-                    } catch (_: Exception) {}
+                val visitResp = api.getVisit(id)
+                Log.d(TAG, "getVisit($id): code=${visitResp.code()}")
+                if (visitResp.isSuccessful) {
+                    _selectedVisit.value = visitResp.body()
+                } else {
+                    Log.w(TAG, "getVisit failed: ${visitResp.code()}")
                 }
                 launch {
                     try {
-                        api.getContract(id).body()?.let {
-                            _contractResponse.value = it
-                            _contract.value = it.displayContract
-                        }
-                    } catch (_: Exception) {}
+                        val r = api.getTranscript(id)
+                        Log.d(TAG, "getTranscript: code=${r.code()}")
+                        if (r.isSuccessful) _transcript.value = r.body()
+                    } catch (e: Exception) { Log.e(TAG, "getTranscript error", e) }
                 }
-            } catch (_: Exception) {}
+                launch {
+                    try {
+                        val r = api.getBillables(id)
+                        Log.d(TAG, "getBillables: code=${r.code()}")
+                        if (r.isSuccessful) _billables.value = r.body()?.allItems ?: emptyList()
+                    } catch (e: Exception) { Log.e(TAG, "getBillables error", e) }
+                }
+                launch {
+                    try {
+                        val r = api.getNote(id)
+                        Log.d(TAG, "getNote: code=${r.code()}")
+                        if (r.isSuccessful) {
+                            r.body()?.let {
+                                _noteResponse.value = it
+                                _note.value = it.displayNote
+                            }
+                        }
+                    } catch (e: Exception) { Log.e(TAG, "getNote error", e) }
+                }
+                launch {
+                    try {
+                        val r = api.getContract(id)
+                        Log.d(TAG, "getContract: code=${r.code()}")
+                        if (r.isSuccessful) {
+                            r.body()?.let {
+                                _contractResponse.value = it
+                                _contract.value = it.displayContract
+                            }
+                        }
+                    } catch (e: Exception) { Log.e(TAG, "getContract error", e) }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "loadVisitDetail error", e)
+            }
             _isLoading.value = false
         }
     }
@@ -191,5 +224,9 @@ class VisitsViewModel @Inject constructor(
 
     fun clearExportMessage() {
         _exportMessage.value = null
+    }
+
+    companion object {
+        private const val TAG = "VisitsVM"
     }
 }

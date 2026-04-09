@@ -1,5 +1,6 @@
 package com.palmtechnologies.palmcareai.data.api
 
+import android.util.Log
 import com.palmtechnologies.palmcareai.data.local.TokenManager
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -17,6 +18,11 @@ class AuthInterceptor @Inject constructor(
             }
             addHeader("Accept", "application/json")
         }.build()
-        return chain.proceed(request)
+        Log.d("AuthInterceptor", "${request.method} ${request.url} auth=${!token.isNullOrBlank()}")
+        val response = chain.proceed(request)
+        if (!response.isSuccessful) {
+            Log.w("AuthInterceptor", "${request.method} ${request.url} -> ${response.code}")
+        }
+        return response
     }
 }
