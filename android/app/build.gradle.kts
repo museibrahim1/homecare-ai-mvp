@@ -89,6 +89,9 @@ dependencies {
     // Biometric
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
+    // Fragment (needed for FragmentActivity + biometric)
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
+
     // Coil (image loading)
     implementation("io.coil-kt:coil-compose:2.7.0")
 

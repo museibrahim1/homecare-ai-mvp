@@ -33,7 +33,6 @@ data class User(
     val id: String,
     val email: String,
     @SerialName("full_name") val fullName: String? = null,
-    /** API uses `company_name` on the User model */
     @SerialName("company_name") val agencyName: String? = null,
     val role: String? = null,
     @SerialName("is_admin") val isAdminField: Boolean? = null,
@@ -61,12 +60,16 @@ data class Client(
     val gender: String? = null,
     @SerialName("insurance_provider") val insuranceProvider: String? = null,
     @SerialName("insurance_id") val insuranceId: String? = null,
+    @SerialName("medicaid_id") val medicaidId: String? = null,
+    @SerialName("medicare_id") val medicareId: String? = null,
     @SerialName("emergency_contact_name") val emergencyContactName: String? = null,
     @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,
     @SerialName("emergency_contact_relationship") val emergencyContactRelationship: String? = null,
     @SerialName("medical_conditions") val medicalConditions: String? = null,
     val medications: String? = null,
     val allergies: String? = null,
+    @SerialName("primary_diagnosis") val primaryDiagnosis: String? = null,
+    @SerialName("care_level") val careLevel: String? = null,
     val notes: String? = null,
     val status: String? = "active",
     @SerialName("created_at") val createdAt: String? = null,
@@ -88,12 +91,16 @@ data class ClientCreate(
     val gender: String? = null,
     @SerialName("insurance_provider") val insuranceProvider: String? = null,
     @SerialName("insurance_id") val insuranceId: String? = null,
+    @SerialName("medicaid_id") val medicaidId: String? = null,
+    @SerialName("medicare_id") val medicareId: String? = null,
     @SerialName("emergency_contact_name") val emergencyContactName: String? = null,
     @SerialName("emergency_contact_phone") val emergencyContactPhone: String? = null,
     @SerialName("emergency_contact_relationship") val emergencyContactRelationship: String? = null,
     @SerialName("medical_conditions") val medicalConditions: String? = null,
     val medications: String? = null,
     val allergies: String? = null,
+    @SerialName("primary_diagnosis") val primaryDiagnosis: String? = null,
+    @SerialName("care_level") val careLevel: String? = null,
     val notes: String? = null
 )
 
@@ -116,7 +123,8 @@ data class Visit(
     val client: VisitClientEmbed? = null,
     val caregiver: JsonElement? = null,
     @SerialName("pipeline_state") val pipelineState: JsonObject? = null,
-    @SerialName("admin_notes") val adminNotes: String? = null
+    @SerialName("admin_notes") val adminNotes: String? = null,
+    @SerialName("scheduled_start") val scheduledStart: String? = null
 ) {
     @Serializable
     data class VisitClientEmbed(
@@ -153,7 +161,9 @@ data class UploadResponse(
 @Serializable
 data class TranscriptResponse(
     val transcript: String? = null,
-    val speakers: List<SpeakerSegment>? = null
+    val speakers: List<SpeakerSegment>? = null,
+    @SerialName("word_count") val wordCount: Int? = null,
+    val duration: Double? = null
 )
 
 @Serializable
@@ -161,7 +171,8 @@ data class SpeakerSegment(
     val speaker: String? = null,
     val text: String? = null,
     val start: Double? = null,
-    val end: Double? = null
+    val end: Double? = null,
+    @SerialName("start_ms") val startMs: Long? = null
 )
 
 @Serializable
@@ -173,7 +184,10 @@ data class BillableItem(
     val rate: Double? = null,
     val total: Double? = null,
     val status: String? = "pending",
-    val category: String? = null
+    val category: String? = null,
+    val approved: Boolean? = null,
+    val denied: Boolean? = null,
+    val flagged: Boolean? = null
 )
 
 @Serializable
@@ -188,24 +202,45 @@ data class BillablesResponse(
 data class NoteResponse(
     val note: String? = null,
     val content: String? = null,
-    @SerialName("soap_note") val soapNote: String? = null
+    @SerialName("soap_note") val soapNote: String? = null,
+    @SerialName("structured_data") val structuredData: NoteStructuredData? = null
 ) {
     val displayNote: String get() = note ?: soapNote ?: content ?: ""
 }
 
 @Serializable
+data class NoteStructuredData(
+    val mood: String? = null,
+    val subjective: String? = null,
+    val objective: String? = null,
+    val assessment: String? = null,
+    val plan: String? = null,
+    val tasks: List<String>? = null,
+    val safety: String? = null,
+    @SerialName("next_visit_plan") val nextVisitPlan: String? = null,
+    @SerialName("narrative_summary") val narrativeSummary: String? = null
+)
+
+@Serializable
 data class ContractResponse(
     val contract: String? = null,
     val content: String? = null,
-    @SerialName("html_content") val htmlContent: String? = null
+    @SerialName("html_content") val htmlContent: String? = null,
+    val style: String? = null,
+    val title: String? = null,
+    val status: String? = null,
+    @SerialName("hourly_rate") val hourlyRate: Double? = null,
+    @SerialName("weekly_hours") val weeklyHours: Double? = null,
+    val services: List<String>? = null,
+    val schedule: String? = null
 ) {
     val displayContract: String get() = contract ?: htmlContent ?: content ?: ""
+    val weeklyTotal: Double? get() = if (hourlyRate != null && weeklyHours != null) hourlyRate * weeklyHours else null
 }
 
 @Serializable
 data class PipelineStatus(
     @SerialName("visit_id") val visitId: String? = null,
-    /** Visit row status: scheduled, in_progress, pending_review, approved, exported */
     val status: String? = null,
     @SerialName("pipeline_state") val pipelineState: JsonObject? = null
 )
@@ -233,6 +268,19 @@ fun PipelineStatus.uiCurrentStepLabel(): String {
 fun PipelineStatus.pipelineCompleteForUi(): Boolean =
     status in setOf("pending_review", "approved", "exported")
 
+val PIPELINE_DISPLAY_STEPS = listOf(
+    "transcription" to "Transcribe",
+    "diarization" to "Speakers",
+    "billing" to "Billables",
+    "note" to "Notes",
+    "contract" to "Contract"
+)
+
+fun PipelineStatus.stepStatus(step: String): String {
+    val el = pipelineState?.get(step) as? JsonObject ?: return "pending"
+    return el["status"]?.jsonPrimitive?.content ?: "pending"
+}
+
 @Serializable
 data class UsageStats(
     @SerialName("completed_assessments") val completedAssessments: Int = 0,
@@ -247,6 +295,7 @@ data class UsageStats(
     val visitsThisMonth: Int get() = totalAssessments
     val visitsLimit: Int get() = maxAllowed
     val visitsRemaining: Int get() = (maxAllowed - totalAssessments).coerceAtLeast(0)
+    val isAtLimit: Boolean get() = !canCreate || upgradeRequired
 }
 
 @Serializable
@@ -271,6 +320,12 @@ data class CalendarEventCreate(
 )
 
 @Serializable
+data class CalendarStatusResponse(
+    val connected: Boolean = false,
+    val email: String? = null
+)
+
+@Serializable
 data class DocumentItem(
     val id: String? = null,
     val name: String? = null,
@@ -284,6 +339,15 @@ data class DocumentItem(
 @Serializable
 data class DocumentsResponse(
     val documents: List<DocumentItem>? = null
+)
+
+@Serializable
+data class ContractTemplate(
+    val id: String,
+    val name: String? = null,
+    val description: String? = null,
+    @SerialName("is_active") val isActive: Boolean = true,
+    @SerialName("created_at") val createdAt: String? = null
 )
 
 @Serializable
@@ -311,16 +375,30 @@ data class CheckoutResponse(
 @Serializable
 data class AgentChatRequest(
     val message: String,
-    val context: String? = null
+    val context: String? = null,
+    val history: List<AgentHistoryItem>? = null
+)
+
+@Serializable
+data class AgentHistoryItem(
+    val role: String,
+    val content: String
 )
 
 @Serializable
 data class AgentChatResponse(
     val response: String? = null,
-    val message: String? = null
+    val message: String? = null,
+    val files: List<AgentFile>? = null
 ) {
     val text: String get() = response ?: message ?: ""
 }
+
+@Serializable
+data class AgentFile(
+    val filename: String? = null,
+    val url: String? = null
+)
 
 @Serializable
 data class OutreachWeeklyPlan(
@@ -359,7 +437,8 @@ data class OutreachDraft(
     val body: String? = null,
     @SerialName("to_email") val toEmail: String? = null,
     @SerialName("to_name") val toName: String? = null,
-    val status: String? = null
+    val status: String? = null,
+    val type: String? = null
 )
 
 @Serializable
@@ -400,6 +479,24 @@ data class LiveTranscriptResponse(
 ) {
     val displayText: String get() = text ?: transcript ?: ""
 }
+
+@Serializable
+data class TaskItem(
+    val id: String,
+    val title: String? = null,
+    val description: String? = null,
+    val status: String? = null,
+    @SerialName("due_date") val dueDate: String? = null,
+    @SerialName("completed_at") val completedAt: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
+)
+
+@Serializable
+data class TaskCreate(
+    val title: String,
+    val description: String? = null,
+    @SerialName("due_date") val dueDate: String? = null
+)
 
 @Serializable
 data class ForgotPasswordRequest(val email: String)

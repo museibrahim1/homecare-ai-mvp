@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
 import com.palmtechnologies.palmcareai.data.models.Client
 import com.palmtechnologies.palmcareai.data.models.ClientCreate
+import com.palmtechnologies.palmcareai.data.models.Visit
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,9 @@ class ClientsViewModel @Inject constructor(private val api: PalmCareApi) : ViewM
     private val _selectedClient = MutableStateFlow<Client?>(null)
     val selectedClient: StateFlow<Client?> = _selectedClient
 
+    private val _clientVisits = MutableStateFlow<List<Visit>>(emptyList())
+    val clientVisits: StateFlow<List<Visit>> = _clientVisits
+
     fun loadClients() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -42,13 +46,20 @@ class ClientsViewModel @Inject constructor(private val api: PalmCareApi) : ViewM
 
     fun loadClient(id: String) {
         viewModelScope.launch {
-            val client = _clients.value.find { it.id == id }
-            if (client != null) {
-                _selectedClient.value = client
-            } else {
+            var client = _clients.value.find { it.id == id }
+            if (client == null) {
                 loadClients()
-                _selectedClient.value = _clients.value.find { it.id == id }
+                client = _clients.value.find { it.id == id }
             }
+            _selectedClient.value = client
+
+            try {
+                api.getVisits().body()?.let { list ->
+                    _clientVisits.value = list.items
+                        .filter { it.clientId == id }
+                        .sortedByDescending { it.createdAt }
+                }
+            } catch (_: Exception) {}
         }
     }
 
@@ -69,4 +80,25 @@ class ClientsViewModel @Inject constructor(private val api: PalmCareApi) : ViewM
             _isLoading.value = false
         }
     }
+
+    fun updateClient(id: String, body: Map<String, Any?>, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = api.updateClient(id, body)
+                if (response.isSuccessful) {
+                    _selectedClient.value = response.body()
+                    loadClients()
+                    onSuccess()
+                } else {
+                    _error.value = "Failed to update client"
+                }
+            } catch (e: Exception) {
+                _error.value = "Connection error"
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun clearError() { _error.value = null }
 }

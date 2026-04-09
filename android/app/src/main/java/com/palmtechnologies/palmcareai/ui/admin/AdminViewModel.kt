@@ -24,10 +24,16 @@ class AdminViewModel @Inject constructor(private val api: PalmCareApi) : ViewMod
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    fun loadWeeklyPlan() {
+    private val _isSending = MutableStateFlow(false)
+    val isSending: StateFlow<Boolean> = _isSending
+
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message
+
+    fun loadWeeklyPlan(weekOffset: Int = 0) {
         viewModelScope.launch {
             _isLoading.value = true
-            try { api.getWeeklyPlan().body()?.let { _weeklyPlan.value = it } } catch (_: Exception) {}
+            try { api.getWeeklyPlan(weekOffset).body()?.let { _weeklyPlan.value = it } } catch (_: Exception) {}
             _isLoading.value = false
         }
     }
@@ -40,7 +46,25 @@ class AdminViewModel @Inject constructor(private val api: PalmCareApi) : ViewMod
 
     fun approveDraft(draftId: String) {
         viewModelScope.launch {
-            try { api.approveDraft(draftId); loadWeeklyPlan() } catch (_: Exception) {}
+            try {
+                api.generateDraft(mapOf("draft_id" to draftId))
+                api.approveDraft(draftId)
+                loadWeeklyPlan()
+            } catch (_: Exception) {}
+        }
+    }
+
+    fun batchSendEmails() {
+        viewModelScope.launch {
+            _isSending.value = true
+            try {
+                val resp = api.batchSend(mapOf("send_all" to true))
+                _message.value = resp.body()?.message ?: "Emails sent"
+                loadWeeklyPlan()
+            } catch (e: Exception) {
+                _message.value = "Failed to send: ${e.message}"
+            }
+            _isSending.value = false
         }
     }
 
@@ -59,4 +83,6 @@ class AdminViewModel @Inject constructor(private val api: PalmCareApi) : ViewMod
             _isLoading.value = false
         }
     }
+
+    fun clearMessage() { _message.value = null }
 }

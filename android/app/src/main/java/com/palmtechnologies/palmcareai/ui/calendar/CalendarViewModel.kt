@@ -22,15 +22,20 @@ class CalendarViewModel @Inject constructor(private val api: PalmCareApi) : View
     fun loadEvents() {
         viewModelScope.launch {
             _isLoading.value = true
-            try { api.getCalendarEvents().body()?.let { _events.value = it } } catch (_: Exception) {}
+            try { api.getCalendarEvents().body()?.let { _events.value = it.sortedBy { e -> e.start } } } catch (_: Exception) {}
             _isLoading.value = false
         }
     }
 
-    fun createEvent(title: String, date: String) {
+    fun createEvent(title: String, date: String, time: String = "09:00", description: String = "") {
         viewModelScope.launch {
             try {
-                api.createCalendarEvent(CalendarEventCreate(title = title, start = "${date}T09:00:00"))
+                val start = "${date}T${time}:00"
+                api.createCalendarEvent(CalendarEventCreate(
+                    title = title,
+                    start = start,
+                    description = description.ifBlank { null }
+                ))
                 loadEvents()
             } catch (_: Exception) {}
         }

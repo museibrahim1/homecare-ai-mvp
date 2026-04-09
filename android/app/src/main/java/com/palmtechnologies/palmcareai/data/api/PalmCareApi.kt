@@ -3,6 +3,7 @@ package com.palmtechnologies.palmcareai.data.api
 import com.palmtechnologies.palmcareai.data.models.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -26,6 +27,9 @@ interface PalmCareApi {
 
     @PUT("auth/business/profile")
     suspend fun updateProfile(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<User>
+
+    @POST("auth/change-password")
+    suspend fun changePassword(@Body body: Map<String, String>): Response<MessageResponse>
 
     // Clients
     @GET("clients")
@@ -101,9 +105,32 @@ interface PalmCareApi {
         @Query("diarize") diarize: Boolean = true
     ): Response<LiveTranscriptResponse>
 
+    // Exports (download files)
+    @GET("exports/visits/{id}/note.pdf")
+    @Streaming
+    suspend fun exportNotePdf(@Path("id") id: String): Response<ResponseBody>
+
+    @GET("exports/visits/{id}/contract.pdf")
+    @Streaming
+    suspend fun exportContractPdf(@Path("id") id: String): Response<ResponseBody>
+
+    @GET("exports/visits/{id}/timesheet.csv")
+    @Streaming
+    suspend fun exportTimesheetCsv(@Path("id") id: String): Response<ResponseBody>
+
+    @GET("exports/visits/{id}/contract.docx")
+    @Streaming
+    suspend fun exportContractDocx(@Path("id") id: String): Response<ResponseBody>
+
     // Calendar
+    @GET("calendar/status")
+    suspend fun getCalendarStatus(): Response<CalendarStatusResponse>
+
     @GET("calendar/events")
-    suspend fun getCalendarEvents(): Response<List<CalendarEvent>>
+    suspend fun getCalendarEvents(
+        @Query("start_date") startDate: String? = null,
+        @Query("end_date") endDate: String? = null
+    ): Response<List<CalendarEvent>>
 
     @POST("calendar/events")
     suspend fun createCalendarEvent(@Body event: CalendarEventCreate): Response<CalendarEvent>
@@ -111,9 +138,19 @@ interface PalmCareApi {
     @DELETE("calendar/events/{id}")
     suspend fun deleteCalendarEvent(@Path("id") id: String): Response<MessageResponse>
 
+    @POST("calendar/connect")
+    suspend fun connectCalendar(@Body body: Map<String, String>): Response<MessageResponse>
+
+    @POST("calendar/disconnect")
+    suspend fun disconnectCalendar(): Response<MessageResponse>
+
     // Documents
     @GET("documents")
     suspend fun getDocuments(): Response<DocumentsResponse>
+
+    // Contract templates
+    @GET("contract-templates/")
+    suspend fun getContractTemplates(): Response<List<ContractTemplate>>
 
     // Billing
     @GET("billing/subscription")
@@ -129,9 +166,13 @@ interface PalmCareApi {
     @POST("platform/agent/chat")
     suspend fun agentChat(@Body request: AgentChatRequest): Response<AgentChatResponse>
 
+    @POST("platform/agent/tts")
+    @Streaming
+    suspend fun agentTts(@Body body: Map<String, String>): Response<ResponseBody>
+
     // Admin: Outreach
     @GET("platform/outreach/weekly-plan")
-    suspend fun getWeeklyPlan(): Response<OutreachWeeklyPlan>
+    suspend fun getWeeklyPlan(@Query("week_offset") weekOffset: Int = 0): Response<OutreachWeeklyPlan>
 
     @POST("platform/outreach/generate-draft")
     suspend fun generateDraft(@Body body: Map<String, String>): Response<OutreachDraft>
@@ -158,4 +199,20 @@ interface PalmCareApi {
         @Query("skip") skip: Int = 0,
         @Query("limit") limit: Int = 100
     ): Response<List<InvestorRecord>>
+
+    // Notes/Tasks
+    @GET("notes/tasks")
+    suspend fun getTasks(): Response<List<TaskItem>>
+
+    @POST("notes/tasks")
+    suspend fun createTask(@Body task: TaskCreate): Response<TaskItem>
+
+    @PUT("notes/tasks/{id}")
+    suspend fun updateTask(@Path("id") id: String, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<TaskItem>
+
+    @PUT("notes/tasks/{id}/complete")
+    suspend fun completeTask(@Path("id") id: String): Response<TaskItem>
+
+    @DELETE("notes/tasks/{id}")
+    suspend fun deleteTask(@Path("id") id: String): Response<MessageResponse>
 }

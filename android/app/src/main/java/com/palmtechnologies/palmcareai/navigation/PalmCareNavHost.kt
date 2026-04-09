@@ -1,6 +1,7 @@
 package com.palmtechnologies.palmcareai.navigation
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -10,7 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -18,11 +22,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.palmtechnologies.palmcareai.data.local.TokenManager
 import com.palmtechnologies.palmcareai.ui.auth.*
 import com.palmtechnologies.palmcareai.ui.home.HomeScreen
 import com.palmtechnologies.palmcareai.ui.clients.ClientsScreen
 import com.palmtechnologies.palmcareai.ui.clients.ClientDetailScreen
 import com.palmtechnologies.palmcareai.ui.clients.AddClientScreen
+import com.palmtechnologies.palmcareai.ui.clients.EditClientScreen
 import com.palmtechnologies.palmcareai.ui.record.RecordScreen
 import com.palmtechnologies.palmcareai.ui.visits.VisitsScreen
 import com.palmtechnologies.palmcareai.ui.visits.VisitDetailScreen
@@ -36,6 +42,8 @@ import com.palmtechnologies.palmcareai.ui.admin.SalesLeadsScreen
 import com.palmtechnologies.palmcareai.ui.admin.InvestorsScreen
 import com.palmtechnologies.palmcareai.ui.admin.AnalyticsScreen
 import com.palmtechnologies.palmcareai.ui.theme.Teal500
+import com.palmtechnologies.palmcareai.ui.theme.Teal600
+import javax.inject.Inject
 
 data class BottomNavItem(
     val route: String,
@@ -189,6 +197,10 @@ fun MainScreen(isAdmin: Boolean, onLogout: () -> Unit) {
                 ClientDetailScreen(clientId = clientId, navController = innerNav)
             }
             composable(NavRoutes.ADD_CLIENT) { AddClientScreen(navController = innerNav) }
+            composable(NavRoutes.EDIT_CLIENT) { backStackEntry ->
+                val clientId = backStackEntry.arguments?.getString("clientId") ?: return@composable
+                EditClientScreen(clientId = clientId, navController = innerNav)
+            }
             composable(NavRoutes.RECORD) { RecordScreen(navController = innerNav) }
             composable(NavRoutes.VISITS) { VisitsScreen(navController = innerNav) }
             composable(NavRoutes.VISIT_DETAIL) { backStackEntry ->
@@ -199,7 +211,7 @@ fun MainScreen(isAdmin: Boolean, onLogout: () -> Unit) {
             composable(NavRoutes.DOCUMENTS) { DocumentsScreen() }
             composable(NavRoutes.SETTINGS) { SettingsScreen(navController = innerNav, onLogout = onLogout) }
             composable(NavRoutes.SUBSCRIPTION) { SubscriptionScreen(navController = innerNav) }
-            composable(NavRoutes.AGENT) { PalmAgentScreen(navController = innerNav) }
+            composable(NavRoutes.AGENT) { PalmAgentScreen(navController = innerNav, isAdmin = isAdmin) }
             composable(NavRoutes.COMMAND_CENTER) { CommandCenterScreen(navController = innerNav) }
             composable(NavRoutes.SALES_LEADS) { SalesLeadsScreen() }
             composable(NavRoutes.INVESTORS) { InvestorsScreen() }

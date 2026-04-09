@@ -10,6 +10,7 @@ object NavRoutes {
     const val CLIENTS = "clients"
     const val CLIENT_DETAIL = "client_detail/{clientId}"
     const val ADD_CLIENT = "add_client"
+    const val EDIT_CLIENT = "edit_client/{clientId}"
     const val RECORD = "record"
     const val VISITS = "visits"
     const val VISIT_DETAIL = "visit_detail/{visitId}"
@@ -24,5 +25,6 @@ object NavRoutes {
     const val ANALYTICS = "analytics"
 
     fun clientDetail(id: String) = "client_detail/$id"
+    fun editClient(id: String) = "edit_client/$id"
     fun visitDetail(id: String) = "visit_detail/$id"
 }
