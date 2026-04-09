@@ -66,7 +66,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.compose.runtime:runtime-livedata")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.5")
@@ -91,9 +90,6 @@ dependencies {
 
     // Fragment (needed for FragmentActivity + biometric)
     implementation("androidx.fragment:fragment-ktx:1.8.5")
-
-    // Coil (image loading)
-    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Accompanist
     implementation("com.google.accompanist:accompanist-permissions:0.36.0")

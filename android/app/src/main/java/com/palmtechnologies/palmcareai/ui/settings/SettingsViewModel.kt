@@ -1,6 +1,7 @@
 package com.palmtechnologies.palmcareai.ui.settings
 
 import android.content.Context
+import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "SettingsVM"
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -54,10 +57,18 @@ class SettingsViewModel @Inject constructor(
     fun loadData() {
         viewModelScope.launch {
             launch {
-                try { api.getSubscription().body()?.let { _subscription.value = it } } catch (_: Exception) {}
+                try {
+                    api.getSubscription().body()?.let { _subscription.value = it }
+                } catch (e: Exception) {
+                    Log.w(TAG, "loadSubscription: ${e.message}")
+                }
             }
             launch {
-                try { api.getUsage().body()?.let { _usage.value = it } } catch (_: Exception) {}
+                try {
+                    api.getUsage().body()?.let { _usage.value = it }
+                } catch (e: Exception) {
+                    Log.w(TAG, "loadUsage: ${e.message}")
+                }
             }
         }
     }
@@ -105,14 +116,10 @@ class SettingsViewModel @Inject constructor(
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Enable Biometric Login")
             .setSubtitle("Verify your identity to enable biometric login")
-            .setNegativeBtnText("Cancel")
+            .setNegativeButtonText("Cancel")
             .build()
 
         prompt.authenticate(promptInfo)
-    }
-
-    private fun BiometricPrompt.PromptInfo.Builder.setNegativeBtnText(text: String): BiometricPrompt.PromptInfo.Builder {
-        return setNegativeButtonText(text)
     }
 
     fun disableBiometric() {
@@ -126,7 +133,9 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.updateProfile(mapOf("owner_name" to name, "phone" to phone.ifBlank { null }))
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.w(TAG, "updateProfile: ${e.message}")
+            }
         }
     }
 
@@ -134,7 +143,9 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.changePassword(mapOf("current_password" to currentPassword, "new_password" to newPassword))
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.w(TAG, "changePassword: ${e.message}")
+            }
         }
     }
 
@@ -142,6 +153,8 @@ class SettingsViewModel @Inject constructor(
         try {
             context.cacheDir.deleteRecursively()
             android.webkit.CookieManager.getInstance().removeAllCookies(null)
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.w(TAG, "clearCache: ${e.message}")
+        }
     }
 }

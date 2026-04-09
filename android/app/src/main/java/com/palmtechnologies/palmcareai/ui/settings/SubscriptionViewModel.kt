@@ -1,5 +1,6 @@
 package com.palmtechnologies.palmcareai.ui.settings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
@@ -10,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "SubscriptionVM"
 
 @HiltViewModel
 class SubscriptionViewModel @Inject constructor(private val api: PalmCareApi) : ViewModel() {
@@ -25,10 +28,20 @@ class SubscriptionViewModel @Inject constructor(private val api: PalmCareApi) : 
     fun load() {
         viewModelScope.launch {
             _isLoading.value = true
-            try {
-                launch { api.getPlans().body()?.let { _plans.value = it } }
-                launch { api.getSubscription().body()?.let { _subscription.value = it } }
-            } catch (_: Exception) {}
+            launch {
+                try {
+                    api.getPlans().body()?.let { _plans.value = it }
+                } catch (e: Exception) {
+                    Log.w(TAG, "loadPlans: ${e.message}")
+                }
+            }
+            launch {
+                try {
+                    api.getSubscription().body()?.let { _subscription.value = it }
+                } catch (e: Exception) {
+                    Log.w(TAG, "loadSubscription: ${e.message}")
+                }
+            }
             _isLoading.value = false
         }
     }
@@ -37,7 +50,9 @@ class SubscriptionViewModel @Inject constructor(private val api: PalmCareApi) : 
         viewModelScope.launch {
             try {
                 api.checkout(mapOf("plan_id" to planId)).body()?.url?.let { onUrl(it) }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.w(TAG, "checkout: ${e.message}")
+            }
         }
     }
 }

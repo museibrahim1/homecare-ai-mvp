@@ -1,5 +1,6 @@
 package com.palmtechnologies.palmcareai.ui.documents
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
@@ -21,7 +22,11 @@ class DocumentsViewModel @Inject constructor(private val api: PalmCareApi) : Vie
     fun loadDocuments() {
         viewModelScope.launch {
             _isLoading.value = true
-            try { api.getDocuments().body()?.documents?.let { _documents.value = it } } catch (_: Exception) {}
+            try {
+                api.getDocuments().body()?.documents?.let { _documents.value = it }
+            } catch (e: Exception) {
+                Log.w("DocumentsVM", "loadDocuments: ${e.message}")
+            }
             _isLoading.value = false
         }
     }

@@ -1,5 +1,6 @@
 package com.palmtechnologies.palmcareai.ui.calendar
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
@@ -10,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "CalendarVM"
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(private val api: PalmCareApi) : ViewModel() {
@@ -22,7 +25,11 @@ class CalendarViewModel @Inject constructor(private val api: PalmCareApi) : View
     fun loadEvents() {
         viewModelScope.launch {
             _isLoading.value = true
-            try { api.getCalendarEvents().body()?.let { _events.value = it.sortedBy { e -> e.start } } } catch (_: Exception) {}
+            try {
+                api.getCalendarEvents().body()?.let { _events.value = it.sortedBy { e -> e.start } }
+            } catch (e: Exception) {
+                Log.w(TAG, "loadEvents: ${e.message}")
+            }
             _isLoading.value = false
         }
     }
@@ -37,13 +44,20 @@ class CalendarViewModel @Inject constructor(private val api: PalmCareApi) : View
                     description = description.ifBlank { null }
                 ))
                 loadEvents()
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.w(TAG, "createEvent: ${e.message}")
+            }
         }
     }
 
     fun deleteEvent(id: String) {
         viewModelScope.launch {
-            try { api.deleteCalendarEvent(id); loadEvents() } catch (_: Exception) {}
+            try {
+                api.deleteCalendarEvent(id)
+                loadEvents()
+            } catch (e: Exception) {
+                Log.w(TAG, "deleteEvent: ${e.message}")
+            }
         }
     }
 }

@@ -127,7 +127,7 @@ fun AddClientScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Select specialty") },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     shape = RoundedCornerShape(12.dp),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = specialtyExpanded) }
                 )
@@ -167,7 +167,7 @@ fun AddClientScreen(
 
             Button(
                 onClick = {
-                    if (isEditing && editingClient != null) {
+                    if (editingClient != null) {
                         viewModel.updateClient(editingClient.id, buildUpdateBody(
                             fullName, email, phone, address, city, state, zipCode, dateOfBirth, gender,
                             careLevel, primaryDiagnosis, emergencyName, emergencyPhone, emergencyRelationship,

@@ -1,5 +1,6 @@
 package com.palmtechnologies.palmcareai.ui.admin
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
@@ -9,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "AdminVM"
 
 @HiltViewModel
 class AdminViewModel @Inject constructor(private val api: PalmCareApi) : ViewModel() {
@@ -33,14 +36,23 @@ class AdminViewModel @Inject constructor(private val api: PalmCareApi) : ViewMod
     fun loadWeeklyPlan(weekOffset: Int = 0) {
         viewModelScope.launch {
             _isLoading.value = true
-            try { api.getWeeklyPlan(weekOffset).body()?.let { _weeklyPlan.value = it } } catch (_: Exception) {}
+            try {
+                api.getWeeklyPlan(weekOffset).body()?.let { _weeklyPlan.value = it }
+            } catch (e: Exception) {
+                Log.w(TAG, "loadWeeklyPlan: ${e.message}")
+            }
             _isLoading.value = false
         }
     }
 
     fun markCalled(leadId: String) {
         viewModelScope.launch {
-            try { api.markCalled(leadId); loadWeeklyPlan() } catch (_: Exception) {}
+            try {
+                api.markCalled(leadId)
+                loadWeeklyPlan()
+            } catch (e: Exception) {
+                Log.w(TAG, "markCalled: ${e.message}")
+            }
         }
     }
 
@@ -50,7 +62,9 @@ class AdminViewModel @Inject constructor(private val api: PalmCareApi) : ViewMod
                 api.generateDraft(mapOf("draft_id" to draftId))
                 api.approveDraft(draftId)
                 loadWeeklyPlan()
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.w(TAG, "approveDraft: ${e.message}")
+            }
         }
     }
 
@@ -71,7 +85,11 @@ class AdminViewModel @Inject constructor(private val api: PalmCareApi) : ViewMod
     fun loadSalesLeads() {
         viewModelScope.launch {
             _isLoading.value = true
-            try { api.getSalesLeads().body()?.let { _salesLeads.value = it } } catch (_: Exception) {}
+            try {
+                api.getSalesLeads().body()?.let { _salesLeads.value = it }
+            } catch (e: Exception) {
+                Log.w(TAG, "loadSalesLeads: ${e.message}")
+            }
             _isLoading.value = false
         }
     }
@@ -79,7 +97,11 @@ class AdminViewModel @Inject constructor(private val api: PalmCareApi) : ViewMod
     fun loadInvestors() {
         viewModelScope.launch {
             _isLoading.value = true
-            try { api.getInvestors().body()?.let { _investors.value = it } } catch (_: Exception) {}
+            try {
+                api.getInvestors().body()?.let { _investors.value = it }
+            } catch (e: Exception) {
+                Log.w(TAG, "loadInvestors: ${e.message}")
+            }
             _isLoading.value = false
         }
     }

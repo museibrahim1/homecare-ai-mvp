@@ -86,8 +86,15 @@ class RecordViewModel @Inject constructor(
     fun loadClients() {
         viewModelScope.launch {
             try {
-                api.getClients().body()?.let { _clients.value = it }
-            } catch (_: Exception) {}
+                val resp = api.getClients()
+                if (resp.isSuccessful) {
+                    _clients.value = resp.body() ?: emptyList()
+                } else {
+                    android.util.Log.w("RecordVM", "loadClients: ${resp.code()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("RecordVM", "loadClients error", e)
+            }
         }
     }
 
@@ -311,7 +318,9 @@ class RecordViewModel @Inject constructor(
                         _uploadProgress.value = body?.uiCurrentStepLabel() ?: "Processing..."
                         if (body?.pipelineCompleteForUi() == true || body?.status == "failed") return@withContext
                     }
-                } catch (_: Exception) {}
+                } catch (e: Exception) {
+                    android.util.Log.w("RecordVM", "pollPipeline error: ${e.message}")
+                }
                 delay(2000)
             }
         }
