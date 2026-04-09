@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -43,7 +42,6 @@ import com.palmtechnologies.palmcareai.ui.admin.InvestorsScreen
 import com.palmtechnologies.palmcareai.ui.admin.AnalyticsScreen
 import com.palmtechnologies.palmcareai.ui.theme.Teal500
 import com.palmtechnologies.palmcareai.ui.theme.Teal600
-import javax.inject.Inject
 
 data class BottomNavItem(
     val route: String,

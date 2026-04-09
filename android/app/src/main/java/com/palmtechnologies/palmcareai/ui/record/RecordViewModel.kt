@@ -144,7 +144,7 @@ class RecordViewModel @Inject constructor(
 
                 launch(Dispatchers.IO) { writeAudioToFile(bufferSize) }
                 launch { tickTimer() }
-                launch { collectLiveTranscription() }
+                collectLiveTranscription()
             } catch (e: Exception) {
                 _error.value = "Recording failed: ${e.message}"
                 _isRecording.value = false
@@ -206,12 +206,12 @@ class RecordViewModel @Inject constructor(
         }
     }
 
-    private suspend fun collectLiveTranscription() {
+    private fun collectLiveTranscription() {
         liveTranscriptionService?.let { service ->
-            launch {
+            viewModelScope.launch {
                 service.fullTranscript.collect { _liveTranscript.value = it }
             }
-            launch {
+            viewModelScope.launch {
                 service.segments.collect { _liveSegments.value = it }
             }
         }

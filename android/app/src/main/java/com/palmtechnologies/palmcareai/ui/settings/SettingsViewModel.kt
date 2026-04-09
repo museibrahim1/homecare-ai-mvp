@@ -1,7 +1,6 @@
 package com.palmtechnologies.palmcareai.ui.settings
 
 import android.content.Context
-import android.webkit.URLUtil
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat

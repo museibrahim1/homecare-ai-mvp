@@ -4,7 +4,6 @@ import android.app.Application
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.speech.SpeechRecognizer
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.palmtechnologies.palmcareai.data.api.PalmCareApi
