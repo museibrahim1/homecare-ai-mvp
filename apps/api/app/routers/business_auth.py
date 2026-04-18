@@ -541,10 +541,34 @@ async def login(
     
     # Update last login
     user.last_login = datetime.now(timezone.utc)
+
+    # Find or create a linked User row so all /clients, /visits, /auth/me
+    # endpoints (which query the `users` table via get_current_user) work
+    # for business accounts. The User row is identified by email.
+    api_user = db.query(User).filter(User.email == user.email).first()
+    if api_user is None:
+        api_user = User(
+            email=user.email,
+            hashed_password=user.password_hash,  # reuse same hash
+            full_name=user.full_name or user.email.split("@")[0],
+            role="user",
+            is_active=True,
+            phone=user.phone,
+            company_name=business.legal_name,
+        )
+        db.add(api_user)
+        db.flush()
+        logger.info(f"Created linked User row {api_user.id} for BusinessUser {user.id} ({user.email})")
+
     db.commit()
-    
-    # Create token
-    token = create_access_token({"sub": str(user.id), "business_id": str(business.id)})
+
+    # IMPORTANT: token sub MUST be the User.id (not BusinessUser.id) so
+    # downstream endpoints can resolve the user via get_current_user.
+    token = create_access_token({
+        "sub": str(api_user.id),
+        "business_id": str(business.id),
+        "business_user_id": str(user.id),
+    })
     
     return BusinessLoginResponse(
         access_token=token,

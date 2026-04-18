@@ -17,10 +17,24 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         UserDefaults.standard.bool(forKey: "backgroundRecording")
     }
 
+    // PCM format constants. Kept here so LiveTranscriptionService can
+    // synthesize a matching WAV header for incremental chunk uploads.
+    static let sampleRate: Double = 16000
+    static let channels: UInt32 = 1
+    static let bitDepth: UInt32 = 16
+    static let wavHeaderSize: Int = 44
+
     func startRecording() throws {
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothA2DP])
-        try session.setActive(true, options: .notifyOthersOnDeactivation)
+        // .allowBluetoothA2DP is output-only; .allowBluetooth enables HFP for
+        // headset microphones (AirPods, etc). Use .measurement mode to disable
+        // automatic gain that distorts soft speech in care environments.
+        try session.setCategory(
+            .playAndRecord,
+            mode: .measurement,
+            options: [.defaultToSpeaker, .allowBluetooth]
+        )
+        try session.setActive(true)
 
         if backgroundRecordingEnabled {
             DispatchQueue.main.async { [weak self] in
@@ -48,9 +62,9 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         // atom only on stop(), making it unreadable while recording.
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatLinearPCM),
-            AVSampleRateKey: 16000.0,
-            AVNumberOfChannelsKey: 1,
-            AVLinearPCMBitDepthKey: 16,
+            AVSampleRateKey: AudioRecorderService.sampleRate,
+            AVNumberOfChannelsKey: Int(AudioRecorderService.channels),
+            AVLinearPCMBitDepthKey: Int(AudioRecorderService.bitDepth),
             AVLinearPCMIsBigEndianKey: false,
             AVLinearPCMIsFloatKey: false,
         ]
