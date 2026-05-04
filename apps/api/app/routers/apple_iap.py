@@ -19,14 +19,14 @@ Set up in App Store Connect:
   1. Create a Subscription Group (e.g. "PalmCare Plans").
   2. Add three auto-renewing subscriptions with these product IDs (must
      match `APPLE_PRODUCT_TIER_MAP` below):
-        com.palmtechnologies.palmcare.starter.monthly
-        com.palmtechnologies.palmcare.growth.monthly
-        com.palmtechnologies.palmcare.pro.monthly
+        com.palmcareai.app.starter.monthly
+        com.palmcareai.app.growth.monthly
+        com.palmcareai.app.pro.monthly
   3. Add the same products to the App Store Connect API Issuer with a
      "Customer Communications" key so refund / cancel webhooks work.
 
 Env vars:
-  APPLE_BUNDLE_ID            - com.palmtechnologies.palmcare
+  APPLE_BUNDLE_ID            - com.palmcareai.app
   APPLE_TEAM_ID              - QFS97GTYJH
   APPLE_ENVIRONMENT          - "Production" | "Sandbox" (default Production)
 
@@ -62,13 +62,13 @@ router = APIRouter()
 # Map App Store Connect product IDs → internal plan tier.
 # Must stay in sync with the iOS `StoreManager` `productIDs` list.
 APPLE_PRODUCT_TIER_MAP: dict[str, PlanTier] = {
-    "com.palmtechnologies.palmcare.starter.monthly": PlanTier.STARTER,
-    "com.palmtechnologies.palmcare.growth.monthly": PlanTier.GROWTH,
-    "com.palmtechnologies.palmcare.pro.monthly": PlanTier.PROFESSIONAL,
+    "com.palmcareai.app.starter.monthly": PlanTier.STARTER,
+    "com.palmcareai.app.growth.monthly": PlanTier.GROWTH,
+    "com.palmcareai.app.pro.monthly": PlanTier.PROFESSIONAL,
 }
 
 
-APPLE_BUNDLE_ID = os.getenv("APPLE_BUNDLE_ID", "com.palmtechnologies.palmcare")
+APPLE_BUNDLE_ID = os.getenv("APPLE_BUNDLE_ID", "com.palmcareai.app")
 APPLE_ENVIRONMENT = (os.getenv("APPLE_ENVIRONMENT") or "Production").strip()
 APPLE_IS_PRODUCTION = APPLE_ENVIRONMENT.lower() == "production"
 

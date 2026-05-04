@@ -23,7 +23,7 @@
 - [ ] In **Xcode → Settings → Accounts**, add your Apple Developer account
 - [ ] In your **project target → Signing & Capabilities**:
   - Set **Team** to your developer account/organization
-  - Verify **Bundle ID** is `com.palmtechnologies.palmcare`
+  - Verify **Bundle ID** is `com.palmcareai.app`
   - Enable **"Automatically manage signing"**
   - Xcode will create the provisioning profile and certificates automatically
 
@@ -52,7 +52,7 @@
   - **Platform**: iOS
   - **Name**: PalmCare AI
   - **Primary Language**: English (U.S.)
-  - **Bundle ID**: `com.palmtechnologies.palmcare`
+  - **Bundle ID**: `com.palmcareai.app`
   - **SKU**: `palmcare-ai-ios`
 
 ### 4b. App Information

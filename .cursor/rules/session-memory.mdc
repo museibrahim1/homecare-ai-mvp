@@ -186,7 +186,7 @@ Clean, modern SaaS. Lots of white space, minimal decoration, teal dominant accen
 
 | Item | Value |
 |------|-------|
-| Bundle ID | `com.palmtechnologies.palmcare` |
+| Bundle ID | `com.palmcareai.app` |
 | Display Name | PalmCare AI |
 | Deployment Target | iOS 16.0 |
 | Version | 1.0.0 (Build 1) |

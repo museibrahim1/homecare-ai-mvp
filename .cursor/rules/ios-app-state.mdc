@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Architecture
 - **SwiftUI** app targeting iOS 16+, built with **XcodeGen** (`project.yml`)
-- Bundle ID: `com.palmtechnologies.palmcare`, Team: `QFS97GTYJH`
+- Bundle ID: `com.palmcareai.app`, Team: `QFS97GTYJH`
 - API base: configurable via `Info.plist` → `API_BASE_URL`, fallback `https://api-production-a0a2.up.railway.app`
 - Auth tokens stored in **Keychain** via `KeychainHelper`
 

@@ -9,7 +9,7 @@ be configured for first submission. The codebase changes are already in place
 ## 1. App Store Connect
 
 ### 1a. Create the app record
-- Bundle ID: `com.palmtechnologies.palmcare`
+- Bundle ID: `com.palmcareai.app`
 - Primary category: **Business**
 - Secondary category: **Productivity**
   - Avoid `Medical` for v1.0 — it triggers stricter review and an additional
@@ -49,9 +49,9 @@ The product IDs **must** match the constants in
 
 | Product ID | Display Name | Price (USD/mo) | Notes |
 | ---------- | ------------ | -------------: | ----- |
-| `com.palmtechnologies.palmcare.starter.monthly` | Starter | 89.99 | 5 visits/mo |
-| `com.palmtechnologies.palmcare.growth.monthly` | Growth | 199.00 | 25 visits/mo (most popular) |
-| `com.palmtechnologies.palmcare.pro.monthly` | Pro | 399.00 | 50 visits/mo |
+| `com.palmcareai.app.starter.monthly` | Starter | 89.99 | 5 visits/mo |
+| `com.palmcareai.app.growth.monthly` | Growth | 199.00 | 25 visits/mo (most popular) |
+| `com.palmcareai.app.pro.monthly` | Pro | 399.00 | 50 visits/mo |
 
 For each product, fill out:
 - Subscription duration: **1 month, auto-renewing**
@@ -91,7 +91,7 @@ Add these to the production API service:
 
 | Var | Value |
 | --- | ----- |
-| `APPLE_BUNDLE_ID` | `com.palmtechnologies.palmcare` |
+| `APPLE_BUNDLE_ID` | `com.palmcareai.app` |
 | `APPLE_ENVIRONMENT` | `Production` |
 | `APPLE_ROOT_CERTS_DIR` | `/app/secrets/apple-root-certs` |
 | `APPLE_TEAM_ID` | `QFS97GTYJH` |

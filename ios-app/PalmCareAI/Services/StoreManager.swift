@@ -18,9 +18,9 @@ final class StoreManager: ObservableObject {
     static let shared = StoreManager()
 
     // Keep these as constants so they can't drift between code paths.
-    static let starterMonthlyID = "com.palmtechnologies.palmcare.starter.monthly"
-    static let growthMonthlyID = "com.palmtechnologies.palmcare.growth.monthly"
-    static let proMonthlyID = "com.palmtechnologies.palmcare.pro.monthly"
+    static let starterMonthlyID = "com.palmcareai.app.starter.monthly"
+    static let growthMonthlyID = "com.palmcareai.app.growth.monthly"
+    static let proMonthlyID = "com.palmcareai.app.pro.monthly"
 
     static let allProductIDs: [String] = [
         starterMonthlyID,
