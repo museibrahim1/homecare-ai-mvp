@@ -36,7 +36,8 @@ targets:
         CFBundlePackageType: APPL
         CFBundleExecutable: $(EXECUTABLE_NAME)
         UILaunchScreen: {}
-        UIRequiresFullScreen: true
+        # iPad Multitasking is required by App Review (4.0). Do not set
+        # UIRequiresFullScreen unless we have a documented reason.
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UISupportedInterfaceOrientations~ipad:
@@ -44,8 +45,12 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        NSMicrophoneUsageDescription: "PalmCareAI needs microphone access to record client visits and assessments."
-        NSSpeechRecognitionUsageDescription: "PalmCareAI uses speech recognition for voice commands with the Palm AI assistant."
+        # Background audio is required so visit recordings continue when the
+        # screen locks or another app is foregrounded mid-assessment.
+        UIBackgroundModes:
+          - audio
+        NSMicrophoneUsageDescription: "PalmCareAI uses the microphone to record client visits and assessments. Recording continues in the background only while a visit is in progress, and audio is processed solely for transcription, billing, and contract generation."
+        NSSpeechRecognitionUsageDescription: "PalmCareAI uses on-device speech recognition for hands-free voice commands with the Palm AI assistant."
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: false
           NSExceptionDomains:

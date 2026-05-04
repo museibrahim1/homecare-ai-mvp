@@ -1,35 +1,24 @@
 import SwiftUI
+import StoreKit
 
-// MARK: - Local plan data (fallback when API unavailable)
-
-struct LocalPlan: Identifiable {
-    let id: String
-    let name: String
-    let runs: String
-    let priceMonthly: String
-    let isPopular: Bool
-}
-
-private let hardcodedPlans: [LocalPlan] = [
-    LocalPlan(id: "starter", name: "Starter", runs: "15", priceMonthly: "$199", isPopular: false),
-    LocalPlan(id: "growth", name: "Growth", runs: "25", priceMonthly: "$349", isPopular: true),
-    LocalPlan(id: "pro", name: "Pro", runs: "50", priceMonthly: "$599", isPopular: false),
-]
-
-// MARK: - Subscription View
-
+/// In-app subscription paywall backed by StoreKit 2.
+///
+/// Apple App Review Guideline 3.1.1: digital subscriptions consumed inside
+/// an iOS app must be sold via in-app purchase. We never link out to Stripe
+/// from this screen. Web users continue to use Stripe via the marketing
+/// site; iOS users use Apple IAP, which the backend reconciles into the
+/// same `Subscription` model.
 struct SubscriptionView: View {
     @EnvironmentObject var api: APIService
+    @StateObject private var store = StoreManager.shared
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
 
     var showLimitBanner: Bool = true
 
-    @State private var remotePlans: [SubscriptionPlan] = []
-    @State private var selectedPlanIndex: Int = 1
-    @State private var isLoading = false
-    @State private var checkoutLoading: String?
+    @State private var purchasingProductID: String?
+    @State private var isRestoring = false
     @State private var errorMessage: String?
+    @State private var successMessage: String?
 
     var body: some View {
         ZStack {
@@ -39,15 +28,19 @@ struct SubscriptionView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     header
-                    if showLimitBanner { usageBanner }
-                    planCards
+                    if showLimitBanner && store.currentTier == nil { usageBanner }
+                    if let currentTier = store.currentTier {
+                        currentPlanCard(tier: currentTier)
+                    }
+                    planList
                     enterpriseCard
+                    legalAndRestore
                     footerNote
                 }
                 .padding(.bottom, 40)
             }
         }
-        .task { await loadPlans() }
+        .task { await store.loadProducts() }
     }
 
     // MARK: - Header
@@ -80,13 +73,13 @@ struct SubscriptionView: View {
                 )
                 .padding(.top, 8)
 
-            Text("Upgrade Your Plan")
+            Text("Choose Your Plan")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(.white)
 
-            Text("Unlock more assessments and grow your practice")
+            Text("Unlock more assessments and grow your practice.")
                 .font(.system(size: 14))
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.white.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         }
@@ -115,11 +108,10 @@ struct SubscriptionView: View {
                 Text("Plan Limit Reached")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
-                Text("Choose a plan below to continue running assessments")
+                Text("Choose a plan below to keep recording assessments.")
                     .font(.system(size: 12))
                     .foregroundColor(.white.opacity(0.5))
             }
-
             Spacer()
         }
         .padding(16)
@@ -135,145 +127,269 @@ struct SubscriptionView: View {
         .padding(.bottom, 20)
     }
 
-    // MARK: - Plan Cards
+    // MARK: - Current Plan
 
-    private var planCards: some View {
-        let displayPlans: [(id: String, name: String, runs: String, price: String, isPopular: Bool)] = {
-            if !remotePlans.isEmpty {
-                return remotePlans.filter { !$0.isEnterprise }.map { plan in
-                    (
-                        id: plan.id,
-                        name: plan.name,
-                        runs: plan.max_users.map { "\($0)" } ?? "∞",
-                        price: plan.displayPrice,
-                        isPopular: plan.tier?.lowercased() == "growth"
+    private func currentPlanCard(tier: PalmTier) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "checkmark.seal.fill")
+                .font(.system(size: 18))
+                .foregroundColor(.palmGreen)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(tier.displayName) plan active")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white)
+                Text("Manage or cancel in Settings → Apple ID → Subscriptions.")
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.55))
+            }
+            Spacer()
+            Button {
+                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("Manage")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.palmPrimary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.palmPrimary.opacity(0.15))
+                    .cornerRadius(10)
+            }
+            .accessibilityLabel("Manage Apple subscription")
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.palmGreen.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.palmGreen.opacity(0.25), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Plan List
+
+    private var planList: some View {
+        VStack(spacing: 12) {
+            if store.isLoadingProducts && store.products.isEmpty {
+                ProgressView()
+                    .tint(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
+            } else if store.products.isEmpty {
+                emptyStateCard
+            } else {
+                ForEach(store.products, id: \.id) { product in
+                    StoreKitPlanCard(
+                        product: product,
+                        isCurrent: store.purchasedProductIDs.contains(product.id),
+                        isPurchasing: purchasingProductID == product.id,
+                        onPurchase: { Task { await purchase(product) } }
                     )
                 }
-            }
-            return hardcodedPlans.map { (id: $0.id, name: $0.name, runs: $0.runs, price: $0.priceMonthly, isPopular: $0.isPopular) }
-        }()
-
-        return VStack(spacing: 12) {
-            ForEach(Array(displayPlans.enumerated()), id: \.element.id) { index, plan in
-                PlanCard(
-                    plan: LocalPlan(id: plan.id, name: plan.name, runs: plan.runs, priceMonthly: plan.price, isPopular: plan.isPopular),
-                    isSelected: selectedPlanIndex == index,
-                    isCheckingOut: checkoutLoading == plan.id,
-                    onSelect: { selectedPlanIndex = index },
-                    onSubscribe: { await subscribe(planId: plan.id, planName: plan.name) }
-                )
             }
         }
         .padding(.horizontal, 20)
     }
 
-    // MARK: - Enterprise Card
+    private var emptyStateCard: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 28))
+                .foregroundColor(.white.opacity(0.5))
+            Text("Couldn't load plans")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white.opacity(0.7))
+            Text("Check your connection and try again.")
+                .font(.system(size: 12))
+                .foregroundColor(.white.opacity(0.4))
+            Button { Task { await store.loadProducts() } } label: {
+                Text("Retry")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.palmPrimary)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.palmPrimary.opacity(0.15))
+                    .cornerRadius(10)
+            }
+            .padding(.top, 4)
+        }
+        .padding(.vertical, 20)
+        .frame(maxWidth: .infinity)
+        .background(Color.white.opacity(0.04))
+        .cornerRadius(14)
+    }
+
+    // MARK: - Enterprise
 
     private var enterpriseCard: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                Image(systemName: "building.2.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(.palmAccent)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Enterprise")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("Unlimited runs · Custom pricing · Dedicated support")
-                        .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.5))
-                }
-
-                Spacer()
-
-                Button {
-                    if let url = URL(string: "mailto:sales@palmtechnologies.co?subject=Enterprise%20Plan%20Inquiry") {
-                        openURL(url)
-                    }
-                } label: {
-                    Text("Contact Sales")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.palmPrimary)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(Color.palmPrimary.opacity(0.12))
-                        .cornerRadius(20)
-                }
-                .accessibilityLabel("Contact sales for enterprise plan")
+        HStack(spacing: 12) {
+            Image(systemName: "building.2.fill")
+                .font(.system(size: 20))
+                .foregroundColor(.palmAccent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Enterprise")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                Text("Unlimited runs · Custom pricing · Dedicated support")
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.5))
             }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.04))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
-                    )
-            )
+            Spacer()
+            Button {
+                if let url = URL(string: "mailto:sales@palmtai.com?subject=Enterprise%20Plan%20Inquiry") {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text("Contact Sales")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.palmPrimary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.palmPrimary.opacity(0.12))
+                    .cornerRadius(20)
+            }
+            .accessibilityLabel("Contact sales for enterprise plan")
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.04))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                )
+        )
         .padding(.horizontal, 20)
         .padding(.top, 16)
+    }
+
+    // MARK: - Legal & Restore
+
+    /// App Review requires links to your EULA + privacy policy and a
+    /// "Restore Purchases" affordance reachable on the paywall.
+    private var legalAndRestore: some View {
+        VStack(spacing: 14) {
+            Button { Task { await restorePurchases() } } label: {
+                HStack(spacing: 6) {
+                    if isRestoring {
+                        ProgressView().tint(.white).scaleEffect(0.7)
+                    }
+                    Text(isRestoring ? "Restoring…" : "Restore Purchases")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .foregroundColor(.white.opacity(0.7))
+            }
+            .disabled(isRestoring)
+            .accessibilityLabel("Restore previous purchases")
+
+            HStack(spacing: 18) {
+                Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.55))
+                Link("Privacy Policy", destination: URL(string: "https://palmcareai.com/legal/privacy")!)
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.55))
+            }
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.red.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            if let successMessage {
+                Text(successMessage)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.palmGreen)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+        }
+        .padding(.top, 24)
+        .padding(.horizontal, 20)
     }
 
     // MARK: - Footer
 
     private var footerNote: some View {
         VStack(spacing: 6) {
-            Text("All plans billed monthly · Cancel anytime")
+            Text("Subscriptions auto-renew monthly until cancelled. Manage or cancel any time in Settings → Apple ID → Subscriptions, at least 24 hours before renewal.")
                 .font(.system(size: 11))
-                .foregroundColor(.white.opacity(0.3))
-            if let error = errorMessage {
-                Text(error)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.red.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-            }
+                .foregroundColor(.white.opacity(0.35))
+                .multilineTextAlignment(.center)
         }
-        .padding(.top, 20)
+        .padding(.top, 16)
+        .padding(.horizontal, 24)
     }
 
     // MARK: - Actions
 
-    private func loadPlans() async {
+    private func purchase(_ product: Product) async {
+        await MainActor.run {
+            purchasingProductID = product.id
+            errorMessage = nil
+            successMessage = nil
+        }
         do {
-            remotePlans = try await api.fetchPlans()
+            _ = try await store.purchase(product)
+            await MainActor.run {
+                successMessage = "Welcome to PalmCare \(product.displayName)!"
+                purchasingProductID = nil
+            }
+        } catch StoreError.userCancelled {
+            await MainActor.run { purchasingProductID = nil }
         } catch {
-            // Use hardcoded plans as fallback
+            await MainActor.run {
+                errorMessage = error.localizedDescription
+                purchasingProductID = nil
+            }
         }
     }
 
-    private func subscribe(planId: String, planName: String) async {
-        checkoutLoading = planId
-
+    private func restorePurchases() async {
+        await MainActor.run {
+            isRestoring = true
+            errorMessage = nil
+            successMessage = nil
+        }
         do {
-            let checkout = try await api.createCheckout(planId: planId)
-            if let url = URL(string: checkout.checkout_url) {
-                await MainActor.run { openURL(url) }
+            try await store.restorePurchases()
+            await MainActor.run {
+                isRestoring = false
+                successMessage = store.currentTier == nil
+                    ? "No previous purchases found on this Apple ID."
+                    : "Subscription restored."
             }
         } catch {
             await MainActor.run {
-                errorMessage = "Could not start checkout. Please try again."
+                isRestoring = false
+                errorMessage = error.localizedDescription
             }
         }
-
-        await MainActor.run { checkoutLoading = nil }
     }
 }
 
-// MARK: - Plan Card
+// MARK: - Plan Card backed by StoreKit Product
 
-struct PlanCard: View {
-    let plan: LocalPlan
-    let isSelected: Bool
-    let isCheckingOut: Bool
-    let onSelect: () -> Void
-    let onSubscribe: () async -> Void
+struct StoreKitPlanCard: View {
+    let product: Product
+    let isCurrent: Bool
+    let isPurchasing: Bool
+    let onPurchase: () -> Void
+
+    private var isPopular: Bool {
+        product.id == StoreManager.growthMonthlyID
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            if plan.isPopular {
+            if isPopular && !isCurrent {
                 HStack {
                     Spacer()
                     Label("Most Popular", systemImage: "star.fill")
@@ -293,64 +409,49 @@ struct PlanCard: View {
                 }
             }
 
-            HStack(alignment: .top, spacing: 14) {
-                Button { onSelect() } label: {
-                    ZStack {
-                        Circle()
-                            .stroke(isSelected ? Color.palmPrimary : Color.white.opacity(0.2), lineWidth: 2)
-                            .frame(width: 22, height: 22)
-                        if isSelected {
-                            Circle()
-                                .fill(Color.palmPrimary)
-                                .frame(width: 14, height: 14)
-                        }
-                    }
-                }
-                .accessibilityLabel("Select \(plan.name) plan")
-                .padding(.top, 2)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(plan.name)
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-
-                        Text("\(plan.runs) runs/mo")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.palmPrimary)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(product.displayName)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                    Spacer()
+                    if isCurrent {
+                        Text("Current")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.palmGreen)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color.palmPrimary.opacity(0.12))
+                            .background(Color.palmGreen.opacity(0.12))
                             .cornerRadius(8)
-                    }
-
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(plan.priceMonthly)
-                            .font(.system(size: 28, weight: .heavy))
-                            .foregroundColor(.white)
-                        Text("/ month")
-                            .font(.system(size: 13))
-                            .foregroundColor(.white.opacity(0.4))
                     }
                 }
 
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 16)
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(product.displayPrice)
+                        .font(.system(size: 28, weight: .heavy))
+                        .foregroundColor(.white)
+                    Text("/ month")
+                        .font(.system(size: 13))
+                        .foregroundColor(.white.opacity(0.4))
+                }
 
-            if isSelected {
-                Button {
-                    Task { await onSubscribe() }
-                } label: {
+                Text(product.description)
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.55))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(16)
+
+            if !isCurrent {
+                Button(action: onPurchase) {
                     HStack(spacing: 8) {
-                        if isCheckingOut {
-                            ProgressView().tint(.white).scaleEffect(0.8)
+                        if isPurchasing {
+                            ProgressView().tint(.white).scaleEffect(0.85)
                         } else {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.system(size: 16))
                         }
-                        Text("Subscribe to \(plan.name)")
+                        Text(isPurchasing ? "Processing…" : "Subscribe")
                             .font(.system(size: 15, weight: .bold))
                     }
                     .foregroundColor(.white)
@@ -365,25 +466,25 @@ struct PlanCard: View {
                     )
                     .cornerRadius(14)
                 }
-                .accessibilityLabel("Subscribe to \(plan.name)")
-                .disabled(isCheckingOut)
+                .disabled(isPurchasing)
+                .accessibilityLabel("Subscribe to \(product.displayName)")
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
         }
         .background(
             RoundedRectangle(cornerRadius: 18)
-                .fill(isSelected ? Color.palmPrimary.opacity(0.06) : Color.white.opacity(0.04))
+                .fill(isCurrent ? Color.palmGreen.opacity(0.05) : Color.white.opacity(0.04))
                 .overlay(
                     RoundedRectangle(cornerRadius: 18)
                         .stroke(
-                            isSelected ? Color.palmPrimary.opacity(0.4) : Color.white.opacity(0.08),
-                            lineWidth: isSelected ? 1.5 : 1
+                            isCurrent
+                                ? Color.palmGreen.opacity(0.35)
+                                : (isPopular ? Color.palmPrimary.opacity(0.4) : Color.white.opacity(0.08)),
+                            lineWidth: isCurrent || isPopular ? 1.5 : 1
                         )
                 )
         )
-        .onTapGesture { onSelect() }
-        .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
 }
 

@@ -7,11 +7,16 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
     @Published var duration: TimeInterval = 0
     @Published var recordingURL: URL?
     @Published var audioLevel: Float = 0
+    /// Set when the system interrupts recording (phone call, Siri, etc.)
+    /// so the UI can show a recoverable banner.
+    @Published var isInterrupted = false
 
     private var audioRecorder: AVAudioRecorder?
     private var timer: Timer?
     private var levelTimer: Timer?
     private var previousIdleTimerDisabled = false
+    private var backgroundTaskId: UIBackgroundTaskIdentifier = .invalid
+    private var didRegisterNotificationObservers = false
 
     private var backgroundRecordingEnabled: Bool {
         UserDefaults.standard.bool(forKey: "backgroundRecording")
@@ -35,6 +40,9 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
             options: [.defaultToSpeaker, .allowBluetooth]
         )
         try session.setActive(true)
+
+        registerSessionObserversIfNeeded()
+        beginBackgroundTaskIfNeeded()
 
         if backgroundRecordingEnabled {
             DispatchQueue.main.async { [weak self] in
@@ -109,6 +117,7 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
         levelTimer?.invalidate()
         levelTimer = nil
         isRecording = false
+        isInterrupted = false
         audioLevel = 0
 
         DispatchQueue.main.async { [weak self] in
@@ -118,7 +127,122 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
 
         let url = recordingURL
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        endBackgroundTaskIfNeeded()
         return url
+    }
+
+    // MARK: - Background Continuity
+
+    /// Hold a UIApplication background task while recording so writes flush
+    /// even if the user briefly switches apps before the audio session
+    /// reaches the background-audio mode.
+    private func beginBackgroundTaskIfNeeded() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            guard self.backgroundTaskId == .invalid else { return }
+            self.backgroundTaskId = UIApplication.shared.beginBackgroundTask(
+                withName: "PalmCareRecording"
+            ) { [weak self] in
+                self?.endBackgroundTaskIfNeeded()
+            }
+        }
+    }
+
+    private func endBackgroundTaskIfNeeded() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            guard self.backgroundTaskId != .invalid else { return }
+            UIApplication.shared.endBackgroundTask(self.backgroundTaskId)
+            self.backgroundTaskId = .invalid
+        }
+    }
+
+    // MARK: - Audio Session Observers
+
+    private func registerSessionObserversIfNeeded() {
+        guard !didRegisterNotificationObservers else { return }
+        didRegisterNotificationObservers = true
+
+        let nc = NotificationCenter.default
+        nc.addObserver(
+            self,
+            selector: #selector(handleInterruption(_:)),
+            name: AVAudioSession.interruptionNotification,
+            object: nil
+        )
+        nc.addObserver(
+            self,
+            selector: #selector(handleRouteChange(_:)),
+            name: AVAudioSession.routeChangeNotification,
+            object: nil
+        )
+        nc.addObserver(
+            self,
+            selector: #selector(handleMediaServicesReset(_:)),
+            name: AVAudioSession.mediaServicesWereResetNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleInterruption(_ notification: Notification) {
+        guard let info = notification.userInfo,
+              let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
+
+        switch type {
+        case .began:
+            DispatchQueue.main.async { [weak self] in
+                self?.isInterrupted = true
+            }
+        case .ended:
+            // Resume only if the system asks us to and we were recording.
+            let optionsValue = info[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
+            let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+            guard options.contains(.shouldResume),
+                  let recorder = audioRecorder,
+                  isRecording else {
+                DispatchQueue.main.async { [weak self] in self?.isInterrupted = false }
+                return
+            }
+            do {
+                try AVAudioSession.sharedInstance().setActive(true)
+                if !recorder.isRecording {
+                    recorder.record()
+                }
+            } catch {
+                // If reactivation fails, surface the interrupted state.
+            }
+            DispatchQueue.main.async { [weak self] in self?.isInterrupted = false }
+        @unknown default:
+            break
+        }
+    }
+
+    @objc private func handleRouteChange(_ notification: Notification) {
+        // When headphones unplug or a Bluetooth device disconnects,
+        // iOS may pause the recorder. Restart it without losing the file.
+        guard let info = notification.userInfo,
+              let reasonValue = info[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else { return }
+        guard isRecording, let recorder = audioRecorder else { return }
+
+        switch reason {
+        case .oldDeviceUnavailable, .newDeviceAvailable, .override:
+            if !recorder.isRecording {
+                recorder.record()
+            }
+        default:
+            break
+        }
+    }
+
+    @objc private func handleMediaServicesReset(_ notification: Notification) {
+        // Rare: media daemon crashed. The recorder is dead; we have to
+        // surface this as an error so the visit is not silently lost.
+        DispatchQueue.main.async { [weak self] in
+            self?.isRecording = false
+            self?.isInterrupted = false
+        }
     }
 
     func requestPermission() async -> Bool {
@@ -168,6 +292,9 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
     deinit {
         timer?.invalidate()
         levelTimer?.invalidate()
+        if didRegisterNotificationObservers {
+            NotificationCenter.default.removeObserver(self)
+        }
     }
 }
 

@@ -38,13 +38,15 @@
 		</dict>
 	</dict>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>PalmCareAI needs microphone access to record client visits and assessments.</string>
+	<string>PalmCareAI uses the microphone to record client visits and assessments. Recording continues in the background only while a visit is in progress, and audio is processed solely for transcription, billing, and contract generation.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>PalmCareAI uses speech recognition for voice commands with the Palm AI assistant.</string>
+	<string>PalmCareAI uses on-device speech recognition for hands-free voice commands with the Palm AI assistant.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
-	<key>UIRequiresFullScreen</key>
-	<true/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

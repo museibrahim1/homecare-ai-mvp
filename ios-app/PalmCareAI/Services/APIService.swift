@@ -616,6 +616,22 @@ class APIService: ObservableObject {
     func forgotPassword(email: String) async throws {
         let _: [String: AnyCodable] = try await request("POST", path: "/auth/forgot-password", body: ["email": email], noAuth: true)
     }
+
+    // MARK: - Account Deletion (App Store Guideline 5.1.1(v))
+
+    /// Permanently delete the authenticated account and all associated data.
+    /// Backend enforces password re-auth and the literal "DELETE MY ACCOUNT" confirmation.
+    func deleteAccount(password: String) async throws {
+        let _: [String: AnyCodable] = try await request(
+            "POST",
+            path: "/auth/delete-account",
+            body: [
+                "password": password,
+                "confirmation": "DELETE MY ACCOUNT",
+            ]
+        )
+        await MainActor.run { self.token = nil }
+    }
     
     // MARK: - Profile
     

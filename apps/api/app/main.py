@@ -82,6 +82,7 @@ from app.routers import (
     admin_platform,
     reports,
     stripe_billing,
+    apple_iap,
     calendar,
     drive,
     gmail,
@@ -204,6 +205,7 @@ app.include_router(business_auth.router, prefix="/auth/business", tags=["Busines
 app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 app.include_router(admin_platform.router, prefix="/platform", tags=["Platform Admin"])
 app.include_router(stripe_billing.router, prefix="/billing", tags=["Billing"])
+app.include_router(apple_iap.router, prefix="/billing/apple", tags=["Apple IAP"])
 app.include_router(calendar.router, prefix="/calendar", tags=["Google Calendar"])
 app.include_router(drive.router, prefix="/drive", tags=["Google Drive"])
 app.include_router(gmail.router, prefix="/gmail", tags=["Gmail"])

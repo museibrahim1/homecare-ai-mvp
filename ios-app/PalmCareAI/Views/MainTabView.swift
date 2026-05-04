@@ -47,6 +47,10 @@ struct MainTabView: View {
             do {
                 currentUser = try await api.fetchUser()
             } catch { /* non-critical */ }
+            // Re-validate App Store entitlements on every launch so renewals,
+            // refunds, or device changes are reflected before the user can
+            // hit a paywalled action.
+            await StoreManager.shared.refreshPurchasedProducts()
         }
         .onChange(of: currentUser?.isAdmin) { _ in
             selectedTab = 0
