@@ -326,7 +326,7 @@ struct FormField: View {
                     .foregroundColor(.palmText)
                     .keyboardType(keyboardType)
                     .textContentType(contentType)
-                    .autocapitalization(keyboardType == .emailAddress ? .none : .words)
+                    .textInputAutocapitalization(keyboardType == .emailAddress ? .never : .words)
                     .disableAutocorrection(keyboardType == .emailAddress)
             }
             .padding(.horizontal, 12)

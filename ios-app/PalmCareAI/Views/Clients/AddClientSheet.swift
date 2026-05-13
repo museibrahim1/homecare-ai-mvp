@@ -137,7 +137,7 @@ struct AddClientSheet: View {
                     .font(.system(size: 15))
                     .foregroundColor(.palmText)
                     .textContentType(.name)
-                    .autocapitalization(.words)
+                    .textInputAutocapitalization(.words)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
@@ -171,7 +171,7 @@ struct AddClientSheet: View {
                     .foregroundColor(.palmText)
                     .keyboardType(keyboard)
                     .textContentType(contentType)
-                    .autocapitalization(keyboard == .emailAddress ? .none : .words)
+                    .textInputAutocapitalization(keyboard == .emailAddress ? .never : .words)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)

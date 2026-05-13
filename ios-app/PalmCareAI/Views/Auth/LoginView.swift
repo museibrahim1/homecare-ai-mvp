@@ -96,7 +96,7 @@ struct LoginView: View {
                                 .foregroundColor(.palmText)
                                 .textContentType(.emailAddress)
                                 .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
+                                .textInputAutocapitalization(.never)
                                 .disableAutocorrection(true)
                                 .accessibilityLabel("Email address")
                         }
@@ -124,7 +124,7 @@ struct LoginView: View {
                                 TextField("Enter your password", text: $password)
                                     .font(.system(size: 13))
                                     .foregroundColor(.palmText)
-                                    .autocapitalization(.none)
+                                    .textInputAutocapitalization(.never)
                                     .disableAutocorrection(true)
                                     .accessibilityLabel("Password")
                             } else {
@@ -336,7 +336,7 @@ struct ForgotPasswordSheet: View {
                                     .foregroundColor(.palmText)
                                     .textContentType(.emailAddress)
                                     .keyboardType(.emailAddress)
-                                    .autocapitalization(.none)
+                                    .textInputAutocapitalization(.never)
                                     .disableAutocorrection(true)
                             }
                             .padding(.horizontal, 12)

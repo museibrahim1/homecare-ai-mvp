@@ -8,6 +8,7 @@ struct MainTabView: View {
     ]
     @State private var currentUser: User?
     @State private var palmAgentOpen = false
+    @State private var userFetchAttempts = 0
 
     private var isAdmin: Bool {
         currentUser?.isAdmin ?? false
@@ -44,9 +45,7 @@ struct MainTabView: View {
         }
         .edgesIgnoringSafeArea(.bottom)
         .task {
-            do {
-                currentUser = try await api.fetchUser()
-            } catch { /* non-critical */ }
+            await fetchCurrentUserWithRetry()
             // Re-validate App Store entitlements on every launch so renewals,
             // refunds, or device changes are reflected before the user can
             // hit a paywalled action.
@@ -58,6 +57,23 @@ struct MainTabView: View {
         .sheet(isPresented: $palmAgentOpen) {
             PalmAgentSheet(isPresented: $palmAgentOpen, isAdmin: isAdmin)
                 .environmentObject(api)
+        }
+    }
+
+    // Retry once with exponential backoff so a flaky network at launch
+    // doesn't permanently hide admin tabs until the next cold start.
+    private func fetchCurrentUserWithRetry() async {
+        for attempt in 0..<3 {
+            do {
+                currentUser = try await api.fetchUser()
+                return
+            } catch {
+                userFetchAttempts = attempt + 1
+                if attempt < 2 {
+                    let delay = UInt64(pow(2.0, Double(attempt))) * 1_000_000_000
+                    try? await Task.sleep(nanoseconds: delay)
+                }
+            }
         }
     }
 

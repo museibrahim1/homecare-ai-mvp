@@ -688,6 +688,8 @@ struct RecordView: View {
 
         var attempts = 0
         let maxAttempts = 120 // ~4 minutes max
+        var consecutiveErrors = 0
+        let maxConsecutiveErrors = 5 // ~10s of failed fetches before warning user
 
         while attempts < maxAttempts {
             attempts += 1
@@ -695,6 +697,7 @@ struct RecordView: View {
 
             do {
                 let status = try await api.getPipelineStatus(visitId: visitId)
+                consecutiveErrors = 0
                 guard let pipelineState = status.pipeline_state else { continue }
 
                 var steps: [(String, String)] = []
@@ -740,7 +743,12 @@ struct RecordView: View {
                     return
                 }
             } catch {
-                // Pipeline status fetch failed - keep polling
+                consecutiveErrors += 1
+                if consecutiveErrors >= maxConsecutiveErrors {
+                    await MainActor.run {
+                        uploadProgress = "Connection lost — your assessment is still processing in the background."
+                    }
+                }
             }
         }
 
