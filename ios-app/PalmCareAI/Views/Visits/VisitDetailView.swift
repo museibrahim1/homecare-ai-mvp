@@ -540,7 +540,11 @@ struct VisitDetailView: View {
                     billables = VisitBillablesResponse(items: items, total_minutes: billables?.total_minutes, total_adjusted_minutes: billables?.total_adjusted_minutes, categories: billables?.categories)
                 }
             }
-        } catch {}
+        } catch {
+            await MainActor.run {
+                errorMessage = "Could not approve billable. \(error.localizedDescription)"
+            }
+        }
     }
 
     private func denyBillable(_ item: BillableItem, index: Int) async {
@@ -552,7 +556,11 @@ struct VisitDetailView: View {
                     billables = VisitBillablesResponse(items: items, total_minutes: billables?.total_minutes, total_adjusted_minutes: billables?.total_adjusted_minutes, categories: billables?.categories)
                 }
             }
-        } catch {}
+        } catch {
+            await MainActor.run {
+                errorMessage = "Could not deny billable. \(error.localizedDescription)"
+            }
+        }
     }
 
     private func approveAllBillables() async {
@@ -1546,10 +1554,29 @@ struct VisitDetailView: View {
             )
             await MainActor.run {
                 let activityVC = UIActivityViewController(activityItems: [localURL], applicationActivities: nil)
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let rootVC = windowScene.windows.first?.rootViewController {
-                    rootVC.present(activityVC, animated: true)
+                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                      let window = windowScene.windows.first(where: { $0.isKeyWindow }) ?? windowScene.windows.first,
+                      let rootVC = window.rootViewController else { return }
+
+                // iPad requires a popover anchor or the share sheet crashes.
+                // Center the popover on the screen since the trigger button
+                // (toolbar Menu item) doesn't give us a stable source view.
+                if let popover = activityVC.popoverPresentationController {
+                    popover.sourceView = window
+                    popover.sourceRect = CGRect(
+                        x: window.bounds.midX,
+                        y: window.bounds.midY,
+                        width: 0,
+                        height: 0
+                    )
+                    popover.permittedArrowDirections = []
                 }
+
+                var topVC: UIViewController = rootVC
+                while let presented = topVC.presentedViewController {
+                    topVC = presented
+                }
+                topVC.present(activityVC, animated: true)
             }
         } catch {
             await MainActor.run { errorMessage = "Export failed: \(error.localizedDescription)" }

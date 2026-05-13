@@ -17,7 +17,7 @@ struct User: Codable, Identifiable {
     }
 
     var isCeo: Bool {
-        role == "admin" && (email.hasSuffix("@palmtai.com"))
+        role == "admin" && (email.hasSuffix("@palmtai.com") || email.hasSuffix("@palmcareai.com"))
     }
 
     func hasPermission(_ perm: String) -> Bool {

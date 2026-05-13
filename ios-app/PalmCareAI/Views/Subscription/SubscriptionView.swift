@@ -241,7 +241,7 @@ struct SubscriptionView: View {
             }
             Spacer()
             Button {
-                if let url = URL(string: "mailto:sales@palmtai.com?subject=Enterprise%20Plan%20Inquiry") {
+                if let url = URL(string: "mailto:sales@palmcareai.com?subject=Enterprise%20Plan%20Inquiry") {
                     UIApplication.shared.open(url)
                 }
             } label: {

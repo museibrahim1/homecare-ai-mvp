@@ -183,11 +183,11 @@ struct SettingsView: View {
             SettingsDivider()
 
             Button {
-                if let url = URL(string: "mailto:support@palmtai.com?subject=PalmCare%20AI%20Support") {
+                if let url = URL(string: "mailto:support@palmcareai.com?subject=PalmCare%20AI%20Support") {
                     openURL(url)
                 }
             } label: {
-                SettingsNavRow(icon: "questionmark.circle.fill", iconColor: .palmAccent, title: "Support", detail: "support@palmtai.com")
+                SettingsNavRow(icon: "questionmark.circle.fill", iconColor: .palmAccent, title: "Support", detail: "support@palmcareai.com")
             }
             .accessibilityLabel("Contact support")
         }
@@ -723,7 +723,7 @@ struct TermsPrivacySheet: View {
 
                     termsSection(
                         title: "Contact",
-                        body: "For questions about these terms or your privacy, contact us at support@palmtai.com"
+                        body: "For questions about these terms or your privacy, contact us at support@palmcareai.com"
                     )
                 }
                 .padding(.horizontal, 20)
