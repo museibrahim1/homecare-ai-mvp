@@ -179,16 +179,20 @@ struct LandingView: View {
                 }
                 .ignoresSafeArea()
 
-                // Center orb
-                VStack {
-                    Spacer()
-                        .frame(height: UIScreen.main.bounds.height * 0.18)
+                // Center orb. GeometryReader avoids deprecated UIScreen.main
+                // and adapts to multi-window/iPad scenes.
+                GeometryReader { geo in
+                    VStack {
+                        Spacer()
+                            .frame(height: geo.size.height * 0.18)
 
-                    LandingOrb()
-                        .frame(width: 220, height: 220)
-                        .accessibilityHidden(true)
+                        LandingOrb()
+                            .frame(width: 220, height: 220)
+                            .accessibilityHidden(true)
 
-                    Spacer()
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
                 }
 
                 // Bottom content
