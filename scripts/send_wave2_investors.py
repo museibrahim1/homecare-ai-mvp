@@ -170,8 +170,7 @@ def main():
             print(f"  --- {saved} drafts saved ---")
 
     print(f"\n  {saved} email drafts saved to {DRAFTS_DIR}")
-    print(f"  Use 'aitask --list-drafts' to review them")
-    print(f"  Use 'aitask --approve-emails' to send when ready")
+    print(f"  Review drafts manually in that directory and send via your preferred email tool.")
 
     print(f"\n{'='*60}")
     print(f"DONE: {saved} investors added to CRM + emails saved as drafts")

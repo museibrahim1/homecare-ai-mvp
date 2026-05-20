@@ -5,13 +5,12 @@ alwaysApply: true
 
 # PalmCare AI — Project State (March 2026)
 
-## Social Media & Email Agents
-- **Scripts**: `scripts/social_media_manager.py`, `scripts/email_agent.py`, `scripts/ai_subagents.py`
-- **CLI**: `scripts/aitask` with commands: `--draft-investor-emails`, `--draft-agency-emails`, `--list-drafts`, `--approve-emails`, `--social-status`, `--social-drafts`
+## Social Media Accounts
 - **LinkedIn**: Access token configured, Person ID `1034844126`, "Share on LinkedIn" product enabled. Posting needs re-auth with correct scopes.
 - **Facebook**: "Palm Technologies" page exists. Need Meta Developer App + Page Access Token.
 - **Instagram**: `@palmcareai` — needs conversion to Business account, link to Facebook Page.
 - **Twitter/X**: API key/secret in `.env`, access token/secret still needed.
+- Note: The local `aitask` daemon + email/social subagent scripts were removed on 2026-05-19. All outreach is now manual or backend-driven.
 
 ## Backend API
 - FastAPI on Railway: `https://api-production-a0a2.up.railway.app`

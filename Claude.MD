@@ -40,8 +40,8 @@
 | Email (workspace) | palmtai.com (Google Workspace) |
 | Email (transactional) | `sales@send.palmtai.com` — **send.palmtai.com VERIFIED in Resend** (palmtai.com failed, use send.palmtai.com) |
 | Reply-to | sales@palmtai.com |
-| AI Agent email | ai@palmcareai.com (Cloudflare Worker → local daemon) |
-| Dashboard | http://localhost:5050 (Flask, launchd) |
+| AI Agent email | ai@palmcareai.com (Cloudflare Worker + local daemon REMOVED 2026-05-19) |
+| ~~Dashboard~~ | ~~http://localhost:5050~~ (REMOVED 2026-05-19) |
 | Production API | https://api-production-a0a2.up.railway.app |
 | Hosting | Railway (API), Vercel/Railway (Web) |
 | Fundraising | $450K SAFE, $2.25M post-money valuation |
@@ -137,11 +137,11 @@ WeFunder (live), AngelList Stack, Gust (financials, funding round, 9 sections).
 ### Mar 2 (Eve) — Investor Outreach Copy
 AngelList pitch script (~450 chars, founder voice), use-of-funds breakdown.
 
-### Mar 4 — AI Email Agent + Subagent Dashboard
-AI email task system (Cloudflare Worker → local daemon → Claude API), 4 subagents (Marketing, Sales, Outreach, Reporting), Flask dashboard at localhost:5050, enhanced email reports with full file contents.
+### Mar 4 — AI Email Agent + Subagent Dashboard *(REMOVED 2026-05-19)*
+~~AI email task system (Cloudflare Worker → local daemon → Claude API), 4 subagents (Marketing, Sales, Outreach, Reporting), Flask dashboard at localhost:5050.~~ Stack fully uninstalled on 2026-05-19: launchd jobs, `~/.palmcare/`, `scripts/ai_task_daemon.py` + siblings, `workers/email-receiver/`, and embedded Resend key all removed. Email drafts/completed history archived to `~/Desktop/palmcare-daemon-archive-*.tar.gz`.
 
-### Mar 5 — Agent Stability + New Agents + iOS Screenshots
-Fixed JSON parsing (balanced-brace parser), PROJECT_ROOT detection, duplicate logging, broken symlinks, file task processing. Added Social Media Manager + Email Agent. 6 fresh iOS screenshots. 9 marketing graphics rebuilt.
+### Mar 5 — Agent Stability + New Agents + iOS Screenshots *(REMOVED 2026-05-19)*
+~~Fixed JSON parsing (balanced-brace parser), PROJECT_ROOT detection, duplicate logging, broken symlinks, file task processing. Added Social Media Manager + Email Agent.~~ Daemon stack removed (see Mar 4 above). 6 fresh iOS screenshots and 9 marketing graphics from this session were kept.
 
 ### Mar 6 (AM) — Nano Banana AI Marketing
 13 new AI-generated marketing graphics via Nano Banana 2. Agency/investor emails updated. Old pitch decks deleted. Pillow/PIL banned for mockups.
