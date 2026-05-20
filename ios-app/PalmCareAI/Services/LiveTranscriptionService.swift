@@ -1,19 +1,211 @@
 import AVFoundation
 import Foundation
 
+/// Streams live transcription chunks of an in-progress WAV recording
+/// to the backend `/live/transcribe` endpoint.
+///
+/// Key behaviors:
+///  * Reads only the NEW PCM bytes since the last chunk (incremental).
+///  * Prepends a synthesized RIFF/WAV header to each chunk so Deepgram
+///    accepts it as a valid WAV. This is what allows long recordings
+///    (> 2.5 min) to keep receiving live transcripts — the original
+///    file's header is only valid for an offset of 0, so seeking into
+///    the body would otherwise produce raw PCM that the server can't
+///    decode.
+///  * Appends results into a rolling transcript instead of replacing it.
 @MainActor
 class LiveTranscriptionService: ObservableObject {
     @Published var segments: [TranscriptSegment] = []
     @Published var isTranscribing = false
     @Published var fullTranscript = ""
+    @Published var lastError: String?
 
     private let api: APIService
     private var chunkTimer: Timer?
-    private var lastChunkEnd: TimeInterval = 0
-    private var lastByteOffset: UInt64 = 0
+
+    /// PCM bytes already sent for transcription.
+    private var lastByteOffset: UInt64 = AudioRecorderService.wavHeaderSize.asUInt64
+    /// Wall-clock time when current recording was started (for segment timestamps).
+    private var recordingStart: Date = .distantPast
+    /// Rolling transcript pieces (one per successful chunk).
+    private var transcriptPieces: [String] = []
+
     private let chunkInterval: TimeInterval = 5
-    private let maxChunkBytes: Int = 5 * 1024 * 1024 // 5 MB cap (WAV files are larger than AAC)
-    @Published var lastError: String?
+    /// ~5 seconds of mono 16kHz/16bit audio = ~160 KB; we cap chunk size
+    /// at 4 MB which is more than 2 minutes of audio in case the timer
+    /// is delayed by the OS.
+    private let maxChunkBytes: Int = 4 * 1024 * 1024
+    /// Need at least ~1 second of new audio (~32 KB) before sending.
+    private let minNewBytes: UInt64 = 32_000
+
+    init(api: APIService) {
+        self.api = api
+    }
+
+    func startTranscribing(recordingURL: URL) {
+        chunkTimer?.invalidate()
+        chunkTimer = nil
+
+        isTranscribing = true
+        lastByteOffset = AudioRecorderService.wavHeaderSize.asUInt64
+        segments = []
+        fullTranscript = ""
+        transcriptPieces = []
+        lastError = nil
+        recordingStart = Date()
+
+        chunkTimer = Timer.scheduledTimer(withTimeInterval: chunkInterval, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            Task { @MainActor in
+                await self.sendChunk(recordingURL: recordingURL)
+            }
+        }
+        if let t = chunkTimer { RunLoop.current.add(t, forMode: .common) }
+    }
+
+    func stopTranscribing() {
+        chunkTimer?.invalidate()
+        chunkTimer = nil
+        isTranscribing = false
+    }
+
+    // MARK: - Chunking
+
+    private func sendChunk(recordingURL: URL) async {
+        guard FileManager.default.fileExists(atPath: recordingURL.path) else {
+            lastError = "File not found"
+            return
+        }
+
+        do {
+            let attrs = try FileManager.default.attributesOfItem(atPath: recordingURL.path)
+            let fileSize = (attrs[.size] as? UInt64) ?? 0
+            guard fileSize > lastByteOffset + minNewBytes else { return }
+
+            // Read at most maxChunkBytes from the new tail of the file.
+            let availableNewBytes = fileSize - lastByteOffset
+            let bytesToRead = min(UInt64(maxChunkBytes), availableNewBytes)
+            let readEnd = lastByteOffset + bytesToRead
+
+            let fileHandle = try FileHandle(forReadingFrom: recordingURL)
+            defer { fileHandle.closeFile() }
+
+            try fileHandle.seek(toOffset: lastByteOffset)
+            let pcmChunk = fileHandle.readData(ofLength: Int(bytesToRead))
+            guard pcmChunk.count > Int(minNewBytes) else { return }
+
+            // Wrap the raw PCM tail in a fresh WAV header so Deepgram
+            // can decode it without seeing the original RIFF header.
+            let wav = Self.wrapPCMInWAV(pcm: pcmChunk)
+
+            let response = try await api.liveTranscribe(audioData: wav, diarize: true)
+
+            // Advance the offset only on a successful round-trip so a
+            // network blip doesn't silently drop audio from the
+            // rolling transcript.
+            lastByteOffset = readEnd
+            lastError = nil
+
+            guard !response.transcript.isEmpty else { return }
+
+            transcriptPieces.append(response.transcript)
+            fullTranscript = transcriptPieces.joined(separator: " ")
+            segments = mergeSegments(segments, with: response.words, chunkStartSeconds: Date().timeIntervalSince(recordingStart) - response.duration)
+        } catch {
+            // Don't advance lastByteOffset on failure; we'll retry the
+            // same audio range on the next tick.
+            lastError = error.localizedDescription
+        }
+    }
+
+    /// Build a 44-byte RIFF/WAV header for the given PCM payload.
+    /// Mirrors the format produced by AudioRecorderService so chunks
+    /// roundtrip cleanly through the server.
+    static func wrapPCMInWAV(pcm: Data) -> Data {
+        let sampleRate = UInt32(AudioRecorderService.sampleRate)
+        let channels = UInt16(AudioRecorderService.channels)
+        let bitsPerSample = UInt16(AudioRecorderService.bitDepth)
+        let byteRate = sampleRate * UInt32(channels) * UInt32(bitsPerSample / 8)
+        let blockAlign = channels * (bitsPerSample / 8)
+        let dataSize = UInt32(pcm.count)
+        let chunkSize = 36 + dataSize
+
+        var header = Data()
+        header.append(contentsOf: Array("RIFF".utf8))
+        header.append(contentsOf: chunkSize.littleEndianBytes)
+        header.append(contentsOf: Array("WAVE".utf8))
+
+        header.append(contentsOf: Array("fmt ".utf8))
+        header.append(contentsOf: UInt32(16).littleEndianBytes)        // PCM fmt chunk size
+        header.append(contentsOf: UInt16(1).littleEndianBytes)         // PCM format
+        header.append(contentsOf: channels.littleEndianBytes)
+        header.append(contentsOf: sampleRate.littleEndianBytes)
+        header.append(contentsOf: byteRate.littleEndianBytes)
+        header.append(contentsOf: blockAlign.littleEndianBytes)
+        header.append(contentsOf: bitsPerSample.littleEndianBytes)
+
+        header.append(contentsOf: Array("data".utf8))
+        header.append(contentsOf: dataSize.littleEndianBytes)
+        header.append(pcm)
+        return header
+    }
+
+    // MARK: - Segment Merging
+
+    /// Convert Deepgram words into TranscriptSegment objects shifted to
+    /// their absolute timeline position, and append them to the
+    /// previously collected segments. Speaker IDs from chunk to chunk
+    /// may not be stable (Deepgram diarizes per request), but the user
+    /// still sees consecutive speaker turns rendered correctly within
+    /// each chunk.
+    private func mergeSegments(_ existing: [TranscriptSegment], with newWords: [TranscriptWord], chunkStartSeconds: TimeInterval) -> [TranscriptSegment] {
+        guard !newWords.isEmpty else { return existing }
+
+        let offset = max(0, chunkStartSeconds)
+        let shifted = newWords.map { w -> TranscriptWord in
+            TranscriptWord(
+                word: w.word,
+                start: w.start + offset,
+                end: w.end + offset,
+                confidence: w.confidence,
+                speaker: w.speaker
+            )
+        }
+
+        var built: [TranscriptSegment] = []
+        var currentSpeaker = shifted[0].speaker ?? 0
+        var currentWords: [TranscriptWord] = []
+        var segmentStart = shifted[0].start
+
+        for word in shifted {
+            let speaker = word.speaker ?? currentSpeaker
+            if speaker != currentSpeaker && !currentWords.isEmpty {
+                built.append(TranscriptSegment(
+                    speaker: currentSpeaker,
+                    text: currentWords.map { $0.word }.joined(separator: " "),
+                    words: currentWords,
+                    startTime: segmentStart,
+                    endTime: currentWords.last?.end ?? segmentStart
+                ))
+                currentWords = []
+                segmentStart = word.start
+                currentSpeaker = speaker
+            }
+            currentWords.append(word)
+        }
+        if !currentWords.isEmpty {
+            built.append(TranscriptSegment(
+                speaker: currentSpeaker,
+                text: currentWords.map { $0.word }.joined(separator: " "),
+                words: currentWords,
+                startTime: segmentStart,
+                endTime: currentWords.last?.end ?? segmentStart
+            ))
+        }
+        return existing + built
+    }
+
+    // MARK: - Medical highlighting
 
     private static let medicalKeywords: Set<String> = [
         "fever", "fatigue", "headache", "headaches", "diabetes", "hypertension",
@@ -31,120 +223,6 @@ class LiveTranscriptionService: ObservableObject {
         "caregiver", "patient", "client", "visit", "appointment",
     ]
 
-    init(api: APIService) {
-        self.api = api
-    }
-
-    func startTranscribing(recordingURL: URL) {
-        // Prevent duplicate timers when start is triggered repeatedly.
-        chunkTimer?.invalidate()
-        chunkTimer = nil
-        isTranscribing = true
-        lastChunkEnd = 0
-        lastByteOffset = 0
-        segments = []
-        fullTranscript = ""
-
-        chunkTimer = Timer.scheduledTimer(withTimeInterval: chunkInterval, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            Task { @MainActor in
-                await self.sendChunk(recordingURL: recordingURL)
-            }
-        }
-        if let t = chunkTimer { RunLoop.current.add(t, forMode: .common) }
-    }
-
-    func stopTranscribing() {
-        chunkTimer?.invalidate()
-        chunkTimer = nil
-        isTranscribing = false
-    }
-
-    private func sendChunk(recordingURL: URL) async {
-        guard FileManager.default.fileExists(atPath: recordingURL.path) else {
-            lastError = "File not found"
-            return
-        }
-
-        do {
-            let attrs = try FileManager.default.attributesOfItem(atPath: recordingURL.path)
-            let fileSize = (attrs[.size] as? UInt64) ?? 0
-
-            // WAV at 16kHz/16bit/mono = ~32KB/sec. Need at least ~2 sec of audio.
-            let minBytes: UInt64 = 64_000
-            guard fileSize > minBytes, fileSize > lastByteOffset + minBytes else { return }
-
-            let fileHandle = try FileHandle(forReadingFrom: recordingURL)
-            defer { fileHandle.closeFile() }
-
-            let cappedData: Data
-            if fileSize > UInt64(maxChunkBytes) {
-                // Send the most recent audio so long recordings keep transcribing
-                let offset = fileSize - UInt64(maxChunkBytes)
-                fileHandle.seek(toFileOffset: offset)
-                cappedData = fileHandle.readData(ofLength: maxChunkBytes)
-            } else {
-                cappedData = fileHandle.readData(ofLength: Int(fileSize))
-            }
-
-            guard cappedData.count > Int(minBytes) else { return }
-
-            lastByteOffset = fileSize
-            lastError = nil
-
-            let response = try await api.liveTranscribe(audioData: cappedData, diarize: true)
-
-            guard !response.transcript.isEmpty else { return }
-
-            let newSegments = buildSegments(from: response.words)
-            self.segments = newSegments
-            self.fullTranscript = response.transcript
-            self.lastChunkEnd = response.duration
-        } catch {
-            lastError = error.localizedDescription
-        }
-    }
-
-    private func buildSegments(from words: [TranscriptWord]) -> [TranscriptSegment] {
-        guard !words.isEmpty else { return [] }
-
-        var segments: [TranscriptSegment] = []
-        var currentSpeaker = words[0].speaker ?? 0
-        var currentWords: [TranscriptWord] = []
-        var segmentStart = words[0].start
-
-        for word in words {
-            let speaker = word.speaker ?? currentSpeaker
-            if speaker != currentSpeaker && !currentWords.isEmpty {
-                let text = currentWords.map { $0.word }.joined(separator: " ")
-                segments.append(TranscriptSegment(
-                    speaker: currentSpeaker,
-                    text: text,
-                    words: currentWords,
-                    startTime: segmentStart,
-                    endTime: currentWords.last?.end ?? segmentStart
-                ))
-                currentWords = []
-                segmentStart = word.start
-                currentSpeaker = speaker
-            }
-            currentWords.append(word)
-        }
-
-        if !currentWords.isEmpty {
-            let text = currentWords.map { $0.word }.joined(separator: " ")
-            segments.append(TranscriptSegment(
-                speaker: currentSpeaker,
-                text: text,
-                words: currentWords,
-                startTime: segmentStart,
-                endTime: currentWords.last?.end ?? segmentStart
-            ))
-        }
-
-        return segments
-    }
-
     static func isMedicalKeyword(_ word: String) -> Bool {
         medicalKeywords.contains(word.lowercased().trimmingCharacters(in: .punctuationCharacters))
     }
@@ -152,4 +230,32 @@ class LiveTranscriptionService: ObservableObject {
     deinit {
         chunkTimer?.invalidate()
     }
+}
+
+// MARK: - Little-endian byte helpers
+
+private extension UInt32 {
+    var littleEndianBytes: [UInt8] {
+        let v = self.littleEndian
+        return [
+            UInt8(v & 0xff),
+            UInt8((v >> 8) & 0xff),
+            UInt8((v >> 16) & 0xff),
+            UInt8((v >> 24) & 0xff),
+        ]
+    }
+}
+
+private extension UInt16 {
+    var littleEndianBytes: [UInt8] {
+        let v = self.littleEndian
+        return [
+            UInt8(v & 0xff),
+            UInt8((v >> 8) & 0xff),
+        ]
+    }
+}
+
+private extension Int {
+    var asUInt64: UInt64 { UInt64(self) }
 }

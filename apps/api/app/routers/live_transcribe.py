@@ -4,10 +4,15 @@ Live Transcription Endpoint
 Provides a REST endpoint for streaming-style transcription.
 The mobile app sends audio chunks, and gets back partial transcripts
 in real-time using Deepgram Nova-3 (primary) with OpenAI Whisper as fallback.
+
+Error handling: never bubble a bare 500 to the iOS client. Every failure
+path returns a JSON detail string so the app can show a useful banner
+without breaking the recording loop.
 """
 
 import os
 import logging
+import traceback
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Request
 from pydantic import BaseModel
 from typing import List, Optional
@@ -58,7 +63,12 @@ async def live_transcribe(
     deepgram_key = os.environ.get("DEEPGRAM_API_KEY", "")
     openai_key = os.environ.get("OPENAI_API_KEY", "")
 
-    content = await file.read()
+    try:
+        content = await file.read()
+    except Exception as e:
+        logger.error(f"live_transcribe: failed to read upload: {e}")
+        raise HTTPException(status_code=400, detail="Couldn't read audio upload")
+
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="Empty audio file")
 
@@ -67,12 +77,46 @@ async def live_transcribe(
 
     content_type = file.content_type or "audio/wav"
 
+    if not deepgram_key and not openai_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Live transcription unavailable: no provider configured on server",
+        )
+
+    # Try Deepgram first (preferred); fall back to OpenAI Whisper on
+    # ANY failure so a transient Deepgram outage doesn't break the
+    # live transcript banner in the iOS app.
     if deepgram_key:
-        return _transcribe_deepgram(content, content_type, deepgram_key, language, diarize)
-    elif openai_key:
+        try:
+            return _transcribe_deepgram(content, content_type, deepgram_key, language, diarize)
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.warning(
+                "live_transcribe: Deepgram failed, falling back to Whisper: %s\n%s",
+                e,
+                traceback.format_exc(limit=3),
+            )
+            if not openai_key:
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"Live transcription failed: {type(e).__name__}",
+                )
+
+    try:
         return _transcribe_openai(content, file.filename or "audio.wav", openai_key, language)
-    else:
-        raise HTTPException(status_code=503, detail="No transcription service configured")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            "live_transcribe: Whisper fallback failed: %s\n%s",
+            e,
+            traceback.format_exc(limit=3),
+        )
+        raise HTTPException(
+            status_code=502,
+            detail=f"Live transcription failed: {type(e).__name__}",
+        )
 
 
 def _transcribe_deepgram(
@@ -93,20 +137,31 @@ def _transcribe_deepgram(
     if diarize:
         params["diarize"] = "true"
 
-    resp = requests.post(
-        DEEPGRAM_API,
-        params=params,
-        headers={
-            "Authorization": f"Token {api_key}",
-            "Content-Type": content_type,
-        },
-        data=audio_data,
-        timeout=30,
-    )
+    try:
+        resp = requests.post(
+            DEEPGRAM_API,
+            params=params,
+            headers={
+                "Authorization": f"Token {api_key}",
+                "Content-Type": content_type,
+            },
+            data=audio_data,
+            timeout=30,
+        )
+    except requests.RequestException as e:
+        logger.error(f"Deepgram network error: {e}")
+        raise HTTPException(
+            status_code=502,
+            detail=f"Could not reach Deepgram ({type(e).__name__})",
+        )
 
     if resp.status_code != 200:
-        logger.error(f"Deepgram error {resp.status_code}: {resp.text[:300]}")
-        raise HTTPException(status_code=502, detail="Transcription service error")
+        snippet = resp.text[:300] if resp.text else ""
+        logger.error(f"Deepgram error {resp.status_code}: {snippet}")
+        raise HTTPException(
+            status_code=502,
+            detail=f"Deepgram {resp.status_code}: {snippet[:160]}",
+        )
 
     data = resp.json()
     channels = data.get("results", {}).get("channels", [])
