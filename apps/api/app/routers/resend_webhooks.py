@@ -7,6 +7,10 @@ email.delivered, email.suppressed
 """
 
 import os
+import json
+import hmac
+import hashlib
+import base64
 import logging
 from datetime import datetime, timezone
 
@@ -19,6 +23,47 @@ from app.models.sales_lead import SalesLead
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+def _verify_resend_signature(
+    raw_body: bytes,
+    svix_id: str,
+    svix_timestamp: str,
+    svix_signature: str,
+    secret: str,
+) -> bool:
+    """Verify a Resend (Svix) webhook signature.
+
+    Resend signs webhooks with Svix using HMAC-SHA256 over
+    `{svix_id}.{svix_timestamp}.{body}`. The signature header may include
+    multiple `v1,<base64>` pairs space-separated; any one valid match is
+    enough.
+
+    The secret can be either a plain string or the `whsec_<base64>` form
+    that Resend's dashboard issues — we strip the prefix and base64-decode
+    the rest when present.
+    """
+    if not (svix_id and svix_timestamp and svix_signature and secret):
+        return False
+
+    if secret.startswith("whsec_"):
+        try:
+            key = base64.b64decode(secret[len("whsec_"):])
+        except Exception:
+            return False
+    else:
+        key = secret.encode("utf-8")
+
+    payload = f"{svix_id}.{svix_timestamp}.".encode("utf-8") + raw_body
+    expected = base64.b64encode(hmac.new(key, payload, hashlib.sha256).digest()).decode("utf-8")
+
+    for sig in svix_signature.split():
+        if "," not in sig:
+            continue
+        _ver, value = sig.split(",", 1)
+        if hmac.compare_digest(value, expected):
+            return True
+    return False
 
 
 def _find_investor_by_email(db, to_email: str):
@@ -37,8 +82,37 @@ def _find_lead_by_email(db, to_email: str):
 
 @router.post("/resend")
 async def resend_webhook(request: Request):
-    """Handle Resend webhook events for email tracking."""
-    payload = await request.json()
+    """Handle Resend webhook events for email tracking.
+
+    Verifies the Svix signature using `RESEND_WEBHOOK_SECRET`. If the env
+    var is unset we fail-closed in production to prevent CRM tampering;
+    in local dev we allow unsigned traffic for ease of testing.
+    """
+    raw_body = await request.body()
+    secret = os.getenv("RESEND_WEBHOOK_SECRET", "")
+    is_production = bool(os.getenv("RAILWAY_ENVIRONMENT"))
+
+    if secret:
+        valid = _verify_resend_signature(
+            raw_body=raw_body,
+            svix_id=request.headers.get("svix-id", ""),
+            svix_timestamp=request.headers.get("svix-timestamp", ""),
+            svix_signature=request.headers.get("svix-signature", ""),
+            secret=secret,
+        )
+        if not valid:
+            logger.warning("Resend webhook signature verification failed")
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
+    elif is_production:
+        logger.error("RESEND_WEBHOOK_SECRET not set in production — rejecting webhook")
+        raise HTTPException(status_code=503, detail="Webhook verification not configured")
+    else:
+        logger.warning("RESEND_WEBHOOK_SECRET not set — accepting unsigned webhook (dev only)")
+
+    try:
+        payload = json.loads(raw_body or b"{}")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
     event_type = payload.get("type", "")
     data = payload.get("data", {})

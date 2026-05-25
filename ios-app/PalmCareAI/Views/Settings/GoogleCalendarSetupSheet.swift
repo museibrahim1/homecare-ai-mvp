@@ -12,7 +12,9 @@ struct GoogleCalendarSetupSheet: View {
     @State private var didStartAuth = false
 
     private let googleClientId = Bundle.main.infoDictionary?["GOOGLE_CLIENT_ID"] as? String ?? ""
-    private let callbackScheme = "com.palmcare.ai"
+    // Must match a scheme listed under CFBundleURLTypes in Info.plist
+    // (also registered in the Google Cloud Console for this client ID).
+    private let callbackScheme = "com.palmcareai.app"
     private let scopes = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events"
 
     var body: some View {

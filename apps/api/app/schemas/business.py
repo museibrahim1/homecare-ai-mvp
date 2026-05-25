@@ -53,30 +53,43 @@ class UserRoleEnum(str, Enum):
 # =============================================================================
 
 class BusinessRegistrationStep1(BaseModel):
-    """Step 1: Basic business information"""
-    name: str = Field(..., min_length=2, max_length=255)
-    dba_name: Optional[str] = None
-    entity_type: EntityTypeEnum
-    state_of_incorporation: str = Field(..., min_length=2, max_length=2)
-    registration_number: Optional[str] = None
-    
-    # Contact
-    address: str
-    city: str
-    state: str = Field(..., min_length=2, max_length=2)
-    zip_code: str
-    phone: str
-    email: EmailStr
-    website: Optional[str] = None
-    
-    # Owner info (creates first user)
-    owner_name: str
+    """Simplified signup: just email, password, and your name.
+
+    Agency details (name, address, state) are all optional and can be filled
+    in later from Settings. This keeps the first-run experience fast.
+    """
+    # Required: who you are
     owner_email: EmailStr
     owner_password: str = Field(..., min_length=8)
+    owner_name: str = Field(..., min_length=1, max_length=255)
+
+    # Optional: agency info (sensible defaults applied server-side)
+    name: Optional[str] = Field(default=None, max_length=255)
+    dba_name: Optional[str] = None
+    entity_type: Optional[EntityTypeEnum] = None
+    state_of_incorporation: Optional[str] = Field(default=None, min_length=2, max_length=2)
+    registration_number: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = Field(default=None, min_length=2, max_length=2)
+    zip_code: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None  # business contact email; defaults to owner_email
+    website: Optional[str] = None
 
     # Signup tracking
     signup_source: Optional[str] = None  # "direct", "demo", "referral"
     selected_plan: Optional[str] = None  # "starter", "growth", "enterprise"
+
+
+class MagicLinkRequest(BaseModel):
+    """Request a one-time login link via email."""
+    email: EmailStr
+
+
+class MagicLinkConfirm(BaseModel):
+    """Exchange a magic-link token for an access token."""
+    token: str
 
 
 class SOSVerificationRequest(BaseModel):
@@ -121,11 +134,17 @@ class DocumentResponse(BaseModel):
 
 
 class BusinessRegistrationResponse(BaseModel):
-    """Response after completing registration"""
+    """Response after completing registration.
+
+    Returns an access token so the iOS/web client is logged in immediately
+    after signup (no extra login round-trip).
+    """
     business_id: UUID
     verification_status: VerificationStatusEnum
     message: str
     next_steps: List[str]
+    access_token: Optional[str] = None
+    token_type: str = "bearer"
 
 
 # =============================================================================

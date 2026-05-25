@@ -24,7 +24,11 @@ DEEPGRAM_WS = "wss://api.deepgram.com/v2/listen"
 
 
 async def verify_ws_token(token: Optional[str]) -> Optional[str]:
-    """Verify JWT and return user id, or None if invalid."""
+    """Verify JWT, enforce force_logout_at + is_active, return user id or None.
+
+    Mirrors the checks that `get_current_user` runs for normal HTTP routes so
+    a deactivated or force-logged-out user can't keep streaming audio.
+    """
     if not token:
         return None
     try:
@@ -33,9 +37,37 @@ async def verify_ws_token(token: Optional[str]) -> Optional[str]:
             settings.jwt_secret,
             algorithms=[settings.jwt_algorithm],
         )
-        return payload.get("sub")
     except JWTError:
         return None
+
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+
+    # Pull the user record to verify is_active + force_logout_at. Done in
+    # a short-lived session so we don't leak a DB connection into the WS loop.
+    try:
+        from datetime import datetime, timezone
+        from app.db.session import SessionLocal
+        from app.models.user import User
+        db = SessionLocal()
+        try:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user or not user.is_active:
+                return None
+            force_logout = getattr(user, "force_logout_at", None)
+            iat = payload.get("iat")
+            if force_logout and iat:
+                token_iat = datetime.fromtimestamp(int(iat), tz=timezone.utc)
+                if token_iat < force_logout:
+                    return None
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"WS auth user-check failed: {type(e).__name__}: {e}")
+        return None
+
+    return user_id
 
 
 async def m4a_to_pcm(m4a_bytes: bytes) -> bytes:

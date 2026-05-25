@@ -134,7 +134,7 @@ def _find_calendar_admin(db: Session) -> Optional[User]:
     """Find an admin user with Google Calendar connected."""
     admin = db.query(User).filter(
         User.google_calendar_connected == True,
-        User.google_calendar_access_token.isnot(None),
+        User._google_calendar_access_token.isnot(None),
     ).first()
     return admin
 

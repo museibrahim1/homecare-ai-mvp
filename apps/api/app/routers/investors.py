@@ -468,13 +468,8 @@ def batch_import_investors(
     db: Session = Depends(get_db),
 ):
     """Batch import investors via internal API key. Skips duplicates by fund_name."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-
-    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
-    if not key_valid:
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     added, skipped = 0, 0
     results = []
@@ -512,13 +507,8 @@ def batch_update_emails(
     db: Session = Depends(get_db),
 ):
     """Batch update investor contact emails via internal API key."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-
-    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
-    if not key_valid:
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     updated, skipped, not_found = 0, 0, 0
     results = []
@@ -562,10 +552,8 @@ def batch_mark_emails_sent(
     """Batch mark investors as emailed via internal API key.
     Each item: {"contact_email": "...", "subject": "...", "send_count": 1}
     """
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if not (cron_secret and provided_key == cron_secret):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     updated, not_found = 0, 0
     now = datetime.now(timezone.utc)

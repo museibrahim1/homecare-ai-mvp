@@ -6,21 +6,45 @@ import SwiftUI
 class EventStore: ObservableObject {
     @Published var events: [CalendarEvent] = []
 
-    private let storageKey = "palmcare_calendar_events"
+    /// Encrypted-at-rest cache file in the Documents directory. Written with
+    /// FileProtectionType.complete so iOS only decrypts it while the device
+    /// is unlocked. UserDefaults was previously used here, which stores plist
+    /// data unencrypted in the app sandbox — not appropriate for PHI.
+    private static let cacheFilename = "palmcare_calendar.cache"
 
-    init() { load() }
+    private static var cacheURL: URL? {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+            .first?.appendingPathComponent(cacheFilename)
+    }
+
+    init() {
+        migrateFromUserDefaultsIfNeeded()
+        load()
+    }
 
     func load() {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
+        guard let url = Self.cacheURL,
+              FileManager.default.fileExists(atPath: url.path),
+              let data = try? Data(contentsOf: url),
               let decoded = try? JSONDecoder().decode([CalendarEvent].self, from: data)
         else { return }
         events = decoded
     }
 
     func save() {
-        if let data = try? JSONEncoder().encode(events) {
-            UserDefaults.standard.set(data, forKey: storageKey)
-        }
+        guard let url = Self.cacheURL,
+              let data = try? JSONEncoder().encode(events) else { return }
+        try? data.write(to: url, options: [.atomic, .completeFileProtection])
+    }
+
+    private func migrateFromUserDefaultsIfNeeded() {
+        let legacyKey = "palmcare_calendar_events"
+        guard let legacyData = UserDefaults.standard.data(forKey: legacyKey),
+              let decoded = try? JSONDecoder().decode([CalendarEvent].self, from: legacyData)
+        else { return }
+        events = decoded
+        save()
+        UserDefaults.standard.removeObject(forKey: legacyKey)
     }
 
     func add(_ event: CalendarEvent) {

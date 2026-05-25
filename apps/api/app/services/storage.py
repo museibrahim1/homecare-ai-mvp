@@ -25,21 +25,34 @@ def ensure_bucket_exists():
 
 
 def upload_file_to_s3(key: str, content: bytes, content_type: str = None):
-    """Upload a file to S3/MinIO."""
+    """Upload a file to S3/MinIO with server-side encryption at rest.
+
+    Defaults to SSE-S3 (AES-256). If `S3_KMS_KEY_ID` is set we switch to
+    SSE-KMS for additional access control. MinIO local dev ignores SSE
+    headers, so this is safe in both environments.
+    """
+    import os
     client = get_s3_client()
     ensure_bucket_exists()
-    
+
     extra_args = {}
     if content_type:
         extra_args["ContentType"] = content_type
-    
+
+    kms_key = os.getenv("S3_KMS_KEY_ID", "")
+    if kms_key:
+        extra_args["ServerSideEncryption"] = "aws:kms"
+        extra_args["SSEKMSKeyId"] = kms_key
+    else:
+        extra_args["ServerSideEncryption"] = "AES256"
+
     client.put_object(
         Bucket=settings.s3_bucket,
         Key=key,
         Body=content,
         **extra_args,
     )
-    
+
     return key
 
 

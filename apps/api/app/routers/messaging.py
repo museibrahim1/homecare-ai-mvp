@@ -21,6 +21,34 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _is_platform_admin(user: User) -> bool:
+    """Platform admins (e.g. CEO, support) can see any channel."""
+    role = str(getattr(user, "role", "") or "").lower()
+    email = (user.email or "").lower()
+    return role == "admin" and email.endswith("@palmtai.com")
+
+
+def _channel_membership_or_404(
+    db: Session, channel_id: str, user: User
+) -> Channel:
+    """Load the channel and confirm the caller is a member.
+
+    Returns 404 (not 403) when the user isn't a member so we don't leak
+    which channel IDs exist.
+    """
+    try:
+        channel = db.query(Channel).filter(Channel.id == channel_id).first()
+    except Exception:
+        # Bad UUID/string → treat as not found
+        raise HTTPException(status_code=404, detail="Channel not found")
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
+    members = channel.members or []
+    if str(user.id) not in members and not _is_platform_admin(user):
+        raise HTTPException(status_code=404, detail="Channel not found")
+    return channel
+
+
 # ─── Pydantic Schemas ────────────────────────────────────────────
 
 class ChannelCreate(BaseModel):
@@ -68,8 +96,9 @@ async def list_channels(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all channels the user is a member of (or all for admins)."""
+    """List all channels the user is a member of (admins see everything)."""
     uid = str(current_user.id)
+    is_admin = _is_platform_admin(current_user)
     channels = db.query(Channel).filter(
         Channel.is_archived == False,
     ).order_by(Channel.created_at).all()
@@ -77,10 +106,10 @@ async def list_channels(
     results = []
     for ch in channels:
         members = ch.members or []
-        if ch.is_dm and uid not in members:
+        # Membership check: admins can list every channel; everyone else must
+        # be in the members array (covers both DMs and group channels).
+        if not is_admin and uid not in members:
             continue
-        last_read_key = f"last_read_{uid}"
-        last_read = (ch.members or [{}])[-1] if False else None
         unread = db.query(Message).filter(
             Message.channel_id == ch.id,
             Message.sender_id != current_user.id,
@@ -160,7 +189,9 @@ async def get_messages(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Fetch messages for a channel, newest last."""
+    """Fetch messages for a channel, newest last. Members only."""
+    _channel_membership_or_404(db, channel_id, current_user)
+
     q = db.query(Message).filter(
         Message.channel_id == channel_id,
         Message.is_deleted == False,
@@ -189,13 +220,11 @@ async def send_message(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Send a message to a channel/DM and notify other members."""
+    """Send a message to a channel/DM and notify other members. Members only."""
     if not data.text.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
 
-    channel = db.query(Channel).filter(Channel.id == channel_id).first()
-    if not channel:
-        raise HTTPException(status_code=404, detail="Channel not found")
+    channel = _channel_membership_or_404(db, channel_id, current_user)
 
     name = current_user.full_name or current_user.email
     avatar = "".join([w[0] for w in (name or "U").split()[:2]]).upper()

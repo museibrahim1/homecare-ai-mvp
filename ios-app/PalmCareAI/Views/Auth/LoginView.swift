@@ -32,6 +32,10 @@ struct LoginView: View {
                     .padding(.horizontal, 24)
                     .padding(.top, 24)
 
+                magicLinkRow
+                    .padding(.horizontal, 24)
+                    .padding(.top, 12)
+
                 registerPrompt
                     .padding(.top, 24)
                     .padding(.bottom, 32)
@@ -203,6 +207,25 @@ struct LoginView: View {
         .accessibilityIdentifier("signInButton")
     }
 
+    private var magicLinkRow: some View {
+        Button(action: sendMagicLink) {
+            HStack {
+                Image(systemName: "envelope.badge")
+                Text("Email me a sign-in link")
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundColor(.palmPrimary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color.palmPrimary.opacity(0.4), lineWidth: 1)
+            )
+        }
+        .disabled(email.isEmpty || isLoading)
+        .opacity(email.isEmpty ? 0.6 : 1)
+    }
+
     private var registerPrompt: some View {
         HStack(spacing: 4) {
             Text("New to PalmCare AI?")
@@ -253,6 +276,29 @@ struct LoginView: View {
                     errorMessage = friendlyError(error)
                     showError = true
                     isLoading = false
+                }
+            }
+        }
+    }
+
+    private func sendMagicLink() {
+        focusedField = nil
+        isLoading = true
+        errorMessage = nil
+        let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        Task {
+            do {
+                try await api.requestMagicLink(email: trimmed)
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = "We just sent a sign-in link to \(trimmed). Check your email."
+                    showError = true
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = friendlyError(error)
+                    showError = true
                 }
             }
         }

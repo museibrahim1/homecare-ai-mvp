@@ -1404,11 +1404,8 @@ def cron_bulk_mark_called(
     db: Session = Depends(get_db),
 ):
     """Bulk mark leads as called via internal key. Also updates contact info if provided."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     now = datetime.now(timezone.utc)
     results = []
@@ -2170,13 +2167,8 @@ def cron_daily_data(
     day_index: Optional[int] = None,
 ):
     """Return outreach data for a specific day. day_index=0 is first work day of week."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-
-    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
-    if not key_valid:
-        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     if day_index is not None:
         work_days = _week_work_days(0)
@@ -2319,14 +2311,8 @@ def cron_mark_emails_sent(
     db: Session = Depends(get_db),
 ):
     """Mark or unmark agency/investor leads as email_sent by ID list."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if not provided_key:
-        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
-    key_valid = (expected_key and provided_key == expected_key) or (cron_secret and provided_key == cron_secret)
-    if not key_valid:
-        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     now = datetime.now(timezone.utc)
     action = body.get("action", "mark")
@@ -2389,13 +2375,8 @@ def cron_mark_bounced(
     db: Session = Depends(get_db),
 ):
     """Mark leads/investors with bounced emails as 'email_bounced' so they stop getting retried."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if not provided_key:
-        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
-    if not ((expected_key and provided_key == expected_key) or (cron_secret and provided_key == cron_secret)):
-        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     bounced_emails = [e.strip().lower() for e in body.get("emails", []) if e.strip()]
     now = datetime.now(timezone.utc)
@@ -2436,13 +2417,8 @@ def cron_daily_digest(
     db: Session = Depends(get_db),
 ):
     """Cron-accessible daily digest. Requires X-Internal-Key header or CRON_SECRET query param."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-
-    key_valid = (expected_key and provided_key == expected_key) or (provided_key == cron_secret)
-    if not key_valid:
-        raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     data = _get_todays_plan_data(db)
 
@@ -2598,11 +2574,8 @@ def cron_fix_all_call_data(
     """Comprehensive fix: recalculate called_at for ALL contacted leads using activity_log.
     Also detects callbacks from notes and marks callback_requested.
     Accessible via cron key."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     all_contacted = (
         db.query(SalesLead)
@@ -2720,11 +2693,8 @@ def cron_call_data_audit(
     db: Session = Depends(get_db),
 ):
     """Audit called_at data — shows how many calls per day and flags issues."""
-    expected_key = os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
     all_contacted = (
         db.query(SalesLead)
@@ -2782,11 +2752,8 @@ def _require_cron_or_auth(request: Request, user=None):
     """Accept either JWT auth or X-Internal-Key / CRON_SECRET."""
     if user:
         return
-    import os as _os
-    cron_secret = _os.getenv("CRON_SECRET", "")
-    provided_key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if not (cron_secret and provided_key == cron_secret):
-        raise HTTPException(status_code=401, detail="Auth required")
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
 
 @router.get("/sequence-status")

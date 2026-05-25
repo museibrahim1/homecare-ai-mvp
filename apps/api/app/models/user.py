@@ -25,10 +25,12 @@ class User(Base, TimestampMixin):
     phone = Column(String(20), nullable=True)
     company_name = Column(String(255), nullable=True)  # For business owners
     
-    # Google Calendar Integration
+    # Google Calendar Integration (OAuth tokens encrypted at rest)
+    # The SQL column names stay the same so no migration is needed; the
+    # Python attributes are exposed via encrypt/decrypt properties below.
     google_calendar_connected = Column(Boolean, default=False, nullable=False)
-    google_calendar_access_token = Column(Text, nullable=True)
-    google_calendar_refresh_token = Column(Text, nullable=True)
+    _google_calendar_access_token = Column("google_calendar_access_token", Text, nullable=True)
+    _google_calendar_refresh_token = Column("google_calendar_refresh_token", Text, nullable=True)
     google_calendar_token_expiry = Column(DateTime(timezone=True), nullable=True)
     
     # Force logout: tokens issued before this timestamp are rejected
@@ -72,6 +74,22 @@ class User(Base, TimestampMixin):
     @voiceprint.setter
     def voiceprint(self, value):
         self._voiceprint_encrypted = encrypt_field(value)
+
+    @property
+    def google_calendar_access_token(self):
+        return decrypt_field(self._google_calendar_access_token)
+
+    @google_calendar_access_token.setter
+    def google_calendar_access_token(self, value):
+        self._google_calendar_access_token = encrypt_field(value) if value else None
+
+    @property
+    def google_calendar_refresh_token(self):
+        return decrypt_field(self._google_calendar_refresh_token)
+
+    @google_calendar_refresh_token.setter
+    def google_calendar_refresh_token(self, value):
+        self._google_calendar_refresh_token = encrypt_field(value) if value else None
 
     # Relationships
     visits_as_caregiver = relationship("Visit", back_populates="caregiver", foreign_keys="Visit.caregiver_id")

@@ -31,11 +31,15 @@ from app.schemas.business import (
     BusinessProfile, BusinessProfileUpdate, BusinessStatusResponse,
     BusinessUserCreate, BusinessUserUpdate, BusinessUserResponse, BusinessUserInviteResponse,
     BusinessLoginRequest, BusinessLoginResponse, PasswordResetRequest, PasswordResetConfirm,
+    MagicLinkRequest, MagicLinkConfirm,
     VerificationStatusEnum, EntityTypeEnum, DocumentTypeEnum, UserRoleEnum
 )
 from app.services.sos_verification import get_sos_service
 from app.services.document_storage import get_document_service
 from app.services.email import get_email_service
+from app.core.security import (
+    check_account_lockout, record_failed_login, clear_login_attempts,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +63,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """Issue a JWT that mirrors the lifetime configured in settings.
+
+    Defaults to `settings.jwt_expiration_hours` (1h per HIPAA) so that
+    business-side tokens don't outlive regular user tokens.
+    """
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(hours=24))
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(hours=settings.jwt_expiration_hours)
+    )
     to_encode.update({
         "exp": expire,
         "iss": settings.jwt_issuer,
@@ -107,156 +118,121 @@ async def register_business(
     registration: BusinessRegistrationStep1,
     db: Session = Depends(get_db),
 ):
+    """Simple signup: email + password + name. Returns a logged-in session.
+
+    No EIN, no SOS verification, no document upload. Agencies can fill in
+    extra details from Settings later. Account is auto-approved.
     """
-    Step 1: Register a new business.
-    
-    Creates business record and owner user account.
-    Triggers SOS verification automatically.
-    """
-    # Check if business email already exists
-    existing = db.query(Business).filter(Business.email == registration.email).first()
-    if existing:
-        raise HTTPException(
-            status_code=409,
-            detail="A business with this email is already registered. Try signing in instead."
-        )
-    
-    # Check if owner email already exists in BusinessUser
-    existing_user = db.query(BusinessUser).filter(
-        BusinessUser.email == registration.owner_email
-    ).first()
+    # Normalize inputs
+    owner_email = registration.owner_email.lower().strip()
+    business_email = (registration.email or owner_email).lower().strip()
+    agency_name = (registration.name or "").strip() or registration.owner_name.strip()
+
+    # Conflict check (one query covers both halves of the email→account map)
+    existing_user = (
+        db.query(BusinessUser).filter(BusinessUser.email == owner_email).first()
+        or db.query(User).filter(User.email == owner_email).first()
+    )
     if existing_user:
         raise HTTPException(
             status_code=409,
-            detail="An account with this email already exists. Try signing in or use a different email."
+            detail="An account with this email already exists. Try signing in instead.",
         )
-    
-    # Check if email already exists in regular User table
-    existing_regular_user = db.query(User).filter(
-        User.email == registration.owner_email
-    ).first()
-    if existing_regular_user:
-        raise HTTPException(
-            status_code=409,
-            detail="An account with this email already exists. Try signing in or use a different email."
-        )
-    
-    # HIPAA Compliance: Validate password meets security requirements
+
+    # HIPAA: validate password complexity
     from app.core.security import validate_password
     is_valid, error_msg = validate_password(registration.owner_password)
     if not is_valid:
-        raise HTTPException(
-            status_code=400,
-            detail=error_msg
-        )
-    
-    # Create business
-    # Use lowercase entity_type value to match PostgreSQL enum
-    entity_type_value = registration.entity_type.value.lower() if hasattr(registration.entity_type, 'value') else registration.entity_type.lower()
+        raise HTTPException(status_code=400, detail=error_msg)
+
+    # Defaults so we don't store empty strings where the DB needs a value
+    entity_type_raw = registration.entity_type or EntityTypeEnum.LLC
+    entity_type_value = (
+        entity_type_raw.value.lower()
+        if hasattr(entity_type_raw, "value")
+        else str(entity_type_raw).lower()
+    )
+    state = (registration.state or registration.state_of_incorporation or "NE").upper()
+    state_of_incorporation = (registration.state_of_incorporation or state).upper()
+
+    # Hash password once, reuse for both records (avoids double bcrypt cost)
+    hashed = hash_password(registration.owner_password)
+
     business = Business(
-        name=registration.name,
+        name=agency_name,
         dba_name=registration.dba_name,
         entity_type=entity_type_value,
-        state_of_incorporation=registration.state_of_incorporation.upper(),
+        state_of_incorporation=state_of_incorporation,
         registration_number=registration.registration_number,
-        address=registration.address,
-        city=registration.city,
-        state=registration.state.upper(),
-        zip_code=registration.zip_code,
-        phone=registration.phone,
-        email=registration.email,
+        address=registration.address or "",
+        city=registration.city or "",
+        state=state,
+        zip_code=registration.zip_code or "",
+        phone=registration.phone or "",
+        email=business_email,
         website=registration.website,
-        verification_status='pending',  # Use lowercase string to match PostgreSQL enum
+        verification_status="approved",
+        approved_at=datetime.now(timezone.utc),
     )
     db.add(business)
-    db.flush()  # Get the ID
-    
-    # Create owner user (BusinessUser for business management)
+    db.flush()
+
     owner = BusinessUser(
         business_id=business.id,
-        email=registration.owner_email,
-        full_name=registration.owner_name,
-        password_hash=hash_password(registration.owner_password),
-        role='owner',  # Use lowercase string to match PostgreSQL enum
+        email=owner_email,
+        full_name=registration.owner_name.strip(),
+        password_hash=hashed,
+        role="owner",
         is_owner=True,
+        email_verified=False,
         email_verification_token=secrets.token_urlsafe(32),
     )
     db.add(owner)
-    db.flush()  # Get the owner ID
-    
-    # Also create a regular User record for app functionality
-    # This allows the user to use all app features (clients, visits, etc.)
+    db.flush()
+
     regular_user = User(
-        id=owner.id,  # Use same ID so token works for both
-        email=registration.owner_email,
-        full_name=registration.owner_name,
-        hashed_password=hash_password(registration.owner_password),
-        company_name=registration.name,
-        role='user',
+        id=owner.id,
+        email=owner_email,
+        full_name=registration.owner_name.strip(),
+        hashed_password=hashed,
+        company_name=agency_name,
+        role="user",
         is_active=True,
     )
     db.add(regular_user)
     db.flush()
-    
-    # Attempt SOS verification
-    sos_service = get_sos_service()
-    sos_result = await sos_service.verify_business(
-        business_name=registration.name,
-        state=registration.state_of_incorporation,
-        registration_number=registration.registration_number,
-    )
-    
-    if sos_result.get("found"):
-        business.sos_verification_data = sos_result
-        business.sos_verified_at = datetime.now(timezone.utc)
-    
-    auto_approve = os.getenv("AUTO_APPROVE_BUSINESSES", "true").lower() == "true"
-    
-    if auto_approve:
-        business.verification_status = 'approved'
-        business.approved_at = datetime.now(timezone.utc)
-        next_steps = [
-            "Your account is ready! You can now log in.",
-            "Go to the login page and use your email and password.",
-        ]
-    else:
-        business.verification_status = 'pending'
-        next_steps = [
-            "Your registration is under review.",
-            "We'll notify you by email once your account is approved.",
-            "This typically takes 1-2 business days.",
-        ]
-    
-    # Pre-populate AgencySettings with registration address so the AI has
-    # location context from the very first contract.
+
+    next_steps = [
+        "You're signed in — start by adding your first client.",
+        "Update your agency details anytime from Settings.",
+    ]
+
     try:
         from app.models.agency_settings import AgencySettings
-        agency_settings = AgencySettings(
+        db.add(AgencySettings(
             user_id=regular_user.id,
             settings_key=f"user_{regular_user.id}",
-            name=registration.name,
+            name=agency_name,
             address=registration.address or "",
             city=registration.city or "",
-            state=(registration.state or registration.state_of_incorporation or "").upper(),
+            state=state,
             zip_code=registration.zip_code or "",
             phone=registration.phone or "",
-            email=registration.email,
-        )
-        db.add(agency_settings)
+            email=business_email,
+        ))
     except Exception as e:
         logger.warning(f"Could not auto-create AgencySettings on registration: {e}")
     
-    # Create 14-day trial subscription (card collected via Stripe Checkout after registration)
+    # Create 14-day trial subscription on the user's chosen plan (or Starter).
     try:
         from app.models.subscription import Plan, Subscription, SubscriptionStatus
         tier_map = {"starter": "STARTER", "growth": "PROFESSIONAL", "professional": "PROFESSIONAL"}
         plan_tier = tier_map.get((registration.selected_plan or "starter").lower(), "STARTER")
-        plan = db.query(Plan).filter(Plan.tier == plan_tier).first()
-        if not plan:
-            plan = db.query(Plan).order_by(Plan.monthly_price).first()
+        plan = db.query(Plan).filter(Plan.tier == plan_tier).first() or \
+            db.query(Plan).order_by(Plan.monthly_price).first()
         if plan:
             trial_end = datetime.now(timezone.utc) + timedelta(days=14)
-            subscription = Subscription(
+            db.add(Subscription(
                 business_id=business.id,
                 plan_id=plan.id,
                 status=SubscriptionStatus.TRIAL,
@@ -264,19 +240,17 @@ async def register_business(
                 trial_ends_at=trial_end,
                 current_period_start=datetime.now(timezone.utc),
                 current_period_end=trial_end,
-            )
-            db.add(subscription)
+            ))
     except Exception as e:
         logger.warning(f"Could not auto-create trial subscription: {e}")
 
-    # Track signup source
     signup_source = getattr(registration, "signup_source", None) or "direct"
     try:
         from app.services.audit import log_action
         log_action(
             db=db, user_id=regular_user.id, action="business_registered",
             entity_type="business", entity_id=business.id,
-            description=f"New business registered: {registration.name} (source: {signup_source}, plan: {registration.selected_plan or 'starter'})",
+            description=f"New business registered (source: {signup_source})",
             changes={"signup_source": signup_source, "selected_plan": registration.selected_plan or "starter"},
         )
     except Exception:
@@ -286,87 +260,103 @@ async def register_business(
         db.commit()
     except Exception as e:
         db.rollback()
-        logger.error(f"Registration commit failed for {registration.name}: {e}")
+        logger.error(f"Registration commit failed: {type(e).__name__}: {e}")
         raise HTTPException(
             status_code=500,
-            detail="Registration could not be completed. Please try again in a moment."
+            detail="Registration could not be completed. Please try again in a moment.",
         )
-    
-    # Send registration confirmation email to the new user
-    email_service = get_email_service()
-    welcome_result = email_service.send_business_registration_received(
-        business_email=registration.owner_email,
-        business_name=registration.name,
-    )
-    if not welcome_result.get("success"):
-        logger.error(
-            f"Failed to send welcome email to {registration.owner_email} "
-            f"for business {registration.name}: {welcome_result.get('error')}"
+
+    # Issue an immediate access token so the client is signed in after signup.
+    token = create_access_token({
+        "sub": str(regular_user.id),
+        "business_id": str(business.id),
+        "email": owner_email,
+    }, expires_delta=timedelta(hours=settings.jwt_expiration_hours))
+
+    # Welcome email — best-effort, never block signup on email failure.
+    try:
+        email_service = get_email_service()
+        welcome_result = email_service.send_business_registration_received(
+            business_email=owner_email,
+            business_name=agency_name,
         )
-    
-    # Notify platform admin of new registration
-    admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com")
-    admin_result = email_service.send_admin_new_registration(
-        admin_email=admin_email,
-        business_name=registration.name,
-        business_id=str(business.id),
-    )
-    if not admin_result.get("success"):
-        logger.error(
-            f"Failed to send admin notification to {admin_email} "
-            f"for new registration {registration.name}: {admin_result.get('error')}"
+        if not welcome_result.get("success"):
+            logger.warning(f"Welcome email failed: {welcome_result.get('error')}")
+    except Exception as e:
+        logger.warning(f"Welcome email skipped: {type(e).__name__}: {e}")
+
+    try:
+        admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com")
+        email_service = get_email_service()
+        email_service.send_admin_new_registration(
+            admin_email=admin_email,
+            business_name=agency_name,
+            business_id=str(business.id),
         )
-    
-    logger.info(
-        f"New business registered: {registration.name} "
-        f"(welcome_email={'sent' if welcome_result.get('success') else 'FAILED'}, "
-        f"admin_notif={'sent' if admin_result.get('success') else 'FAILED'})"
-    )
-    
+    except Exception:
+        pass
+
+    logger.info(f"New business registered: business_id={business.id}, source={signup_source}")
+
     return BusinessRegistrationResponse(
         business_id=business.id,
         verification_status=VerificationStatusEnum(business.verification_status),
-        message="Registration submitted successfully",
+        message="Welcome to PalmCare AI!",
         next_steps=next_steps,
+        access_token=token,
     )
 
 
 @router.post("/verify-sos", response_model=SOSVerificationResponse)
+@limiter.limit("10/minute")
 async def verify_with_sos(
-    request: SOSVerificationRequest,
+    request: Request,
+    body: SOSVerificationRequest,
+    current_user: User = Depends(get_current_api_user),
 ):
     """
-    Verify a business with Secretary of State records.
-    
-    Can be used before registration to check if business exists.
+    Optional helper: look up a business in Secretary of State records.
+
+    Auth-gated and rate-limited to prevent abuse of upstream SOS APIs.
+    Not part of the signup flow anymore.
     """
     sos_service = get_sos_service()
     result = await sos_service.verify_business(
-        business_name=request.business_name,
-        state=request.state,
-        registration_number=request.registration_number,
+        business_name=body.business_name,
+        state=body.state,
+        registration_number=body.registration_number,
     )
-    
     return SOSVerificationResponse(**result)
 
 
 @router.post("/upload-document/{business_id}")
+@limiter.limit("10/minute")
 async def upload_document(
+    request: Request,
     business_id: UUID,
     document_type: str = Form(...),
     expiration_date: Optional[str] = Form(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
 ):
-    """
-    Upload a verification document for a business.
-    
-    Only allowed for businesses in pending/documents_submitted state.
+    """Upload an optional verification document for a business.
+
+    Auth-gated: the caller must be the owner of the business they're uploading
+    documents for. The signup flow itself no longer requires any documents.
     """
     # Get business
     business = db.query(Business).filter(Business.id == business_id).first()
     if not business:
         raise HTTPException(status_code=404, detail="Business not found")
+
+    # Ownership: the caller's linked BusinessUser must belong to this business.
+    business_user = db.query(BusinessUser).filter(
+        BusinessUser.email == current_user.email,
+        BusinessUser.business_id == business.id,
+    ).first()
+    if not business_user:
+        raise HTTPException(status_code=403, detail="You don't have access to this business")
     
     allowed_statuses = ('pending', 'documents_submitted', 'rejected')
     if business.verification_status not in allowed_statuses:
@@ -451,12 +441,21 @@ async def upload_document(
 async def get_registration_status(
     business_id: UUID,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
 ):
     """
     Check the registration/verification status of a business.
+    Requires auth: caller must belong to the business.
     """
     business = db.query(Business).filter(Business.id == business_id).first()
     if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+
+    business_user = db.query(BusinessUser).filter(
+        BusinessUser.email == current_user.email,
+        BusinessUser.business_id == business.id,
+    ).first()
+    if not business_user:
         raise HTTPException(status_code=404, detail="Business not found")
     
     # Count documents
@@ -495,22 +494,41 @@ async def get_registration_status(
 # =============================================================================
 
 @router.post("/login", response_model=BusinessLoginResponse)
+@limiter.limit("10/minute")
 async def login(
+    request: Request,
     credentials: BusinessLoginRequest,
     db: Session = Depends(get_db),
 ):
+    """Login with email and password.
+
+    Brute-force protected: IP-level slowapi limit (10/min) + per-email
+    account lockout after 5 failures.
     """
-    Login with email and password.
-    
-    Only approved businesses can login.
-    """
-    # Find user
-    user = db.query(BusinessUser).filter(
-        BusinessUser.email == credentials.email
-    ).first()
-    
+    email = credentials.email.lower().strip()
+
+    # Per-account lockout (shared with /auth/login)
+    is_locked, seconds_remaining = check_account_lockout(email)
+    if is_locked:
+        minutes = (seconds_remaining or 900) // 60
+        raise HTTPException(
+            status_code=429,
+            detail=f"Account temporarily locked. Try again in {minutes} minutes.",
+        )
+
+    user = db.query(BusinessUser).filter(BusinessUser.email == email).first()
     if not user or not verify_password(credentials.password, user.password_hash):
+        is_now_locked, lock_duration = record_failed_login(email)
+        if is_now_locked:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Account locked due to too many failed attempts. "
+                       f"Try again in {(lock_duration or 900) // 60} minutes.",
+            )
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    # Successful credentials — clear failure counter
+    clear_login_attempts(email)
     
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account is disabled")
@@ -610,60 +628,208 @@ async def login(
 
 
 @router.post("/password-reset/request")
+@limiter.limit("5/15minutes")
 async def request_password_reset(
-    request: PasswordResetRequest,
+    request: Request,
+    body: PasswordResetRequest,
     db: Session = Depends(get_db),
 ):
-    """Request a password reset email."""
-    user = db.query(BusinessUser).filter(
-        BusinessUser.email == request.email
-    ).first()
-    
+    """Request a password reset email. Rate-limited to 5 per IP per 15 min."""
+    email = body.email.lower().strip()
+    user = db.query(BusinessUser).filter(BusinessUser.email == email).first()
+
     if user:
-        # Generate token
         token = secrets.token_urlsafe(32)
         user.password_reset_token = token
         user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=24)
         db.commit()
-        
+
         app_url = os.getenv("APP_URL", "https://palmcareai.com")
         reset_url = f"{app_url}/reset-password?token={token}"
-        
-        email_svc = get_email_service()
-        result = email_svc.send_password_reset(
-            user_email=user.email,
-            user_name=user.full_name,
-            reset_url=reset_url,
-        )
-        if result.get("success"):
-            logger.info("Business password reset email sent successfully")
-        else:
-            logger.error(f"Business password reset email FAILED: {result.get('error')}")
-    
-    # Always return success to prevent email enumeration
+
+        try:
+            email_svc = get_email_service()
+            result = email_svc.send_password_reset(
+                user_email=user.email,
+                user_name=user.full_name,
+                reset_url=reset_url,
+            )
+            if not result.get("success"):
+                logger.warning(f"Password reset email failed: {result.get('error')}")
+        except Exception as e:
+            logger.warning(f"Password reset email skipped: {type(e).__name__}: {e}")
+
+    # Always return success — prevents user enumeration
     return {"message": "If an account exists, a password reset email has been sent."}
 
 
 @router.post("/password-reset/confirm")
+@limiter.limit("10/15minutes")
 async def confirm_password_reset(
-    request: PasswordResetConfirm,
+    request: Request,
+    body: PasswordResetConfirm,
     db: Session = Depends(get_db),
 ):
-    """Reset password using token."""
+    """Reset password using token. Also invalidates existing sessions."""
+    from app.core.security import validate_password
+    is_valid, error_msg = validate_password(body.new_password)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+
     user = db.query(BusinessUser).filter(
-        BusinessUser.password_reset_token == request.token,
+        BusinessUser.password_reset_token == body.token,
         BusinessUser.password_reset_expires > datetime.now(timezone.utc),
     ).first()
-    
+
     if not user:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
-    
-    user.password_hash = hash_password(request.new_password)
+
+    new_hash = hash_password(body.new_password)
+    user.password_hash = new_hash
     user.password_reset_token = None
     user.password_reset_expires = None
+
+    # Mirror new password to linked User row + force-logout all existing sessions
+    linked = db.query(User).filter(User.email == user.email).first()
+    if linked:
+        linked.hashed_password = new_hash
+        if hasattr(linked, "force_logout_at"):
+            linked.force_logout_at = datetime.now(timezone.utc)
+
     db.commit()
-    
+    clear_login_attempts(user.email)
     return {"message": "Password reset successfully"}
+
+
+# =============================================================================
+# MAGIC LINK — passwordless one-tap email sign-in
+# =============================================================================
+
+@router.post("/magic-link/request")
+@limiter.limit("5/15minutes")
+async def request_magic_link(
+    request: Request,
+    body: MagicLinkRequest,
+    db: Session = Depends(get_db),
+):
+    """Send a one-time login link to the user's email.
+
+    Tokens are 15-minute single-use. Always returns 200 to prevent
+    email enumeration; only sends if the account exists.
+    """
+    email = body.email.lower().strip()
+    user = db.query(BusinessUser).filter(BusinessUser.email == email).first()
+
+    if user:
+        token = secrets.token_urlsafe(32)
+        # Reuse password_reset_token columns to avoid a schema migration;
+        # we keep the magic-link expiry short (15 min) so it can't shadow
+        # a real password-reset request in practice.
+        user.password_reset_token = f"magic:{token}"
+        user.password_reset_expires = datetime.now(timezone.utc) + timedelta(minutes=15)
+        db.commit()
+
+        app_url = os.getenv("APP_URL", "https://palmcareai.com")
+        login_url = f"{app_url}/sign-in?magic={token}"
+
+        try:
+            email_svc = get_email_service()
+            result = email_svc.send_magic_link(
+                user_email=user.email,
+                user_name=user.full_name,
+                login_url=login_url,
+            ) if hasattr(email_svc, "send_magic_link") else email_svc.send_password_reset(
+                user_email=user.email,
+                user_name=user.full_name,
+                reset_url=login_url,
+            )
+            if not result.get("success"):
+                logger.warning(f"Magic link email failed: {result.get('error')}")
+        except Exception as e:
+            logger.warning(f"Magic link email skipped: {type(e).__name__}: {e}")
+
+    return {"message": "If an account exists, a sign-in link has been sent."}
+
+
+@router.post("/magic-link/verify", response_model=BusinessLoginResponse)
+@limiter.limit("10/minute")
+async def verify_magic_link(
+    request: Request,
+    body: MagicLinkConfirm,
+    db: Session = Depends(get_db),
+):
+    """Exchange a magic-link token for an access token + login response."""
+    stored = f"magic:{body.token}"
+    user = db.query(BusinessUser).filter(
+        BusinessUser.password_reset_token == stored,
+        BusinessUser.password_reset_expires > datetime.now(timezone.utc),
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired sign-in link")
+
+    # Single-use: clear the token immediately
+    user.password_reset_token = None
+    user.password_reset_expires = None
+    user.email_verified = True  # email ownership proven
+    user.last_login = datetime.now(timezone.utc)
+
+    business = user.business
+
+    # Ensure linked User row exists (same logic as /login)
+    api_user = db.query(User).filter(User.email == user.email).first()
+    if api_user is None:
+        api_user = User(
+            id=user.id,
+            email=user.email,
+            hashed_password=user.password_hash,
+            full_name=user.full_name or user.email.split("@")[0],
+            role="user",
+            is_active=True,
+            company_name=business.name if business else None,
+        )
+        db.add(api_user)
+        db.flush()
+
+    db.commit()
+    clear_login_attempts(user.email)
+
+    token = create_access_token({
+        "sub": str(api_user.id),
+        "business_id": str(business.id) if business else None,
+        "email": user.email,
+    })
+
+    return BusinessLoginResponse(
+        access_token=token,
+        user=BusinessUserResponse(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            phone=user.phone,
+            role=UserRoleEnum(user.role) if isinstance(user.role, str) else UserRoleEnum(str(user.role)),
+            is_active=user.is_active,
+            is_owner=user.is_owner,
+            email_verified=user.email_verified,
+            last_login=user.last_login,
+            created_at=user.created_at,
+        ),
+        business=BusinessProfile(
+            id=business.id if business else user.id,
+            name=business.name if business else "",
+            dba_name=business.dba_name if business else None,
+            entity_type=EntityTypeEnum(business.entity_type) if business else EntityTypeEnum.LLC,
+            state_of_incorporation=business.state_of_incorporation if business else "",
+            address=business.address if business else None,
+            city=business.city if business else None,
+            state=business.state if business else None,
+            zip_code=business.zip_code if business else None,
+            phone=business.phone if business else None,
+            email=business.email if business else user.email,
+            verification_status=VerificationStatusEnum(business.verification_status) if business else VerificationStatusEnum.APPROVED,
+            created_at=business.created_at if business else user.created_at,
+        ),
+    )
 
 
 # =============================================================================

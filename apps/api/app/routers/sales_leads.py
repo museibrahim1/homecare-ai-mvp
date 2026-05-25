@@ -2021,15 +2021,9 @@ import os as _os
 
 
 def _require_internal_key(request: Request):
-    """Validate internal API key or cron secret."""
-    expected_key = _os.getenv("INTERNAL_API_KEY", "")
-    cron_secret = _os.getenv("CRON_SECRET", "")
-    provided_key = (
-        request.headers.get("X-Internal-Key", "")
-        or request.query_params.get("key", "")
-    )
-    if not ((expected_key and provided_key == expected_key) or (provided_key == cron_secret)):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    """Validate internal API key or cron secret. Delegates to shared helper."""
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
 
 class InternalAddLeadAndEmail(BaseModel):

@@ -242,8 +242,41 @@ class APIService: ObservableObject {
         return user
     }
 
-    func register(body: [String: Any]) async throws {
-        let _: RegisterResponse = try await request("POST", path: "/auth/business/register", body: body, noAuth: true)
+    /// Register a new business. The simplified backend returns an access_token
+    /// directly so the user is signed in immediately — no second login call needed.
+    @discardableResult
+    func register(body: [String: Any]) async throws -> RegisterResponse {
+        let response: RegisterResponse = try await request(
+            "POST", path: "/auth/business/register", body: body, noAuth: true
+        )
+        if let access = response.access_token, !access.isEmpty {
+            await MainActor.run { self.token = access }
+        }
+        return response
+    }
+
+    /// Request a one-time magic sign-in link sent to the user's email.
+    /// Backend always returns 200 to prevent enumeration.
+    func requestMagicLink(email: String) async throws {
+        let _: [String: AnyCodable] = try await request(
+            "POST",
+            path: "/auth/business/magic-link/request",
+            body: ["email": email],
+            noAuth: true
+        )
+    }
+
+    /// Exchange a magic-link token (deep-linked from email) for a session.
+    func verifyMagicLink(token: String) async throws {
+        let response: BusinessLoginResponse = try await request(
+            "POST",
+            path: "/auth/business/magic-link/verify",
+            body: ["token": token],
+            noAuth: true
+        )
+        await MainActor.run {
+            if let access = response.access_token { self.token = access }
+        }
     }
 
     // MARK: - Clients
@@ -347,8 +380,7 @@ class APIService: ObservableObject {
             if let errorBody = try? jsonDecoder.decode(ErrorResponse.self, from: data) {
                 throw APIError.serverError(errorBody.detail ?? errorBody.message ?? "Upload failed")
             }
-            let bodyStr = String(data: data, encoding: .utf8) ?? ""
-            throw APIError.serverError("Upload failed (\(httpResponse.statusCode)): \(bodyStr.prefix(200))")
+            throw APIError.serverError("Upload failed (\(httpResponse.statusCode))")
         }
 
         return try jsonDecoder.decode(UploadResponse.self, from: data)
@@ -621,6 +653,8 @@ class APIService: ObservableObject {
 
     /// Permanently delete the authenticated account and all associated data.
     /// Backend enforces password re-auth and the literal "DELETE MY ACCOUNT" confirmation.
+    /// On success, performs a full local wipe (token + recordings + cached
+    /// calendar data + temp files) to satisfy Apple Guideline 5.1.1(v).
     func deleteAccount(password: String) async throws {
         let _: [String: AnyCodable] = try await request(
             "POST",
@@ -630,7 +664,9 @@ class APIService: ObservableObject {
                 "confirmation": "DELETE MY ACCOUNT",
             ]
         )
-        await MainActor.run { self.token = nil }
+        // logout() clears the keychain token, in-memory caches, the
+        // Recordings/ directory, and the tmp directory.
+        await MainActor.run { self.logout() }
     }
     
     // MARK: - Profile
@@ -706,15 +742,38 @@ class APIService: ObservableObject {
     func logout() {
         token = nil
 
-        UserDefaults.standard.removeObject(forKey: "palmcare_calendar_events")
-        UserDefaults.standard.removeObject(forKey: "googleCalendarConnected")
+        // Clear any cached PHI from UserDefaults (legacy keys + new ones).
+        let defaults = UserDefaults.standard
+        for key in [
+            "palmcare_calendar_events",
+            "googleCalendarConnected",
+            "cachedClients",
+            "cachedVisits",
+            "lastSyncedAt",
+        ] {
+            defaults.removeObject(forKey: key)
+        }
         URLCache.shared.removeAllCachedResponses()
 
         let fm = FileManager.default
+
+        // Wipe the encrypted calendar cache file (see CalendarStorage).
+        if let docsDir = fm.urls(for: .documentDirectory, in: .userDomainMask).first {
+            for name in ["palmcare_calendar.cache", "calendar_events.json"] {
+                let url = docsDir.appendingPathComponent(name)
+                if fm.fileExists(atPath: url.path) {
+                    try? fm.removeItem(at: url)
+                }
+            }
+        }
+
+        // Recordings directory (PHI audio).
         let recordingsDir = fm.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Recordings")
         if let dir = recordingsDir, fm.fileExists(atPath: dir.path) {
             try? fm.removeItem(at: dir)
         }
+
+        // Tmp directory (export sheets, chunked audio, etc.).
         let tmpDir = fm.temporaryDirectory
         if let files = try? fm.contentsOfDirectory(atPath: tmpDir.path) {
             for file in files {
@@ -734,6 +793,9 @@ struct ErrorResponse: Codable {
 struct RegisterResponse: Codable {
     let business_id: String?
     let message: String?
+    let access_token: String?
+    let token_type: String?
+    let next_steps: [String]?
 }
 
 enum APIError: LocalizedError {
@@ -748,7 +810,13 @@ enum APIError: LocalizedError {
         case .invalidResponse: return "We received an unexpected response. Please try again."
         case .unauthorized: return "Session expired. Please log in again."
         case .serverError(let msg):
-            if msg.contains("{") || msg.contains("status") || msg.count > 120 {
+            // Don't pass raw JSON, stack traces, or anything that looks like
+            // server internals out to the user.
+            let lowered = msg.lowercased()
+            if msg.contains("{") || msg.contains("}")
+                || msg.contains("<") || msg.contains("</")
+                || lowered.contains("traceback") || lowered.contains("exception")
+                || msg.count > 120 {
                 return "Something went wrong. Please try again."
             }
             return msg
@@ -757,7 +825,11 @@ enum APIError: LocalizedError {
 }
 
 private enum KeychainHelper {
-    private static let service = "com.palmcare.ai"
+    // Use the same service identifier as our bundle ID so Keychain
+    // entries are scoped correctly. (The legacy "com.palmcare.ai"
+    // value is migrated below on first launch.)
+    private static let service = "com.palmcareai.app"
+    private static let legacyService = "com.palmcare.ai"
     private static let tokenKey = "auth_token"
 
     static func save(_ token: String) {
@@ -776,6 +848,20 @@ private enum KeychainHelper {
     }
 
     static func load() -> String? {
+        if let token = read(service: service) {
+            return token
+        }
+        // One-time migration: pull from legacy service ID and re-save under
+        // the new one so future loads stay on the modern key.
+        if let legacy = read(service: legacyService) {
+            save(legacy)
+            deleteLegacy()
+            return legacy
+        }
+        return nil
+    }
+
+    private static func read(service: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -793,6 +879,16 @@ private enum KeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
+            kSecAttrAccount as String: tokenKey,
+        ]
+        SecItemDelete(query as CFDictionary)
+        deleteLegacy()
+    }
+
+    private static func deleteLegacy() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: legacyService,
             kSecAttrAccount as String: tokenKey,
         ]
         SecItemDelete(query as CFDictionary)

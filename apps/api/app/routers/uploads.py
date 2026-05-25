@@ -78,6 +78,29 @@ async def upload_audio(
     if len(content) > MAX_UPLOAD_SIZE:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File too large. Maximum size is 500MB.")
     file_size = len(content)
+
+    # Magic-byte sniff: the content_type/extension can be spoofed, so verify
+    # the first few bytes look like one of the audio/video containers we
+    # actually support. We accept WAV (RIFF), MP3 (ID3/sync), MP4/M4A (ftyp),
+    # OGG, WebM/Matroska, FLAC, AMR, and 3GPP.
+    if file_size >= 12:
+        head = content[:16]
+        looks_like_audio = (
+            head[:4] == b"RIFF" and head[8:12] == b"WAVE"      # WAV
+            or head[:3] == b"ID3"                                  # MP3 w/ ID3
+            or (head[0] == 0xFF and (head[1] & 0xE0) == 0xE0)      # MP3 frame sync
+            or head[4:8] == b"ftyp"                                # MP4/M4A/3GP
+            or head[:4] == b"OggS"                                  # OGG
+            or head[:4] == b"\x1aE\xdf\xa3"                       # Matroska/WebM
+            or head[:4] == b"fLaC"                                  # FLAC
+            or head[:6] == b"#!AMR\n"                              # AMR
+            or head[:3] == b"FFC"                                   # AAC ADTS variant
+        )
+        if not looks_like_audio:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The uploaded file doesn't look like a supported audio recording.",
+            )
     
     # Sanitize filename to prevent path traversal
     import re

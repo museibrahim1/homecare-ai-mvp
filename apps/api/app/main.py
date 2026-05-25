@@ -4,12 +4,14 @@ import traceback
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import settings
 from app.core.rate_limit import limiter, rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -121,9 +123,25 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Rate limiting
+# Rate limiting — register limiter, exception handler, AND the middleware
+# so global default_limits actually apply to undecorated routes.
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+# Trusted Host — only accept requests whose Host header matches our domains.
+# Defaults cover localhost dev + railway production + palmcareai.com.
+_trusted_hosts = [
+    "localhost", "127.0.0.1", "testserver",
+    "api-production-a0a2.up.railway.app",
+    "*.railway.app",
+    "palmcareai.com", "*.palmcareai.com",
+    "palmtai.com", "*.palmtai.com",
+]
+_extra_hosts = os.getenv("TRUSTED_HOSTS", "")
+if _extra_hosts:
+    _trusted_hosts.extend([h.strip() for h in _extra_hosts.split(",") if h.strip()])
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=_trusted_hosts)
 
 # CORS middleware - allow frontend origins (reuse the shared list)
 cors_origins = list(_ALLOWED_ORIGINS)

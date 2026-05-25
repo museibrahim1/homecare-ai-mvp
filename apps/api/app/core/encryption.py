@@ -15,16 +15,26 @@ _fernet_instance = None
 
 
 def _get_fernet() -> Fernet:
-    """Lazy-init a Fernet cipher from FIELD_ENCRYPTION_KEY env var."""
+    """Lazy-init a Fernet cipher from FIELD_ENCRYPTION_KEY env var.
+
+    In production (RAILWAY_ENVIRONMENT set) we refuse to start with an
+    auto-generated key — a process-local key means encrypted DB rows
+    silently become unreadable across deploys/replicas.
+    """
     global _fernet_instance
     if _fernet_instance is None:
         key = os.getenv("FIELD_ENCRYPTION_KEY")
         if not key:
+            if os.getenv("RAILWAY_ENVIRONMENT"):
+                raise RuntimeError(
+                    "FATAL: FIELD_ENCRYPTION_KEY is required in production. "
+                    "Generate one with: python -c 'from cryptography.fernet import Fernet; "
+                    "print(Fernet.generate_key().decode())'"
+                )
             key = Fernet.generate_key().decode()
             logger.warning(
-                "FIELD_ENCRYPTION_KEY not set — using auto-generated key. "
-                "Encrypted data will NOT survive restarts. "
-                "Set FIELD_ENCRYPTION_KEY env var for production."
+                "FIELD_ENCRYPTION_KEY not set — using auto-generated key (dev only). "
+                "Encrypted data will NOT survive restarts."
             )
         _fernet_instance = Fernet(key.encode() if isinstance(key, str) else key)
     return _fernet_instance

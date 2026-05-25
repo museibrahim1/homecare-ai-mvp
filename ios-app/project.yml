@@ -54,6 +54,9 @@ targets:
           - audio
         NSMicrophoneUsageDescription: "PalmCareAI uses the microphone to record client visits and assessments. Recording continues in the background only while a visit is in progress, and audio is processed solely for transcription, billing, and contract generation."
         NSSpeechRecognitionUsageDescription: "PalmCareAI uses on-device speech recognition for hands-free voice commands with the Palm AI assistant."
+        NSFaceIDUsageDescription: "PalmCareAI uses Face ID to quickly and securely unlock the app and protect access to sensitive client information."
+        NSCameraUsageDescription: "PalmCareAI uses the camera so caregivers can attach photos to visit notes and care plans."
+        NSPhotoLibraryUsageDescription: "PalmCareAI accesses your photo library so caregivers can attach photos to visit notes and care plans."
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: false
           NSExceptionDomains:
@@ -61,6 +64,18 @@ targets:
               NSIncludesSubdomains: true
               NSExceptionAllowsInsecureHTTPLoads: false
         ITSAppUsesNonExemptEncryption: false
+        # Backend base URL. Empty falls back to the production Railway URL
+        # in code, so this can be overridden by a build configuration.
+        API_BASE_URL: ""
+        # Google OAuth client ID for Calendar/Gmail/Drive integrations.
+        # Leave blank in source — set via build configuration / xcconfig.
+        GOOGLE_CLIENT_ID: ""
+        # Register the OAuth callback URL scheme so Google can redirect
+        # back into the app after the user grants Calendar access.
+        CFBundleURLTypes:
+          - CFBundleURLName: com.palmcareai.app
+            CFBundleURLSchemes:
+              - com.palmcareai.app
 
 schemes:
   PalmCareAI:

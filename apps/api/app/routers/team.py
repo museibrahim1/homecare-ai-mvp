@@ -674,13 +674,9 @@ def _send_invite_email(member: User, password: str, is_reset: bool = False):
 # ── Internal Endpoints (key-auth) ────────────────────────────
 
 def _require_internal_key(request: Request):
-    expected = os.getenv("INTERNAL_API_KEY", "")
-    cron = os.getenv("CRON_SECRET", "")
-    provided = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
-    if not provided:
-        raise HTTPException(401, "Invalid or missing API key")
-    if not ((expected and provided == expected) or (cron and provided == cron)):
-        raise HTTPException(401, "Invalid or missing API key")
+    """Delegate to the shared validator that fail-closes if env vars are unset."""
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
 
 
 @router.get("/team-internal/list")

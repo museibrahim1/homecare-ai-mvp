@@ -89,18 +89,23 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
     """
     email = request.email.lower().strip()
     client_ip = req.client.host if req.client else "unknown"
-    
+
+    # Hash for audit log JSON so we never persist the raw email in structured
+    # fields, but still allow correlation across failed-login records.
+    import hashlib as _hashlib
+    email_hash = _hashlib.sha256(email.encode()).hexdigest()[:16]
+
     # Rate limiting by IP
     _check_rate_limit(f"login:{client_ip}")
-    
+
     # HIPAA: Check if account is locked
     is_locked, seconds_remaining = check_account_lockout(email)
     if is_locked:
         log_action(
-            db=db, user_id=None, action="login_blocked_lockout", 
+            db=db, user_id=None, action="login_blocked_lockout",
             entity_type="security", entity_id=None,
             description=f"Login blocked for {email} - account locked",
-            changes={"email": email, "ip": client_ip, "seconds_remaining": seconds_remaining},
+            changes={"email_hash": email_hash, "ip": client_ip, "seconds_remaining": seconds_remaining},
             ip_address=client_ip
         )
         minutes = (seconds_remaining or 900) // 60
@@ -117,10 +122,10 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
         is_now_locked, lock_duration = record_failed_login(email)
         
         log_action(
-            db=db, user_id=None, action="login_failed", 
+            db=db, user_id=None, action="login_failed",
             entity_type="security", entity_id=None,
             description=f"Failed login attempt for {email}",
-            changes={"email": email, "user_exists": user is not None, "locked": is_now_locked},
+            changes={"email_hash": email_hash, "user_exists": user is not None, "locked": is_now_locked},
             ip_address=client_ip
         )
         
