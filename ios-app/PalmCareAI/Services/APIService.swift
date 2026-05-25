@@ -275,7 +275,9 @@ class APIService: ObservableObject {
             noAuth: true
         )
         await MainActor.run {
-            if let access = response.access_token { self.token = access }
+            if !response.access_token.isEmpty {
+                self.token = response.access_token
+            }
         }
     }
 
