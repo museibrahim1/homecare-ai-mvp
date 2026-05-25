@@ -47,7 +47,7 @@ export default function SchedulerPage() {
   const [searchResults, setSearchResults] = useState<CrmResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [selectedCrm, setSelectedCrm] = useState<CrmResult | null>(null);
-  const searchTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [form, setForm] = useState({
     contact_name: '', contact_email: '', contact_phone: '',

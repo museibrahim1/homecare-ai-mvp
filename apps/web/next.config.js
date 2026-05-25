@@ -2,7 +2,12 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  swcMinify: true,
+  // Next 15+ removed `swcMinify` (SWC minification is now default and not configurable).
+  // Pin the Turbopack workspace root so Next.js does not infer it from the
+  // repo-root puppeteer lockfile.
+  turbopack: {
+    root: __dirname,
+  },
   experimental: {
     optimizeCss: true,
   },

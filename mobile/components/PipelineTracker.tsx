@@ -1,4 +1,5 @@
-import { View, Text, Animated, Easing, useRef, useEffect } from 'react-native';
+import { View, Text, Animated, Easing } from 'react-native';
+import { useRef, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import type { PipelineState } from '@/lib/types';
 

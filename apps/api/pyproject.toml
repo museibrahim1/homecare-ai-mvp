@@ -4,53 +4,66 @@ version = "0.1.0"
 description = "AI Voice Analyzer API for In-Home Healthcare"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi>=0.115.0",
-    "starlette>=0.40.0",
-    "uvicorn[standard]>=0.30.0",
-    "pydantic[email]>=2.7.0",
-    "pydantic-settings>=2.3.0",
-    "sqlalchemy>=2.0.32",
-    "psycopg[binary]>=3.2.0",
-    "psycopg2-binary>=2.9.9",
+    "fastapi>=0.136.3",
+    # starlette 1.0+ (PYSEC-2026-161)
+    "starlette>=1.0.1",
+    "uvicorn[standard]>=0.48.0",
+    "pydantic[email]>=2.13.0",
+    "pydantic-settings>=2.14.0",
+    "sqlalchemy>=2.0.50",
+    "psycopg[binary]>=3.3.4",
+    "psycopg2-binary>=2.9.12",
     "alembic>=1.13.2",
     "python-jose[cryptography]>=3.3.0",
     "passlib>=1.7.4",
-    "bcrypt==4.0.1",
-    # CVE-2024-24762: starlette parses multipart slowly. python-multipart 0.0.9+ fixes upstream.
-    "python-multipart>=0.0.18",
-    "boto3>=1.34.0",
-    "celery[redis]>=5.4.0",
-    "redis>=5.1.0",
+    # bcrypt 5.x — major bump, API still compatible w/ passlib
+    "bcrypt>=5.0.0",
+    # python-multipart 0.0.27+ closes CVE-2026-40347 and CVE-2026-42561
+    "python-multipart>=0.0.27",
+    "boto3>=1.43.0",
+    "celery[redis]>=5.6.3",
+    # kombu (celery's transport) pins redis<6.5; stay on latest 6.x.
+    # No known CVEs on redis 6.4.0. Re-evaluate redis 7.x once celery 6.x lifts the cap.
+    "redis>=6.4.0,<7",
     "python-docx>=1.1.2",
     "httpx>=0.27.0",
-    # urllib3<2.5 has GHSA-pq67-6m6q-mj2v (PoolManager redirect issue)
-    "urllib3>=2.5.0",
-    # requests<2.32 has GHSA-9wx4-h78v-vm56 (Session.verify bypass)
-    "requests>=2.32.0",
-    # Pillow<10.3 has CVE-2024-28219 (buffer overflow), <11.3 fixed CVE-2025-48433
-    "pillow>=11.3.0",
-    # python-dotenv<1.1 has parser issues w/ shell-style quoting
-    "python-dotenv>=1.1.1",
-    "anthropic>=0.34.0",
-    "openai>=1.40.0",
-    "reportlab>=4.2.0",
-    "resend>=2.4.0",
-    "stripe>=10.0.0",
+    # urllib3 2.7.0 patches PYSEC-2026-141 and PYSEC-2026-142
+    "urllib3>=2.7.0",
+    # requests 2.33.0 patches CVE-2026-25645
+    "requests>=2.33.0",
+    # pillow 12.2.0 patches CVE-2026-40192 and CVE-2026-42308-11
+    "pillow>=12.2.0",
+    # python-dotenv 1.2.2 patches CVE-2026-28684
+    "python-dotenv>=1.2.2",
+    "anthropic>=0.104.0",
+    "openai>=2.38.0",
+    "reportlab>=4.5.0",
+    "resend>=2.30.0",
+    # stripe 15.x — major bump (PaymentIntent API tweaks)
+    "stripe>=15.0.0",
     "app-store-server-library>=1.5.0",
-    "cryptography>=44.0.0",
+    # cryptography 48.x patches PYSEC-2026-35 and PYSEC-2026-36
+    "cryptography>=48.0.0",
     "pyotp>=2.9.0",
     "websockets>=13.0",
     "slowapi>=0.1.9",
+    # Transitive security pins (pulled by FastAPI / requests stack)
+    "idna>=3.15",          # CVE-2026-45409
+    "lxml>=6.1.0",         # PYSEC-2026-87
+    "mako>=1.3.12",        # CVE-2026-44307
+    "pyasn1>=0.6.3",       # CVE-2026-30922
+    "ecdsa>=0.19.2",       # CVE-2026-33936
+    "pygments>=2.20.0",    # CVE-2026-4539
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.0",
+    "pytest>=9.0.3",       # CVE-2025-71176
     "pytest-asyncio>=0.23.0",
-    "pytest-cov>=4.1.0",
+    "pytest-cov>=7.1.0",
     "httpx>=0.26.0",
-    "black>=24.1.0",
-    "ruff>=0.1.0",
+    "black>=26.3.1",       # CVE-2026-32274
+    "ruff>=0.15.14",
 ]
 
 [build-system]

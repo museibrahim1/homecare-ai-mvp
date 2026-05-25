@@ -1,6 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Continue using the existing v3-style tailwind.config.js (theme colors,
+   custom backgrounds, shadows). Tailwind 4 supports this via @config. */
+@config "../../tailwind.config.js";
+
+/* Tailwind 4 needs an explicit content/source declaration in CSS. */
+@source "../**/*.{js,ts,jsx,tsx,mdx}";
+
+/* Tailwind 4 changed the default border color from gray-200 to currentColor.
+   Restore the v3 behavior so existing `border` classes keep the old look. */
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
 
 /* ============================================================
    THEME: Enterprise Light (Default)
@@ -654,11 +667,17 @@ html {
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
     -webkit-text-fill-color: transparent;
   }
   .text-gradient-primary {
-    @apply text-gradient bg-gradient-to-r from-primary-500 to-accent-cyan;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(to right, var(--primary-500, #0d9488), var(--accent-cyan, #0891b2));
   }
 
   .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
@@ -686,7 +705,9 @@ html {
   }
 
   .card-interactive {
-    @apply card cursor-pointer;
+    @apply bg-white border border-gray-200 rounded-xl cursor-pointer;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .card-interactive:hover {
     @apply border-primary-500/30;
@@ -750,11 +771,11 @@ html {
   .badge {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium;
   }
-  .badge-primary { @apply badge bg-primary-50 text-primary-600; }
-  .badge-green { @apply badge bg-green-50 text-green-700; }
-  .badge-red { @apply badge bg-red-50 text-red-700; }
-  .badge-amber { @apply badge bg-amber-50 text-amber-700; }
-  .badge-purple { @apply badge bg-purple-50 text-purple-700; }
+  .badge-primary { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary-50 text-primary-600; }
+  .badge-green   { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-50 text-green-700; }
+  .badge-red     { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-50 text-red-700; }
+  .badge-amber   { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700; }
+  .badge-purple  { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700; }
 
   /* Skeleton */
   .skeleton {
@@ -763,9 +784,9 @@ html {
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
   }
-  .skeleton-text { @apply skeleton h-4 rounded; }
-  .skeleton-avatar { @apply skeleton rounded-full; }
-  .skeleton-card { @apply skeleton rounded-xl; }
+  .skeleton-text   { @apply bg-gray-200 rounded h-4; background: linear-gradient(90deg, rgb(229 231 235) 25%, rgb(243 244 246) 50%, rgb(229 231 235) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
+  .skeleton-avatar { @apply bg-gray-200 rounded-full;   background: linear-gradient(90deg, rgb(229 231 235) 25%, rgb(243 244 246) 50%, rgb(229 231 235) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
+  .skeleton-card   { @apply bg-gray-200 rounded-xl;     background: linear-gradient(90deg, rgb(229 231 235) 25%, rgb(243 244 246) 50%, rgb(229 231 235) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; }
 
   /* Divider */
   .divider {
@@ -870,10 +891,10 @@ html {
     @apply px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer;
   }
   .filter-pill-inactive {
-    @apply filter-pill border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 bg-white;
+    @apply px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 bg-white;
   }
   .filter-pill-active {
-    @apply filter-pill border-primary-200 text-primary-700 bg-primary-50;
+    @apply px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer border-primary-200 text-primary-700 bg-primary-50;
   }
 
   /* ── Stat Card (compact enterprise variant) ── */
@@ -894,10 +915,10 @@ html {
   .status-badge {
     @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium;
   }
-  .status-active { @apply status-badge bg-emerald-50 text-emerald-700; }
-  .status-pending { @apply status-badge bg-amber-50 text-amber-700; }
-  .status-inactive { @apply status-badge bg-slate-100 text-slate-600; }
-  .status-error { @apply status-badge bg-red-50 text-red-700; }
+  .status-active   { @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700; }
+  .status-pending  { @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700; }
+  .status-inactive { @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600; }
+  .status-error    { @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-red-50 text-red-700; }
 }
 
 /* ============================================================
