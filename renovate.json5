@@ -1,0 +1,58 @@
+// Renovate config — polyglot project with multiple package ecosystems.
+// Used in: museibrahim1/homecare-ai-mvp (Python + TS + Kotlin + Swift + Docker).
+//
+// Strategy: conservative. No auto-merge — too many ecosystems means a
+// bad update in one (e.g. a Python wheel) can silently break CI for
+// another. Group aggressively by ecosystem so each Monday lands one
+// PR per language, not 40.
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+    ":dependencyDashboard",
+    ":timezone(America/Chicago)",
+  ],
+  schedule: ["before 8am on monday"],
+  labels: ["dependencies"],
+  prConcurrentLimit: 8,
+  prHourlyLimit: 2,
+  rangeStrategy: "bump",
+  lockFileMaintenance: { enabled: true, schedule: ["before 8am on monday"] },
+  vulnerabilityAlerts: { labels: ["security"], schedule: [] },
+  // Enable every relevant manager for this multi-stack repo.
+  enabledManagers: [
+    "npm",
+    "pip_requirements",
+    "pip_setup",
+    "pep621",
+    "poetry",
+    "gradle",
+    "gradle-wrapper",
+    "swift",
+    "cocoapods",
+    "dockerfile",
+    "docker-compose",
+    "github-actions",
+  ],
+  packageRules: [
+    // One PR per ecosystem, per week.
+    { matchManagers: ["npm"], groupName: "npm" },
+    { matchManagers: ["pip_requirements", "pip_setup", "pep621", "poetry"], groupName: "python" },
+    { matchManagers: ["gradle", "gradle-wrapper"], groupName: "android" },
+    { matchManagers: ["swift", "cocoapods"], groupName: "ios" },
+    { matchManagers: ["dockerfile", "docker-compose"], groupName: "docker" },
+    { matchManagers: ["github-actions"], groupName: "github-actions", pinDigests: true },
+    // Type defs are always safe.
+    {
+      matchPackagePatterns: ["^@types/"],
+      groupName: "type-definitions",
+      automerge: true,
+    },
+    // Security alerts come through immediately with the security label.
+    {
+      matchPackagePatterns: [".*"],
+      vulnerabilityAlerts: { schedule: [], labels: ["security"] },
+    },
+  ],
+}
