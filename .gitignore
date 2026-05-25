@@ -77,3 +77,4 @@ ios-app/preview_*.png
 marketing/screen-recordings/*.mp4
 marketing/screenshots/*.png
 videos/public/screen-recordings/
+.venv311/
