@@ -15,7 +15,6 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File,
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.rate_limit import limiter
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 from jose import jwt
 
 from app.core.deps import get_db, get_current_user as get_current_api_user
@@ -39,12 +38,12 @@ from app.services.document_storage import get_document_service
 from app.services.email import get_email_service
 from app.core.security import (
     check_account_lockout, record_failed_login, clear_login_attempts,
+    get_password_hash, verify_password as _verify_password,
 )
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Required documents for verification (use lowercase strings to match PostgreSQL enum)
 REQUIRED_DOCUMENTS = [
@@ -55,11 +54,11 @@ REQUIRED_DOCUMENTS = [
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return get_password_hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return _verify_password(plain_password, hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

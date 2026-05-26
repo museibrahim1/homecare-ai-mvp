@@ -2,13 +2,28 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 import logging
 import re
+
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# bcrypt has a hard 72-byte input limit. Older passlib used to silently
+# truncate; bcrypt 4.1+ raises a ValueError instead. We match the legacy
+# silent-truncate behavior so that:
+#   * passwords longer than 72 bytes don't 500 the API
+#   * pre-existing `$2b$` hashes (created when passlib was truncating
+#     server-side) still verify against the same plaintext
+_BCRYPT_MAX_BYTES = 72
+
+
+def _bcrypt_safe_bytes(password: str) -> bytes:
+    """Encode and truncate password to bcrypt's 72-byte input limit."""
+    if password is None:
+        password = ""
+    return password.encode("utf-8")[:_BCRYPT_MAX_BYTES]
 
 # Redis-backed login attempt tracking (multi-process safe)
 _redis_client = None
@@ -33,13 +48,29 @@ _login_attempts: dict = {}  # {email: {"count": int, "locked_until": datetime}}
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a password against its bcrypt hash.
+
+    Accepts any standard bcrypt prefix ($2a$, $2b$, $2y$) — `bcrypt.checkpw`
+    handles them transparently, so existing hashes created by passlib remain
+    verifiable after the migration.
+    """
+    if not hashed_password:
+        return False
+    try:
+        return bcrypt.checkpw(
+            _bcrypt_safe_bytes(plain_password),
+            hashed_password.encode("utf-8"),
+        )
+    except (ValueError, TypeError):
+        # Malformed or non-bcrypt hash — treat as a verification failure
+        # rather than letting a noisy exception propagate up.
+        return False
 
 
 def get_password_hash(password: str) -> str:
-    """Generate password hash."""
-    return pwd_context.hash(password)
+    """Generate a bcrypt password hash (12 rounds, matches the historical default)."""
+    salt = bcrypt.gensalt(rounds=12)
+    return bcrypt.hashpw(_bcrypt_safe_bytes(password), salt).decode("utf-8")
 
 
 def validate_password(password: str) -> Tuple[bool, str]:
@@ -160,7 +191,7 @@ def check_password_history(user, new_password: str) -> bool:
     """
     history = getattr(user, "password_history", None) or []
     for old_hash in history:
-        if pwd_context.verify(new_password, old_hash):
+        if verify_password(new_password, old_hash):
             return True
     return False
 

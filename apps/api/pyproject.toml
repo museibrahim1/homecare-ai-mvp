@@ -15,18 +15,14 @@ dependencies = [
     "psycopg2-binary>=2.9.12",
     "alembic>=1.13.2",
     "python-jose[cryptography]>=3.3.0",
-    "passlib>=1.7.4",
-    # passlib 1.7.4 (the latest passlib release) is broken on bcrypt 4.1+:
-    #   * bcrypt 4.1 added a strict ">72 byte password" ValueError that
-    #     passlib's startup self-test (`detect_wrap_bug`) trips on, which
-    #     prevents the bcrypt backend from loading at all.
-    #   * bcrypt 5.0  removed `__about__`, which passlib 1.7.x reads to
-    #     detect the version (https://github.com/pyca/bcrypt/issues/684).
-    # Both ultimately make every register / login call raise HTTP 500.
-    # Keep bcrypt pinned to the last passlib-compatible series until either
-    # passlib ships a fix or we migrate auth off passlib (e.g. bcrypt
-    # directly or argon2-cffi). No known CVEs on bcrypt 4.0.x.
-    "bcrypt>=4.0.1,<4.1",
+    # passlib was dropped — app.core.security uses the `bcrypt` library
+    # directly. That removes the passlib startup-probe crash on bcrypt 4.1+
+    # (https://github.com/pyca/bcrypt/issues/684) and lets us ride latest 4.x.
+    # Existing stored `$2b$` hashes from the passlib era still verify
+    # correctly because bcrypt.checkpw accepts every $2a$ / $2b$ / $2y$ prefix.
+    # Cap at <5 for now: bcrypt 5 hasn't been audited against our stored
+    # hashes yet, but lifting that cap is now a one-line change.
+    "bcrypt>=4.3.0,<5",
     # python-multipart 0.0.27+ closes CVE-2026-40347 and CVE-2026-42561
     "python-multipart>=0.0.27",
     "boto3>=1.43.0",

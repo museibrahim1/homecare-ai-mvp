@@ -16,9 +16,9 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status, Query
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from passlib.context import CryptContext
 
 from app.core.deps import get_db, get_current_user
+from app.core.security import get_password_hash
 from app.models.user import User
 from app.models.business import (
     Business, BusinessDocument, BusinessUser,
@@ -612,9 +612,6 @@ async def get_admin_stats(
 # QUICK SETUP (DEMO ONBOARDING)
 # =============================================================================
 
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
 class QuickSetupRequest(BaseModel):
     company_name: str
     owner_name: str
@@ -666,7 +663,7 @@ async def quick_setup(
         raise HTTPException(status_code=400, detail="A user with this email already exists")
 
     temp_password = _generate_temp_password()
-    hashed = _pwd_context.hash(temp_password)
+    hashed = get_password_hash(temp_password)
 
     # 1. Business (auto-approved)
     business = Business(
