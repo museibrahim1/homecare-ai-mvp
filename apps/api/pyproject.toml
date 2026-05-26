@@ -16,8 +16,11 @@ dependencies = [
     "alembic>=1.13.2",
     "python-jose[cryptography]>=3.3.0",
     "passlib>=1.7.4",
-    # bcrypt 5.x — major bump, API still compatible w/ passlib
-    "bcrypt>=5.0.0",
+    # bcrypt 5.0.0 removed `__about__`, which passlib 1.7.x reads to detect
+    # the version (https://github.com/pyca/bcrypt/issues/684). Until passlib
+    # ships a fix or we migrate off it, bcrypt MUST stay <5. No known CVEs on
+    # bcrypt 4.x — sticking to the 4 series is purely a compat constraint.
+    "bcrypt>=4.0.1,<5",
     # python-multipart 0.0.27+ closes CVE-2026-40347 and CVE-2026-42561
     "python-multipart>=0.0.27",
     "boto3>=1.43.0",
