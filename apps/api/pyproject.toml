@@ -16,11 +16,17 @@ dependencies = [
     "alembic>=1.13.2",
     "python-jose[cryptography]>=3.3.0",
     "passlib>=1.7.4",
-    # bcrypt 5.0.0 removed `__about__`, which passlib 1.7.x reads to detect
-    # the version (https://github.com/pyca/bcrypt/issues/684). Until passlib
-    # ships a fix or we migrate off it, bcrypt MUST stay <5. No known CVEs on
-    # bcrypt 4.x — sticking to the 4 series is purely a compat constraint.
-    "bcrypt>=4.0.1,<5",
+    # passlib 1.7.4 (the latest passlib release) is broken on bcrypt 4.1+:
+    #   * bcrypt 4.1 added a strict ">72 byte password" ValueError that
+    #     passlib's startup self-test (`detect_wrap_bug`) trips on, which
+    #     prevents the bcrypt backend from loading at all.
+    #   * bcrypt 5.0  removed `__about__`, which passlib 1.7.x reads to
+    #     detect the version (https://github.com/pyca/bcrypt/issues/684).
+    # Both ultimately make every register / login call raise HTTP 500.
+    # Keep bcrypt pinned to the last passlib-compatible series until either
+    # passlib ships a fix or we migrate auth off passlib (e.g. bcrypt
+    # directly or argon2-cffi). No known CVEs on bcrypt 4.0.x.
+    "bcrypt>=4.0.1,<4.1",
     # python-multipart 0.0.27+ closes CVE-2026-40347 and CVE-2026-42561
     "python-multipart>=0.0.27",
     "boto3>=1.43.0",
