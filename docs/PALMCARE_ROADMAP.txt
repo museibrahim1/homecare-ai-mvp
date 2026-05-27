@@ -1,0 +1,464 @@
+================================================================================
+                         PALMCARE — 12-MONTH COMPANY ROADMAP
+                    Homecare CRM · Assessments · Contracts · Billables
+                              February 2026 – January 2027
+================================================================================
+
+STAGE OVERVIEW
+──────────────
+  Stage        Months        Mission
+  ──────────   ───────────   ───────────────────────────────────────────────
+  Stage 1      Feb – Apr     Beta → First Revenue (prove people pay)
+  Stage 2      May – Jul     Build the Sales Machine (scale what works)
+  Stage 3      Aug – Oct     Expand & Raise (grow ARR + close funding)
+  Stage 4      Nov – Jan     Market Leadership (dominate the niche)
+
+KEY NORTH STAR METRICS
+──────────────────────
+  End of Stage 1    5–10 paying agencies, $5K–$15K MRR
+  End of Stage 2    25–40 paying agencies, $30K–$60K MRR
+  End of Stage 3    75–100 agencies, $100K+ MRR, Seed round closed
+  End of Stage 4    150–200 agencies, $200K+ MRR, Series A narrative ready
+
+
+================================================================================
+  STAGE 1 — BETA TO FIRST REVENUE
+  Feb · Mar · Apr 2026
+  Goal: Convert beta users to paid. Prove the core product is sticky.
+================================================================================
+
+────────────────────────────────────────────────────────────
+  FEBRUARY 2026 — Lock the Product, Charge for It
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • Audit beta feedback — identify top 3 blockers to paying
+    • Fix critical bugs from beta testing
+    • Finalize assessment → contract → billable core workflow
+    • Make onboarding self-serve (new agency live in < 30 min)
+    • Build basic reporting dashboard (billables captured, time saved)
+
+  Business / Legal / Ops
+    • Finalize company incorporation (if not done)
+    • Set up business bank account + accounting (QuickBooks/Pilot)
+    • Create standard SaaS customer agreement (MSA + DPA)
+    • Define pricing tiers (suggested: Starter / Growth / Agency)
+    • Set up Stripe billing + subscription management
+
+  Go-to-Market / Marketing
+    • Update website with clear value prop + pricing page
+    • Create 1-page "Why Palmcare" leave-behind (PDF)
+    • Document 3 beta user wins with real numbers (time saved, $$ captured)
+    • Start founder LinkedIn content (2–3 posts/week, homecare angle)
+
+  Sales
+    • Personally call every beta user — convert or learn why not
+    • Set a target: 3 paid logos by end of month
+    • Define ICP clearly: agency size, state, payer mix (Medicare/Medicaid/private)
+    • Build a simple CRM (even a spreadsheet) tracking every prospect
+
+  Funding
+    • N/A this month — focus 100% on first dollars
+
+────────────────────────────────────────────────────────────
+  MARCH 2026 — Build the Sales Motion
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • Ship v1 of agency setup toolkit (domain, intake forms, branding)
+    • Add e-signature to contracts (DocuSign or native)
+    • Connect to at least 1 clearinghouse or billing platform (integration)
+    • Improve assessment templates (add common OASIS, HHA, PCA formats)
+    • Implement in-app onboarding checklist for new agencies
+
+  Business / Legal / Ops
+    • Hire or contract a part-time customer success person
+    • Write internal playbook: how to onboard a new agency in 48 hours
+    • Define refund/cancellation policy
+    • Set up basic support (Intercom or similar)
+
+  Go-to-Market / Marketing
+    • Launch 1 case study (before/after with real agency data)
+    • Start building email newsletter for homecare operators
+    • Identify 5–10 homecare industry Facebook Groups / communities to join
+    • Research homecare conferences and state association events (plan to attend Q2)
+
+  Sales
+    • Target: 5–8 paying agencies
+    • Start outbound: LinkedIn DMs + cold email to agency owners (50/week)
+    • Partner outreach: contact 3–5 homecare consultants / franchisors as referral sources
+    • Offer a "Founder Pricing" lock-in incentive for early adopters
+
+  Funding
+    • Begin tracking metrics investors care about: MRR, churn, CAC, LTV
+    • Draft 1-page company overview (for warm intros, not formal raise yet)
+
+────────────────────────────────────────────────────────────
+  APRIL 2026 — Prove It Works at Scale for Small Agencies
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • Mobile-optimized assessment flow (field workers use phones)
+    • Billing export to QuickBooks / ADP
+    • Add user roles: Admin / Coordinator / Caregiver
+    • Net Promoter Score (NPS) survey in-app at 30-day mark
+    • Address top 5 feature requests from paid customers
+
+  Business / Legal / Ops
+    • Review and tighten pricing based on what's converting
+    • Set up basic affiliate / referral program for existing customers
+    • Formalize weekly internal operating rhythm (see bottom of doc)
+
+  Go-to-Market / Marketing
+    • Post 2 video demos on YouTube (assessment workflow + billables flow)
+    • Run a small LinkedIn ad test ($500 budget, target homecare owners)
+    • Get 3 written testimonials from paying customers for website
+
+  Sales
+    • Target: 10–12 paying agencies
+    • Launch "Agency Jumpstart" offer: onboarding + 90-day success package
+    • Attend 1 homecare industry event or state association meeting
+    • Formalize referral deal with 1 homecare consultant / franchisor
+
+  Funding
+    • Build pitch deck v1 (problem, solution, traction, ask)
+    • Start collecting warm intro list (investors who focus on healthtech / SaaS)
+
+
+================================================================================
+  STAGE 2 — BUILD THE SALES MACHINE
+  May · Jun · Jul 2026
+  Goal: Systematize what's working. Hit $30K–$60K MRR.
+================================================================================
+
+────────────────────────────────────────────────────────────
+  MAY 2026 — Systematize + Hire
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • Launch multi-location support (agencies with multiple offices)
+    • Automated billable reminders + aging reports
+    • Integrations: begin Medicaid EVV (Electronic Visit Verification) research
+    • API / webhook layer (prep for partner integrations)
+
+  Business / Ops
+    • Hire first full-time sales rep or SDR
+    • Formalize sales process: demo → trial → close playbook
+    • Build customer health scoring (identify churn risk early)
+
+  Go-to-Market / Marketing
+    • Launch referral program publicly (give $X/month credit per referral)
+    • SEO content: start writing 2 blog posts/month (homecare billing, compliance)
+    • Speak or present at 1 homecare association event
+
+  Sales
+    • Target: 20–25 paying agencies
+    • Open channel: homecare franchise networks (Comfort Keepers, BrightSpring, etc.)
+    • Build a demo video library (objection-specific demos)
+    • Weekly sales pipeline review with clear stage definitions
+
+  Funding
+    • Start warm investor conversations (no deck pressure, relationship building)
+    • Apply to 1–2 relevant accelerators (YC, a16z START, Hustle Fund, etc.)
+
+────────────────────────────────────────────────────────────
+  JUNE 2026 — Channel Partnerships
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • EVV integration (at least 1 state-approved vendor)
+    • Caregiver mobile app (visit check-in, task completion, notes)
+    • Automated contract renewal reminders
+    • Enhanced billing: split billing, multi-payer per client
+
+  Business / Ops
+    • Hire or contract a marketing generalist
+    • Build a partner program with tiers (Referral / Reseller / OEM)
+    • Get SOC 2 Type I audit started (trust signal for enterprise agencies)
+
+  Go-to-Market / Marketing
+    • Co-marketing with 1 homecare software partner or supplier
+    • Launch a free resource hub (compliance guides, billing templates)
+    • YouTube channel: weekly "Homecare Business" tips (SEO + authority)
+
+  Sales
+    • Target: 30–35 paying agencies
+    • First reseller partner signed
+    • Create annual contract discount offer (12-month prepay = 2 months free)
+    • Regional sales focus: lock down 2–3 states as strongholds
+
+  Funding
+    • Refine pitch deck with real traction numbers
+    • Target: 10–15 warm investor meetings this month
+
+────────────────────────────────────────────────────────────
+  JULY 2026 — Consolidate + Prep for Raise
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • AI-powered assessment suggestions (common care plan recommendations)
+    • Compliance alerts (state regulation changes affecting contracts)
+    • Advanced analytics dashboard (revenue forecasting, census trends)
+    • White-label option for franchisor / reseller partners
+
+  Business / Ops
+    • Mid-year review: revisit pricing, churn, CAC, LTV
+    • Finalize data room for fundraising (financials, contracts, cap table)
+    • HIPAA compliance audit + documentation
+
+  Go-to-Market / Marketing
+    • Launch a "Palmcare Certified" badge for partner agencies
+    • Webinar series: "From Setup to First Billable in 30 Days"
+    • Press outreach: pitch 1–2 homecare trade publications
+
+  Sales
+    • Target: 40–50 paying agencies
+    • Lock in 2 enterprise agency deals (10+ locations)
+    • Build renewal forecast for next 6 months
+
+  Funding
+    • Seed round pitch process begins in earnest
+    • Target: $1M–$2.5M Seed round
+    • Target close: by end of Stage 3 (October)
+
+
+================================================================================
+  STAGE 3 — EXPAND & RAISE
+  Aug · Sep · Oct 2026
+  Goal: 75–100 agencies, $100K+ MRR, close Seed round.
+================================================================================
+
+────────────────────────────────────────────────────────────
+  AUGUST 2026 — Raise Mode + Product Depth
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • Payroll integration (caregivers paid from billables data)
+    • Family / client portal (transparency for care recipients)
+    • Bulk import: migrate agencies from competitor platforms
+    • Performance + reliability hardening (99.9% uptime SLA target)
+
+  Business / Ops
+    • Hire: Head of Customer Success
+    • Hire: Part-time Finance / Controller (fundraise readiness)
+    • Finalize term sheet negotiations (if raise in progress)
+
+  Go-to-Market / Marketing
+    • Launch competitor comparison pages on website (SEO)
+    • Run first paid Google Ads campaign targeting "homecare software"
+    • Collect 10+ G2 / Capterra reviews from paying customers
+
+  Sales
+    • Target: 65–75 paying agencies
+    • Close 1 state association as a preferred vendor partner
+    • Direct sales to franchise corporate offices (top-down deals)
+
+  Funding
+    • Active fundraising: weekly investor meetings
+    • Target: term sheet by end of August
+
+────────────────────────────────────────────────────────────
+  SEPTEMBER 2026 — Close the Round, Accelerate
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • AI documentation assistant (auto-generate progress notes)
+    • Scheduling module (caregiver scheduling linked to assessments)
+    • State-specific compliance templates (expand to 10+ states)
+    • Mobile app v2 (offline mode for rural caregivers)
+
+  Business / Ops
+    • Seed round closes
+    • Begin strategic hiring plan with new capital
+    • Set up proper data infrastructure (analytics, BI tooling)
+
+  Go-to-Market / Marketing
+    • Press release on Seed round
+    • Sponsor 1 national homecare conference (brand visibility)
+    • Launch customer community (Slack or Circle)
+
+  Sales
+    • Target: 80–90 paying agencies
+    • Expand to 5+ new states with dedicated outreach
+    • Build channel sales: onboard 3–5 active resellers
+
+  Funding
+    • Round closed — begin capital deployment planning
+    • Start Series A metrics tracking (path to $1M ARR)
+
+────────────────────────────────────────────────────────────
+  OCTOBER 2026 — Scale Infrastructure for Growth
+────────────────────────────────────────────────────────────
+
+  Product / Engineering
+    • SOC 2 Type II certification complete
+    • Open API published (developer docs + sandbox)
+    • Enterprise SSO + advanced permissions
+    • Predictive churn model (flag at-risk accounts)
+
+  Business / Ops
+    • Hire: 2–3 Sales Reps (funded by Seed)
+    • Hire: Full-time Marketing Manager
+    • Build formal onboarding program (Palmcare Academy)
+
+  Go-to-Market / Marketing
+    • Launch Palmcare Academy (online training for agency staff)
+    • Guest podcast appearances on homecare business shows
+    • Case study video series (3 agency transformation stories)
+
+  Sales
+    • Target: 100 paying agencies
+    • $100K+ MRR milestone celebration + customer event
+    • Build enterprise pipeline (agencies with 50+ employees)
+
+  Funding
+    • Post-close: investor update cadence established (monthly)
+    • Series A story: unit economics, expansion revenue, market size
+
+
+================================================================================
+  STAGE 4 — MARKET LEADERSHIP
+  Nov 2026 · Dec 2026 · Jan 2027
+  Goal: Cement position as the #1 CRM for homecare agencies.
+================================================================================
+
+────────────────────────────────────────────────────────────
+  NOVEMBER 2026 — Dominate the Category
+────────────────────────────────────────────────────────────
+
+  Product
+    • Marketplace / app integrations (HR, payroll, EHR partners)
+    • AI billing anomaly detection (catch underbilling automatically)
+    • Multi-state enterprise dashboard
+    • Feedback-driven Q4 product sprint based on NPS data
+
+  Business / Ops
+    • Formalize culture + values documentation
+    • Build company-level OKR system for 2027
+    • Consider first international market feasibility (Canada homecare)
+
+  Sales & Marketing
+    • Target: 130+ paying agencies
+    • Run "End of Year" campaign (annual contract push)
+    • Host first Palmcare customer summit (virtual or in-person)
+    • Publish state-of-homecare-billing annual report (thought leadership)
+
+────────────────────────────────────────────────────────────
+  DECEMBER 2026 — Reflect, Reset, Plan 2027
+────────────────────────────────────────────────────────────
+
+  Product
+    • Engineering retrospective + 2027 roadmap planning
+    • Address technical debt from rapid scaling
+    • Ship year-end customer-requested features
+
+  Business / Ops
+    • Year-end financial close + board reporting
+    • Compensation + equity refresh for early team
+    • 2027 hiring plan + budget finalized
+
+  Sales & Marketing
+    • Target: 150+ paying agencies
+    • Holiday retention campaign (check-in calls to all customers)
+    • Lock in annual contracts before year-end for ARR boost
+
+  Funding
+    • Series A data package assembled
+    • Begin warm Series A investor conversations (Q1 2027 raise target)
+
+────────────────────────────────────────────────────────────
+  JANUARY 2027 — Year 2 Launch Pad
+────────────────────────────────────────────────────────────
+
+  Product
+    • Palmcare Platform v2 launch (major release)
+    • New vertical: consider skilled nursing or pediatric homecare expansion
+    • Launch Palmcare AI features publicly (AI notes, AI contracts, AI billing)
+
+  Business / Ops
+    • Team size target: 15–20 people
+    • Series A process begins
+    • Begin partnership with national homecare associations
+
+  Sales & Marketing
+    • Target: 175–200 paying agencies
+    • $200K+ MRR milestone
+    • Announce Series A publicly upon close
+
+  Funding
+    • Series A: target $5M–$10M raise
+    • Use of funds: product, sales team, geographic expansion
+
+
+================================================================================
+  WEEKLY OPERATING RHYTHM
+  (Run this every week, every stage)
+================================================================================
+
+  Day         Focus Area
+  ─────────   ─────────────────────────────────────────────────────────────
+  Monday      Operations — blockers, hiring, vendor/partner issues
+  Tuesday     Product — engineering priorities, bug triage, roadmap review
+  Wednesday   Marketing — content, campaigns, brand, pipeline top-of-funnel
+  Thursday    Sales — demos, follow-ups, pipeline, partner calls
+  Friday      Review — metrics, MRR, churn, investor update, weekly plan
+
+  WEEKLY NON-NEGOTIABLES
+    • Review MRR, new signups, and churn number
+    • Close at least 1 new agency (Stages 1–2) or review 5 active deals
+    • Send 1 piece of content (post, email, video, or article)
+    • Talk to at least 1 customer (not support — strategic conversation)
+
+
+================================================================================
+  METRICS DASHBOARD — TRACK WEEKLY
+================================================================================
+
+  Revenue
+    • MRR (Monthly Recurring Revenue)
+    • ARR (Annual Run Rate)
+    • New MRR added this week
+    • Churned MRR this week
+    • Net Revenue Retention (NRR)
+
+  Sales
+    • # of demos scheduled
+    • # of demos completed
+    • # of trials started
+    • # of new paying agencies
+    • Pipeline value (total + by stage)
+
+  Product
+    • Daily/Weekly Active Users (DAU/WAU)
+    • Assessments created
+    • Contracts generated
+    • Billables captured ($)
+    • NPS score (monthly)
+
+  Unit Economics
+    • CAC (Customer Acquisition Cost)
+    • LTV (Lifetime Value)
+    • LTV:CAC ratio (target > 3:1)
+    • Payback period (target < 12 months)
+
+
+================================================================================
+  ONE FOUNDING PRINCIPLE — READ THIS EVERY MONDAY
+================================================================================
+
+  Palmcare wins by making homecare agencies more profitable
+  faster than any other tool on the market.
+
+  Every product decision, every sale, every marketing move
+  should answer one question:
+
+        "Does this help a homecare agency get to revenue faster?"
+
+  If yes — prioritize it.
+  If no  — cut it or defer it.
+
+  From beta to $200K MRR, your only job is sequencing.
+  Do the thing that removes the biggest risk this week.
+  Then do the next thing.
+
+================================================================================

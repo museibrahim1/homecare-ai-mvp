@@ -78,3 +78,4 @@ marketing/screen-recordings/*.mp4
 marketing/screenshots/*.png
 videos/public/screen-recordings/
 .venv311/
+*.mp3

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modal Stress Test Controller</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        #log {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #0f0;
+            padding: 10px;
+            margin: 20px 0;
+            background: #000;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0c0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            border: 1px solid #0f0;
+            padding: 15px;
+            background: #000;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥 Modal Stress Test Controller</h1>
+    
+    <div class="stats">
+        <div class="stat-card">
+            <div>Cycles Completed</div>
+            <div class="stat-value" id="cycles">0</div>
+        </div>
+        <div class="stat-card">
+            <div>Avg Open Time</div>
+            <div class="stat-value" id="avgOpen">-</div>
+        </div>
+        <div class="stat-card">
+            <div>Avg Close Time</div>
+            <div class="stat-value" id="avgClose">-</div>
+        </div>
+    </div>
+    
+    <button onclick="runStressTest()">▶️ Start Stress Test (120 cycles)</button>
+    <button onclick="stopTest()">⏹️ Stop Test</button>
+    <button onclick="clearLog()">🗑️ Clear Log</button>
+    
+    <div id="log"></div>
+    
+    <script>
+        let running = false;
+        let timings = [];
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        function stopTest() {
+            running = false;
+            log('⏹️ Test stopped by user');
+        }
+        
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        async function runStressTest() {
+            if (running) {
+                log('⚠️ Test already running!');
+                return;
+            }
+            
+            running = true;
+            timings = [];
+            
+            log('🚀 Starting stress test...');
+            log('Target: 120 modal open/close cycles');
+            log('');
+            
+            // Open the clients page in a new window
+            const clientsWindow = window.open('http://localhost:3000/clients', '_blank');
+            
+            if (!clientsWindow) {
+                log('❌ Failed to open window. Please allow popups.');
+                running = false;
+                return;
+            }
+            
+            // Wait for page to load
+            await sleep(3000);
+            log('✅ Clients page loaded');
+            
+            const totalCycles = 120;
+            
+            for (let i = 1; i <= totalCycles && running; i++) {
+                const cycleStart = performance.now();
+                
+                try {
+                    // Open modal
+                    const openStart = performance.now();
+                    clientsWindow.postMessage({ action: 'openModal' }, '*');
+                    await sleep(100); // Wait for modal to open
+                    const openDuration = performance.now() - openStart;
+                    
+                    // Close modal
+                    const closeStart = performance.now();
+                    clientsWindow.postMessage({ action: 'closeModal' }, '*');
+                    await sleep(100); // Wait for modal to close
+                    const closeDuration = performance.now() - closeStart;
+                    
+                    const totalDuration = performance.now() - cycleStart;
+                    
+                    timings.push({
+                        cycle: i,
+                        openDuration,
+                        closeDuration,
+                        totalDuration
+                    });
+                    
+                    // Update stats
+                    document.getElementById('cycles').textContent = i;
+                    
+                    if (i % 20 === 0) {
+                        const recent = timings.slice(-20);
+                        const avgOpen = recent.reduce((sum, t) => sum + t.openDuration, 0) / recent.length;
+                        const avgClose = recent.reduce((sum, t) => sum + t.closeDuration, 0) / recent.length;
+                        const avgTotal = recent.reduce((sum, t) => sum + t.totalDuration, 0) / recent.length;
+                        
+                        document.getElementById('avgOpen').textContent = `${avgOpen.toFixed(0)}ms`;
+                        document.getElementById('avgClose').textContent = `${avgClose.toFixed(0)}ms`;
+                        
+                        log(`✅ Cycle ${i}/${totalCycles} - Avg: ${avgTotal.toFixed(0)}ms`);
+                    }
+                    
+                } catch (error) {
+                    log(`❌ Error on cycle ${i}: ${error.message}`);
+                }
+            }
+            
+            if (running) {
+                log('');
+                log('✅ Stress test complete!');
+                log(`Total cycles: ${timings.length}`);
+                
+                // Analysis
+                const firstBatch = timings.slice(0, 20);
+                const lastBatch = timings.slice(-20);
+                
+                const firstAvg = firstBatch.reduce((sum, t) => sum + t.totalDuration, 0) / firstBatch.length;
+                const lastAvg = lastBatch.reduce((sum, t) => sum + t.totalDuration, 0) / lastBatch.length;
+                const delta = lastAvg - firstAvg;
+                const deltaPct = (delta / firstAvg * 100).toFixed(1);
+                
+                log('');
+                log('📊 PERFORMANCE ANALYSIS:');
+                log(`First 20 cycles avg: ${firstAvg.toFixed(0)}ms`);
+                log(`Last 20 cycles avg: ${lastAvg.toFixed(0)}ms`);
+                log(`Delta: ${delta > 0 ? '+' : ''}${delta.toFixed(0)}ms (${deltaPct > 0 ? '+' : ''}${deltaPct}%)`);
+                
+                if (Math.abs(delta) > 50) {
+                    log('⚠️ WARNING: Significant timing degradation detected!');
+                } else {
+                    log('✅ Timing stable within acceptable range');
+                }
+            }
+            
+            running = false;
+        }
+    </script>
+</body>
+</html>

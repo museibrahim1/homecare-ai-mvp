@@ -1,0 +1,842 @@
+[
+  {
+    "fund_name": "Rockies Seed Fund",
+    "contact_email": "info@rockiesseedfund.com",
+    "contact_name": "General Contact",
+    "location": "Denver, CO",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$100K-$500K",
+    "description": "Part of Rockies Venture Fund; invests in healthcare tech, medtech; focus on underinvested communities",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Denver Ventures",
+    "contact_email": "info@denverventures.co",
+    "contact_name": "David Prichard",
+    "location": "Denver, CO",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$250K-$800K",
+    "description": "Colorado early-stage fund with 800+ angel network; invests across US with Colorado emphasis",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Next Level Ventures",
+    "contact_email": "info@nextlevelvc.com",
+    "contact_name": "Liz Keehner",
+    "location": "Des Moines, IA",
+    "focus_stages": ["Seed", "Growth"],
+    "check_size_display": "$500K-$5M",
+    "description": "Iowa's largest VC firm; $400M AUM; 45+ portfolio companies; healthtech, fintech, IoT focus",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Flyover Capital",
+    "contact_email": "info@flyovercapital.com",
+    "contact_name": "General Contact",
+    "location": "Kansas City, MO",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$500K-$2M",
+    "description": "Partners for the Underestimated; 49 investments across 19 flyover states; SaaS and AI focus",
+    "priority": "high"
+  },
+  {
+    "fund_name": "KCRise Fund",
+    "contact_email": "info@kcventurecapital.com",
+    "contact_name": "Darcy Howe",
+    "location": "Kansas City, MO",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$1M+",
+    "description": "KC region early-stage tech fund; $90M+ AUM; B2B technology companies",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Royal Street Ventures",
+    "contact_email": "laura@royalstreet.vc",
+    "contact_name": "Laura Brady",
+    "location": "Kansas City, MO / Utah",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$1M-$3M",
+    "description": "Early-stage tech in under-capitalized markets; Mountain West, Midwest, Southeast coverage",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Heartland Ventures",
+    "contact_email": "mbrickman@heartlandvc.com",
+    "contact_name": "Max Brickman",
+    "location": "South Bend, IN / Columbus, OH",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$500K-$2M",
+    "description": "$100M+ AUM; connects coastal startups with Heartland corporations; manufacturing, logistics, healthcare",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Lewis & Clark Ventures",
+    "contact_email": "info@lacventures.com",
+    "contact_name": "General Contact",
+    "location": "St. Louis, MO",
+    "focus_stages": ["Seed", "Series A", "Series B"],
+    "check_size_display": "$2M-$3M",
+    "description": "Between-the-coasts B2B software investor; strong founding teams with product-market fit",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Cultivation Capital",
+    "contact_email": "info@cultivationcapital.com",
+    "contact_name": "Brian Matthews",
+    "location": "St. Louis, MO",
+    "focus_stages": ["Seed", "Series A", "Series B"],
+    "check_size_display": "$100K-$3.5M",
+    "description": "148 companies across 27 states; life sciences, health tech, software, fintech, agtech",
+    "priority": "high"
+  },
+  {
+    "fund_name": "BioGenerator Ventures",
+    "contact_email": "info@biogeneratorventures.com",
+    "contact_name": "General Contact",
+    "location": "St. Louis, MO",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$100K-$500K",
+    "description": "Life sciences, human health, and agriculture startup fund in St. Louis",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Prolog Ventures",
+    "contact_email": "prolog@prologventures.com",
+    "contact_name": "General Contact",
+    "location": "St. Louis, MO",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$2M",
+    "description": "St. Louis-based early-stage fund; technology and life sciences focus",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Groove Capital",
+    "contact_email": "info@groovecap.com",
+    "contact_name": "Reed Robinson",
+    "location": "Minneapolis, MN",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$100K-$500K",
+    "description": "Minnesota-focused seed fund; healthcare, medical device, enterprise SaaS, financial services",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Gopher Angels",
+    "contact_email": "info@gopherangels.com",
+    "contact_name": "General Contact",
+    "location": "Minneapolis, MN",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$100K-$500K",
+    "description": "Minnesota's most active angel network; scalable high-growth Midwest companies; Angel Capital Association member",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Arboretum Ventures",
+    "contact_email": "info@arboretumvc.com",
+    "contact_name": "General Contact",
+    "location": "Ann Arbor, MI",
+    "focus_stages": ["Seed", "Series A", "Series B"],
+    "check_size_display": "$1M-$10M",
+    "description": "Midwest healthcare VC; $1B across 6 funds; 44% portfolio led by female/minority CEOs; medtech, care delivery",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Grand Ventures",
+    "contact_email": "info@grandvcp.com",
+    "contact_name": "James Hill",
+    "location": "Grand Rapids, MI",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$250K-$2M",
+    "description": "$80M+ raised; fintech, DevOps, digital health, supply chain; B2B technology seed fund",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Michigan Rise",
+    "contact_email": "info@michiganrise.com",
+    "contact_name": "General Contact",
+    "location": "East Lansing, MI",
+    "focus_stages": ["Pre-Seed"],
+    "check_size_display": "$50K-$250K",
+    "description": "MSU Research Foundation pre-seed fund; healthcare/life sciences, software; Michigan-based companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Huron River Ventures",
+    "contact_email": "info@huronrivervc.com",
+    "contact_name": "Ryan Waddington",
+    "location": "Ann Arbor, MI",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$1M-$5M",
+    "description": "Early-stage Michigan/Midwest fund; agriculture, energy, manufacturing, mobility; 20 companies, 10 exits",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Hyde Park Venture Partners",
+    "contact_email": "allison@hydeparkvp.com",
+    "contact_name": "Allison Lechnir",
+    "location": "Chicago, IL",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$500K-$2M",
+    "description": "Mid-continent software VC; Midwest, Toronto, Atlanta; first/second round institutional capital",
+    "priority": "high"
+  },
+  {
+    "fund_name": "7wire Ventures",
+    "contact_email": "info@7wireventures.com",
+    "contact_name": "Glen Tullman",
+    "location": "Chicago, IL",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$100K-$5M",
+    "description": "Chicago digital health VC; consumer-centered healthcare innovation; chronic disease, mental health, aging in place",
+    "priority": "high"
+  },
+  {
+    "fund_name": "LongJump VC",
+    "contact_email": "hello@longjump.vc",
+    "contact_name": "General Contact",
+    "location": "Chicago, IL",
+    "focus_stages": ["Pre-Seed"],
+    "check_size_display": "$110K",
+    "description": "Founder-led pre-seed fund; $110K checks; strong bias toward Chicago-based companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Lodi Ventures",
+    "contact_email": "info@lodiventures.com",
+    "contact_name": "General Contact",
+    "location": "Chicago, IL",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$100K-$500K",
+    "description": "Chicago early-stage VC; enterprise tech, healthcare products, services/supply chain",
+    "priority": "high"
+  },
+  {
+    "fund_name": "LOUD Capital",
+    "contact_email": "loudventures@loudco.com",
+    "contact_name": "Buffy Alegria",
+    "location": "Columbus, OH",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$2M",
+    "description": "Healthcare-focused venture fund; medtech, AI, tech-enabled health, alternative care models",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Chingona Ventures",
+    "contact_email": "media@chingona.ventures",
+    "contact_name": "Samara Hernandez",
+    "location": "Chicago, IL",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$250K-$1M",
+    "description": "Latina-founded $52M Fund II; underrepresented founders; health/wellness, fintech, consumer tech, AI",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Ohio Innovation Fund",
+    "contact_email": "info@ohioinnovationfund.com",
+    "contact_name": "General Contact",
+    "location": "Columbus, OH",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$2M",
+    "description": "Backs transformative founders in AI, medtech, cybersecurity, SaaS, biotech in Ohio",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Rev1 Ventures",
+    "contact_email": "info@rev1ventures.com",
+    "contact_name": "General Contact",
+    "location": "Columbus, OH",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$250K-$1M+",
+    "description": "190+ companies; $130M+ AUM; enterprise software, life sciences, healthcare IT in Central Ohio",
+    "priority": "high"
+  },
+  {
+    "fund_name": "CincyTech",
+    "contact_email": "info@cincytechusa.com",
+    "contact_name": "General Contact",
+    "location": "Cincinnati, OH",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$250K-$1M",
+    "description": "Most active Midwest seed fund; life science and digital companies; $30.75M Fund IV; Ohio Third Frontier backed",
+    "priority": "high"
+  },
+  {
+    "fund_name": "JumpStart Inc",
+    "contact_email": "info@jumpstart.vc",
+    "contact_name": "General Contact",
+    "location": "Cleveland, OH",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$2M",
+    "description": "$140M+ AUM; B2B SaaS and healthcare; 100+ co-invested VC partners; Evergreen & Healthcare Collaboration Funds",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Drive Capital",
+    "contact_email": "info@drivecapital.com",
+    "contact_name": "Chris Olsen",
+    "location": "Columbus, OH",
+    "focus_stages": ["Seed", "Series A", "Series B"],
+    "check_size_display": "$1M-$10M",
+    "description": "$2B+ raised; invests Hudson River to Rocky Mountains; Duolingo, Root Insurance exits; top Midwest VC",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Elevate Ventures",
+    "contact_email": "info@elevateventures.com",
+    "contact_name": "General Contact",
+    "location": "Indianapolis, IN",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$100K-$1M",
+    "description": "#1 most active early-stage VC in Great Lakes Region; Indiana-focused; all technology sectors",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Flywheel Fund",
+    "contact_email": "hello@flywheelfund.vc",
+    "contact_name": "General Contact",
+    "location": "Indianapolis, IN",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$100K-$1.5M",
+    "description": "Indiana early-stage tech; same-day investment decisions; monthly mentoring",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Sixty8 Capital",
+    "contact_email": "weare@sixty8.capital",
+    "contact_name": "Kelli Jones",
+    "location": "Indianapolis, IN",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$250K-$500K",
+    "description": "First Black female VC in Indiana; $20M fund for diverse, undercapitalized founders in Midwest flyover states",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Allos Ventures",
+    "contact_email": "info@allosventures.com",
+    "contact_name": "General Contact",
+    "location": "Cincinnati, OH / Indianapolis, IN",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$500K-$3M",
+    "description": "Midwest B2B software and tech-enabled services; lead investor; 5-hour drive radius from offices",
+    "priority": "high"
+  },
+  {
+    "fund_name": "High Alpha Capital",
+    "contact_email": "info@highalpha.com",
+    "contact_name": "General Contact",
+    "location": "Indianapolis, IN",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$500K-$3M",
+    "description": "Indianapolis enterprise software VC and studio; cloud SaaS focus; invests across North America",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "gener8tor",
+    "contact_email": "info@gener8tor.com",
+    "contact_name": "General Contact",
+    "location": "Madison, WI",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$100K",
+    "description": "Top-ranked accelerator; $100K for 7.5% equity; 12-week program; all industries; $1M+ in vendor perks",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Valency Fund",
+    "contact_email": "hello@valencyfund.com",
+    "contact_name": "Laura Strong",
+    "location": "Madison, WI",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$100K-$500K",
+    "description": "Wisconsin nonprofit growth fund; revenue-based financing; tech, manufacturing, agribusiness",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Nebraska Angels",
+    "contact_email": "info@nebraskaangels.org",
+    "contact_name": "General Contact",
+    "location": "Lincoln/Omaha, NE",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$100K-$1M",
+    "description": "125+ angel investors; $75M+ invested in 85+ companies; 15-20 deals/year; $10M annual deployment",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Husker Venture Fund",
+    "contact_email": "hvf@unl.edu",
+    "contact_name": "Dr. Sam Nelson",
+    "location": "Lincoln, NE",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$25K-$100K",
+    "description": "University of Nebraska student-run venture fund; early-stage Nebraska startups",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Collab Capital",
+    "contact_email": "founders@collab.capital",
+    "contact_name": "General Contact",
+    "location": "Atlanta, GA",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$1M",
+    "description": "Black-owned VC investing in diverse founders; revenue-based returns model; Atlanta-based",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Harlem Capital",
+    "contact_email": "info@harlem.capital",
+    "contact_name": "General Contact",
+    "location": "New York, NY",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$500K-$2M",
+    "description": "Mission to invest in 1000 diverse founders over 20 years; women and minority-led startups",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Precursor Ventures",
+    "contact_email": "info@precursorvc.com",
+    "contact_name": "Charles Hudson",
+    "location": "San Francisco, CA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$100K-$500K",
+    "description": "400+ pre-seed investments; defined pre-seed category; Black GP; software/hardware; geographically diverse",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Black Founders Matter",
+    "contact_email": "info@blackfoundersmatter.org",
+    "contact_name": "General Contact",
+    "location": "United States",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$50K-$150K",
+    "description": "$10M seed fund for Black founders; 50% reserved for follow-on; industry-specific partnerships",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Black Star Fund",
+    "contact_email": "info@blackstar.fund",
+    "contact_name": "Kwame Anku",
+    "location": "Sacramento, CA",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$50K-$1M",
+    "description": "Black-led VC; $12M AUM; 62% capital to Black women; 19 portfolio companies; health, CPG, media",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Fearless Fund",
+    "contact_email": "hello@fearless.fund",
+    "contact_name": "General Contact",
+    "location": "Atlanta, GA",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$250K-$1M",
+    "description": "First VC built by women of color for women of color; bridges funding gap for WOC founders",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Lightship Capital",
+    "contact_email": "info@lightship.capital",
+    "contact_name": "General Contact",
+    "location": "Cincinnati, OH",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$1M",
+    "description": "Midwest-based fund for underrepresented founders; healthcare, consumer, e-commerce, AI, sustainability",
+    "priority": "high"
+  },
+  {
+    "fund_name": "MaC Venture Capital",
+    "contact_email": "info@macventurecapital.com",
+    "contact_name": "General Contact",
+    "location": "Los Angeles, CA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$500K-$2M",
+    "description": "$500M+ AUM; 120+ companies; visionary diverse founders; Cross Culture Ventures successor",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Kapor Capital",
+    "contact_email": "info@kaporcapital.com",
+    "contact_name": "General Contact",
+    "location": "Oakland, CA",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$250K-$2M",
+    "description": "170+ companies; 62% underrepresented founders; closes gaps for low-income communities; health, education, finance",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Impact America Fund",
+    "contact_email": "info@impactamericafund.com",
+    "contact_name": "General Contact",
+    "location": "Oakland, CA",
+    "focus_stages": ["Seed", "Series A", "Series B"],
+    "check_size_display": "$250K-$3M",
+    "description": "Underrepresented founders; portfolio includes CareAcademy (home-care training); Mayvenn, Camino Financial",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Born Global Ventures",
+    "contact_email": "info@bornglobal.vc",
+    "contact_name": "General Contact",
+    "location": "Houston, TX",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$250K-$1M",
+    "description": "Invests in early-stage tech startups led by immigrant entrepreneurs",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Moontide Capital",
+    "contact_email": "ning@moontidecapital.com",
+    "contact_name": "Ning",
+    "location": "United States",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$75K-$150K",
+    "description": "Founded by and for immigrant founders on all visa types; capital, community, mentorship, legal support",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Unshackled Ventures",
+    "contact_email": "info@unshackledvc.com",
+    "contact_name": "General Contact",
+    "location": "Sunnyvale, CA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$100K-$500K",
+    "description": "Backs immigrant founders from day zero; visa sponsorship and immigration attorney support; sector agnostic",
+    "priority": "high"
+  },
+  {
+    "fund_name": "One Way Ventures",
+    "contact_email": "info@onewayvc.com",
+    "contact_name": "Semyon Dukach",
+    "location": "Boston, MA",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$500K-$1.5M",
+    "description": "Exclusively backs startups with at least one immigrant founder; led by former MIT Blackjack Team member",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Punch Capital",
+    "contact_email": "info@punchcap.com",
+    "contact_name": "General Contact",
+    "location": "New York, NY",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$50K-$100K",
+    "description": "First/second-gen immigrant founders; immigration help, technical hires, capital; generalist",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Vamos Ventures",
+    "contact_email": "marcos@vamosventures.com",
+    "contact_name": "Marcos Gonzalez",
+    "location": "Los Angeles, CA",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$750K",
+    "description": "$50M fund for diverse/Latino founders; health & wellness, fintech, future of work; first-gen Mexican-American GP",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Lattitude Ventures",
+    "contact_email": "info@lattitudeventures.com",
+    "contact_name": "General Contact",
+    "location": "United States",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$1M-$3M",
+    "description": "Fund II investing in visionary Latino leadership; scalable, high-impact US-based tech companies",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Halogen Ventures",
+    "contact_email": "hello@halogenvc.com",
+    "contact_name": "General Contact",
+    "location": "Los Angeles, CA",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$250K-$1M",
+    "description": "Invests in female founders building consumer technology companies",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Cleo Capital",
+    "contact_email": "sarah@cleocap.com",
+    "contact_name": "Sarah Kunst",
+    "location": "San Francisco, CA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$100K-$1M",
+    "description": "Early-stage software fund; future of income, consumer, decentralized enterprise; diverse founder focus",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Cake Ventures",
+    "contact_email": "info@cake.vc",
+    "contact_name": "Monique Woodard",
+    "location": "San Francisco, CA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$200K-$750K",
+    "description": "Demographic change thesis; 50%+ portfolio outside SF/SV; underrepresented founders; North America",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Concrete Rose Capital",
+    "contact_email": "info@concreterosecapital.com",
+    "contact_name": "General Contact",
+    "location": "San Francisco, CA",
+    "focus_stages": ["Pre-Seed", "Seed", "Series A"],
+    "check_size_display": "$100K-$3M",
+    "description": "Founders of color, underrepresented consumers, diverse team builders; 50% carry to community foundation",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Slauson & Co",
+    "contact_email": "info@slauson.co",
+    "contact_name": "Austin Clements",
+    "location": "Los Angeles, CA",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$750K-$2.5M",
+    "description": "Economic inclusion focus; SMB SaaS and culturally-aligned consumer tech; backed by Google, Meta, PayPal",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Ulu Ventures",
+    "contact_email": "info@uluventures.com",
+    "contact_name": "Miriam Rivera",
+    "location": "Palo Alto, CA",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$1M-$5M",
+    "description": "Largest Latina-led fund in US; $400M AUM; 10 unicorns; diversity thesis; health, fintech, enterprise",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Elevate Capital",
+    "contact_email": "info@elevatecapital.com",
+    "contact_name": "General Contact",
+    "location": "Portland, OR",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$1M",
+    "description": "10-year track record; 92+ startups; 92% BIPOC/LGBTQI+/veteran; healthcare, life sciences, cleantech",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Health Equity Ventures",
+    "contact_email": "info@healthequityventures.com",
+    "contact_name": "General Contact",
+    "location": "United States",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$2M",
+    "description": "Improving US healthcare for all through impact investing; health equity movement",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Healthcare Equity Angels",
+    "contact_email": "jtopdjian@healtheqty.com",
+    "contact_name": "J. Topdjian",
+    "location": "United States",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$50K-$250K",
+    "description": "Angel group focused on healthcare equity; early-stage investing for equal access to healthcare",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Foreground Capital",
+    "contact_email": "pitch@foreground.vc",
+    "contact_name": "General Contact",
+    "location": "United States",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$500K-$3M",
+    "description": "Women's health $1T market opportunity; transformative innovation, access, affordability, systemic change",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Fabric VC",
+    "contact_email": "info@fabricvc.com",
+    "contact_name": "General Contact",
+    "location": "United States",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$250K-$1M",
+    "description": "DEI-focused venture fund; diversity, equity, and inclusion in fundraising",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "New Stack Ventures",
+    "contact_email": "info@newstack.vc",
+    "contact_name": "Nick Moran",
+    "location": "Chicago, IL",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$500K-$1.5M",
+    "description": "Investing in Outsiders; $100M+ AUM; B2B SaaS, healthcare, fintech; The Full Ratchet podcast founder",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Visible Hands",
+    "contact_email": "info@visiblehands.vc",
+    "contact_name": "Yasmin Cruz Ferrine",
+    "location": "Boston, MA",
+    "focus_stages": ["Pre-Seed"],
+    "check_size_display": "$100K-$200K",
+    "description": "Pre-seed fund for underrepresented founders; women, Black, Latinx, Indigenous; accelerator programs",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Scrub Capital",
+    "contact_email": "info@scrubcapital.com",
+    "contact_name": "Dr. Rebecca Mitchell",
+    "location": "United States",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$100K-$300K",
+    "description": "Clinician-powered healthcare investing; 650-member physician community; pre-seed/seed healthcare",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Jumpstart Capital",
+    "contact_email": "info@jscap.co",
+    "contact_name": "General Contact",
+    "location": "Nashville, TN",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$250K-$500K",
+    "description": "AI-empowered healthcare workforce; tools and workflows for better patient care",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Jumpstart Foundry",
+    "contact_email": "info@jsf.co",
+    "contact_name": "Vic Gatto",
+    "location": "Nashville, TN",
+    "focus_stages": ["Pre-Seed"],
+    "check_size_display": "$150K",
+    "description": "Pre-seed healthcare fund; 150+ portfolio companies across 35 states; 30-50 investments per year",
+    "priority": "high"
+  },
+  {
+    "fund_name": "HealthX Ventures",
+    "contact_email": "info@healthxventures.com",
+    "contact_name": "General Contact",
+    "location": "San Francisco, CA / Madison, WI",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$250K-$1M",
+    "description": "Digital health seed fund; near Epic Systems in Madison; targets $100K+ MRR companies; lead investor",
+    "priority": "high"
+  },
+  {
+    "fund_name": "HIP Fund",
+    "contact_email": "info@hip.fund",
+    "contact_name": "General Contact",
+    "location": "United States",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$2M",
+    "description": "Healthcare VC with 150+ investor network including angels, family offices, physicians, health systems",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Act One Ventures",
+    "contact_email": "info@actoneventures.com",
+    "contact_name": "General Contact",
+    "location": "Los Angeles, CA",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$500K-$2M",
+    "description": "Diverse-founder focused; early-stage technology startups; underrepresented entrepreneurs",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Camelback Ventures",
+    "contact_email": "info@camelbackventures.org",
+    "contact_name": "General Contact",
+    "location": "New Orleans, LA",
+    "focus_stages": ["Pre-Seed"],
+    "check_size_display": "$50K",
+    "description": "$10M invested in 220+ Fellows; $365M follow-on; education and technology impact; diverse founders",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Gaingels",
+    "contact_email": "paulgrossinger@gaingels.com",
+    "contact_name": "Paul Grossinger",
+    "location": "New York, NY",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$100K-$500K",
+    "description": "LGBTQ+ angel network; $850M deployed; 2000+ portfolio companies; DEI-aligned diverse founders",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Innovation Works",
+    "contact_email": "info@innovationworks.org",
+    "contact_name": "General Contact",
+    "location": "Pittsburgh, PA",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$100K-$1M",
+    "description": "780+ companies supported; $3.54B follow-on; $93M invested; AlphaLab accelerator; Southwestern PA",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Greater Colorado Venture Fund",
+    "contact_email": "info@greatercolorado.vc",
+    "contact_name": "Marc Nager",
+    "location": "Durango/Ridgway, CO",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$250K-$500K",
+    "description": "High-growth rural Colorado companies outside Front Range; SaaS, consumer, enterprise, AI",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Telluride Venture Fund",
+    "contact_email": "info@tellurideventurefund.com",
+    "contact_name": "Bonnie Watson",
+    "location": "Telluride, CO",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$100K-$250K",
+    "description": "Colorado Plateau seed investor; outdoor recreation, tourism, and technology",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Midwest.VC Syndicate",
+    "contact_email": "info@midwest.vc",
+    "contact_name": "General Contact",
+    "location": "Chicago, IL",
+    "focus_stages": ["Pre-Seed", "Seed"],
+    "check_size_display": "$133K avg",
+    "description": "AngelList syndicate; 87 LPs; WI, IA, IN, MI, NE, KC network; logistics, fintech, agritech",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Vensana Capital",
+    "contact_email": "info@vensanacap.com",
+    "contact_name": "Justin Klein",
+    "location": "Minneapolis, MN",
+    "focus_stages": ["Series A", "Series B"],
+    "check_size_display": "$10M-$30M",
+    "description": "Healthcare-focused VC; $225M fund; medical devices, diagnostics, digital health, drug delivery",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "Vora Ventures",
+    "contact_email": "info@voraventures.com",
+    "contact_name": "Mahendra Vora",
+    "location": "Midwest",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$500K-$5M",
+    "description": "Family office; 25+ years healthcare and AI technology; permanent family capital; Midwest-based",
+    "priority": "high"
+  },
+  {
+    "fund_name": "iSelect Fund",
+    "contact_email": "info@iselectfund.com",
+    "contact_name": "General Contact",
+    "location": "St. Louis, MO",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$100K-$500K",
+    "description": "AngelList syndicate; 20 deals/year; agriculture, health, energy, B2B software; Midwest focused",
+    "priority": "medium"
+  },
+  {
+    "fund_name": "MD Angels",
+    "contact_email": "info@mdangels.com",
+    "contact_name": "General Contact",
+    "location": "Chicago, IL",
+    "focus_stages": ["Seed", "Series A"],
+    "check_size_display": "$50K-$250K",
+    "description": "Physician-led angel group; 14 members; medical devices, digital health, health IT; Midwest preference",
+    "priority": "high"
+  },
+  {
+    "fund_name": "Alas Angels",
+    "contact_email": "info@alasangels.com",
+    "contact_name": "General Contact",
+    "location": "United States",
+    "focus_stages": ["Seed"],
+    "check_size_display": "$50K-$250K",
+    "description": "Latino/Hispanic angel investor community focused on seed-stage startups",
+    "priority": "medium"
+  }
+]
