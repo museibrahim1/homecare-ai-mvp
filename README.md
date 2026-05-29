@@ -48,15 +48,19 @@ A full diagram + per-route walkthrough lives in [`docs/ARCHITECTURE.md`](docs/AR
 │   ├── api/                 FastAPI backend (routers, services, schemas, models, core)
 │   ├── web/                 Next.js 16 admin + marketing site
 │   └── worker/              Celery worker for long-running pipeline jobs
-├── ios-app/                 SwiftUI iOS app (App Store target)
-├── mobile/                  Expo prototype (legacy — kept for reference)
-├── android/                 Kotlin app (on hold)
+├── ios-app/                 SwiftUI iOS app (the App Store target)
 ├── videos/                  Remotion marketing videos
 ├── data/                    Seed / CRM JSON (investors, agencies, leads)
-├── docs/                    Architecture, app-store plans, investor memo, etc.
-├── scripts/                 Operational scripts (data import, email ops, marketing)
-│   └── dev-tools/           Browser/stress-test HTML + JS helpers
-├── tests/                   pytest suite (api, pipeline, fixtures, performance)
+├── docs/                    Architecture, deployment, app-store plans, research
+├── marketing/               Generated marketing assets + campaign copy
+├── screenshots/             App screenshots (consumed by Remotion videos)
+├── scripts/                 Operational scripts, foldered by domain
+│   ├── investors/           Investor CRM seeding + outreach
+│   ├── marketing/           Asset + image + voiceover generation
+│   ├── email/               Resend / outreach email ops
+│   ├── leads/               Agency lead import + enrichment
+│   └── dev-tools/           Browser/stress-test helpers + test fixtures
+├── tests/                   pytest suite (api, pipeline, fixtures, performance, e2e)
 ├── infra/                   Local infra configs (Postgres init, MinIO buckets)
 ├── templates/               Contract + note templates
 ├── compliance/              BAAs and HIPAA artifacts

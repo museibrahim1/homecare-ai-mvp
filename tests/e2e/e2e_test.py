@@ -6,7 +6,7 @@ Tests the complete flow from registration to contract generation.
 Run against the deployed API to verify everything works.
 
 Usage:
-    python tests/e2e_test.py [--api-url URL]
+    python tests/e2e/e2e_test.py [--api-url URL]
 """
 
 import os
