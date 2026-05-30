@@ -4,58 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import { FileSignature, Printer, FileText, RefreshCw, AlertCircle, Edit3, Save, X, Check, Download, Mail, Send, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-
-interface UploadedDocument {
-  id: string;
-  name: string;
-  type: string;
-  category: string;
-  content: string;
-  uploaded_at: string;
-}
-
-interface AgencySettings {
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  phone: string;
-  email: string;
-  logo: string | null;
-  primary_color: string;
-  secondary_color: string;
-  documents: UploadedDocument[];
-  contract_template: string | null;
-  contract_template_name: string | null;
-  contract_template_type: string | null;
-}
-
-const defaultAgency: AgencySettings = {
-  name: 'Home Care Services Agency',
-  address: '',
-  city: '',
-  state: '',
-  zip_code: '',
-  phone: '',
-  email: '',
-  logo: null,
-  primary_color: '#1e3a8a',
-  secondary_color: '#3b82f6',
-  documents: [],
-  contract_template: null,
-  contract_template_name: null,
-  contract_template_type: null,
-};
-
-interface ContractPreviewProps {
-  contract: any;
-  client: any;
-  visitId?: string;
-  onContractUpdate?: (contract: any) => void;
-}
+import { UploadedDocument, AgencySettings, ContractPreviewProps } from './ContractPreview.types';
+import { API_BASE, defaultAgency } from './ContractPreview.constants';
 
 export default function ContractPreview({ contract, client, visitId, onContractUpdate }: ContractPreviewProps) {
   const { token } = useAuth();

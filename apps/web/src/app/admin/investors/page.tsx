@@ -14,76 +14,8 @@ import {
   MapPin, Tag, Briefcase, Database, Sparkles,
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-
-interface Investor {
-  id: string;
-  fund_name: string;
-  investor_type: string | null;
-  website: string | null;
-  focus_sectors: string[];
-  focus_stages: string[];
-  check_size_display: string | null;
-  location: string | null;
-  contact_name: string | null;
-  contact_email: string | null;
-  status: string;
-  priority: string;
-  email_send_count: number;
-  email_open_count: number;
-  last_email_sent_at: string | null;
-  campaign_tag: string | null;
-  source: string | null;
-  relevance_reason: string | null;
-  created_at: string | null;
-}
-
-interface InvestorStats {
-  total: number;
-  has_email: number;
-  vc_funds: number;
-  angels: number;
-  new: number;
-  email_sent: number;
-  responded: number;
-  interested: number;
-  contacted: number;
-  meeting_scheduled: number;
-  passed: number;
-  committed: number;
-  avg_priority_score: number;
-}
-
-const STATUS_OPTIONS = [
-  'new', 'researched', 'contacted', 'email_sent', 'responded',
-  'meeting_scheduled', 'interested', 'passed', 'committed',
-] as const;
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
-  new: { label: 'New', color: 'bg-slate-500/20 text-slate-600', icon: Circle },
-  researched: { label: 'Researched', color: 'bg-blue-500/20 text-blue-400', icon: Eye },
-  contacted: { label: 'Contacted', color: 'bg-indigo-500/20 text-indigo-400', icon: Mail },
-  email_sent: { label: 'Email Sent', color: 'bg-violet-500/20 text-violet-400', icon: Send },
-  responded: { label: 'Responded', color: 'bg-cyan-500/20 text-cyan-400', icon: MailOpen },
-  meeting_scheduled: { label: 'Meeting', color: 'bg-amber-500/20 text-amber-400', icon: Calendar },
-  interested: { label: 'Interested', color: 'bg-emerald-500/20 text-emerald-400', icon: CheckCircle2 },
-  passed: { label: 'Passed', color: 'bg-red-500/20 text-red-400', icon: X },
-  committed: { label: 'Committed', color: 'bg-green-500/20 text-green-300', icon: DollarSign },
-};
-
-const PRIORITY_COLORS: Record<string, string> = {
-  high: 'text-red-400 bg-red-500/15 border-red-500/30',
-  medium: 'text-amber-400 bg-amber-500/15 border-amber-500/30',
-  low: 'text-slate-400 bg-slate-500/10 border-slate-500/30',
-};
-
-const TYPE_OPTIONS = ['vc_fund', 'angel', 'accelerator', 'syndicate'] as const;
-const TYPE_LABELS: Record<string, string> = {
-  vc_fund: 'VC Fund',
-  angel: 'Angel',
-  accelerator: 'Accelerator',
-  syndicate: 'Syndicate',
-};
+import { Investor, InvestorStats } from './types';
+import { API_BASE, STATUS_OPTIONS, STATUS_CONFIG, PRIORITY_COLORS, TYPE_OPTIONS, TYPE_LABELS } from './constants';
 
 export default function InvestorsPage() {
   const router = useRouter();

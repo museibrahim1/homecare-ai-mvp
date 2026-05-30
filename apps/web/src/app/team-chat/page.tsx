@@ -4,26 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { MessagesSquare, Hash, Users, Plus, Send, AtSign, Mail, Inbox, Check, Loader2, RefreshCw, X, Star, Paperclip, Reply, Trash2, Forward, UserCircle, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-// Empty defaults
-const defaultChannels: { id: string; name: string; unread: number }[] = [];
-const defaultTeamMembers: { id: string; name: string; status: string; role: string; email?: string }[] = [];
-
-type Email = {
-  id: string;
-  from: string;
-  fromEmail: string;
-  subject: string;
-  snippet: string;
-  date: string;
-  unread: boolean;
-  starred: boolean;
-  hasAttachment: boolean;
-};
-
-type DmConversation = { id: string; memberId: string; memberName: string; memberAvatar: string; lastMessage?: string; lastTime?: string; unread: number };
+import { API_URL, defaultChannels, defaultTeamMembers } from './constants';
+import type { Email, DmConversation } from './types';
 
 export default function TeamChatPage() {
   const { token, user } = useAuth();
