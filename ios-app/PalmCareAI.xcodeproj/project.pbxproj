@@ -14,8 +14,10 @@
 		11668AE68694D0698B0161A6 /* SalesLeadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 173E8C8D759D632BD467F0E7 /* SalesLeadsView.swift */; };
 		135CE43DA9F154AB373CD239 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D7A50D477FC9EE6BF4A0B0F /* User.swift */; };
 		141F927F15C477E97C29E0A1 /* SettingsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FA85219CEFB0BFA3D30AFE /* SettingsComponents.swift */; };
+		1885F2DA3936DC8C9B93E7CB /* APIService+Outreach.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4985749FA9FAA5A955F997 /* APIService+Outreach.swift */; };
 		1D67A70EACDDC4706F3858EB /* AdminHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1E566A583A57CF92A0C8BE /* AdminHubView.swift */; };
 		1DB6F966D0BAF1CEED96D570 /* TasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0870197ADB4B30C40D45C13D /* TasksView.swift */; };
+		1DC12F7A9BB42680035DC903 /* APIService+PipelineDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = F75E45C5D06BE868EFC22EE1 /* APIService+PipelineDocuments.swift */; };
 		2801AB657853429D4D52D3C9 /* GoogleCalendarSetupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F86448E3F9D8340AD63CE38 /* GoogleCalendarSetupSheet.swift */; };
 		2BC2CF3FE818A2F9A4AC5114 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC790C5DBC9A39EC36C4E2FF /* StoreManager.swift */; };
 		2CBE2B9DE893369E522FD389 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6B393D33E424DB4C4C8B75 /* Note.swift */; };
@@ -46,6 +48,7 @@
 		79680044B7D5D35B6DC2DD68 /* Visit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C659B9C3B38D4508AEEEDF9 /* Visit.swift */; };
 		7C445A47FD792A18761F4145 /* VisitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB838A8AD893DD563742F9EF /* VisitDetailView.swift */; };
 		7E8863E5766B2A39F346C7E4 /* TaskItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C954C670DB7BCBA279AA631 /* TaskItem.swift */; };
+		7F42517468F4C9C8E7426117 /* APIService+AuthClientsVisits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84658C2E024E0F219EEFFA49 /* APIService+AuthClientsVisits.swift */; };
 		89AE5390D532494AB1FC00E6 /* VisitDetailView+Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F7055C89D42D284F45AEFA /* VisitDetailView+Shared.swift */; };
 		8F8596F06F1792DE50BFF41B /* ContractsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E6ABB714B743F12ADFB3D66 /* ContractsView.swift */; };
 		94648104A496234C1A8DB1D2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A1131D8E1B71DF1EA9DB392 /* PrivacyInfo.xcprivacy */; };
@@ -66,6 +69,7 @@
 		D7BC1ADD03FE68A611EF1DC2 /* Billing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416BEF412DD2A345AF29F0DA /* Billing.swift */; };
 		E57895BA529502BEB461F6EC /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35BEA66607E528FB3FADBDF4 /* Client.swift */; };
 		EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEA75021BD113DD86530A11 /* RecordView.swift */; };
+		EAE8A23B0CB7A6CFE00D62B9 /* APIService+TemplatesTasksBilling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86E8F1D9E66602044CC7A52B /* APIService+TemplatesTasksBilling.swift */; };
 		F23E5D61BCFB2A1E18F6762C /* ClientDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D15C6C3E52AD92EF25A44FBF /* ClientDetailView.swift */; };
 		F550B4192FBBEA3CA2B46F53 /* LiveTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */; };
 		FB1FB140CF8C5B0F8A762ECF /* VisitDetailView+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFCF89DDFD88DAEE7F23451 /* VisitDetailView+Data.swift */; };
@@ -112,6 +116,8 @@
 		748C6E60A4F45E08581497C8 /* AssessmentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentsListView.swift; sourceTree = "<group>"; };
 		7E6ABB714B743F12ADFB3D66 /* ContractsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContractsView.swift; sourceTree = "<group>"; };
 		7FE5716DE1D6F7505F157C68 /* VisitDetailView+Contract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VisitDetailView+Contract.swift"; sourceTree = "<group>"; };
+		84658C2E024E0F219EEFFA49 /* APIService+AuthClientsVisits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+AuthClientsVisits.swift"; sourceTree = "<group>"; };
+		86E8F1D9E66602044CC7A52B /* APIService+TemplatesTasksBilling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+TemplatesTasksBilling.swift"; sourceTree = "<group>"; };
 		94BA31B4B732B6A4B775BC4C /* AudioFilePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilePicker.swift; sourceTree = "<group>"; };
 		965C098053DF16C330D69A47 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		9955EEED2AEDE41A7C5D2D3A /* PalmAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmAlert.swift; sourceTree = "<group>"; };
@@ -120,6 +126,7 @@
 		A87989128BE2784A9ACA1797 /* PalmCareAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmCareAIApp.swift; sourceTree = "<group>"; };
 		A96879251DCD2FCF4C599FBF /* Calendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calendar.swift; sourceTree = "<group>"; };
 		AA6B393D33E424DB4C4C8B75 /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
+		AD4985749FA9FAA5A955F997 /* APIService+Outreach.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+Outreach.swift"; sourceTree = "<group>"; };
 		AE0C6D4F6B7BC50F2DF9EDD2 /* PalmCareTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmCareTheme.swift; sourceTree = "<group>"; };
 		AE6E6ABEA65540D82DF2FF30 /* ClientsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientsView.swift; sourceTree = "<group>"; };
 		B7134EA3FF1A06C5E549D8A6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -140,6 +147,7 @@
 		EADB7EC6A06BBE991FD60E53 /* Outreach.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Outreach.swift; sourceTree = "<group>"; };
 		EB838A8AD893DD563742F9EF /* VisitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetailView.swift; sourceTree = "<group>"; };
 		EC1E566A583A57CF92A0C8BE /* AdminHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminHubView.swift; sourceTree = "<group>"; };
+		F75E45C5D06BE868EFC22EE1 /* APIService+PipelineDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+PipelineDocuments.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -344,6 +352,10 @@
 			isa = PBXGroup;
 			children = (
 				4DC7E34D4B0393336B0CBB48 /* APIService.swift */,
+				84658C2E024E0F219EEFFA49 /* APIService+AuthClientsVisits.swift */,
+				AD4985749FA9FAA5A955F997 /* APIService+Outreach.swift */,
+				F75E45C5D06BE868EFC22EE1 /* APIService+PipelineDocuments.swift */,
+				86E8F1D9E66602044CC7A52B /* APIService+TemplatesTasksBilling.swift */,
 				25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */,
 				07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */,
 				B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */,
@@ -439,6 +451,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F42517468F4C9C8E7426117 /* APIService+AuthClientsVisits.swift in Sources */,
+				1885F2DA3936DC8C9B93E7CB /* APIService+Outreach.swift in Sources */,
+				1DC12F7A9BB42680035DC903 /* APIService+PipelineDocuments.swift in Sources */,
+				EAE8A23B0CB7A6CFE00D62B9 /* APIService+TemplatesTasksBilling.swift in Sources */,
 				66B8766816DFAE60BD26C157 /* APIService.swift in Sources */,
 				4BC6C1F6558E9FF34676385D /* AddClientSheet.swift in Sources */,
 				1D67A70EACDDC4706F3858EB /* AdminHubView.swift in Sources */,
