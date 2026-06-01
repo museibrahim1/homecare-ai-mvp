@@ -571,23 +571,48 @@ async def delete_account(
         from sqlalchemy import text as sa_text
         uid = str(user_id)
 
-        # Delete owned rows (non-nullable FK → must delete)
+        def _safe(sql: str, params: dict | None = None) -> None:
+            """Run one statement inside a SAVEPOINT.
+
+            On Postgres a failed statement aborts the whole transaction, so each
+            best-effort cleanup must be isolated — otherwise a single missing
+            table or FK quirk would poison the final user delete (the cause of
+            past HTTP 500s on this endpoint).
+            """
+            sp = db.begin_nested()
+            try:
+                db.execute(sa_text(sql), params or {"uid": uid})
+                sp.commit()
+            except Exception as e:  # noqa: BLE001 - cleanup is best-effort per row
+                sp.rollback()
+                logger.warning(f"delete-account: skipped [{sql[:50]}…]: {type(e).__name__}: {e}")
+
+        # 1) Visit children must go before the visits themselves (non-nullable
+        #    visit_id FKs with no cascade). Scope to visits this user owns.
+        visit_scope = "visit_id IN (SELECT id FROM visits WHERE caregiver_id = :uid)"
+        for tbl in ("billable_items", "audio_assets", "transcript_segments", "diarization_turns", "notes"):
+            _safe(f"DELETE FROM {tbl} WHERE {visit_scope}")
+        _safe("DELETE FROM visits WHERE caregiver_id = :uid")
+
+        # 2) Messaging: messages reference channels, so clear messages first.
+        _safe("DELETE FROM messages WHERE sender_id = :uid")
+        _safe("DELETE FROM messages WHERE channel_id IN (SELECT id FROM channels WHERE created_by = :uid)")
+        _safe("DELETE FROM channels WHERE created_by = :uid")
+        _safe("DELETE FROM notifications WHERE user_id = :uid")
+
+        # 3) Other rows owned by this user (non-nullable FK → must delete).
         for tbl, col in [
             ("smart_notes", "user_id"),
             ("reminders", "user_id"),
             ("contract_templates", "owner_id"),
-            ("visits", "caregiver_id"),
             ("tasks", "user_id"),
             ("agency_settings", "user_id"),
             ("usage_analytics", "user_id"),
             ("provider_engagement", "user_id"),
         ]:
-            try:
-                db.execute(sa_text(f"DELETE FROM {tbl} WHERE {col} = :uid"), {"uid": uid})
-            except Exception:
-                pass
+            _safe(f"DELETE FROM {tbl} WHERE {col} = :uid")
 
-        # Nullify references (nullable FK → set null)
+        # 4) Nullify nullable references held by rows we keep.
         for tbl, col in [
             ("clients", "created_by"),
             ("caregivers", "created_by"),
@@ -599,10 +624,27 @@ async def delete_account(
             ("support_tickets", "resolved_by_id"),
             ("ticket_responses", "responder_id"),
         ]:
-            try:
-                db.execute(sa_text(f"UPDATE {tbl} SET {col} = NULL WHERE {col} = :uid"), {"uid": uid})
-            except Exception:
-                pass
+            _safe(f"UPDATE {tbl} SET {col} = NULL WHERE {col} = :uid")
+
+        # 5) Tear down the linked business account so a "deleted" owner can no
+        #    longer sign in via business auth. The BusinessUser shares this id.
+        biz_row = db.execute(
+            sa_text("SELECT business_id FROM business_users WHERE id = :uid OR email = :em"),
+            {"uid": uid, "em": user_email},
+        ).first()
+        _safe("DELETE FROM business_users WHERE id = :uid OR email = :em", {"uid": uid, "em": user_email})
+        if biz_row and biz_row[0]:
+            biz_id = str(biz_row[0])
+            remaining = db.execute(
+                sa_text("SELECT COUNT(*) FROM business_users WHERE business_id = :bid"),
+                {"bid": biz_id},
+            ).scalar()
+            # Only delete the business if no team members are left behind.
+            if not remaining:
+                _safe("DELETE FROM invoices WHERE business_id = :bid", {"bid": biz_id})
+                _safe("DELETE FROM subscriptions WHERE business_id = :bid", {"bid": biz_id})
+                _safe("DELETE FROM business_documents WHERE business_id = :bid", {"bid": biz_id})
+                _safe("DELETE FROM businesses WHERE id = :bid", {"bid": biz_id})
 
         db.delete(current_user)
         db.commit()
