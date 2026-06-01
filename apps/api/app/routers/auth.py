@@ -589,8 +589,10 @@ async def delete_account(
 
         # 1) Visit children must go before the visits themselves (non-nullable
         #    visit_id FKs with no cascade). Scope to visits this user owns.
+        #    Order matters: transcript_segments/diarization_turns reference
+        #    audio_assets, so audio_assets must be deleted AFTER them.
         visit_scope = "visit_id IN (SELECT id FROM visits WHERE caregiver_id = :uid)"
-        for tbl in ("billable_items", "audio_assets", "transcript_segments", "diarization_turns", "notes"):
+        for tbl in ("transcript_segments", "diarization_turns", "billable_items", "notes", "audio_assets"):
             _safe(f"DELETE FROM {tbl} WHERE {visit_scope}")
         _safe("DELETE FROM visits WHERE caregiver_id = :uid")
 
