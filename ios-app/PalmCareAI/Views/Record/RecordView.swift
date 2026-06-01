@@ -30,6 +30,9 @@ struct RecordView: View {
     @State private var completedVisitId: String?
     @State private var completedClientName: String?
     @State private var navigateToVisit = false
+    /// Holds a finished recording when the user stopped without selecting a
+    /// client, so it can be processed once a client is chosen (no lost audio).
+    @State private var pendingAudioURL: URL?
     @State private var pipelineSteps: [(String, String)] = []
     #if DEBUG
     @State private var didRunAutomationDemo = false
@@ -187,6 +190,23 @@ struct RecordView: View {
             }
             .onChange(of: isProcessing) { processing in
                 assessmentInProgress = recorder.isRecording || processing
+            }
+            .onChange(of: selectedClient?.id) { clientId in
+                // A recording was held because no client was selected at stop.
+                // Now that one is chosen, process it.
+                guard let audioURL = pendingAudioURL, let clientId,
+                      let client = selectedClient else { return }
+                pendingAudioURL = nil
+                processRecording(audioURL: audioURL, clientId: clientId, clientName: client.full_name)
+            }
+            .onChange(of: showClientPicker) { isShowing in
+                // Picker dismissed without choosing a client: don't keep PHI
+                // audio lingering on device; clean up and let the user know.
+                guard !isShowing, let audioURL = pendingAudioURL, selectedClient == nil else { return }
+                pendingAudioURL = nil
+                try? FileManager.default.removeItem(at: audioURL)
+                errorMessage = "Recording discarded — no client was selected."
+                showError = true
             }
     }
 
@@ -469,19 +489,29 @@ struct RecordView: View {
     private func stopAndProcess() {
         let url = recorder.stopRecording()
         liveTranscription?.stopTranscribing()
+        liveTranscription?.segments = []
 
-        guard let audioURL = url, let clientId = selectedClient?.id else {
-            if selectedClient == nil {
-                errorMessage = "Please select a client before stopping. Your recording was saved."
-                showError = true
-            }
-            liveTranscription?.segments = []
+        guard let audioURL = url else {
+            errorMessage = "Recording could not be saved. Please try again."
+            showError = true
             return
         }
 
-        let clientName = selectedClient?.full_name
-        liveTranscription?.segments = []
+        // If the caregiver forgot to pick a client, don't discard the audio.
+        // Hold it and prompt for a client; we'll process once one is chosen.
+        guard let clientId = selectedClient?.id else {
+            pendingAudioURL = audioURL
+            showClientPicker = true
+            return
+        }
 
+        processRecording(audioURL: audioURL, clientId: clientId, clientName: selectedClient?.full_name)
+    }
+
+    /// Upload a recorded audio file and run the assessment pipeline.
+    /// Shared by the live-recording stop path and the deferred
+    /// "picked a client after stopping" recovery path.
+    private func processRecording(audioURL: URL, clientId: String, clientName: String?) {
         withAnimation {
             isProcessing = true
             uploadProgress = "Creating assessment..."
@@ -564,7 +594,7 @@ struct RecordView: View {
 
                 await MainActor.run {
                     pipelineSteps = steps
-                    if let currentStep = steps.first(where: { $0.1 == "running" || $0.1 == "queued" }) {
+                    if let currentStep = steps.first(where: { isActiveStatus($0.1) }) {
                         uploadProgress = "Running: \(currentStep.0)..."
                     }
                 }
@@ -668,6 +698,13 @@ struct RecordView: View {
         }
     }
 
+    /// The backend pipeline reports an in-flight step as "processing"
+    /// (and historically "running"); treat both as active.
+    private func isActiveStatus(_ status: String) -> Bool {
+        let s = status.lowercased()
+        return s == "running" || s == "processing" || s == "queued"
+    }
+
     @ViewBuilder
     private func pipelineIcon(for status: String) -> some View {
         switch status.lowercased() {
@@ -675,7 +712,7 @@ struct RecordView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 12))
                 .foregroundColor(.palmGreen)
-        case "running":
+        case "running", "processing":
             ProgressView()
                 .scaleEffect(0.5)
                 .tint(.palmPrimary)
@@ -683,7 +720,7 @@ struct RecordView: View {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 12))
                 .foregroundColor(.red)
-        case "queued":
+        case "queued", "pending":
             Image(systemName: "clock.fill")
                 .font(.system(size: 12))
                 .foregroundColor(.palmOrange)
@@ -697,9 +734,9 @@ struct RecordView: View {
     private func pipelineColor(for status: String) -> Color {
         switch status.lowercased() {
         case "completed": return .palmGreen
-        case "running": return .palmPrimary
+        case "running", "processing": return .palmPrimary
         case "failed": return .red
-        case "queued": return .palmOrange
+        case "queued", "pending": return .palmOrange
         default: return .white.opacity(0.4)
         }
     }
