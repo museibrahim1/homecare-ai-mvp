@@ -66,6 +66,7 @@ struct VisitDetailView: View {
         .task {
             if initialTab != 0 { activeTab = initialTab }
             await loadVisit()
+            await pollPipelineUntilComplete()
         }
         .onChange(of: activeTab) { _ in
             Task { await loadTabDataIfNeeded() }
@@ -136,6 +137,9 @@ struct VisitDetailView: View {
                 } else if let error = errorMessage {
                     errorView(error)
                 } else {
+                    if isPipelineProcessing {
+                        processingBanner
+                    }
                     switch activeTab {
                     case 0: overviewTab
                     case 1: transcriptTab
@@ -150,6 +154,30 @@ struct VisitDetailView: View {
             .padding(.vertical, 16)
             .padding(.bottom, 80)
         }
+    }
+
+    /// Shown while the AI pipeline is still running so the user understands
+    /// that empty tabs are filling in (not broken).
+    var processingBanner: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .scaleEffect(0.8)
+                .tint(.palmPrimary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Processing assessment…")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmText)
+                Text("Transcript, billables, notes, and contract will appear here automatically.")
+                    .font(.system(size: 11))
+                    .foregroundColor(.palmSecondary)
+            }
+            Spacer()
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.palmPrimary.opacity(0.08))
+        .cornerRadius(12)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmPrimary.opacity(0.2), lineWidth: 1))
     }
 
 }

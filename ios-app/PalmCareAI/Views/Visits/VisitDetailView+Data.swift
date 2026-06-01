@@ -53,7 +53,9 @@ extension VisitDetailView {
             let t = try await api.fetchVisitTranscript(visitId: visitId)
             await MainActor.run { transcript = t; tabFetchFailed.remove(1) }
         } catch {
-            await MainActor.run { _ = tabFetchFailed.insert(1) }
+            // While the pipeline is still running, a missing result isn't an
+            // error — show the friendly "processing" state, not "Failed to Load".
+            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert(1) } }
         }
     }
 
@@ -63,7 +65,7 @@ extension VisitDetailView {
             let b = try await api.fetchVisitBillables(visitId: visitId)
             await MainActor.run { billables = b; tabFetchFailed.remove(2) }
         } catch {
-            await MainActor.run { _ = tabFetchFailed.insert(2) }
+            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert(2) } }
         }
     }
 
@@ -73,7 +75,7 @@ extension VisitDetailView {
             let n = try await api.fetchVisitNote(visitId: visitId)
             await MainActor.run { note = n; tabFetchFailed.remove(3) }
         } catch {
-            await MainActor.run { _ = tabFetchFailed.insert(3) }
+            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert(3) } }
         }
     }
 
@@ -83,7 +85,53 @@ extension VisitDetailView {
             let c = try await api.fetchVisitContract(visitId: visitId)
             await MainActor.run { contract = c; tabFetchFailed.remove(4) }
         } catch {
-            await MainActor.run { _ = tabFetchFailed.insert(4) }
+            await MainActor.run { if !isPipelineProcessing { _ = tabFetchFailed.insert(4) } }
+        }
+    }
+
+    // MARK: - Live Pipeline Refresh
+
+    /// True while any core pipeline step is still pending/processing. Drives
+    /// both the auto-refresh loop and the per-tab "processing" placeholder.
+    var isPipelineProcessing: Bool {
+        guard let ps = visit?.pipeline_state else { return false }
+        for step in ["transcription", "billing", "note", "contract"] {
+            guard let stepData = ps[step]?.value as? [String: Any],
+                  let status = stepData["status"] as? String else {
+                // A core step entry hasn't been written yet → still spinning up.
+                return true
+            }
+            switch status.lowercased() {
+            case "pending", "processing", "running", "queued":
+                return true
+            default:
+                continue
+            }
+        }
+        return false
+    }
+
+    /// Re-fetch the visit and any not-yet-loaded results while the pipeline
+    /// runs, so the screen fills in automatically without manual retries.
+    func pollPipelineUntilComplete() async {
+        var attempts = 0
+        let maxAttempts = 100 // ~5 min at 3s intervals
+        while attempts < maxAttempts && !Task.isCancelled {
+            guard isPipelineProcessing else {
+                // Final sweep to load anything that just finished.
+                await loadTabDataIfNeeded()
+                return
+            }
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            attempts += 1
+            if Task.isCancelled { return }
+
+            if let v = try? await api.fetchVisit(id: visitId) {
+                await MainActor.run { visit = v }
+            }
+            // Allow failed/empty tabs to retry as results become available.
+            await MainActor.run { tabFetchFailed.removeAll() }
+            await loadTabDataIfNeeded()
         }
     }
 
