@@ -9,23 +9,6 @@ struct ClientDetailView: View {
     @State var loadError: String?
     @State var showEditSheet = false
 
-    static let avatarColors: [Color] = [
-        Color(red: 13/255, green: 148/255, blue: 136/255),
-        Color(red: 59/255, green: 130/255, blue: 246/255),
-        Color(red: 220/255, green: 38/255, blue: 38/255),
-        Color(red: 124/255, green: 58/255, blue: 237/255),
-        Color(red: 217/255, green: 119/255, blue: 6/255),
-        Color(red: 8/255, green: 145/255, blue: 178/255),
-    ]
-
-    var initials: String {
-        client.full_name.split(separator: " ").map { String($0.prefix(1)) }.joined().uppercased()
-    }
-
-    var avatarColor: Color {
-        Self.avatarColors[abs(client.full_name.hashValue) % Self.avatarColors.count]
-    }
-
     var clientVisits: [Visit] {
         visits.filter { $0.client_id == client.id }
     }

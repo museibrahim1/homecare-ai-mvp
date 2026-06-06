@@ -5,15 +5,7 @@ extension ClientDetailView {
 
     var profileCard: some View {
         VStack(spacing: 16) {
-            Circle()
-                .fill(avatarColor)
-                .frame(width: 68, height: 68)
-                .overlay(
-                    Text(initials)
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.white)
-                )
-                .shadow(color: avatarColor.opacity(0.3), radius: 8, y: 4)
+            ClientAvatar(name: client.full_name, size: 72)
 
             VStack(spacing: 6) {
                 Text(client.full_name)
@@ -27,7 +19,7 @@ extension ClientDetailView {
                 }
 
                 if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
-                    Text(diagnosis)
+                    Text(diagnosis.replacingOccurrences(of: "_", with: " ").capitalized)
                         .font(.system(size: 13))
                         .foregroundColor(.palmSecondary)
                         .multilineTextAlignment(.center)
@@ -51,7 +43,7 @@ extension ClientDetailView {
                         Image(systemName: "heart.fill")
                             .font(.system(size: 10))
                             .foregroundColor(.palmPink)
-                        Text(careLevel)
+                        Text(careLevel.capitalized)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.palmPink)
                     }
@@ -232,7 +224,7 @@ extension ClientDetailView {
                 var showDivider = false
 
                 if let diagnosis = client.primary_diagnosis, !diagnosis.isEmpty {
-                    detailRow(icon: "stethoscope", label: "Primary Diagnosis", value: diagnosis, color: .palmPrimary)
+                    detailRow(icon: "stethoscope", label: "Primary Diagnosis", value: diagnosis.replacingOccurrences(of: "_", with: " ").capitalized, color: .palmPrimary)
                     let _ = (showDivider = true)
                 }
                 if let secondary = client.secondary_diagnoses, !secondary.isEmpty {
