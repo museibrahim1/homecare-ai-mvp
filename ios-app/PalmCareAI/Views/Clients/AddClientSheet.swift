@@ -56,39 +56,52 @@ struct AddClientSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                sheetHeader
+            ZStack(alignment: .bottom) {
+                VStack(spacing: 0) {
+                    sheetHeader
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        nameField
-                        inputField("Email", text: $email, placeholder: "john@email.com", icon: "envelope.fill", keyboard: .emailAddress, contentType: .emailAddress)
-                        inputField("Phone", text: $phone, placeholder: "+1 555 123 4567", icon: "phone.fill", keyboard: .phonePad, contentType: .telephoneNumber)
-                        inputField("Address", text: $address, placeholder: "123 Main St, City, State", icon: "mappin.circle.fill", contentType: .fullStreetAddress)
-                        prioritySection
-                        insuranceSection
-                        specialtySection
-                        notesField
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 16) {
+                            avatarPreview
 
-                        if let error = errorMessage {
-                            HStack(spacing: 6) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .font(.system(size: 12))
-                                Text(error)
-                                    .font(.system(size: 12))
+                            sectionCard(title: "Contact", icon: "person.crop.circle") {
+                                nameField
+                                inputField("Email", text: $email, placeholder: "john@email.com", icon: "envelope.fill", keyboard: .emailAddress, contentType: .emailAddress)
+                                inputField("Phone", text: $phone, placeholder: "+1 555 123 4567", icon: "phone.fill", keyboard: .phonePad, contentType: .telephoneNumber)
+                                inputField("Address", text: $address, placeholder: "123 Main St, City, State", icon: "mappin.circle.fill", contentType: .fullStreetAddress)
                             }
-                            .foregroundColor(.red)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
 
-                        submitButton
+                            sectionCard(title: "Care Details", icon: "heart.text.square") {
+                                prioritySection
+                                insuranceSection
+                                specialtySection
+                            }
+
+                            sectionCard(title: "Referral Notes", icon: "note.text") {
+                                notesField
+                            }
+
+                            if let error = errorMessage {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "exclamationmark.circle.fill")
+                                        .font(.system(size: 13))
+                                    Text(error)
+                                        .font(.system(size: 13))
+                                }
+                                .foregroundColor(.red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 4)
+                            }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.top, 14)
+                        .padding(.bottom, 120)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-                    .padding(.bottom, 40)
                 }
+
+                submitBar
             }
-            .background(Color(UIColor.systemBackground))
+            .background(Color.palmBackground.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
             .onAppear { populateFromClient() }
         }
@@ -97,12 +110,13 @@ struct AddClientSheet: View {
     private var sheetHeader: some View {
         HStack {
             Text(isEditing ? "Edit Client" : "Add New Client")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 19, weight: .heavy))
                 .foregroundColor(.palmText)
+                .tracking(-0.4)
             Spacer()
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.palmSecondary)
                     .frame(width: 30, height: 30)
                     .background(Color.palmFieldBg)
@@ -110,13 +124,64 @@ struct AddClientSheet: View {
             }
             .accessibilityLabel("Close")
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 8)
+        .padding(.horizontal, 18)
+        .padding(.top, 14)
+        .padding(.bottom, 12)
         .background(Color(UIColor.systemBackground))
         .overlay(alignment: .bottom) {
-            Divider().background(Color.palmBorder.opacity(0.7))
+            Rectangle().fill(Color.palmBorder.opacity(0.7)).frame(height: 1)
         }
+    }
+
+    // MARK: - Avatar Preview
+
+    private var avatarPreview: some View {
+        VStack(spacing: 8) {
+            ClientAvatar(name: fullName.isEmpty ? "New Client" : fullName, size: 64)
+            Text(fullName.isEmpty ? "New Client" : fullName)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(fullName.isEmpty ? .palmSecondary : .palmText)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 4)
+    }
+
+    // MARK: - Section Card
+
+    private func sectionCard<Content: View>(title: String, icon: String,
+                                            @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 7) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmPrimary)
+                Text(title)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.palmText)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+            }
+            content()
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(16)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.palmBorder.opacity(0.7), lineWidth: 1))
+    }
+
+    // MARK: - Sticky Submit Bar
+
+    private var submitBar: some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(Color.palmBorder.opacity(0.6)).frame(height: 1)
+            submitButton
+                .padding(.horizontal, 18)
+                .padding(.top, 12)
+                .padding(.bottom, 28)
+        }
+        .background(.ultraThinMaterial)
     }
 
     // MARK: - Name Field
@@ -141,7 +206,7 @@ struct AddClientSheet: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
-            .background(Color(UIColor.systemBackground))
+            .background(Color.palmFieldBg)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
@@ -175,7 +240,7 @@ struct AddClientSheet: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
-            .background(Color(UIColor.systemBackground))
+            .background(Color.palmFieldBg)
             .cornerRadius(12)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
         }
@@ -206,7 +271,7 @@ struct AddClientSheet: View {
                         .foregroundColor(careLevel == value ? color : .palmSecondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 9)
-                        .background(careLevel == value ? color.opacity(0.1) : Color(UIColor.systemBackground))
+                        .background(careLevel == value ? color.opacity(0.1) : Color.palmFieldBg)
                         .cornerRadius(10)
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
@@ -239,7 +304,7 @@ struct AddClientSheet: View {
                             .foregroundColor(insuranceType == value ? .palmPrimary : .palmSecondary)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 9)
-                            .background(insuranceType == value ? Color.palmPrimary.opacity(0.1) : Color(UIColor.systemBackground))
+                            .background(insuranceType == value ? Color.palmPrimary.opacity(0.1) : Color.palmFieldBg)
                             .cornerRadius(10)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
@@ -289,7 +354,7 @@ struct AddClientSheet: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 13)
-                .background(Color(UIColor.systemBackground))
+                .background(Color.palmFieldBg)
                 .cornerRadius(12)
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
             }
@@ -300,21 +365,15 @@ struct AddClientSheet: View {
     // MARK: - Notes
 
     private var notesField: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Referral Notes")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.palmText)
-
-            TextField("Referral source, special requirements...", text: $notes, axis: .vertical)
-                .font(.system(size: 15))
-                .foregroundColor(.palmText)
-                .lineLimit(3...5)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 13)
-                .background(Color(UIColor.systemBackground))
-                .cornerRadius(12)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
-        }
+        TextField("Referral source, special requirements...", text: $notes, axis: .vertical)
+            .font(.system(size: 15))
+            .foregroundColor(.palmText)
+            .lineLimit(3...5)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 13)
+            .background(Color.palmFieldBg)
+            .cornerRadius(12)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmBorder, lineWidth: 1))
     }
 
     // MARK: - Submit

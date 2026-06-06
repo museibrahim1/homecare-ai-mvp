@@ -106,7 +106,11 @@ struct RecordView: View {
 
             }
             .navigationDestination(isPresented: $navigateToVisit) {
-                VisitDetailView(visitId: completedVisitId ?? "", clientName: completedClientName)
+                // Open straight to the Contract tab — the finished assessment
+                // lands the caregiver on the generated contract automatically,
+                // matching the web app's behavior. The detail view polls the
+                // pipeline and fills in the contract as soon as it's ready.
+                VisitDetailView(visitId: completedVisitId ?? "", clientName: completedClientName, initialTab: 4)
                     .environmentObject(api)
             }
             .sheet(isPresented: $showClientPicker) {
@@ -311,27 +315,6 @@ struct RecordView: View {
                 .overlay(Capsule().stroke(Color.palmPrimary.opacity(0.3), lineWidth: 1))
             }
             .padding(.top, 20)
-
-            #if DEBUG
-            Button {
-                isDemoMode = true
-                demoTranscription.startTranscribing()
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                    Text("Demo Assessment")
-                        .font(.system(size: 13, weight: .semibold))
-                }
-                .foregroundColor(.palmOrange)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 10)
-                .background(Color.palmOrange.opacity(0.1))
-                .cornerRadius(20)
-                .overlay(Capsule().stroke(Color.palmOrange.opacity(0.3), lineWidth: 1))
-            }
-            .padding(.top, 10)
-            #endif
 
             Spacer()
 

@@ -72,15 +72,10 @@ class APIService: ObservableObject {
         guard let email = Bundle.main.infoDictionary?["DEMO_EMAIL"] as? String, !email.isEmpty,
               let pass = Bundle.main.infoDictionary?["DEMO_PASSWORD"] as? String, !pass.isEmpty else { return }
         Task {
-            let url = URL(string: "\(baseURL)/auth/login")!
-            var req = URLRequest(url: url)
-            req.httpMethod = "POST"
-            req.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            req.httpBody = try? JSONSerialization.data(withJSONObject: ["email": email, "password": pass])
-            guard let (data, _) = try? await URLSession.shared.data(for: req),
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let t = json["access_token"] as? String else { return }
-            await MainActor.run { self.token = t }
+            // Use the shared login() which falls back to business auth, so demo
+            // accounts created via the simplified business signup also work.
+            guard let resp = try? await self.login(email: email, password: pass) else { return }
+            await MainActor.run { self.token = resp.access_token }
         }
     }
     #endif

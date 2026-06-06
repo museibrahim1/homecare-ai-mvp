@@ -6,28 +6,18 @@ struct MainTabView: View {
     @State private var navigationResetIds: [Int: UUID] = [
         0: UUID(), 1: UUID(), 2: UUID(), 3: UUID(), 4: UUID()
     ]
-    @State private var currentUser: User?
     @State private var palmAgentOpen = false
-    @State private var userFetchAttempts = 0
-
-    private var isAdmin: Bool {
-        currentUser?.isAdmin ?? false
-    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Group {
-                if isAdmin {
-                    adminContent
-                } else {
-                    normalContent
-                }
-            }
-            .padding(.bottom, 60)
+            // The mobile app is the caregiver-facing product. Admin tools
+            // (Command Center, Sales Leads, Investors, Analytics) live only in
+            // the web app, so the phone always uses the normal layout.
+            normalContent
+                .padding(.bottom, 60)
 
             CustomTabBar(
                 selectedTab: $selectedTab,
-                isAdmin: isAdmin,
                 onTabReselected: { tab in
                     navigationResetIds[tab] = UUID()
                 }
@@ -45,82 +35,18 @@ struct MainTabView: View {
         }
         .edgesIgnoringSafeArea(.bottom)
         .task {
-            await fetchCurrentUserWithRetry()
             // Re-validate App Store entitlements on every launch so renewals,
             // refunds, or device changes are reflected before the user can
             // hit a paywalled action.
             await StoreManager.shared.refreshPurchasedProducts()
         }
-        .onChange(of: currentUser?.isAdmin) { _ in
-            selectedTab = 0
-        }
         .sheet(isPresented: $palmAgentOpen) {
-            PalmAgentSheet(isPresented: $palmAgentOpen, isAdmin: isAdmin)
+            PalmAgentSheet(isPresented: $palmAgentOpen, isAdmin: false)
                 .environmentObject(api)
         }
     }
 
-    // Retry once with exponential backoff so a flaky network at launch
-    // doesn't permanently hide admin tabs until the next cold start.
-    private func fetchCurrentUserWithRetry() async {
-        for attempt in 0..<3 {
-            do {
-                currentUser = try await api.fetchUser()
-                return
-            } catch {
-                userFetchAttempts = attempt + 1
-                if attempt < 2 {
-                    let delay = UInt64(pow(2.0, Double(attempt))) * 1_000_000_000
-                    try? await Task.sleep(nanoseconds: delay)
-                }
-            }
-        }
-    }
-
-    // MARK: - Admin Layout
-    // Tabs: Command Center, Sales Leads, Investors, Analytics, Workspace
-
-    @ViewBuilder
-    private var adminContent: some View {
-        switch selectedTab {
-        case 0:
-            NavigationStack {
-                CommandCenterView()
-                    .environmentObject(api)
-            }
-            .id(navigationResetIds[0])
-        case 1:
-            NavigationStack {
-                SalesLeadsView()
-                    .environmentObject(api)
-            }
-            .id(navigationResetIds[1])
-        case 2:
-            NavigationStack {
-                InvestorsView()
-                    .environmentObject(api)
-            }
-            .id(navigationResetIds[2])
-        case 3:
-            NavigationStack {
-                AnalyticsDashView()
-                    .environmentObject(api)
-            }
-            .id(navigationResetIds[3])
-        case 4:
-            AdminWorkspaceView()
-                .environmentObject(api)
-                .id(navigationResetIds[4])
-        default:
-            NavigationStack {
-                CommandCenterView()
-                    .environmentObject(api)
-            }
-            .id(navigationResetIds[0])
-        }
-    }
-
-    // MARK: - Normal User Layout
+    // MARK: - Caregiver Layout
     // Tabs: Home, Clients, Palm It, Workspace, Settings
 
     @ViewBuilder
@@ -168,33 +94,20 @@ struct MainTabView: View {
 
 struct CustomTabBar: View {
     @Binding var selectedTab: Int
-    var isAdmin: Bool = false
     var onTabReselected: ((Int) -> Void)?
 
-    private var tabs: [(icon: String, label: String)] {
-        if isAdmin {
-            return [
-                ("paperplane.fill", "Command"),
-                ("target", "Leads"),
-                ("chart.line.uptrend.xyaxis", "Investors"),
-                ("chart.bar.fill", "Analytics"),
-                ("square.grid.2x2.fill", "Workspace"),
-            ]
-        } else {
-            return [
-                ("house.fill", "Home"),
-                ("person.2.fill", "Clients"),
-                ("mic.fill", "Palm It"),
-                ("square.grid.2x2.fill", "Workspace"),
-                ("gearshape.fill", "Settings"),
-            ]
-        }
-    }
+    private let tabs: [(icon: String, label: String)] = [
+        ("house.fill", "Home"),
+        ("person.2.fill", "Clients"),
+        ("mic.fill", "Palm It"),
+        ("square.grid.2x2.fill", "Workspace"),
+        ("gearshape.fill", "Settings"),
+    ]
 
     var body: some View {
         HStack {
             ForEach(0..<tabs.count, id: \.self) { index in
-                if !isAdmin && index == 2 {
+                if index == 2 {
                     palmItButton(index: index)
                 } else {
                     standardTabButton(index: index)
