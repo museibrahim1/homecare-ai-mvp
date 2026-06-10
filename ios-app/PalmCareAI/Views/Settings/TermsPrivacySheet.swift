@@ -38,13 +38,13 @@ struct TermsPrivacySheet: View {
                     )
 
                     termsSection(
-                        title: "5. HIPAA Compliance",
-                        body: "PALM is designed to support HIPAA compliance for healthcare providers. We implement administrative, physical, and technical safeguards to protect electronic protected health information (ePHI)."
+                        title: "5. HIPAA-Aligned Safeguards",
+                        body: "PALM is designed with HIPAA-aligned administrative, physical, and technical safeguards for electronic protected health information (ePHI). A Business Associate Agreement is available for covered entities."
                     )
 
                     termsSection(
-                        title: "6. Subscription & Billing",
-                        body: "PALM is currently provided free of charge during the evaluation period. Certain features may require a paid subscription in the future; you will be notified before any charges apply."
+                        title: "6. Beta Access",
+                        body: "PALM is currently free during the beta evaluation period. There are no in-app purchases. Certain features may require a paid plan in the future; you will be notified before any charges apply."
                     )
 
                     termsSection(
@@ -74,6 +74,14 @@ struct TermsPrivacySheet: View {
                         title: "Contact",
                         body: "For questions about these terms or your privacy, contact us at support@palmcareai.com"
                     )
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Link("View full Terms of Service", destination: URL(string: "https://palmcareai.com/legal/terms")!)
+                            .font(.system(size: 14, weight: .semibold))
+                        Link("View full Privacy Policy", destination: URL(string: "https://palmcareai.com/legal/privacy")!)
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .padding(.top, 8)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)

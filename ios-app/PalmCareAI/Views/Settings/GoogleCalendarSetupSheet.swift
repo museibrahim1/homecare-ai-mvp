@@ -9,7 +9,6 @@ struct GoogleCalendarSetupSheet: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showDisconnectConfirm = false
-    @State private var didStartAuth = false
 
     /// Build-config override; when empty, the client ID is fetched from the
     /// backend (`GET /calendar/oauth-configured`) so TestFlight builds work
@@ -30,11 +29,11 @@ struct GoogleCalendarSetupSheet: View {
                 } else if let error = errorMessage {
                     errorContent(error)
                 } else {
-                    loadingContent
+                    connectPrompt
                 }
             }
             .background(Color.palmBackground)
-            .navigationTitle(isConnected ? "Google Calendar" : "Connecting...")
+            .navigationTitle(isConnected ? "Google Calendar" : "Google Calendar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -52,11 +51,47 @@ struct GoogleCalendarSetupSheet: View {
                 confirmStyle: .destructive,
                 onConfirm: { disconnectCalendar() }
             )
-            .onAppear {
-                if !isConnected && !didStartAuth {
-                    didStartAuth = true
-                    startGoogleOAuth()
+        }
+    }
+
+    private var connectPrompt: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                Spacer().frame(height: 32)
+                ZStack {
+                    Circle()
+                        .fill(Color.palmBlue.opacity(0.1))
+                        .frame(width: 72, height: 72)
+                    Image(systemName: "calendar.badge.plus")
+                        .font(.system(size: 30))
+                        .foregroundColor(.palmBlue)
                 }
+                Text("Connect Google Calendar")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.palmText)
+                Text("Sync your schedule so visit appointments appear in PALM and stay up to date across devices.")
+                    .font(.system(size: 14))
+                    .foregroundColor(.palmSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 30)
+                Button { startGoogleOAuth() } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "link")
+                            .font(.system(size: 14, weight: .bold))
+                        Text("Connect with Google")
+                            .font(.system(size: 15, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        LinearGradient(colors: [Color.palmBlue, Color(red: 66/255, green: 133/255, blue: 244/255)],
+                                       startPoint: .leading, endPoint: .trailing)
+                    )
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal, 30)
+                .padding(.top, 8)
             }
         }
     }

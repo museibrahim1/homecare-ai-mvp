@@ -55,11 +55,6 @@ struct RegisterView: View {
                     createButton
                         .padding(.top, 8)
 
-                    orDivider
-                        .padding(.vertical, 4)
-
-                    magicLinkButton
-
                     bottomLink
                         .padding(.top, 8)
                 }
@@ -95,7 +90,7 @@ struct RegisterView: View {
             VStack(spacing: 4) {
                 Text("Get started in 30 seconds")
                     .font(.system(size: 22, weight: .bold))
-                Text("No business verification, no paperwork.")
+                Text("Built for licensed home care agencies.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -248,11 +243,22 @@ struct RegisterView: View {
                         .foregroundColor(.palmPrimary)
                 }
             }
-            Text("By creating an account, you agree to our Terms of Service and Privacy Policy.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 8)
+            VStack(spacing: 4) {
+                Text("By creating an account, you agree to our")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                HStack(spacing: 4) {
+                    Link("Terms of Service", destination: URL(string: "https://palmcareai.com/legal/terms")!)
+                        .font(.caption.weight(.semibold))
+                    Text("and")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Link("Privacy Policy", destination: URL(string: "https://palmcareai.com/legal/privacy")!)
+                        .font(.caption.weight(.semibold))
+                }
+            }
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 8)
         }
     }
 

@@ -52,14 +52,10 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSCameraUsageDescription</key>
-	<string>PALM uses the camera so caregivers can attach photos to visit notes and care plans.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>PALM uses Face ID to quickly and securely unlock the app and protect access to sensitive client information.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>PALM uses the microphone to record client visits and assessments. Recording continues in the background only while a visit is in progress, and audio is processed solely for transcription, billing, and contract generation.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>PALM accesses your photo library so caregivers can attach photos to visit notes and care plans.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>PALM uses on-device speech recognition for hands-free voice commands with the Palm assistant.</string>
 	<key>UIBackgroundModes</key>

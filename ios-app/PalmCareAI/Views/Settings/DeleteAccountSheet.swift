@@ -34,7 +34,7 @@ struct DeleteAccountSheet: View {
                             .padding(.horizontal, 8)
                     }
                     deleteButton
-                    Text("This action is permanent. Account data is purged within 30 days. Subscriptions and billing managed through the App Store must also be cancelled separately in Settings → Apple ID → Subscriptions.")
+                    Text("This action is permanent. Account data is purged within 30 days. PALM is free during the beta — there are no subscriptions to cancel.")
                         .font(.system(size: 11))
                         .foregroundColor(.palmSecondary)
                         .multilineTextAlignment(.center)
@@ -82,7 +82,6 @@ struct DeleteAccountSheet: View {
             consequenceRow(icon: "person.crop.circle.badge.xmark", text: "Your login and profile will be removed")
             consequenceRow(icon: "waveform", text: "All visit recordings, transcripts, and contracts will be deleted")
             consequenceRow(icon: "person.2.fill", text: "Client records you created will be unlinked or removed")
-            consequenceRow(icon: "creditcard.trianglebadge.exclamationmark", text: "Active subscriptions are not auto-refunded — cancel in App Store separately")
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -192,7 +191,7 @@ struct DeleteAccountSheet: View {
         } catch {
             await MainActor.run {
                 isDeleting = false
-                errorMessage = error.localizedDescription
+                errorMessage = error.palmFriendlyMessage
             }
         }
     }

@@ -194,7 +194,7 @@ struct SettingsView: View {
             SettingsToggleRow(
                 icon: "faceid",
                 iconColor: .palmPrimary,
-                title: "Login with Face ID",
+                title: "Unlock with Face ID",
                 isOn: Binding(
                     get: { useFaceID },
                     set: { newValue in

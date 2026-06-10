@@ -71,7 +71,7 @@ class PalmAgentViewModel: ObservableObject {
             messages.append(PalmAgentMessage(role: "assistant", content: result.response, files: files))
             if ttsEnabled { await speak(text: result.response, api: api) }
         } catch {
-            messages.append(PalmAgentMessage(role: "assistant", content: "Something went wrong: \(error.localizedDescription)"))
+            messages.append(PalmAgentMessage(role: "assistant", content: "Something went wrong. Please try again in a moment."))
         }
     }
 

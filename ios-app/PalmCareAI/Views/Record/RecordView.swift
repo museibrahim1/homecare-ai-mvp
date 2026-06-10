@@ -134,17 +134,14 @@ struct RecordView: View {
 
             }
             .navigationDestination(isPresented: $navigateToVisit) {
-                // Open straight to the Contract tab — the finished assessment
-                // lands the caregiver on the generated contract automatically,
-                // matching the web app's behavior. If a step failed there is
-                // no contract to show, so land on Overview where the detail
-                // view surfaces what happened.
-                VisitDetailView(
-                    visitId: completedVisitId ?? "",
-                    clientName: completedClientName,
-                    initialTab: pipelineFailed ? 0 : 4
-                )
-                .environmentObject(api)
+                if let visitId = completedVisitId, !visitId.isEmpty {
+                    VisitDetailView(
+                        visitId: visitId,
+                        clientName: completedClientName,
+                        initialTab: pipelineFailed ? 0 : 4
+                    )
+                    .environmentObject(api)
+                }
             }
             .sheet(isPresented: $showClientPicker) {
                 ClientPickerSheet(clients: clients, selected: $selectedClient, onClientAdded: { newClient in
@@ -642,7 +639,7 @@ struct RecordView: View {
                             pipelineSteps = []
                         }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            navigateToVisit = true
+                            if !visitId.isEmpty { navigateToVisit = true }
                         }
                     }
                     return
@@ -669,7 +666,7 @@ struct RecordView: View {
                 pipelineSteps = []
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                navigateToVisit = true
+                if !visitId.isEmpty { navigateToVisit = true }
             }
         }
     }

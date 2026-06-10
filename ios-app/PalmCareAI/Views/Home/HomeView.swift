@@ -396,7 +396,7 @@ struct VisitRow: View {
             formatter.formatOptions = [.withInternetDateTime]
             date = formatter.date(from: isoString)
         }
-        guard let parsedDate = date else { return isoString }
+        guard let parsedDate = date else { return "—" }
         let display = DateFormatter()
         display.dateStyle = .medium
         display.timeStyle = .short

@@ -315,10 +315,11 @@ private enum KeychainHelper {
         addQuery[kSecValueData as String] = data
         let status = SecItemAdd(addQuery as CFDictionary, nil)
         if status != errSecSuccess {
-            // Retry once without the accessibility constraint — better a
-            // saved session than a user silently logged out on next launch.
-            addQuery.removeValue(forKey: kSecAttrAccessible as String)
-            SecItemAdd(addQuery as CFDictionary, nil)
+            // Do not silently downgrade accessibility — weaker Keychain storage
+            // is inappropriate for auth tokens in a care-documentation app.
+            #if DEBUG
+            print("Keychain save failed (status \(status))")
+            #endif
         }
     }
 
@@ -413,5 +414,26 @@ extension Data {
         if let data = string.data(using: .utf8) {
             append(data)
         }
+    }
+}
+
+extension Error {
+    /// User-safe message for alerts and inline error text.
+    var palmFriendlyMessage: String {
+        if let api = self as? APIError, let desc = api.errorDescription {
+            return desc
+        }
+        let raw = localizedDescription
+        let lower = raw.lowercased()
+        if lower.contains("invalid") && (lower.contains("credentials") || lower.contains("password") || lower.contains("email")) {
+            return "Incorrect email or password."
+        }
+        if lower.contains("network") || lower.contains("offline") || lower.contains("connection") || lower.contains("timed out") {
+            return "Can't reach PALM. Check your internet connection and try again."
+        }
+        if raw.contains("{") || raw.contains("<") || raw.count > 120 {
+            return "Something went wrong. Please try again."
+        }
+        return raw
     }
 }

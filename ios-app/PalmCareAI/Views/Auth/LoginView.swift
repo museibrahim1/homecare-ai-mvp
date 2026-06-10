@@ -33,10 +33,6 @@ struct LoginView: View {
                     .padding(.horizontal, 24)
                     .padding(.top, 24)
 
-                magicLinkRow
-                    .padding(.horizontal, 24)
-                    .padding(.top, 12)
-
                 registerPrompt
                     .padding(.top, 24)
                     .padding(.bottom, 32)
@@ -282,7 +278,7 @@ struct LoginView: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = friendlyError(error)
+                    errorMessage = error.palmFriendlyMessage
                     showError = true
                     isLoading = false
                 }
@@ -306,7 +302,7 @@ struct LoginView: View {
             } catch {
                 await MainActor.run {
                     isLoading = false
-                    errorMessage = friendlyError(error)
+                    errorMessage = error.palmFriendlyMessage
                     showError = true
                 }
             }
