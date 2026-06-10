@@ -212,14 +212,14 @@ struct LandingView: View {
                                     .foregroundColor(.white)
                             }
 
-                            Text("PalmCare AI")
+                            Text("PALM")
                                 .font(.system(size: 17, weight: .heavy))
                                 .foregroundColor(.white)
-                                .tracking(-0.3)
+                                .tracking(0.5)
 
                             Spacer()
 
-                            Text("AI-POWERED")
+                            Text("FOR HOME CARE TEAMS")
                                 .font(.system(size: 10, weight: .bold))
                                 .tracking(0.8)
                                 .foregroundColor(Color.palmPrimaryLight)

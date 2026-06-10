@@ -34,12 +34,6 @@ struct MainTabView: View {
             }
         }
         .edgesIgnoringSafeArea(.bottom)
-        .task {
-            // Re-validate App Store entitlements on every launch so renewals,
-            // refunds, or device changes are reflected before the user can
-            // hit a paywalled action.
-            await StoreManager.shared.refreshPurchasedProducts()
-        }
         .sheet(isPresented: $palmAgentOpen) {
             PalmAgentSheet(isPresented: $palmAgentOpen, isAdmin: false)
                 .environmentObject(api)

@@ -178,8 +178,9 @@ struct FaceIDLockScreen: View {
             }
 
             VStack(spacing: 6) {
-                Text("PalmCare AI")
+                Text("PALM")
                     .font(.system(size: 22, weight: .bold))
+                    .tracking(1)
                     .foregroundColor(.palmText)
 
                 Text("Authenticate to continue")
@@ -234,7 +235,7 @@ struct FaceIDLockScreen: View {
         isAuthenticating = true
         authFailed = false
 
-        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Unlock PalmCare AI") { success, _ in
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Unlock PALM") { success, _ in
             DispatchQueue.main.async {
                 isAuthenticating = false
                 if success {

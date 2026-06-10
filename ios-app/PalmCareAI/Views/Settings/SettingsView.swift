@@ -221,7 +221,7 @@ struct SettingsView: View {
             SettingsDivider()
 
             Button {
-                if let url = URL(string: "mailto:support@palmcareai.com?subject=PalmCare%20AI%20Support") {
+                if let url = URL(string: "mailto:support@palmcareai.com?subject=PALM%20Support") {
                     openURL(url)
                 }
             } label: {

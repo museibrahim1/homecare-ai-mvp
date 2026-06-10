@@ -53,6 +53,53 @@ class APIService: ObservableObject {
         cachedUser = nil
     }
 
+    // MARK: - Logout
+
+    /// End the session and wipe everything user-specific from the device:
+    /// keychain token, cached PHI, calendar cache, recordings, and temp files.
+    func logout() {
+        token = nil
+
+        // Clear any cached PHI from UserDefaults (legacy keys + new ones).
+        let defaults = UserDefaults.standard
+        for key in [
+            "palmcare_calendar_events",
+            "googleCalendarConnected",
+            "cachedClients",
+            "cachedVisits",
+            "lastSyncedAt",
+        ] {
+            defaults.removeObject(forKey: key)
+        }
+        URLCache.shared.removeAllCachedResponses()
+
+        let fm = FileManager.default
+
+        // Wipe the encrypted calendar cache file (see CalendarStorage).
+        if let docsDir = fm.urls(for: .documentDirectory, in: .userDomainMask).first {
+            for name in ["palmcare_calendar.cache", "calendar_events.json"] {
+                let url = docsDir.appendingPathComponent(name)
+                if fm.fileExists(atPath: url.path) {
+                    try? fm.removeItem(at: url)
+                }
+            }
+        }
+
+        // Recordings directory (PHI audio).
+        let recordingsDir = fm.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Recordings")
+        if let dir = recordingsDir, fm.fileExists(atPath: dir.path) {
+            try? fm.removeItem(at: dir)
+        }
+
+        // Tmp directory (export sheets, chunked audio, etc.).
+        let tmpDir = fm.temporaryDirectory
+        if let files = try? fm.contentsOfDirectory(atPath: tmpDir.path) {
+            for file in files {
+                try? fm.removeItem(at: tmpDir.appendingPathComponent(file))
+            }
+        }
+    }
+
     func invalidateClients() { cachedClients = nil }
     func invalidateVisits() { cachedVisits = nil }
 

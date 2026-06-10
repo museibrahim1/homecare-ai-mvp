@@ -12,19 +12,19 @@ struct TermsPrivacySheet: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.palmText)
 
-                        Text("Last updated: February 2026")
+                        Text("Last updated: June 2026")
                             .font(.system(size: 12))
                             .foregroundColor(.palmSecondary)
                     }
 
                     termsSection(
                         title: "1. Acceptance of Terms",
-                        body: "By accessing or using PalmCare AI, you agree to be bound by these Terms of Service. If you do not agree, do not use the service."
+                        body: "By accessing or using PALM, you agree to be bound by these Terms of Service. If you do not agree, do not use the service."
                     )
 
                     termsSection(
                         title: "2. Service Description",
-                        body: "PalmCare AI provides AI-powered care documentation tools including voice recording, transcription, contract generation, and client management for care professionals."
+                        body: "PALM provides care documentation tools for home care organizations, including voice recording, transcription, service agreement generation, and client management."
                     )
 
                     termsSection(
@@ -39,17 +39,17 @@ struct TermsPrivacySheet: View {
 
                     termsSection(
                         title: "5. HIPAA Compliance",
-                        body: "PalmCare AI is designed to support HIPAA compliance for healthcare providers. We implement administrative, physical, and technical safeguards to protect electronic protected health information (ePHI)."
+                        body: "PALM is designed to support HIPAA compliance for healthcare providers. We implement administrative, physical, and technical safeguards to protect electronic protected health information (ePHI)."
                     )
 
                     termsSection(
                         title: "6. Subscription & Billing",
-                        body: "Paid features require an active subscription. You may cancel at any time. Refunds are handled on a case-by-case basis within 30 days of purchase."
+                        body: "PALM is currently provided free of charge during the evaluation period. Certain features may require a paid subscription in the future; you will be notified before any charges apply."
                     )
 
                     termsSection(
                         title: "7. Limitation of Liability",
-                        body: "PalmCare AI is provided \"as is\" without warranties. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service."
+                        body: "PALM is provided \"as is\" without warranties. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service."
                     )
 
                     Divider().padding(.vertical, 8)

@@ -81,7 +81,7 @@ struct LoginView: View {
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.primary)
 
-                Text("Sign in to continue to PalmCare AI")
+                Text("Sign in to continue to PALM")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -234,7 +234,7 @@ struct LoginView: View {
 
     private var registerPrompt: some View {
         HStack(spacing: 4) {
-            Text("New to PalmCare AI?")
+            Text("New to PALM?")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
@@ -320,7 +320,7 @@ struct LoginView: View {
             return "Incorrect email or password."
         }
         if lower.contains("network") || lower.contains("offline") || lower.contains("connection") {
-            return "Can't reach PalmCare AI. Check your internet connection and try again."
+            return "Can't reach PALM. Check your internet connection and try again."
         }
         return raw
     }

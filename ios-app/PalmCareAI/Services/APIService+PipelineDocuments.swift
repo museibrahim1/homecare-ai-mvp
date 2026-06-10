@@ -1,14 +1,6 @@
 import Foundation
 
 extension APIService {
-    func listContractTemplates() async throws -> [ContractTemplate] {
-        try await request("GET", path: "/contract-templates/")
-    }
-
-    func runPipelineStep(visitId: String, step: String) async throws {
-        let _: [String: AnyCodable] = try await request("POST", path: "/pipeline/visits/\(visitId)/\(step)")
-    }
-
     func restartVisit(visitId: String) async throws {
         let _: [String: AnyCodable] = try await request("POST", path: "/visits/\(visitId)/restart")
     }
@@ -110,8 +102,6 @@ extension APIService {
         try data.write(to: fileURL, options: [.atomic, .completeFileProtection])
         return fileURL
     }
-
-    // MARK: - Contract Templates
 
     // MARK: - Email Contract
 

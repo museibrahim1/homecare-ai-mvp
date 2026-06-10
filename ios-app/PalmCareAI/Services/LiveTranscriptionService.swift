@@ -22,6 +22,9 @@ class LiveTranscriptionService: ObservableObject {
 
     private let api: APIService
     private var chunkTimer: Timer?
+    /// Prevents overlapping uploads when a slow request outlives the timer
+    /// interval — otherwise the same byte range gets transcribed twice.
+    private var isSendingChunk = false
 
     /// PCM bytes already sent for transcription.
     private var lastByteOffset: UInt64 = AudioRecorderService.wavHeaderSize.asUInt64
@@ -72,6 +75,10 @@ class LiveTranscriptionService: ObservableObject {
     // MARK: - Chunking
 
     private func sendChunk(recordingURL: URL) async {
+        guard !isSendingChunk else { return }
+        isSendingChunk = true
+        defer { isSendingChunk = false }
+
         guard FileManager.default.fileExists(atPath: recordingURL.path) else {
             lastError = "File not found"
             return

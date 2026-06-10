@@ -137,7 +137,7 @@ struct GoogleCalendarSetupSheet: View {
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.palmText)
 
-                    Text("Your Google Calendar events are synced with PalmCare.")
+                    Text("Your Google Calendar events are synced with PALM.")
                         .font(.system(size: 14))
                         .foregroundColor(.palmSecondary)
                         .multilineTextAlignment(.center)

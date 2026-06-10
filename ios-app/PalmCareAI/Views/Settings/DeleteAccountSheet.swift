@@ -69,7 +69,7 @@ struct DeleteAccountSheet: View {
             Text("Delete your account?")
                 .font(.system(size: 19, weight: .bold))
                 .foregroundColor(.palmText)
-            Text("This will permanently delete your PalmCare AI account and remove access for everyone in your agency workspace.")
+            Text("This will permanently delete your PALM account and remove access for everyone in your agency workspace.")
                 .font(.system(size: 13))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)

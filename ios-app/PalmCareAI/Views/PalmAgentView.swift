@@ -188,7 +188,7 @@ struct PalmAgentButton: View {
                     .foregroundColor(.white)
             }
         }
-        .accessibilityLabel("Open Palm AI assistant")
+        .accessibilityLabel("Open Palm assistant")
     }
 }
 
@@ -213,7 +213,7 @@ struct PalmAgentSheet: View {
                 inputBar
             }
             .background(Color(UIColor.secondarySystemGroupedBackground))
-            .navigationTitle("Palm AI")
+            .navigationTitle("Palm Assistant")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

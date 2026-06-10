@@ -29,7 +29,7 @@ targets:
       path: PalmCareAI/Info.plist
       properties:
         CFBundleName: PalmCareAI
-        CFBundleDisplayName: PalmCare AI
+        CFBundleDisplayName: PALM
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleShortVersionString: $(MARKETING_VERSION)
@@ -52,11 +52,11 @@ targets:
         # screen locks or another app is foregrounded mid-assessment.
         UIBackgroundModes:
           - audio
-        NSMicrophoneUsageDescription: "PalmCareAI uses the microphone to record client visits and assessments. Recording continues in the background only while a visit is in progress, and audio is processed solely for transcription, billing, and contract generation."
-        NSSpeechRecognitionUsageDescription: "PalmCareAI uses on-device speech recognition for hands-free voice commands with the Palm AI assistant."
-        NSFaceIDUsageDescription: "PalmCareAI uses Face ID to quickly and securely unlock the app and protect access to sensitive client information."
-        NSCameraUsageDescription: "PalmCareAI uses the camera so caregivers can attach photos to visit notes and care plans."
-        NSPhotoLibraryUsageDescription: "PalmCareAI accesses your photo library so caregivers can attach photos to visit notes and care plans."
+        NSMicrophoneUsageDescription: "PALM uses the microphone to record client visits and assessments. Recording continues in the background only while a visit is in progress, and audio is processed solely for transcription, billing, and contract generation."
+        NSSpeechRecognitionUsageDescription: "PALM uses on-device speech recognition for hands-free voice commands with the Palm assistant."
+        NSFaceIDUsageDescription: "PALM uses Face ID to quickly and securely unlock the app and protect access to sensitive client information."
+        NSCameraUsageDescription: "PALM uses the camera so caregivers can attach photos to visit notes and care plans."
+        NSPhotoLibraryUsageDescription: "PALM accesses your photo library so caregivers can attach photos to visit notes and care plans."
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: false
           NSExceptionDomains:

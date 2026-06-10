@@ -20,7 +20,9 @@ extension APIService {
                     mfa_token: nil
                 )
             } catch {
-                // Both failed — throw the original regular auth error
+                // Both failed — surface the business-auth error, since app
+                // accounts are created through the business signup flow and
+                // its message (lockout, wrong password) is the relevant one.
                 throw error
             }
         }

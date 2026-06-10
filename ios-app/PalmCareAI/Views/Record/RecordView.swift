@@ -151,7 +151,7 @@ struct RecordView: View {
             }
             .palmConfirmAlert(
                 "Microphone Access",
-                message: "PalmCareAI needs microphone access to record visits. Please enable it in Settings.",
+                message: "PALM needs microphone access to record visits. Please enable it in Settings.",
                 icon: "mic.slash.fill",
                 iconColor: .palmOrange,
                 isPresented: $showPermissionAlert,
@@ -338,7 +338,7 @@ struct RecordView: View {
                 .foregroundColor(.palmPrimaryLight)
                 .padding(.top, 16)
 
-            Text("AI handles the rest")
+            Text("Transcript, notes, and agreement — handled for you")
                 .font(.system(size: 12))
                 .foregroundColor(.white.opacity(0.4))
                 .padding(.top, 4)

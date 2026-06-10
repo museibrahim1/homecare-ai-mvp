@@ -302,24 +302,33 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
     // MARK: - AVAudioRecorderDelegate
 
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        guard !flag else { return }
         DispatchQueue.main.async { [weak self] in
-            if !flag {
-                self?.isRecording = false
-                self?.timer?.invalidate()
-                self?.timer = nil
-                self?.levelTimer?.invalidate()
-                self?.levelTimer = nil
+            guard let self else { return }
+            let wasRecording = self.isRecording
+            self.isRecording = false
+            self.timer?.invalidate()
+            self.timer = nil
+            self.levelTimer?.invalidate()
+            self.levelTimer = nil
+            if wasRecording {
+                self.recordingFailureMessage = "Recording stopped unexpectedly. The audio captured so far has been saved — you can upload it now."
             }
         }
     }
 
     func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
         DispatchQueue.main.async { [weak self] in
-            self?.isRecording = false
-            self?.timer?.invalidate()
-            self?.timer = nil
-            self?.levelTimer?.invalidate()
-            self?.levelTimer = nil
+            guard let self else { return }
+            let wasRecording = self.isRecording
+            self.isRecording = false
+            self.timer?.invalidate()
+            self.timer = nil
+            self.levelTimer?.invalidate()
+            self.levelTimer = nil
+            if wasRecording {
+                self.recordingFailureMessage = "Recording stopped due to an audio error. The audio captured so far has been saved — you can upload it now."
+            }
         }
     }
 
