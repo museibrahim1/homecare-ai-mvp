@@ -25,6 +25,13 @@ alwaysApply: true
 - Contact page: email only (sales@palmtai.com), no phone number
 - Screenshots live in `apps/web/public/screenshots/` and `ios/` subfolder
 
+## App Store Screenshots & Demo Data (Jun 9, 2026)
+- **App Store set**: `marketing/app-store-screenshots/` — 19 captures of every screen at 6.9" size (1320×2868), iPhone 17 Pro Max sim, status bar 9:41. Use for App Store listing + onboarding brochure.
+- **Web set**: `apps/web/public/screenshots/ios/` replaced with rebranded PALM captures (old deleted, recording shots kept).
+- **Demo account (production)**: `demo-screenshots@palmtai.com` — "Sunrise Home Care" (FL), 5 realistic clients, 1 fully processed assessment (Eleanor Whitfield: transcript, 8 billables, SOAP notes, contract).
+- **Capture method**: `idb ui tap` (point coords, 440×956) — cliclick is unreliable near the Simulator window top. Auto-login via `SIMCTL_CHILD_AUTOMATION_LOGIN_EMAIL/PASSWORD` env vars (DEBUG builds).
+- **State readiness**: `scripts/test_all_states.py` validates all 51 jurisdictions structurally; `--llm` runs real contract analysis per state. Last run: 51/51 passed.
+
 ## Pending Tasks
 1. LinkedIn: Re-authorize with `openid profile w_member_social` scopes (Share on LinkedIn product now enabled)
 2. Facebook: Create Meta Developer App, get Page Access Token with `pages_manage_posts`
