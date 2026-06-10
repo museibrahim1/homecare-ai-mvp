@@ -17,7 +17,7 @@ from app.models.user import User, UserRole
 
 from .prompts import AGENT_MODEL, SYSTEM_PROMPT, ADMIN_ROLE_CONTEXT, USER_ROLE_CONTEXT
 from .tool_schemas import SHARED_TOOLS, ADMIN_TOOLS
-from .tools import _execute_tool, _GENERATED_FILES
+from .tools import _execute_tool, _GENERATED_FILES, _today_eastern
 
 logger = logging.getLogger(__name__)
 
