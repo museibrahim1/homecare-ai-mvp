@@ -40,63 +40,6 @@ struct WorkspaceView: View {
     }
 }
 
-// MARK: - Admin Workspace (all normal user views in one tab)
-
-struct AdminWorkspaceView: View {
-    @EnvironmentObject var api: APIService
-    @State private var selectedSection = 0
-
-    private let sections = ["Home", "Clients", "Palm It", "Calendar", "Documents", "Settings"]
-    private let sectionIcons = [
-        "house.fill", "person.2.fill", "mic.fill",
-        "calendar", "doc.text.fill", "gearshape.fill"
-    ]
-
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                sectionPicker
-                    .padding(.top, 8)
-
-                Group {
-                    switch selectedSection {
-                    case 0:
-                        HomeView(onNavigateToRecord: {
-                            withAnimation { selectedSection = 2 }
-                        })
-                    case 1:
-                        ClientsView()
-                    case 2:
-                        RecordView()
-                    case 3:
-                        CalendarView()
-                    case 4:
-                        ContractsView()
-                    case 5:
-                        SettingsView()
-                    default:
-                        HomeView(onNavigateToRecord: {
-                            withAnimation { selectedSection = 2 }
-                        })
-                    }
-                }
-                .environmentObject(api)
-            }
-            .background(Color.palmBackground)
-            .navigationTitle("Workspace")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-
-    private var sectionPicker: some View {
-        WorkspaceSectionPicker(
-            sections: sections,
-            sectionIcons: sectionIcons,
-            selectedSection: $selectedSection
-        )
-    }
-}
-
 // MARK: - Shared Section Picker
 
 struct WorkspaceSectionPicker: View {

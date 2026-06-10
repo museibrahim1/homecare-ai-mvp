@@ -6,8 +6,8 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var user: User?
-    @State private var subscription: SubscriptionResponse?
-    @State private var showSubscription = false
+    @State private var usage: UserSubscription?
+    @State private var loadFailed = false
     @State private var showLogoutConfirm = false
     @State private var showGoogleCalAuth = false
     @State private var showPasswordChange = false
@@ -17,9 +17,10 @@ struct SettingsView: View {
     @AppStorage("googleCalendarConnected") private var googleCalConnected = false
 
     @AppStorage("useFaceID") private var useFaceID = false
-    @AppStorage("notificationsEnabled") private var notificationsEnabled = true
     @AppStorage("backgroundRecording") private var backgroundRecording = false
     @AppStorage("isDarkMode") private var isDarkMode = false
+    @State private var faceIDError: String?
+    @State private var cacheCleared = false
 
     @StateObject private var emailConnector = EmailSenderConnector()
     @State private var emailSender: EmailSenderStatus?
@@ -29,6 +30,7 @@ struct SettingsView: View {
     var body: some View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
+                    if loadFailed { loadErrorBanner }
                     profileHeader
                     preferencesSection
                     accountSection
@@ -45,9 +47,6 @@ struct SettingsView: View {
             .background(Color.palmBackground)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showSubscription) {
-                SubscriptionView(showLimitBanner: false).environmentObject(api)
-            }
             .sheet(isPresented: $showGoogleCalAuth) {
                 GoogleCalendarSetupSheet(isConnected: $googleCalConnected)
                     .environmentObject(api)
@@ -66,6 +65,40 @@ struct SettingsView: View {
             }
             .task { await loadData() }
             .preferredColorScheme(isDarkMode ? .dark : .light)
+    }
+
+    // MARK: - Load Error
+
+    private var loadErrorBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.palmOrange)
+
+            Text("Couldn't load your profile")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.palmText)
+
+            Spacer()
+
+            Button {
+                Task { await loadData() }
+            } label: {
+                Text("Retry")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(Color.palmPrimary)
+                    .cornerRadius(12)
+            }
+            .accessibilityLabel("Retry loading profile")
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color.palmOrange.opacity(0.08))
+        .cornerRadius(14)
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmOrange.opacity(0.25), lineWidth: 1))
     }
 
     // MARK: - Profile Header
@@ -130,15 +163,6 @@ struct SettingsView: View {
     private var preferencesSection: some View {
         SettingsSection(title: "Preferences") {
             SettingsToggleRow(
-                icon: "bell.fill",
-                iconColor: .palmOrange,
-                title: "Notifications & sounds",
-                isOn: $notificationsEnabled
-            )
-
-            SettingsDivider()
-
-            SettingsToggleRow(
                 icon: "record.circle",
                 iconColor: .red,
                 title: "Background recording",
@@ -175,8 +199,9 @@ struct SettingsView: View {
                     get: { useFaceID },
                     set: { newValue in
                         if newValue {
-                            authenticateBiometric { success in
+                            authenticateBiometric { success, message in
                                 useFaceID = success
+                                if !success { faceIDError = message }
                             }
                         } else {
                             useFaceID = false
@@ -184,6 +209,14 @@ struct SettingsView: View {
                     }
                 )
             )
+            .alert("Face ID", isPresented: Binding(
+                get: { faceIDError != nil },
+                set: { if !$0 { faceIDError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(faceIDError ?? "")
+            }
 
             SettingsDivider()
 
@@ -198,49 +231,48 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Billing
+    // MARK: - Plan
+    // During the TestFlight beta everything is unlocked and free — pricing
+    // comes later from real usage data, so there is no billing UI to manage.
 
     private var billingSection: some View {
-        SettingsSection(title: "Subscription & Billing") {
-            Button { showSubscription = true } label: {
-                HStack(spacing: 12) {
-                    SettingsIcon(systemName: "creditcard.fill", color: .palmGreen)
+        SettingsSection(title: "Your Plan") {
+            HStack(spacing: 12) {
+                SettingsIcon(systemName: "sparkles", color: .palmGreen)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Billing plan")
-                            .font(.system(size: 11))
-                            .foregroundColor(.palmSecondary)
-                        Text(subscription?.plan?.name ?? "Free")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.palmText)
-                    }
-
-                    Spacer()
-
-                    Text("Manage")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.palmPrimary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 5)
-                        .background(Color.palmPrimary.opacity(0.1))
-                        .cornerRadius(12)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Beta access")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.palmText)
+                    Text("Everything unlocked — free during the beta")
+                        .font(.system(size: 11))
+                        .foregroundColor(.palmSecondary)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
+
+                Spacer()
+
+                Text("FREE")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundColor(.palmGreen)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.palmGreen.opacity(0.12))
+                    .cornerRadius(10)
             }
-            .accessibilityLabel("Manage billing plan")
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
 
-            SettingsDivider()
+            if let usage {
+                SettingsDivider()
 
-            if let sub = subscription {
                 HStack(spacing: 12) {
                     SettingsIcon(systemName: "chart.bar.fill", color: .palmBlue)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Usage this period")
+                        Text("Assessments completed")
                             .font(.system(size: 11))
                             .foregroundColor(.palmSecondary)
-                        Text("\(sub.subscription?.visits_this_month ?? 0) / \(sub.plan?.max_visits_per_month ?? 0) runs")
+                        Text("\(usage.total_assessments ?? 0)")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.palmText)
                     }
@@ -380,9 +412,18 @@ struct SettingsView: View {
 
             Button {
                 URLCache.shared.removeAllCachedResponses()
+                withAnimation { cacheCleared = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    withAnimation { cacheCleared = false }
+                }
             } label: {
-                SettingsNavRow(icon: "trash.fill", iconColor: .palmSecondary, title: "Clear cache")
+                SettingsNavRow(
+                    icon: cacheCleared ? "checkmark.circle.fill" : "trash.fill",
+                    iconColor: cacheCleared ? .palmGreen : .palmSecondary,
+                    title: cacheCleared ? "Cache cleared" : "Clear cache"
+                )
             }
+            .disabled(cacheCleared)
             .accessibilityLabel("Clear cache")
         }
     }
@@ -464,10 +505,15 @@ struct SettingsView: View {
     // MARK: - Actions
 
     private func loadData() async {
-        async let fetchedUser = try api.fetchUser()
-        async let fetchedSub = try api.fetchSubscription()
-        user = try? await fetchedUser
-        subscription = try? await fetchedSub
+        loadFailed = false
+        do {
+            user = try await api.fetchUser()
+        } catch {
+            // Without the profile the header is stuck on "Loading..." — give
+            // the user a retry instead of a silent dead screen.
+            loadFailed = true
+        }
+        usage = try? await api.fetchUsage()
         emailSender = try? await api.emailSenderStatus()
         // Sync the cached calendar flag with the server so the row doesn't
         // keep saying "Connected" after a server-side disconnect/expiry.
@@ -498,15 +544,23 @@ struct SettingsView: View {
         }
     }
 
-    private func authenticateBiometric(completion: @escaping (Bool) -> Void) {
+    private func authenticateBiometric(completion: @escaping (Bool, String?) -> Void) {
         let context = LAContext()
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            completion(false)
+            completion(false, "Face ID isn't available on this device. Make sure it's set up in the iPhone Settings app.")
             return
         }
-        context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "Enable Face ID for quick login") { success, _ in
-            DispatchQueue.main.async { completion(success) }
+        context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "Enable Face ID for quick login") { success, evalError in
+            DispatchQueue.main.async {
+                if success {
+                    completion(true, nil)
+                } else if let laError = evalError as? LAError, laError.code == .userCancel {
+                    completion(false, nil)
+                } else {
+                    completion(false, "Face ID verification didn't complete. Please try again.")
+                }
+            }
         }
     }
 }

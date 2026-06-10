@@ -52,6 +52,16 @@ from app.models.subscription import Subscription, Plan
 
 def get_team_limits(db: Session, company_name: str):
     """Get team limits based on subscription plan."""
+    # Beta: no team-size caps while we collect usage data for pricing.
+    if settings.beta_free_access:
+        return {
+            "max_users": 999,
+            "plan_name": "Beta",
+            "plan_tier": "beta",
+            "monthly_price": 0,
+            "upgrade_options": [],
+        }
+
     # Find business by company name
     business = db.query(Business).filter(Business.name == company_name).first()
     

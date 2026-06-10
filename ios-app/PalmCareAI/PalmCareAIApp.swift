@@ -72,6 +72,20 @@ struct PalmCareAIApp: App {
                 if !newValue { isBiometricUnlocked = false }
                 registerInteraction()
             }
+            #if DEBUG
+            // Simulator automation: log in from launch environment so UI smoke
+            // tests don't depend on flaky synthetic keyboard input.
+            .task {
+                let env = ProcessInfo.processInfo.environment
+                guard !api.isAuthenticated,
+                      let email = env["AUTOMATION_LOGIN_EMAIL"],
+                      let password = env["AUTOMATION_LOGIN_PASSWORD"] else { return }
+                if let response = try? await api.login(email: email, password: password),
+                   let token = response.access_token, !token.isEmpty {
+                    await MainActor.run { api.token = token }
+                }
+            }
+            #endif
             .onChange(of: scenePhase) { newPhase in
                 guard api.isAuthenticated else {
                     enteredBackgroundAt = nil

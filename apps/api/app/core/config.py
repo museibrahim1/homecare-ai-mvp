@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     # Application
     debug: bool = False
     log_level: str = "INFO"
+
+    # TestFlight/beta: every account gets full access with no assessment or
+    # team-size limits. Pricing/limits will be set from real usage data after
+    # the beta. Flip BETA_FREE_ACCESS=false when billing goes live.
+    beta_free_access: bool = True
     
     # Google Calendar
     google_client_id: str = ""

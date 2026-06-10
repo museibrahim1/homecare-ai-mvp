@@ -23,6 +23,7 @@ struct ContractsView: View {
     @State private var previewURL: URL?
     @State private var downloadingId: String?
     @State private var errorMessage: String?
+    @State private var loadFailed = false
     @State private var expandedClients: Set<String> = []
     // OCR template upload is handled on the backend
 
@@ -98,6 +99,8 @@ struct ContractsView: View {
                             .foregroundColor(.palmSecondary)
                         Spacer()
                     }
+                } else if loadFailed && documents.isEmpty {
+                    loadFailedState
                 } else if clientGroups.isEmpty {
                     emptyState
                 } else {
@@ -187,9 +190,12 @@ struct ContractsView: View {
             .padding(.top, 6)
             .padding(.bottom, 120)
         }
+        .refreshable { await loadDocuments() }
     }
 
-    // MARK: - Empty State
+    // MARK: - Empty / Error States
+
+    private var isFiltering: Bool { !searchText.isEmpty || selectedFilter != "All" }
 
     private var emptyState: some View {
         VStack(spacing: 14) {
@@ -197,14 +203,56 @@ struct ContractsView: View {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 44))
                 .foregroundColor(.palmSecondary.opacity(0.4))
-            Text("No Documents Found")
+            Text(isFiltering ? "No Matching Documents" : "No Documents Yet")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.palmText)
-            Text("Contracts and documents from completed assessments will appear here.")
+            Text(isFiltering
+                 ? "Try a different search or filter."
+                 : "Contracts and documents from completed assessments will appear here.")
                 .font(.system(size: 13))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
+            if isFiltering {
+                Button {
+                    withAnimation { searchText = ""; selectedFilter = "All" }
+                } label: {
+                    Text("Clear filters")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.palmPrimary)
+                }
+                .accessibilityLabel("Clear search and filters")
+            }
+            Spacer()
+        }
+    }
+
+    private var loadFailedState: some View {
+        VStack(spacing: 14) {
+            Spacer()
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 44))
+                .foregroundColor(.palmOrange.opacity(0.7))
+            Text("Couldn't Load Documents")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.palmText)
+            Text("Check your connection and try again.")
+                .font(.system(size: 13))
+                .foregroundColor(.palmSecondary)
+            Button {
+                isLoading = true
+                Task { await loadDocuments() }
+            } label: {
+                Text("Retry")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 9)
+                    .background(Color.palmPrimary)
+                    .cornerRadius(12)
+            }
+            .accessibilityLabel("Retry loading documents")
+            .padding(.top, 4)
             Spacer()
         }
     }
@@ -226,11 +274,13 @@ struct ContractsView: View {
             let response = try await api.fetchDocuments()
             await MainActor.run {
                 documents = response.documents
+                loadFailed = false
                 isLoading = false
             }
         } catch {
             await MainActor.run {
-                errorMessage = "Failed to load documents"
+                loadFailed = true
+                errorMessage = documents.isEmpty ? nil : "Failed to refresh documents"
                 isLoading = false
             }
         }

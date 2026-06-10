@@ -121,9 +121,10 @@ struct ContractStylesView: View {
             Text("Choose a style for your contract")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.palmText)
-            Text("Same data, different look. Switch styles anytime.")
+            Text("Changes how the agreement looks in the app. Downloaded PDF and DOCX files use the standard format.")
                 .font(.system(size: 12))
                 .foregroundColor(.palmSecondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 18)
         .padding(.top, 8)

@@ -21,7 +21,6 @@ struct RecordView: View {
     @State private var errorMessage: String?
     @State private var showError = false
     @State private var isProcessing = false
-    @State private var showUpgrade = false
     @State private var showFilePicker = false
     @State private var uploadProgress: String?
     @AppStorage("backgroundRecording") private var backgroundRecording = false
@@ -165,10 +164,6 @@ struct RecordView: View {
                 }
             )
             .palmErrorAlert(message: $errorMessage, isPresented: $showError)
-            .sheet(isPresented: $showUpgrade) {
-                SubscriptionView()
-                    .environmentObject(api)
-            }
             .sheet(isPresented: $showFilePicker) {
                 AudioFilePicker { url in
                     handlePickedAudioFile(url)
@@ -490,16 +485,7 @@ struct RecordView: View {
                 return
             }
 
-            do {
-                let usage = try await api.fetchUsage()
-                if usage.isAtLimit {
-                    await MainActor.run { showUpgrade = true }
-                    return
-                }
-            } catch {
-                // If usage check fails, allow recording anyway
-            }
-
+            // Beta: no usage limits, so no pre-flight quota check.
             await MainActor.run {
                 liveTranscription?.segments = []
                 liveSegments = []
@@ -567,13 +553,8 @@ struct RecordView: View {
                     withAnimation { isProcessing = false }
                     uploadProgress = nil
                     pipelineSteps = []
-                    let msg = error.localizedDescription.lowercased()
-                    if msg.contains("limit") || msg.contains("plan") || msg.contains("upgrade") || msg.contains("quota") || msg.contains("exceeded") {
-                        showUpgrade = true
-                    } else {
-                        errorMessage = error.localizedDescription
-                        showError = true
-                    }
+                    errorMessage = error.localizedDescription
+                    showError = true
                 }
             }
         }
@@ -689,17 +670,6 @@ struct RecordView: View {
 
         Task {
             do {
-                let usage = try? await api.fetchUsage()
-                if usage?.isAtLimit == true {
-                    await MainActor.run {
-                        withAnimation { isProcessing = false }
-                        uploadProgress = nil
-                        pipelineSteps = []
-                        showUpgrade = true
-                    }
-                    return
-                }
-
                 let accessing = url.startAccessingSecurityScopedResource()
                 defer { if accessing { url.stopAccessingSecurityScopedResource() } }
 
@@ -719,13 +689,8 @@ struct RecordView: View {
                     withAnimation { isProcessing = false }
                     uploadProgress = nil
                     pipelineSteps = []
-                    let msg = error.localizedDescription.lowercased()
-                    if msg.contains("limit") || msg.contains("plan") || msg.contains("upgrade") || msg.contains("quota") || msg.contains("exceeded") {
-                        showUpgrade = true
-                    } else {
-                        errorMessage = error.localizedDescription
-                        showError = true
-                    }
+                    errorMessage = error.localizedDescription
+                    showError = true
                 }
             }
         }

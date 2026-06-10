@@ -47,17 +47,22 @@ struct VisitDetailView: View {
                     .disabled(contract == nil)
                     .accessibilityLabel("Email service agreement")
                     Divider()
+                    // Each export is gated on its data existing, otherwise the
+                    // server 404s and the user just sees a confusing failure.
                     Button { Task { await exportFile(type: "note.pdf") } } label: {
                         Label("Export Notes (PDF)", systemImage: "doc.text")
                     }
+                    .disabled(note == nil)
                     .accessibilityLabel("Export notes as PDF")
                     Button { Task { await exportFile(type: "contract.pdf") } } label: {
                         Label("Export Contract (PDF)", systemImage: "doc.fill")
                     }
+                    .disabled(contract == nil)
                     .accessibilityLabel("Export contract as PDF")
                     Button { Task { await exportFile(type: "timesheet.csv") } } label: {
                         Label("Export Timesheet (CSV)", systemImage: "tablecells")
                     }
+                    .disabled(visit == nil)
                     .accessibilityLabel("Export timesheet as CSV")
                     Divider()
                     Button(role: .destructive) { Task { await restartAssessment() } } label: {

@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.config import settings
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
@@ -28,6 +29,10 @@ FREE_ASSESSMENT_LIMIT = 50
 
 def _get_user_subscription(db: Session, user: User):
     """Check if user has an active paid subscription."""
+    # Beta: everyone has full access while we collect usage data for pricing.
+    if settings.beta_free_access:
+        return {"has_paid_plan": True, "plan_name": "Beta", "tier": "beta"}
+
     # Platform admins are unlimited
     role = user.role.value if hasattr(user.role, 'value') else (user.role or "user")
     if role == "admin" and hasattr(user, 'email') and user.email.endswith("@palmtai.com"):

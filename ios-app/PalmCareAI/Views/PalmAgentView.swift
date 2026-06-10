@@ -197,6 +197,8 @@ struct PalmAgentSheet: View {
     @StateObject private var vm = PalmAgentViewModel()
     @Binding var isPresented: Bool
     let isAdmin: Bool
+    @State private var downloadingFile: String?
+    @State private var downloadError: String?
 
     private var suggestions: [String] {
         isAdmin
@@ -232,7 +234,46 @@ struct PalmAgentSheet: View {
                     }
                 }
             }
+            .alert("Download Failed", isPresented: Binding(
+                get: { downloadError != nil },
+                set: { if !$0 { downloadError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(downloadError ?? "")
+            }
         }
+    }
+
+    private func downloadAndShare(_ file: AgentFile) async {
+        downloadingFile = file.filename
+        defer { downloadingFile = nil }
+        do {
+            let localURL = try await api.downloadFile(path: file.url, suggestedFilename: file.filename)
+            await MainActor.run { presentShareSheet(for: localURL) }
+        } catch {
+            await MainActor.run { downloadError = error.localizedDescription }
+        }
+    }
+
+    private func presentShareSheet(for url: URL) {
+        let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first(where: { $0.isKeyWindow }) ?? windowScene.windows.first,
+              let rootVC = window.rootViewController else { return }
+
+        // iPad requires a popover anchor or the share sheet crashes.
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = window
+            popover.sourceRect = CGRect(x: window.bounds.midX, y: window.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+
+        var topVC: UIViewController = rootVC
+        while let presented = topVC.presentedViewController {
+            topVC = presented
+        }
+        topVC.present(activityVC, animated: true)
     }
 
     private var messagesArea: some View {
@@ -328,22 +369,32 @@ struct PalmAgentSheet: View {
                     .cornerRadius(16)
 
                 ForEach(msg.files, id: \.filename) { file in
-                    HStack(spacing: 8) {
-                        Image(systemName: "doc.fill")
-                            .foregroundColor(.palmPrimary)
-                        Text(file.filename)
-                            .font(.caption)
-                            .foregroundColor(.palmPrimary)
-                            .lineLimit(1)
-                        Spacer()
-                        Image(systemName: "arrow.down.circle.fill")
-                            .foregroundColor(.palmPrimary)
+                    Button {
+                        Task { await downloadAndShare(file) }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "doc.fill")
+                                .foregroundColor(.palmPrimary)
+                            Text(file.filename)
+                                .font(.caption)
+                                .foregroundColor(.palmPrimary)
+                                .lineLimit(1)
+                            Spacer()
+                            if downloadingFile == file.filename {
+                                ProgressView().scaleEffect(0.7)
+                            } else {
+                                Image(systemName: "arrow.down.circle.fill")
+                                    .foregroundColor(.palmPrimary)
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.palmPrimary.opacity(0.08))
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmPrimary.opacity(0.2), lineWidth: 1))
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.palmPrimary.opacity(0.08))
-                    .cornerRadius(12)
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.palmPrimary.opacity(0.2), lineWidth: 1))
+                    .disabled(downloadingFile != nil)
+                    .accessibilityLabel("Download \(file.filename)")
                 }
             }
 

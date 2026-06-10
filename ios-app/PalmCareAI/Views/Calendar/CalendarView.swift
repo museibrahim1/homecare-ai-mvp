@@ -42,13 +42,14 @@ struct CalendarView: View {
             eventsList
         }
         .background(Color.palmBackground)
-        .task {
-            if googleCalConnected {
-                do {
-                    apiEvents = try await api.fetchCalendarEvents()
-                } catch {
-                    syncError = "Calendar sync failed"
-                }
+        .task { await refreshEvents() }
+        // Refetch when Google Calendar is connected in Settings, so the user
+        // doesn't come back to a stale calendar until the tab is reset.
+        .onChange(of: googleCalConnected) { connected in
+            if connected {
+                Task { await refreshEvents() }
+            } else {
+                apiEvents = []
             }
         }
         .overlay(alignment: .bottomTrailing) {
@@ -86,7 +87,9 @@ struct CalendarView: View {
                             let apiEvent = try await api.createCalendarEvent(body: body)
                             await MainActor.run { apiEvents.append(apiEvent) }
                         } catch {
-                            // API sync failed; event saved locally
+                            // The event is saved locally either way — tell the
+                            // user the Google sync didn't go through.
+                            await MainActor.run { syncError = "Saved on this device, but Google Calendar sync failed" }
                         }
                     }
                 }
@@ -262,13 +265,7 @@ struct CalendarView: View {
                     Spacer()
                     Button {
                         self.syncError = nil
-                        Task {
-                            do {
-                                apiEvents = try await api.fetchCalendarEvents()
-                            } catch {
-                                self.syncError = "Calendar sync failed"
-                            }
-                        }
+                        Task { await refreshEvents() }
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "arrow.clockwise")
@@ -355,11 +352,22 @@ struct CalendarView: View {
                     .padding(.horizontal, 18)
                     .padding(.bottom, 120)
                 }
+                .refreshable { await refreshEvents() }
             }
         }
     }
 
     // MARK: - Helpers
+
+    private func refreshEvents() async {
+        guard googleCalConnected else { return }
+        do {
+            apiEvents = try await api.fetchCalendarEvents()
+            syncError = nil
+        } catch {
+            syncError = "Calendar sync failed"
+        }
+    }
 
     private func shiftMonth(_ delta: Int) {
         if let m = cal.date(byAdding: .month, value: delta, to: displayedMonth) {
