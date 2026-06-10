@@ -150,16 +150,16 @@ export function HeroOrb() {
   }, []);
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center relative px-6 pt-24 pb-8 overflow-hidden" style={{ background: '#000' }}>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(13,148,136,0.06) 0%, transparent 70%)' }} />
+    <section className="min-h-[100svh] flex flex-col items-center justify-center relative px-4 sm:px-6 pt-24 pb-10 overflow-hidden" style={{ background: '#000' }}>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(500px,100vw)] h-[min(500px,100vw)] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(13,148,136,0.06) 0%, transparent 70%)' }} />
 
-      <div className="text-center mb-8 relative z-10 animate-fade-in-up">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+      <div className="text-center mb-6 sm:mb-8 relative z-10 animate-fade-in-up">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
           Record It. Transcribe It.
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-cyan">Contract It.</span>
         </h1>
-        <p className="text-lg md:text-xl text-white/50 mt-4 max-w-xl mx-auto">
+        <p className="text-base sm:text-lg md:text-xl text-white/50 mt-3 sm:mt-4 max-w-xl mx-auto">
           Watch a live assessment become a signed contract — automatically.
         </p>
       </div>
@@ -170,7 +170,8 @@ export function HeroOrb() {
           style={{
             width: 320,
             height: 320,
-            maxWidth: '80vw',
+            maxWidth: '70vw',
+            maxHeight: '70vw',
             filter: isRecording
               ? 'drop-shadow(0 0 40px rgba(13,148,136,0.5)) drop-shadow(0 0 80px rgba(8,145,178,0.2))'
               : 'drop-shadow(0 0 20px rgba(13,148,136,0.25))',
@@ -209,7 +210,7 @@ export function HeroOrb() {
       </div>
 
       <div className="w-full max-w-lg relative z-10">
-        <div className="max-h-[200px] overflow-y-auto scrollbar-hide px-2" ref={transcriptRef}>
+        <div className="max-h-[160px] sm:max-h-[200px] overflow-y-auto scrollbar-hide px-2" ref={transcriptRef}>
           {visibleSegments === 0 && isRecording && (
             <div className="flex items-center gap-2 text-white/30 text-sm justify-center">
               <div className="flex gap-1">
@@ -251,16 +252,16 @@ export function HeroOrb() {
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-4 mt-8 relative z-10">
-        <Link href="/register" data-track="hero-cta-trial" className="btn-primary flex items-center gap-2 py-4 px-8 text-lg">
-          Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-3 sm:gap-4 mt-8 relative z-10 w-full max-w-md sm:max-w-none sm:w-auto">
+        <Link href="/register" data-track="hero-cta-trial" className="btn-primary flex items-center justify-center gap-2 py-4 px-6 sm:px-8 text-base sm:text-lg">
+          Start Your 14-Day Free Trial <ArrowRight className="w-5 h-5 shrink-0" />
         </Link>
-        <a href="#features" data-track="hero-cta-features" className="flex items-center gap-2 py-4 px-8 text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
-          See How It Works <ChevronDown className="w-5 h-5" />
+        <a href="#features" data-track="hero-cta-features" className="flex items-center justify-center gap-2 py-4 px-6 sm:px-8 text-base sm:text-lg rounded-lg text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition">
+          See How It Works <ChevronDown className="w-5 h-5 shrink-0" />
         </a>
       </div>
 
-      <div className="flex items-center flex-wrap gap-4 mt-6 relative z-10">
+      <div className="flex items-center justify-center flex-wrap gap-3 sm:gap-4 mt-6 relative z-10">
         <div className="flex items-center gap-2 px-3 py-1.5 border border-green-500/20 rounded-full">
           <Shield className="w-3.5 h-3.5 text-green-500" />
           <span className="text-xs text-green-500/80 font-medium">HIPAA Compliant</span>
