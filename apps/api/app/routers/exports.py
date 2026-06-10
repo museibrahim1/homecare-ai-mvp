@@ -27,6 +27,7 @@ from app.services.document_generation import (
     fill_docx_template,
 )
 from app.services.email import get_email_service
+from app.services import email_sender
 
 logger = logging.getLogger(__name__)
 
@@ -408,13 +409,18 @@ async def email_contract(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail="No contract found. Please generate a contract first by running the assessment pipeline."
         )
-    
+
+    # Agreements must be sent from the agency's own connected mailbox so they
+    # come from a real, trusted business address (and land in their Sent folder).
+    if not current_user.email_sender_connected:
+        raise HTTPException(
+            status_code=status.HTTP_428_PRECONDITION_REQUIRED,
+            detail="Connect your business email before sending agreements.",
+        )
+
     # Generate PDF
     pdf_bytes = generate_contract_pdf(client, contract)
-    
-    # Prepare email
-    email_service = get_email_service()
-    
+
     client_name = client.full_name
     recipient_name = email_request.recipient_name or client_name
     
@@ -451,35 +457,27 @@ async def email_contract(
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #999; font-size: 12px;">
-            This email was sent from PalmCare AI on behalf of your care provider.
+            Sent by {current_user.full_name}{(' · ' + current_user.company_name) if current_user.company_name else ''}.
         </p>
     </div>
     """
-    
-    attachments = [{
-        "filename": f"Service_Agreement_{client_name.replace(' ', '_')}.pdf",
-        "content": base64.b64encode(pdf_bytes).decode('utf-8'),
-    }]
-    
-    recipients = [email_request.recipient_email]
-    if email_request.cc_email:
-        recipients.append(email_request.cc_email)
-    
-    result = email_service.send_email(
-        to=recipients,
+
+    attachment_filename = f"Service_Agreement_{client_name.replace(' ', '_')}.pdf"
+
+    # Send from the agency's own connected mailbox (Gmail). The agreement comes
+    # from their real business address and lands in their Sent folder.
+    await email_sender.send_via_gmail(
+        current_user,
+        db,
+        to=email_request.recipient_email,
         subject=subject,
         html=html,
-        attachments=attachments,
-        reply_to=current_user.email,
-        sender=email_service.from_sales,
+        cc=email_request.cc_email,
+        attachment_bytes=pdf_bytes,
+        attachment_filename=attachment_filename,
+        sender_name=current_user.company_name or current_user.full_name,
     )
-    
-    if not result.get("success"):
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send email. Please try again later."
-        )
-    
+
     # Auto-move client to "proposal" status when contract/proposal is emailed
     try:
         if client.status not in ('proposal', 'active', 'assigned'):
@@ -487,11 +485,12 @@ async def email_contract(
             db.commit()
     except Exception:
         pass  # Don't fail the email send over a status update
-    
+
     return {
         "success": True,
-        "message": f"Contract sent to {email_request.recipient_email}",
+        "message": f"Agreement sent to {email_request.recipient_email}",
         "recipient": email_request.recipient_email,
+        "sender": current_user.email_sender_address or current_user.email,
         "client_status_updated": client.status == 'proposal',
     }
 

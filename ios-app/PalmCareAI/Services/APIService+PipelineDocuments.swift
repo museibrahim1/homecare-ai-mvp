@@ -113,4 +113,34 @@ extension APIService {
 
     // MARK: - Contract Templates
 
+    // MARK: - Email Contract
+
+    /// Email the generated service agreement (PDF) to a recipient. The backend
+    /// renders the contract PDF, attaches it, and sends via the agency's sender
+    /// with reply-to set to the current user.
+    @discardableResult
+    func emailContract(
+        visitId: String,
+        recipientEmail: String,
+        recipientName: String? = nil,
+        ccEmail: String? = nil,
+        subject: String? = nil,
+        message: String? = nil
+    ) async throws -> String {
+        var body: [String: Any] = ["recipient_email": recipientEmail]
+        if let n = recipientName?.trimmingCharacters(in: .whitespaces), !n.isEmpty { body["recipient_name"] = n }
+        if let cc = ccEmail?.trimmingCharacters(in: .whitespaces), !cc.isEmpty { body["cc_email"] = cc }
+        if let s = subject?.trimmingCharacters(in: .whitespaces), !s.isEmpty { body["subject"] = s }
+        if let m = message?.trimmingCharacters(in: .whitespaces), !m.isEmpty { body["message"] = m }
+        let resp: EmailContractResponse = try await request(
+            "POST", path: "/exports/visits/\(visitId)/email-contract", body: body
+        )
+        return resp.message ?? "Agreement sent."
+    }
+}
+
+struct EmailContractResponse: Decodable {
+    let success: Bool
+    let message: String?
+    let recipient: String?
 }

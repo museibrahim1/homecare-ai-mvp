@@ -32,6 +32,18 @@ class User(Base, TimestampMixin):
     _google_calendar_access_token = Column("google_calendar_access_token", Text, nullable=True)
     _google_calendar_refresh_token = Column("google_calendar_refresh_token", Text, nullable=True)
     google_calendar_token_expiry = Column(DateTime(timezone=True), nullable=True)
+
+    # "Send from my business email" — the caregiver/agency connects their own
+    # mailbox (Google Workspace / Gmail, gmail.send scope) so agreements are
+    # sent from their address and land in their Sent folder. Tokens encrypted
+    # at rest; kept separate from the calendar/inbox integration above so this
+    # narrow-scope connection never disturbs the broader Google integration.
+    email_sender_connected = Column(Boolean, default=False, nullable=False, server_default="false")
+    email_sender_provider = Column(String(20), nullable=True)  # 'google'
+    email_sender_address = Column(String(255), nullable=True)
+    _email_sender_access_token = Column("email_sender_access_token", Text, nullable=True)
+    _email_sender_refresh_token = Column("email_sender_refresh_token", Text, nullable=True)
+    email_sender_token_expiry = Column(DateTime(timezone=True), nullable=True)
     
     # Force logout: tokens issued before this timestamp are rejected
     force_logout_at = Column(DateTime(timezone=True), nullable=True)
@@ -90,6 +102,22 @@ class User(Base, TimestampMixin):
     @google_calendar_refresh_token.setter
     def google_calendar_refresh_token(self, value):
         self._google_calendar_refresh_token = encrypt_field(value) if value else None
+
+    @property
+    def email_sender_access_token(self):
+        return decrypt_field(self._email_sender_access_token)
+
+    @email_sender_access_token.setter
+    def email_sender_access_token(self, value):
+        self._email_sender_access_token = encrypt_field(value) if value else None
+
+    @property
+    def email_sender_refresh_token(self):
+        return decrypt_field(self._email_sender_refresh_token)
+
+    @email_sender_refresh_token.setter
+    def email_sender_refresh_token(self, value):
+        self._email_sender_refresh_token = encrypt_field(value) if value else None
 
     # Relationships
     visits_as_caregiver = relationship("Visit", back_populates="caregiver", foreign_keys="Visit.caregiver_id")

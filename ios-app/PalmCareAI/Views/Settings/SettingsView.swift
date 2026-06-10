@@ -21,6 +21,11 @@ struct SettingsView: View {
     @AppStorage("backgroundRecording") private var backgroundRecording = false
     @AppStorage("isDarkMode") private var isDarkMode = false
 
+    @StateObject private var emailConnector = EmailSenderConnector()
+    @State private var emailSender: EmailSenderStatus?
+    @State private var showDisconnectEmail = false
+    @State private var emailSenderError: String?
+
     var body: some View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
@@ -288,7 +293,70 @@ struct SettingsView: View {
                 .padding(.vertical, 12)
             }
             .accessibilityLabel(googleCalConnected ? "Manage Google Calendar" : "Connect Google Calendar")
+
+            SettingsDivider()
+
+            businessEmailRow
         }
+    }
+
+    private var emailConnected: Bool { emailSender?.connected == true }
+
+    private var businessEmailRow: some View {
+        Button {
+            if emailConnected {
+                showDisconnectEmail = true
+            } else {
+                Task { await connectBusinessEmail() }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "paperplane.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.palmPrimary)
+                    .frame(width: 32, height: 32)
+                    .background(Color.palmPrimary.opacity(0.1))
+                    .cornerRadius(8)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Send-from email")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.palmText)
+                    Text(emailConnected ? (emailSender?.address ?? "Connected") : "Send agreements from your business email")
+                        .font(.system(size: 11))
+                        .foregroundColor(emailConnected ? .palmGreen : .palmSecondary)
+                        .lineLimit(1)
+                }
+
+                Spacer()
+
+                if emailConnector.isConnecting {
+                    ProgressView().scaleEffect(0.8)
+                } else {
+                    Text(emailConnected ? "Disconnect" : "Connect")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(emailConnected ? .red : .white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(emailConnected ? Color.red.opacity(0.1) : Color.palmPrimary)
+                        .cornerRadius(12)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+        }
+        .disabled(emailConnector.isConnecting)
+        .accessibilityLabel(emailConnected ? "Disconnect business email" : "Connect business email")
+        .palmConfirmAlert(
+            "Disconnect Email",
+            message: "Stop sending agreements from \(emailSender?.address ?? "your business email")? You can reconnect anytime.",
+            icon: "paperplane.fill",
+            iconColor: .red,
+            isPresented: $showDisconnectEmail,
+            confirmTitle: "Disconnect",
+            confirmStyle: .destructive,
+            onConfirm: { Task { await disconnectBusinessEmail() } }
+        )
     }
 
     // MARK: - Legal
@@ -392,6 +460,29 @@ struct SettingsView: View {
         async let fetchedSub = try api.fetchSubscription()
         user = try? await fetchedUser
         subscription = try? await fetchedSub
+        emailSender = try? await api.emailSenderStatus()
+    }
+
+    private func connectBusinessEmail() async {
+        emailSenderError = nil
+        do {
+            let status = try await emailConnector.connect(api: api)
+            await MainActor.run { emailSender = status }
+        } catch let e as EmailSenderConnector.ConnectError {
+            if case .cancelled = e { return }
+            await MainActor.run { emailSenderError = e.localizedDescription }
+        } catch {
+            await MainActor.run { emailSenderError = error.localizedDescription }
+        }
+    }
+
+    private func disconnectBusinessEmail() async {
+        do {
+            try await api.disconnectEmailSender()
+            await MainActor.run { emailSender = EmailSenderStatus(connected: false, address: nil, provider: nil) }
+        } catch {
+            await MainActor.run { emailSenderError = error.localizedDescription }
+        }
     }
 
     private func authenticateBiometric(completion: @escaping (Bool) -> Void) {

@@ -88,6 +88,7 @@ from app.routers import (
     calendar,
     drive,
     gmail,
+    email_sender,
     documents,
     demos,
     status,
@@ -227,6 +228,7 @@ app.include_router(apple_iap.router, prefix="/billing/apple", tags=["Apple IAP"]
 app.include_router(calendar.router, prefix="/calendar", tags=["Google Calendar"])
 app.include_router(drive.router, prefix="/drive", tags=["Google Drive"])
 app.include_router(gmail.router, prefix="/gmail", tags=["Gmail"])
+app.include_router(email_sender.router, prefix="/email-sender", tags=["Send From My Email"])
 app.include_router(documents.router, prefix="/documents", tags=["Documents"])
 app.include_router(demos.router, prefix="/demos", tags=["Demo Booking"])
 app.include_router(status.router, prefix="/status", tags=["Status Page"])

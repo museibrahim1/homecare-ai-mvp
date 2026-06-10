@@ -84,6 +84,10 @@ extension VisitDetailView {
                 }
 
                 Menu {
+                    Button { showEmailSheet = true } label: {
+                        Label("Email Agreement", systemImage: "paperplane.fill")
+                    }
+                    Divider()
                     Button { Task { await exportFile(type: "contract.pdf") } } label: {
                         Label("Download PDF", systemImage: "arrow.down.doc.fill")
                     }
@@ -441,6 +445,26 @@ extension VisitDetailView {
                             .foregroundColor(.palmSecondary)
                             .lineLimit(4)
                     }
+
+                    Button { showEmailSheet = true } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "paperplane.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                            Text("Email Full Agreement")
+                                .font(.system(size: 15, weight: .bold))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(
+                            LinearGradient(colors: currentStyle.previewColors,
+                                           startPoint: .leading, endPoint: .trailing)
+                        )
+                        .cornerRadius(isClassic ? 4 : 12)
+                        .shadow(color: accent.opacity(0.3), radius: 6, y: 3)
+                    }
+                    .padding(.top, 4)
+                    .accessibilityLabel("Email the full service agreement")
                 }
                 .padding(14)
                 .background(isMinimal ? Color.clear : Color(UIColor.secondarySystemGroupedBackground))

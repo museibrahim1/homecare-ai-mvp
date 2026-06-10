@@ -21,6 +21,7 @@ struct VisitDetailView: View {
     @State var showFullContract = false
     @State var selectedContractStyle = "modern"
     @State var showStylePicker = false
+    @State var showEmailSheet = false
     #if DEBUG
     @State var didRunAutomationTabCycle = false
     #endif
@@ -38,6 +39,11 @@ struct VisitDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
+                    Button { showEmailSheet = true } label: {
+                        Label("Email Agreement", systemImage: "paperplane.fill")
+                    }
+                    .accessibilityLabel("Email service agreement")
+                    Divider()
                     Button { Task { await exportFile(type: "note.pdf") } } label: {
                         Label("Export Notes (PDF)", systemImage: "doc.text")
                     }
@@ -62,6 +68,10 @@ struct VisitDetailView: View {
                 }
                 .accessibilityLabel("Assessment actions")
             }
+        }
+        .sheet(isPresented: $showEmailSheet) {
+            EmailContractSheet(visitId: visitId, clientName: clientName, contractTitle: contract?.title)
+                .environmentObject(api)
         }
         .task {
             if initialTab != 0 { activeTab = initialTab }
