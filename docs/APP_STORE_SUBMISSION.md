@@ -15,7 +15,67 @@ This document captures App Store Connect setup and reviewer notes for the
 - **Avoid** Medical category for v1.0 beta — triggers extra HIPAA intake.
 - **Age rating:** 17+ (Unrestricted Web Access; Medical/Treatment Information)
 
-### 1b. Demo account for Apple review
+### 1b. App Store listing copy (copy/paste into App Store Connect)
+
+**Name** (30 chars max):
+
+> PALM
+
+**Subtitle** (30 chars max):
+
+> Record. Transcribe. Contract.
+
+**Promotional text** (170 chars max, can change without review):
+
+> Turn a recorded care assessment into a transcript, billables, clinical notes, and a state-compliant service agreement — in minutes, not days.
+
+**Description** (4000 chars max):
+
+> PALM is the fastest way for home care agencies to go from a client conversation to a signed service agreement.
+>
+> Record a care assessment on your phone. PALM transcribes the visit, identifies who said what, extracts billable services, writes the clinical note, and drafts a service agreement that follows your state's home care rules — all before you're back in the car.
+>
+> BUILT FOR HOME CARE
+> • Designed for licensed U.S. home care and home health agencies
+> • Service agreements aligned with regulations in all 50 states + DC
+> • Care levels, schedules, and rates pulled straight from the conversation
+>
+> RECORD ONCE, GET EVERYTHING
+> • Live transcription with speaker identification while you record
+> • Billable services extracted automatically with units and rates
+> • Structured clinical notes generated from the visit
+> • A complete, professional service agreement ready to review and send
+>
+> RUN YOUR DAY FROM YOUR PHONE
+> • Client profiles with care levels, contacts, and visit history
+> • Calendar with Google Calendar sync
+> • Send agreements by email — from your own business address
+> • Documents, reports, and exports when you need them
+>
+> ENTERPRISE-GRADE SECURITY
+> • Face ID lock, encrypted storage, and TLS everywhere
+> • Role-based access and full audit logging
+> • Your data is never sold or used for advertising
+>
+> SUPPORT THAT ANSWERS
+> • Submit a request right from Settings → Support and track it in the app
+>
+> PALM is free during the beta — every feature unlocked, no subscription required. Pricing will be announced before any paid plans take effect.
+>
+> PALM is built for professional agencies. It does not provide medical advice, diagnosis, or treatment.
+
+**Keywords** (100 chars max):
+
+> home care,homecare,caregiver,care agency,transcription,service agreement,contract,billing,visit,EVV
+
+**Support URL:** https://palmcareai.com/contact
+**Marketing URL:** https://palmcareai.com
+
+**What's New (v1.0):**
+
+> Welcome to the first public beta of PALM — record a care assessment and get the transcript, billables, clinical note, and service agreement automatically. All features are free during the beta.
+
+### 1c. Demo account for Apple review
 
 | Field | Value |
 | ----- | ----- |
@@ -41,13 +101,16 @@ contract).
 >
 > **Account deletion:** Settings → Danger Zone → Delete Account (requires password).
 >
+> **Support:** Users can submit and track support tickets in-app (Settings → Support).
+>
 > **Sign in with Apple:** Not required — email/password only; no third-party OAuth login.
 
 ---
 
 ## 2. Screenshots (ready)
 
-**Location:** `marketing/app-store-screenshots/` — 19 captures at 1320×2868 (6.9" iPhone).
+**Location:** `marketing/app-store-screenshots/` — 20 captures at 1320×2868 (6.9" iPhone),
+including the redesigned record screen and the new Support screen (`20_support.png`).
 
 Suggested App Store order:
 1. Landing (`01_landing.png`)
