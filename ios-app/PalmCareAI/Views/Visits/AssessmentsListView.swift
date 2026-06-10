@@ -188,7 +188,7 @@ struct AssessmentsListView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 HStack(spacing: 4) {
                     Circle().fill(statusColor).frame(width: 6, height: 6)
-                    Text(visit.status.capitalized)
+                    Text(visit.displayStatus)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(statusColor)
                 }

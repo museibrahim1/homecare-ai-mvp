@@ -93,7 +93,7 @@ extension VisitDetailView {
             switch status.lowercased() {
             case "completed": return .palmGreen
             case "processing": return .palmBlue
-            case "pending": return .palmOrange
+            case "pending", "pending_review": return .palmOrange
             case "failed": return .red
             default: return .palmSecondary
             }
@@ -101,7 +101,7 @@ extension VisitDetailView {
 
         return HStack(spacing: 4) {
             Circle().fill(color).frame(width: 6, height: 6)
-            Text(status.capitalized)
+            Text(status.replacingOccurrences(of: "_", with: " ").capitalized)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundColor(color)
         }

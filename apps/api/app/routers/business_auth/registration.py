@@ -253,7 +253,7 @@ async def register_business(
     return BusinessRegistrationResponse(
         business_id=business.id,
         verification_status=VerificationStatusEnum(business.verification_status),
-        message="Welcome to PalmCare AI!",
+        message="Welcome to PALM!",
         next_steps=next_steps,
         access_token=token,
     )

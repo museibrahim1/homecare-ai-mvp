@@ -215,7 +215,7 @@ extension ClientDetailView {
 
             Spacer()
 
-            Text(visit.status.capitalized)
+            Text(visit.displayStatus)
                 .font(.system(size: 10, weight: .bold))
                 .foregroundColor(visitStatusColor)
                 .padding(.horizontal, 8)

@@ -15,6 +15,11 @@ struct Visit: Codable, Identifiable {
     let updated_at: String?
     let client: Client?
     let caregiver: User?
+
+    /// "pending_review" → "Pending Review" for status badges.
+    var displayStatus: String {
+        status.replacingOccurrences(of: "_", with: " ").capitalized
+    }
 }
 
 struct VisitListResponse: Codable {

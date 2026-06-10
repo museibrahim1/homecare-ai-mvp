@@ -372,7 +372,7 @@ struct VisitRow: View {
 
             Spacer()
 
-            Text(visit.status.capitalized)
+            Text(visit.displayStatus)
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(statusColor)
                 .padding(.horizontal, 8)
