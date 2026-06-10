@@ -6,7 +6,8 @@ AI-powered note-taking with task extraction and reminders.
 
 import uuid
 from sqlalchemy import Column, String, Text, Boolean, ForeignKey, Index
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
+from app.db.types import JSONB
 from app.db.base import Base, TimestampMixin
 
 

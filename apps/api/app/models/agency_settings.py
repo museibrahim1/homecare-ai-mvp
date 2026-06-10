@@ -9,7 +9,8 @@ Each user has their own settings (data isolation).
 
 import uuid
 from sqlalchemy import Column, String, Text, ForeignKey, Numeric, Boolean
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
+from app.db.types import JSONB
 from app.db.base import Base, TimestampMixin
 
 

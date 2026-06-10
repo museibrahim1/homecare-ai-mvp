@@ -8,7 +8,8 @@ Replaces the simple user model with a full business entity system.
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Text, Boolean, Date, DateTime, ForeignKey, Enum as SQLEnum
-from sqlalchemy.dialects.postgresql import UUID, JSONB, ENUM as PGEnum
+from sqlalchemy.dialects.postgresql import UUID
+from app.db.types import JSONB
 from sqlalchemy.orm import relationship
 import enum
 

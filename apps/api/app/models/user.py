@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy import Column, String, Boolean, Enum, DateTime, Text
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
+from app.db.types import JSONB
 from sqlalchemy.orm import relationship
 from app.db.base import Base, TimestampMixin
 from app.core.encryption import encrypt_field, decrypt_field

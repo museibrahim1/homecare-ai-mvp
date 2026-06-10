@@ -1,3 +1,4 @@
+import uuid
 from typing import Generator, Optional
 from datetime import datetime, timezone
 from fastapi import Depends, HTTPException, status
@@ -42,8 +43,20 @@ async def get_current_user(
             detail="Invalid token payload",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    user = db.query(User).filter(User.id == user_id).first()
+
+    # Bind a real UUID, not a string: Postgres coerces strings to uuid columns
+    # but SQLite (tests) does not, and a malformed sub should be a clean 401
+    # rather than a 500 from the database layer.
+    try:
+        user_uuid = uuid.UUID(user_id)
+    except (ValueError, AttributeError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = db.query(User).filter(User.id == user_uuid).first()
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
