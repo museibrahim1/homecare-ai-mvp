@@ -61,16 +61,7 @@ struct LoginView: View {
 
     private var header: some View {
         VStack(spacing: 20) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(LinearGradient.palmPrimary)
-                    .frame(width: 72, height: 72)
-                    .shadow(color: Color.palmPrimary.opacity(0.3), radius: 10, y: 4)
-
-                Image(systemName: "waveform")
-                    .font(.system(size: 30, weight: .semibold))
-                    .foregroundColor(.white)
-            }
+            PalmOrbLogo(size: 84, animated: true)
 
             VStack(spacing: 6) {
                 Text("Welcome back")

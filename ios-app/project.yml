@@ -37,8 +37,6 @@ targets:
         CFBundleExecutable: $(EXECUTABLE_NAME)
         UILaunchScreen:
           UIColorName: LaunchBackground
-          UIImageName: PalmLogo
-          UIImageRespectsSafeAreaInsets: true
         # iPad Multitasking is required by App Review (4.0). Do not set
         # UIRequiresFullScreen unless we have a documented reason.
         UISupportedInterfaceOrientations:

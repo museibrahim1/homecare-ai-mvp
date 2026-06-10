@@ -66,10 +66,6 @@
 	<dict>
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
-		<key>UIImageName</key>
-		<string>PalmLogo</string>
-		<key>UIImageRespectsSafeAreaInsets</key>
-		<true/>
 	</dict>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

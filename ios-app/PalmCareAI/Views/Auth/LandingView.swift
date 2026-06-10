@@ -82,9 +82,11 @@ struct LandingOrbShape: Shape {
 
         for i in 0...points {
             let angle = CGFloat(i) / CGFloat(points) * .pi * 2
-            let wobble1 = sin(angle * 3 + phase * .pi * 2) * 5
-            let wobble2 = cos(angle * 2 - phase * .pi * 1.5) * 4
-            let wobble3 = sin(angle * 5 + phase * .pi * 3) * 2.5
+            // Wobble scales with radius so the blob keeps its proportions at
+            // any size (login mark, landing hero, launch screen).
+            let wobble1 = sin(angle * 3 + phase * .pi * 2) * radius * 0.083
+            let wobble2 = cos(angle * 2 - phase * .pi * 1.5) * radius * 0.067
+            let wobble3 = sin(angle * 5 + phase * .pi * 3) * radius * 0.042
             let r = radius + wobble1 + wobble2 + wobble3
 
             let point = CGPoint(
@@ -201,16 +203,7 @@ struct LandingView: View {
 
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 9) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 11)
-                                    .fill(LinearGradient.palmPrimary)
-                                    .frame(width: 38, height: 38)
-                                    .shadow(color: Color.palmPrimary.opacity(0.5), radius: 6, y: 2)
-
-                                Image(systemName: "mic.fill")
-                                    .font(.system(size: 17))
-                                    .foregroundColor(.white)
-                            }
+                            PalmOrbLogo(size: 38)
 
                             Text("PALM")
                                 .font(.system(size: 17, weight: .heavy))

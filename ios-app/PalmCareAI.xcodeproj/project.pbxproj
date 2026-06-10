@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		022F73AF525AD8FE49B863F9 /* PalmOrbLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D33AF1DC55D298332C52B8C /* PalmOrbLogo.swift */; };
 		08A1F6ECC58F3235CABEEC32 /* PalmAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9955EEED2AEDE41A7C5D2D3A /* PalmAlert.swift */; };
 		09D5105092F5014A092792D9 /* RecordOrbViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F93493E955750982C65A92 /* RecordOrbViews.swift */; };
 		0B44C3356220A46037ACDE7A /* ContractStylesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482E38D4A70B9B736C64D377 /* ContractStylesView.swift */; };
@@ -86,6 +87,7 @@
 		23F93493E955750982C65A92 /* RecordOrbViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordOrbViews.swift; sourceTree = "<group>"; };
 		25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorderService.swift; sourceTree = "<group>"; };
 		2C659B9C3B38D4508AEEEDF9 /* Visit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Visit.swift; sourceTree = "<group>"; };
+		2D33AF1DC55D298332C52B8C /* PalmOrbLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmOrbLogo.swift; sourceTree = "<group>"; };
 		2DEA75021BD113DD86530A11 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
 		2F86448E3F9D8340AD63CE38 /* GoogleCalendarSetupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarSetupSheet.swift; sourceTree = "<group>"; };
 		35BEA66607E528FB3FADBDF4 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 			isa = PBXGroup;
 			children = (
 				9955EEED2AEDE41A7C5D2D3A /* PalmAlert.swift */,
+				2D33AF1DC55D298332C52B8C /* PalmOrbLogo.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -462,6 +465,7 @@
 				08A1F6ECC58F3235CABEEC32 /* PalmAlert.swift in Sources */,
 				6699DA1B3C377734838CD895 /* PalmCareAIApp.swift in Sources */,
 				5EA469E56F749FDCF74408EF /* PalmCareTheme.swift in Sources */,
+				022F73AF525AD8FE49B863F9 /* PalmOrbLogo.swift in Sources */,
 				09D5105092F5014A092792D9 /* RecordOrbViews.swift in Sources */,
 				EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */,
 				9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */,

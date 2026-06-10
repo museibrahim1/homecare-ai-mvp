@@ -78,15 +78,7 @@ struct RegisterView: View {
 
     private var header: some View {
         VStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(LinearGradient.palmPrimary)
-                    .frame(width: 64, height: 64)
-                    .shadow(color: Color.palmPrimary.opacity(0.3), radius: 8, y: 3)
-                Image(systemName: "waveform")
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundColor(.white)
-            }
+            PalmOrbLogo(size: 72, animated: true)
             VStack(spacing: 4) {
                 Text("Get started in 30 seconds")
                     .font(.system(size: 22, weight: .bold))

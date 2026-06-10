@@ -167,15 +167,7 @@ struct FaceIDLockScreen: View {
         VStack(spacing: 24) {
             Spacer()
 
-            ZStack {
-                Circle()
-                    .fill(Color.palmPrimary.opacity(0.1))
-                    .frame(width: 100, height: 100)
-
-                Image(systemName: "faceid")
-                    .font(.system(size: 44))
-                    .foregroundColor(.palmPrimary)
-            }
+            PalmOrbLogo(size: 96, animated: true)
 
             VStack(spacing: 6) {
                 Text("PALM")
