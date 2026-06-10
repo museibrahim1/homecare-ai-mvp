@@ -34,6 +34,9 @@ struct RecordView: View {
     /// client, so it can be processed once a client is chosen (no lost audio).
     @State private var pendingAudioURL: URL?
     @State private var pipelineSteps: [(String, String)] = []
+    /// Upload + pipeline-poll task, cancelled when the view goes away. The
+    /// backend keeps processing either way; the visit shows up in Home.
+    @State private var processingTask: Task<Void, Never>?
     #if DEBUG
     @State private var didRunAutomationDemo = false
     #endif
@@ -214,6 +217,8 @@ struct RecordView: View {
                 if !recorder.isRecording && !isProcessing {
                     assessmentInProgress = false
                 }
+                processingTask?.cancel()
+                processingTask = nil
             }
             .onChange(of: recorder.isRecording) { isRecording in
                 assessmentInProgress = isRecording || isProcessing
@@ -230,9 +235,16 @@ struct RecordView: View {
                 processRecording(audioURL: audioURL, clientId: clientId, clientName: client.full_name)
             }
             .onChange(of: showClientPicker) { isShowing in
+                if isShowing {
+                    // Retry a failed initial load so the picker isn't empty.
+                    if clients.isEmpty {
+                        Task { await loadClients(quiet: true) }
+                    }
+                    return
+                }
                 // Picker dismissed without choosing a client: don't keep PHI
                 // audio lingering on device; clean up and let the user know.
-                guard !isShowing, let audioURL = pendingAudioURL, selectedClient == nil else { return }
+                guard let audioURL = pendingAudioURL, selectedClient == nil else { return }
                 pendingAudioURL = nil
                 try? FileManager.default.removeItem(at: audioURL)
                 errorMessage = "Recording discarded — no client was selected."
@@ -470,7 +482,10 @@ struct RecordView: View {
     private func handleRecordTap() {
         if recorder.isRecording {
             stopAndProcess()
-        } else {
+        } else if !isProcessing {
+            // Don't allow a second recording while the previous assessment
+            // is still uploading/processing — it would create overlapping
+            // visits sharing the same UI state.
             startRecording()
         }
     }
@@ -535,7 +550,7 @@ struct RecordView: View {
             pipelineSteps = []
         }
 
-        Task {
+        processingTask = Task {
             do {
                 let visit = try await api.createVisit(clientId: clientId)
                 let data = try Data(contentsOf: audioURL)
@@ -576,8 +591,10 @@ struct RecordView: View {
         let maxConsecutiveErrors = 5 // ~10s of failed fetches before warning user
 
         while attempts < maxAttempts {
+            if Task.isCancelled { return }
             attempts += 1
             try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+            if Task.isCancelled { return }
 
             do {
                 let status = try await api.getPipelineStatus(visitId: visitId)
@@ -585,7 +602,7 @@ struct RecordView: View {
                 guard let pipelineState = status.pipeline_state else { continue }
 
                 var steps: [(String, String)] = []
-                var allDone = true
+                var allTerminal = true
                 var anyFailed = false
 
                 for key in stepOrder {
@@ -599,7 +616,10 @@ struct RecordView: View {
                         let label = stepLabels[key] ?? key.capitalized
                         if stateStr == "skipped" { continue }
                         steps.append((label, stateStr))
-                        if stateStr != "completed" && stateStr != "skipped" { allDone = false }
+                        // Wait until every step reaches a terminal state —
+                        // navigating away on the first failure would hide
+                        // steps that are still producing results.
+                        if stateStr != "completed" && stateStr != "failed" { allTerminal = false }
                         if stateStr == "failed" { anyFailed = true }
                     }
                 }
@@ -611,11 +631,11 @@ struct RecordView: View {
                     }
                 }
 
-                if allDone || anyFailed {
+                if allTerminal && !steps.isEmpty {
                     await MainActor.run {
                         completedVisitId = visitId
                         completedClientName = clientName
-                        pipelineFailed = anyFailed && !allDone
+                        pipelineFailed = anyFailed
                         withAnimation {
                             isProcessing = false
                             uploadProgress = nil
@@ -637,11 +657,12 @@ struct RecordView: View {
             }
         }
 
-        // Timed out - still navigate to the visit
+        // Timed out — still navigate to the visit, but land on Overview:
+        // the pipeline may not have produced a contract yet.
         await MainActor.run {
             completedVisitId = visitId
             completedClientName = clientName
-            pipelineFailed = false
+            pipelineFailed = true
             withAnimation {
                 isProcessing = false
                 uploadProgress = nil
@@ -668,7 +689,7 @@ struct RecordView: View {
             pipelineSteps = []
         }
 
-        Task {
+        processingTask = Task {
             do {
                 let accessing = url.startAccessingSecurityScopedResource()
                 defer { if accessing { url.stopAccessingSecurityScopedResource() } }
@@ -739,13 +760,14 @@ struct RecordView: View {
         }
     }
 
-    private func loadClients() async {
+    private func loadClients(quiet: Bool = false) async {
         do {
             let fetched = try await api.fetchClients()
             await MainActor.run { clients = fetched }
         } catch {
+            guard !quiet else { return }
             await MainActor.run {
-                errorMessage = "Could not load clients. Pull down to retry."
+                errorMessage = "Could not load clients. Check your connection and try again."
                 showError = true
             }
         }

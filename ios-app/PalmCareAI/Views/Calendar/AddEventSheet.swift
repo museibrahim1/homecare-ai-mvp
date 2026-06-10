@@ -22,7 +22,7 @@ struct AddEventSheet: View {
     ]
 
     private var canSave: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty
+        !title.trimmingCharacters(in: .whitespaces).isEmpty && endTime > startTime
     }
 
     var body: some View {
@@ -132,6 +132,13 @@ struct AddEventSheet: View {
                     DatePicker("", selection: $startTime)
                         .labelsHidden()
                         .tint(.palmPrimary)
+                        .onChange(of: startTime) { newStart in
+                            // Keep the range valid: moving start past end
+                            // drags end along (1h default duration).
+                            if endTime <= newStart {
+                                endTime = newStart.addingTimeInterval(3600)
+                            }
+                        }
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)

@@ -71,25 +71,42 @@ struct CalendarView: View {
         }
         .sheet(isPresented: $showAddEvent) {
             AddEventSheet { event in
-                store.add(event)
-                if googleCalConnected {
-                    Task {
-                        do {
-                            let isoFmt = ISO8601DateFormatter()
-                            isoFmt.formatOptions = [.withInternetDateTime]
-                            var body: [String: Any] = [
-                                "title": event.title,
-                                "start_time": isoFmt.string(from: event.startDate),
-                                "end_time": isoFmt.string(from: event.endDate),
-                            ]
-                            if let desc = event.description { body["description"] = desc }
-                            if let loc = event.location { body["location"] = loc }
-                            let apiEvent = try await api.createCalendarEvent(body: body)
-                            await MainActor.run { apiEvents.append(apiEvent) }
-                        } catch {
-                            // The event is saved locally either way — tell the
-                            // user the Google sync didn't go through.
-                            await MainActor.run { syncError = "Saved on this device, but Google Calendar sync failed" }
+                guard googleCalConnected else {
+                    store.add(event)
+                    return
+                }
+                // Connected: create in Google only, so the event isn't shown
+                // twice (once local, once from the next sync). Local storage
+                // is the fallback when the sync fails.
+                Task {
+                    do {
+                        let isoFmt = ISO8601DateFormatter()
+                        isoFmt.formatOptions = [.withInternetDateTime]
+                        var body: [String: Any] = [
+                            "title": event.title,
+                            "start_time": isoFmt.string(from: event.startDate),
+                            "end_time": isoFmt.string(from: event.endDate),
+                        ]
+                        if let desc = event.description { body["description"] = desc }
+                        if let loc = event.location { body["location"] = loc }
+                        let eventId = try await api.createCalendarEvent(body: body)
+                        let synced = APICalendarEvent(
+                            id: eventId,
+                            title: event.title,
+                            description: event.description,
+                            start_time: isoFmt.string(from: event.startDate),
+                            end_time: isoFmt.string(from: event.endDate),
+                            location: event.location,
+                            google_event_id: eventId,
+                            created_at: nil
+                        )
+                        await MainActor.run { apiEvents.append(synced) }
+                    } catch {
+                        // Keep the event on this device and tell the user
+                        // the Google sync didn't go through.
+                        await MainActor.run {
+                            store.add(event)
+                            syncError = "Saved on this device, but Google Calendar sync failed"
                         }
                     }
                 }
@@ -190,7 +207,7 @@ struct CalendarView: View {
         let isToday = cal.isDateInToday(date)
         let hasLocalEvt = store.hasEvents(on: date, calendar: cal)
         let hasApiEvt = apiEvents.contains { event in
-            if let d = ISO8601DateFormatter().date(from: event.start_time) {
+            if let d = Self.parseEventDate(event.start_time) {
                 return cal.isDate(d, inSameDayAs: date)
             }
             return false
@@ -236,22 +253,21 @@ struct CalendarView: View {
 
     private var eventsList: some View {
         let localEvents = store.events(on: selectedDate, calendar: cal)
-        let apiDayEvents = apiEvents.filter { event in
-            if let date = ISO8601DateFormatter().date(from: event.start_time) {
-                return cal.isDate(date, inSameDayAs: selectedDate)
-            }
-            return false
-        }
-        let dayEvents = localEvents + apiDayEvents.map { apiEvt in
-            CalendarEvent(
+        let apiDayEvents: [CalendarEvent] = apiEvents.compactMap { apiEvt in
+            // Drop events whose dates can't be parsed rather than shoving
+            // them onto today's date.
+            guard let start = Self.parseEventDate(apiEvt.start_time),
+                  cal.isDate(start, inSameDayAs: selectedDate) else { return nil }
+            return CalendarEvent(
                 id: apiEvt.id,
                 title: apiEvt.title,
                 description: apiEvt.description,
-                startDate: ISO8601DateFormatter().date(from: apiEvt.start_time) ?? Date(),
-                endDate: ISO8601DateFormatter().date(from: apiEvt.end_time) ?? Date(),
+                startDate: start,
+                endDate: Self.parseEventDate(apiEvt.end_time) ?? start,
                 location: apiEvt.location
             )
         }
+        let dayEvents = (localEvents + apiDayEvents).sorted { $0.startDate < $1.startDate }
 
         return VStack(alignment: .leading, spacing: 0) {
             if let syncError = syncError {
@@ -335,9 +351,14 @@ struct CalendarView: View {
                                         let isApiEvent = apiEvents.contains { $0.id == event.id }
                                         if isApiEvent {
                                             Task {
-                                                try? await api.deleteCalendarEvent(eventId: event.id)
-                                                await MainActor.run {
-                                                    withAnimation { apiEvents.removeAll { $0.id == event.id } }
+                                                do {
+                                                    try await api.deleteCalendarEvent(eventId: event.id)
+                                                    await MainActor.run {
+                                                        withAnimation { apiEvents.removeAll { $0.id == event.id } }
+                                                    }
+                                                } catch {
+                                                    // Don't remove from the UI if Google still has it.
+                                                    await MainActor.run { syncError = "Couldn't delete from Google Calendar" }
                                                 }
                                             }
                                         } else {
@@ -358,6 +379,17 @@ struct CalendarView: View {
     }
 
     // MARK: - Helpers
+
+    /// Google event times come as RFC3339 with offsets ("2026-06-10T15:00:00-05:00"),
+    /// occasionally with fractional seconds, or date-only for all-day events.
+    static func parseEventDate(_ string: String) -> Date? {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let d = iso.date(from: string) { return d }
+        iso.formatOptions = [.withInternetDateTime]
+        if let d = iso.date(from: string) { return d }
+        return ISO8601Flexible.parse(string)
+    }
 
     private func refreshEvents() async {
         guard googleCalConnected else { return }

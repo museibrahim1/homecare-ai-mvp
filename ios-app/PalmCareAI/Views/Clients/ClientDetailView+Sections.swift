@@ -72,7 +72,9 @@ extension ClientDetailView {
             if let phone = client.phone, !phone.isEmpty {
                 HStack(spacing: 16) {
                     actionButton(icon: "phone.fill", label: "Call", color: .palmGreen) {
-                        if let url = URL(string: "tel:\(phone)") {
+                        // Strip formatting — "(555) 123-4567" isn't a valid tel: URL.
+                        let dialable = phone.filter { $0.isNumber || $0 == "+" }
+                        if !dialable.isEmpty, let url = URL(string: "tel:\(dialable)") {
                             UIApplication.shared.open(url)
                         }
                     }

@@ -221,6 +221,7 @@ struct HomeView: View {
     }
 
     private func loadData(forceRefresh: Bool = false) async {
+        await MainActor.run { if visits.isEmpty && clients.isEmpty { isLoading = true } }
         do {
             async let fetchedUser = api.fetchUser(forceRefresh: forceRefresh)
             async let fetchedClients = api.fetchClients(forceRefresh: forceRefresh)
@@ -231,6 +232,7 @@ struct HomeView: View {
                 user = u
                 clients = c
                 visits = v
+                loadError = nil
                 isLoading = false
             }
         } catch {

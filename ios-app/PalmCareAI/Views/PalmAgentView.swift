@@ -60,7 +60,9 @@ class PalmAgentViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        let history: [[String: Any]] = messages.suffix(20).map { ["role": $0.role, "content": $0.content] }
+        // History excludes the message we just appended — the backend adds
+        // `message` itself, so including it twice duplicates the user turn.
+        let history: [[String: Any]] = messages.dropLast().suffix(20).map { ["role": $0.role, "content": $0.content] }
         let body: [String: Any] = ["message": text, "history": history]
 
         do {
@@ -138,7 +140,14 @@ class PalmAgentViewModel: ObservableObject {
         }
 
         audioEngine.prepare()
-        try? audioEngine.start()
+        do {
+            try audioEngine.start()
+        } catch {
+            // No capture session — don't pretend we're listening.
+            inputNode.removeTap(onBus: 0)
+            self.recognitionRequest = nil
+            return
+        }
         isListening = true
 
         recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
@@ -242,6 +251,12 @@ struct PalmAgentSheet: View {
             } message: {
                 Text(downloadError ?? "")
             }
+        }
+        // Swipe-to-dismiss skips the Close button — make sure the mic and
+        // speaker are released either way.
+        .onDisappear {
+            vm.stopSpeaking()
+            vm.stopListening()
         }
     }
 
@@ -360,7 +375,12 @@ struct PalmAgentSheet: View {
             }
 
             VStack(alignment: msg.role == "user" ? .trailing : .leading, spacing: 6) {
-                Text(LocalizedStringKey(msg.content))
+                // Render markdown safely; fall back to plain text instead of
+                // letting LocalizedStringKey mis-handle %, _, etc.
+                Text((try? AttributedString(
+                    markdown: msg.content,
+                    options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+                )) ?? AttributedString(msg.content))
                     .font(.subheadline)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)

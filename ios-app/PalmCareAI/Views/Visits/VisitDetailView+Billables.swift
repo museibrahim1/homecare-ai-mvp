@@ -87,22 +87,28 @@ extension VisitDetailView {
             }
 
             if !isApproved && !isDenied {
+                let isPending = pendingBillableIds.contains(item.id)
                 HStack(spacing: 10) {
                     Button {
                         Task { await approveBillable(item, index: index) }
                     } label: {
                         HStack(spacing: 4) {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 11, weight: .bold))
+                            if isPending {
+                                ProgressView().scaleEffect(0.6).tint(.white)
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 11, weight: .bold))
+                            }
                             Text("Approve")
                                 .font(.system(size: 12, weight: .semibold))
                         }
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
-                        .background(Color.palmGreen)
+                        .background(Color.palmGreen.opacity(isPending ? 0.6 : 1))
                         .cornerRadius(8)
                     }
+                    .disabled(isPending)
 
                     Button {
                         Task { await denyBillable(item, index: index) }
@@ -120,6 +126,7 @@ extension VisitDetailView {
                         .cornerRadius(8)
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.red.opacity(0.3), lineWidth: 1))
                     }
+                    .disabled(isPending)
                 }
             }
         }
@@ -131,6 +138,9 @@ extension VisitDetailView {
     }
 
     func approveBillable(_ item: BillableItem, index: Int) async {
+        guard !pendingBillableIds.contains(item.id) else { return }
+        await MainActor.run { _ = pendingBillableIds.insert(item.id) }
+        defer { Task { @MainActor in pendingBillableIds.remove(item.id) } }
         do {
             let _ = try await api.approveBillableItem(visitId: visitId, itemId: item.id)
             await MainActor.run {
@@ -141,12 +151,16 @@ extension VisitDetailView {
             }
         } catch {
             await MainActor.run {
-                errorMessage = "Could not approve billable. \(error.localizedDescription)"
+                actionError = "Could not approve billable. \(error.localizedDescription)"
+                showActionError = true
             }
         }
     }
 
     func denyBillable(_ item: BillableItem, index: Int) async {
+        guard !pendingBillableIds.contains(item.id) else { return }
+        await MainActor.run { _ = pendingBillableIds.insert(item.id) }
+        defer { Task { @MainActor in pendingBillableIds.remove(item.id) } }
         do {
             let _ = try await api.denyBillableItem(visitId: visitId, itemId: item.id)
             await MainActor.run {
@@ -157,7 +171,8 @@ extension VisitDetailView {
             }
         } catch {
             await MainActor.run {
-                errorMessage = "Could not deny billable. \(error.localizedDescription)"
+                actionError = "Could not deny billable. \(error.localizedDescription)"
+                showActionError = true
             }
         }
     }

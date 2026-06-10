@@ -440,7 +440,7 @@ extension VisitDetailView {
                         contractFormattedContent(content)
                     } else {
                         let preview = String(content.prefix(200)).trimmingCharacters(in: .whitespacesAndNewlines)
-                        Text(preview + "...")
+                        Text(content.count > 200 ? preview + "..." : preview)
                             .font(.system(size: 12, design: isClassic ? .serif : .default))
                             .foregroundColor(.palmSecondary)
                             .lineLimit(4)

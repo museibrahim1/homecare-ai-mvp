@@ -25,11 +25,11 @@ struct AddClientSheet: View {
 
     private var isEditing: Bool { editingClient != nil }
 
+    // Matches the backend's documented care_level values (LOW/MODERATE/HIGH).
     private let priorityOptions: [(String, String, Color)] = [
         ("LOW", "Low", .palmGreen),
         ("MODERATE", "Medium", .palmOrange),
         ("HIGH", "High", Color(red: 239/255, green: 68/255, blue: 68/255)),
-        ("URGENT", "Urgent", Color(red: 190/255, green: 18/255, blue: 60/255)),
     ]
 
     private let insuranceOptions: [(String, String)] = [

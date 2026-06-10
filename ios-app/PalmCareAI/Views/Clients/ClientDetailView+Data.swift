@@ -2,10 +2,12 @@ import SwiftUI
 
 extension ClientDetailView {
     func loadVisits() async {
+        await MainActor.run { if visits.isEmpty { isLoading = true } }
         do {
             let fetched = try await api.fetchVisits()
             await MainActor.run {
                 visits = fetched
+                loadError = nil
                 isLoading = false
             }
         } catch {

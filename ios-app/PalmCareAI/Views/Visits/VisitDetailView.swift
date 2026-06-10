@@ -16,8 +16,15 @@ struct VisitDetailView: View {
 
     @State var isLoading = true
     @State var activeTab = 0
+    /// Initial visit-load failure only — drives the full-screen error state.
     @State var errorMessage: String?
+    /// Transient action failures (export, restart) — shown as an alert so the
+    /// user doesn't lose the tabs they already loaded.
+    @State var actionError: String?
+    @State var showActionError = false
     @State var isRefreshing = false
+    /// Billable IDs with an approve/deny request in flight (double-tap guard).
+    @State var pendingBillableIds: Set<String> = []
     @State var showFullContract = false
     @State var selectedContractStyle = "modern"
     @State var showStylePicker = false
@@ -81,6 +88,7 @@ struct VisitDetailView: View {
             EmailContractSheet(visitId: visitId, clientName: clientName, contractTitle: contract?.title)
                 .environmentObject(api)
         }
+        .palmErrorAlert(message: $actionError, isPresented: $showActionError)
         .task {
             if initialTab != 0 { activeTab = initialTab }
             await loadVisit()

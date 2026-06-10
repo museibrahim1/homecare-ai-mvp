@@ -274,6 +274,7 @@ struct AssessmentsListView: View {
             let fetched = try await api.fetchVisits(forceRefresh: forceRefresh)
             await MainActor.run {
                 visits = fetched.sorted { $0.created_at > $1.created_at }
+                loadError = nil
                 isLoading = false
             }
         } catch {

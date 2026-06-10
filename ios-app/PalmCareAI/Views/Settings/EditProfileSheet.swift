@@ -166,7 +166,7 @@ struct EditProfileSheet: View {
         errorMessage = nil
         Task {
             do {
-                var body: [String: Any] = ["owner_name": fullName]
+                var body: [String: Any] = ["full_name": fullName]
                 if !phone.isEmpty { body["phone"] = phone }
                 _ = try await api.updateProfile(body: body)
                 await MainActor.run {

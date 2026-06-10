@@ -12,6 +12,7 @@ struct ClientPickerSheet: View {
     @State private var search = ""
     @State private var showAddClient = false
     @State private var localClients: [Client] = []
+    @State private var loadFailed = false
 
     private var allClients: [Client] {
         localClients.isEmpty ? clients : localClients
@@ -58,10 +59,16 @@ struct ClientPickerSheet: View {
             })
             .environmentObject(api)
         }
-        .task {
-            if clients.isEmpty {
-                localClients = (try? await api.fetchClients()) ?? []
-            }
+        .task { await loadClientsIfNeeded() }
+    }
+
+    private func loadClientsIfNeeded() async {
+        guard clients.isEmpty else { return }
+        do {
+            localClients = try await api.fetchClients()
+            loadFailed = false
+        } catch {
+            loadFailed = true
         }
     }
 
@@ -206,16 +213,40 @@ struct ClientPickerSheet: View {
     private var emptyState: some View {
         VStack(spacing: 12) {
             Spacer()
-            Image(systemName: search.isEmpty ? "person.2.slash" : "magnifyingglass")
-                .font(.system(size: 36))
-                .foregroundColor(.palmSecondary.opacity(0.4))
-            Text(search.isEmpty ? "No clients yet" : "No results for \u{201C}\(search)\u{201D}")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.palmText)
-            if search.isEmpty {
-                Text("Add a client above to get started.")
-                    .font(.system(size: 13))
-                    .foregroundColor(.palmSecondary)
+            if loadFailed && search.isEmpty {
+                Image(systemName: "wifi.exclamationmark")
+                    .font(.system(size: 36))
+                    .foregroundColor(.palmOrange)
+                Text("Couldn't load clients")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.palmText)
+                Button {
+                    Task { await loadClientsIfNeeded() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 12, weight: .bold))
+                        Text("Try Again")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 9)
+                    .background(Color.palmPrimary)
+                    .cornerRadius(10)
+                }
+            } else {
+                Image(systemName: search.isEmpty ? "person.2.slash" : "magnifyingglass")
+                    .font(.system(size: 36))
+                    .foregroundColor(.palmSecondary.opacity(0.4))
+                Text(search.isEmpty ? "No clients yet" : "No results for \u{201C}\(search)\u{201D}")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.palmText)
+                if search.isEmpty {
+                    Text("Add a client above to get started.")
+                        .font(.system(size: 13))
+                        .foregroundColor(.palmSecondary)
+                }
             }
             Spacer()
             Spacer()

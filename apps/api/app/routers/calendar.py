@@ -49,11 +49,16 @@ class CalendarEventUpdate(BaseModel):
 
 @router.get("/oauth-configured")
 async def check_oauth_configured():
-    """Public check: is Google OAuth configured on this server?"""
+    """Public check: is Google OAuth configured on this server?
+
+    Also returns the OAuth client ID (a public identifier, not a secret) so
+    the mobile app can build the consent URL without bundling the value.
+    """
     has_id = bool(settings.google_client_id)
     has_secret = bool(settings.google_client_secret)
     return {
         "configured": has_id and has_secret,
+        "client_id": settings.google_client_id or None,
     }
 
 

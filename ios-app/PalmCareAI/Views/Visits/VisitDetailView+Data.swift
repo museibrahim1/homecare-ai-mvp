@@ -168,7 +168,10 @@ extension VisitDetailView {
                 topVC.present(activityVC, animated: true)
             }
         } catch {
-            await MainActor.run { errorMessage = "Export failed: \(error.localizedDescription)" }
+            await MainActor.run {
+                actionError = "Export failed: \(error.localizedDescription)"
+                showActionError = true
+            }
         }
     }
 
@@ -182,9 +185,16 @@ extension VisitDetailView {
                 billables = nil
                 note = nil
                 contract = nil
+                tabFetchFailed = []
             }
+            // The pipeline is running again — resume the auto-refresh loop so
+            // the processing banner clears and tabs fill in on their own.
+            await pollPipelineUntilComplete()
         } catch {
-            await MainActor.run { errorMessage = "Restart failed: \(error.localizedDescription)" }
+            await MainActor.run {
+                actionError = "Restart failed: \(error.localizedDescription)"
+                showActionError = true
+            }
         }
     }
 

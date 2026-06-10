@@ -395,7 +395,7 @@ struct EmailContractSheet: View {
                 loadingStatus = false
                 // Don't silently show the "connect" UI when the status check
                 // itself failed — the user may already be connected.
-                errorMessage = "Couldn't check your email connection. Pull to retry or check your network."
+                errorMessage = "Couldn't check your email connection. Check your network and try again."
             }
         }
     }

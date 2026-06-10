@@ -288,10 +288,12 @@ struct ClientsView: View {
     }
 
     private func loadClients() async {
+        await MainActor.run { if clients.isEmpty { isLoading = true } }
         do {
             let fetched = try await api.fetchClients()
             await MainActor.run {
                 clients = fetched
+                loadError = nil
                 isLoading = false
             }
         } catch {

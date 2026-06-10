@@ -210,6 +210,32 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
     return current_user
 
 
+class ProfileUpdateRequest(BaseModel):
+    full_name: str | None = None
+    phone: str | None = None
+
+
+@router.put("/me", response_model=UserResponse)
+async def update_current_user_info(
+    update: ProfileUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Update the current user's own profile (name, phone)."""
+    if update.full_name is not None:
+        name = update.full_name.strip()
+        if not name:
+            raise HTTPException(status_code=422, detail="Name cannot be empty")
+        if len(name) > 200:
+            raise HTTPException(status_code=422, detail="Name is too long")
+        current_user.full_name = name
+    if update.phone is not None:
+        current_user.phone = update.phone.strip()[:30]
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
 @router.post("/logout")
 async def logout(
     db: Session = Depends(get_db),

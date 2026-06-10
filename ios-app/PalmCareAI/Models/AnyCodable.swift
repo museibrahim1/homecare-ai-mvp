@@ -1,7 +1,7 @@
 import Foundation
 
 // Lenient ISO-8601 date parser — accepts microseconds, missing zone, date-only.
-// Used by TaskItem.dueDate and anything else dealing with mixed API timestamps.
+// Used anywhere the API hands back mixed timestamp formats.
 enum ISO8601Flexible {
     private static let formatters: [DateFormatter] = {
         let formats = [

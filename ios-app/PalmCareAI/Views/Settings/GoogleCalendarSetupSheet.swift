@@ -11,7 +11,10 @@ struct GoogleCalendarSetupSheet: View {
     @State private var showDisconnectConfirm = false
     @State private var didStartAuth = false
 
-    private let googleClientId = Bundle.main.infoDictionary?["GOOGLE_CLIENT_ID"] as? String ?? ""
+    /// Build-config override; when empty, the client ID is fetched from the
+    /// backend (`GET /calendar/oauth-configured`) so TestFlight builds work
+    /// without bundling the value.
+    private let bundledClientId = Bundle.main.infoDictionary?["GOOGLE_CLIENT_ID"] as? String ?? ""
     // Must match a scheme listed under CFBundleURLTypes in Info.plist
     // (also registered in the Google Cloud Console for this client ID).
     private let callbackScheme = "com.palmcareai.app"
@@ -144,6 +147,16 @@ struct GoogleCalendarSetupSheet: View {
                         .padding(.horizontal, 30)
                 }
 
+                // Disconnect failures land here — the error screen is only
+                // shown when not connected, so surface them inline.
+                if let error = errorMessage {
+                    Text(error)
+                        .font(.system(size: 13))
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 30)
+                }
+
                 Button {
                     showDisconnectConfirm = true
                 } label: {
@@ -168,6 +181,28 @@ struct GoogleCalendarSetupSheet: View {
         isLoading = true
         errorMessage = nil
 
+        Task {
+            var clientId = bundledClientId
+            if clientId.isEmpty {
+                struct OAuthConfig: Decodable {
+                    let configured: Bool
+                    let client_id: String?
+                }
+                let config: OAuthConfig? = try? await api.request("GET", path: "/calendar/oauth-configured", noAuth: true)
+                clientId = config?.client_id ?? ""
+            }
+            await MainActor.run {
+                guard !clientId.isEmpty else {
+                    isLoading = false
+                    errorMessage = "Google Calendar isn't available right now. Please try again later."
+                    return
+                }
+                launchOAuthSession(clientId: clientId)
+            }
+        }
+    }
+
+    private func launchOAuthSession(clientId googleClientId: String) {
         let redirectURI = "\(api.baseURL)/calendar/mobile-callback"
         let encodedRedirectURI = redirectURI.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? redirectURI
         let encodedScopes = scopes.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? scopes
@@ -257,7 +292,7 @@ struct GoogleCalendarSetupSheet: View {
                     dismiss()
                 }
             } catch {
-                await MainActor.run { errorMessage = error.localizedDescription }
+                await MainActor.run { errorMessage = "Couldn't disconnect: \(error.localizedDescription)" }
             }
         }
     }

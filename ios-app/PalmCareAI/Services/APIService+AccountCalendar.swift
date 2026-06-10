@@ -34,24 +34,34 @@ extension APIService {
     }
     
     // MARK: - Profile
-    
+
+    /// Update the signed-in user's own name/phone via `PUT /auth/me`.
     func updateProfile(body: [String: Any]) async throws -> User {
-        try await request("PUT", path: "/auth/business/profile", body: body)
+        let user: User = try await request("PUT", path: "/auth/me", body: body)
+        cachedUser = CacheEntry(value: user, timestamp: Date())
+        return user
     }
     
     // MARK: - Calendar API
-    
-    func fetchCalendarEvents(startDate: String? = nil, endDate: String? = nil) async throws -> [APICalendarEvent] {
-        var path = "/calendar/events"
-        var params: [String] = []
-        if let s = startDate { params.append("start_date=\(s)") }
-        if let e = endDate { params.append("end_date=\(e)") }
-        if !params.isEmpty { path += "?" + params.joined(separator: "&") }
-        return try await request("GET", path: path)
+
+    /// Fetch Google Calendar events from 30 days back to 90 days ahead.
+    /// The backend proxies Google's raw list, so map each item into our
+    /// own event shape and drop anything without a start time.
+    func fetchCalendarEvents() async throws -> [APICalendarEvent] {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime]
+        let timeMin = iso.string(from: Date().addingTimeInterval(-30 * 86400))
+        let timeMax = iso.string(from: Date().addingTimeInterval(90 * 86400))
+        let response: GoogleEventsResponse = try await request(
+            "GET", path: "/calendar/events?time_min=\(timeMin)&time_max=\(timeMax)"
+        )
+        return response.events.compactMap { $0.asAPIEvent }
     }
-    
-    func createCalendarEvent(body: [String: Any]) async throws -> APICalendarEvent {
-        try await request("POST", path: "/calendar/events", body: body)
+
+    /// Create a Google Calendar event. Returns the new Google event ID.
+    func createCalendarEvent(body: [String: Any]) async throws -> String {
+        let response: CalendarCreateResponse = try await request("POST", path: "/calendar/events", body: body)
+        return response.event_id
     }
     
     func deleteCalendarEvent(eventId: String) async throws {
