@@ -35,6 +35,16 @@ extension APIService {
         return user
     }
 
+    /// Complete a login that required a second factor. The backend re-verifies
+    /// email + password together with the TOTP code and returns a full token.
+    func mfaLogin(email: String, password: String, code: String) async throws -> LoginResponse {
+        try await request(
+            "POST", path: "/auth/mfa/login",
+            body: ["email": email, "password": password, "mfa_code": code],
+            noAuth: true
+        )
+    }
+
     /// Register a new business. The simplified backend returns an access_token
     /// directly so the user is signed in immediately — no second login call needed.
     @discardableResult

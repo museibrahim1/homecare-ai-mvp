@@ -59,7 +59,9 @@ final class EmailSenderConnector: NSObject, ObservableObject {
                 }
             }
             session.presentationContextProvider = self
-            session.prefersEphemeralWebBrowserSession = false
+            // Ephemeral: don't share Safari's Google session. On a shared
+            // device this prevents silently connecting someone else's account.
+            session.prefersEphemeralWebBrowserSession = true
             self.session = session
             if !session.start() {
                 cont.resume(throwing: ConnectError.startFailed)
@@ -71,9 +73,9 @@ final class EmailSenderConnector: NSObject, ObservableObject {
         guard let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems else {
             return nil
         }
-        // CSRF guard: state must round-trip.
-        if let returnedState = items.first(where: { $0.name == "state" })?.value,
-           returnedState != expectedState {
+        // CSRF guard: state must round-trip exactly. A callback with no state
+        // at all is just as suspect as one with the wrong state.
+        guard items.first(where: { $0.name == "state" })?.value == expectedState else {
             return nil
         }
         return items.first(where: { $0.name == "code" })?.value

@@ -266,7 +266,13 @@ private enum KeychainHelper {
         SecItemDelete(query as CFDictionary)
         var addQuery = query
         addQuery[kSecValueData as String] = data
-        SecItemAdd(addQuery as CFDictionary, nil)
+        let status = SecItemAdd(addQuery as CFDictionary, nil)
+        if status != errSecSuccess {
+            // Retry once without the accessibility constraint — better a
+            // saved session than a user silently logged out on next launch.
+            addQuery.removeValue(forKey: kSecAttrAccessible as String)
+            SecItemAdd(addQuery as CFDictionary, nil)
+        }
     }
 
     static func load() -> String? {

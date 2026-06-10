@@ -171,6 +171,7 @@ struct GoogleCalendarSetupSheet: View {
         let redirectURI = "\(api.baseURL)/calendar/mobile-callback"
         let encodedRedirectURI = redirectURI.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? redirectURI
         let encodedScopes = scopes.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? scopes
+        let expectedState = UUID().uuidString
 
         let authURLString = "https://accounts.google.com/o/oauth2/v2/auth"
             + "?client_id=\(googleClientId)"
@@ -179,6 +180,7 @@ struct GoogleCalendarSetupSheet: View {
             + "&scope=\(encodedScopes)"
             + "&access_type=offline"
             + "&prompt=consent"
+            + "&state=\(expectedState)"
 
         guard let authURL = URL(string: authURLString) else {
             isLoading = false
@@ -200,6 +202,8 @@ struct GoogleCalendarSetupSheet: View {
 
                 guard let callbackURL = callbackURL,
                       let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
+                      // CSRF guard: only accept a code if our state round-tripped.
+                      components.queryItems?.first(where: { $0.name == "state" })?.value == expectedState,
                       let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
                     self.isLoading = false
                     if let callbackURL = callbackURL,
@@ -218,7 +222,8 @@ struct GoogleCalendarSetupSheet: View {
             }
         }
 
-        session.prefersEphemeralWebBrowserSession = false
+        // Ephemeral: don't reuse Safari's Google session on shared devices.
+        session.prefersEphemeralWebBrowserSession = true
         session.presentationContextProvider = GoogleAuthPresentationContext.shared
         session.start()
     }

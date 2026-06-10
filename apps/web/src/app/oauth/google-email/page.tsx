@@ -17,6 +17,12 @@ export default function GoogleEmailOAuthBounce() {
   useEffect(() => {
     const search = window.location.search || '';
     const params = new URLSearchParams(search);
+
+    // The one-time authorization code must not linger in the address bar,
+    // browser history, or analytics that capture URLs. Capture it in memory,
+    // then scrub the query string before doing anything else.
+    window.history.replaceState({}, '', window.location.pathname);
+
     if (params.get('error')) {
       setError(params.get('error') || 'Authorization was cancelled.');
       return;
@@ -77,20 +83,26 @@ export default function GoogleEmailOAuthBounce() {
             If the app doesn&apos;t open automatically, tap the button below.
           </p>
           {deepLink && (
-            <a
-              href={deepLink}
+            // Button (not <a href>) so the one-time code never sits in the
+            // DOM as an inspectable attribute.
+            <button
+              onClick={() => {
+                window.location.href = deepLink;
+              }}
               style={{
                 marginTop: 20,
                 background: '#0d9488',
                 color: '#fff',
-                textDecoration: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 16,
                 fontWeight: 600,
                 padding: '12px 24px',
                 borderRadius: 12,
               }}
             >
               Open PalmCare AI
-            </a>
+            </button>
           )}
         </>
       )}

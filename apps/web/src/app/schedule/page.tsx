@@ -92,6 +92,9 @@ function OAuthHandler({ token, onConnected, onError }: { token: string | null; o
     const code = searchParams.get('code');
     const error = searchParams.get('error');
     if (error) { onError('Failed to connect Google Calendar: ' + error); window.history.replaceState({}, '', '/schedule'); return; }
+    // No session (expired during OAuth): still scrub the one-time code from
+    // the address bar/history rather than leaving it to linger.
+    if (code && !token) { window.history.replaceState({}, '', '/schedule'); return; }
     if (code && token && !processing) {
       setProcessing(true);
       (async () => {

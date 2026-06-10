@@ -357,6 +357,14 @@ struct SettingsView: View {
             confirmStyle: .destructive,
             onConfirm: { Task { await disconnectBusinessEmail() } }
         )
+        .alert("Business Email", isPresented: Binding(
+            get: { emailSenderError != nil },
+            set: { if !$0 { emailSenderError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(emailSenderError ?? "")
+        }
     }
 
     // MARK: - Legal

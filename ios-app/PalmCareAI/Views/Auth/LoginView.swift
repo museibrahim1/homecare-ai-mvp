@@ -10,6 +10,7 @@ struct LoginView: View {
     @State private var showError = false
     @State private var showRegister = false
     @State private var showForgotPassword = false
+    @State private var showMFASheet = false
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable { case email, password }
@@ -51,6 +52,11 @@ struct LoginView: View {
         .palmErrorAlert("Sign In Failed", message: $errorMessage, isPresented: $showError)
         .sheet(isPresented: $showForgotPassword) {
             ForgotPasswordSheet().environmentObject(api)
+        }
+        .sheet(isPresented: $showMFASheet) {
+            MFACodeSheet(email: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
+                .environmentObject(api)
+                .presentationDetents([.medium])
         }
         .onSubmit(submitFromKeyboard)
     }
@@ -263,7 +269,10 @@ struct LoginView: View {
             do {
                 let response = try await api.login(email: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
                 await MainActor.run {
-                    if let token = response.access_token {
+                    if response.requires_mfa == true {
+                        // Password accepted, but the account needs a TOTP code.
+                        showMFASheet = true
+                    } else if let token = response.access_token, !token.isEmpty {
                         api.token = token
                     } else {
                         errorMessage = "Sign in succeeded but no token was returned. Please try again."
@@ -314,6 +323,131 @@ struct LoginView: View {
             return "Can't reach PalmCare AI. Check your internet connection and try again."
         }
         return raw
+    }
+}
+
+// MARK: - MFA Code Sheet
+
+struct MFACodeSheet: View {
+    @EnvironmentObject var api: APIService
+    @Environment(\.dismiss) private var dismiss
+
+    let email: String
+    let password: String
+
+    @State private var code = ""
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    @FocusState private var codeFocused: Bool
+
+    private var canSubmit: Bool { code.count == 6 && !isLoading }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.palmPrimary.opacity(0.12))
+                            .frame(width: 72, height: 72)
+                        Image(systemName: "lock.shield")
+                            .font(.system(size: 30))
+                            .foregroundColor(.palmPrimary)
+                    }
+
+                    Text("Two-Factor Verification")
+                        .font(.title2.weight(.bold))
+
+                    Text("Enter the 6-digit code from your authenticator app.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                }
+                .padding(.top, 8)
+
+                TextField("000000", text: $code)
+                    .font(.system(size: 32, weight: .semibold, design: .monospaced))
+                    .multilineTextAlignment(.center)
+                    .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
+                    .focused($codeFocused)
+                    .onChange(of: code) { newValue in
+                        code = String(newValue.filter(\.isNumber).prefix(6))
+                        if code.count == 6 { verify() }
+                    }
+                    .padding(.vertical, 14)
+                    .background(Color(UIColor.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                if let error = errorMessage {
+                    Text(error)
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                Button(action: verify) {
+                    ZStack {
+                        Text("Verify")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .opacity(isLoading ? 0 : 1)
+                        if isLoading {
+                            ProgressView().tint(.white)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(canSubmit ? Color.palmPrimary : Color.palmPrimary.opacity(0.4))
+                    )
+                }
+                .disabled(!canSubmit)
+
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 16)
+            .background(Color(UIColor.systemBackground))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+            .onAppear { codeFocused = true }
+        }
+    }
+
+    private func verify() {
+        guard canSubmit else { return }
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                let response = try await api.mfaLogin(email: email, password: password, code: code)
+                await MainActor.run {
+                    isLoading = false
+                    if let token = response.access_token, !token.isEmpty {
+                        api.token = token
+                        dismiss()
+                    } else {
+                        errorMessage = "Verification succeeded but no session was returned. Please try again."
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    code = ""
+                    let lower = error.localizedDescription.lowercased()
+                    errorMessage = lower.contains("invalid mfa")
+                        ? "That code didn't match. Check your authenticator app and try again."
+                        : error.localizedDescription
+                }
+            }
+        }
     }
 }
 

@@ -10,6 +10,9 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
     /// Set when the system interrupts recording (phone call, Siri, etc.)
     /// so the UI can show a recoverable banner.
     @Published var isInterrupted = false
+    /// Set when the system kills the recording out from under us (media
+    /// daemon crash). The partial file in `recordingURL` is still on disk.
+    @Published var recordingFailureMessage: String?
 
     private var audioRecorder: AVAudioRecorder?
     private var timer: Timer?
@@ -237,11 +240,42 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
     }
 
     @objc private func handleMediaServicesReset(_ notification: Notification) {
-        // Rare: media daemon crashed. The recorder is dead; we have to
-        // surface this as an error so the visit is not silently lost.
+        // Rare: media daemon crashed. The recorder is dead, but the WAV bytes
+        // written so far are still on disk at `recordingURL` — surface the
+        // failure so the UI can offer to save the partial recording instead
+        // of losing the visit silently.
+        let wasRecording = isRecording
+        timer?.invalidate()
+        timer = nil
+        levelTimer?.invalidate()
+        levelTimer = nil
+        audioRecorder = nil
         DispatchQueue.main.async { [weak self] in
             self?.isRecording = false
             self?.isInterrupted = false
+            if wasRecording {
+                self?.recordingFailureMessage = "Recording was stopped by the system. The audio captured so far has been saved — you can upload it now."
+            }
+        }
+    }
+
+    /// Remove recordings left behind by crashes or abandoned uploads. PHI
+    /// audio should not accumulate on disk indefinitely; anything older than
+    /// `hours` can't belong to an in-flight assessment.
+    static func purgeStaleRecordings(olderThan hours: Double = 48) {
+        guard let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        let recordingsDir = documentsDir.appendingPathComponent("Recordings", isDirectory: true)
+        guard let files = try? FileManager.default.contentsOfDirectory(
+            at: recordingsDir,
+            includingPropertiesForKeys: [.contentModificationDateKey]
+        ) else { return }
+
+        let cutoff = Date().addingTimeInterval(-hours * 3600)
+        for file in files {
+            let modified = (try? file.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+            if let modified, modified < cutoff {
+                try? FileManager.default.removeItem(at: file)
+            }
         }
     }
 

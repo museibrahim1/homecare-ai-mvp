@@ -28,6 +28,7 @@ struct RecordView: View {
     @AppStorage("assessmentInProgress") private var assessmentInProgress = false
 
     @State private var completedVisitId: String?
+    @State private var pipelineFailed = false
     @State private var completedClientName: String?
     @State private var navigateToVisit = false
     /// Holds a finished recording when the user stopped without selecting a
@@ -104,14 +105,44 @@ struct RecordView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
+                // Phone call / Siri interruption banner — recording is paused
+                // by the system and will resume automatically when it ends.
+                if recorder.isRecording && recorder.isInterrupted {
+                    VStack {
+                        HStack(spacing: 10) {
+                            Image(systemName: "phone.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.palmOrange)
+                            Text("Recording paused by a call — it will resume automatically.")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 40/255, green: 28/255, blue: 12/255).opacity(0.95))
+                        .cornerRadius(14)
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.palmOrange.opacity(0.4), lineWidth: 1))
+                        .padding(.horizontal, 20)
+                        .padding(.top, 70)
+                        Spacer()
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+
             }
             .navigationDestination(isPresented: $navigateToVisit) {
                 // Open straight to the Contract tab — the finished assessment
                 // lands the caregiver on the generated contract automatically,
-                // matching the web app's behavior. The detail view polls the
-                // pipeline and fills in the contract as soon as it's ready.
-                VisitDetailView(visitId: completedVisitId ?? "", clientName: completedClientName, initialTab: 4)
-                    .environmentObject(api)
+                // matching the web app's behavior. If a step failed there is
+                // no contract to show, so land on Overview where the detail
+                // view surfaces what happened.
+                VisitDetailView(
+                    visitId: completedVisitId ?? "",
+                    clientName: completedClientName,
+                    initialTab: pipelineFailed ? 0 : 4
+                )
+                .environmentObject(api)
             }
             .sheet(isPresented: $showClientPicker) {
                 ClientPickerSheet(clients: clients, selected: $selectedClient, onClientAdded: { newClient in
@@ -210,6 +241,23 @@ struct RecordView: View {
                 pendingAudioURL = nil
                 try? FileManager.default.removeItem(at: audioURL)
                 errorMessage = "Recording discarded — no client was selected."
+                showError = true
+            }
+            .onChange(of: recorder.recordingFailureMessage) { message in
+                // System killed the recording (media daemon crash). Recover
+                // the partial file through the normal upload path.
+                guard let message else { return }
+                recorder.recordingFailureMessage = nil
+                liveTranscription?.stopTranscribing()
+                if let url = recorder.recordingURL {
+                    if let client = selectedClient {
+                        processRecording(audioURL: url, clientId: client.id, clientName: client.full_name)
+                    } else {
+                        pendingAudioURL = url
+                        showClientPicker = true
+                    }
+                }
+                errorMessage = message
                 showError = true
             }
     }
@@ -586,6 +634,7 @@ struct RecordView: View {
                     await MainActor.run {
                         completedVisitId = visitId
                         completedClientName = clientName
+                        pipelineFailed = anyFailed && !allDone
                         withAnimation {
                             isProcessing = false
                             uploadProgress = nil
@@ -611,6 +660,7 @@ struct RecordView: View {
         await MainActor.run {
             completedVisitId = visitId
             completedClientName = clientName
+            pipelineFailed = false
             withAnimation {
                 isProcessing = false
                 uploadProgress = nil

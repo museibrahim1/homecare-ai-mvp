@@ -8,7 +8,12 @@ from urllib.parse import urlparse
 
 from fastapi import HTTPException, status
 
-ALLOWED_REDIRECT_HOSTS = {"palmcareai.com", "www.palmcareai.com"}
+ALLOWED_REDIRECT_HOSTS = {
+    "palmcareai.com",
+    "www.palmcareai.com",
+    # The iOS calendar flow bounces through the API's own /calendar/mobile-callback.
+    "api-production-a0a2.up.railway.app",
+}
 DEV_HOSTS = {"localhost", "127.0.0.1"}
 
 

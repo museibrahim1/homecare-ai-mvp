@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { formatLocalDate } from './api';
+import { getStoredToken } from './auth';
 
 /* ─── Types ─── */
 export type NotificationCategory = 'schedule' | 'task' | 'message' | 'email' | 'follow_up' | 'system';
@@ -417,7 +418,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchApiNotifs = async () => {
       try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('palmcare-token') : null;
+        const token = getStoredToken();
         if (!token) return;
         const res = await fetch(`${API_URL}/messaging/notifications?unread_only=true&limit=50`, {
           headers: { 'Authorization': `Bearer ${token}` },

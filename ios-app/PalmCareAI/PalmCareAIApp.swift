@@ -31,6 +31,12 @@ struct PalmCareAIApp: App {
         UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
         UINavigationBar.appearance().compactAppearance = navAppearance
         UINavigationBar.appearance().tintColor = UIColor(red: 13/255, green: 148/255, blue: 136/255, alpha: 1)
+
+        // PHI hygiene: clear out recordings orphaned by crashes or
+        // abandoned uploads. Done off-main so launch isn't delayed.
+        DispatchQueue.global(qos: .utility).async {
+            AudioRecorderService.purgeStaleRecordings()
+        }
     }
 
     var body: some Scene {

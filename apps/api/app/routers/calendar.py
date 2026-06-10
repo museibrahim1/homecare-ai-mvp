@@ -78,7 +78,9 @@ async def mobile_oauth_callback(
     OAuth callback for iOS app. Google redirects here with the auth code,
     then we redirect to the app's custom URL scheme with the code.
     """
-    app_scheme = "com.palmcare.ai"
+    # Must match the CFBundleURLSchemes entry registered by the iOS app —
+    # ASWebAuthenticationSession only completes on this exact scheme.
+    app_scheme = "com.palmcareai.app"
 
     if error:
         redirect = f"{app_scheme}://oauth2callback?error={urllib.parse.quote(error)}"

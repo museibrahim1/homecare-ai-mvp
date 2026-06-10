@@ -340,7 +340,13 @@ export default function DocumentsPage() {
       window.history.replaceState({}, '', '/documents');
       return;
     }
-    
+
+    // Session expired mid-OAuth: scrub the one-time code from the URL anyway.
+    if (code && !token) {
+      window.history.replaceState({}, '', '/documents');
+      return;
+    }
+
     if (code && token) {
       const connectDrive = async () => {
         setDriveLoading(true);

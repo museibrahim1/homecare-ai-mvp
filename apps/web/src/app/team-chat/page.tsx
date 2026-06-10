@@ -347,7 +347,13 @@ export default function TeamChatPage() {
       window.history.replaceState({}, '', '/team-chat');
       return;
     }
-    
+
+    // Session expired mid-OAuth: scrub the one-time code from the URL anyway.
+    if (code && !token) {
+      window.history.replaceState({}, '', '/team-chat');
+      return;
+    }
+
     if (code && token) {
       const connectGmail = async () => {
         setGmailLoading(true);

@@ -42,6 +42,9 @@ struct VisitDetailView: View {
                     Button { showEmailSheet = true } label: {
                         Label("Email Agreement", systemImage: "paperplane.fill")
                     }
+                    // No contract yet (pipeline still running or failed) —
+                    // there's nothing to attach, so don't offer the send.
+                    .disabled(contract == nil)
                     .accessibilityLabel("Email service agreement")
                     Divider()
                     Button { Task { await exportFile(type: "note.pdf") } } label: {
