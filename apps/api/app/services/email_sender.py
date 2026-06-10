@@ -148,6 +148,11 @@ async def get_valid_access_token(user: User, db: Session) -> str:
     return user.email_sender_access_token
 
 
+def _clean_header(value: str) -> str:
+    """Strip CR/LF so user-supplied values can't inject extra MIME headers."""
+    return value.replace("\r", " ").replace("\n", " ").strip()
+
+
 def _build_mime(
     *,
     sender: str,
@@ -161,11 +166,11 @@ def _build_mime(
 ) -> str:
     """Build a base64url-encoded MIME message for the Gmail send API."""
     msg = MIMEMultipart("mixed")
-    msg["To"] = to
-    msg["Subject"] = subject
-    msg["From"] = f"{sender_name} <{sender}>" if sender_name else sender
+    msg["To"] = _clean_header(to)
+    msg["Subject"] = _clean_header(subject)
+    msg["From"] = _clean_header(f"{sender_name} <{sender}>" if sender_name else sender)
     if cc:
-        msg["Cc"] = cc
+        msg["Cc"] = _clean_header(cc)
 
     alt = MIMEMultipart("alternative")
     alt.attach(MIMEText(html, "html", "utf-8"))

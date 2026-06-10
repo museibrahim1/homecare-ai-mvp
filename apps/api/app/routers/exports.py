@@ -2,8 +2,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
+import html as html_lib
 import io
 import csv
 import base64
@@ -33,11 +34,11 @@ logger = logging.getLogger(__name__)
 
 
 class EmailContractRequest(BaseModel):
-    recipient_email: str
-    recipient_name: Optional[str] = None
-    subject: Optional[str] = None
-    message: Optional[str] = None
-    cc_email: Optional[str] = None
+    recipient_email: EmailStr
+    recipient_name: Optional[str] = Field(default=None, max_length=200)
+    subject: Optional[str] = Field(default=None, max_length=300)
+    message: Optional[str] = Field(default=None, max_length=5000)
+    cc_email: Optional[EmailStr] = None
 
 router = APIRouter()
 
@@ -422,12 +423,14 @@ async def email_contract(
     pdf_bytes = generate_contract_pdf(client, contract)
 
     client_name = client.full_name
-    recipient_name = email_request.recipient_name or client_name
-    
+    # Escape user-controlled values so free-text input can't inject markup
+    # into the email we send on the agency's behalf.
+    recipient_name = html_lib.escape(email_request.recipient_name or client_name)
+    client_name_html = html_lib.escape(client_name)
+
     subject = email_request.subject or f"Service Agreement - {client_name}"
-    
-    # Build email HTML
-    custom_message = email_request.message or ""
+
+    custom_message = html_lib.escape(email_request.message or "")
     message_html = f"<p>{custom_message.replace(chr(10), '<br>')}</p>" if custom_message else ""
     
     html = f"""
@@ -440,7 +443,7 @@ async def email_contract(
         
         <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0;">
             <p style="margin: 0; color: #666;">
-                <strong>Client:</strong> {client_name}<br>
+                <strong>Client:</strong> {client_name_html}<br>
                 <strong>Document:</strong> Home Care Service Agreement (PDF attached)
             </p>
         </div>
@@ -457,7 +460,7 @@ async def email_contract(
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #999; font-size: 12px;">
-            Sent by {current_user.full_name}{(' · ' + current_user.company_name) if current_user.company_name else ''}.
+            Sent by {html_lib.escape(current_user.full_name)}{(' · ' + html_lib.escape(current_user.company_name)) if current_user.company_name else ''}.
         </p>
     </div>
     """
@@ -520,11 +523,12 @@ async def email_note(
     # Prepare email
     email_service = get_email_service()
     
-    recipient_name = email_request.recipient_name or client_name
-    
+    recipient_name = html_lib.escape(email_request.recipient_name or client_name)
+    client_name_html = html_lib.escape(client_name)
+
     subject = email_request.subject or f"Visit Note - {client_name}"
-    
-    custom_message = email_request.message or ""
+
+    custom_message = html_lib.escape(email_request.message or "")
     message_html = f"<p>{custom_message.replace(chr(10), '<br>')}</p>" if custom_message else ""
     
     html = f"""
@@ -537,7 +541,7 @@ async def email_note(
         
         <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0;">
             <p style="margin: 0; color: #666;">
-                <strong>Client:</strong> {client_name}<br>
+                <strong>Client:</strong> {client_name_html}<br>
                 <strong>Document:</strong> Visit Note (PDF attached)
             </p>
         </div>
