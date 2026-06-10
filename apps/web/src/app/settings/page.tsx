@@ -1808,7 +1808,9 @@ export default function SettingsPage() {
                             });
                             const d = await res.json();
                             if (!res.ok) throw new Error(d.detail || 'Deletion failed');
-                            localStorage.removeItem('token');
+                            // Clear the real session (zustand 'palmcare-auth' store) —
+                            // a stale 'token' key removal left the session alive.
+                            logout();
                             router.push('/login?deleted=1');
                           } catch (e: any) {
                             setError(e.message);

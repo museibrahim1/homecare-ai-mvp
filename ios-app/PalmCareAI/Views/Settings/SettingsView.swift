@@ -469,6 +469,11 @@ struct SettingsView: View {
         user = try? await fetchedUser
         subscription = try? await fetchedSub
         emailSender = try? await api.emailSenderStatus()
+        // Sync the cached calendar flag with the server so the row doesn't
+        // keep saying "Connected" after a server-side disconnect/expiry.
+        if let connected = try? await api.checkGoogleCalendarStatus() {
+            googleCalConnected = connected
+        }
     }
 
     private func connectBusinessEmail() async {
