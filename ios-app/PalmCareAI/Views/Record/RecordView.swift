@@ -276,30 +276,25 @@ struct RecordView: View {
     // MARK: - Top Bar
 
     private var topBar: some View {
-        HStack {
+        HStack(spacing: 10) {
             Button { showClientPicker = true } label: {
-                HStack(spacing: 8) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.palmPrimary.opacity(0.15))
-                            .frame(width: 28, height: 28)
-                        Image(systemName: "person.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.palmPrimary)
-                    }
+                HStack(spacing: 7) {
+                    Image(systemName: "person")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(selectedClient != nil ? .palmPrimaryLight : .white.opacity(0.45))
                     Text(selectedClient?.full_name ?? "Select Client")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(selectedClient != nil ? .white : .white.opacity(0.5))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(selectedClient != nil ? .white.opacity(0.9) : .white.opacity(0.45))
                         .lineLimit(1)
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white.opacity(0.4))
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.3))
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color.white.opacity(0.06))
-                .cornerRadius(20)
-                .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                .padding(.horizontal, 14)
+                .frame(height: 36)
+                .background(Color.white.opacity(0.05))
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
             }
             .accessibilityLabel("Select client")
 
@@ -307,21 +302,37 @@ struct RecordView: View {
 
             if recorder.isRecording {
                 HStack(spacing: 6) {
-                    Circle().fill(Color.red).frame(width: 7, height: 7)
+                    Circle().fill(Color.red).frame(width: 6, height: 6)
                     Text(timeString(recorder.duration))
-                        .font(.system(size: 14, weight: .bold).monospacedDigit())
-                        .foregroundColor(.white)
+                        .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                        .foregroundColor(.white.opacity(0.9))
                     if backgroundRecording {
-                        Image(systemName: "lock.open.fill")
+                        Image(systemName: "lock.open")
                             .font(.system(size: 10))
                             .foregroundColor(.palmPrimaryLight)
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.red.opacity(0.15))
-                .cornerRadius(16)
-                .overlay(Capsule().stroke(Color.red.opacity(0.3), lineWidth: 1))
+                .padding(.horizontal, 14)
+                .frame(height: 36)
+                .background(Color.white.opacity(0.05))
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(Color.red.opacity(0.25), lineWidth: 1))
+            } else {
+                Button { showFilePicker = true } label: {
+                    HStack(spacing: 7) {
+                        Image(systemName: "arrow.up")
+                            .font(.system(size: 12, weight: .medium))
+                        Text("Upload")
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                    .foregroundColor(.white.opacity(0.45))
+                    .padding(.horizontal, 14)
+                    .frame(height: 36)
+                    .background(Color.white.opacity(0.05))
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+                }
+                .accessibilityLabel("Upload audio file")
             }
         }
         .padding(.horizontal, 16)
@@ -343,39 +354,11 @@ struct RecordView: View {
                 .accessibilityAddTraits(.isButton)
 
             Text("Tap to start recording")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.palmPrimaryLight)
-                .padding(.top, 16)
-
-            Text("Transcript, notes, and agreement — handled for you")
-                .font(.system(size: 12))
-                .foregroundColor(.white.opacity(0.4))
-                .padding(.top, 4)
-
-            Button { showFilePicker = true } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.up.doc.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                    Text("Upload Audio File")
-                        .font(.system(size: 13, weight: .semibold))
-                }
-                .foregroundColor(.palmPrimaryLight)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 10)
-                .background(Color.white.opacity(0.06))
-                .cornerRadius(20)
-                .overlay(Capsule().stroke(Color.palmPrimary.opacity(0.3), lineWidth: 1))
-            }
-            .padding(.top, 20)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.white.opacity(0.5))
+                .padding(.top, 20)
 
             Spacer()
-
-            HStack(spacing: 16) {
-                FeaturePill(icon: "waveform", text: "Live Transcription")
-                FeaturePill(icon: "person.2", text: "Speaker ID")
-                FeaturePill(icon: "doc.text", text: "Auto Contract")
-            }
-            .padding(.bottom, 90)
         }
     }
 
@@ -451,26 +434,6 @@ struct RecordView: View {
                     }
                 }
             }
-        }
-    }
-
-    // MARK: - Feature Pill
-
-    struct FeaturePill: View {
-        let icon: String
-        let text: String
-
-        var body: some View {
-            HStack(spacing: 4) {
-                Image(systemName: icon).font(.system(size: 10))
-                Text(text).font(.system(size: 10, weight: .medium))
-            }
-            .foregroundColor(.white.opacity(0.35))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background(Color.white.opacity(0.04))
-            .cornerRadius(12)
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.06), lineWidth: 1))
         }
     }
 

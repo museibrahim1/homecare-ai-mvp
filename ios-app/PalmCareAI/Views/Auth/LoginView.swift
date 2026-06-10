@@ -42,6 +42,7 @@ struct LoginView: View {
         .scrollDismissesKeyboard(.interactively)
         .background(Color(UIColor.systemBackground))
         .navigationBarTitleDisplayMode(.inline)
+        .palmBackButton()
         .navigationDestination(isPresented: $showRegister) {
             RegisterView().environmentObject(api)
         }

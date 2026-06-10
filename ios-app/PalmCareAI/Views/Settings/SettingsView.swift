@@ -220,12 +220,11 @@ struct SettingsView: View {
 
             SettingsDivider()
 
-            Button {
-                if let url = URL(string: "mailto:support@palmcareai.com?subject=PALM%20Support") {
-                    openURL(url)
-                }
+            NavigationLink {
+                SupportView()
+                    .environmentObject(api)
             } label: {
-                SettingsNavRow(icon: "questionmark.circle.fill", iconColor: .palmAccent, title: "Support", detail: "support@palmcareai.com")
+                SettingsNavRow(icon: "questionmark.circle.fill", iconColor: .palmAccent, title: "Support", detail: "Get help, report a bug")
             }
             .accessibilityLabel("Contact support")
         }
@@ -476,18 +475,13 @@ struct SettingsView: View {
 
     private var logoutButton: some View {
         Button { showLogoutConfirm = true } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
-                    .font(.system(size: 15, weight: .semibold))
-                Text("Logout")
-                    .font(.system(size: 15, weight: .semibold))
-            }
-            .foregroundColor(.red)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(Color.red.opacity(0.06))
-            .cornerRadius(14)
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.red.opacity(0.15), lineWidth: 1))
+            Text("Log Out")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(.red)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(14)
         }
         .accessibilityLabel("Log out")
         .palmConfirmAlert(

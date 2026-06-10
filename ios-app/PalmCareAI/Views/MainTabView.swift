@@ -23,13 +23,17 @@ struct MainTabView: View {
                 }
             )
 
-            VStack {
-                Spacer()
-                HStack {
+            // The record screen stays minimal — just the orb. The assistant
+            // is available on every other tab.
+            if selectedTab != 2 {
+                VStack {
                     Spacer()
-                    PalmAgentButton(isOpen: $palmAgentOpen)
-                        .padding(.trailing, 20)
-                        .padding(.bottom, 90)
+                    HStack {
+                        Spacer()
+                        PalmAgentButton(isOpen: $palmAgentOpen)
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 90)
+                    }
                 }
             }
         }

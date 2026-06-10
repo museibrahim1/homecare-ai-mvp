@@ -66,6 +66,7 @@ struct RegisterView: View {
         .background(Color(UIColor.systemBackground))
         .navigationTitle("Create Account")
         .navigationBarTitleDisplayMode(.inline)
+        .palmBackButton()
         .palmErrorAlert("Registration Failed", message: $errorMessage, isPresented: $showError)
         .alert("Check your email", isPresented: $showMagicLinkSent) {
             Button("OK", role: .cancel) { }
