@@ -76,6 +76,21 @@ async def register_business(
             detail="An account with this email already exists. Try signing in instead.",
         )
 
+    # Team membership is keyed on company_name, so an agency name must map to
+    # exactly one tenant. Without this check, registering under an existing
+    # agency's name would join (and expose) that agency's team.
+    from sqlalchemy import func
+    name_taken = (
+        db.query(User)
+        .filter(func.lower(User.company_name) == agency_name.lower())
+        .first()
+    )
+    if name_taken:
+        raise HTTPException(
+            status_code=409,
+            detail="An agency with this name is already registered. If you work there, ask the account owner to invite you from Settings → Team.",
+        )
+
     # HIPAA: validate password complexity
     from app.core.security import validate_password
     is_valid, error_msg = validate_password(registration.owner_password)

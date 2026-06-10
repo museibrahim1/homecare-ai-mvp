@@ -186,11 +186,14 @@ async def download_audio(
         # Determine content type
         content_type = audio.content_type or "audio/mpeg"
         filename = audio.original_filename or f"audio_{audio_id}.mp3"
-        
+        # The original filename is user-supplied at upload time: strip header
+        # control characters and quotes so it can't break the response headers.
+        safe_filename = "".join(c for c in filename if c.isprintable() and c not in '"\\;') or f"audio_{audio_id}.mp3"
+
         return StreamingResponse(
             io.BytesIO(content),
             media_type=content_type,
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
+            headers={"Content-Disposition": f'attachment; filename="{safe_filename}"'}
         )
     except Exception as e:
         raise HTTPException(

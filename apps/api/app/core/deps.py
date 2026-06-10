@@ -35,7 +35,16 @@ async def get_current_user(
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
+    # A token issued mid-MFA (password verified, TOTP not yet) must never be
+    # accepted as a full session token — it exists only for /auth/mfa/verify.
+    if payload.get("mfa_pending"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="MFA verification required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     user_id: Optional[str] = payload.get("sub")
     if user_id is None:
         raise HTTPException(

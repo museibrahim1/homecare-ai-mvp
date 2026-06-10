@@ -15,6 +15,7 @@ from app.core.security import (
     verify_password, create_access_token, get_password_hash,
     check_account_lockout, record_failed_login, clear_login_attempts,
     check_password_history, record_password_in_history,
+    validate_password,
     _get_redis,
 )
 from app.models.user import User
@@ -328,12 +329,28 @@ async def mfa_login(
 
     _check_rate_limit(f"mfa_login:{client_ip}")
 
+    # Same lockout rules as /auth/login — the MFA path must not be a side door
+    # around brute-force protection.
+    is_locked, seconds_remaining = check_account_lockout(email)
+    if is_locked:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Account temporarily locked. Try again in {seconds_remaining} seconds.",
+        )
+
     user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(request.password, user.hashed_password):
+        record_failed_login(email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user account",
         )
 
     if not user.mfa_enabled or not user.mfa_secret:
@@ -354,6 +371,8 @@ async def mfa_login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid MFA code",
         )
+
+    clear_login_attempts(email)
 
     access_token = create_access_token(data={"sub": str(user.id)})
 
@@ -411,11 +430,13 @@ async def reset_password(
             detail="Reset link has expired. Please request a new one.",
         )
     
-    # Validate new password length
-    if len(request.new_password) < 6:
+    # Same complexity policy as registration/change-password — a reset must
+    # not be a path to a weaker password.
+    is_valid, policy_error = validate_password(request.new_password)
+    if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 6 characters long.",
+            detail=policy_error,
         )
     
     # HIPAA: Prevent reuse of last 5 passwords

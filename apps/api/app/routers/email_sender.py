@@ -48,6 +48,7 @@ async def status(current_user: User = Depends(get_current_user)):
 @router.get("/auth-url", response_model=AuthURLResponse)
 async def auth_url(redirect_uri: str, state: str = "", current_user: User = Depends(get_current_user)):
     """Build the Google consent URL the client opens to grant gmail.send."""
+    sender.validate_redirect_uri(redirect_uri)
     params = {
         "client_id": settings.google_client_id or "",
         "redirect_uri": redirect_uri,

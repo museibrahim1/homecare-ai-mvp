@@ -32,6 +32,23 @@ TOKEN_URL = "https://oauth2.googleapis.com/token"
 USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 GMAIL_SEND_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
 
+# Only redirect URIs we control may participate in the OAuth flow. Google
+# enforces its own registered-URI list, but we must not depend on another
+# system's configuration for our own auth boundary.
+ALLOWED_REDIRECT_URIS = {
+    "https://palmcareai.com/oauth/google-email",
+    "https://www.palmcareai.com/oauth/google-email",
+}
+
+
+def validate_redirect_uri(redirect_uri: str) -> str:
+    if redirect_uri not in ALLOWED_REDIRECT_URIS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported redirect URI.",
+        )
+    return redirect_uri
+
 
 def _require_oauth_configured():
     if not settings.google_client_id or not settings.google_client_secret:
@@ -45,6 +62,7 @@ async def exchange_and_store(user: User, db: Session, code: str, redirect_uri: s
     """Exchange an OAuth authorization code for tokens, look up the connected
     address, and persist everything on the user. Returns the connected email."""
     _require_oauth_configured()
+    validate_redirect_uri(redirect_uri)
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         token_resp = await client.post(

@@ -14,6 +14,7 @@ import urllib.parse
 
 from app.core.deps import get_db, get_current_user
 from app.core.config import settings
+from app.core.oauth import validate_oauth_redirect_uri
 from app.models.user import User
 
 router = APIRouter()
@@ -127,6 +128,8 @@ async def connect_google_calendar(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Google OAuth not configured on server. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.",
         )
+
+    validate_oauth_redirect_uri(token_request.redirect_uri)
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:

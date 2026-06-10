@@ -44,6 +44,10 @@ async def verify_ws_token(token: Optional[str]) -> Optional[str]:
     if not user_id:
         return None
 
+    # Half-authenticated MFA tokens must not open streaming sessions.
+    if payload.get("mfa_pending"):
+        return None
+
     # Pull the user record to verify is_active + force_logout_at. Done in
     # a short-lived session so we don't leak a DB connection into the WS loop.
     try:

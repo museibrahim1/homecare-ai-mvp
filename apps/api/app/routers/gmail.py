@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 
 from app.core.deps import get_db, get_current_user
 from app.core.config import settings
+from app.core.oauth import validate_oauth_redirect_uri
 from app.models.user import User
 
 router = APIRouter()
@@ -70,7 +71,9 @@ async def connect_gmail(
     
     logger.info(f"Gmail connect attempt for user {current_user.id}")
     logger.info(f"OAuth configured: client_id={bool(settings.google_client_id)}, client_secret={bool(settings.google_client_secret)}")
-    
+
+    validate_oauth_redirect_uri(token_request.redirect_uri)
+
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
@@ -297,11 +300,15 @@ async def send_email(
 ):
     """Send an email via Gmail."""
     access_token = await get_valid_access_token(current_user, db)
-    
-    # Create email message
+
+    # Create email message. Strip CR/LF from header values so user-supplied
+    # to/subject can't inject extra MIME headers (e.g. hidden Bcc).
+    def _hdr(value: str) -> str:
+        return (value or "").replace("\r", " ").replace("\n", " ").strip()
+
     message = MIMEText(email_data.body)
-    message["to"] = email_data.to
-    message["subject"] = email_data.subject
+    message["to"] = _hdr(email_data.to)
+    message["subject"] = _hdr(email_data.subject)
     
     # Encode message
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")

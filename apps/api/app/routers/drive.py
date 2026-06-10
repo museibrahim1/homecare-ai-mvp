@@ -12,6 +12,7 @@ import httpx
 
 from app.core.deps import get_db, get_current_user
 from app.core.config import settings
+from app.core.oauth import validate_oauth_redirect_uri
 from app.models.user import User
 
 router = APIRouter()
@@ -55,6 +56,7 @@ async def connect_drive(
     current_user: User = Depends(get_current_user),
 ):
     """Exchange OAuth code for tokens and save to user."""
+    validate_oauth_redirect_uri(token_request.redirect_uri)
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(

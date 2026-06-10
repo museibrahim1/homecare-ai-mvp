@@ -173,6 +173,22 @@ async def list_team_members(
     }
 
 
+# Roles a business can assign to its own team. Platform-level roles
+# ("admin", "admin_team") must never be reachable from tenant-facing APIs —
+# get_current_admin_user only checks role == "admin", so allowing it here
+# would be a self-service privilege escalation to platform admin.
+ASSIGNABLE_TEAM_ROLES = {"caregiver", "user"}
+TEAM_MANAGER_ROLES = {"user", "admin"}
+
+
+def _require_team_manager(current_user: User):
+    """Only business owners/managers (and platform admins) manage the team."""
+    if current_user.role not in TEAM_MANAGER_ROLES:
+        raise HTTPException(status_code=403, detail="Only account owners can manage team members")
+    if not current_user.company_name:
+        raise HTTPException(status_code=403, detail="No business is associated with this account")
+
+
 @router.post("/team/invite")
 async def invite_team_member(
     db: Session = Depends(get_db),
@@ -184,6 +200,10 @@ async def invite_team_member(
     """Invite a new team member."""
     if not email or not full_name:
         raise HTTPException(status_code=400, detail="Email and full_name are required")
+
+    _require_team_manager(current_user)
+    if role not in ASSIGNABLE_TEAM_ROLES:
+        raise HTTPException(status_code=400, detail=f"Role must be one of: {', '.join(sorted(ASSIGNABLE_TEAM_ROLES))}")
     
     # Check team limits based on subscription plan
     limits = get_team_limits(db, current_user.company_name)
@@ -289,19 +309,28 @@ async def update_team_member(
     is_active: bool = None,
 ):
     """Update a team member's role or status."""
+    _require_team_manager(current_user)
+
     member = db.query(User).filter(User.id == user_id).first()
     if not member:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # Check same company
-    if member.company_name != current_user.company_name:
+
+    # Check same company (company_name must be present — two users with no
+    # company are NOT teammates).
+    if not member.company_name or member.company_name != current_user.company_name:
         raise HTTPException(status_code=403, detail="Not authorized to modify this user")
-    
+
     # Can't deactivate yourself
     if is_active is False and member.id == current_user.id:
         raise HTTPException(status_code=400, detail="Cannot deactivate your own account")
-    
+
     if role is not None:
+        if role not in ASSIGNABLE_TEAM_ROLES:
+            raise HTTPException(status_code=400, detail=f"Role must be one of: {', '.join(sorted(ASSIGNABLE_TEAM_ROLES))}")
+        # Changing your own role is how a caregiver-turned-manager would
+        # self-promote; require another manager to do it.
+        if member.id == current_user.id:
+            raise HTTPException(status_code=400, detail="You cannot change your own role")
         member.role = role
     if is_active is not None:
         member.is_active = is_active
@@ -325,12 +354,14 @@ async def remove_team_member(
     current_user: User = Depends(get_current_api_user),
 ):
     """Remove a team member (soft delete - deactivate)."""
+    _require_team_manager(current_user)
+
     member = db.query(User).filter(User.id == user_id).first()
     if not member:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # Check same company
-    if member.company_name != current_user.company_name:
+
+    # Check same company (must be non-empty on both sides)
+    if not member.company_name or member.company_name != current_user.company_name:
         raise HTTPException(status_code=403, detail="Not authorized to modify this user")
     
     # Can't remove yourself

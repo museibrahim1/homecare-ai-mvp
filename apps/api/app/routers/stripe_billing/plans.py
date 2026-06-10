@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.internal_auth import require_internal_key
 from app.models.user import User
 from app.models.business import Business, BusinessUser
 from app.models.subscription import Plan, Subscription, SubscriptionStatus, Invoice
@@ -61,8 +62,13 @@ async def get_public_plans(db: Session = Depends(get_db)):
 
 
 @router.post("/plans/seed")
-async def seed_plans(db: Session = Depends(get_db)):
-    """Seed default pricing plans if they don't exist. Idempotent."""
+async def seed_plans(request: Request, db: Session = Depends(get_db)):
+    """Seed default pricing plans if they don't exist. Idempotent.
+
+    Internal/ops only — overwrites platform pricing, so it must never be
+    callable anonymously.
+    """
+    require_internal_key(request)
     from app.models.subscription import PlanTier
     import json
 
@@ -180,8 +186,9 @@ async def seed_plans(db: Session = Depends(get_db)):
 
 
 @router.post("/plans/wire-stripe")
-async def wire_stripe_ids(db: Session = Depends(get_db)):
+async def wire_stripe_ids(request: Request, db: Session = Depends(get_db)):
     """Internal endpoint to wire Stripe price IDs to existing plans."""
+    require_internal_key(request)
     from app.models.subscription import PlanTier
 
     updated = 0
