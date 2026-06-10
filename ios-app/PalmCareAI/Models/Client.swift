@@ -52,3 +52,34 @@ struct Client: Codable, Identifiable {
         status ?? "active"
     }
 }
+
+extension String {
+    /// "3055550187" → "(305) 555-0187". Leaves anything that isn't a plain
+    /// 10-digit (or 1-prefixed 11-digit) US number untouched.
+    var palmFormattedPhone: String {
+        let digits = filter(\.isNumber)
+        if digits.count == 10 {
+            let area = digits.prefix(3)
+            let mid = digits.dropFirst(3).prefix(3)
+            let last = digits.suffix(4)
+            return "(\(area)) \(mid)-\(last)"
+        }
+        if digits.count == 11, digits.first == "1" {
+            let rest = digits.dropFirst()
+            let area = rest.prefix(3)
+            let mid = rest.dropFirst(3).prefix(3)
+            let last = rest.suffix(4)
+            return "+1 (\(area)) \(mid)-\(last)"
+        }
+        return self
+    }
+
+    /// "1941-03-22" → "Mar 22, 1941". Leaves unparseable values untouched.
+    var palmFormattedDateOnly: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        guard let date = formatter.date(from: String(prefix(10))) else { return self }
+        return date.formatted(.dateTime.month(.abbreviated).day().year())
+    }
+}

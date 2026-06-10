@@ -58,7 +58,7 @@ extension ClientDetailView {
                         Image(systemName: "birthday.cake")
                             .font(.system(size: 10))
                             .foregroundColor(.palmPurple)
-                        Text(dob)
+                        Text(dob.palmFormattedDateOnly)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.palmPurple)
                     }
@@ -120,11 +120,11 @@ extension ClientDetailView {
         DetailSection(title: "Contact", icon: "phone.fill", iconColor: .palmPrimary) {
             VStack(spacing: 0) {
                 if let phone = client.phone, !phone.isEmpty {
-                    detailRow(icon: "phone.fill", label: "Phone", value: phone, color: .palmPrimary)
+                    detailRow(icon: "phone.fill", label: "Phone", value: phone.palmFormattedPhone, color: .palmPrimary)
                 }
                 if let phone2 = client.phone_secondary, !phone2.isEmpty {
                     detailDivider
-                    detailRow(icon: "phone", label: "Secondary Phone", value: phone2, color: .palmPrimary)
+                    detailRow(icon: "phone", label: "Secondary Phone", value: phone2.palmFormattedPhone, color: .palmPrimary)
                 }
                 if let email = client.email, !email.isEmpty {
                     detailDivider
@@ -194,7 +194,7 @@ extension ClientDetailView {
                             Image(systemName: "phone.fill")
                                 .font(.system(size: 10))
                                 .foregroundColor(.palmPrimary)
-                            Text(phone)
+                            Text(phone.palmFormattedPhone)
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(.palmText.opacity(0.8))
                         }
@@ -246,7 +246,7 @@ extension ClientDetailView {
                 }
                 if let physician = client.physician_name, !physician.isEmpty {
                     if showDivider { detailDivider }
-                    let physicianDetail = [physician, client.physician_phone]
+                    let physicianDetail = [physician, client.physician_phone?.palmFormattedPhone]
                         .compactMap { $0 }
                         .filter { !$0.isEmpty }
                         .joined(separator: " · ")
@@ -337,11 +337,11 @@ extension ClientDetailView {
                 }
                 if let intake = client.intake_date, !intake.isEmpty {
                     detailDivider
-                    detailRow(icon: "calendar.badge.plus", label: "Intake Date", value: intake, color: .palmGreen)
+                    detailRow(icon: "calendar.badge.plus", label: "Intake Date", value: intake.palmFormattedDateOnly, color: .palmGreen)
                 }
                 if let discharge = client.discharge_date, !discharge.isEmpty {
                     detailDivider
-                    detailRow(icon: "calendar.badge.minus", label: "Discharge Date", value: discharge, color: .palmOrange)
+                    detailRow(icon: "calendar.badge.minus", label: "Discharge Date", value: discharge.palmFormattedDateOnly, color: .palmOrange)
                 }
                 if let extId = client.external_id, !extId.isEmpty {
                     detailDivider

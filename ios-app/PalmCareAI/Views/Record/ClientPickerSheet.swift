@@ -186,7 +186,7 @@ struct ClientPickerSheet: View {
                             Text(diagnosis.replacingOccurrences(of: "_", with: " ").capitalized)
                                 .lineLimit(1)
                         } else if let phone = client.phone, !phone.isEmpty {
-                            Text(phone)
+                            Text(phone.palmFormattedPhone)
                         }
                     }
                     .font(.system(size: 12))

@@ -363,7 +363,7 @@ struct ClientCard: View {
                         HStack(spacing: 4) {
                             Image(systemName: "phone.fill")
                                 .font(.system(size: 9))
-                            Text(phone)
+                            Text(phone.palmFormattedPhone)
                                 .font(.system(size: 11, weight: .medium))
                         }
                         .foregroundColor(.palmSecondary)
