@@ -11,17 +11,26 @@ struct PalmBackButtonModifier: ViewModifier {
         content
             .navigationBarBackButtonHidden(true)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(darkBackground ? .white.opacity(0.8) : .secondary)
-                            .frame(width: 30, height: 30)
-                            .contentShape(Circle())
-                    }
-                    .accessibilityLabel("Back")
+                // On iOS 26 the system wraps toolbar items in a Liquid Glass
+                // circle — hide it so the chevron stays quiet and seamless.
+                if #available(iOS 26.0, *) {
+                    ToolbarItem(placement: .topBarLeading) { backButton }
+                        .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .topBarLeading) { backButton }
                 }
             }
+    }
+
+    private var backButton: some View {
+        Button { dismiss() } label: {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(darkBackground ? .white.opacity(0.8) : .secondary)
+                .frame(width: 32, height: 32)
+                .contentShape(Circle())
+        }
+        .accessibilityLabel("Back")
     }
 }
 
