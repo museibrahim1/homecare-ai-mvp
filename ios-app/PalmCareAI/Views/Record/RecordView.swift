@@ -8,6 +8,7 @@ struct RecordView: View {
     @State private var liveTranscription: LiveTranscriptionService?
     @State private var liveSegments: [TranscriptSegment] = []
     @State private var liveFullTranscript = ""
+    @State private var liveNoSpeech = false
     #if DEBUG
     @StateObject private var demoTranscription = DemoTranscriptionService()
     @State private var isDemoMode = false
@@ -209,6 +210,9 @@ struct RecordView: View {
                     liveSegments = lt.segments
                     liveFullTranscript = lt.fullTranscript
                 }
+                if lt.noSpeechDetected != liveNoSpeech {
+                    withAnimation { liveNoSpeech = lt.noSpeechDetected }
+                }
             }
             .onDisappear {
                 if !recorder.isRecording && !isProcessing {
@@ -402,6 +406,16 @@ struct RecordView: View {
                 }
                 .padding(.bottom, 8)
 
+                if transcriptSegments.isEmpty, liveNoSpeech {
+                    Text("No speech detected yet — make sure you're speaking near the microphone.")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white.opacity(0.35))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 8)
+                        .transition(.opacity)
+                }
+
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 16) {
@@ -465,6 +479,7 @@ struct RecordView: View {
                 liveTranscription?.segments = []
                 liveSegments = []
                 liveFullTranscript = ""
+                liveNoSpeech = false
                 do {
                     try recorder.startRecording()
                     if let url = recorder.recordingURL {

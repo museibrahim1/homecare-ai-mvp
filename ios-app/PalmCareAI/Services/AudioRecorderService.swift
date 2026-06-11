@@ -34,12 +34,14 @@ class AudioRecorderService: NSObject, ObservableObject, AVAudioRecorderDelegate 
 
     func startRecording() throws {
         let session = AVAudioSession.sharedInstance()
-        // .allowBluetoothA2DP is output-only; .allowBluetooth enables HFP for
-        // headset microphones (AirPods, etc). Use .measurement mode to disable
-        // automatic gain that distorts soft speech in care environments.
+        // .default mode keeps the system's automatic gain control active —
+        // .measurement mode (tried previously) disables input processing and
+        // produced silent/near-silent recordings on some devices and routes,
+        // which broke live transcription. AGC is what we want for room
+        // conversations anyway.
         try session.setCategory(
             .playAndRecord,
-            mode: .measurement,
+            mode: .default,
             options: [.defaultToSpeaker, .allowBluetooth]
         )
         try session.setActive(true)

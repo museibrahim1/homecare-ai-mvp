@@ -19,6 +19,9 @@ class LiveTranscriptionService: ObservableObject {
     @Published var isTranscribing = false
     @Published var fullTranscript = ""
     @Published var lastError: String?
+    /// True once several chunks have round-tripped successfully but produced
+    /// no words — the mic is likely muted, blocked, or picking up silence.
+    @Published var noSpeechDetected = false
 
     private let api: APIService
     private var chunkTimer: Timer?
@@ -28,6 +31,12 @@ class LiveTranscriptionService: ObservableObject {
 
     /// PCM bytes already sent for transcription.
     private var lastByteOffset: UInt64 = AudioRecorderService.wavHeaderSize.asUInt64
+    /// Whether we've located the real start of PCM data in the WAV file.
+    /// CoreAudio writes extra JUNK/FLLR chunks before `data` (~4 KB), so the
+    /// canonical 44-byte offset is wrong on real files.
+    private var didLocateDataChunk = false
+    /// Successful chunks that came back with no words at all.
+    private var emptyChunkCount = 0
     /// Wall-clock time when current recording was started (for segment timestamps).
     private var recordingStart: Date = .distantPast
     /// Rolling transcript pieces (one per successful chunk).
@@ -51,6 +60,9 @@ class LiveTranscriptionService: ObservableObject {
 
         isTranscribing = true
         lastByteOffset = AudioRecorderService.wavHeaderSize.asUInt64
+        didLocateDataChunk = false
+        emptyChunkCount = 0
+        noSpeechDetected = false
         segments = []
         fullTranscript = ""
         transcriptPieces = []
@@ -85,6 +97,19 @@ class LiveTranscriptionService: ObservableObject {
         }
 
         do {
+            // Find where PCM actually starts. AVAudioRecorder (CoreAudio)
+            // pads WAV headers with JUNK + FLLR chunks, so `data` usually
+            // begins near 4 KB rather than the canonical byte 44.
+            if !didLocateDataChunk {
+                if let offset = Self.findDataChunkOffset(in: recordingURL) {
+                    lastByteOffset = offset
+                    didLocateDataChunk = true
+                }
+                // If the header is still being written, fall through —
+                // worst case the first chunk carries a few KB of header
+                // bytes, which Deepgram tolerates.
+            }
+
             let attrs = try FileManager.default.attributesOfItem(atPath: recordingURL.path)
             let fileSize = (attrs[.size] as? UInt64) ?? 0
             guard fileSize > lastByteOffset + minNewBytes else { return }
@@ -113,8 +138,19 @@ class LiveTranscriptionService: ObservableObject {
             lastByteOffset = readEnd
             lastError = nil
 
-            guard !response.transcript.isEmpty else { return }
+            guard !response.transcript.isEmpty else {
+                // Several rounds of clean uploads with zero words means the
+                // mic is muted/blocked — tell the user instead of showing a
+                // silent screen forever.
+                emptyChunkCount += 1
+                if emptyChunkCount >= 3 && transcriptPieces.isEmpty {
+                    noSpeechDetected = true
+                }
+                return
+            }
 
+            emptyChunkCount = 0
+            noSpeechDetected = false
             transcriptPieces.append(response.transcript)
             fullTranscript = transcriptPieces.joined(separator: " ")
             segments = mergeSegments(segments, with: response.words, chunkStartSeconds: Date().timeIntervalSince(recordingStart) - response.duration)
@@ -123,6 +159,31 @@ class LiveTranscriptionService: ObservableObject {
             // same audio range on the next tick.
             lastError = error.localizedDescription
         }
+    }
+
+    /// Scan the first few KB of a RIFF/WAV file for the `data` chunk and
+    /// return the byte offset where PCM samples begin. Returns nil if the
+    /// header is malformed or the chunk hasn't been written yet.
+    static func findDataChunkOffset(in url: URL) -> UInt64? {
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { handle.closeFile() }
+        let header = handle.readData(ofLength: 16 * 1024)
+        guard header.count > 12,
+              header.prefix(4) == Data("RIFF".utf8) else { return nil }
+
+        // Walk RIFF sub-chunks: [fourCC][size][payload]...
+        var i = 12
+        while i + 8 <= header.count {
+            let fourCC = header.subdata(in: i..<(i + 4))
+            let sizeBytes = header.subdata(in: (i + 4)..<(i + 8))
+            let size = sizeBytes.withUnsafeBytes { $0.loadUnaligned(as: UInt32.self) }.littleEndian
+            if fourCC == Data("data".utf8) {
+                return UInt64(i + 8)
+            }
+            // Chunks are word-aligned; odd sizes are padded with one byte.
+            i += 8 + Int(size) + (Int(size) % 2)
+        }
+        return nil
     }
 
     /// Build a 44-byte RIFF/WAV header for the given PCM payload.
