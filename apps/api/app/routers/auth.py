@@ -19,7 +19,7 @@ from app.core.security import (
     _get_redis,
 )
 from app.models.user import User
-from app.schemas.auth import LoginRequest, Token, MFALoginRequest
+from app.schemas.auth import LoginRequest, Token, MFALoginRequest, RefreshRequest
 from app.schemas.user import UserResponse
 from app.services.audit import log_action
 from app.services.email import email_service
@@ -27,6 +27,24 @@ from app.services.email import email_service
 logger = logging.getLogger(__name__)
 
 PASSWORD_RESET_EXPIRY_HOURS = 1
+REFRESH_TOKEN_EXPIRY_DAYS = 30
+
+
+def _hash_refresh_token(token: str) -> str:
+    import hashlib
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def _issue_refresh_token(user: User) -> str:
+    """Create a new refresh token for the user (rotates any existing one).
+
+    Caller is responsible for db.commit(). The plain token is returned to
+    the client once and only its hash is stored.
+    """
+    token = secrets.token_urlsafe(48)
+    user.refresh_token_hash = _hash_refresh_token(token)
+    user.refresh_token_expires_at = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRY_DAYS)
+    return token
 
 # Rate limit settings
 RATE_LIMIT_WINDOW = 60  # seconds
@@ -181,6 +199,7 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
     else:
         expires = None  # uses default from settings
     access_token = create_access_token(data={"sub": str(user.id)}, expires_delta=expires)
+    refresh_token = _issue_refresh_token(user)
 
     # Track last login time
     user.last_login = datetime.now(timezone.utc)
@@ -201,7 +220,51 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
         except Exception as e:
             logger.warning(f"Failed to notify CEO of team login: {e}")
     
-    return Token(access_token=access_token)
+    return Token(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_session(
+    request: RefreshRequest,
+    req: Request,
+    db: Session = Depends(get_db),
+):
+    """
+    Exchange a valid refresh token for a new access token.
+
+    The refresh token is rotated on every use. Used by the mobile app so
+    Face ID users stay signed in without long-lived access tokens.
+    """
+    client_ip = req.client.host if req.client else "unknown"
+    _check_rate_limit(f"refresh:{client_ip}")
+
+    token_hash = _hash_refresh_token(request.refresh_token)
+    user = db.query(User).filter(User.refresh_token_hash == token_hash).first()
+
+    invalid = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Session expired — please sign in again",
+    )
+    if not user or not user.is_active:
+        raise invalid
+    expires_at = user.refresh_token_expires_at
+    if not expires_at:
+        raise invalid
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(timezone.utc):
+        raise invalid
+
+    if getattr(user, "role", "") == "admin_team":
+        expires = timedelta(days=7)
+    else:
+        expires = None
+    access_token = create_access_token(data={"sub": str(user.id)}, expires_delta=expires)
+    new_refresh = _issue_refresh_token(user)
+    user.last_active = datetime.now(timezone.utc)
+    db.commit()
+
+    return Token(access_token=access_token, refresh_token=new_refresh)
 
 
 @router.get("/me", response_model=UserResponse)
@@ -251,7 +314,10 @@ async def logout(
         current_user.google_calendar_access_token = None
         current_user.google_calendar_refresh_token = None
         current_user.google_calendar_token_expiry = None
-        db.commit()
+
+    current_user.refresh_token_hash = None
+    current_user.refresh_token_expires_at = None
+    db.commit()
 
     return {"message": "Successfully logged out"}
 
@@ -269,6 +335,8 @@ async def logout_all_devices(
     every device.
     """
     current_user.force_logout_at = datetime.now(timezone.utc)
+    current_user.refresh_token_hash = None
+    current_user.refresh_token_expires_at = None
 
     is_platform_admin = (
         getattr(current_user, 'role', '') == 'admin'
@@ -401,6 +469,8 @@ async def mfa_login(
     clear_login_attempts(email)
 
     access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = _issue_refresh_token(user)
+    db.commit()
 
     log_action(
         db=db, user_id=user.id, action="user_login",
@@ -409,7 +479,7 @@ async def mfa_login(
         ip_address=client_ip,
     )
 
-    return Token(access_token=access_token)
+    return Token(access_token=access_token, refresh_token=refresh_token)
 
 
 @router.post("/reset-password")

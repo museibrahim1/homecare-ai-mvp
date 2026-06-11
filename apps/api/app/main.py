@@ -281,6 +281,8 @@ async def seed_database():
             "last_login": "TIMESTAMP WITH TIME ZONE",
             "last_active": "TIMESTAMP WITH TIME ZONE",
             "total_session_minutes": "JSONB DEFAULT '{}'::jsonb",
+            "refresh_token_hash": "VARCHAR(64)",
+            "refresh_token_expires_at": "TIMESTAMP WITH TIME ZONE",
         }
         for col_name, col_type in new_cols.items():
             if col_name not in existing_cols:

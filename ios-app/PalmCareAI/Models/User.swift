@@ -32,9 +32,11 @@ struct LoginResponse: Codable {
     let token_type: String?
     let requires_mfa: Bool?
     let mfa_token: String?
+    let refresh_token: String?
 }
 
 struct BusinessLoginResponse: Codable {
     let access_token: String
     let token_type: String
+    let refresh_token: String?
 }

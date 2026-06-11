@@ -208,6 +208,10 @@ async def register_business(
     except Exception:
         pass
 
+    # Rotating refresh token so the mobile app can renew the session.
+    from app.routers.auth import _issue_refresh_token
+    refresh_token = _issue_refresh_token(regular_user)
+
     try:
         db.commit()
     except Exception as e:
@@ -256,6 +260,7 @@ async def register_business(
         message="Welcome to PALM!",
         next_steps=next_steps,
         access_token=token,
+        refresh_token=refresh_token,
     )
 
 

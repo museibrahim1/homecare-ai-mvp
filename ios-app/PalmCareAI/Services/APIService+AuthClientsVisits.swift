@@ -4,8 +4,9 @@ extension APIService {
     // MARK: - Auth
 
     func login(email: String, password: String) async throws -> LoginResponse {
+        let response: LoginResponse
         do {
-            return try await request("POST", path: "/auth/login", body: ["email": email, "password": password], noAuth: true)
+            response = try await request("POST", path: "/auth/login", body: ["email": email, "password": password], noAuth: true)
         } catch {
             // If regular auth fails, try business auth (matches web app behavior)
             do {
@@ -13,11 +14,12 @@ extension APIService {
                     "POST", path: "/auth/business/login",
                     body: ["email": email, "password": password], noAuth: true
                 )
-                return LoginResponse(
+                response = LoginResponse(
                     access_token: bizResponse.access_token,
                     token_type: bizResponse.token_type,
                     requires_mfa: nil,
-                    mfa_token: nil
+                    mfa_token: nil,
+                    refresh_token: bizResponse.refresh_token
                 )
             } catch {
                 // Both failed — surface the business-auth error, since app
@@ -26,6 +28,10 @@ extension APIService {
                 throw error
             }
         }
+        if let refresh = response.refresh_token, !refresh.isEmpty {
+            await MainActor.run { self.refreshToken = refresh }
+        }
+        return response
     }
 
     func fetchUser(forceRefresh: Bool = false) async throws -> User {
@@ -40,11 +46,15 @@ extension APIService {
     /// Complete a login that required a second factor. The backend re-verifies
     /// email + password together with the TOTP code and returns a full token.
     func mfaLogin(email: String, password: String, code: String) async throws -> LoginResponse {
-        try await request(
+        let response: LoginResponse = try await request(
             "POST", path: "/auth/mfa/login",
             body: ["email": email, "password": password, "mfa_code": code],
             noAuth: true
         )
+        if let refresh = response.refresh_token, !refresh.isEmpty {
+            await MainActor.run { self.refreshToken = refresh }
+        }
+        return response
     }
 
     /// Register a new business. The simplified backend returns an access_token
@@ -54,8 +64,13 @@ extension APIService {
         let response: RegisterResponse = try await request(
             "POST", path: "/auth/business/register", body: body, noAuth: true
         )
-        if let access = response.access_token, !access.isEmpty {
-            await MainActor.run { self.token = access }
+        await MainActor.run {
+            if let refresh = response.refresh_token, !refresh.isEmpty {
+                self.refreshToken = refresh
+            }
+            if let access = response.access_token, !access.isEmpty {
+                self.token = access
+            }
         }
         return response
     }
@@ -80,6 +95,9 @@ extension APIService {
             noAuth: true
         )
         await MainActor.run {
+            if let refresh = response.refresh_token, !refresh.isEmpty {
+                self.refreshToken = refresh
+            }
             if !response.access_token.isEmpty {
                 self.token = response.access_token
             }
@@ -132,7 +150,7 @@ extension APIService {
 
     // MARK: - Audio Upload
 
-    func uploadAudio(visitId: String, audioData: Data, filename: String, autoProcess: Bool = true) async throws -> UploadResponse {
+    func uploadAudio(visitId: String, audioData: Data, filename: String, autoProcess: Bool = true, isRetry: Bool = false) async throws -> UploadResponse {
         let url = try validatedURL(path: "/uploads/audio")
 
         let boundary = UUID().uuidString
@@ -179,7 +197,15 @@ extension APIService {
         }
 
         if httpResponse.statusCode == 401 {
-            await MainActor.run { self.token = nil }
+            // Never lose a recorded assessment to an expired token — renew
+            // the session and retry the upload once.
+            if !isRetry, await refreshSession() {
+                return try await uploadAudio(visitId: visitId, audioData: audioData, filename: filename, autoProcess: autoProcess, isRetry: true)
+            }
+            await MainActor.run {
+                self.refreshToken = nil
+                self.token = nil
+            }
             throw APIError.unauthorized
         }
 

@@ -12,6 +12,11 @@ class Token(BaseModel):
     token_type: str = "bearer"
     requires_mfa: bool = False
     mfa_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
 
 
 class MFALoginRequest(BaseModel):

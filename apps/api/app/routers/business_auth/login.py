@@ -133,6 +133,11 @@ async def login(
         db.flush()
         logger.info(f"Created linked User row {api_user.id} for BusinessUser {user.id} ({user.email})")
 
+    # Issue a rotating refresh token on the linked User row so the mobile
+    # app can renew sessions (Face ID stay-signed-in) via /auth/refresh.
+    from app.routers.auth import _issue_refresh_token
+    refresh_token = _issue_refresh_token(api_user)
+
     db.commit()
 
     # IMPORTANT: token sub MUST be the User.id (not BusinessUser.id) so
@@ -146,6 +151,7 @@ async def login(
     return BusinessLoginResponse(
         access_token=token,
         token_type="bearer",
+        refresh_token=refresh_token,
         user=BusinessUserResponse(
             id=user.id,
             email=user.email,

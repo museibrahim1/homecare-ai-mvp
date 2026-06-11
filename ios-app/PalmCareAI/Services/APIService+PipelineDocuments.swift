@@ -73,7 +73,7 @@ extension APIService {
 
     /// Download a file from an API path with authentication, saving to a temp file.
     /// Returns the local file URL on success.
-    func downloadFile(path: String, suggestedFilename: String) async throws -> URL {
+    func downloadFile(path: String, suggestedFilename: String, isRetry: Bool = false) async throws -> URL {
         let fullPath = path.hasPrefix("http") ? path : "\(baseURL)\(path)"
         guard let url = URL(string: fullPath) else { throw APIError.invalidURL }
         guard isAllowedURL(url) else { throw APIError.serverError("Insecure connection blocked.") }
@@ -90,7 +90,13 @@ extension APIService {
         guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
 
         if http.statusCode == 401 {
-            await MainActor.run { self.token = nil }
+            if !isRetry, await refreshSession() {
+                return try await downloadFile(path: path, suggestedFilename: suggestedFilename, isRetry: true)
+            }
+            await MainActor.run {
+                self.refreshToken = nil
+                self.token = nil
+            }
             throw APIError.unauthorized
         }
         guard (200...299).contains(http.statusCode) else {

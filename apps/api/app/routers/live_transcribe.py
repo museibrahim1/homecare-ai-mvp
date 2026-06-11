@@ -77,6 +77,18 @@ async def live_transcribe(
 
     content_type = file.content_type or "audio/wav"
 
+    # Diagnostic: log the PCM peak of each chunk so silent-microphone
+    # devices are visible in server logs (peak=0 means pure silence).
+    try:
+        peak = _pcm_peak(content)
+        logger.info(
+            "live chunk user=%s bytes=%d peak=%s",
+            getattr(current_user, "email", "?"), len(content),
+            peak if peak is not None else "n/a",
+        )
+    except Exception:
+        pass
+
     if not deepgram_key and not openai_key:
         raise HTTPException(
             status_code=503,
@@ -117,6 +129,37 @@ async def live_transcribe(
             status_code=502,
             detail=f"Live transcription failed: {type(e).__name__}",
         )
+
+
+def _pcm_peak(content: bytes) -> Optional[int]:
+    """Max abs int16 sample of a WAV chunk (None if not parseable as WAV)."""
+    import struct
+
+    if len(content) < 44 or content[:4] != b"RIFF":
+        return None
+    # Walk RIFF sub-chunks to find `data`
+    i = 12
+    pcm = None
+    while i + 8 <= len(content):
+        four_cc = content[i:i + 4]
+        size = struct.unpack_from("<I", content, i + 4)[0]
+        if four_cc == b"data":
+            pcm = content[i + 8: i + 8 + size]
+            break
+        i += 8 + size + (size % 2)
+    if pcm is None or len(pcm) < 2:
+        return None
+    # Sample up to ~50k samples evenly to keep this cheap
+    n = len(pcm) // 2
+    step = max(1, n // 50_000)
+    peak = 0
+    for j in range(0, n, step):
+        val = struct.unpack_from("<h", pcm, j * 2)[0]
+        if abs(val) > peak:
+            peak = abs(val)
+            if peak >= 32767:
+                break
+    return peak
 
 
 def _transcribe_deepgram(

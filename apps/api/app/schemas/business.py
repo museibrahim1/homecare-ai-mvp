@@ -145,6 +145,7 @@ class BusinessRegistrationResponse(BaseModel):
     next_steps: List[str]
     access_token: Optional[str] = None
     token_type: str = "bearer"
+    refresh_token: Optional[str] = None
 
 
 # =============================================================================
@@ -264,6 +265,7 @@ class BusinessLoginResponse(BaseModel):
     """Login response"""
     access_token: str
     token_type: str = "bearer"
+    refresh_token: Optional[str] = None
     user: BusinessUserResponse
     business: BusinessProfile
 

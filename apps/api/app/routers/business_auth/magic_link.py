@@ -134,6 +134,9 @@ async def verify_magic_link(
         db.add(api_user)
         db.flush()
 
+    from app.routers.auth import _issue_refresh_token
+    refresh_token = _issue_refresh_token(api_user)
+
     db.commit()
     clear_login_attempts(user.email)
 
@@ -145,6 +148,7 @@ async def verify_magic_link(
 
     return BusinessLoginResponse(
         access_token=token,
+        refresh_token=refresh_token,
         user=BusinessUserResponse(
             id=user.id,
             email=user.email,

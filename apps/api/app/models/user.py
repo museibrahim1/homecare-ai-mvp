@@ -52,6 +52,12 @@ class User(Base, TimestampMixin):
     # Password reset
     password_reset_token = Column(String(255), nullable=True, index=True)
     password_reset_expires = Column(DateTime(timezone=True), nullable=True)
+
+    # Mobile session refresh token (sha256 hash; plain value lives only in
+    # the device Keychain). Lets Face ID users stay signed in past the
+    # 1-hour JWT without weakening the access-token lifetime.
+    refresh_token_hash = Column(String(64), nullable=True, index=True)
+    refresh_token_expires_at = Column(DateTime(timezone=True), nullable=True)
     
     # Voiceprint for speaker identification (encrypted at rest)
     _voiceprint_encrypted = Column("voiceprint", Text, nullable=True)

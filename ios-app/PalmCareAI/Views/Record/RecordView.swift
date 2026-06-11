@@ -34,6 +34,12 @@ struct RecordView: View {
     /// Holds a finished recording when the user stopped without selecting a
     /// client, so it can be processed once a client is chosen (no lost audio).
     @State private var pendingAudioURL: URL?
+    /// True when the user tapped record with no client selected — the picker
+    /// opens first and recording auto-starts once they choose someone.
+    @State private var pendingStartAfterClientPick = false
+    /// Shown when the picker is dismissed while a finished recording is on
+    /// hold, so the audio is never silently discarded.
+    @State private var showHeldRecordingPrompt = false
     @State private var pipelineSteps: [(String, String)] = []
     /// Upload + pipeline-poll task, cancelled when the view goes away. The
     /// backend keeps processing either way; the visit shows up in Home.
@@ -228,12 +234,20 @@ struct RecordView: View {
                 assessmentInProgress = recorder.isRecording || processing
             }
             .onChange(of: selectedClient?.id) { clientId in
+                guard clientId != nil, let client = selectedClient else { return }
                 // A recording was held because no client was selected at stop.
                 // Now that one is chosen, process it.
-                guard let audioURL = pendingAudioURL, let clientId,
-                      let client = selectedClient else { return }
-                pendingAudioURL = nil
-                processRecording(audioURL: audioURL, clientId: clientId, clientName: client.full_name)
+                if let audioURL = pendingAudioURL {
+                    pendingAudioURL = nil
+                    showHeldRecordingPrompt = false
+                    processRecording(audioURL: audioURL, clientId: client.id, clientName: client.full_name)
+                    return
+                }
+                // The user tapped record before picking a client — start now.
+                if pendingStartAfterClientPick {
+                    pendingStartAfterClientPick = false
+                    startRecording()
+                }
             }
             .onChange(of: showClientPicker) { isShowing in
                 if isShowing {
@@ -243,14 +257,31 @@ struct RecordView: View {
                     }
                     return
                 }
-                // Picker dismissed without choosing a client: don't keep PHI
-                // audio lingering on device; clean up and let the user know.
-                guard let audioURL = pendingAudioURL, selectedClient == nil else { return }
-                pendingAudioURL = nil
-                try? FileManager.default.removeItem(at: audioURL)
-                errorMessage = "Recording discarded — no client was selected."
-                showError = true
+                if selectedClient == nil {
+                    pendingStartAfterClientPick = false
+                    // Picker dismissed while a finished recording is on hold —
+                    // ask before doing anything destructive with the audio.
+                    if pendingAudioURL != nil {
+                        showHeldRecordingPrompt = true
+                    }
+                }
             }
+            .palmAlert(
+                "Recording On Hold",
+                message: "Your recording is saved but needs a client before it can be processed into a contract.",
+                icon: "person.crop.circle.badge.questionmark",
+                iconColor: .palmOrange,
+                isPresented: $showHeldRecordingPrompt,
+                primaryButton: .init(title: "Choose Client", style: .primary, action: {
+                    showClientPicker = true
+                }),
+                secondaryButton: .init(title: "Discard Recording", style: .destructive, action: {
+                    if let audioURL = pendingAudioURL {
+                        try? FileManager.default.removeItem(at: audioURL)
+                    }
+                    pendingAudioURL = nil
+                })
+            )
             .onChange(of: recorder.recordingFailureMessage) { message in
                 // System killed the recording (media daemon crash). Recover
                 // the partial file through the normal upload path.
@@ -460,6 +491,13 @@ struct RecordView: View {
             // Don't allow a second recording while the previous assessment
             // is still uploading/processing — it would create overlapping
             // visits sharing the same UI state.
+            guard selectedClient != nil else {
+                // Pick the client up front so stopping always leads straight
+                // to processing — no held-audio limbo at the end of a visit.
+                pendingStartAfterClientPick = true
+                showClientPicker = true
+                return
+            }
             startRecording()
         }
     }

@@ -21,7 +21,74 @@ class APIService: ObservableObject {
         }
     }
 
+    /// Long-lived rotating token used to renew the 1-hour access token so
+    /// Face ID users stay signed in. Lives only in the Keychain.
+    var refreshToken: String? {
+        didSet {
+            if let refreshToken = refreshToken {
+                KeychainHelper.saveRefreshToken(refreshToken)
+            } else {
+                KeychainHelper.deleteRefreshToken()
+            }
+        }
+    }
+
+    /// In-flight refresh, shared so concurrent 401s trigger one network call.
+    private var refreshTask: Task<Bool, Never>?
+
     var isAuthenticated: Bool { token != nil }
+
+    /// Exchange the stored refresh token for a fresh access token.
+    /// Returns true on success. Safe to call concurrently.
+    @MainActor
+    func refreshSession() async -> Bool {
+        if let existing = refreshTask {
+            return await existing.value
+        }
+        guard let currentRefresh = refreshToken else { return false }
+
+        let task = Task<Bool, Never> { [weak self] in
+            guard let self else { return false }
+            struct RefreshResponse: Codable {
+                let access_token: String
+                let refresh_token: String?
+            }
+            do {
+                let url = try self.validatedURL(path: "/auth/refresh")
+                var request = URLRequest(url: url)
+                request.httpMethod = "POST"
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.timeoutInterval = 15
+                request.httpBody = try JSONSerialization.data(withJSONObject: ["refresh_token": currentRefresh])
+                let (data, response) = try await self.session.data(for: request)
+                guard let http = response as? HTTPURLResponse else { return false }
+                if http.statusCode == 401 {
+                    // Refresh token revoked/expired — session is truly over.
+                    await MainActor.run {
+                        self.refreshToken = nil
+                        self.token = nil
+                    }
+                    return false
+                }
+                guard (200...299).contains(http.statusCode) else { return false }
+                let parsed = try self.sharedDecoder.decode(RefreshResponse.self, from: data)
+                await MainActor.run {
+                    self.token = parsed.access_token
+                    if let newRefresh = parsed.refresh_token, !newRefresh.isEmpty {
+                        self.refreshToken = newRefresh
+                    }
+                }
+                return true
+            } catch {
+                // Network error: keep the refresh token so we can try again.
+                return false
+            }
+        }
+        refreshTask = task
+        let result = await task.value
+        refreshTask = nil
+        return result
+    }
 
     // MARK: - In-Memory Cache
 
@@ -58,6 +125,7 @@ class APIService: ObservableObject {
     /// End the session and wipe everything user-specific from the device:
     /// keychain token, cached PHI, calendar cache, recordings, and temp files.
     func logout() {
+        refreshToken = nil
         token = nil
 
         // Clear any cached PHI from UserDefaults (legacy keys + new ones).
@@ -111,6 +179,16 @@ class APIService: ObservableObject {
             KeychainHelper.save(legacyToken)
             UserDefaults.standard.removeObject(forKey: "auth_token")
         }
+        refreshToken = KeychainHelper.loadRefreshToken()
+
+        // A stored refresh token but no access token means the last session
+        // ended with an expired JWT — silently restore the session so Face ID
+        // users go straight in instead of back to the login screen.
+        if token == nil, refreshToken != nil {
+            Task { @MainActor in
+                _ = await self.refreshSession()
+            }
+        }
     }
 
     #if DEBUG
@@ -158,7 +236,7 @@ class APIService: ObservableObject {
         return url
     }
 
-    func request<T: Decodable>(_ method: String, path: String, body: [String: Any]? = nil, noAuth: Bool = false, allowSoftUnauthorized: Bool = false) async throws -> T {
+    func request<T: Decodable>(_ method: String, path: String, body: [String: Any]? = nil, noAuth: Bool = false, allowSoftUnauthorized: Bool = false, isRetry: Bool = false) async throws -> T {
         let url = try validatedURL(path: path)
 
         var request = URLRequest(url: url)
@@ -188,7 +266,15 @@ class APIService: ObservableObject {
                 }
                 throw APIError.serverError("Not authorized for this resource")
             }
-            await MainActor.run { self.token = nil }
+            // Access token expired — try renewing with the refresh token and
+            // retry the call once before giving up the session.
+            if !noAuth, !isRetry, await refreshSession() {
+                return try await self.request(method, path: path, body: body, noAuth: noAuth, allowSoftUnauthorized: allowSoftUnauthorized, isRetry: true)
+            }
+            await MainActor.run {
+                self.refreshToken = nil
+                self.token = nil
+            }
             throw APIError.unauthorized
         }
 
@@ -202,7 +288,7 @@ class APIService: ObservableObject {
         return try jsonDecoder.decode(T.self, from: data)
     }
 
-    func requestVoid(_ method: String, path: String, body: [String: Any]? = nil) async throws {
+    func requestVoid(_ method: String, path: String, body: [String: Any]? = nil, isRetry: Bool = false) async throws {
         let url = try validatedURL(path: path)
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -220,7 +306,13 @@ class APIService: ObservableObject {
             throw APIError.invalidResponse
         }
         if httpResponse.statusCode == 401 {
-            await MainActor.run { self.token = nil }
+            if !isRetry, await refreshSession() {
+                return try await self.requestVoid(method, path: path, body: body, isRetry: true)
+            }
+            await MainActor.run {
+                self.refreshToken = nil
+                self.token = nil
+            }
             throw APIError.unauthorized
         }
         guard (200...299).contains(httpResponse.statusCode) else {
@@ -264,6 +356,7 @@ struct RegisterResponse: Codable {
     let message: String?
     let access_token: String?
     let token_type: String?
+    let refresh_token: String?
     let next_steps: [String]?
 }
 
@@ -300,13 +393,35 @@ private enum KeychainHelper {
     private static let service = "com.palmcareai.app"
     private static let legacyService = "com.palmcare.ai"
     private static let tokenKey = "auth_token"
+    private static let refreshTokenKey = "refresh_token"
 
     static func save(_ token: String) {
+        save(token, account: tokenKey)
+    }
+
+    static func saveRefreshToken(_ token: String) {
+        save(token, account: refreshTokenKey)
+    }
+
+    static func loadRefreshToken() -> String? {
+        read(service: service, account: refreshTokenKey)
+    }
+
+    static func deleteRefreshToken() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: refreshTokenKey,
+        ]
+        SecItemDelete(query as CFDictionary)
+    }
+
+    private static func save(_ token: String, account: String) {
         guard let data = token.data(using: .utf8) else { return }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: tokenKey,
+            kSecAttrAccount as String: account,
             // Keep auth tokens device-bound and unavailable in backups/migrations.
             kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ]
@@ -324,12 +439,12 @@ private enum KeychainHelper {
     }
 
     static func load() -> String? {
-        if let token = read(service: service) {
+        if let token = read(service: service, account: tokenKey) {
             return token
         }
         // One-time migration: pull from legacy service ID and re-save under
         // the new one so future loads stay on the modern key.
-        if let legacy = read(service: legacyService) {
+        if let legacy = read(service: legacyService, account: tokenKey) {
             save(legacy)
             deleteLegacy()
             return legacy
@@ -337,11 +452,11 @@ private enum KeychainHelper {
         return nil
     }
 
-    private static func read(service: String) -> String? {
+    private static func read(service: String, account: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: tokenKey,
+            kSecAttrAccount as String: account,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
         ]
