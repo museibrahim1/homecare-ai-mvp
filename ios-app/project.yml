@@ -10,7 +10,7 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "1"
+    CURRENT_PROJECT_VERSION: "3"
 
 targets:
   PalmCareAI:
@@ -25,6 +25,11 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: BM5U63WP92
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # iPhone-only for v1.0. Must live at the TARGET level: xcodegen emits
+        # TARGETED_DEVICE_FAMILY "1,2" on the target for iOS apps, which would
+        # override a project-level setting and make the binary universal
+        # (that's what triggered Apple's iPad screenshot requirement).
+        TARGETED_DEVICE_FAMILY: "1"
     info:
       path: PalmCareAI/Info.plist
       properties:
@@ -37,15 +42,11 @@ targets:
         CFBundleExecutable: $(EXECUTABLE_NAME)
         UILaunchScreen:
           UIColorName: LaunchBackground
-        # iPad Multitasking is required by App Review (4.0). Do not set
-        # UIRequiresFullScreen unless we have a documented reason.
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
-        UISupportedInterfaceOrientations~ipad:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationPortraitUpsideDown
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
+        # Portrait-only iPhone app: required so App Store validation does not
+        # demand iPad multitasking orientations (ITMS-90474).
+        UIRequiresFullScreen: true
         # Background audio is required so visit recordings continue when the
         # screen locks or another app is foregrounded mid-assessment.
         UIBackgroundModes:
