@@ -389,7 +389,7 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					BCAD9AD0459AF38B45212A83 = {
-						DevelopmentTeam = QFS97GTYJH;
+						DevelopmentTeam = BM5U63WP92;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -574,7 +574,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QFS97GTYJH;
+				DEVELOPMENT_TEAM = BM5U63WP92;
 				INFOPLIST_FILE = PalmCareAI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -650,7 +650,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QFS97GTYJH;
+				DEVELOPMENT_TEAM = BM5U63WP92;
 				INFOPLIST_FILE = PalmCareAI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

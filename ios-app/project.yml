@@ -23,7 +23,7 @@ targets:
         INFOPLIST_FILE: PalmCareAI/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: com.palmcareai.app
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: QFS97GTYJH
+        DEVELOPMENT_TEAM: BM5U63WP92
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     info:
       path: PalmCareAI/Info.plist
