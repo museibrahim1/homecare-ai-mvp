@@ -13,6 +13,10 @@ from app.core.rate_limit import limiter, rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
+# Give app loggers a stdout handler at INFO — uvicorn only configures its own
+# loggers, so module-level logger.info() calls were invisible in Railway logs.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s [%(name)s] %(message)s")
+
 logger = logging.getLogger(__name__)
 
 
