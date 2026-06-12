@@ -5,6 +5,16 @@ alwaysApply: true
 
 # PalmCare AI — Project State (March 2026)
 
+## TestFlight Release Checklist (do ALL of these on EVERY build)
+App ID `6766371988` ("PALM – Home Care Contracts"), Team `BM5U63WP92`. App Store Connect internal API base: `https://appstoreconnect.apple.com/iris/v1`.
+1. Bump `CURRENT_PROJECT_VERSION` in `ios-app/project.yml`, archive, export+upload.
+2. Wait for build `processingState` to be `VALID`.
+3. **Set "What to Test"** on the build's `betaBuildLocalizations` — NOTE: the iris API field is `whatsNew` (NOT `whatToTest`). Describe exactly what changed and the steps to test it.
+4. Delete any stale `betaAppReviewSubmissions` from older builds, then POST a new one for the new build.
+5. Attach the build to the **Agencies** external group (`5cac674b-59ab-4c60-95e1-3ee557c47c86`). Internal group is `95481cc3-2538-41e6-a4b3-83e6b7e3cafa` (can't attach builds to internal group via API).
+6. Confirm review-detail demo account is the WORKING one: **`demo-screenshots@palmtai.com` / `ScreenShot2026!Demo`** (`demoAccountRequired: true`). The old `museibrahim@palmtai.com / HomeHealthCareAi13` is BROKEN (401) — never use it.
+7. External testers must be **INVITED** (POST `betaTesterInvitations`) — adding them to a group does NOT send the invite. `info@patronseniorliving.com` (id `28eae6dc-6d92-482b-963c-23afbb855a12`) is in the Agencies group.
+
 ## Social Media Accounts
 - **LinkedIn**: Access token configured, Person ID `1034844126`, "Share on LinkedIn" product enabled. Posting needs re-auth with correct scopes.
 - **Facebook**: "Palm Technologies" page exists. Need Meta Developer App + Page Access Token.
