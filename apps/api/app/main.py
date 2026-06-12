@@ -166,6 +166,16 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        # Block this API's JSON from being embedded as a cross-origin
+        # resource (OWASP ZAP 90004). It's a pure API — nothing here should
+        # ever be loaded as a subresource by another site.
+        response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+        # API responses carry PHI and per-user data; never let a shared proxy
+        # or browser cache them (OWASP ZAP 10015/10049). Static docs assets
+        # (/docs, /openapi.json, /redoc) are fine to cache.
+        path = request.url.path
+        if not (path.startswith("/docs") or path.startswith("/redoc") or path.startswith("/openapi")):
+            response.headers["Cache-Control"] = "no-store"
         if request.url.scheme == "https" or os.getenv("RAILWAY_ENVIRONMENT"):
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         return response
