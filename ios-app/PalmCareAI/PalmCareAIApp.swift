@@ -28,7 +28,9 @@ struct PalmCareAIApp: App {
         navAppearance.largeTitleTextAttributes = [
             .foregroundColor: UIColor.label
         ]
-        navAppearance.shadowColor = UIColor.separator
+        // No hairline divider under the nav bar — the back chevron should
+        // blend straight into the screen for a seamless, modern flow.
+        navAppearance.shadowColor = .clear
 
         UINavigationBar.appearance().standardAppearance = navAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navAppearance

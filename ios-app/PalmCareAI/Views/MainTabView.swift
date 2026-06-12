@@ -91,6 +91,7 @@ struct MainTabView: View {
 // MARK: - Custom Tab Bar
 
 struct CustomTabBar: View {
+    @EnvironmentObject var session: AssessmentSession
     @Binding var selectedTab: Int
     var onTabReselected: ((Int) -> Void)?
 
@@ -127,37 +128,49 @@ struct CustomTabBar: View {
     }
 
     private func palmItButton(index: Int) -> some View {
-        VStack(spacing: 3) {
+        let isRecording = session.recorder.isRecording
+        // Red while recording (acts as a stop button) or while on the record
+        // tab; teal otherwise.
+        let isHot = isRecording || selectedTab == 2
+        return VStack(spacing: 3) {
             Button {
-                if selectedTab == index {
-                    onTabReselected?(index)
+                if isRecording {
+                    // Stop the active recording from anywhere — same effect as
+                    // tapping the orb. Jump to the record tab so the user sees
+                    // processing and the contract open.
+                    selectedTab = index
+                    session.stopRecording(client: nil)
+                } else {
+                    if selectedTab == index {
+                        onTabReselected?(index)
+                    }
+                    selectedTab = index
                 }
-                selectedTab = index
             } label: {
                 ZStack {
                     Circle()
                         .fill(
-                            selectedTab == 2
+                            isHot
                                 ? LinearGradient(colors: [.red, .red.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing)
                                 : LinearGradient(colors: [Color.palmPrimary, Color.palmPrimaryDark], startPoint: .topLeading, endPoint: .bottomTrailing)
                         )
                         .frame(width: 50, height: 50)
                         .shadow(
-                            color: (selectedTab == 2 ? Color.red : Color.palmPrimary).opacity(0.45),
+                            color: (isHot ? Color.red : Color.palmPrimary).opacity(0.45),
                             radius: 7, y: 3
                         )
 
-                    Image(systemName: tabs[index].icon)
+                    Image(systemName: isRecording ? "stop.fill" : tabs[index].icon)
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(.white)
                 }
             }
-            .accessibilityLabel("Record assessment")
+            .accessibilityLabel(isRecording ? "Stop recording" : "Record assessment")
             .offset(y: -20)
 
-            Text(tabs[index].label)
+            Text(isRecording ? "Stop" : tabs[index].label)
                 .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(.palmSecondary)
+                .foregroundColor(isRecording ? .red : .palmSecondary)
                 .offset(y: -17)
         }
         .frame(maxWidth: .infinity)
@@ -192,4 +205,5 @@ struct CustomTabBar: View {
 #Preview {
     MainTabView()
         .environmentObject(APIService.shared)
+        .environmentObject(AssessmentSession(api: APIService.shared))
 }

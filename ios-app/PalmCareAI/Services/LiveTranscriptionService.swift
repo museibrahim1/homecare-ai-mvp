@@ -42,7 +42,7 @@ class LiveTranscriptionService: ObservableObject {
     /// Rolling transcript pieces (one per successful chunk).
     private var transcriptPieces: [String] = []
 
-    private let chunkInterval: TimeInterval = 5
+    private let chunkInterval: TimeInterval = 3
     /// ~5 seconds of mono 16kHz/16bit audio = ~160 KB; we cap chunk size
     /// at 4 MB which is more than 2 minutes of audio in case the timer
     /// is delayed by the OS.
