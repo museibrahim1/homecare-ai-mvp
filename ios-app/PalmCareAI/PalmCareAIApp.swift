@@ -4,6 +4,9 @@ import LocalAuthentication
 @main
 struct PalmCareAIApp: App {
     @StateObject private var api = APIService.shared
+    /// App-level assessment session: recording and contract processing
+    /// survive tab switches, navigation, and view teardown.
+    @StateObject private var assessmentSession = AssessmentSession(api: APIService.shared)
     @AppStorage("useFaceID") private var useFaceID = false
     @AppStorage("isDarkMode") private var isDarkMode = false
     @AppStorage("assessmentInProgress") private var assessmentInProgress = false
@@ -54,13 +57,16 @@ struct PalmCareAIApp: App {
                         if ProcessInfo.processInfo.arguments.contains("AUTOMATION_STRESS_FLOW") {
                             AutomationStressHarnessView()
                                 .environmentObject(api)
+                                .environmentObject(assessmentSession)
                         } else {
                             MainTabView()
                                 .environmentObject(api)
+                                .environmentObject(assessmentSession)
                         }
                         #else
                         MainTabView()
                             .environmentObject(api)
+                            .environmentObject(assessmentSession)
                         #endif
                     }
                 } else {

@@ -29,6 +29,7 @@
 		3E6A77DDDD556EC865F8C1AD /* TermsPrivacySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4891A98B5FCFAF61CA98EF6 /* TermsPrivacySheet.swift */; };
 		3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 694B1D5D023FE459648FA84F /* LandingView.swift */; };
 		3F6E67D7113D9B87EC9C6F32 /* VisitDetailView+Overview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365201F4D04F4613F26A76B6 /* VisitDetailView+Overview.swift */; };
+		42700FAFF50136D5A01B9936 /* AssessmentSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAFF8E5E38F965015D46C93 /* AssessmentSession.swift */; };
 		441ED8E4CA766509026656D4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F2F27F9C01421C91DAE203 /* HomeView.swift */; };
 		44C9C6DEF0241F271535EE25 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D877C9B39FFC83C67359CB1B /* CalendarView.swift */; };
 		4597BEB2AD073D9AED759923 /* AudioFilePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BA31B4B732B6A4B775BC4C /* AudioFilePicker.swift */; };
@@ -149,6 +150,7 @@
 		E9F571D0F9C831B327F6C328 /* EditProfileSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileSheet.swift; sourceTree = "<group>"; };
 		EA911CA4DDC1736C1DAE4B66 /* APIService+EmailSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+EmailSender.swift"; sourceTree = "<group>"; };
 		EB838A8AD893DD563742F9EF /* VisitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetailView.swift; sourceTree = "<group>"; };
+		ECAFF8E5E38F965015D46C93 /* AssessmentSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentSession.swift; sourceTree = "<group>"; };
 		F75E45C5D06BE868EFC22EE1 /* APIService+PipelineDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+PipelineDocuments.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -335,6 +337,7 @@
 				EA911CA4DDC1736C1DAE4B66 /* APIService+EmailSender.swift */,
 				F75E45C5D06BE868EFC22EE1 /* APIService+PipelineDocuments.swift */,
 				A15DEE24A86CBE6300B1EF89 /* APIService+Support.swift */,
+				ECAFF8E5E38F965015D46C93 /* AssessmentSession.swift */,
 				25F5164BD23844FFA3DDA1DA /* AudioRecorderService.swift */,
 				07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */,
 				A72217ACB74F974613CD621F /* EmailSenderConnector.swift */,
@@ -439,6 +442,7 @@
 				4BC6C1F6558E9FF34676385D /* AddClientSheet.swift in Sources */,
 				2E2862862F270A98F5A3C404 /* AddEventSheet.swift in Sources */,
 				760E9D55BA37BE5FAAF39DD3 /* AnyCodable.swift in Sources */,
+				42700FAFF50136D5A01B9936 /* AssessmentSession.swift in Sources */,
 				CB8BFB4C0847725F56BE3B88 /* AssessmentsListView.swift in Sources */,
 				4597BEB2AD073D9AED759923 /* AudioFilePicker.swift in Sources */,
 				7955D7C2A2D22D6AEF1DF236 /* AudioRecorderService.swift in Sources */,

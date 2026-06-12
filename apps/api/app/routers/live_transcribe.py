@@ -100,7 +100,12 @@ async def live_transcribe(
     # live transcript banner in the iOS app.
     if deepgram_key:
         try:
-            return _transcribe_deepgram(content, content_type, deepgram_key, language, diarize)
+            result = _transcribe_deepgram(content, content_type, deepgram_key, language, diarize)
+            logger.info(
+                "live result user=%s provider=deepgram words=%d chars=%d",
+                getattr(current_user, "email", "?"), len(result.words), len(result.transcript),
+            )
+            return result
         except HTTPException:
             raise
         except Exception as e:

@@ -4,8 +4,10 @@ import UniformTypeIdentifiers
 
 struct RecordView: View {
     @EnvironmentObject var api: APIService
-    @StateObject private var recorder = AudioRecorderService()
-    @State private var liveTranscription: LiveTranscriptionService?
+    /// App-level session owning the recorder, live transcription, and the
+    /// upload/pipeline task. Lives outside this view, so leaving the screen
+    /// never stops a recording or kills contract processing.
+    @EnvironmentObject var session: AssessmentSession
     @State private var liveSegments: [TranscriptSegment] = []
     @State private var liveFullTranscript = ""
     @State private var liveNoSpeech = false
@@ -21,32 +23,29 @@ struct RecordView: View {
     @State private var showPermissionAlert = false
     @State private var errorMessage: String?
     @State private var showError = false
-    @State private var isProcessing = false
     @State private var showFilePicker = false
-    @State private var uploadProgress: String?
     @AppStorage("backgroundRecording") private var backgroundRecording = false
-    @AppStorage("assessmentInProgress") private var assessmentInProgress = false
 
+    /// Local copies of the finished visit used by navigationDestination —
+    /// the session's values are cleared on acknowledgeCompletion().
     @State private var completedVisitId: String?
     @State private var pipelineFailed = false
     @State private var completedClientName: String?
     @State private var navigateToVisit = false
-    /// Holds a finished recording when the user stopped without selecting a
-    /// client, so it can be processed once a client is chosen (no lost audio).
-    @State private var pendingAudioURL: URL?
     /// True when the user tapped record with no client selected — the picker
     /// opens first and recording auto-starts once they choose someone.
     @State private var pendingStartAfterClientPick = false
     /// Shown when the picker is dismissed while a finished recording is on
     /// hold, so the audio is never silently discarded.
     @State private var showHeldRecordingPrompt = false
-    @State private var pipelineSteps: [(String, String)] = []
-    /// Upload + pipeline-poll task, cancelled when the view goes away. The
-    /// backend keeps processing either way; the visit shows up in Home.
-    @State private var processingTask: Task<Void, Never>?
     #if DEBUG
     @State private var didRunAutomationDemo = false
     #endif
+
+    private var recorder: AudioRecorderService { session.recorder }
+    private var isProcessing: Bool { session.isProcessing }
+    private var uploadProgress: String? { session.uploadProgress }
+    private var pipelineSteps: [(String, String)] { session.pipelineSteps }
 
     var body: some View {
             ZStack {
@@ -205,13 +204,22 @@ struct RecordView: View {
             }
             #endif
             .onAppear {
-                if liveTranscription == nil {
-                    liveTranscription = LiveTranscriptionService(api: api)
+                // If a recording is in flight from a previous visit to this
+                // tab, restore the client chosen at start.
+                if selectedClient == nil, let active = session.activeClient {
+                    selectedClient = active
                 }
-                assessmentInProgress = recorder.isRecording || isProcessing
+                // Pull any live transcript collected while the tab was away.
+                let lt = session.liveTranscription
+                if lt.isTranscribing {
+                    liveSegments = lt.segments
+                    liveFullTranscript = lt.fullTranscript
+                    liveNoSpeech = lt.noSpeechDetected
+                }
             }
             .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { _ in
-                guard let lt = liveTranscription, lt.isTranscribing else { return }
+                let lt = session.liveTranscription
+                guard lt.isTranscribing else { return }
                 if lt.segments.count != liveSegments.count || lt.fullTranscript != liveFullTranscript {
                     liveSegments = lt.segments
                     liveFullTranscript = lt.fullTranscript
@@ -220,27 +228,23 @@ struct RecordView: View {
                     withAnimation { liveNoSpeech = lt.noSpeechDetected }
                 }
             }
-            .onDisappear {
-                if !recorder.isRecording && !isProcessing {
-                    assessmentInProgress = false
-                }
-                processingTask?.cancel()
-                processingTask = nil
+            .onReceive(session.$completedVisitId) { visitId in
+                guard let visitId else { return }
+                openCompletedVisit(visitId)
             }
-            .onChange(of: recorder.isRecording) { isRecording in
-                assessmentInProgress = isRecording || isProcessing
-            }
-            .onChange(of: isProcessing) { processing in
-                assessmentInProgress = recorder.isRecording || processing
+            .onReceive(session.$errorMessage) { message in
+                guard let message else { return }
+                session.errorMessage = nil
+                errorMessage = message
+                showError = true
             }
             .onChange(of: selectedClient?.id) { clientId in
                 guard clientId != nil, let client = selectedClient else { return }
                 // A recording was held because no client was selected at stop.
                 // Now that one is chosen, process it.
-                if let audioURL = pendingAudioURL {
-                    pendingAudioURL = nil
+                if session.pendingAudioURL != nil {
                     showHeldRecordingPrompt = false
-                    processRecording(audioURL: audioURL, clientId: client.id, clientName: client.full_name)
+                    session.processPendingAudio(client: client)
                     return
                 }
                 // The user tapped record before picking a client — start now.
@@ -261,7 +265,7 @@ struct RecordView: View {
                     pendingStartAfterClientPick = false
                     // Picker dismissed while a finished recording is on hold —
                     // ask before doing anything destructive with the audio.
-                    if pendingAudioURL != nil {
+                    if session.pendingAudioURL != nil {
                         showHeldRecordingPrompt = true
                     }
                 }
@@ -276,10 +280,7 @@ struct RecordView: View {
                     showClientPicker = true
                 }),
                 secondaryButton: .init(title: "Discard Recording", style: .destructive, action: {
-                    if let audioURL = pendingAudioURL {
-                        try? FileManager.default.removeItem(at: audioURL)
-                    }
-                    pendingAudioURL = nil
+                    session.discardPendingAudio()
                 })
             )
             .onChange(of: recorder.recordingFailureMessage) { message in
@@ -287,18 +288,24 @@ struct RecordView: View {
                 // the partial file through the normal upload path.
                 guard let message else { return }
                 recorder.recordingFailureMessage = nil
-                liveTranscription?.stopTranscribing()
-                if let url = recorder.recordingURL {
-                    if let client = selectedClient {
-                        processRecording(audioURL: url, clientId: client.id, clientName: client.full_name)
-                    } else {
-                        pendingAudioURL = url
-                        showClientPicker = true
-                    }
+                session.recoverFailedRecording(client: selectedClient)
+                if selectedClient == nil, session.pendingAudioURL != nil {
+                    showClientPicker = true
                 }
                 errorMessage = message
                 showError = true
             }
+    }
+
+    /// Copy the finished visit out of the session and push the detail view.
+    private func openCompletedVisit(_ visitId: String) {
+        completedVisitId = visitId
+        completedClientName = session.completedClientName
+        pipelineFailed = session.pipelineFailed
+        session.acknowledgeCompletion()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            navigateToVisit = true
+        }
     }
 
     private var transcriptSegments: [TranscriptSegment] {
@@ -514,15 +521,11 @@ struct RecordView: View {
 
             // Beta: no usage limits, so no pre-flight quota check.
             await MainActor.run {
-                liveTranscription?.segments = []
                 liveSegments = []
                 liveFullTranscript = ""
                 liveNoSpeech = false
                 do {
-                    try recorder.startRecording()
-                    if let url = recorder.recordingURL {
-                        liveTranscription?.startTranscribing(recordingURL: url)
-                    }
+                    try session.startRecording(client: selectedClient)
                 } catch {
                     errorMessage = "Failed to start recording: \(error.localizedDescription)"
                     showError = true
@@ -532,209 +535,21 @@ struct RecordView: View {
     }
 
     private func stopAndProcess() {
-        let url = recorder.stopRecording()
-        liveTranscription?.stopTranscribing()
-        liveTranscription?.segments = []
-
-        guard let audioURL = url else {
-            errorMessage = "Recording could not be saved. Please try again."
-            showError = true
-            return
-        }
-
-        // If the caregiver forgot to pick a client, don't discard the audio.
-        // Hold it and prompt for a client; we'll process once one is chosen.
-        guard let clientId = selectedClient?.id else {
-            pendingAudioURL = audioURL
+        session.stopRecording(client: selectedClient)
+        // If the caregiver somehow stopped without a client, the audio is
+        // held by the session; prompt for a client to process it.
+        if session.pendingAudioURL != nil {
             showClientPicker = true
-            return
-        }
-
-        processRecording(audioURL: audioURL, clientId: clientId, clientName: selectedClient?.full_name)
-    }
-
-    /// Upload a recorded audio file and run the assessment pipeline.
-    /// Shared by the live-recording stop path and the deferred
-    /// "picked a client after stopping" recovery path.
-    private func processRecording(audioURL: URL, clientId: String, clientName: String?) {
-        withAnimation {
-            isProcessing = true
-            uploadProgress = "Creating assessment..."
-            pipelineSteps = []
-        }
-
-        processingTask = Task {
-            do {
-                let visit = try await api.createVisit(clientId: clientId)
-                let data = try Data(contentsOf: audioURL)
-
-                await MainActor.run { uploadProgress = "Uploading audio..." }
-                _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: audioURL.lastPathComponent, autoProcess: true)
-                try? FileManager.default.removeItem(at: audioURL)
-
-                await MainActor.run { uploadProgress = "Pipeline running..." }
-                await pollPipeline(visitId: visit.id, clientName: clientName)
-            } catch {
-                // Minimize PHI retention on device when upload/processing fails.
-                try? FileManager.default.removeItem(at: audioURL)
-                await MainActor.run {
-                    withAnimation { isProcessing = false }
-                    uploadProgress = nil
-                    pipelineSteps = []
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
-            }
-        }
-    }
-
-    private func pollPipeline(visitId: String, clientName: String?) async {
-        let stepOrder = ["transcription", "diarization", "billing", "note", "contract"]
-        let stepLabels = [
-            "transcription": "Transcription",
-            "diarization": "Speaker ID",
-            "billing": "Billables",
-            "note": "Clinical Note",
-            "contract": "Contract"
-        ]
-
-        var attempts = 0
-        let maxAttempts = 120 // ~4 minutes max
-        var consecutiveErrors = 0
-        let maxConsecutiveErrors = 5 // ~10s of failed fetches before warning user
-
-        while attempts < maxAttempts {
-            if Task.isCancelled { return }
-            attempts += 1
-            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
-            if Task.isCancelled { return }
-
-            do {
-                let status = try await api.getPipelineStatus(visitId: visitId)
-                consecutiveErrors = 0
-                guard let pipelineState = status.pipeline_state else { continue }
-
-                var steps: [(String, String)] = []
-                var allTerminal = true
-                var anyFailed = false
-
-                for key in stepOrder {
-                    if let stateVal = pipelineState[key]?.value {
-                        var stateStr = "pending"
-                        if let dict = stateVal as? [String: Any], let s = dict["status"] as? String {
-                            stateStr = s
-                        } else if let s = stateVal as? String {
-                            stateStr = s
-                        }
-                        let label = stepLabels[key] ?? key.capitalized
-                        if stateStr == "skipped" { continue }
-                        steps.append((label, stateStr))
-                        // Wait until every step reaches a terminal state —
-                        // navigating away on the first failure would hide
-                        // steps that are still producing results.
-                        if stateStr != "completed" && stateStr != "failed" { allTerminal = false }
-                        if stateStr == "failed" { anyFailed = true }
-                    }
-                }
-
-                await MainActor.run {
-                    pipelineSteps = steps
-                    if let currentStep = steps.first(where: { isActiveStatus($0.1) }) {
-                        uploadProgress = "Running: \(currentStep.0)..."
-                    }
-                }
-
-                if allTerminal && !steps.isEmpty {
-                    await MainActor.run {
-                        completedVisitId = visitId
-                        completedClientName = clientName
-                        pipelineFailed = anyFailed
-                        withAnimation {
-                            isProcessing = false
-                            uploadProgress = nil
-                            pipelineSteps = []
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            if !visitId.isEmpty { navigateToVisit = true }
-                        }
-                    }
-                    return
-                }
-            } catch {
-                consecutiveErrors += 1
-                if consecutiveErrors >= maxConsecutiveErrors {
-                    await MainActor.run {
-                        uploadProgress = "Connection lost — your assessment is still processing in the background."
-                    }
-                }
-            }
-        }
-
-        // Timed out — still navigate to the visit, but land on Overview:
-        // the pipeline may not have produced a contract yet.
-        await MainActor.run {
-            completedVisitId = visitId
-            completedClientName = clientName
-            pipelineFailed = true
-            withAnimation {
-                isProcessing = false
-                uploadProgress = nil
-                pipelineSteps = []
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                if !visitId.isEmpty { navigateToVisit = true }
-            }
         }
     }
 
     private func handlePickedAudioFile(_ url: URL) {
-        guard let clientId = selectedClient?.id else {
+        guard let client = selectedClient else {
             errorMessage = "Please select a client first."
             showError = true
             return
         }
-
-        let clientName = selectedClient?.full_name
-
-        withAnimation {
-            isProcessing = true
-            uploadProgress = "Uploading audio file..."
-            pipelineSteps = []
-        }
-
-        processingTask = Task {
-            do {
-                let accessing = url.startAccessingSecurityScopedResource()
-                defer { if accessing { url.stopAccessingSecurityScopedResource() } }
-
-                let data = try Data(contentsOf: url)
-                let filename = url.lastPathComponent
-
-                await MainActor.run { uploadProgress = "Creating assessment..." }
-                let visit = try await api.createVisit(clientId: clientId)
-
-                await MainActor.run { uploadProgress = "Uploading audio..." }
-                _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: filename, autoProcess: true)
-
-                await MainActor.run { uploadProgress = "Pipeline running..." }
-                await pollPipeline(visitId: visit.id, clientName: clientName)
-            } catch {
-                await MainActor.run {
-                    withAnimation { isProcessing = false }
-                    uploadProgress = nil
-                    pipelineSteps = []
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
-            }
-        }
-    }
-
-    /// The backend pipeline reports an in-flight step as "processing"
-    /// (and historically "running"); treat both as active.
-    private func isActiveStatus(_ status: String) -> Bool {
-        let s = status.lowercased()
-        return s == "running" || s == "processing" || s == "queued"
+        session.processPickedFile(url: url, clientId: client.id, clientName: client.full_name)
     }
 
     @ViewBuilder
