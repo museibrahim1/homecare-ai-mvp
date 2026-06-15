@@ -30,7 +30,7 @@ The final output is a state-specific, proposal-ready service contract that the a
 | Database | PostgreSQL 16 |
 | Object storage | S3 (MinIO in dev, AWS S3 / SSE in prod) |
 | ASR | **Deepgram Nova-3** (speaker diarization built-in, ~300 ms latency); OpenAI Whisper fallback |
-| LLM | **Anthropic Claude Sonnet 4** for contract / notes generation; Claude Haiku for landing chat |
+| LLM | **Anthropic Claude Sonnet 4.6** (`claude-sonnet-4-6`) for contract / notes generation; Claude Haiku for landing chat |
 | Auth | JWT (RS256) + bcrypt (direct, no passlib) + optional Google OAuth |
 | Email | Resend (`sales@send.palmtai.com`) |
 | Payments | Stripe + Apple In-App Purchase |

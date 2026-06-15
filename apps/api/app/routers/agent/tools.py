@@ -559,7 +559,7 @@ def _tool_generate_document(db: Session, user: User, title: str, doc_type: str, 
     if client_data:
         prompt += f"\nClient Information: {client_data}"
     prompt += "\n\nWrite the complete document content in clean, professional prose. Use markdown formatting."
-    resp = ai.messages.create(model="claude-sonnet-4-20250514", max_tokens=4096, messages=[{"role": "user", "content": prompt}])
+    resp = ai.messages.create(model="claude-sonnet-4-6", max_tokens=4096, messages=[{"role": "user", "content": prompt}])
     content = resp.content[0].text if resp.content else ""
     from reportlab.lib.pagesizes import letter
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer

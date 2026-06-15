@@ -1,7 +1,7 @@
 """Model selection and system/role prompts for the Palm AI agent."""
 
 
-AGENT_MODEL = "claude-sonnet-4-20250514"
+AGENT_MODEL = "claude-sonnet-4-6"
 
 
 # ══════════════════════════════════════════════════════════════════════

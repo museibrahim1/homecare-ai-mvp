@@ -229,7 +229,7 @@ JSON:"""
     try:
         client = anthropic.Anthropic(api_key=api_key, timeout=120.0)
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             max_tokens=8000,  # Comprehensive extraction needs more tokens
             messages=[{"role": "user", "content": prompt}]
         )

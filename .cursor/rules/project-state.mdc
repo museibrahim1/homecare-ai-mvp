@@ -24,7 +24,7 @@ App ID `6766371988` ("PALM – Home Care Contracts"), Team `BM5U63WP92`. App Sto
 
 ## Backend API
 - FastAPI on Railway: `https://api-production-a0a2.up.railway.app`
-- Deepgram Nova-3 for transcription, Claude Sonnet 4 for LLM
+- Deepgram Nova-3 for transcription, Claude Sonnet 4.6 (`claude-sonnet-4-6`) for LLM
 - Contract generation uses 50-state rules from `apps/worker/libs/state_rules.py`
 - Pipeline: transcribe → speakers → billables → notes → contract
 

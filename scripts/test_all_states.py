@@ -118,7 +118,7 @@ def phase1() -> bool:
 def run_state(code: str) -> tuple[str, str, str]:
     """Returns (code, PASS/FAIL, detail)."""
     from libs.llm import LLMService
-    svc = LLMService(model="claude-sonnet-4-20250514")
+    svc = LLMService(model="claude-sonnet-4-6")
     try:
         result = svc.analyze_transcript_for_contract(
             TRANSCRIPT, CLIENT_INFO, agency_state=code,

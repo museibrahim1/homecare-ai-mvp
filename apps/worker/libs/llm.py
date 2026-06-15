@@ -924,13 +924,13 @@ class LLMService:
     """Service for LLM-powered text generation with multi-provider support."""
     
     OPENAI_MODELS = ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"]
-    ANTHROPIC_MODELS = ["claude-sonnet-4-20250514", "claude-3-5-sonnet-20241022", "claude-3-opus-20240229", "claude-3-haiku-20240307"]
+    ANTHROPIC_MODELS = ["claude-sonnet-4-6", "claude-sonnet-4-20250514", "claude-3-5-sonnet-20241022", "claude-3-opus-20240229", "claude-3-haiku-20240307"]
     
     def __init__(
         self,
         openai_api_key: Optional[str] = None,
         anthropic_api_key: Optional[str] = None,
-        model: str = "claude-sonnet-4-20250514",
+        model: str = "claude-sonnet-4-6",
         temperature: float = 0.7,
     ):
         self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
@@ -1006,7 +1006,7 @@ class LLMService:
             system_prompt = f"{system_prompt}\n\nIMPORTANT: Respond ONLY with valid JSON. No markdown, no explanation, just the JSON object."
         
         response = self.anthropic_client.messages.create(
-            model=self.model if self.model in self.ANTHROPIC_MODELS else "claude-sonnet-4-20250514",
+            model=self.model if self.model in self.ANTHROPIC_MODELS else "claude-sonnet-4-6",
             max_tokens=4096,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}],
@@ -1934,6 +1934,6 @@ def get_llm_service() -> LLMService:
     return LLMService(
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
-        model=os.getenv("LLM_MODEL", "claude-sonnet-4-20250514"),
+        model=os.getenv("LLM_MODEL", "claude-sonnet-4-6"),
         temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
     )

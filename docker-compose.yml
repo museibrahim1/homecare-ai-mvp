@@ -99,7 +99,7 @@ services:
       USE_OPENAI_WHISPER: "true"
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      LLM_MODEL: ${LLM_MODEL:-claude-sonnet-4-20250514}
+      LLM_MODEL: ${LLM_MODEL:-claude-sonnet-4-6}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.7}
       DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
       SKIP_DIARIZATION: "true"
