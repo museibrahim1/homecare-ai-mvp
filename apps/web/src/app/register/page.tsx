@@ -145,6 +145,7 @@ function RegisterForm() {
         email: form.email || form.owner_email,
         signup_source: 'direct',
         selected_plan: selectedPlan,
+        accepted_terms: true,
       };
 
       const res = await fetch(`${API}/auth/business/register`, {

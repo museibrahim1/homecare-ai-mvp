@@ -34,7 +34,7 @@ struct TermsPrivacySheet: View {
 
                     termsSection(
                         title: "4. Data Privacy",
-                        body: "We take your privacy seriously. Client data and recordings are encrypted at rest and in transit. We do not sell or share your data with third parties. Audio recordings are processed for transcription and then stored securely."
+                        body: "We take your privacy seriously. Client data and recordings are encrypted at rest and in transit. To turn a recording into a transcript and documents, we share visit audio and transcripts with the AI service providers listed in the Privacy Policy below. We never sell your data or use it for advertising."
                     )
 
                     termsSection(
@@ -66,6 +66,11 @@ struct TermsPrivacySheet: View {
                     )
 
                     termsSection(
+                        title: "Third-Party AI Processing",
+                        body: "To generate transcripts and documents, we send your visit audio and transcripts to AI service providers: Deepgram (speech-to-text and speaker identification) and Anthropic / Claude (visit notes, billable items, and service agreements). This data may include personal and health information. Neither provider uses your data to train their models, and your audio is not retained by Deepgram after processing. You are asked to agree to this before your first recording or upload."
+                    )
+
+                    termsSection(
                         title: "Data Retention",
                         body: "Your data is retained as long as your account is active. Upon account deletion, all associated data is permanently removed within 30 days."
                     )
@@ -76,9 +81,9 @@ struct TermsPrivacySheet: View {
                     )
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Link("View full Terms of Service", destination: URL(string: "https://palmcareai.com/legal/terms")!)
+                        Link("View full Terms of Service", destination: URL(string: "https://palmcareai.com/terms")!)
                             .font(.system(size: 14, weight: .semibold))
-                        Link("View full Privacy Policy", destination: URL(string: "https://palmcareai.com/legal/privacy")!)
+                        Link("View full Privacy Policy", destination: URL(string: "https://palmcareai.com/privacy")!)
                             .font(.system(size: 14, weight: .semibold))
                     }
                     .padding(.top, 8)

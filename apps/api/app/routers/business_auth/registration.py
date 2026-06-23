@@ -197,13 +197,21 @@ async def register_business(
         logger.warning(f"Could not auto-create trial subscription: {e}")
 
     signup_source = getattr(registration, "signup_source", None) or "direct"
+    accepted_terms = bool(getattr(registration, "accepted_terms", False))
     try:
         from app.services.audit import log_action
         log_action(
             db=db, user_id=regular_user.id, action="business_registered",
             entity_type="business", entity_id=business.id,
             description=f"New business registered (source: {signup_source})",
-            changes={"signup_source": signup_source, "selected_plan": registration.selected_plan or "starter"},
+            changes={
+                "signup_source": signup_source,
+                "selected_plan": registration.selected_plan or "starter",
+                # Consent record: user agreed to ToS, Privacy Policy, and AI
+                # data processing at sign-up (App Store guideline 5.1.1(i)).
+                "accepted_terms": accepted_terms,
+                "accepted_terms_at": datetime.now(timezone.utc).isoformat() if accepted_terms else None,
+            },
         )
     except Exception:
         pass

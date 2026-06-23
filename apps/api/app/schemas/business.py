@@ -81,6 +81,10 @@ class BusinessRegistrationStep1(BaseModel):
     signup_source: Optional[str] = None  # "direct", "demo", "referral"
     selected_plan: Optional[str] = None  # "starter", "growth", "enterprise"
 
+    # Consent: user accepted Terms, Privacy Policy, and AI data processing
+    # (incl. sharing audio/transcripts with Deepgram and Anthropic) at sign-up.
+    accepted_terms: Optional[bool] = None
+
 
 class MagicLinkRequest(BaseModel):
     """Request a one-time login link via email."""

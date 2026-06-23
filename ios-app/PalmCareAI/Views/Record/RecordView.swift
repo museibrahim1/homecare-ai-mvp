@@ -25,6 +25,14 @@ struct RecordView: View {
     @State private var showError = false
     @State private var showFilePicker = false
     @AppStorage("backgroundRecording") private var backgroundRecording = false
+    /// One-time, explicit consent to send visit audio/transcripts to our
+    /// third-party AI processors (Deepgram, Anthropic). Required by App Store
+    /// Review guideline 5.1.1(i)/5.1.2(i): the user must be told what data is
+    /// sent, to whom, and grant permission *before* any data leaves the device.
+    @AppStorage("aiProcessingConsentAccepted") private var aiConsentAccepted = false
+    @State private var showAIConsent = false
+    /// Action to run once the user accepts the AI data-sharing consent.
+    @State private var pendingConsentAction: (() -> Void)?
 
     /// Local copies of the finished visit used by navigationDestination —
     /// the session's values are cleared on acknowledgeCompletion().
@@ -174,6 +182,25 @@ struct RecordView: View {
                 AudioFilePicker { url in
                     handlePickedAudioFile(url)
                 }
+            }
+            .sheet(isPresented: $showAIConsent) {
+                AIDataConsentSheet(
+                    onAgree: {
+                        aiConsentAccepted = true
+                        showAIConsent = false
+                        let action = pendingConsentAction
+                        pendingConsentAction = nil
+                        // Let the consent sheet finish dismissing before any
+                        // follow-up sheet (e.g. the client picker) presents.
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            action?()
+                        }
+                    },
+                    onCancel: {
+                        showAIConsent = false
+                        pendingConsentAction = nil
+                    }
+                )
             }
             .task {
                 permissionGranted = await recorder.requestPermission()
@@ -494,18 +521,36 @@ struct RecordView: View {
     private func handleRecordTap() {
         if recorder.isRecording {
             stopAndProcess()
-        } else if !isProcessing {
-            // Don't allow a second recording while the previous assessment
-            // is still uploading/processing — it would create overlapping
-            // visits sharing the same UI state.
-            guard selectedClient != nil else {
-                // Pick the client up front so stopping always leads straight
-                // to processing — no held-audio limbo at the end of a visit.
-                pendingStartAfterClientPick = true
-                showClientPicker = true
-                return
-            }
-            startRecording()
+            return
+        }
+        // Don't allow a second recording while the previous assessment
+        // is still uploading/processing — it would create overlapping
+        // visits sharing the same UI state.
+        guard !isProcessing else { return }
+        // Gate the entire recording flow behind explicit AI data-sharing
+        // consent: nothing is recorded or uploaded until the user agrees.
+        requireAIConsent { beginRecordingFlow() }
+    }
+
+    private func beginRecordingFlow() {
+        guard selectedClient != nil else {
+            // Pick the client up front so stopping always leads straight
+            // to processing — no held-audio limbo at the end of a visit.
+            pendingStartAfterClientPick = true
+            showClientPicker = true
+            return
+        }
+        startRecording()
+    }
+
+    /// Runs `action` immediately if the user has already consented to AI
+    /// processing; otherwise presents the consent sheet and defers it.
+    private func requireAIConsent(_ action: @escaping () -> Void) {
+        if aiConsentAccepted {
+            action()
+        } else {
+            pendingConsentAction = action
+            showAIConsent = true
         }
     }
 
@@ -549,7 +594,11 @@ struct RecordView: View {
             showError = true
             return
         }
-        session.processPickedFile(url: url, clientId: client.id, clientName: client.full_name)
+        // Uploading a file also sends audio to our AI processors, so it must
+        // clear the same consent gate as a live recording.
+        requireAIConsent {
+            session.processPickedFile(url: url, clientId: client.id, clientName: client.full_name)
+        }
     }
 
     @ViewBuilder
@@ -605,5 +654,129 @@ struct RecordView: View {
         let m = Int(interval) / 60
         let s = Int(interval) % 60
         return String(format: "%02d:%02d", m, s)
+    }
+}
+
+// MARK: - AI Data Sharing Consent
+
+/// Explicit, in-app disclosure and consent shown before any visit audio or
+/// transcript is sent to a third-party AI service. Satisfies App Store Review
+/// guideline 5.1.1(i)/5.1.2(i): the user is told *what* is sent, *who* it goes
+/// to, and must tap Agree *before* any data leaves the device.
+struct AIDataConsentSheet: View {
+    let onAgree: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Image(systemName: "lock.shield.fill")
+                            .font(.system(size: 34))
+                            .foregroundColor(.palmPrimary)
+
+                        Text("How your recordings are processed")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.palmText)
+
+                        Text("Before you record or upload a visit, here’s exactly what happens to that audio and who processes it. Your permission is required to continue.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.palmSecondary)
+                            .lineSpacing(3)
+                    }
+
+                    consentRow(
+                        icon: "waveform",
+                        title: "What we send",
+                        body: "The audio you record (or upload) and the transcript it produces. This may include personal and health information about your client."
+                    )
+
+                    consentRow(
+                        icon: "text.bubble.fill",
+                        title: "Deepgram — Transcription",
+                        body: "Audio is sent to Deepgram to convert speech to text and identify speakers. Deepgram does not retain your audio after processing and does not use it to train its models."
+                    )
+
+                    consentRow(
+                        icon: "doc.text.fill",
+                        title: "Anthropic (Claude) — Documentation",
+                        body: "The transcript is sent to Anthropic to generate visit notes, billable items, and the service agreement. Anthropic does not use your data to train its models."
+                    )
+
+                    consentRow(
+                        icon: "checkmark.shield.fill",
+                        title: "How it’s protected",
+                        body: "Data is encrypted in transit (TLS) and at rest. These providers are bound by agreements requiring protections equal to our own. Your data is never sold or used for advertising."
+                    )
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Link("Read our full Privacy Policy", destination: URL(string: "https://palmcareai.com/privacy")!)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.palmPrimary)
+
+                        Text("You are responsible for obtaining any consent required from the individuals whose information you record.")
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmSecondary)
+                            .lineSpacing(2)
+                    }
+
+                    VStack(spacing: 12) {
+                        Button(action: onAgree) {
+                            Text("Agree and Continue")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 15)
+                                .background(
+                                    LinearGradient(colors: [Color.palmPrimary, Color.palmTeal600],
+                                                   startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12)
+                        }
+
+                        Button(action: onCancel) {
+                            Text("Not Now")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.palmSecondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 24)
+                .padding(.bottom, 40)
+            }
+            .background(Color.palmBackground)
+            .navigationTitle("Data & Privacy")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel", action: onCancel)
+                }
+            }
+            .interactiveDismissDisabled(true)
+        }
+    }
+
+    private func consentRow(icon: String, title: String, body: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundColor(.palmPrimary)
+                .frame(width: 26)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.palmText)
+                Text(body)
+                    .font(.system(size: 13))
+                    .foregroundColor(.palmSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }

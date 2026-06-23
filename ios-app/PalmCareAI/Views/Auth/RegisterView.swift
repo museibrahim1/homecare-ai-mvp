@@ -20,6 +20,11 @@ struct RegisterView: View {
     @State private var errorMessage: String?
     @State private var showError = false
     @State private var showMagicLinkSent = false
+    @State private var showConsent = false
+    /// Shared with RecordView: accepting the agreements during sign-up also
+    /// satisfies the in-app AI data-sharing consent, so users aren't asked
+    /// twice. Required by App Store Review guideline 5.1.1(i)/5.1.2(i).
+    @AppStorage("aiProcessingConsentAccepted") private var aiConsentAccepted = false
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
@@ -72,6 +77,18 @@ struct RegisterView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("If an account exists for that email, we just sent a one-tap sign-in link.")
+        }
+        .sheet(isPresented: $showConsent) {
+            RegistrationConsentView(
+                isSubmitting: $isLoading,
+                onAgree: {
+                    aiConsentAccepted = true
+                    submitRegistration()
+                },
+                onCancel: {
+                    showConsent = false
+                }
+            )
         }
     }
 
@@ -176,7 +193,7 @@ struct RegisterView: View {
     }
 
     private var createButton: some View {
-        Button(action: performRegister) {
+        Button(action: { focusedField = nil; showConsent = true }) {
             ZStack {
                 Text("Create Account")
                     .font(.headline)
@@ -237,16 +254,16 @@ struct RegisterView: View {
                 }
             }
             VStack(spacing: 4) {
-                Text("By creating an account, you agree to our")
+                Text("You'll review and agree to our policies in the next step.")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 HStack(spacing: 4) {
-                    Link("Terms of Service", destination: URL(string: "https://palmcareai.com/legal/terms")!)
+                    Link("Terms of Service", destination: URL(string: "https://palmcareai.com/terms")!)
                         .font(.caption.weight(.semibold))
                     Text("and")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Link("Privacy Policy", destination: URL(string: "https://palmcareai.com/legal/privacy")!)
+                    Link("Privacy Policy", destination: URL(string: "https://palmcareai.com/privacy")!)
                         .font(.caption.weight(.semibold))
                 }
             }
@@ -291,7 +308,9 @@ struct RegisterView: View {
         )
     }
 
-    private func performRegister() {
+    /// Called only after the user has accepted the agreements on the consent
+    /// step. Records that acceptance and creates the account.
+    private func submitRegistration() {
         focusedField = nil
         isLoading = true
         errorMessage = nil
@@ -301,10 +320,13 @@ struct RegisterView: View {
         let trimmedAgency = agencyName.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Minimal payload — backend fills in defaults for everything optional.
+        // accepted_terms records that the user agreed to ToS, Privacy Policy,
+        // and AI data processing at sign-up.
         var body: [String: Any] = [
             "owner_email": trimmedEmail,
             "owner_password": password,
             "owner_name": trimmedFullName,
+            "accepted_terms": true,
         ]
         if !trimmedAgency.isEmpty {
             body["name"] = trimmedAgency
@@ -313,15 +335,17 @@ struct RegisterView: View {
         Task {
             do {
                 try await api.register(body: body)
-                // register() now sets api.token automatically on success.
+                // register() now sets api.token automatically on success — the
+                // app swaps to the main tab view, replacing this screen.
                 await MainActor.run {
                     isLoading = false
                 }
             } catch {
                 await MainActor.run {
+                    isLoading = false
+                    showConsent = false
                     errorMessage = error.localizedDescription
                     showError = true
-                    isLoading = false
                 }
             }
         }
@@ -348,6 +372,183 @@ struct RegisterView: View {
                     isLoading = false
                 }
             }
+        }
+    }
+}
+
+// MARK: - Registration Consent Step
+
+/// Final step of sign-up: the user must review and agree to the Terms of
+/// Service, Privacy Policy, and the AI data-processing disclosure before the
+/// account is created. Required by App Store Review guideline 5.1.1(i)/5.1.2(i)
+/// — consent is captured before any personal data can be sent to AI services.
+struct RegistrationConsentView: View {
+    @Binding var isSubmitting: Bool
+    let onAgree: () -> Void
+    let onCancel: () -> Void
+
+    @State private var agreed = false
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Image(systemName: "checkmark.shield.fill")
+                            .font(.system(size: 34))
+                            .foregroundColor(.palmPrimary)
+
+                        Text("Review and agree")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.palmText)
+
+                        Text("Before you create your account, please review how PALM handles your data and agree to our policies.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.palmSecondary)
+                            .lineSpacing(3)
+                    }
+
+                    policyRow(
+                        icon: "doc.plaintext.fill",
+                        title: "Terms of Service",
+                        body: "The rules for using PALM, including your responsibilities and acceptable use.",
+                        linkTitle: "Read the Terms of Service",
+                        url: "https://palmcareai.com/terms"
+                    )
+
+                    policyRow(
+                        icon: "hand.raised.fill",
+                        title: "Privacy Policy",
+                        body: "What data we collect, how we use it, how long we keep it, and your rights.",
+                        linkTitle: "Read the Privacy Policy",
+                        url: "https://palmcareai.com/privacy"
+                    )
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(alignment: .top, spacing: 14) {
+                            Image(systemName: "cpu.fill")
+                                .font(.system(size: 18))
+                                .foregroundColor(.palmPrimary)
+                                .frame(width: 26)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("AI Data Processing")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(.palmText)
+                                Text("To turn recordings into transcripts and documents, PALM sends your visit audio and transcripts (which may include personal and health information) to third-party AI providers:")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.palmSecondary)
+                                    .lineSpacing(3)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            bullet("Deepgram — converts speech to text and identifies speakers. Does not retain your audio after processing or use it to train models.")
+                            bullet("Anthropic (Claude) — generates visit notes, billable items, and service agreements from the transcript. Does not use your data to train models.")
+                            bullet("Data is encrypted in transit and at rest. These providers are bound by agreements requiring protection equal to our own. Your data is never sold or used for advertising.")
+                        }
+                        .padding(.leading, 40)
+                    }
+
+                    Text("You are responsible for obtaining any consent required from the individuals whose information you record.")
+                        .font(.system(size: 12))
+                        .foregroundColor(.palmSecondary)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Button(action: { agreed.toggle() }) {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: agreed ? "checkmark.square.fill" : "square")
+                                .font(.system(size: 22))
+                                .foregroundColor(agreed ? .palmPrimary : .palmSecondary)
+                            Text("I have read and agree to the Terms of Service, the Privacy Policy, and the AI data processing described above.")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.palmText)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(14)
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(agreed ? Color.palmPrimary.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: onAgree) {
+                        ZStack {
+                            Text("Agree and Create Account")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                                .opacity(isSubmitting ? 0 : 1)
+                            if isSubmitting {
+                                ProgressView().tint(.white)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(
+                            LinearGradient(colors: [Color.palmPrimary, Color.palmTeal600],
+                                           startPoint: .leading, endPoint: .trailing)
+                                .opacity(agreed && !isSubmitting ? 1 : 0.4)
+                        )
+                        .cornerRadius(12)
+                    }
+                    .disabled(!agreed || isSubmitting)
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 24)
+                .padding(.bottom, 40)
+            }
+            .background(Color.palmBackground)
+            .navigationTitle("Almost done")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel", action: onCancel)
+                        .disabled(isSubmitting)
+                }
+            }
+            .interactiveDismissDisabled(isSubmitting)
+        }
+    }
+
+    private func policyRow(icon: String, title: String, body: String, linkTitle: String, url: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundColor(.palmPrimary)
+                .frame(width: 26)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.palmText)
+                Text(body)
+                    .font(.system(size: 13))
+                    .foregroundColor(.palmSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                Link(linkTitle, destination: URL(string: url)!)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.palmPrimary)
+            }
+        }
+    }
+
+    private func bullet(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Circle()
+                .fill(Color.palmPrimary)
+                .frame(width: 5, height: 5)
+                .padding(.top, 6)
+            Text(text)
+                .font(.system(size: 13))
+                .foregroundColor(.palmSecondary)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
