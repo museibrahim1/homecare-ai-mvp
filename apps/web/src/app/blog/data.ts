@@ -322,6 +322,145 @@ The result: a more thorough, more natural assessment process that produces bette
 If your agency is still using paper forms or typing notes after the fact, there's a better way. [Book a demo](/) to see how PalmCare AI turns a single voice recording into a complete, compliant assessment — and a signed contract.
 `,
   },
+  {
+    slug: 'how-much-does-home-care-software-cost',
+    title: 'How Much Does Home Care Software Cost in 2026?',
+    description:
+      'A plain-English breakdown of home care software pricing in 2026 — per-user fees, setup costs, what drives the price, and how to compare plans without surprises.',
+    date: '2026-06-23',
+    readTime: '7 min read',
+    category: 'Pricing',
+    content: `
+If you run a home care agency and you're shopping for software, the first question is usually the hardest to answer: what does it actually cost? Most vendors hide pricing behind a "book a demo" wall, so it's tough to compare. Here's a straight answer.
+
+## The Short Version
+
+Home care software in 2026 typically lands in one of three ranges:
+
+- **Entry tools (solo / very small agencies):** roughly $50–$150 per month, often per-user.
+- **Growing agencies (30–200 clients):** roughly $300–$800 per month, depending on user count and modules.
+- **Enterprise (200+ clients, multi-location):** $1,000+ per month, usually custom-quoted.
+
+Those numbers move based on a few things — let's break them down so you can read any quote accurately.
+
+## What Actually Drives the Price
+
+- **Per-user vs. per-client pricing.** Some vendors charge per caregiver seat, which punishes you for growing your team. Others charge by active client count. Know which model you're signing up for.
+- **Setup and onboarding fees.** Legacy platforms often add a one-time implementation fee ($500–$5,000) for data migration and training. Ask whether it's included.
+- **Modules and add-ons.** Scheduling, billing, EVV, and reporting are sometimes sold separately. A low headline price can double once you add what you actually need.
+- **Contract length.** Annual commitments are usually cheaper per month, but make sure you can leave if it isn't working.
+
+## Questions to Ask Before You Sign
+
+1. Is pricing per user or per client?
+2. What's the setup or migration fee?
+3. Which features are included vs. add-ons?
+4. Is there a free trial, and does it include all features?
+5. Can I cancel anytime, and what happens to my data if I do?
+
+## Where the Real Savings Are
+
+The sticker price is only half the math. The bigger number is the time your team spends on documentation. If your staff spends 10–15 hours a week typing assessments, filling forms, and re-keying data into contracts, that labor cost dwarfs most software fees.
+
+This is where AI-native tools change the equation. PalmCare AI turns a recorded assessment into a state-specific service contract automatically — so the question isn't just "what does the software cost," it's "how many hours does it give back." For most agencies, that's the number that decides it.
+
+## See a Real Quote
+
+PalmCare AI offers transparent plans for solo, growing, and enterprise agencies, each with a 14-day free trial and no setup fee. [Book a demo](/) and we'll walk through a quote based on your client count — no guesswork.
+`,
+  },
+  {
+    slug: 'how-to-write-home-care-service-agreement',
+    title: 'How to Write a Home Care Service Agreement (Free Checklist)',
+    description:
+      'What every home care service agreement should include to be clear, compliant, and protect your agency — plus how to generate one from a recorded assessment in seconds.',
+    date: '2026-06-23',
+    readTime: '8 min read',
+    category: 'Compliance',
+    content: `
+A service agreement is the document that turns a care assessment into a working relationship. Done well, it sets expectations, satisfies state requirements, and protects both your agency and the client. Done poorly — or skipped — it's where disputes and compliance gaps start. Here's what to include.
+
+## What a Home Care Service Agreement Should Cover
+
+- **Parties and effective date.** The agency, the client (and responsible party, if any), and when service begins.
+- **Scope of services.** The specific care being provided — personal care, companionship, medication reminders, ADL support — written plainly, not as a generic list.
+- **Schedule and hours.** Days, hours, and how changes are handled.
+- **Rates and billing.** Hourly or visit rate, payer (private pay, Medicaid, long-term care insurance), billing cycle, and late-payment terms.
+- **Caregiver responsibilities.** What caregivers will and won't do, including any tasks that require a nurse.
+- **Client rights and responsibilities.** Including the right to be informed, to privacy, and to change or end services.
+- **Termination terms.** Notice period and how either side can end the agreement.
+- **State-specific clauses.** Mandatory language varies by state — disclosures, bill of rights, grievance procedures, and more.
+- **Signatures.** Client (or representative) and an agency representative, with dates.
+
+## The Free Checklist
+
+- [ ] Parties and start date
+- [ ] Plain-language scope of services
+- [ ] Schedule and how changes are handled
+- [ ] Rate, payer, and billing terms
+- [ ] Caregiver scope and limits
+- [ ] Client rights and grievance process
+- [ ] Termination and notice terms
+- [ ] State-required disclosures and clauses
+- [ ] Signature blocks with dates
+
+## The Hard Part: State-Specific Requirements
+
+A general template gets you most of the way, but home care is regulated state by state. Florida, California, and Texas each require different disclosures and mandatory clauses. Using a one-size template risks an agreement that's clear but not compliant.
+
+## From Conversation to Contract
+
+This is exactly the work PalmCare AI was built to remove. Record the assessment, and PALM writes the care plan, the billables, and a state-specific service agreement built from what was actually said — pre-filled and ready for review in seconds. You review and sign; the compliance details are already in place.
+
+[Book a demo](/) to see a service agreement generated from a single recorded assessment.
+`,
+  },
+  {
+    slug: 'best-home-care-software-2026-comparison',
+    title: 'Best Home Care Software in 2026: AxisCare vs WellSky vs PalmCare AI',
+    description:
+      'An honest comparison of leading home care platforms in 2026 — what AxisCare, WellSky, and PalmCare AI each do well, and how to choose the right fit for your agency.',
+    date: '2026-06-23',
+    readTime: '8 min read',
+    category: 'Comparison',
+    content: `
+There are dozens of home care platforms, but most agencies end up comparing a few. Here's an honest look at three common choices in 2026 — what each does well, and where they differ — so you can pick the right fit.
+
+## AxisCare
+
+AxisCare is a well-established scheduling and EVV platform. It's strong on the operational basics: shift scheduling, electronic visit verification, and billing workflows. Agencies that need a mature, widely-used scheduling backbone often land here.
+
+- **Best for:** agencies that primarily need scheduling, EVV, and billing.
+- **Watch for:** assessments and contracts are still largely manual — you fill out forms and templates by hand.
+
+## WellSky
+
+WellSky is an enterprise-grade platform spanning many areas of post-acute and home care. It's broad and deep, with strong reporting and integrations.
+
+- **Best for:** larger organizations that need a wide, configurable enterprise suite.
+- **Watch for:** breadth comes with complexity and cost; implementation can be lengthy.
+
+## PalmCare AI
+
+PalmCare AI takes a different starting point: instead of digitizing paperwork, it removes it. You record a care assessment, and the AI transcribes it, separates speakers, extracts billables, writes the visit notes, and generates a state-specific service contract — automatically.
+
+- **Best for:** agencies that want to cut documentation time and turn assessments into signed contracts fast.
+- **Watch for:** it's AI-native and focused on the assessment-to-contract workflow rather than being a decades-old all-in-one.
+
+## How to Choose
+
+1. **Start with your biggest time sink.** If it's scheduling and EVV, a legacy platform may cover it. If it's documentation and contracts, an AI-native tool will give you the most hours back.
+2. **Count the manual steps.** Every time data is re-typed from one place to another is a place for errors and lost time.
+3. **Check state compliance.** Make sure contracts reflect your state's requirements without manual editing.
+4. **Trial it with real visits.** A demo shows the happy path; a trial shows what your team actually experiences.
+
+## The Bottom Line
+
+Legacy platforms digitized the paperwork. AI-native platforms aim to eliminate it. If your agency's pain is the hours spent on assessments, notes, billing, and contracts, that's exactly what PalmCare AI was built to remove.
+
+[Book a demo](/) and see your own assessment turned into a signed contract — then compare.
+`,
+  },
 ];
 
 export function getPostBySlug(slug: string): BlogPost | undefined {

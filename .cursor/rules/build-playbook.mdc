@@ -172,6 +172,56 @@ actual stack: **Supabase + FastAPI + Next.js (web) + SwiftUI (iOS) + RevenueCat/
 
 ---
 
+## 5. SHIP-SAFE OPERATIONS & GROWTH (Sources 7–11, Jun 2026)
+
+### 5.1 Test your own security before attackers do (Source 7)
+> "You built all the right security features… but have you ever tried to hack your own app?"
+- [ ] Run **OWASP ZAP** against staging — crawls the app, tests the OWASP Top 10
+      (SQLi, XSS, broken auth). One Docker command, free.
+- [ ] **Burp Suite** your own API: intercept a request and tamper with it —
+      change the user ID in the JWT, swap `org_id` in the body, modify the `role`
+      claim. If you can read another tenant's data or hit admin endpoints, your
+      authorization has holes. **RLS alone is not enough** if the API passes
+      unchecked params to the DB.
+- [ ] **Automate security scanning in CI** (we do): Trivy (deps/CVEs) + Gitleaks
+      (secrets) + **CodeQL** (static analysis) on every push/PR. See `.github/workflows/ci.yml`.
+
+### 5.2 AI reviews the code your AI wrote (Source 8)
+> "The AI wrote your code. You shipped it without reading it. Now you have tech debt you don't understand."
+- [ ] Add an **AI reviewer to the PR pipeline** (we have **Bugbot**; CodeRabbit/
+      custom Claude action are alternatives). Every PR gets an automated review.
+- [ ] **Prompt for architecture, not syntax**: business-logic correctness, SQLi
+      vectors, unhandled edge cases, N+1 queries, anything touching payments or
+      data deletion. Tell it to ignore style nits.
+- [ ] **Gate merges**: critical findings block; warnings inform. You are the
+      orchestrator making the final call.
+
+### 5.3 Survive your first 100 users (Source 9)
+> "50 people sign up, the database locks up, blank screen of death."
+- [ ] **Connection pooling** on the DB (PgBouncer / Supabase pooler). Don't open a
+      new connection per request.
+- [ ] **Caching layer** (Redis / Upstash / in-memory) for data that doesn't change
+      every second — cuts response time and DB load dramatically.
+- [ ] **Load test before launch** with **k6** or **artillery** (free, ~30 min):
+      simulate 100 concurrent users, find the bottleneck before users do.
+      (We have `tests/performance/`.)
+
+### 5.4 SEO + AEO = helpful content, not gimmicks (Sources 10 & 11)
+> Google's 2026 AEO/GEO guide: AI Overviews use the **same quality signals as normal SEO**.
+- [ ] **Don't** over-engineer AI-only schema or depend on `llms.txt` for Google —
+      Google extracts relevant passages itself and can **penalize** attempts to
+      game generative responses. (`llms.txt` still helps non-Google engines; keep it lean.)
+- [ ] **Do** write genuinely helpful, question-targeted content. Mine real
+      questions (e.g. AnswerThePublic), answer them with your real expertise,
+      experience, case studies, and opinions. Two quality posts a week beats tricks.
+- [ ] Keep SEO fundamentals solid: unique titles/descriptions, one H1, clean URLs,
+      canonical tags, sitemap derived from real content, FAQ/Article/Breadcrumb
+      structured data, fast Core Web Vitals.
+- [ ] Fill SaaS content gaps: **pricing**, **comparison/alternative**, and
+      **how-to** pages (these win high-intent search). See `apps/web/src/app/blog/`.
+
+---
+
 ## How to use this playbook
 - Treat the **ship-gates** as a pre-release checklist for every project.
 - When implementing auth, DB access, storage, billing, or onboarding, re-read the
@@ -186,3 +236,11 @@ Distilled from Instagram reels (Jun 2026):
 - Top security mistakes in vibe-coded startups — instagram.com/reels/DZFhBi6AW7S
 - 5 things your vibe-coded login screen is missing — instagram.com/reels/DZsXW-HonCi
 - 6 docs to have before building an app with AI — instagram.com/reels/DYMsCRLz8Ik
+- (7) Hack your own app: ZAP + Burp + CI scanning — instagram.com/reels/DZQU76-x-1G
+- (8) AI code reviewer in the PR pipeline — instagram.com/reels/DZN3Z3IPD9a
+- (9) Survive your first 100 users (pooling, caching, load tests) — instagram.com/reels/DYkAobpgwjI
+- (10) Google's AEO/GEO guide — 5 things you're doing wrong — instagram.com/reels/DY2cCXgM9GA
+- (11) Free SEO: real questions → helpful blog posts — instagram.com/reels/DRHy1evjTZM
+
+> Installed agent skills are documented in `docs/AGENT_SKILLS.md` (and the
+> `agent-skills` project rule). Use the marketing/SEO skills for growth work.

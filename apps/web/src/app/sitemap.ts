@@ -1,14 +1,10 @@
 import { MetadataRoute } from 'next';
+import { getAllSlugs } from './blog/data';
 
 const BASE_URL = 'https://palmcareai.com';
 
-const BLOG_SLUGS = [
-  'what-is-ai-powered-home-care-software',
-  'voice-to-contract-saves-home-care-agencies-time',
-  'hipaa-compliance-guide-home-care-agencies-2026',
-  '5-signs-your-agency-outgrown-paper-documentation',
-  'complete-guide-home-care-client-assessments',
-];
+// Derived from the blog data so the sitemap never drifts from published posts.
+const BLOG_SLUGS = getAllSlugs();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages: MetadataRoute.Sitemap = [

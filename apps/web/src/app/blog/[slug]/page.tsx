@@ -59,17 +59,32 @@ export default async function BlogPostPage({ params }: Props) {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: post.title,
-    description: post.description,
-    datePublished: post.date,
-    author: { '@type': 'Organization', name: 'PalmCare AI', url: 'https://palmcareai.com' },
-    publisher: {
-      '@type': 'Organization',
-      name: 'PalmCare AI',
-      logo: { '@type': 'ImageObject', url: 'https://palmcareai.com/icon-512.png' },
-    },
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://palmcareai.com/blog/${slug}` },
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: post.title,
+        description: post.description,
+        datePublished: post.date,
+        dateModified: post.date,
+        articleSection: post.category,
+        image: 'https://palmcareai.com/og-image.png',
+        author: { '@type': 'Organization', name: 'PalmCare AI', url: 'https://palmcareai.com' },
+        publisher: {
+          '@type': 'Organization',
+          name: 'PalmCare AI',
+          logo: { '@type': 'ImageObject', url: 'https://palmcareai.com/icon-512.png' },
+        },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': `https://palmcareai.com/blog/${slug}` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://palmcareai.com' },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://palmcareai.com/blog' },
+          { '@type': 'ListItem', position: 3, name: post.title, item: `https://palmcareai.com/blog/${slug}` },
+        ],
+      },
+    ],
   };
 
   const htmlContent = markdownToHtml(post.content);

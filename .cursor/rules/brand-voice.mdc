@@ -1,0 +1,47 @@
+---
+description: PALM brand voice — apply to all marketing copy, ad creative, landing-page/app-facing text, emails, and social content. Voice is fixed; tone adapts by channel.
+globs: marketing/**,apps/web/**,videos/**,docs/**
+alwaysApply: false
+---
+
+# PALM — Brand Voice
+
+Canonical source: `marketing/PALM_BRAND_VOICE.md`. Apply this whenever writing or reviewing user-facing copy.
+
+**Product in one line:** PALM turns a recorded care visit into a proposal-ready, state-specific service contract — automatically.
+**Tagline:** Where care meets intelligence. · **Workflow line:** Record. Transcribe. Contract. · **CTA verb:** "Palm It."
+
+## Voice attributes (fixed)
+
+- **Calm authority** — confident, precise, let the product talk. Not hypey or "revolutionary."
+  - Sounds like: "Record the visit. Palm writes the care plan, the billables, and the contract."
+- **Caregiver-first warmth** — on the caregiver's side; respect their time and craft. Not cold/corporate.
+  - Sounds like: "Two hours of nightly paperwork — gone. You get your evenings back."
+- **Plainspoken and concrete** — specific, short, outcome-led; real numbers and steps. No jargon padding.
+  - Sounds like: "From conversation to contract, in seconds."
+- **Quietly credible** — trustworthy on care, compliance, accuracy; earn it, don't claim it. No fear-mongering.
+  - Sounds like: "State-specific service agreements, built from what was actually said."
+
+## Audience
+Owners/admins of in-home care agencies, plus caregivers and nurses. They already feel the paperwork pain — name it, then move to relief. Address them as a respected peer, never as a "user."
+
+## Content pillars (every piece belongs to one)
+1. **How it works** — record → transcribe → bill → notes → contract. "One recording does the whole assessment."
+2. **Time & relief** — hours saved, evenings back. "Stop doing robotic work."
+3. **Trust & accuracy** — state-specific contracts, speaker-separated transcripts. "Built from what was actually said."
+4. **Proof** — quiet agency stories and testimonials. "Here's what it changed for a real team."
+
+## Tone by channel
+- **LinkedIn:** professional, founder-voice, insight-led.
+- **Instagram:** warm, visual, human.
+- **TikTok/Reels:** punchy; hook in first 3 seconds.
+- **X:** one sharp claim.
+- **Email/ads:** personal, "you"-framed, one clear next step.
+
+## Terminology
+- **Say:** PALM / Palm · "Palm It" · care assessment · service contract / care agreement · billables · caregiver, nurse, agency · home care · palmcareai.com · demo@palmtai.com
+- **Avoid:** "users" (say caregivers/agencies) · leverage / synergy / seamless / revolutionary / game-changing · fear-based HIPAA claims · lazy CTAs ("drop a comment below") · over-promising (100% / guaranteed / instant).
+- **Capitalization:** brand mark is **PALM** (all caps) or **Palm**; the action is **Palm It**.
+
+## Pre-publish checklist
+- One pillar, clearly. · Hook lands in the first line (first 3 sec for video). · Concrete outcome, not abstract benefit. · Passes the "never sounds like" test (calm, warm, plain). · Correct terms + capitalization. · One deliberate next step (palmcareai.com organic · demo@palmtai.com ads).

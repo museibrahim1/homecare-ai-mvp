@@ -1,0 +1,35 @@
+# PalmCare AI
+
+> PalmCare AI turns a recorded home care visit into a proposal-ready, state-specific service contract — automatically. Record the visit; PALM writes the care plan, the billables, the visit notes, and the contract. Built for in-home care agencies, caregivers, and nurses.
+
+Tagline: Where care meets intelligence.
+Workflow: Record. Transcribe. Contract.
+
+## What it does
+- Voice-powered care assessments: record a natural conversation; AI transcribes and separates speakers (Deepgram Nova-3).
+- Automatic, state-specific service contracts generated from what was actually said (50-state rules).
+- Smart billing extraction and visit notes from the same recording.
+- Client CRM, caregiver management, and an iOS companion app.
+- HIPAA-minded: AES-256 at rest, TLS in transit, role-based access, audit trails, BAA available.
+
+## Who it's for
+Owners and administrators of in-home care agencies, plus the caregivers and nurses who do assessments. Best for agencies losing hours each week to documentation, assessments, and manual contract writing.
+
+## Key pages
+- Home: https://palmcareai.com
+- Features: https://palmcareai.com/features
+- Pricing: https://palmcareai.com/pricing
+- FAQ: https://palmcareai.com/faq
+- Blog: https://palmcareai.com/blog
+- Mobile app: https://palmcareai.com/mobile-app
+- Contact: https://palmcareai.com/contact
+
+## Helpful answers
+- How much does home care software cost: https://palmcareai.com/blog/how-much-does-home-care-software-cost
+- How to write a home care service agreement: https://palmcareai.com/blog/how-to-write-home-care-service-agreement
+- Home care software comparison (AxisCare vs WellSky vs PalmCare AI): https://palmcareai.com/blog/best-home-care-software-2026-comparison
+- HIPAA compliance guide for home care agencies: https://palmcareai.com/blog/hipaa-compliance-guide-home-care-agencies-2026
+
+## Contact
+- Sales/demo: demo@palmtai.com
+- Support: support@palmtai.com

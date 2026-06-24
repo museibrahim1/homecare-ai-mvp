@@ -1,0 +1,31 @@
+---
+description: Index of installed agent skills and when to use them. Full human-readable doc in docs/AGENT_SKILLS.md.
+globs:
+alwaysApply: true
+---
+
+# Agent Skills — Use the Right One
+
+Full catalog (with descriptions + where each has been used): `docs/AGENT_SKILLS.md`.
+Global skills live in `~/.agents/skills/`. Load the matching skill before doing the work.
+
+## Reach for these by task
+
+- **SEO / AEO / growth** → `seo-audit`, `programmatic-seo`, `content-strategy`,
+  `copywriting`, `marketing-psychology`, `marketing-ideas`.
+  AEO rule of thumb: helpful, question-targeted content + solid SEO fundamentals
+  beat schema/llms.txt gimmicks (Google penalizes attempts to game AI answers).
+- **Before building** → `brainstorming`, then `writing-plans`.
+- **Implementing / fixing** → `test-driven-development`, `systematic-debugging`,
+  `diagnosing-bugs`, then `verification-before-completion` before claiming done.
+- **Web (Next.js/React)** → `vercel-react-best-practices`,
+  `vercel-composition-patterns`, `vercel-optimize`, `web-design-guidelines`,
+  `webapp-testing`.
+- **Backend / DB** → `supabase-postgres-best-practices`, `claude-api`.
+- **Generate files** → `docx`, `pdf`, `pptx`, `xlsx`.
+- **Architecture** → `improve-codebase-architecture`.
+
+## Ship-safe ops (from build-playbook §5)
+Security-test your own app (ZAP/Burp), AI-review PRs (Bugbot), scale for the first
+100 users (pooling/caching/load tests), and grow with helpful content. Details in
+`.cursor/rules/build-playbook.mdc`.
