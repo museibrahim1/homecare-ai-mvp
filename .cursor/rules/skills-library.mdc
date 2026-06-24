@@ -1,0 +1,39 @@
+---
+description: Pointer to the local Claude Skills Library (97+ expert SKILL.md guides). Consult a relevant skill before doing specialized work to raise quality.
+globs:
+alwaysApply: true
+---
+
+# Skills Library — use it to do better work
+
+A local clone of the open-source skills library lives at:
+
+`~/claude-skills-library/free-skills/<skill-name>/SKILL.md`
+
+(Source: github.com/frankxai/claude-skills-library — MIT. Update with
+`git -C ~/claude-skills-library pull`.)
+
+## When to use
+Before doing specialized work, check whether a matching skill exists and READ its
+`SKILL.md` (and `references/` if present) to follow current best practices.
+Treat the skill as authoritative guidance for that domain.
+
+## High-value skills for our stack
+| Task | Skill |
+|------|-------|
+| Next.js / web app work | `nextjs-expert` |
+| UI / UX / accessibility | `ui-ux-design-expert` |
+| Product specs (the 6 kickoff docs) | `product-management-expert` |
+| Reviewing a diff / PR | `github-code-review` |
+| Designing an MCP server | `mcp-architecture`, `mcp-builder` |
+| Perf / profiling | `performance-analysis` |
+| Verification / quality gates | `verification-quality` |
+| Docs output (docx/pptx/xlsx/pdf) | `anthropic/docx`, `anthropic/pptx`, etc. |
+
+Browse all: `ls ~/claude-skills-library/free-skills`
+
+## How to apply
+1. Identify the task domain.
+2. `ls ~/claude-skills-library/free-skills` (or check the table above) for a match.
+3. Read that `SKILL.md`, then follow it while completing the task.
+4. If nothing matches, proceed normally.
