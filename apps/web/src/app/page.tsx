@@ -249,8 +249,8 @@ export default function LandingPage() {
           </p>
           <p className="text-sm text-slate-500 mt-5">
             New here? See{' '}
-            <Link href="/blog/best-home-care-software-2026-comparison" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
-              how PalmCare AI compares to AxisCare and WellSky
+            <Link href="/blog/ai-home-care-documentation-tools-2026" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
+              how PalmCare AI compares to AI scribes and contract templates
             </Link>
             , or{' '}
             <Link href="/pricing" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">

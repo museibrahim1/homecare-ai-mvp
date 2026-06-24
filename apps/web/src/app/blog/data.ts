@@ -416,60 +416,60 @@ This is exactly the work PalmCare AI was built to remove. Record the assessment,
 `,
   },
   {
-    slug: 'best-home-care-software-2026-comparison',
-    title: 'Best Home Care Software in 2026: AxisCare vs WellSky vs PalmCare AI',
+    slug: 'ai-home-care-documentation-tools-2026',
+    title: 'AI Documentation Tools for Home Care Agencies, Compared (2026)',
     description:
-      'An honest comparison of leading home care platforms in 2026 — what AxisCare, WellSky, and PalmCare AI each do well, and how to choose the right fit for your agency.',
+      'The real AI tools that turn a recorded home visit into documentation in 2026 — AI clinical scribes (Eleos, Enzo, Apricot, Scribble), service-agreement templates (PandaDoc, Genie AI), and PalmCare AI — and how to choose as a home care agency.',
     date: '2026-06-23',
-    readTime: '8 min read',
+    readTime: '7 min read',
     category: 'Comparison',
     content: `
-There are dozens of home care platforms, but most agencies end up comparing a few. Here's an honest look at three common choices in 2026 — what each does well, and where they differ — so you can pick the right fit.
+If you run a home care agency and you want AI to cut documentation time, the market is easy to confuse. One quick note first: **scheduling and EVV platforms — AxisCare, WellSky, Sandata — aren't on this list.** They manage shifts and electronic visit verification; they don't turn a recorded assessment into paperwork. The tools below do. They fall into three groups.
 
 ## At a glance
 
-| Capability | AxisCare | WellSky | PalmCare AI |
+| What it does | AI clinical scribes | Service-agreement templates | PalmCare AI |
 |---|---|---|---|
-| Primary focus | Scheduling & EVV | Broad enterprise suite | Assessment → signed contract |
-| Voice-recorded assessments | No | No | Yes |
-| Auto-generated service contracts | Manual | Manual | Automatic |
-| State-specific contract clauses | Manual | Varies | Built in (50 states) |
-| Typical setup time | Days to weeks | Weeks | About 24 hours |
-| Best for | Scheduling & EVV needs | Large, complex orgs | Cutting documentation time |
+| Examples | Eleos, Enzo, nVoq, Apricot, Scribble | PandaDoc, Genie AI, DocHub | PalmCare AI |
+| Built for | Medicare home health & hospice | General document drafting | Non-medical home care agencies |
+| Captures the visit by voice | Yes | No | Yes |
+| Main output | OASIS-E + clinical visit notes | Blank fillable template | Care plan + SOAP notes + billables + service contract |
+| State-specific service contract | No | Manual editing | Automatic (50 states) |
+| Best for | OASIS charting & reimbursement | One-off agreements | Assessments → signed contracts |
 
-## AxisCare
+## 1. AI clinical scribes (Eleos, Enzo, nVoq, Apricot, Scribble, Lime)
 
-AxisCare is a well-established scheduling and EVV platform. It's strong on the operational basics: shift scheduling, electronic visit verification, and billing workflows. Agencies that need a mature, widely-used scheduling backbone often land here.
+These ambient AI tools listen during a visit and generate clinical documentation in real time. They're genuinely good — but they're built for **Medicare-certified home health and hospice**. Their output is OASIS-E, ICD-10 coding, and clinical visit notes that sync into a home-health EHR like WellSky, MatrixCare, HCHB, or Axxess.
 
-- **Best for:** agencies that primarily need scheduling, EVV, and billing.
-- **Watch for:** assessments and contracts are still largely manual — you fill out forms and templates by hand.
+- **Best for:** Medicare home health/hospice agencies that need OASIS charting and reimbursement-ready notes.
+- **Watch for:** they don't produce a client service agreement, and they're oriented around clinical and Medicare workflows — not private-pay home care onboarding.
 
-## WellSky
+## 2. Service-agreement templates (PandaDoc, Genie AI, DocHub, Agiled)
 
-WellSky is an enterprise-grade platform spanning many areas of post-acute and home care. It's broad and deep, with strong reporting and integrations.
+These give you a caregiver or home care service agreement you fill in, often with e-signature. Useful for a one-off contract.
 
-- **Best for:** larger organizations that need a wide, configurable enterprise suite.
-- **Watch for:** breadth comes with complexity and cost; implementation can be lengthy.
+- **Best for:** drafting a single agreement from a template.
+- **Watch for:** no voice, no assessment, no automatic care plan or billables — you still do the thinking and the typing, and getting the state-specific clauses right is on you.
 
-## PalmCare AI
+## 3. PalmCare AI
 
-PalmCare AI takes a different starting point: instead of digitizing paperwork, it removes it. You record a care assessment, and the AI transcribes it, separates speakers, extracts billables, writes the visit notes, and generates a state-specific service contract — automatically.
+PalmCare AI is built for **home care agencies** (non-medical / private duty). You record the client assessment, and it transcribes the conversation, separates speakers, extracts the billable services, writes the visit notes, and generates a **state-specific service contract** — built from what was actually said. A staff member reviews and approves before anything is finalized.
 
-- **Best for:** agencies that want to cut documentation time and turn assessments into signed contracts fast.
-- **Watch for:** it's AI-native and focused on the assessment-to-contract workflow rather than being a decades-old all-in-one.
+- **Best for:** home care agencies that want each assessment turned into a signed service agreement — plus notes and billables — in minutes.
+- **Watch for:** it's focused on the home care assessment-to-contract workflow, not OASIS clinical charting for Medicare home health.
 
-## How to Choose
+## How to choose
 
-1. **Start with your biggest time sink.** If it's scheduling and EVV, a legacy platform may cover it. If it's documentation and contracts, an AI-native tool will give you the most hours back.
-2. **Count the manual steps.** Every time data is re-typed from one place to another is a place for errors and lost time.
-3. **Check state compliance.** Make sure contracts reflect your state's requirements without manual editing.
-4. **Trial it with real visits.** A demo shows the happy path; a trial shows what your team actually experiences.
+1. **Are you Medicare-certified home health, or non-medical home care?** Home health → an OASIS scribe. Home care → PalmCare AI.
+2. **Do you need a signable client contract, or a clinical chart?** Scribes produce the chart; PALM produces the contract, care plan, and billables.
+3. **Count the manual re-types in your current flow.** Every handoff is lost time and a chance for an error.
+4. **Trial it with a real assessment,** not just a scripted demo.
 
-## The Bottom Line
+## The bottom line
 
-Legacy platforms digitized the paperwork. AI-native platforms aim to eliminate it. If your agency's pain is the hours spent on assessments, notes, billing, and contracts, that's exactly what PalmCare AI was built to remove.
+The AI scribe tools are excellent at clinical OASIS notes for home health. The template tools are fine for a one-off agreement. But if you're a home care agency and your pain is turning every assessment into a complete, state-specific service contract — with notes and billables — that specific job is what PalmCare AI was built for.
 
-[Book a demo](/) and see your own assessment turned into a signed contract — then compare.
+[Book a demo](/) and watch your own assessment become a signed contract — then compare.
 `,
   },
 ];
