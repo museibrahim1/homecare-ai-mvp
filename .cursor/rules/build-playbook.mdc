@@ -140,6 +140,38 @@ actual stack: **Supabase + FastAPI + Next.js (web) + SwiftUI (iOS) + RevenueCat/
 
 ---
 
+## 4. PROJECT KICKOFF — 6 docs before you write any code (Source 5)
+
+> "Even before writing a single line of code, here are six documents you should
+> have." These give the AI agent the context to build correctly instead of
+> guessing. Write them with Claude/ChatGPT, keep them in the repo (e.g. `/docs`),
+> and reference them when scaffolding. Do this at the start of every NEW project.
+
+1. **PRD — Product Requirements Document**
+   - Brief overview of the whole app idea + every feature, exactly what you're building.
+2. **TRD — Technical Requirements Document**
+   - All tech decisions: stack, tools, APIs. The blueprint so the agent makes
+     technical choices without guessing.
+3. **App Flow**
+   - Every screen/piece, navigation, full user journey: what happens when a user
+     taps a button, which page it goes to, etc.
+4. **UI/UX Design Brief**
+   - Look and feel: color palette, typography, components, style, and roughly how
+     each screen should look — so the AI doesn't build something random.
+5. **Backend Schema**
+   - How user data is stored/organized: full auth flow, every table with its
+     columns and relationships. (Pair with Section 1.2 RLS + Section 2 cost rules.)
+6. **Implementation Plan**
+   - Exact step-by-step build sequence so the agent builds in the right order.
+
+### Kickoff ship-gate (new projects)
+1. `/docs/PRD.md`, `TRD.md`, `APP_FLOW.md`, `UIUX_BRIEF.md`, `BACKEND_SCHEMA.md`,
+   `IMPLEMENTATION_PLAN.md` exist and are filled in.
+2. Schema doc designed with RLS + efficient-query rules already in mind.
+3. Implementation plan ordered so auth/security land before feature sprawl.
+
+---
+
 ## How to use this playbook
 - Treat the **ship-gates** as a pre-release checklist for every project.
 - When implementing auth, DB access, storage, billing, or onboarding, re-read the
@@ -148,8 +180,9 @@ actual stack: **Supabase + FastAPI + Next.js (web) + SwiftUI (iOS) + RevenueCat/
   append a dated note and commit. Don't let it drift.
 
 ## Sources
-Distilled from 4 Instagram reels (Jun 2026):
+Distilled from Instagram reels (Jun 2026):
 - App revenue tips 2026 — instagram.com/reels/DZpv3iFztaw
 - Supabase bill / cost reasons + fixes — instagram.com/reels/DYXyuvpBEqZ
 - Top security mistakes in vibe-coded startups — instagram.com/reels/DZFhBi6AW7S
 - 5 things your vibe-coded login screen is missing — instagram.com/reels/DZsXW-HonCi
+- 6 docs to have before building an app with AI — instagram.com/reels/DYMsCRLz8Ik
