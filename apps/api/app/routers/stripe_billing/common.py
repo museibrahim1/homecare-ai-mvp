@@ -25,6 +25,16 @@ if STRIPE_AVAILABLE and STRIPE_SECRET_KEY:
 
 EXTENDED_TRIAL_PRICE_ID = "price_1TCWKuKWCMHtsHgGNAxfEnZ0"
 
+# Retention "save offer" shown before a user cancels. Create a coupon in Stripe
+# (e.g. 50% off for 3 months) and set its ID here. If unset, the save offer is
+# disabled and the cancel flow goes straight to the portal.
+RETENTION_COUPON_ID = (os.getenv("STRIPE_RETENTION_COUPON_ID") or "").strip() or None
+RETENTION_OFFER_HEADLINE = os.getenv("RETENTION_OFFER_HEADLINE", "Wait — here's 50% off your next 3 months").strip()
+RETENTION_OFFER_SUBTEXT = os.getenv(
+    "RETENTION_OFFER_SUBTEXT",
+    "Stay with PalmCare AI and we'll cut your bill in half for the next 3 billing cycles. No commitment — cancel anytime.",
+).strip()
+
 STRIPE_PRICE_MAP = {
     "starter": {
         "product_id": "prod_UAs4awY6QzxE92",

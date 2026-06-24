@@ -160,6 +160,10 @@ export default function BillingPage() {
   const [portalLoading, setPortalLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [activeTab, setActiveTab] = useState<'plans' | 'usage' | 'invoices'>('plans');
+  const [cancelModal, setCancelModal] = useState<{ headline: string; subtext: string } | null>(null);
+  const [cancelChecking, setCancelChecking] = useState(false);
+  const [applyingOffer, setApplyingOffer] = useState(false);
+  const [offerToast, setOfferToast] = useState<string | null>(null);
 
   const fetchBilling = useCallback(async () => {
     if (!token) return;
@@ -236,6 +240,52 @@ export default function BillingPage() {
       alert('Failed to connect to billing service');
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  // Intercept cancellation with a save-offer. If no offer is available we send
+  // the user straight to the Stripe portal to cancel.
+  const handleStartCancel = async () => {
+    if (!token) return;
+    setCancelChecking(true);
+    try {
+      const res = await fetch(`${API_BASE}/billing/retention-offer`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = res.ok ? await res.json() : { available: false };
+      if (data.available) {
+        setCancelModal({ headline: data.headline, subtext: data.subtext });
+      } else {
+        await handleManageBilling();
+      }
+    } catch {
+      await handleManageBilling();
+    } finally {
+      setCancelChecking(false);
+    }
+  };
+
+  const handleAcceptOffer = async () => {
+    if (!token) return;
+    setApplyingOffer(true);
+    try {
+      const res = await fetch(`${API_BASE}/billing/retention-offer`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCancelModal(null);
+        setOfferToast(data.message || 'Discount applied. Thanks for staying!');
+        fetchBilling();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.detail || 'Could not apply the offer.');
+      }
+    } catch {
+      alert('Failed to connect to billing service');
+    } finally {
+      setApplyingOffer(false);
     }
   };
 
@@ -319,13 +369,24 @@ export default function BillingPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-slate-900">
-                      {formatCurrency(subscription.billing_cycle === 'annual'
-                        ? Math.round(plan.annual_price / 12)
-                        : plan.monthly_price)}
-                    </span>
-                    <span className="text-slate-500 text-sm">/mo</span>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold text-slate-900">
+                        {formatCurrency(subscription.billing_cycle === 'annual'
+                          ? Math.round(plan.annual_price / 12)
+                          : plan.monthly_price)}
+                      </span>
+                      <span className="text-slate-500 text-sm">/mo</span>
+                    </div>
+                    {subscription.status !== 'cancelled' && subscription.stripe_subscription_id && (
+                      <button
+                        onClick={handleStartCancel}
+                        disabled={cancelChecking}
+                        className="text-xs text-slate-400 hover:text-red-600 transition-colors"
+                      >
+                        {cancelChecking ? 'Checking…' : 'Cancel subscription'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -663,6 +724,45 @@ export default function BillingPage() {
             )}
           </div>
         </div>
+
+        {/* Cancellation save-offer modal */}
+        {cancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+              <div className="w-12 h-12 rounded-full bg-primary-50 flex items-center justify-center mb-4">
+                <Sparkles className="w-6 h-6 text-primary-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">{cancelModal.headline}</h3>
+              <p className="text-sm text-slate-600 mb-6">{cancelModal.subtext}</p>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={handleAcceptOffer}
+                  disabled={applyingOffer}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors"
+                  style={{ color: '#fff' }}
+                >
+                  {applyingOffer ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Keep my plan & apply discount'}
+                </button>
+                <button
+                  onClick={() => { setCancelModal(null); handleManageBilling(); }}
+                  disabled={applyingOffer}
+                  className="w-full py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  No thanks, continue to cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Offer applied toast */}
+        {offerToast && (
+          <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-sm rounded-lg px-4 py-3 shadow-lg flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            {offerToast}
+            <button onClick={() => setOfferToast(null)} className="ml-2 text-slate-400 hover:text-white">×</button>
+          </div>
+        )}
       </main>
     </div>
   );

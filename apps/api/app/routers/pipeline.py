@@ -1,8 +1,13 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session
 
+from app.core.rate_limit import limiter
 from app.core.deps import get_db, get_current_user
+
+# Expensive AI work (Deepgram + Claude) is gated tighter than the global
+# default so a single account can't run up the bill or be abused.
+AI_RATE_LIMIT = "30/minute"
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
@@ -24,7 +29,9 @@ def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
 
 
 @router.post("/visits/{visit_id}/process-transcript")
+@limiter.limit(AI_RATE_LIMIT)
 async def process_transcript_only(
+    request: Request,
     visit_id: UUID,
     generate_note: bool = Query(True, description="Generate visit note from transcript"),
     generate_contract: bool = Query(True, description="Generate service contract"),
@@ -85,7 +92,9 @@ async def process_transcript_only(
 
 
 @router.post("/visits/{visit_id}/transcribe")
+@limiter.limit(AI_RATE_LIMIT)
 async def start_transcription(
+    request: Request,
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -111,7 +120,9 @@ async def start_transcription(
 
 
 @router.post("/visits/{visit_id}/diarize")
+@limiter.limit(AI_RATE_LIMIT)
 async def start_diarization(
+    request: Request,
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -131,7 +142,9 @@ async def start_diarization(
 
 
 @router.post("/visits/{visit_id}/align")
+@limiter.limit(AI_RATE_LIMIT)
 async def start_alignment(
+    request: Request,
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -151,7 +164,9 @@ async def start_alignment(
 
 
 @router.post("/visits/{visit_id}/bill")
+@limiter.limit(AI_RATE_LIMIT)
 async def start_billing(
+    request: Request,
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -171,7 +186,9 @@ async def start_billing(
 
 
 @router.post("/visits/{visit_id}/note")
+@limiter.limit(AI_RATE_LIMIT)
 async def start_note_generation(
+    request: Request,
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -191,7 +208,9 @@ async def start_note_generation(
 
 
 @router.post("/visits/{visit_id}/contract")
+@limiter.limit(AI_RATE_LIMIT)
 async def start_contract_generation(
+    request: Request,
     visit_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),

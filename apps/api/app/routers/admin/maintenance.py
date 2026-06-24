@@ -233,3 +233,21 @@ async def cleanup_orphaned_visits(
         "message": f"Cleaned up {deleted_count} visits",
         "deleted_visits": deleted_count
     }
+
+
+@router.post("/cleanup/audio")
+async def cleanup_audio_storage(
+    dry_run: bool = Query(True, description="Preview only; set false to actually delete"),
+    abandoned_days: int = Query(30, ge=1, le=365, description="Delete unprocessed uploads older than N days"),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_platform_admin),
+):
+    """Remove orphaned/abandoned audio from object storage ("storage graveyard").
+
+    Defaults to a dry run that reports what WOULD be deleted. Pass dry_run=false
+    to actually delete. Only audio prefixes are ever touched.
+    """
+    from app.services.storage_cleanup import cleanup_orphaned_audio
+    result = cleanup_orphaned_audio(db, dry_run=dry_run, abandoned_days=abandoned_days)
+    logger.info(f"Admin {admin.id} ran audio cleanup (dry_run={dry_run}): {result['found']} found, {result['deleted']} deleted")
+    return result

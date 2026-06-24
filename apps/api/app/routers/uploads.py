@@ -1,11 +1,12 @@
 import os
 from uuid import UUID
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 import io
 
+from app.core.rate_limit import limiter
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.visit import Visit
@@ -31,7 +32,9 @@ def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
 
 
 @router.post("/audio", response_model=UploadResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("30/minute")
 async def upload_audio(
+    request: Request,
     visit_id: UUID = Form(...),
     file: UploadFile = File(...),
     auto_process: Optional[str] = Form(None),

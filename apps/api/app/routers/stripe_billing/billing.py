@@ -14,6 +14,7 @@ from app.models.subscription import Plan, Subscription, SubscriptionStatus, Invo
 from .common import (
     stripe, STRIPE_AVAILABLE, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
     STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, EXTENDED_TRIAL_PRICE_ID, STRIPE_PRICE_MAP,
+    RETENTION_COUPON_ID, RETENTION_OFFER_HEADLINE, RETENTION_OFFER_SUBTEXT,
 )
 from .schemas import (
     CreateCheckoutRequest, SignupCheckoutRequest, CheckoutResponse,
@@ -78,6 +79,81 @@ async def get_my_subscription(
             "features": plan.features,
         } if plan else None,
     }
+
+
+def _get_user_subscription(db: Session, current_user: User):
+    """Resolve the current user's Subscription via their business, or None."""
+    business_user = db.query(BusinessUser).filter(
+        BusinessUser.email == current_user.email
+    ).first()
+    if not business_user:
+        return None
+    return db.query(Subscription).filter(
+        Subscription.business_id == business_user.business_id
+    ).first()
+
+
+@router.get("/retention-offer")
+async def get_retention_offer(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Return the save-offer to show before a user cancels.
+
+    `available` is False if the offer isn't configured or was already redeemed,
+    in which case the client should go straight to the cancel/portal flow.
+    """
+    if not (STRIPE_AVAILABLE and STRIPE_SECRET_KEY and RETENTION_COUPON_ID):
+        return {"available": False}
+
+    subscription = _get_user_subscription(db, current_user)
+    if not subscription or not subscription.stripe_subscription_id:
+        return {"available": False}
+
+    # One save-offer per subscription — tracked in Stripe metadata (no DB change).
+    try:
+        stripe_sub = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
+        if (stripe_sub.get("metadata") or {}).get("retention_offer_used") == "true":
+            return {"available": False}
+    except stripe.error.StripeError:
+        return {"available": False}
+
+    return {
+        "available": True,
+        "headline": RETENTION_OFFER_HEADLINE,
+        "subtext": RETENTION_OFFER_SUBTEXT,
+    }
+
+
+@router.post("/retention-offer")
+async def accept_retention_offer(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Apply the retention coupon to the user's subscription (one-time)."""
+    if not (STRIPE_AVAILABLE and STRIPE_SECRET_KEY and RETENTION_COUPON_ID):
+        raise HTTPException(status_code=503, detail="Retention offer not available")
+
+    subscription = _get_user_subscription(db, current_user)
+    if not subscription or not subscription.stripe_subscription_id:
+        raise HTTPException(status_code=404, detail="No active subscription found")
+
+    try:
+        stripe_sub = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
+        if (stripe_sub.get("metadata") or {}).get("retention_offer_used") == "true":
+            raise HTTPException(status_code=409, detail="Offer already redeemed")
+
+        stripe.Subscription.modify(
+            subscription.stripe_subscription_id,
+            coupon=RETENTION_COUPON_ID,
+            metadata={**(stripe_sub.get("metadata") or {}), "retention_offer_used": "true"},
+        )
+    except stripe.error.StripeError as e:
+        logger.error(f"Failed to apply retention offer: {e}")
+        raise HTTPException(status_code=500, detail="Could not apply offer")
+
+    logger.info(f"Retention offer applied for business {subscription.business_id}")
+    return {"applied": True, "message": "Discount applied to your next 3 months."}
 
 
 @router.get("/invoices")

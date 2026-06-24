@@ -3,6 +3,7 @@ import LocalAuthentication
 
 @main
 struct PalmCareAIApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var api = APIService.shared
     /// App-level assessment session: recording and contract processing
     /// survive tab switches, navigation, and view teardown.
@@ -78,6 +79,11 @@ struct PalmCareAIApp: App {
             }
             .onChange(of: api.isAuthenticated) { newValue in
                 if !newValue { isBiometricUnlocked = false }
+                if newValue {
+                    // Signed in: request push permission and (re)send the token.
+                    PushManager.requestAuthorizationAndRegister()
+                    Task { await api.registerStoredDeviceTokenIfPossible() }
+                }
                 registerInteraction()
             }
             #if DEBUG

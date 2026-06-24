@@ -111,6 +111,7 @@ from app.routers import (
     messaging,
     scheduler,
     support,
+    notifications,
 )
 
 @asynccontextmanager
@@ -260,6 +261,7 @@ app.include_router(resend_webhooks.router, prefix="/webhooks", tags=["Webhooks"]
 app.include_router(messaging.router, prefix="/messaging", tags=["Team Messaging"])
 app.include_router(scheduler.router, prefix="/admin/scheduler", tags=["Scheduler & Goals"])
 app.include_router(support.router, prefix="/support", tags=["Support Tickets"])
+app.include_router(notifications.router, prefix="/notifications", tags=["Push Notifications"])
 
 
 async def seed_database():
@@ -373,6 +375,30 @@ async def seed_database():
             logger.info("Created site_events table for public analytics")
     except Exception as e:
         logger.warning(f"site_events table check: {e}")
+        db.rollback()
+
+    # Auto-create device_tokens table for push notifications
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        if "device_tokens" not in inspector.get_table_names():
+            db.execute(sa_text("""
+                CREATE TABLE device_tokens (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    user_id UUID NOT NULL REFERENCES users(id),
+                    token VARCHAR(512) NOT NULL UNIQUE,
+                    platform VARCHAR(20) NOT NULL DEFAULT 'ios',
+                    last_seen_at TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+                )
+            """))
+            db.execute(sa_text("CREATE INDEX ix_device_tokens_user_id ON device_tokens (user_id)"))
+            db.execute(sa_text("CREATE INDEX ix_device_tokens_token ON device_tokens (token)"))
+            db.commit()
+            logger.info("Created device_tokens table for push notifications")
+    except Exception as e:
+        logger.warning(f"device_tokens table check: {e}")
         db.rollback()
 
     # Auto-create messaging tables (channels, messages, notifications)
