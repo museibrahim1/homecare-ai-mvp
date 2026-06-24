@@ -1,0 +1,155 @@
+---
+description: Cross-project build playbook — security, cost-control, and revenue standards distilled from field-tested sources. Apply to every app, build, and project.
+globs:
+alwaysApply: true
+---
+
+# BUILD PLAYBOOK — Apply to Every Build & Project
+
+> Single source of truth for engineering, security, cost, and growth standards.
+> Distilled from 4 source videos (see "Sources" at bottom). When you ship ANY
+> feature in ANY project, check it against the relevant sections below.
+> If you learn something new worth keeping, append it here and commit.
+
+This playbook is intentionally stack-agnostic, with concrete notes for our
+actual stack: **Supabase + FastAPI + Next.js (web) + SwiftUI (iOS) + RevenueCat/Superwall**.
+
+---
+
+## 1. SECURITY — Never ship an insecure app (Sources 3 & 4)
+
+> "One single line of code could end up leaking your entire database."
+> AI scaffolding makes it fast to build but easy to leave gaping holes.
+> Every one of these is a "vibe-codable" change — you just have to ask for it.
+
+### 1.1 Authentication
+- [ ] Real auth: email + password login, not a fake/client-only gate.
+- [ ] Add **Google + Apple Sign In** — faster, higher trust, higher conversion.
+- [ ] **Email verification** on signup — without it, anyone can sign up as anyone.
+- [ ] **2FA / MFA** available for accounts (at minimum for admin/privileged users).
+
+### 1.2 Authorization & data isolation (Row-Level Security)
+- [ ] Users can ONLY read/write **their own** data — never anyone else's.
+- [ ] Supabase: **RLS enabled on every table**, with explicit policies. A table
+      with RLS off is a public table. Verify with `get_advisors` (security).
+- [ ] **Admin checks happen on the SERVER, never the client.** A client-side
+      `if (user.isAdmin)` is not security — it's a suggestion.
+
+### 1.3 Rate limiting (anti-abuse / anti-brute-force)
+- [ ] Rate-limit every public endpoint: login, **password reset**, signup, OTP,
+      and any expensive/AI endpoint.
+- [ ] Without it, login + reset endpoints can be brute-forced and bots/spammers
+      can scrape or exhaust resources.
+
+### 1.4 Server-side validation
+- [ ] Validate EVERY field server-side against what's expected (type, length,
+      format, range). Never trust client input.
+- [ ] FastAPI: enforce with Pydantic schemas; reject unexpected fields.
+
+### 1.5 Session / token handling
+- [ ] **Do NOT store session tokens in `localStorage`** → exposed to XSS.
+      Prefer **httpOnly, Secure, SameSite cookies**.
+- [ ] Short-lived access tokens + refresh rotation.
+
+### 1.6 Password hygiene
+- [ ] Enforce **password rule sets** (length/complexity).
+- [ ] Run a **leaked/compromised password check** (e.g. HaveIBeenPwned / Supabase
+      leaked-password protection) at signup and reset.
+
+### Security ship-gate (run before any release)
+1. RLS on for all tables + policies verified (`get_advisors`).
+2. All admin/privileged logic enforced server-side.
+3. Rate limiting on auth + sensitive endpoints.
+4. Server-side validation on all inputs.
+5. Tokens in httpOnly cookies, not localStorage.
+6. Email verification + password rules + leaked-password check live.
+
+---
+
+## 2. COST CONTROL — Don't let the bill humble you (Source 2)
+
+> Specifically Supabase, but the patterns apply to any DB/host (Vercel, etc.).
+> Audit AFTER AI scaffolds your project — it defaults to inefficient patterns.
+
+### 2.1 Efficient queries
+- [ ] **Never `SELECT *`** by default. Select only the columns you need.
+      AI scaffolding pulls every column, every image, every blob → you pay for
+      all those reads/writes.
+- [ ] Don't over-fetch rows; paginate and filter at the DB, not in app code.
+
+### 2.2 Indexes
+- [ ] Add indexes on columns you filter/search/join on. Without them the DB
+      scans every row ("reading every name in the phone book"). Fine at 10 users,
+      brutal at 1,000+.
+- [ ] Use `get_advisors` (performance) to find missing indexes.
+
+### 2.3 Connections
+- [ ] Reuse connections / use a pooler. Don't open a new DB connection per page
+      and leave it open — idle connections eat bandwidth and money.
+- [ ] Close/clean up listeners and realtime subscriptions on unmount.
+
+### 2.4 Storage hygiene
+- [ ] Clean the "storage graveyard": delete test uploads, failed-signup artifacts,
+      and duplicate/retry uploads. You pay rent on every orphaned object monthly.
+- [ ] Add lifecycle cleanup for temp/unreferenced files.
+
+### 2.5 Background jobs & logs
+- [ ] No job silently retrying in a loop thousands of times. **Read the logs**
+      (`get_logs`) regularly. Add retry caps + dead-letter handling + alerts.
+
+### Cost ship-gate
+1. No `SELECT *` in hot paths; columns scoped.
+2. Indexes on all filter/search/join columns (`get_advisors` perf clean).
+3. Connection pooling; no leaked subscriptions.
+4. Storage cleaned of orphans; lifecycle rules set.
+5. Logs reviewed; no runaway retry loops.
+
+---
+
+## 3. REVENUE & GROWTH — Make the app actually earn (Source 1)
+
+> "5 tips that actually increase app revenue." Bake these into product decisions.
+
+### 3.1 Test subscription pricing
+- [ ] A/B test price points (try higher, then lower) to find true willingness to pay.
+- [ ] Test **weekly vs monthly** plans — many apps make more on weekly.
+- [ ] Run via RevenueCat / Superwall experiments.
+
+### 3.2 Optimize the App Store / store page (ASO)
+- [ ] Title, subtitle, description **packed with real searched keywords**.
+- [ ] High-quality screenshots that **show how the app works** (not just pretty art).
+
+### 3.3 Cancellation save-offer
+- [ ] When a user tries to cancel, show **one screen, one offer** (e.g. 50% off)
+      before they leave. Set up with RevenueCat / Superwall.
+
+### 3.4 Lifecycle push (day 3)
+- [ ] By day 3 users are in or out. Send a push with a **discounted price** to
+      convert fence-sitters.
+
+### 3.5 Onboarding → "wow moment"
+- [ ] Get users to the value/"wow" moment **before** asking them to sign up or pay.
+      This can lift conversion dramatically (~+60% cited).
+
+### Growth ship-gate (for monetized apps)
+1. Pricing experiment running (weekly vs monthly tested).
+2. Store listing keyword-optimized with how-it-works screenshots.
+3. Cancellation save-offer live.
+4. Day-3 (and other lifecycle) push configured.
+5. Onboarding delivers value before the paywall.
+
+---
+
+## How to use this playbook
+- Treat the **ship-gates** as a pre-release checklist for every project.
+- When implementing auth, DB access, storage, billing, or onboarding, re-read the
+  matching section first.
+- Keep it current: when the user teaches a new lesson (or a new video drops),
+  append a dated note and commit. Don't let it drift.
+
+## Sources
+Distilled from 4 Instagram reels (Jun 2026):
+- App revenue tips 2026 — instagram.com/reels/DZpv3iFztaw
+- Supabase bill / cost reasons + fixes — instagram.com/reels/DYXyuvpBEqZ
+- Top security mistakes in vibe-coded startups — instagram.com/reels/DZFhBi6AW7S
+- 5 things your vibe-coded login screen is missing — instagram.com/reels/DZsXW-HonCi
