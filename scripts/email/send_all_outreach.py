@@ -111,7 +111,8 @@ Founder & CEO, Palm Technologies Inc.
 def get_day_data(day_index):
     r = requests.get(
         f"{API_BASE}/platform/outreach/cron/daily-data",
-        params={"key": INTERNAL_KEY, "day_index": day_index},
+        headers={"X-Internal-Key": INTERNAL_KEY},
+        params={"day_index": day_index},
     )
     r.raise_for_status()
     return r.json()

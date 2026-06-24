@@ -61,7 +61,12 @@ def get_current_business_user(
 ) -> BusinessUser:
     """Decode token and get current business user."""
     try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret,
+            algorithms=[settings.jwt_algorithm],
+            issuer=settings.jwt_issuer,
+        )
         user_id = payload.get("sub")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token")

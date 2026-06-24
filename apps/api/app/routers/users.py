@@ -93,9 +93,17 @@ async def update_user(
         )
     
     update_data = user_in.model_dump(exclude_unset=True)
+
+    # SECURITY: explicit allow-list (defense-in-depth against mass assignment),
+    # and prevent an admin from self-demoting or self-locking out by accident.
+    ALLOWED_FIELDS = {"email", "full_name", "phone", "role", "is_active"}
+    if user.id == current_user.id:
+        update_data.pop("role", None)
+        update_data.pop("is_active", None)
     for field, value in update_data.items():
-        setattr(user, field, value)
-    
+        if field in ALLOWED_FIELDS:
+            setattr(user, field, value)
+
     db.commit()
     db.refresh(user)
     return user

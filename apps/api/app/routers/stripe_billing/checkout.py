@@ -55,15 +55,13 @@ async def create_checkout_session(
     if not price_id:
         raise HTTPException(status_code=400, detail="Plan not configured for Stripe billing")
     
-    # Get or determine business
-    business_id = request.business_id
-    if not business_id:
-        # Try to get business from user
-        business_user = db.query(BusinessUser).filter(
-            BusinessUser.email == current_user.email
-        ).first()
-        if business_user:
-            business_id = business_user.business_id
+    # SECURITY: resolve the business from the AUTHENTICATED user only. Never
+    # trust request.business_id — trusting it lets a user bind a checkout to
+    # another tenant and overwrite their subscription via webhook metadata.
+    business_user = db.query(BusinessUser).filter(
+        BusinessUser.email == current_user.email
+    ).first()
+    business_id = business_user.business_id if business_user else None
     
     # Build line items
     line_items = [
@@ -136,12 +134,21 @@ async def create_portal_session(
     """Create a Stripe Customer Portal session for managing subscription."""
     if not STRIPE_AVAILABLE or not STRIPE_SECRET_KEY:
         raise HTTPException(status_code=503, detail="Stripe not configured")
-    
-    # Get subscription
-    subscription = db.query(Subscription).filter(
-        Subscription.business_id == request.business_id
+
+    # SECURITY: derive the business from the authenticated user, NOT from
+    # request.business_id. Trusting the client value was a cross-tenant IDOR —
+    # any user could open another business's billing portal (view invoices/PII,
+    # change card, cancel their subscription).
+    business_user = db.query(BusinessUser).filter(
+        BusinessUser.email == current_user.email
     ).first()
-    
+    if not business_user:
+        raise HTTPException(status_code=404, detail="No subscription found")
+
+    subscription = db.query(Subscription).filter(
+        Subscription.business_id == business_user.business_id
+    ).first()
+
     if not subscription or not subscription.stripe_customer_id:
         raise HTTPException(status_code=404, detail="No subscription found")
     

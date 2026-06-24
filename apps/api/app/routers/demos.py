@@ -114,7 +114,8 @@ def track_funnel_event(request: Request, event: DemoFunnelEvent):
 def get_funnel_stats(request: Request):
     """Return demo booking funnel stats. Requires internal key."""
     cron_secret = os.getenv("CRON_SECRET", "")
-    key = request.headers.get("X-Internal-Key", "") or request.query_params.get("key", "")
+    # Header-only: never accept the secret via query string (log/referrer leak).
+    key = request.headers.get("X-Internal-Key", "")
     if not key or not cron_secret or key != cron_secret:
         raise HTTPException(status_code=401, detail="Unauthorized")
 

@@ -69,7 +69,7 @@ def fetch_daily_data():
     """Fetch today's outreach data from the production cron endpoint."""
     r = requests.get(
         f"{API_BASE}/platform/outreach/cron/daily-data",
-        params={"key": CRON_SECRET},
+        headers={"X-Internal-Key": CRON_SECRET},
         timeout=30,
     )
     if r.status_code == 200:

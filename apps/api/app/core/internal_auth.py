@@ -32,12 +32,11 @@ def require_internal_key(request: Request) -> None:
             detail="Internal auth is not configured on this deployment",
         )
 
-    provided_key = (
-        request.headers.get("X-Internal-Key", "")
-        or request.query_params.get("key", "")
-    )
+    # SECURITY: header-only. Accepting the key via `?key=` leaked the secret to
+    # access logs, proxies, and Referer headers. All internal callers now send
+    # the X-Internal-Key header.
+    provided_key = request.headers.get("X-Internal-Key", "")
 
-    # Reject empty caller keys outright — never allow `?key=` to succeed.
     if not provided_key:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 

@@ -205,10 +205,11 @@ def _transcribe_deepgram(
 
     if resp.status_code != 200:
         snippet = resp.text[:300] if resp.text else ""
+        # Log the upstream detail internally; don't leak it to the client.
         logger.error(f"Deepgram error {resp.status_code}: {snippet}")
         raise HTTPException(
             status_code=502,
-            detail=f"Deepgram {resp.status_code}: {snippet[:160]}",
+            detail="Transcription service is temporarily unavailable. Please try again.",
         )
 
     data = resp.json()
