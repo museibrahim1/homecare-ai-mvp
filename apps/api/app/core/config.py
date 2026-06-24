@@ -39,6 +39,15 @@ class Settings(BaseSettings):
     password_require_special: bool = False
     max_login_attempts: int = 5
     lockout_duration_minutes: int = 15
+
+    # Email verification. The full flow (send / verify / resend) always runs;
+    # this flag controls whether an UNVERIFIED account is BLOCKED at login.
+    # Kept off by default so existing accounts and the App Store review demo
+    # account are never locked out. Flip REQUIRE_EMAIL_VERIFICATION=true to
+    # enforce once the listing is approved.
+    require_email_verification: bool = False
+    # Base URL used to build email-verification links (falls back to APP_URL env).
+    app_url: str = "https://palmcareai.com"
     
     # ASR
     asr_model_size: str = "medium"

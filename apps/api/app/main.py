@@ -307,6 +307,33 @@ async def seed_database():
         logger.warning(f"Column migration check: {e}")
         db.rollback()
 
+    # Auto-add 2FA columns to business_users + grandfather existing accounts
+    # as email-verified so enabling REQUIRE_EMAIL_VERIFICATION never locks out
+    # current customers or the App Store review demo account.
+    try:
+        from sqlalchemy import text as sa_text, inspect as sa_inspect
+        inspector = sa_inspect(db.bind)
+        if "business_users" in inspector.get_table_names():
+            bu_cols = {c["name"] for c in inspector.get_columns("business_users")}
+            bu_new = {
+                "two_factor_secret": "VARCHAR(255)",
+                "two_factor_enabled": "BOOLEAN DEFAULT false",
+            }
+            for col_name, col_type in bu_new.items():
+                if col_name not in bu_cols:
+                    db.execute(sa_text(f'ALTER TABLE business_users ADD COLUMN "{col_name}" {col_type}'))
+                    logger.info(f"Added column business_users.{col_name}")
+            # One-time grandfather: mark all pre-existing accounts verified.
+            db.execute(sa_text(
+                "UPDATE business_users SET email_verified = true, "
+                "email_verified_at = COALESCE(email_verified_at, now()) "
+                "WHERE email_verified IS NOT TRUE AND created_at < now() - interval '1 minute'"
+            ))
+            db.commit()
+    except Exception as e:
+        logger.warning(f"business_users migration check: {e}")
+        db.rollback()
+
     # Auto-create site_events table for public analytics
     try:
         from sqlalchemy import text as sa_text, inspect as sa_inspect

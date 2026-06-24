@@ -25,6 +25,8 @@ from app.schemas.business import (
     BusinessUserCreate, BusinessUserUpdate, BusinessUserResponse, BusinessUserInviteResponse,
     BusinessLoginRequest, BusinessLoginResponse, PasswordResetRequest, PasswordResetConfirm,
     MagicLinkRequest, MagicLinkConfirm,
+    EmailVerificationRequest, EmailVerificationConfirm,
+    TwoFactorSetupResponse, TwoFactorEnableRequest, TwoFactorDisableRequest,
     VerificationStatusEnum, EntityTypeEnum, DocumentTypeEnum, UserRoleEnum
 )
 from app.services.sos_verification import get_sos_service
@@ -87,7 +89,28 @@ async def login(
     
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account is disabled")
-    
+
+    # Email verification gate (flag-controlled; existing accounts are
+    # grandfathered to verified so this never locks out current users).
+    if settings.require_email_verification and not user.email_verified:
+        raise HTTPException(
+            status_code=403,
+            detail="Please verify your email address. Check your inbox for the verification link.",
+        )
+
+    # Two-factor challenge — only for accounts that have enabled it.
+    if getattr(user, "two_factor_enabled", False):
+        if not credentials.totp_code:
+            raise HTTPException(
+                status_code=401,
+                detail="2FA code required",
+                headers={"X-2FA-Required": "true"},
+            )
+        import pyotp
+        secret = getattr(user, "two_factor_secret", None)
+        if not secret or not pyotp.TOTP(secret).verify(credentials.totp_code.strip(), valid_window=1):
+            raise HTTPException(status_code=401, detail="Invalid 2FA code")
+
     # Check business status
     business = user.business
     if business.verification_status != 'approved':
@@ -161,6 +184,7 @@ async def login(
             is_active=user.is_active,
             is_owner=user.is_owner,
             email_verified=user.email_verified,
+            two_factor_enabled=bool(getattr(user, "two_factor_enabled", False)),
             last_login=user.last_login,
             created_at=user.created_at,
         ),
@@ -232,8 +256,11 @@ async def confirm_password_reset(
     db: Session = Depends(get_db),
 ):
     """Reset password using token. Also invalidates existing sessions."""
-    from app.core.security import validate_password
-    is_valid, error_msg = validate_password(body.new_password)
+    from fastapi.concurrency import run_in_threadpool
+    from app.core.security import validate_password_secure
+    is_valid, error_msg = await run_in_threadpool(
+        validate_password_secure, body.new_password
+    )
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_msg)
 
@@ -260,5 +287,146 @@ async def confirm_password_reset(
     db.commit()
     clear_login_attempts(user.email)
     return {"message": "Password reset successfully"}
+
+
+# =============================================================================
+# EMAIL VERIFICATION
+# =============================================================================
+
+def _current_business_user(current_user: User, db: Session) -> BusinessUser:
+    """Resolve the BusinessUser for an authenticated request (keyed by email)."""
+    bu = db.query(BusinessUser).filter(BusinessUser.email == current_user.email).first()
+    if not bu:
+        raise HTTPException(status_code=404, detail="Account not found")
+    return bu
+
+
+@router.post("/verify-email")
+@limiter.limit("20/15minutes")
+async def verify_email(
+    request: Request,
+    body: EmailVerificationConfirm,
+    db: Session = Depends(get_db),
+):
+    """Confirm an email address using the token from the verification email."""
+    user = db.query(BusinessUser).filter(
+        BusinessUser.email_verification_token == body.token
+    ).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired verification link")
+
+    if not user.email_verified:
+        user.email_verified = True
+        user.email_verified_at = datetime.now(timezone.utc)
+    user.email_verification_token = None
+    db.commit()
+    return {"message": "Email verified successfully"}
+
+
+@router.post("/resend-verification")
+@limiter.limit("3/15minutes")
+async def resend_verification(
+    request: Request,
+    body: EmailVerificationRequest,
+    db: Session = Depends(get_db),
+):
+    """Resend the verification email. Always returns success (no enumeration)."""
+    email = (body.email or "").lower().strip()
+    if email:
+        user = db.query(BusinessUser).filter(BusinessUser.email == email).first()
+        if user and not user.email_verified:
+            if not user.email_verification_token:
+                user.email_verification_token = secrets.token_urlsafe(32)
+                db.commit()
+            try:
+                app_url = os.getenv("APP_URL", settings.app_url)
+                verify_url = f"{app_url}/verify-email?token={user.email_verification_token}"
+                get_email_service().send_email_verification(
+                    user_email=user.email,
+                    user_name=user.full_name or user.email.split("@")[0],
+                    verify_url=verify_url,
+                )
+            except Exception as e:
+                logger.warning(f"Resend verification skipped: {type(e).__name__}: {e}")
+    return {"message": "If the account exists and is unverified, a new link has been sent."}
+
+
+# =============================================================================
+# TWO-FACTOR AUTHENTICATION (TOTP)
+# =============================================================================
+
+@router.post("/2fa/setup", response_model=TwoFactorSetupResponse)
+@limiter.limit("10/15minutes")
+async def setup_two_factor(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+):
+    """Begin 2FA enrollment: generate a secret + otpauth URL for the QR code.
+
+    The secret is stored but 2FA is NOT active until confirmed via /2fa/enable.
+    """
+    import pyotp
+    user = _current_business_user(current_user, db)
+    if user.two_factor_enabled:
+        raise HTTPException(status_code=400, detail="2FA is already enabled")
+
+    secret = pyotp.random_base32()
+    user.two_factor_secret = secret
+    db.commit()
+
+    otpauth_url = pyotp.totp.TOTP(secret).provisioning_uri(
+        name=user.email, issuer_name="PalmCare AI"
+    )
+    return TwoFactorSetupResponse(secret=secret, otpauth_url=otpauth_url)
+
+
+@router.post("/2fa/enable")
+@limiter.limit("10/15minutes")
+async def enable_two_factor(
+    request: Request,
+    body: TwoFactorEnableRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+):
+    """Confirm a TOTP code to activate 2FA."""
+    import pyotp
+    user = _current_business_user(current_user, db)
+    if not user.two_factor_secret:
+        raise HTTPException(status_code=400, detail="Start 2FA setup first")
+    if not pyotp.TOTP(user.two_factor_secret).verify(body.code.strip(), valid_window=1):
+        raise HTTPException(status_code=400, detail="Invalid 2FA code")
+
+    user.two_factor_enabled = True
+    db.commit()
+    return {"message": "Two-factor authentication enabled"}
+
+
+@router.post("/2fa/disable")
+@limiter.limit("10/15minutes")
+async def disable_two_factor(
+    request: Request,
+    body: TwoFactorDisableRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_api_user),
+):
+    """Disable 2FA. Requires a valid current TOTP code or the account password."""
+    import pyotp
+    user = _current_business_user(current_user, db)
+    if not user.two_factor_enabled:
+        return {"message": "Two-factor authentication is not enabled"}
+
+    verified = False
+    if body.code and user.two_factor_secret:
+        verified = pyotp.TOTP(user.two_factor_secret).verify(body.code.strip(), valid_window=1)
+    if not verified and body.password:
+        verified = verify_password(body.password, user.password_hash)
+    if not verified:
+        raise HTTPException(status_code=400, detail="Provide a valid 2FA code or your password")
+
+    user.two_factor_enabled = False
+    user.two_factor_secret = None
+    db.commit()
+    return {"message": "Two-factor authentication disabled"}
 
 

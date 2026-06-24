@@ -241,6 +241,7 @@ class BusinessUserResponse(BaseModel):
     is_active: bool
     is_owner: bool
     email_verified: bool
+    two_factor_enabled: bool = False
     last_login: Optional[datetime] = None
     created_at: datetime
 
@@ -263,6 +264,8 @@ class BusinessLoginRequest(BaseModel):
     """Login request"""
     email: EmailStr
     password: str
+    # Required only when the account has 2FA enabled.
+    totp_code: Optional[str] = None
 
 
 class BusinessLoginResponse(BaseModel):
@@ -272,6 +275,33 @@ class BusinessLoginResponse(BaseModel):
     refresh_token: Optional[str] = None
     user: BusinessUserResponse
     business: BusinessProfile
+
+
+class EmailVerificationRequest(BaseModel):
+    """Resend a verification email to the given (or current) account."""
+    email: Optional[EmailStr] = None
+
+
+class EmailVerificationConfirm(BaseModel):
+    """Confirm email ownership with the token from the verification email."""
+    token: str
+
+
+class TwoFactorSetupResponse(BaseModel):
+    """Returned when a user starts 2FA enrollment."""
+    secret: str
+    otpauth_url: str
+
+
+class TwoFactorEnableRequest(BaseModel):
+    """Confirm a TOTP code to finish enabling 2FA."""
+    code: str
+
+
+class TwoFactorDisableRequest(BaseModel):
+    """Disable 2FA — requires a current TOTP code (or password)."""
+    code: Optional[str] = None
+    password: Optional[str] = None
 
 
 class PasswordResetRequest(BaseModel):

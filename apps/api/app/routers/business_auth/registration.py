@@ -91,9 +91,12 @@ async def register_business(
             detail="An agency with this name is already registered. If you work there, ask the account owner to invite you from Settings → Team.",
         )
 
-    # HIPAA: validate password complexity
-    from app.core.security import validate_password
-    is_valid, error_msg = validate_password(registration.owner_password)
+    # HIPAA: validate password complexity + reject breached passwords (HIBP).
+    from fastapi.concurrency import run_in_threadpool
+    from app.core.security import validate_password_secure
+    is_valid, error_msg = await run_in_threadpool(
+        validate_password_secure, registration.owner_password
+    )
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_msg)
 
@@ -248,6 +251,21 @@ async def register_business(
             logger.warning(f"Welcome email failed: {welcome_result.get('error')}")
     except Exception as e:
         logger.warning(f"Welcome email skipped: {type(e).__name__}: {e}")
+
+    # Email verification link — best-effort. The token was generated on the
+    # owner row above; verification is enforced at login only when
+    # REQUIRE_EMAIL_VERIFICATION=true (see settings), so this never blocks the
+    # immediate signup session.
+    try:
+        app_url = os.getenv("APP_URL", settings.app_url)
+        verify_url = f"{app_url}/verify-email?token={owner.email_verification_token}"
+        get_email_service().send_email_verification(
+            user_email=owner.email,
+            user_name=owner.full_name or owner.email.split("@")[0],
+            verify_url=verify_url,
+        )
+    except Exception as e:
+        logger.warning(f"Verification email skipped: {type(e).__name__}: {e}")
 
     try:
         admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com")

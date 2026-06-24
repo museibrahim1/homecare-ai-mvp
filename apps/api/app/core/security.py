@@ -101,6 +101,50 @@ def validate_password(password: str) -> Tuple[bool, str]:
     return True, ""
 
 
+def is_password_leaked(password: str) -> bool:
+    """Check a password against the HaveIBeenPwned breach corpus.
+
+    Uses the k-anonymity range API: only the first 5 chars of the SHA-1 hash
+    are ever sent over the wire, so the plaintext (and full hash) never leave
+    this process. Fails OPEN (returns False) on any network/timeout error so a
+    HIBP outage can never block a signup or password reset.
+    """
+    try:
+        import hashlib
+        import httpx
+
+        sha1 = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
+        prefix, suffix = sha1[:5], sha1[5:]
+        resp = httpx.get(
+            f"https://api.pwnedpasswords.com/range/{prefix}",
+            headers={"Add-Padding": "true", "User-Agent": "PalmCareAI-Auth"},
+            timeout=2.5,
+        )
+        if resp.status_code != 200:
+            return False
+        for line in resp.text.splitlines():
+            hash_suffix, _, count = line.partition(":")
+            if hash_suffix.strip().upper() == suffix and count.strip() not in ("", "0"):
+                return True
+        return False
+    except Exception:
+        # Fail open — never let a breach-check outage block authentication.
+        return False
+
+
+def validate_password_secure(password: str) -> Tuple[bool, str]:
+    """validate_password() + a HaveIBeenPwned leaked-password check."""
+    is_valid, error_msg = validate_password(password)
+    if not is_valid:
+        return False, error_msg
+    if is_password_leaked(password):
+        return False, (
+            "This password has appeared in a known data breach. "
+            "Please choose a different, unique password."
+        )
+    return True, ""
+
+
 def check_account_lockout(email: str) -> Tuple[bool, Optional[int]]:
     """
     HIPAA Compliance: Check if account is locked due to failed attempts.

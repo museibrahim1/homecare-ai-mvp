@@ -185,7 +185,11 @@ class BusinessUser(Base, TimestampMixin):
     # Password Reset
     password_reset_token = Column(String(255))
     password_reset_expires = Column(DateTime(timezone=True))
-    
+
+    # Two-Factor Authentication (TOTP)
+    two_factor_secret = Column(String(255))
+    two_factor_enabled = Column(Boolean, default=False)
+
     # Last Activity
     last_login = Column(DateTime(timezone=True))
     

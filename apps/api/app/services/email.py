@@ -194,7 +194,44 @@ class EmailService:
         </div>
         """
         return self.send_email(user_email, subject, html, sender=self.from_support)
-    
+
+    # ==================== Email Verification ====================
+
+    def send_email_verification(self, user_email: str, user_name: str, verify_url: str):
+        """Send an email-address verification link."""
+        subject = f"Verify your email - {BRAND}"
+        html = f"""
+        <div style="font-family: -apple-system, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+            <div style="background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%); padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
+                <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">PalmCare AI</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">Confirm your email address</p>
+            </div>
+            <div style="padding: 40px 30px;">
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">Hi {user_name},</p>
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+                    Please confirm this is your email address to secure your PalmCare AI account.
+                    This link expires in <strong>24 hours</strong>.
+                </p>
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="{verify_url}"
+                       style="background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px; display: inline-block;">
+                        Verify Email
+                    </a>
+                </div>
+                <p style="color: #9ca3af; font-size: 13px; margin-top: 20px;">
+                    If the button doesn't work, copy and paste this link into your browser:<br>
+                    <span style="color: #0d9488; word-break: break-all;">{verify_url}</span>
+                </p>
+                <p style="color: #9ca3af; font-size: 13px;">If you didn't create this account, you can ignore this email.</p>
+            </div>
+            <div style="background: #f9fafb; padding: 25px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="color: #0d9488; font-weight: 600; margin: 0 0 5px 0; font-size: 14px;">PalmCare AI</p>
+                <p style="color: #d1d5db; font-size: 11px; margin: 10px 0 0 0;">&copy; 2026 PalmCare AI. All rights reserved.</p>
+            </div>
+        </div>
+        """
+        return self.send_email(user_email, subject, html, sender=self.from_support)
+
     # ==================== Business Emails ====================
     
     def send_business_registration_received(self, business_email: str, business_name: str):
