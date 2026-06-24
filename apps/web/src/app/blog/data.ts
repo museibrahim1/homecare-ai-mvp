@@ -472,6 +472,108 @@ The AI scribe tools are excellent at clinical OASIS notes for home health. The t
 [Book a demo](/) and watch your own assessment become a signed contract — then compare.
 `,
   },
+  {
+    slug: 'how-to-do-home-care-client-assessment',
+    title: 'How to Do a Home Care Client Assessment (Step-by-Step + Checklist)',
+    description:
+      'A practical, step-by-step guide to conducting a non-medical home care client assessment — what to ask, what to document, and a free checklist you can follow on every visit.',
+    date: '2026-06-24',
+    readTime: '8 min read',
+    category: 'Operations',
+    content: `
+A home care client assessment is the in-home visit where an agency documents a new client's needs, environment, and goals so it can build a safe care plan and a clear service agreement. A complete assessment covers daily living needs, health background, the home environment, and the services the client is buying — and it's the foundation everything else (care plan, billing, contract) is built on.
+
+## What a home care assessment should cover
+
+Use these sections on every assessment so nothing gets missed:
+
+| Section | What to capture |
+|---|---|
+| Client & contacts | Legal name, DOB, address, emergency contacts, POA/guardian, primary physician |
+| Activities of daily living (ADLs) | Bathing, dressing, grooming, toileting, transferring, eating — and how much help each needs |
+| Instrumental ADLs (IADLs) | Meals, medication reminders, housekeeping, laundry, transportation, shopping |
+| Health background | Diagnoses, allergies, medications, mobility aids, fall history, cognition |
+| Home environment | Safety hazards, stairs, bathroom setup, pets, smoke/CO detectors |
+| Services & schedule | Which services, how many hours, which days, start date, rate |
+| Goals & preferences | What the client and family want, routines, cultural/dietary preferences |
+
+## Step-by-step
+
+1. **Prepare before the visit.** Confirm the appointment, review any referral or intake notes, and bring (or open) your assessment checklist.
+2. **Build rapport first.** Explain who you are and what the visit is for. People share more when they're comfortable.
+3. **Walk through ADLs and IADLs.** Ask how a normal day goes rather than reading a list — you'll surface needs the client wouldn't think to mention.
+4. **Do a home safety scan.** Note hazards (loose rugs, poor lighting, bathroom grab bars) you can address in the care plan.
+5. **Capture health background and medications.** Record diagnoses, allergies, and a current medication list.
+6. **Agree on services, hours, and schedule.** Translate needs into the specific services the client is buying.
+7. **Document and confirm.** Summarize what you heard, confirm it with the client/family, and capture consent.
+
+## Free assessment checklist
+
+- [ ] Client identity, contacts, physician, POA
+- [ ] ADLs scored with level of assistance
+- [ ] IADLs and household needs
+- [ ] Diagnoses, allergies, medications, fall risk
+- [ ] Home safety hazards noted
+- [ ] Services, weekly hours, schedule, rate
+- [ ] Goals, routines, and preferences
+- [ ] Consent captured and documented
+
+## Turn the assessment into a care plan and contract
+
+The slowest part isn't the visit — it's everything after: re-typing the assessment into a care plan, pulling billable items, and drafting a state-specific service agreement. PalmCare AI does that from a recording of the assessment automatically, so the conversation becomes the documentation.
+
+See [what belongs in the care plan next](/blog/home-care-care-plan-template), or [estimate the hours you'd save](/roi-calculator).
+`,
+  },
+  {
+    slug: 'home-care-care-plan-template',
+    title: 'What to Include in a Home Care Care Plan (Free Template)',
+    description:
+      'A home care care plan turns an assessment into a clear plan of services, goals, and tasks. Here is exactly what to include, with a free template and how to generate one automatically.',
+    date: '2026-06-24',
+    readTime: '7 min read',
+    category: 'Operations',
+    content: `
+A home care care plan is the document that turns a client assessment into an actionable plan: the services the caregiver will provide, the schedule, the goals, and the specific tasks for each visit. A good care plan is specific enough that any caregiver could step in and know exactly what to do — and it ties directly to what the client agreed to pay for.
+
+## What every home care care plan should include
+
+| Element | What it means |
+|---|---|
+| Client summary | Name, key diagnoses, allergies, mobility, cognition, emergency contacts |
+| Goals | What "good" looks like — e.g., "remains safe at home," "no falls," "improved nutrition" |
+| Services & tasks | The exact ADL/IADL tasks per visit (bathing, meals, meds reminders, light housekeeping) |
+| Schedule | Days, times, and hours per visit |
+| Safety & risk plan | Fall precautions, home hazards, what to do in an emergency |
+| Special instructions | Diet, routines, preferences, equipment use |
+| Review date | When the plan will be re-evaluated |
+
+## How a care plan differs from a service agreement
+
+They're related but not the same:
+
+- The **care plan** is the clinical/operational document — *what care happens and how*.
+- The **service agreement (contract)** is the legal/business document — *the terms, rate, responsibilities, and state-required clauses* the client signs.
+
+You need both, and they must agree with each other. (See [how to write a home care service agreement](/blog/how-to-write-home-care-service-agreement).)
+
+## Free care plan template
+
+1. **Client snapshot** — identity, diagnoses, allergies, contacts
+2. **Goals** — 2–4 measurable goals
+3. **Services by visit** — task list per scheduled visit
+4. **Schedule** — days, times, total weekly hours
+5. **Safety plan** — risks and precautions
+6. **Preferences** — diet, routine, cultural/religious notes
+7. **Signatures & review date**
+
+## Generate the care plan from the assessment
+
+Re-typing the assessment into a care plan, then again into a contract, is where agencies lose hours. PalmCare AI generates the care plan, visit notes, billable items, and a state-specific service contract from one recorded assessment — all consistent with each other.
+
+[Estimate your savings](/roi-calculator) or [see how PalmCare AI compares to other tools](/blog/ai-home-care-documentation-tools-2026).
+`,
+  },
 ];
 
 export function getPostBySlug(slug: string): BlogPost | undefined {

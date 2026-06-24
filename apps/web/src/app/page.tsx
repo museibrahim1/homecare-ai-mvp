@@ -67,6 +67,7 @@ const NAV_FEATURES = [
 
 const NAV_RESOURCES = [
   { label: 'Blog', href: '/blog' },
+  { label: 'ROI Calculator', href: '/roi-calculator' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Contact Us', href: '/contact' },
   { label: 'System Status', href: '/status' },
@@ -551,6 +552,7 @@ export default function LandingPage() {
                 <li><Link href="/features" className="hover:text-slate-900 transition inline-block py-0.5">Features</Link></li>
                 <li><Link href="/mobile-app" className="hover:text-slate-900 transition inline-block py-0.5">Mobile App</Link></li>
                 <li><Link href="/pricing" className="hover:text-slate-900 transition inline-block py-0.5">Pricing</Link></li>
+                <li><Link href="/roi-calculator" className="hover:text-slate-900 transition inline-block py-0.5">ROI Calculator</Link></li>
                 <li><Link href="/blog" className="hover:text-slate-900 transition inline-block py-0.5">Blog</Link></li>
                 <li><Link href="/faq" className="hover:text-slate-900 transition inline-block py-0.5">FAQ</Link></li>
                 <li><Link href="/login" className="hover:text-slate-900 transition inline-block py-0.5">Sign in</Link></li>

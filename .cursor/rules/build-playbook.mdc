@@ -205,6 +205,24 @@ actual stack: **Supabase + FastAPI + Next.js (web) + SwiftUI (iOS) + RevenueCat/
 - [ ] **Load test before launch** with **k6** or **artillery** (free, ~30 min):
       simulate 100 concurrent users, find the bottleneck before users do.
       (We have `tests/performance/`.)
+- [ ] Scale beyond 1k→10k users (Source 13): **async job queues** (Celery/Redis —
+      we have this) so heavy work (email, transcription, doc scanning) never locks
+      the request; **targeted DB indexes**; and when one box isn't enough,
+      **horizontal scaling** (multiple backend instances behind a load balancer).
+
+### 5.5 Pass Apple's ~90-second human review (Source 12)
+> "Apple has a human reviewing your app for ninety seconds. Here's how to not get rejected."
+- [ ] **Working demo credentials in App Review notes** (we use `demo-screenshots@palmtai.com`).
+      No login = instant rejection. No placeholder/"lorem" content visible.
+- [ ] **Justify every permission** (camera, mic, location) in the usage strings.
+      Unjustified prompts get rejected.
+- [ ] **Disclose AI-generated content** where the app produces it.
+- [ ] **Screenshots must match the live app** — don't show features that aren't built.
+- [ ] **Digital goods → Apple IAP**; remove any external "buy" path from the app.
+- [ ] **Sign in with Apple is required** if you offer any third-party social login
+      (Google/Facebook, etc.). ⚠️ Verify in `ios-app`.
+- [ ] **In-app account deletion is required** if users can create accounts. ⚠️ Verify
+      there's a delete-account flow inside the app, not just a web/email request.
 
 ### 5.4 SEO + AEO = helpful content, not gimmicks (Sources 10 & 11)
 > Google's 2026 AEO/GEO guide: AI Overviews use the **same quality signals as normal SEO**.
@@ -250,6 +268,8 @@ Distilled from Instagram reels (Jun 2026):
 - (9) Survive your first 100 users (pooling, caching, load tests) — instagram.com/reels/DYkAobpgwjI
 - (10) Google's AEO/GEO guide — 5 things you're doing wrong — instagram.com/reels/DY2cCXgM9GA
 - (11) Free SEO: real questions → helpful blog posts — instagram.com/reels/DRHy1evjTZM
+- (12) Apple's 90-second app review — how not to get rejected — instagram.com/reels/DXVBU_fk5ZG
+- (13) Scaling 100→10k users (cache, async, indexes, k6, horizontal) — instagram.com/reels/DY8DcYZyAaB
 
 > Installed agent skills are documented in `docs/AGENT_SKILLS.md` (and the
 > `agent-skills` project rule). Use the marketing/SEO skills for growth work.

@@ -27,6 +27,7 @@ Owners and administrators of in-home care agencies, plus the caregivers and nurs
 - Home: https://palmcareai.com
 - Features: https://palmcareai.com/features
 - Pricing: https://palmcareai.com/pricing
+- ROI calculator (estimate documentation savings): https://palmcareai.com/roi-calculator
 - FAQ: https://palmcareai.com/faq
 - Blog: https://palmcareai.com/blog
 - Mobile app: https://palmcareai.com/mobile-app
@@ -37,6 +38,8 @@ Owners and administrators of in-home care agencies, plus the caregivers and nurs
 - How to write a home care service agreement: https://palmcareai.com/blog/how-to-write-home-care-service-agreement
 - AI documentation tools for home care compared (AI scribes vs templates vs PalmCare AI): https://palmcareai.com/blog/ai-home-care-documentation-tools-2026
 - HIPAA compliance guide for home care agencies: https://palmcareai.com/blog/hipaa-compliance-guide-home-care-agencies-2026
+- How to do a home care client assessment (+ checklist): https://palmcareai.com/blog/how-to-do-home-care-client-assessment
+- What to include in a home care care plan (+ template): https://palmcareai.com/blog/home-care-care-plan-template
 
 ## Contact
 - Sales/demo: demo@palmtai.com
