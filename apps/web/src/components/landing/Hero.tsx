@@ -53,8 +53,9 @@ export function Hero() {
             <span className="text-primary-600">Contract it.</span>
           </h1>
           <p className="text-lg sm:text-xl text-slate-600 mt-5 max-w-xl leading-relaxed">
-            PalmCare AI turns a recorded client assessment into a complete care plan
-            and service agreement — in minutes, not hours.
+            Record the assessment. PALM writes the care plan, the billables, and a
+            state-specific service contract — built from what was actually said.
+            Minutes, not hours of paperwork.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 mt-8">

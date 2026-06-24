@@ -23,7 +23,21 @@ import {
 
 import { Hero } from '@/components/landing/Hero';
 import { FaqItem } from '@/components/landing/FaqItem';
-import { FEATURES_TABS, TESTIMONIALS, SOLUTIONS, FAQ_ITEMS } from '@/components/landing/data';
+import { FEATURES_TABS, SOLUTIONS, FAQ_ITEMS } from '@/components/landing/data';
+
+const OLD_WAY = [
+  'Type the assessment into forms — during or after the visit',
+  'Re-key the same data into a care plan, then again into a contract',
+  'Hunt down the right state-specific clauses for every agreement',
+  'Hours of nightly paperwork, where billing errors creep in',
+];
+
+const PALM_WAY = [
+  'Record the visit — in person or over the phone',
+  'AI writes the transcript, care plan, billables, and visit notes',
+  'State-specific service contracts, built from what was actually said',
+  'Review, send, and sign — minutes, not hours',
+];
 
 const NAV_FEATURES = [
   { href: '/features#ai', icon: Brain, label: 'AI Intelligence', desc: 'Voice assessments & smart contracts' },
@@ -334,28 +348,36 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ TESTIMONIALS ═══ */}
-      <section id="testimonials" className="py-16 sm:py-24 px-4 sm:px-6">
+      {/* ═══ THE OLD WAY vs PALM ═══ */}
+      <section id="why" className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mb-12 sm:mb-16">
-            <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">Customers</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">What agencies are saying</h2>
+            <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">Why agencies switch</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Old software digitized the paperwork. PALM removes it.</h2>
+            <p className="text-lg text-slate-600 mt-4">Legacy platforms turned paper forms into digital forms. You still type, re-key, and chase clauses. PALM starts from the conversation instead.</p>
           </div>
-          {/* Carousel on mobile, grid on md+ */}
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto md:overflow-visible scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory">
-            {TESTIMONIALS.map((t, i) => (
-              <figure key={i} className="card p-6 sm:p-8 flex flex-col shrink-0 md:shrink w-[85vw] max-w-sm md:w-auto md:max-w-none snap-center">
-                <blockquote className="text-slate-700 text-[15px] sm:text-base leading-relaxed flex-1">
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-                <figcaption className="mt-6 pt-5 border-t border-slate-100">
-                  <p className="font-semibold text-slate-900 text-sm">{t.author}</p>
-                  <p className="text-sm text-slate-500">{t.role}, {t.company}</p>
-                </figcaption>
-              </figure>
-            ))}
+          <div className="grid md:grid-cols-2 gap-5 sm:gap-6">
+            <div className="card p-6 sm:p-8">
+              <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-5">The old way</p>
+              <ul className="space-y-4">
+                {OLD_WAY.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-slate-600 text-sm sm:text-[15px] leading-relaxed">
+                    <X className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="card p-6 sm:p-8 ring-1 ring-primary-100 bg-primary-50/30">
+              <p className="text-sm font-semibold text-primary-700 uppercase tracking-wide mb-5">With PALM</p>
+              <ul className="space-y-4">
+                {PALM_WAY.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-slate-800 text-sm sm:text-[15px] leading-relaxed">
+                    <CheckCircle className="w-5 h-5 text-primary-600 shrink-0 mt-0.5" />{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <p className="md:hidden text-center text-slate-400 text-xs mt-4">Swipe to see more</p>
         </div>
       </section>
 

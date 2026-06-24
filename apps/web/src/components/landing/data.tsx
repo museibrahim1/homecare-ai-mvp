@@ -143,58 +143,12 @@ export const FEATURES_TABS = [
   },
 ];
 
-export const TESTIMONIALS = [
-  {
-    quote: "PalmCare AI cut our contract generation time from hours to minutes. We went from 3 hours of paperwork per client to under 10 minutes.",
-    author: "Sarah Mitchell",
-    role: "Agency Owner",
-    company: "Sunrise Home Care, TX",
-    rating: 5,
-    metric: "95% time saved",
-  },
-  {
-    quote: "The voice assessment feature lets our caregivers focus on clients, not paperwork. Our caregiver satisfaction scores went up 40% since switching.",
-    author: "Michael Rodriguez",
-    role: "Operations Director",
-    company: "Coastal Care Services, FL",
-    rating: 5,
-    metric: "40% retention boost",
-  },
-  {
-    quote: "Finally, a system built for home care agencies. Not retrofitted from something else. The AI actually understands care terminology.",
-    author: "Jennifer Liu",
-    role: "Care Coordinator",
-    company: "Golden State Home Health, CA",
-    rating: 5,
-    metric: "Zero learning curve",
-  },
-  {
-    quote: "We onboarded 50 caregivers in a single week. The mobile app is so intuitive that training took 15 minutes per person.",
-    author: "David Okonkwo",
-    role: "Regional Manager",
-    company: "Heritage Care Group, GA",
-    rating: 5,
-    metric: "15-min onboarding",
-  },
-  {
-    quote: "The OCR template engine saved us from re-entering data across 200+ contracts when we updated our service agreement format.",
-    author: "Patricia Hernandez",
-    role: "Compliance Officer",
-    company: "Compassion Home Services, AZ",
-    rating: 5,
-    metric: "200+ contracts migrated",
-  },
-  {
-    quote: "We reduced billing errors by 80% and our collections improved by 35%. The automated extraction from assessments is incredibly accurate.",
-    author: "Robert Chen",
-    role: "CFO",
-    company: "Pacific Care Alliance, WA",
-    rating: 5,
-    metric: "80% fewer billing errors",
-  },
-];
-
-/* Stats bar removed — will re-add when we have real traction numbers */
+/*
+ * Testimonials intentionally removed: the landing page no longer ships
+ * fabricated quotes/metrics (brand voice: "earn it, don't claim it").
+ * Add a TESTIMONIALS array of REAL, attributable agency quotes here and wire
+ * it back into the landing page once we have permission to publish them.
+ */
 
 export const SOLUTIONS = [
   {
