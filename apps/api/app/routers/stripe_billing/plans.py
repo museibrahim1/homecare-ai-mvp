@@ -1,25 +1,11 @@
 import logging
-from datetime import datetime, timezone
-from typing import Optional
-from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Header
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_db, get_current_user
+from app.core.deps import get_db
 from app.core.internal_auth import require_internal_key
-from app.models.user import User
-from app.models.business import Business, BusinessUser
-from app.models.subscription import Plan, Subscription, SubscriptionStatus, Invoice
-
-from .common import (
-    stripe, STRIPE_AVAILABLE, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
-    STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, EXTENDED_TRIAL_PRICE_ID, STRIPE_PRICE_MAP,
-)
-from .schemas import (
-    CreateCheckoutRequest, SignupCheckoutRequest, CheckoutResponse,
-    PortalRequest, StripePriceConfig,
-)
+from app.models.subscription import Plan
 
 logger = logging.getLogger(__name__)
 
@@ -86,9 +72,6 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "max_storage_gb": 5,
             "is_contact_sales": False,
             "is_active": True,
-            "stripe_product_id": STRIPE_PRICE_MAP["starter"]["product_id"],
-            "stripe_price_id_monthly": STRIPE_PRICE_MAP["starter"]["monthly"],
-            "stripe_price_id_annual": STRIPE_PRICE_MAP["starter"]["annual"],
             "features": json.dumps([
                 "5 assessments/month", "5 team members",
                 "AI voice-to-contract", "Smart SOAP notes",
@@ -109,9 +92,6 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "max_storage_gb": 15,
             "is_contact_sales": False,
             "is_active": True,
-            "stripe_product_id": STRIPE_PRICE_MAP["growth"]["product_id"],
-            "stripe_price_id_monthly": STRIPE_PRICE_MAP["growth"]["monthly"],
-            "stripe_price_id_annual": STRIPE_PRICE_MAP["growth"]["annual"],
             "features": json.dumps([
                 "25 assessments/month", "15 team members",
                 "AI voice-to-contract", "Smart SOAP notes",
@@ -133,9 +113,6 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "max_storage_gb": 50,
             "is_contact_sales": False,
             "is_active": True,
-            "stripe_product_id": STRIPE_PRICE_MAP["professional"]["product_id"],
-            "stripe_price_id_monthly": STRIPE_PRICE_MAP["professional"]["monthly"],
-            "stripe_price_id_annual": STRIPE_PRICE_MAP["professional"]["annual"],
             "features": json.dumps([
                 "75 assessments/month", "Unlimited team members",
                 "AI voice-to-contract", "Smart SOAP notes",
@@ -158,7 +135,6 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
             "max_storage_gb": 999,
             "is_contact_sales": True,
             "is_active": True,
-            "stripe_product_id": STRIPE_PRICE_MAP["enterprise"]["product_id"],
             "features": json.dumps([
                 "Unlimited assessments", "Unlimited team members",
                 "AI voice-to-contract", "Smart SOAP notes",
@@ -183,25 +159,4 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
 
     db.commit()
     return {"created": created, "updated": len(PLANS) - created}
-
-
-@router.post("/plans/wire-stripe")
-async def wire_stripe_ids(request: Request, db: Session = Depends(get_db)):
-    """Internal endpoint to wire Stripe price IDs to existing plans."""
-    require_internal_key(request)
-    from app.models.subscription import PlanTier
-
-    updated = 0
-    for tier_value, ids in STRIPE_PRICE_MAP.items():
-        plan = db.query(Plan).filter(Plan.tier == tier_value).first()
-        if plan:
-            plan.stripe_product_id = ids["product_id"]
-            if ids.get("monthly"):
-                plan.stripe_price_id_monthly = ids["monthly"]
-            if ids.get("annual"):
-                plan.stripe_price_id_annual = ids["annual"]
-            updated += 1
-
-    db.commit()
-    return {"updated": updated, "price_map": STRIPE_PRICE_MAP}
 

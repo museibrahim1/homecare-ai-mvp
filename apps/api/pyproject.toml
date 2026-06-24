@@ -44,8 +44,7 @@ dependencies = [
     "openai>=2.38.0",
     "reportlab>=4.5.0",
     "resend>=2.30.0",
-    # stripe 15.x — major bump (PaymentIntent API tweaks)
-    "stripe>=15.0.0",
+    # Billing is handled by Apple In-App Purchase (StoreKit). Stripe removed.
     "app-store-server-library>=1.5.0",
     # cryptography 48.x patches PYSEC-2026-35 and PYSEC-2026-36
     "cryptography>=48.0.0",

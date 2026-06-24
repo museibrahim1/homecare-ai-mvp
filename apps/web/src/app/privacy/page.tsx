@@ -56,7 +56,7 @@ export default function PrivacyPolicyPage() {
                 <li><strong className="text-white">Client & Care Data:</strong> Client names, care assessments, caregiver information, visit records, and related care documentation that you input into the platform.</li>
                 <li><strong className="text-white">Audio Recordings & Transcripts:</strong> Audio recordings of care assessments that you upload for AI-powered transcription, speaker identification, and documentation generation. See Section 4 for recording consent requirements.</li>
                 <li><strong className="text-white">Assessment Data:</strong> Structured assessment information including ADLs, IADLs, cognitive screening results, medical conditions, and care needs as captured during provider assessments.</li>
-                <li><strong className="text-white">Payment Information:</strong> Billing details processed securely through our third-party payment processor (Stripe). We do not store full credit card numbers on our servers.</li>
+                <li><strong className="text-white">Payment Information:</strong> Subscriptions are processed by Apple through In-App Purchase. We never receive or store your payment card details; Apple handles all payment information under its own privacy policy.</li>
                 <li><strong className="text-white">Communications:</strong> Support tickets, emails, and other correspondence you send to us.</li>
               </ul>
             </Subsection>
@@ -215,7 +215,7 @@ export default function PrivacyPolicyPage() {
                 <li>Your user profile, login credentials, and account settings</li>
                 <li>All client records, assessments, care plans, and contracts you created</li>
                 <li>Audio recordings and transcripts</li>
-                <li>Billing history and subscription data (Stripe retains transaction records per their policy)</li>
+                <li>Subscription status and plan data (Apple retains purchase/transaction records per its policy)</li>
                 <li>Push notification tokens and device registrations</li>
               </ul>
             </Subsection>
@@ -240,7 +240,7 @@ export default function PrivacyPolicyPage() {
             <ul className="list-disc list-inside space-y-2 text-dark-300">
               <li><strong className="text-white">Deepgram (Speech-to-Text):</strong> Processes audio recordings for transcription. Audio is transmitted securely and is not retained by Deepgram after processing. <a href="https://deepgram.com/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Deepgram Privacy Policy</a></li>
               <li><strong className="text-white">Anthropic (AI Analysis):</strong> Processes transcript text for document generation (care plans, contracts, billable items). Data is not used to train Anthropic&apos;s models. <a href="https://www.anthropic.com/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Anthropic Privacy Policy</a></li>
-              <li><strong className="text-white">Stripe (Payments):</strong> Processes payment information. We do not store credit card numbers. <a href="https://stripe.com/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Stripe Privacy Policy</a></li>
+              <li><strong className="text-white">Apple (Payments):</strong> Processes subscription payments via In-App Purchase. We do not receive or store your payment card details. <a href="https://www.apple.com/legal/privacy/" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Apple Privacy Policy</a></li>
               <li><strong className="text-white">Resend (Email):</strong> Delivers transactional and service emails on our behalf. <a href="https://resend.com/legal/privacy-policy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Resend Privacy Policy</a></li>
               <li><strong className="text-white">Railway (Hosting):</strong> Hosts our API infrastructure. All data is encrypted in transit and at rest. <a href="https://railway.app/legal/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Railway Privacy Policy</a></li>
               <li><strong className="text-white">Google (Calendar, OAuth):</strong> Optional integration for demo scheduling and calendar sync. Only activated when you explicitly connect your Google account. <a href="https://policies.google.com/privacy" className="text-primary-400 hover:text-primary-300" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a></li>

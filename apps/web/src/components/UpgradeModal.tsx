@@ -90,7 +90,10 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
     if (planName === 'Enterprise') {
       router.push('/contact?inquiry=enterprise');
     } else {
-      router.push(`/register?plan=${planName.toLowerCase()}`);
+      // Subscriptions are purchased via Apple In-App Purchase in the iOS app.
+      // Send the user to the read-only subscription page, which explains how to
+      // upgrade in the app.
+      router.push('/billing');
     }
     onClose();
   };
@@ -203,7 +206,7 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
                       : 'bg-primary-500 text-white hover:bg-primary-600'
                   }`}
                 >
-                  Get Started
+                  {plan.name === 'Enterprise' ? 'Contact Sales' : 'Upgrade in App'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -211,7 +214,7 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
           </div>
 
           <p className="text-center text-slate-400 text-sm mt-6">
-            All plans include a 14-day free trial. Cancel anytime.
+            Plans are purchased and managed in the PalmCare iOS app via your Apple ID. Cancel anytime.
           </p>
         </div>
       </div>

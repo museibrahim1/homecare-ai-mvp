@@ -573,38 +573,28 @@ async def seed_database():
                     demo_user.google_calendar_token_expiry = None
                 db.commit()
         
-        # Seed pricing plans and wire Stripe IDs
+        # Seed pricing plans (display + feature limits only; billing is handled
+        # by Apple In-App Purchase, so no Stripe price IDs are wired here).
         try:
             from app.models.subscription import Plan, PlanTier
-            from app.routers.stripe_billing import STRIPE_PRICE_MAP
             import json as _json
 
             _plan_defs = [
                 dict(name="Starter", tier=PlanTier.STARTER, description="5 assessments, 5 team members",
                      monthly_price=89.99, annual_price=899, max_users=5, max_clients=25,
                      max_visits_per_month=5, max_storage_gb=5,
-                     stripe_product_id=STRIPE_PRICE_MAP["starter"]["product_id"],
-                     stripe_price_id_monthly=STRIPE_PRICE_MAP["starter"]["monthly"],
-                     stripe_price_id_annual=STRIPE_PRICE_MAP["starter"]["annual"],
                      features=_json.dumps(["5 assessments/month","5 team members","AI voice-to-contract","Smart SOAP notes","Basic reporting","Email support","$13/extra assessment"])),
                 dict(name="Growth", tier=PlanTier.GROWTH, description="25 assessments, 15 team members",
                      monthly_price=179.99, annual_price=1799, max_users=15, max_clients=100,
                      max_visits_per_month=25, max_storage_gb=15,
-                     stripe_product_id=STRIPE_PRICE_MAP["growth"]["product_id"],
-                     stripe_price_id_monthly=STRIPE_PRICE_MAP["growth"]["monthly"],
-                     stripe_price_id_annual=STRIPE_PRICE_MAP["growth"]["annual"],
                      features=_json.dumps(["25 assessments/month","15 team members","Advanced analytics","Priority support","Custom templates","Team management","$13/extra assessment"])),
                 dict(name="Professional", tier=PlanTier.PROFESSIONAL, description="75 assessments, unlimited team",
                      monthly_price=299.99, annual_price=2999, max_users=999, max_clients=500,
                      max_visits_per_month=75, max_storage_gb=50,
-                     stripe_product_id=STRIPE_PRICE_MAP["professional"]["product_id"],
-                     stripe_price_id_monthly=STRIPE_PRICE_MAP["professional"]["monthly"],
-                     stripe_price_id_annual=STRIPE_PRICE_MAP["professional"]["annual"],
                      features=_json.dumps(["75 assessments/month","Unlimited team members","Advanced dashboards","Priority support","50-state compliance","$13/extra assessment"])),
                 dict(name="Enterprise", tier=PlanTier.ENTERPRISE, description="Unlimited everything, no overage fees",
                      monthly_price=0, annual_price=0, max_users=999, max_clients=9999,
                      max_visits_per_month=99999, max_storage_gb=999, is_contact_sales=True,
-                     stripe_product_id=STRIPE_PRICE_MAP["enterprise"]["product_id"],
                      features=_json.dumps(["Unlimited assessments","Unlimited team members","Dedicated account manager","HIPAA BAA","Custom integrations","SLA guarantee","No overage fees"])),
             ]
             for pd in _plan_defs:
@@ -616,7 +606,7 @@ async def seed_database():
                 else:
                     db.add(Plan(**pd))
             db.commit()
-            logger.info(f"Pricing plans seeded/updated with Stripe IDs")
+            logger.info("Pricing plans seeded/updated")
         except Exception as e:
             logger.warning(f"Plan seeding skipped: {e}")
             db.rollback()

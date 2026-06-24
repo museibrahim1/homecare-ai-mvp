@@ -5,9 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Loader2, Check, ArrowLeft, ArrowRight, Eye, EyeOff,
-  Building2, CreditCard, Shield, Clock, Sparkles, AlertCircle, RefreshCw,
+  Building2, Shield, Clock, AlertCircle,
 } from 'lucide-react';
 import { trackFunnelStep } from '@/lib/analytics';
+import { useAuth } from '@/lib/auth';
+import { api } from '@/lib/api';
 
 const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -42,6 +44,7 @@ export default function RegisterPage() {
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setToken, setUser } = useAuth();
   const selectedPlan = searchParams.get('plan') || 'starter';
 
   const [step, setStep] = useState(1);
@@ -49,9 +52,6 @@ function RegisterForm() {
   const [error, setError] = useState('');
   const [errorHint, setErrorHint] = useState('');
   const [showPw, setShowPw] = useState(false);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-  const [trialType, setTrialType] = useState<'standard' | 'extended'>('standard');
-  const [businessId, setBusinessId] = useState<string | null>(null);
 
   const friendlyError = (raw: string): { message: string; hint: string } => {
     const lower = raw.toLowerCase();
@@ -63,8 +63,8 @@ function RegisterForm() {
       return { message: 'Password doesn\'t meet security requirements.', hint: 'Use at least 8 characters with a mix of letters, numbers, and symbols.' };
     if (lower.includes('rate limit') || lower.includes('too many'))
       return { message: 'Too many attempts. Please wait a moment.', hint: 'For security, we limit registration attempts. Try again in a few minutes.' };
-    if (lower.includes('not configured') || lower.includes('stripe'))
-      return { message: 'Payment system is temporarily unavailable.', hint: 'Please try again in a few minutes. If this persists, contact support@palmtai.com.' };
+    if (lower.includes('not configured'))
+      return { message: 'Our service is temporarily unavailable.', hint: 'Please try again in a few minutes. If this persists, contact support@palmtai.com.' };
     if (lower.includes('network') || lower.includes('fetch') || lower.includes('failed to fetch'))
       return { message: 'Unable to connect to our servers.', hint: 'Check your internet connection and try again.' };
     if (lower.includes('checkout') || lower.includes('payment'))
@@ -162,61 +162,37 @@ function RegisterForm() {
         throw new Error(detail);
       }
 
+      // Registration creates the account AND a 14-day free trial, and returns
+      // an access token. Subscriptions/billing are managed via Apple IAP in the
+      // iOS app, so there is no web checkout step — sign the user straight in.
       const data = await res.json();
-      setBusinessId(data.business_id);
-      setStep(3);
-      trackFunnelStep(3, 'registration', { plan: selectedPlan });
+      trackFunnelStep(4, 'registration', { plan: selectedPlan });
+      if (data.access_token) {
+        setToken(data.access_token);
+        try {
+          const me = await api.getMe(data.access_token);
+          if (me) setUser(me);
+        } catch {
+          // non-fatal — user can still proceed; /welcome will load the session
+        }
+        await new Promise((r) => setTimeout(r, 100));
+        router.push('/welcome');
+      } else {
+        router.push('/login');
+      }
     } catch (e: any) {
       setFriendlyError(e.message || 'Something went wrong. Please try again.');
-    }
-    setLoading(false);
-  };
-
-  const handleStartTrial = async () => {
-    if (!businessId) return;
-    setLoading(true);
-    clearError();
-
-    try {
-      const res = await fetch(`${API}/billing/signup-checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          business_id: businessId,
-          email: form.owner_email,
-          billing_cycle: billingCycle,
-          trial_type: trialType,
-          plan_tier: selectedPlan,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ detail: 'Could not connect to payment service' }));
-        const detail = typeof data.detail === 'string' ? data.detail : 'Could not set up payment. Please try again.';
-        throw new Error(detail);
-      }
-
-      const data = await res.json();
-      if (!data.checkout_url) throw new Error('Payment service returned an invalid response.');
-      trackFunnelStep(4, 'registration', { plan: selectedPlan, billing: billingCycle, trial: trialType });
-      window.location.href = data.checkout_url;
-    } catch (e: any) {
-      setFriendlyError(e.message || 'Unable to connect to payment service. Please try again.');
       setLoading(false);
     }
   };
 
-  const planConfig: Record<string, { label: string; price: number; annual: number }> = {
-    starter: { label: 'Starter', price: 89.99, annual: 899 },
-    growth: { label: 'Growth', price: 179.99, annual: 1799 },
-    professional: { label: 'Professional', price: 299.99, annual: 2999 },
+  const planConfig: Record<string, { label: string }> = {
+    starter: { label: 'Starter' },
+    growth: { label: 'Growth' },
+    professional: { label: 'Professional' },
   };
   const activePlan = planConfig[selectedPlan] || planConfig.starter;
   const planLabel = activePlan.label;
-  const planPrice = activePlan.price;
-  const annualPrice = activePlan.annual;
-  const displayPrice = billingCycle === 'annual' ? +(annualPrice / 12).toFixed(2) : planPrice;
-  const trialDays = trialType === 'extended' ? 30 : 14;
 
   const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/30 focus:border-teal-500 focus:outline-none transition";
 
@@ -233,8 +209,8 @@ function RegisterForm() {
               Start your free trial<br />and transform your agency
             </h2>
             <p className="text-white/70 mt-4 text-lg leading-relaxed">
-              Set up your agency in minutes. Credit card required to start trial — you
-              will not be charged until your trial period ends.
+              Set up your agency in minutes and start a 14-day free trial.
+              No credit card required.
             </p>
           </div>
           <div className="mt-12 space-y-4">
@@ -256,7 +232,7 @@ function RegisterForm() {
           {/* Trust badges */}
           <div className="mt-12 flex items-center gap-6 text-white/50 text-xs">
             <div className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> HIPAA Compliant</div>
-            <div className="flex items-center gap-1.5"><CreditCard className="w-4 h-4" /> Stripe Secured</div>
+            <div className="flex items-center gap-1.5"><Check className="w-4 h-4" /> No Credit Card</div>
             <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Cancel Anytime</div>
           </div>
         </div>
@@ -276,12 +252,11 @@ function RegisterForm() {
           </div>
 
           {/* Step Indicators */}
-          {step <= 3 && (
+          {step <= 2 && (
             <div className="flex items-center gap-2 mb-8">
               {[
                 { n: 1, label: 'Account' },
                 { n: 2, label: 'Agency' },
-                { n: 3, label: 'Start Trial' },
               ].map(({ n, label }) => (
                 <div key={n} className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
@@ -294,7 +269,7 @@ function RegisterForm() {
                   <span className={`text-xs font-medium ${n === step ? 'text-white' : 'text-white/30'}`}>
                     {label}
                   </span>
-                  {n < 3 && <div className="w-6 h-px bg-white/10 mx-1" />}
+                  {n < 2 && <div className="w-6 h-px bg-white/10 mx-1" />}
                 </div>
               ))}
             </div>
@@ -422,148 +397,15 @@ function RegisterForm() {
               <button onClick={handleRegister} disabled={loading}
                 className="w-full mt-6 bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-xl text-sm font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2">
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</> :
-                  <><Building2 className="w-4 h-4" /> Continue to Trial Setup</>}
+                  <><Building2 className="w-4 h-4" /> Create Account & Start Free Trial</>}
               </button>
+
+              <p className="text-center text-white/30 text-xs mt-4">
+                14-day free trial &middot; No credit card required
+              </p>
             </div>
           )}
 
-          {/* STEP 3: Choose Trial & Billing, then Stripe Checkout */}
-          {step === 3 && (
-            <div>
-              <button onClick={() => { setStep(2); clearError(); }}
-                className="flex items-center gap-1 text-white/40 hover:text-white/70 text-sm mb-4 transition">
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <h1 className="text-2xl font-bold text-white mb-1">Choose Your Trial</h1>
-              <p className="text-white/50 text-sm mb-6">
-                Select a trial period and billing cycle. Your credit card is required but you will not be charged until the trial ends.
-              </p>
-
-              {/* Trial Type Selection */}
-              <div className="space-y-3 mb-6">
-                <button onClick={() => setTrialType('standard')}
-                  className={`w-full text-left p-4 rounded-xl border transition ${
-                    trialType === 'standard'
-                      ? 'border-teal-500 bg-teal-500/10'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20'
-                  }`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-teal-400" />
-                        <span className="text-white font-semibold text-sm">14-Day Free Trial</span>
-                      </div>
-                      <p className="text-white/50 text-xs mt-1 ml-6">$0 today — full access for 14 days</p>
-                    </div>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      trialType === 'standard' ? 'border-teal-500 bg-teal-500' : 'border-white/20'
-                    }`}>
-                      {trialType === 'standard' && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                  </div>
-                </button>
-
-                <button onClick={() => setTrialType('extended')}
-                  className={`w-full text-left p-4 rounded-xl border transition ${
-                    trialType === 'extended'
-                      ? 'border-teal-500 bg-teal-500/10'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20'
-                  }`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-amber-400" />
-                        <span className="text-white font-semibold text-sm">30-Day Extended Trial</span>
-                        <span className="text-amber-400 text-[10px] font-bold bg-amber-400/10 px-1.5 py-0.5 rounded">$39.99</span>
-                      </div>
-                      <p className="text-white/50 text-xs mt-1 ml-6">$39.99 today — full access for 30 days</p>
-                    </div>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      trialType === 'extended' ? 'border-teal-500 bg-teal-500' : 'border-white/20'
-                    }`}>
-                      {trialType === 'extended' && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                  </div>
-                </button>
-              </div>
-
-              {/* Billing Cycle */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-white/70 mb-3">After trial, bill me:</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => setBillingCycle('monthly')}
-                    className={`p-3 rounded-xl border text-center transition ${
-                      billingCycle === 'monthly'
-                        ? 'border-teal-500 bg-teal-500/10'
-                        : 'border-white/10 bg-white/[0.02] hover:border-white/20'
-                    }`}>
-                    <div className="text-white font-semibold text-sm">${planPrice}/mo</div>
-                    <div className="text-white/40 text-xs">Monthly</div>
-                  </button>
-                  <button onClick={() => setBillingCycle('annual')}
-                    className={`p-3 rounded-xl border text-center transition relative ${
-                      billingCycle === 'annual'
-                        ? 'border-teal-500 bg-teal-500/10'
-                        : 'border-white/10 bg-white/[0.02] hover:border-white/20'
-                    }`}>
-                    <div className="absolute -top-2 right-2 text-[9px] font-bold text-teal-400 bg-teal-400/10 px-1.5 py-0.5 rounded">SAVE 17%</div>
-                    <div className="text-white font-semibold text-sm">${Math.round(annualPrice / 12)}/mo</div>
-                    <div className="text-white/40 text-xs">${annualPrice.toLocaleString()}/yr</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Summary */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-white/60 text-sm">Plan</span>
-                  <span className="text-white font-medium text-sm">{planLabel}</span>
-                </div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-white/60 text-sm">Trial period</span>
-                  <span className="text-teal-400 font-medium text-sm">{trialDays} days</span>
-                </div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-white/60 text-sm">Due today</span>
-                  <span className="text-white font-semibold text-sm">
-                    {trialType === 'extended' ? '$39.99' : '$0.00'}
-                  </span>
-                </div>
-                <div className="border-t border-white/10 mt-3 pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/60 text-sm">After trial ends</span>
-                    <span className="text-white font-semibold text-sm">
-                      {billingCycle === 'annual'
-                        ? `$${annualPrice.toLocaleString()}/yr`
-                        : `$${planPrice}/mo`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Terms notice */}
-              <p className="text-white/40 text-[11px] leading-relaxed mb-4">
-                By continuing, you agree that after your {trialDays}-day trial,
-                your card will be automatically charged{' '}
-                {billingCycle === 'monthly'
-                  ? `$${planPrice}/month`
-                  : `$${annualPrice.toLocaleString()}/year`}{' '}
-                for PalmCare AI {planLabel}. You can cancel anytime before the trial ends
-                to avoid being charged.
-              </p>
-
-              <button onClick={handleStartTrial} disabled={loading}
-                className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3.5 rounded-xl text-sm font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2">
-                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting to checkout...</> :
-                  <><CreditCard className="w-4 h-4" /> Start {trialDays}-Day Trial</>}
-              </button>
-
-              <div className="flex items-center justify-center gap-4 mt-4 text-white/30 text-[10px]">
-                <div className="flex items-center gap-1"><Shield className="w-3 h-3" /> SSL Encrypted</div>
-                <div className="flex items-center gap-1"><CreditCard className="w-3 h-3" /> Powered by Stripe</div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

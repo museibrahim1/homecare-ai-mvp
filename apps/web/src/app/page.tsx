@@ -492,7 +492,7 @@ export default function LandingPage() {
                 Talk to us
               </Link>
             </div>
-            <p className="text-slate-400 text-sm mt-6">HIPAA compliant &middot; Secure payments by Stripe &middot; No charge until the trial ends</p>
+            <p className="text-slate-400 text-sm mt-6">HIPAA compliant &middot; 14-day free trial &middot; No credit card required</p>
           </div>
         </div>
       </section>

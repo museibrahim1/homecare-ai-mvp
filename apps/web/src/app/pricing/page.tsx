@@ -139,7 +139,7 @@ export default function PricingPage() {
           Start with a 14-day free trial. Cancel anytime before your trial ends.
         </p>
         <p className="text-sm text-white/40 max-w-xl mx-auto mb-8">
-          Credit card required to start trial. You will not be charged until the trial period ends.
+          No credit card required to start. Subscriptions are purchased and managed in the PalmCare iOS app via your Apple ID.
         </p>
 
         {/* Billing Toggle */}
@@ -313,31 +313,27 @@ export default function PricingPage() {
           {[
             {
               q: 'Do I need a credit card for the free trial?',
-              a: 'Yes, a credit card is required to start your trial. This helps us prevent abuse and ensures a seamless transition if you decide to continue. You will not be charged during the 14-day trial period.',
+              a: 'No. You can create your account and start a 14-day free trial with full access — no credit card required. When you\'re ready to subscribe, you do so in the PalmCare iOS app through your Apple ID.',
+            },
+            {
+              q: 'How do subscriptions and payments work?',
+              a: 'Subscriptions are purchased and billed through Apple In-App Purchase in the PalmCare iOS app. Open the app, go to Settings → Subscription, and choose your plan. Apple handles payment securely with your Apple ID.',
             },
             {
               q: 'What happens after the 14-day trial?',
-              a: 'At the end of your 14-day trial, your card will be automatically charged based on your selected plan: Starter ($89.99/mo), Growth ($179.99/mo), or Professional ($299.99/mo). If you chose annual billing, you\'ll save the equivalent of 2 months. Cancel anytime before the trial ends to avoid charges.',
+              a: 'When your trial ends, subscribe in the PalmCare iOS app to keep full access: Starter ($89.99/mo), Growth ($179.99/mo), or Professional ($299.99/mo). Your data is preserved while you decide.',
             },
             {
               q: 'What happens if I exceed my assessment limit?',
               a: 'On Starter, Growth, and Professional plans, each assessment beyond your monthly limit costs $13. Enterprise plans include unlimited assessments with no overage fees.',
             },
             {
-              q: 'What is the 30-day extended trial?',
-              a: 'For $39.99, you can extend your trial from 14 days to 30 days. This gives you more time to evaluate PalmCare AI with your team. The $39.99 is a one-time fee — after 30 days, your regular subscription billing begins.',
-            },
-            {
               q: 'Can I change plans later?',
-              a: 'Yes. You can upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle. Upgrading mid-cycle is prorated.',
-            },
-            {
-              q: 'How does annual billing work?',
-              a: 'Annual billing gives you 2 months free — you pay for 10 months instead of 12. For example, Starter is $89.99/mo monthly but only $74.92/mo when billed annually at $899/year.',
+              a: 'Yes. You can upgrade or downgrade anytime in the iOS app under Settings → Subscription. Plan changes are handled by Apple and take effect per Apple\'s billing rules.',
             },
             {
               q: 'How do I cancel?',
-              a: 'You can cancel anytime from your billing settings or through the Stripe customer portal. If you cancel during your trial, you will not be charged. Your data is preserved for 30 days after cancellation.',
+              a: 'Manage or cancel your subscription anytime from iPhone Settings → [your name] → Subscriptions, or in the PalmCare app. If you cancel, you keep access until the end of your current billing period, and your data is preserved for 30 days after cancellation.',
             },
             {
               q: 'Is my data secure?',
@@ -376,7 +372,7 @@ export default function PricingPage() {
           </div>
           <div className="flex items-center justify-center gap-6 mt-6 text-white/30 text-xs">
             <div className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> HIPAA Compliant</div>
-            <div className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> Powered by Stripe</div>
+            <div className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> Billed via App Store</div>
             <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Cancel Anytime</div>
           </div>
         </div>

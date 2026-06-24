@@ -208,7 +208,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Do you offer a free trial?',
-    a: 'Yes — every plan comes with a 14-day free trial with full access to all features. A credit card is required to start, but you won\'t be charged until the trial ends. You can cancel anytime during the trial period.',
+    a: 'Yes — every plan comes with a 14-day free trial with full access to all features. No credit card required to start. When you\'re ready, subscriptions are purchased in the PalmCare iOS app via your Apple ID, and you can cancel anytime.',
   },
 ];
 

@@ -42,7 +42,7 @@ export default function TermsPage() {
               },
               {
                 title: '4. Free Trial, Subscription & Billing',
-                content: 'New accounts receive a 7-day free trial with full access to all features. At the end of the trial period, your account will require an active subscription to continue using the Service. You will not be charged automatically at the end of the trial unless you explicitly subscribe to a paid plan. Paid plans are billed monthly or annually through Stripe. You may cancel your subscription at any time through Settings > Billing. Cancellation takes effect at the end of the current billing period. Prices are subject to change with 30 days written notice.',
+                content: 'New accounts receive a 14-day free trial with full access to all features, with no credit card required. At the end of the trial period, your account will require an active subscription to continue using the Service. Subscriptions are sold and billed through Apple In-App Purchase in the PalmCare iOS app and are charged to your Apple ID. Payment, renewals, plan changes, and cancellations are handled by Apple — you can manage or cancel your subscription at any time in iPhone Settings > [your name] > Subscriptions, with cancellation taking effect at the end of the current billing period. Refunds are handled by Apple in accordance with the App Store terms. Prices are subject to change with 30 days written notice.',
               },
               {
                 title: '5. Refund Policy',

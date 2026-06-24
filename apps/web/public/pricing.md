@@ -1,8 +1,9 @@
 # Pricing — PalmCare AI
 
 PalmCare AI turns a recorded home care assessment into a state-specific service
-contract automatically. All paid plans include a 14-day free trial (credit card
-required; no charge until the trial ends). Annual billing gives 2 months free.
+contract automatically. Every plan includes a 14-day free trial with no credit
+card required. Subscriptions are purchased and billed through Apple In-App
+Purchase in the PalmCare iOS app (charged to your Apple ID).
 
 Last updated: 2026-06-23. Currency: USD.
 
@@ -41,11 +42,11 @@ Last updated: 2026-06-23. Currency: USD.
 - Best for: large or multi-location agencies
 
 ## Add-ons & notes
-- Extended trial: $39.99 one-time to extend the free trial from 14 to 30 days
 - Overage: $13 per assessment beyond the monthly limit (Starter/Growth/Professional)
-- Billing: monthly or annual; cancel anytime; data preserved 30 days after cancellation
+- Billing: handled by Apple In-App Purchase; manage or cancel anytime in iPhone
+  Settings > [your name] > Subscriptions; data preserved 30 days after cancellation
 - Security: HIPAA-compliant, AES-256 encryption, role-based access, audit logs
-- Payments: processed by Stripe
+- Payments: processed by Apple (In-App Purchase); we never store payment card details
 
 Pricing page: https://palmcareai.com/pricing
 Start a free trial: https://palmcareai.com/register
