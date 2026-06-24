@@ -26,6 +26,7 @@
 		33EA7E5745ED4A1155C9032F /* VisitDetailView+Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F9CED57A1C1BBE9397AD09 /* VisitDetailView+Notes.swift */; };
 		34EAF2246049B247E38B5FD8 /* Subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E70150D66675D30AAE7599 /* Subscription.swift */; };
 		3C78F6A90A2F783878B1AB17 /* VisitDetailView+Transcript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46904E0BFAB746224FA5E0A8 /* VisitDetailView+Transcript.swift */; };
+		3D2D2E63458DADA4642A6F30 /* PushNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CC73B9C868A19C347EECD0 /* PushNotifications.swift */; };
 		3E6A77DDDD556EC865F8C1AD /* TermsPrivacySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4891A98B5FCFAF61CA98EF6 /* TermsPrivacySheet.swift */; };
 		3EDAF7BABB7B6AB2C701C036 /* LandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 694B1D5D023FE459648FA84F /* LandingView.swift */; };
 		3F6E67D7113D9B87EC9C6F32 /* VisitDetailView+Overview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365201F4D04F4613F26A76B6 /* VisitDetailView+Overview.swift */; };
@@ -147,6 +148,7 @@
 		D711F21CC2AD05B3CCF6A697 /* DeleteAccountSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountSheet.swift; sourceTree = "<group>"; };
 		D877C9B39FFC83C67359CB1B /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		D8F2F27F9C01421C91DAE203 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		E1CC73B9C868A19C347EECD0 /* PushNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotifications.swift; sourceTree = "<group>"; };
 		E65CD0559B92384020DE6E53 /* EmailContractSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailContractSheet.swift; sourceTree = "<group>"; };
 		E8E9F160EB8FA04B4131FCB4 /* PalmCareAI.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PalmCareAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9F571D0F9C831B327F6C328 /* EditProfileSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileSheet.swift; sourceTree = "<group>"; };
@@ -345,6 +347,7 @@
 				07BC6362903B94409F8D020E /* DemoTranscriptionService.swift */,
 				A72217ACB74F974613CD621F /* EmailSenderConnector.swift */,
 				B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */,
+				E1CC73B9C868A19C347EECD0 /* PushNotifications.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -484,6 +487,7 @@
 				6699DA1B3C377734838CD895 /* PalmCareAIApp.swift in Sources */,
 				5EA469E56F749FDCF74408EF /* PalmCareTheme.swift in Sources */,
 				022F73AF525AD8FE49B863F9 /* PalmOrbLogo.swift in Sources */,
+				3D2D2E63458DADA4642A6F30 /* PushNotifications.swift in Sources */,
 				09D5105092F5014A092792D9 /* RecordOrbViews.swift in Sources */,
 				EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */,
 				9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */,
@@ -545,7 +549,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -628,7 +632,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
