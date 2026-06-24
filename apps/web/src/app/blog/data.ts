@@ -426,6 +426,17 @@ This is exactly the work PalmCare AI was built to remove. Record the assessment,
     content: `
 There are dozens of home care platforms, but most agencies end up comparing a few. Here's an honest look at three common choices in 2026 — what each does well, and where they differ — so you can pick the right fit.
 
+## At a glance
+
+| Capability | AxisCare | WellSky | PalmCare AI |
+|---|---|---|---|
+| Primary focus | Scheduling & EVV | Broad enterprise suite | Assessment → signed contract |
+| Voice-recorded assessments | No | No | Yes |
+| Auto-generated service contracts | Manual | Manual | Automatic |
+| State-specific contract clauses | Manual | Varies | Built in (50 states) |
+| Typical setup time | Days to weeks | Weeks | About 24 hours |
+| Best for | Scheduling & EVV needs | Large, complex orgs | Cutting documentation time |
+
 ## AxisCare
 
 AxisCare is a well-established scheduling and EVV platform. It's strong on the operational basics: shift scheduling, electronic visit verification, and billing workflows. Agencies that need a mature, widely-used scheduling backbone often land here.

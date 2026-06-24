@@ -32,6 +32,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function markdownToHtml(md: string): string {
+  // GitHub-style tables -> single-line HTML (so the paragraph pass below skips it).
+  // Great for AEO: comparison tables are among the most-cited formats by AI engines.
+  md = md.replace(
+    /^\|(.+)\|[ \t]*\n\|[ :|\-]+\|[ \t]*\n((?:\|.*\|[ \t]*\n?)+)/gm,
+    (_m, header: string, body: string) => {
+      const ths = header
+        .split('|')
+        .map((c) => c.trim())
+        .filter((c) => c.length > 0)
+        .map((c) => `<th class="text-left font-semibold text-white px-3 py-2 border-b border-dark-600">${c}</th>`)
+        .join('');
+      const rows = body
+        .trim()
+        .split('\n')
+        .map((row) => {
+          const tds = row
+            .replace(/^\s*\|/, '')
+            .replace(/\|\s*$/, '')
+            .split('|')
+            .map((c) => c.trim())
+            .map((c) => `<td class="align-top text-dark-300 px-3 py-2 border-b border-dark-700/60">${c}</td>`)
+            .join('');
+          return `<tr>${tds}</tr>`;
+        })
+        .join('');
+      return `<div class="overflow-x-auto my-6"><table class="w-full text-sm border-collapse"><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
+  );
   return md
     .replace(/^### (.+)$/gm, '<h3 class="text-xl font-semibold text-white mt-8 mb-3">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold text-white mt-10 mb-4">$1</h2>')
@@ -43,7 +71,7 @@ function markdownToHtml(md: string): string {
     .replace(/^\d+\. (.+)$/gm, '<li class="text-dark-300 mb-1">$1</li>')
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
     .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" class="text-primary-400 hover:text-primary-300 underline underline-offset-2" rel="noopener noreferrer">$1</a>')
-    .replace(/^(?!<[hluoa])((?!^\s*$).+)$/gm, '<p class="text-dark-300 leading-relaxed mb-4">$1</p>');
+    .replace(/^(?!<[hluoatd])((?!^\s*$).+)$/gm, '<p class="text-dark-300 leading-relaxed mb-4">$1</p>');
 }
 
 export default async function BlogPostPage({ params }: Props) {

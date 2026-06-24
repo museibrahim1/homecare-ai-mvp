@@ -236,6 +236,31 @@ export default function LandingPage() {
       {/* ═══ HERO ═══ */}
       <Hero />
 
+      {/* ═══ WHAT IS PALMCARE AI (AEO answer block) ═══ */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 border-b border-slate-200">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">What is PalmCare AI?</h2>
+          <p className="text-lg text-slate-600 mt-4 leading-relaxed">
+            PalmCare AI is documentation software for home care agencies that turns a
+            recorded client assessment into a state-specific service contract —
+            automatically. Record the visit, and the AI writes the transcript, care
+            plan, billable items, and visit notes, then generates a ready-to-sign
+            agreement in minutes instead of hours.
+          </p>
+          <p className="text-sm text-slate-500 mt-5">
+            New here? See{' '}
+            <Link href="/blog/best-home-care-software-2026-comparison" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
+              how PalmCare AI compares to AxisCare and WellSky
+            </Link>
+            , or{' '}
+            <Link href="/pricing" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
+              view simple, transparent pricing
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
       {/* ═══ HOW IT WORKS ═══ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 border-y border-slate-200">
         <div className="max-w-7xl mx-auto">

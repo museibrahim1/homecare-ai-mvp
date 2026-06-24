@@ -12,22 +12,42 @@ Last updated: 2026-06-23.
 
 ---
 
-## Marketing, SEO & AEO
+## Marketing (full set from coreyhaines31/marketingskills)
 
-Use these to grow organic traffic and get cited by AI answer engines (ChatGPT, Perplexity, Google AI Overviews).
+The complete marketing skill library is installed (45 skills). Reach for them by job:
 
-| Skill | What it does | Where it's been used here |
+**SEO & discovery**
+| Skill | What it does | Used here |
 |---|---|---|
-| `seo-audit` | Technical + on-page + content SEO audits; crawlability, metadata, schema, E-E-A-T | Audited the marketing site; drove the content + schema improvements below |
-| `programmatic-seo` | Build SEO pages at scale from templates + data (location/comparison/use-case pages) | Available for future location/state pages |
-| `copywriting` | Write/rewrite marketing copy for landing, pricing, feature, about pages | Brand-voice-aligned blog posts |
-| `content-strategy` | Decide what to write; topic clusters; editorial planning | Picked the 3 new high-intent blog topics |
-| `marketing-psychology` | Persuasion, mental models, behavioral science applied to copy/UX | Available for CRO + landing-page work |
-| `marketing-ideas` | Growth/marketing strategies for SaaS | Campaign + channel ideation |
+| `seo-audit` | Technical + on-page + content SEO audits | Audited the marketing site |
+| `ai-seo` | AEO/GEO/LLMO — get cited by ChatGPT/Perplexity/AI Overviews | `pricing.md`, landing answer block, comparison table |
+| `schema` | Structured data (Article, FAQ, Product, Breadcrumb) | Fixed homepage Offer pricing; blog schema |
+| `programmatic-seo` | SEO pages at scale from templates + data | Available for state/location pages |
+| `site-architecture` | Page hierarchy, nav, URL structure, internal linking | Internal links on landing |
+| `competitors` | Comparison / "vs" / alternative pages | Comparison blog post + table |
 
-**AEO note (from Google's 2026 AEO/GEO guidance):** Don't over-engineer AI-specific schema or rely on `llms.txt`
-for Google — AI Overviews use the *same quality signals as normal SEO*. The win is genuinely helpful,
-question-targeted content + solid fundamentals. (`llms.txt` is still added here for non-Google engines.)
+**Conversion & content**
+| Skill | What it does |
+|---|---|
+| `cro` | Conversion optimization for any page/form |
+| `copywriting` / `copy-editing` | Write / polish marketing copy |
+| `content-strategy` | Decide what to write; topic clusters |
+| `customer-research` | Synthesize voice-of-customer for copy |
+| `offers` / `pricing` | Offer construction; pricing & packaging |
+| `popups` / `signup` / `onboarding` / `paywalls` | Conversion moments across the funnel |
+
+**Growth, retention & distribution**
+`marketing-ideas`, `marketing-plan`, `marketing-psychology`, `launch`, `ads`, `ad-creative`,
+`social`, `emails`, `cold-email`, `sms`, `referrals`, `churn-prevention`, `free-tools`,
+`lead-magnets`, `co-marketing`, `community-marketing`, `public-relations`, `directory-submissions`,
+`analytics`, `ab-testing`, `aso`, `revops`, `sales-enablement`, `prospecting`, `competitor-profiling`,
+`product-marketing`, `image`, `video`.
+
+**AEO rule of thumb (from `ai-seo` + Google's 2026 guidance):** AI Overviews use the *same quality
+signals as normal SEO*. Don't write separate "AI content" or chunk pages into bait (risks scaled-content
+spam). Do: lead sections with a 40–60 word answer, cite real stats/sources, keep content fresh, use
+comparison tables (≈33% of AI citations), keep AI bots unblocked, and ship machine-readable files
+(`llms.txt`, `pricing.md`) for non-Google engines and buying agents.
 
 ## Engineering Rigor (the "do it properly" skills)
 

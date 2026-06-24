@@ -219,6 +219,15 @@ actual stack: **Supabase + FastAPI + Next.js (web) + SwiftUI (iOS) + RevenueCat/
       structured data, fast Core Web Vitals.
 - [ ] Fill SaaS content gaps: **pricing**, **comparison/alternative**, and
       **how-to** pages (these win high-intent search). See `apps/web/src/app/blog/`.
+- [ ] **AEO extractability** (`ai-seo` skill): lead each section with a 40–60 word
+      answer; add a "What is X?" definition block; use **comparison tables**
+      (≈33% of AI citations); cite real stats with sources (never fabricated).
+- [ ] **Machine-readable files** for AI engines + buying agents: `llms.txt` and
+      `/pricing.md` (structured, real numbers). Keep pricing public, not behind
+      "contact sales" or JS-only walls.
+- [ ] **Don't block AI crawlers** you want citations from (GPTBot, PerplexityBot,
+      ClaudeBot, Google-Extended). Block training-only bots (CCBot) only if needed.
+- [ ] Keep structured data accurate (Offer prices must match the real pricing page).
 
 ---
 
