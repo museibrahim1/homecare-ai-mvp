@@ -39,6 +39,23 @@ const PALM_WAY = [
   'Review, send, and sign — minutes, not hours',
 ];
 
+// Honest product facts (not performance claims) — proof density without fabrication.
+const PROOF_STATS = [
+  { stat: '4-in-1', label: 'Care plan, visit notes, billables & service contract — from one recording' },
+  { stat: '50 states', label: 'State-specific contract rules built in' },
+  { stat: 'Minutes', label: 'From a recorded assessment to a ready-to-sign contract' },
+  { stat: 'HIPAA', label: '256-bit encryption, audit logs, BAA available' },
+];
+
+// Honest competitive comparison (validated against live competitor sites, Jun 2026).
+const COMPARE_ROWS = [
+  { label: 'Built for', palm: 'Home care agencies', scribes: 'Medicare home health', templates: 'General documents', manual: '—' },
+  { label: 'Captures the visit by voice', palm: 'Yes', scribes: 'Yes', templates: 'No', manual: 'No' },
+  { label: 'State-specific service contract', palm: 'Automatic (50 states)', scribes: 'No', templates: 'Manual editing', manual: 'Manual' },
+  { label: 'Care plan, notes & billables', palm: 'Yes', scribes: 'Clinical notes only', templates: 'No', manual: 'Manual' },
+  { label: 'Time to a ready-to-sign agreement', palm: 'Minutes', scribes: 'Not produced', templates: 'Hours', manual: 'Hours' },
+];
+
 const NAV_FEATURES = [
   { href: '/features#ai', icon: Brain, label: 'AI Intelligence', desc: 'Voice assessments & smart contracts' },
   { href: '/features#ops', icon: ClipboardList, label: 'Agency Operations', desc: 'CRM, scheduling & visit management' },
@@ -261,6 +278,18 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ═══ BY THE NUMBERS (honest product facts) ═══ */}
+      <section className="py-10 sm:py-14 px-4 sm:px-6 bg-slate-900">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
+          {PROOF_STATS.map((s) => (
+            <div key={s.stat}>
+              <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{s.stat}</p>
+              <p className="text-sm text-slate-400 mt-2 leading-relaxed">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ═══ HOW IT WORKS ═══ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 border-y border-slate-200">
         <div className="max-w-7xl mx-auto">
@@ -403,6 +432,48 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ═══ COMPARISON ═══ */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50 border-y border-slate-200">
+        <div className="max-w-5xl mx-auto">
+          <div className="max-w-2xl mb-10 sm:mb-12">
+            <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">How PALM compares</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">The only tool that turns the assessment into a contract</h2>
+            <p className="text-lg text-slate-600 mt-4">AI clinical scribes chart OASIS notes for Medicare home health. Template tools hand you a blank form. PALM is built for home care — and produces the whole packet from one recording.</p>
+          </div>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="w-full min-w-[640px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left font-medium text-slate-500 py-3 pr-4">Capability</th>
+                  <th className="text-center font-semibold text-primary-700 py-3 px-3 bg-primary-50">PalmCare AI</th>
+                  <th className="text-center font-medium text-slate-500 py-3 px-3">AI clinical scribes</th>
+                  <th className="text-center font-medium text-slate-500 py-3 px-3">Contract templates</th>
+                  <th className="text-center font-medium text-slate-500 py-3 px-3">Manual / by hand</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARE_ROWS.map((row) => (
+                  <tr key={row.label} className="border-b border-slate-100">
+                    <td className="text-slate-700 py-3 pr-4 font-medium">{row.label}</td>
+                    <td className="text-center py-3 px-3 bg-primary-50 text-slate-900 font-medium">{row.palm}</td>
+                    <td className="text-center py-3 px-3 text-slate-500">{row.scribes}</td>
+                    <td className="text-center py-3 px-3 text-slate-500">{row.templates}</td>
+                    <td className="text-center py-3 px-3 text-slate-500">{row.manual}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-sm text-slate-500 mt-5">
+            See the full breakdown in{' '}
+            <Link href="/blog/ai-home-care-documentation-tools-2026" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-2">
+              AI documentation tools for home care, compared
+            </Link>
+            .
+          </p>
         </div>
       </section>
 

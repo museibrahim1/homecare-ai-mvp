@@ -12,8 +12,10 @@ const inter = Inter({ subsets: ['latin'] });
 
 const SITE_URL = 'https://palmcareai.com';
 const SITE_NAME = 'PalmCare AI';
+// Keyword-led title (category first, brand last) — like top competitors rank with.
+const SITE_TITLE = 'AI Home Care Documentation & Contract Software';
 const SITE_DESCRIPTION =
-  'PalmCare AI turns care assessments into signed contracts — automatically. Record it. Transcribe it. Contract it. All in your palm. Built for home care agencies.';
+  'AI documentation for home care agencies: turn a recorded assessment into a state-specific service contract, care plan, visit notes, and billables — automatically.';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -28,32 +30,33 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Where Care Meets Intelligence`,
+    default: `${SITE_TITLE} | ${SITE_NAME}`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   keywords: [
     'PalmCare AI',
-    'Palm It',
+    'AI home care documentation',
+    'home care documentation software',
+    'home care assessment software',
+    'home care service agreement software',
+    'home care care plan software',
+    'AI scribe for home care',
+    'non-medical home care software',
     'home care software',
     'home care agency software',
     'AI contract generation',
     'voice-powered assessment',
     'care assessment platform',
+    'automated care plan generator',
+    'service contract generator',
+    'voice to contract',
     'caregiver management',
     'home care CRM',
     'AI transcription',
-    'service contract generator',
-    'HIPAA compliant',
-    'home care management',
-    'home care documentation software',
-    'home health care assessment tool',
-    'automated care plan generator',
     'home care billing software',
-    'home health agency CRM',
-    'voice to contract',
     'home care compliance software',
-    'patient assessment app',
+    'HIPAA compliant',
     'home care SaaS',
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
@@ -70,7 +73,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Where Care Meets Intelligence`,
+    title: `${SITE_TITLE} | ${SITE_NAME}`,
     description: SITE_DESCRIPTION,
     images: [
       {
@@ -83,7 +86,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} — Where Care Meets Intelligence`,
+    title: `${SITE_TITLE} | ${SITE_NAME}`,
     description: SITE_DESCRIPTION,
     images: ['/og-image.png'],
   },
