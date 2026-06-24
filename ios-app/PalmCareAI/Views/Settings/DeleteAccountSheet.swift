@@ -34,7 +34,7 @@ struct DeleteAccountSheet: View {
                             .padding(.horizontal, 8)
                     }
                     deleteButton
-                    Text("This action is permanent. Account data is purged within 30 days. PALM is free during the beta — there are no subscriptions to cancel.")
+                    Text("This action is permanent. Your account and data are purged within 30 days. Any active subscription is billed by Apple and must be cancelled separately in Settings → Apple ID → Subscriptions.")
                         .font(.system(size: 11))
                         .foregroundColor(.palmSecondary)
                         .multilineTextAlignment(.center)

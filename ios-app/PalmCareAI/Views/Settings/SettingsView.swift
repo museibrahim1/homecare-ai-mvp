@@ -231,8 +231,21 @@ struct SettingsView: View {
     }
 
     // MARK: - Plan
-    // During the TestFlight beta everything is unlocked and free — pricing
-    // comes later from real usage data, so there is no billing UI to manage.
+
+    private var planTitle: String {
+        if let name = usage?.plan_name, !name.isEmpty { return name }
+        return "PALM"
+    }
+
+    private var planSubtitle: String {
+        usage?.has_paid_plan == true
+            ? "Every feature is unlocked on your account"
+            : "Free trial — full access to every feature"
+    }
+
+    private var planBadge: String {
+        usage?.has_paid_plan == true ? "ACTIVE" : "TRIAL"
+    }
 
     private var billingSection: some View {
         SettingsSection(title: "Your Plan") {
@@ -240,17 +253,17 @@ struct SettingsView: View {
                 SettingsIcon(systemName: "sparkles", color: .palmGreen)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Beta access")
+                    Text(planTitle)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.palmText)
-                    Text("Everything unlocked — free during the beta")
+                    Text(planSubtitle)
                         .font(.system(size: 11))
                         .foregroundColor(.palmSecondary)
                 }
 
                 Spacer()
 
-                Text("FREE")
+                Text(planBadge)
                     .font(.system(size: 11, weight: .heavy))
                     .foregroundColor(.palmGreen)
                     .padding(.horizontal, 10)
@@ -281,6 +294,32 @@ struct SettingsView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
             }
+
+            SettingsDivider()
+
+            Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
+                HStack(spacing: 12) {
+                    SettingsIcon(systemName: "creditcard.fill", color: .palmGreen)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Manage Subscription")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.palmText)
+                        Text("Upgrade, change, or cancel your plan")
+                            .font(.system(size: 11))
+                            .foregroundColor(.palmSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.palmSecondary)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+            }
+            .accessibilityLabel("Manage subscription in the App Store")
         }
     }
 

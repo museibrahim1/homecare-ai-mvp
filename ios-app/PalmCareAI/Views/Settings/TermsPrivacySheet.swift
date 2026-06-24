@@ -43,8 +43,8 @@ struct TermsPrivacySheet: View {
                     )
 
                     termsSection(
-                        title: "6. Beta Access",
-                        body: "PALM is currently free during the beta evaluation period. There are no in-app purchases. Certain features may require a paid plan in the future; you will be notified before any charges apply."
+                        title: "6. Subscriptions & Billing",
+                        body: "New accounts include a free trial with full access. Subscriptions are sold through Apple In-App Purchase and billed to your Apple ID. Payment, renewals, and cancellations are managed by Apple — you can manage or cancel anytime in Settings → Apple ID → Subscriptions. Prices are shown in the app before purchase."
                     )
 
                     termsSection(

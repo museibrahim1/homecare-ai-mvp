@@ -52,12 +52,12 @@ from app.models.subscription import Subscription, Plan
 
 def get_team_limits(db: Session, company_name: str):
     """Get team limits based on subscription plan."""
-    # Beta: no team-size caps while we collect usage data for pricing.
+    # Full access promo: no team-size caps. Label is user-facing — no "beta".
     if settings.beta_free_access:
         return {
             "max_users": 999,
-            "plan_name": "Beta",
-            "plan_tier": "beta",
+            "plan_name": "Full Access",
+            "plan_tier": "complete",
             "monthly_price": 0,
             "upgrade_options": [],
         }

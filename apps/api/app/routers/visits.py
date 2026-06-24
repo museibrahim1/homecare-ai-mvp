@@ -29,9 +29,10 @@ FREE_ASSESSMENT_LIMIT = 50
 
 def _get_user_subscription(db: Session, user: User):
     """Check if user has an active paid subscription."""
-    # Beta: everyone has full access while we collect usage data for pricing.
+    # Full access is granted to all accounts during the current promotional
+    # period. The label is user-facing, so it must not reference "beta".
     if settings.beta_free_access:
-        return {"has_paid_plan": True, "plan_name": "Beta", "tier": "beta"}
+        return {"has_paid_plan": True, "plan_name": "Full Access", "tier": "complete"}
 
     # Platform admins are unlimited
     role = user.role.value if hasattr(user.role, 'value') else (user.role or "user")

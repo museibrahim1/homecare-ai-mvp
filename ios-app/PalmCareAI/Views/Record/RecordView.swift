@@ -564,7 +564,7 @@ struct RecordView: View {
                 return
             }
 
-            // Beta: no usage limits, so no pre-flight quota check.
+            // Usage limits are enforced server-side on submit, not here.
             await MainActor.run {
                 liveSegments = []
                 liveFullTranscript = ""
