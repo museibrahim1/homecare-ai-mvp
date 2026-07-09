@@ -63,6 +63,13 @@ const VISUAL_EXAMPLES = [
   'Instagram ad targeting agency owners tired of paperwork',
 ];
 
+const EMAIL_EXAMPLES = [
+  'Intro email to a home health company support team with our brochure attached',
+  'Follow up with an agency owner who asked for pricing last week',
+  'Thank you email after a demo, recap the three things they liked',
+  'Re-engage an agency that went quiet after the free trial ended',
+];
+
 const PROMPT_EXAMPLES = [
   'Write a cold email to agency owners in Florida who are still doing paper assessments',
   'Call script for when an agency says they already have software',
@@ -76,11 +83,19 @@ export default function MarketingStudioPage() {
   const { token, user, isLoading } = useAuth();
   const router = useRouter();
 
-  const [mode, setMode] = useState<'copy' | 'visual'>('copy');
+  const [mode, setMode] = useState<'copy' | 'visual' | 'email'>('copy');
   const [prompt, setPrompt] = useState('');
   const [format, setFormat] = useState('email_template');
   const [tone, setTone] = useState('professional');
   const [length, setLength] = useState('medium');
+
+  const [emailTo, setEmailTo] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [composingEmail, setComposingEmail] = useState(false);
+  const [hasComposedEmail, setHasComposedEmail] = useState(false);
+  const [sendingCustomEmail, setSendingCustomEmail] = useState(false);
+  const [emailSendResult, setEmailSendResult] = useState<string | null>(null);
 
   const [generatedTitle, setGeneratedTitle] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
@@ -164,6 +179,53 @@ export default function MarketingStudioPage() {
       }
     } catch { alert('Network error during image generation'); }
     setGeneratingVisual(false);
+  };
+
+  const handleComposeEmail = async () => {
+    if (!prompt.trim()) return;
+    setComposingEmail(true);
+    setEmailSendResult(null);
+    try {
+      const res = await fetch(`${API}/admin/scheduler/marketing-assets/compose-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ prompt: prompt.trim(), tone, recipient_context: emailTo ? `Sending to: ${emailTo}` : '' }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setEmailSubject(data.subject || '');
+        setEmailBody(data.body || '');
+        setHasComposedEmail(true);
+      } else {
+        const err = await res.json().catch(() => ({ detail: 'Compose failed' }));
+        alert(err.detail || 'Email compose failed');
+      }
+    } catch { alert('Network error while composing email'); }
+    setComposingEmail(false);
+  };
+
+  const handleSendCustomEmail = async () => {
+    const recipients = emailTo.split(',').map(s => s.trim()).filter(Boolean);
+    if (recipients.length === 0) { alert('Add at least one recipient email'); return; }
+    if (!emailSubject.trim() || !emailBody.trim()) { alert('Subject and body are required'); return; }
+    if (!confirm(`Send this email to ${recipients.join(', ')}?`)) return;
+    setSendingCustomEmail(true);
+    setEmailSendResult(null);
+    try {
+      const res = await fetch(`${API}/admin/scheduler/marketing-assets/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ to: recipients, subject: emailSubject, body: emailBody }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        setEmailSendResult(`Sent to ${data.sent} of ${data.total} recipient${data.total > 1 ? 's' : ''}`);
+      } else {
+        setEmailSendResult(null);
+        alert(data.detail || 'Send failed');
+      }
+    } catch { alert('Network error while sending'); }
+    setSendingCustomEmail(false);
   };
 
   const handleSave = async () => {
@@ -254,6 +316,10 @@ export default function MarketingStudioPage() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'visual' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                 <Image className="w-4 h-4" /> Create Visual
               </button>
+              <button onClick={() => setMode('email')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'email' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                <Mail className="w-4 h-4" /> Compose Email
+              </button>
             </div>
 
             {/* ━━━ Prompt Section ━━━ */}
@@ -292,7 +358,7 @@ export default function MarketingStudioPage() {
                       {LENGTHS.map(l => <option key={l.id} value={l.id}>{l.label} ({l.desc})</option>)}
                     </select>
                   </>
-                ) : (
+                ) : mode === 'visual' ? (
                   <>
                     <select value={visualStyle} onChange={e => setVisualStyle(e.target.value)}
                       className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-slate-400">
@@ -303,27 +369,40 @@ export default function MarketingStudioPage() {
                       {ASPECT_RATIOS.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
                     </select>
                   </>
+                ) : (
+                  <>
+                    <input
+                      value={emailTo}
+                      onChange={e => setEmailTo(e.target.value)}
+                      placeholder="To: email@company.com (comma separated for multiple)"
+                      className="flex-1 min-w-[240px] text-xs font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 outline-none focus:border-slate-400"
+                    />
+                    <select value={tone} onChange={e => setTone(e.target.value)}
+                      className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-slate-400">
+                      {TONES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                    </select>
+                  </>
                 )}
 
                 <div className="flex-1" />
 
-                <button onClick={mode === 'copy' ? handleGenerate : handleGenerateVisual}
-                  disabled={(mode === 'copy' ? generating : generatingVisual) || !prompt.trim()}
+                <button onClick={mode === 'copy' ? handleGenerate : mode === 'visual' ? handleGenerateVisual : handleComposeEmail}
+                  disabled={(mode === 'copy' ? generating : mode === 'visual' ? generatingVisual : composingEmail) || !prompt.trim()}
                   className="flex items-center gap-2 px-5 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  {(mode === 'copy' ? generating : generatingVisual) ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> {mode === 'visual' ? 'Creating...' : 'Generating...'}</>
+                  {(mode === 'copy' ? generating : mode === 'visual' ? generatingVisual : composingEmail) ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> {mode === 'visual' ? 'Creating...' : mode === 'email' ? 'Drafting...' : 'Generating...'}</>
                   ) : (
-                    <>{mode === 'visual' ? <Paintbrush className="w-4 h-4" /> : <Send className="w-4 h-4" />} {mode === 'visual' ? 'Create Visual' : 'Generate'}</>
+                    <>{mode === 'visual' ? <Paintbrush className="w-4 h-4" /> : mode === 'email' ? <Edit3 className="w-4 h-4" /> : <Send className="w-4 h-4" />} {mode === 'visual' ? 'Create Visual' : mode === 'email' ? 'Draft Email' : 'Generate'}</>
                   )}
                 </button>
               </div>
 
               {/* Example Prompts */}
-              {!hasGenerated && !generating && !hasGeneratedVisual && !generatingVisual && (
+              {!hasGenerated && !generating && !hasGeneratedVisual && !generatingVisual && !hasComposedEmail && !composingEmail && (
                 <div className="px-5 pb-4">
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2">Try a prompt</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {(mode === 'copy' ? PROMPT_EXAMPLES : VISUAL_EXAMPLES).map((ex, i) => (
+                    {(mode === 'copy' ? PROMPT_EXAMPLES : mode === 'visual' ? VISUAL_EXAMPLES : EMAIL_EXAMPLES).map((ex, i) => (
                       <button key={i} onClick={() => insertExample(ex)}
                         className="text-xs text-slate-500 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 transition-colors hover:text-slate-700 text-left">
                         {ex.length > 65 ? ex.slice(0, 65) + '...' : ex}
@@ -382,6 +461,76 @@ export default function MarketingStudioPage() {
                 </div>
                 <div className="px-5 py-3 border-t border-slate-100 text-xs text-slate-400">
                   Prompt: {prompt.length > 100 ? prompt.slice(0, 100) + '...' : prompt}
+                </div>
+              </div>
+            )}
+
+            {/* ━━━ Composed Email Output ━━━ */}
+            {composingEmail && (
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 mb-6 text-center">
+                <div className="inline-flex items-center gap-3 text-slate-500">
+                  <div className="relative w-10 h-10">
+                    <div className="absolute inset-0 rounded-full border-2 border-teal-200" />
+                    <div className="absolute inset-0 rounded-full border-2 border-teal-500 border-t-transparent animate-spin" />
+                    <Mail className="absolute inset-0 m-auto w-4 h-4 text-teal-500" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-slate-700">Drafting your email...</p>
+                    <p className="text-xs text-slate-400">You review and edit it before anything is sent.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {mode === 'email' && hasComposedEmail && !composingEmail && (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6 overflow-hidden">
+                <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-md bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
+                      <Mail className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-900">Review before sending</span>
+                    <span className="text-xs text-slate-400">from sales@palmcareai.com</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button onClick={handleComposeEmail} disabled={composingEmail}
+                      className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors">
+                      <RotateCcw className="w-3 h-3" /> Redraft
+                    </button>
+                    <button onClick={() => { setHasComposedEmail(false); setEmailSubject(''); setEmailBody(''); setEmailSendResult(null); }}
+                      className="p-1 text-slate-400 hover:text-slate-600 transition-colors" title="Discard draft">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="p-5 space-y-3">
+                  <input
+                    value={emailTo}
+                    onChange={e => setEmailTo(e.target.value)}
+                    placeholder="To: email@company.com"
+                    className="w-full text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-teal-400"
+                  />
+                  <input
+                    value={emailSubject}
+                    onChange={e => setEmailSubject(e.target.value)}
+                    placeholder="Subject"
+                    className="w-full text-sm font-semibold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-teal-400"
+                  />
+                  <textarea
+                    value={emailBody}
+                    onChange={e => setEmailBody(e.target.value)}
+                    rows={Math.max(10, emailBody.split('\n').length + 2)}
+                    className="w-full text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-teal-400 resize-none leading-relaxed"
+                  />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-400">
+                      {emailSendResult || `${emailBody.split(/\s+/).filter(Boolean).length} words`}
+                    </span>
+                    <button onClick={handleSendCustomEmail} disabled={sendingCustomEmail}
+                      className="flex items-center gap-2 px-5 py-2 bg-teal-500 text-white rounded-lg text-sm font-semibold hover:bg-teal-600 disabled:opacity-40 transition-colors">
+                      {sendingCustomEmail ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : <><Send className="w-4 h-4" /> Send Email</>}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

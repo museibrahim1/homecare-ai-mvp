@@ -166,6 +166,145 @@ No other meta-commentary. Just the title line and the content."""
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# CUSTOM EMAIL COMPOSER — AI drafts a full email, admin reviews + sends
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class EmailComposeRequest(BaseModel):
+    prompt: str
+    tone: str = "conversational"
+    recipient_context: str = ""
+
+
+class EmailSendRequest(BaseModel):
+    to: List[str]
+    subject: str
+    body: str  # plain text; converted to branded HTML on send
+
+
+@router.post("/marketing-assets/compose-email")
+def compose_custom_email(
+    body: EmailComposeRequest,
+    user: User = Depends(require_permission("sales_leads")),
+):
+    """AI drafts a complete custom email (subject + body) ready to review and send."""
+    try:
+        import anthropic
+        api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("CLAUDE_API_KEY")
+        if not api_key:
+            raise HTTPException(503, "AI generation unavailable — no API key configured")
+
+        tone_guide = {
+            "professional": "Tone: clear and businesslike, but still human.",
+            "conversational": "Tone: warm and natural, like one founder writing to another person.",
+            "bold": "Tone: direct and confident. Short sentences.",
+            "empathetic": "Tone: understanding and helpful. Acknowledge their world first.",
+        }
+
+        system_prompt = f"""You write real emails for Muse Ibrahim, founder of PalmCare AI.
+
+ABOUT PALMCARE AI:
+Software for home care agencies. A caregiver records the client visit by voice and the
+platform writes the transcript, care notes, billable items, and a state compliant service
+agreement that is ready to sign. Agencies put contracts in front of clients the same day.
+14 day free trial, no card required. Website: palmcareai.com. Sender: sales@palmcareai.com.
+
+HARD RULES:
+- Write like a competent human, never like marketing AI. No hype words, no "revolutionize",
+  no "seamless", no "unlock", no "in today's fast-paced world".
+- NEVER use any dash characters. No hyphens between words, no en dashes, no em dashes.
+  Rephrase so dashes are not needed (write "14 day free trial" not "14-day").
+- No emojis. No bullet spam. Short paragraphs.
+- One clear ask at the end.
+{tone_guide.get(body.tone, tone_guide["conversational"])}
+
+OUTPUT FORMAT (exactly):
+SUBJECT: <subject line, under 9 words, no dashes>
+<blank line>
+<email body as plain text, ending with this signature>
+
+Muse Ibrahim
+Founder, PalmCare AI
+palmcareai.com
+sales@palmcareai.com"""
+
+        user_msg = body.prompt
+        if body.recipient_context:
+            user_msg += f"\n\nRecipient context: {body.recipient_context}"
+
+        client = anthropic.Anthropic(api_key=api_key)
+        msg = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1500,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        raw = (msg.content[0].text if msg.content else "").strip()
+
+        subject = ""
+        email_body = raw
+        lines = raw.split("\n")
+        if lines and lines[0].upper().startswith("SUBJECT:"):
+            subject = lines[0].split(":", 1)[1].strip()
+            email_body = "\n".join(lines[1:]).strip()
+
+        return {"ok": True, "subject": subject, "body": email_body}
+
+    except ImportError:
+        raise HTTPException(503, "AI generation unavailable — anthropic not installed")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Email compose failed: {e}")
+        raise HTTPException(500, f"Email compose failed: {str(e)}")
+
+
+@router.post("/marketing-assets/send-email")
+def send_custom_email(
+    body: EmailSendRequest,
+    user: User = Depends(require_permission("sales_leads")),
+):
+    """Send a custom email to any recipient(s) from sales@palmcareai.com."""
+    from app.services.email import email_service
+
+    recipients = [e.strip() for e in body.to if e.strip()]
+    if not recipients:
+        raise HTTPException(400, "At least one recipient is required")
+    if len(recipients) > 20:
+        raise HTTPException(400, "Maximum 20 recipients per send")
+    if not body.subject.strip() or not body.body.strip():
+        raise HTTPException(400, "Subject and body are required")
+
+    import html as _html
+    paragraphs = "".join(
+        f'<p style="margin: 0 0 16px 0;">{_html.escape(p).replace(chr(10), "<br>")}</p>'
+        for p in body.body.split("\n\n") if p.strip()
+    )
+    html_body = f"""
+    <div style="font-family: 'Segoe UI', -apple-system, Arial, sans-serif; max-width: 560px;
+                margin: 0 auto; color: #222; font-size: 15px; line-height: 1.6;">
+        {paragraphs}
+    </div>
+    """
+
+    results = []
+    for rcpt in recipients:
+        result = email_service.send_email(
+            to=rcpt,
+            subject=body.subject,
+            html=html_body,
+            text=body.body,
+            sender=email_service.from_sales,
+            reply_to="sales@palmcareai.com",
+        )
+        results.append({"to": rcpt, "success": result.get("success", False), "id": result.get("id")})
+        logger.info(f"Custom email to {rcpt} by {user.email}: {result.get('success')}")
+
+    sent = sum(1 for r in results if r["success"])
+    return {"ok": sent > 0, "sent": sent, "total": len(recipients), "results": results}
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # VISUAL FLYER / AD GENERATION (Nano Banana 2 via WaveSpeed)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
