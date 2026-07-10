@@ -7,11 +7,12 @@ Extracts agency information from uploaded contract templates using Claude.
 import base64
 import logging
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
+from app.core.rate_limit import limiter
 from app.models.user import User
 
 logger = logging.getLogger(__name__)
@@ -38,8 +39,10 @@ class ExtractedAgencyInfo(BaseModel):
 
 
 @router.post("/extract-agency-info", response_model=ExtractedAgencyInfo)
+@limiter.limit("10/minute")
 async def extract_agency_info(
-    request: TemplateParseRequest,
+    request: Request,
+    body: TemplateParseRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -51,7 +54,7 @@ async def extract_agency_info(
     try:
         # Decode base64 to get file content
         # Remove data URL prefix if present
-        template_data = request.template_data
+        template_data = body.template_data
         if ',' in template_data:
             template_data = template_data.split(',')[1]
         
@@ -60,7 +63,7 @@ async def extract_agency_info(
         # Extract text from document
         text_content = ""
         
-        if 'pdf' in request.template_type.lower():
+        if 'pdf' in body.template_type.lower():
             # Try to extract text from PDF
             try:
                 import io
@@ -68,24 +71,24 @@ async def extract_agency_info(
                 text_content = extract_text_from_pdf(file_bytes)
             except Exception as e:
                 logger.warning(f"PDF extraction failed: {e}")
-                text_content = f"[PDF document: {request.template_name}]"
+                text_content = f"[PDF document: {body.template_name}]"
                 
-        elif 'word' in request.template_type.lower() or 'docx' in request.template_type.lower():
+        elif 'word' in body.template_type.lower() or 'docx' in body.template_type.lower():
             # Extract text from DOCX
             try:
                 text_content = extract_text_from_docx(file_bytes)
             except Exception as e:
                 logger.warning(f"DOCX extraction failed: {e}")
-                text_content = f"[Word document: {request.template_name}]"
+                text_content = f"[Word document: {body.template_name}]"
         else:
             # Try to decode as text
             try:
                 text_content = file_bytes.decode('utf-8')
             except:
-                text_content = f"[Document: {request.template_name}]"
+                text_content = f"[Document: {body.template_name}]"
         
         # Use Claude to extract agency information
-        extracted = await extract_with_llm(text_content, request.template_name)
+        extracted = await extract_with_llm(text_content, body.template_name)
         
         return extracted
         

@@ -432,7 +432,7 @@ Remaining to 100%:
 | Video | Remotion | Code-based |
 | Dev TTS | OpenAI | tts-1-hd (nova, onyx, alloy, fable, shimmer) |
 
-WaveSpeed API Key: 42b1574b75089a503d4c5ddcaced5b677c41123c936b31d99f9c084831719dc7
+WaveSpeed API Key: in `.env` as `WAVESPEED_API_KEY` (old key that was committed here was rotated — never paste keys into tracked files; the repo is public)
 
 ---
 

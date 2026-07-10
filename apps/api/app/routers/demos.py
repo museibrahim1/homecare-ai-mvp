@@ -442,12 +442,13 @@ async def book_demo(
     if not prospect_result.get("success"):
         logger.error(f"Failed to send demo confirmation to {booking.email}: {prospect_result.get('error')}")
 
-    # Admin notification to sales, business, and personal email
-    admin_emails = [
-        os.getenv("ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com"),
-        "museibrahim@palmtai.com",
-        "musajama89@gmail.com",
-    ]
+    # Admin notification recipients. Configured via env so personal/business
+    # emails aren't hardcoded in this (public) repo. ADMIN_NOTIFICATION_EMAILS
+    # may be a comma-separated list; falls back to the single-address var.
+    _admin_emails_raw = os.getenv("ADMIN_NOTIFICATION_EMAILS") or os.getenv(
+        "ADMIN_NOTIFICATION_EMAIL", "sales@palmtai.com"
+    )
+    admin_emails = [e.strip() for e in _admin_emails_raw.split(",") if e.strip()]
     admin_subject = f"{'Demo Booked' if has_schedule else 'New Demo Request'}: {booking.company_name} — {booking.name}"
     admin_html = f"""
         <div style="font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif; background-color: #f6f6f6; padding: 40px 20px;">

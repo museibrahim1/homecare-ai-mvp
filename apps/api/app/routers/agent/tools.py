@@ -11,6 +11,7 @@ functions to avoid import cycles.
 import os
 import json
 import logging
+import time as _time
 from datetime import datetime, timezone, date, timedelta
 from typing import Optional, List
 from uuid import UUID
@@ -849,8 +850,33 @@ def _tool_add_lead_notes(db: Session, user: User, lead_name: str, notes: str) ->
 #  TOOL ROUTER
 # ══════════════════════════════════════════════════════════════════════
 
+# Tools that expose the platform's internal CRM / outreach machinery. These
+# must never run for a normal tenant user, even if a future refactor somehow
+# hands the model the admin tool schemas. Non-admins never receive these
+# schemas today (see routes.py), so this is defense-in-depth, not the only gate.
+_ADMIN_TOOLS = frozenset({
+    "get_outreach_stats", "get_weekly_summary", "batch_send_emails",
+    "mark_call_done", "search_leads", "search_investors", "get_callbacks",
+    "get_pending_work", "send_single_email", "assign_leads_to_team",
+    "add_lead_notes",
+})
+
+
+def _is_platform_admin(user: User) -> bool:
+    return (
+        getattr(user, "role", None) == UserRole.admin
+        and (user.email or "").endswith("@palmtai.com")
+    )
+
+
 def _execute_tool(tool_name: str, tool_input: dict, db: Session, user: User) -> str:
     try:
+        if tool_name in _ADMIN_TOOLS and not _is_platform_admin(user):
+            logger.warning(
+                "Blocked admin tool '%s' for non-admin user %s",
+                tool_name, getattr(user, "email", "?"),
+            )
+            return json.dumps({"error": "Not authorized for this action."})
         # Shared tools
         if tool_name == "list_clients":
             result = _tool_list_clients(db, user, tool_input.get("search", ""), tool_input.get("status", ""), tool_input.get("limit", 20))
