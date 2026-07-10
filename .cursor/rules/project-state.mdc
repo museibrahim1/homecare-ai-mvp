@@ -5,6 +5,13 @@ alwaysApply: true
 
 # PalmCare AI — Project State (March 2026)
 
+## Apple Subscriptions (Jul 10, 2026)
+- Version **1.1 (build 10)** submitted for review with all 3 subscriptions attached; review submission `d55767df-aae1-4c7c-9ee1-daf66cef1d67`, state WAITING_FOR_REVIEW.
+- Products (group 22222636, all monthly auto-renew): `com.palmcareai.app.starter.monthly` $89.99, `com.palmcareai.app.growth.monthly` $349.99, `com.palmcareai.app.pro.monthly` $999.99. Priced in all 175 territories.
+- iOS: `StoreKitService.swift` (StoreKit 2) + `PaywallView.swift`, entry via Settings → Your Plan. Backend verify endpoint: `POST /billing/apple/verify`; server notifications: `POST /billing/apple/notifications`.
+- Apple root CAs bundled at `apps/api/certs/apple/` (loader falls back to this path; `APPLE_ROOT_CERTS_DIR` overrides).
+- Upload signing: App Store Connect API key `AuthKey_N5LFW2CYVG.p8`, issuer `18430c66-4e0a-4733-8058-efaef5e61ce0` — use with `xcodebuild -exportArchive -authenticationKeyID N5LFW2CYVG ...` for cloud signing (local keychain has no distribution cert).
+
 ## TestFlight Release Checklist (do ALL of these on EVERY build)
 App ID `6766371988` ("PALM – Home Care Contracts"), Team `BM5U63WP92`. App Store Connect internal API base: `https://appstoreconnect.apple.com/iris/v1`.
 1. Bump `CURRENT_PROJECT_VERSION` in `ios-app/project.yml`, archive, export+upload.
