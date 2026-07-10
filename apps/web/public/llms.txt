@@ -16,11 +16,10 @@ Workflow: Record. Transcribe. Contract.
 Owners and administrators of in-home care agencies, plus the caregivers and nurses who do assessments. Best for agencies losing hours each week to documentation, assessments, and manual contract writing.
 
 ## Pricing (summary; full machine-readable file at /pricing.md)
-- Starter: $89.99/mo ($899/yr) — 5 assessments/mo, 5 team members
-- Growth: $179.99/mo ($1,799/yr) — 25 assessments/mo, 15 team members (most popular)
-- Professional: $299.99/mo ($2,999/yr) — 75 assessments/mo, unlimited team members
-- Enterprise: custom (unlimited, no overage) — contact sales@palmtai.com
-- 14-day free trial on all plans, no credit card required. Subscriptions are purchased and billed via Apple In-App Purchase in the PalmCare iOS app.
+- Starter: $199/mo ($1,910/yr, 20% off) — 20 assessments/mo, 5 team members, 14-day free trial
+- Growth: $699/mo ($6,710/yr, 20% off) — 75 assessments/mo, 20 team members, 14-day free trial (most popular)
+- Enterprise: $1,200/mo ($11,520/yr, 20% off) — unlimited assessments, unlimited team members, dedicated account manager
+- 14-day free trial on Starter and Growth. Annual billing saves 20% on every plan. Subscriptions are purchased and billed via Apple In-App Purchase in the PalmCare iOS app.
 - Structured pricing for agents: https://palmcareai.com/pricing.md
 
 ## Key pages

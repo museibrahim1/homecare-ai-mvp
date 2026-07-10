@@ -1,13 +1,21 @@
 import SwiftUI
 import StoreKit
 
-/// Subscription paywall: three auto-renewable monthly plans purchased
-/// through Apple In-App Purchase.
+/// Subscription paywall: three auto-renewable plans (Starter, Growth,
+/// Enterprise) purchased through Apple In-App Purchase, each available
+/// monthly or annually (annual saves 20%). Starter and Growth include a
+/// 14 day free trial through an Apple introductory offer.
 struct PaywallView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var store = StoreKitService.shared
     @Environment(\.dismiss) private var dismiss
 
+    enum BillingPeriod: String, CaseIterable {
+        case monthly = "Monthly"
+        case annual = "Annual"
+    }
+
+    @State private var billingPeriod: BillingPeriod = .monthly
     @State private var selectedProductID: String = "com.palmcareai.app.growth.monthly"
     @State private var showSuccess = false
     @State private var restoreMessage: String?
@@ -17,28 +25,44 @@ struct PaywallView: View {
         let team: String
         let highlights: [String]
         let badge: String?
+        let hasTrial: Bool
     }
 
+    /// Keyed by the base product family ("starter", "growth", "pro").
     private let planDetails: [String: PlanInfo] = [
-        "com.palmcareai.app.starter.monthly": PlanInfo(
-            assessments: "5 AI assessments a month",
+        "starter": PlanInfo(
+            assessments: "20 AI assessments a month",
             team: "5 team members",
-            highlights: ["AI voice to contract", "Smart SOAP notes", "Email support"],
-            badge: nil
+            highlights: ["AI voice to contract", "Smart SOAP notes", "Basic reporting", "Email support"],
+            badge: nil,
+            hasTrial: true
         ),
-        "com.palmcareai.app.growth.monthly": PlanInfo(
-            assessments: "25 AI assessments a month",
-            team: "15 team members",
-            highlights: ["Everything in Starter", "Advanced analytics", "Custom contract templates", "Priority support"],
-            badge: "MOST POPULAR"
-        ),
-        "com.palmcareai.app.pro.monthly": PlanInfo(
+        "growth": PlanInfo(
             assessments: "75 AI assessments a month",
+            team: "20 team members",
+            highlights: ["Everything in Starter", "Advanced analytics", "Custom contract templates", "Team management", "Priority support"],
+            badge: "MOST POPULAR",
+            hasTrial: true
+        ),
+        "pro": PlanInfo(
+            assessments: "Unlimited AI assessments",
             team: "Unlimited team members",
-            highlights: ["Everything in Growth", "50-state compliance engine", "Advanced dashboards"],
-            badge: "BEST VALUE"
+            highlights: ["Everything in Growth", "Dedicated account manager", "50-state compliance engine", "Custom dashboards", "HIPAA BAA included"],
+            badge: "FULL SCALE",
+            hasTrial: false
         ),
     ]
+
+    private func planFamily(_ productID: String) -> String {
+        if productID.contains(".starter.") { return "starter" }
+        if productID.contains(".growth.") { return "growth" }
+        return "pro"
+    }
+
+    private var visibleProducts: [Product] {
+        let suffix = billingPeriod == .monthly ? ".monthly" : ".annual"
+        return store.products.filter { $0.id.hasSuffix(suffix) }
+    }
 
     var body: some View {
         NavigationStack {
@@ -52,7 +76,11 @@ struct PaywallView: View {
                     } else if store.products.isEmpty {
                         loadFailedView
                     } else {
-                        ForEach(store.products, id: \.id) { product in
+                        if !store.products.filter({ $0.id.hasSuffix(".annual") }).isEmpty {
+                            billingToggle
+                        }
+
+                        ForEach(visibleProducts, id: \.id) { product in
                             planCard(product)
                         }
 
@@ -72,6 +100,14 @@ struct PaywallView: View {
                 }
             }
             .task { await store.loadProducts() }
+            .onChange(of: billingPeriod) { newPeriod in
+                // Keep the same plan family selected when switching periods.
+                let family = planFamily(selectedProductID)
+                let suffix = newPeriod == .monthly ? ".monthly" : ".annual"
+                if let match = store.products.first(where: { $0.id.contains(".\(family).") && $0.id.hasSuffix(suffix) }) {
+                    selectedProductID = match.id
+                }
+            }
             .alert("You're all set", isPresented: $showSuccess) {
                 Button("OK") { dismiss() }
             } message: {
@@ -116,6 +152,23 @@ struct PaywallView: View {
         }
     }
 
+    private var billingToggle: some View {
+        VStack(spacing: 6) {
+            Picker("Billing period", selection: $billingPeriod) {
+                ForEach(BillingPeriod.allCases, id: \.self) { period in
+                    Text(period.rawValue).tag(period)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            if billingPeriod == .annual {
+                Text("Save 20% with annual billing")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.palmGreen)
+            }
+        }
+    }
+
     private var loadFailedView: some View {
         VStack(spacing: 12) {
             Image(systemName: "wifi.exclamationmark")
@@ -140,9 +193,13 @@ struct PaywallView: View {
     }
 
     private func planCard(_ product: Product) -> some View {
-        let info = planDetails[product.id]
+        let info = planDetails[planFamily(product.id)]
         let isSelected = selectedProductID == product.id
         let isOwned = store.purchasedProductIDs.contains(product.id)
+        let isAnnual = product.id.hasSuffix(".annual")
+        // Only show the trial pill when Apple actually has the intro offer
+        // configured for this product.
+        let hasTrialOffer = (info?.hasTrial ?? false) && product.subscription?.introductoryOffer != nil
 
         return Button {
             selectedProductID = product.id
@@ -178,6 +235,16 @@ struct PaywallView: View {
                                 .font(.system(size: 12))
                                 .foregroundColor(.palmSecondary)
                         }
+                        if hasTrialOffer {
+                            Text("14 day free trial")
+                                .font(.system(size: 10, weight: .heavy))
+                                .foregroundColor(.palmGreen)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 3)
+                                .background(Color.palmGreen.opacity(0.12))
+                                .cornerRadius(6)
+                                .padding(.top, 2)
+                        }
                     }
 
                     Spacer()
@@ -186,7 +253,7 @@ struct PaywallView: View {
                         Text(product.displayPrice)
                             .font(.system(size: 18, weight: .heavy))
                             .foregroundColor(.palmText)
-                        Text("per month")
+                        Text(isAnnual ? "per year" : "per month")
                             .font(.system(size: 10))
                             .foregroundColor(.palmSecondary)
                     }
@@ -217,11 +284,17 @@ struct PaywallView: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(product.displayName), \(product.displayPrice) per month")
+        .accessibilityLabel("\(product.displayName), \(product.displayPrice) \(isAnnual ? "per year" : "per month")")
     }
 
     private var purchaseButton: some View {
-        VStack(spacing: 10) {
+        let selectedHasTrial = visibleProducts.first(where: { $0.id == selectedProductID })
+            .flatMap { product -> Bool? in
+                (planDetails[planFamily(product.id)]?.hasTrial ?? false)
+                    && product.subscription?.introductoryOffer != nil
+            } ?? false
+
+        return VStack(spacing: 10) {
             Button {
                 guard let product = store.products.first(where: { $0.id == selectedProductID }) else { return }
                 Task {
@@ -234,7 +307,9 @@ struct PaywallView: View {
                     if store.purchaseInFlight {
                         ProgressView().tint(.white).scaleEffect(0.85)
                     }
-                    Text(store.purchaseInFlight ? "Processing…" : "Subscribe")
+                    Text(store.purchaseInFlight
+                         ? "Processing…"
+                         : (selectedHasTrial ? "Start 14 Day Free Trial" : "Subscribe"))
                         .font(.system(size: 16, weight: .bold))
                 }
                 .foregroundColor(.white)
@@ -247,9 +322,11 @@ struct PaywallView: View {
                 .cornerRadius(14)
             }
             .disabled(store.purchaseInFlight || store.purchasedProductIDs.contains(selectedProductID))
-            .accessibilityLabel("Subscribe to selected plan")
+            .accessibilityLabel(selectedHasTrial ? "Start 14 day free trial" : "Subscribe to selected plan")
 
-            Text("Billed monthly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime.")
+            Text(billingPeriod == .annual
+                 ? "Billed yearly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime."
+                 : "Billed monthly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime.")
                 .font(.system(size: 11))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)

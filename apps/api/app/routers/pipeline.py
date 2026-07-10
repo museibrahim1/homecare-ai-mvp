@@ -4,17 +4,19 @@ from sqlalchemy.orm import Session
 
 from app.core.rate_limit import limiter
 from app.core.deps import get_db, get_current_user
+from app.core.tier_limits import enforce_ai_tier_limit
 
-# Expensive AI work (Deepgram + Claude) is gated tighter than the global
-# default so a single account can't run up the bill or be abused.
-AI_RATE_LIMIT = "30/minute"
+# Expensive AI work (Deepgram + Claude) is gated by two layers: a hard
+# per-user ceiling here, and a plan-tier quota (see core/tier_limits.py)
+# so higher tiers get more AI throughput.
+AI_RATE_LIMIT = "120/minute"
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
 from app.models.transcript_segment import TranscriptSegment
 from app.services.jobs import enqueue_task
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(enforce_ai_tier_limit)])
 
 
 def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:

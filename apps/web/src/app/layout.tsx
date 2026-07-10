@@ -131,14 +131,14 @@ const jsonLd = {
       description: SITE_DESCRIPTION,
       offers: {
         '@type': 'AggregateOffer',
-        lowPrice: '89.99',
-        highPrice: '299.99',
+        lowPrice: '199',
+        highPrice: '1200',
         priceCurrency: 'USD',
         offerCount: 3,
         offers: [
-          { '@type': 'Offer', name: 'Starter', price: '89.99', priceCurrency: 'USD' },
-          { '@type': 'Offer', name: 'Growth', price: '179.99', priceCurrency: 'USD' },
-          { '@type': 'Offer', name: 'Professional', price: '299.99', priceCurrency: 'USD' },
+          { '@type': 'Offer', name: 'Starter', price: '199', priceCurrency: 'USD' },
+          { '@type': 'Offer', name: 'Growth', price: '699', priceCurrency: 'USD' },
+          { '@type': 'Offer', name: 'Enterprise', price: '1200', priceCurrency: 'USD' },
         ],
       },
       featureList: [

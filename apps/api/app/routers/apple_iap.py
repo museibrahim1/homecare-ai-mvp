@@ -60,11 +60,25 @@ router = APIRouter()
 
 
 # Map App Store Connect product IDs → internal plan tier.
-# Must stay in sync with the iOS `StoreManager` `productIDs` list.
+# Must stay in sync with the iOS `StoreKitService.productIDs` list.
+# The "pro" product IDs are sold as the Enterprise plan (product IDs are
+# immutable in App Store Connect, display names are not).
 APPLE_PRODUCT_TIER_MAP: dict[str, PlanTier] = {
     "com.palmcareai.app.starter.monthly": PlanTier.STARTER,
     "com.palmcareai.app.growth.monthly": PlanTier.GROWTH,
-    "com.palmcareai.app.pro.monthly": PlanTier.PROFESSIONAL,
+    "com.palmcareai.app.pro.monthly": PlanTier.ENTERPRISE,
+    "com.palmcareai.app.starter.annual": PlanTier.STARTER,
+    "com.palmcareai.app.growth.annual": PlanTier.GROWTH,
+    "com.palmcareai.app.pro.annual": PlanTier.ENTERPRISE,
+}
+
+# Products granting a 14 day free trial through an Apple introductory offer.
+# Enterprise is excluded deliberately.
+APPLE_TRIAL_PRODUCT_IDS = {
+    "com.palmcareai.app.starter.monthly",
+    "com.palmcareai.app.growth.monthly",
+    "com.palmcareai.app.starter.annual",
+    "com.palmcareai.app.growth.annual",
 }
 
 
@@ -251,18 +265,27 @@ async def verify_apple_transaction(
         db.add(sub)
 
     sub.plan_id = plan.id
-    sub.billing_cycle = "monthly"
+    sub.billing_cycle = "annual" if body.product_id.endswith(".annual") else "monthly"
     sub.current_period_end = expires_at
+
     sub.stripe_subscription_id = None  # iOS-managed now
     # Reuse the stripe_customer_id slot to record the Apple original
     # transaction ID so renewal webhooks can find this row later. We do
     # this rather than adding a new column to keep the migration small.
     sub.stripe_customer_id = f"apple:{original_transaction_id}"
 
+    # StoreKit marks free-trial periods with offerType 1 (introductory offer).
+    offer_type = decoded.get("offerType") or decoded.get("offer_type")
+    is_trial_period = offer_type == 1 and body.product_id in APPLE_TRIAL_PRODUCT_IDS
+
     if is_revoked or is_expired:
         sub.status = SubscriptionStatus.CANCELLED
         if is_revoked and not sub.cancelled_at:
             sub.cancelled_at = datetime.now(timezone.utc)
+    elif is_trial_period:
+        sub.status = SubscriptionStatus.TRIAL
+        sub.trial_ends_at = expires_at
+        sub.cancelled_at = None
     else:
         sub.status = SubscriptionStatus.ACTIVE
         sub.cancelled_at = None
@@ -272,7 +295,7 @@ async def verify_apple_transaction(
     db.refresh(sub)
 
     return AppleVerifyResponse(
-        success=sub.status == SubscriptionStatus.ACTIVE,
+        success=sub.status in (SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL),
         plan_tier=plan_tier.value,
         subscription_status=sub.status.value,
         expires_at=expires_at,
@@ -290,6 +313,8 @@ async def get_apple_products():
         {
             "product_id": pid,
             "tier": tier.value,
+            "billing_cycle": "annual" if pid.endswith(".annual") else "monthly",
+            "has_free_trial": pid in APPLE_TRIAL_PRODUCT_IDS,
         }
         for pid, tier in APPLE_PRODUCT_TIER_MAP.items()
     ]

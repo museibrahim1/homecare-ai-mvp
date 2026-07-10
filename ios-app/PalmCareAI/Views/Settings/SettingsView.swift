@@ -1,5 +1,6 @@
 import SwiftUI
 import LocalAuthentication
+import StoreKit
 
 struct SettingsView: View {
     @EnvironmentObject var api: APIService
@@ -15,6 +16,9 @@ struct SettingsView: View {
     @State private var showEditProfile = false
     @State private var showDeleteAccount = false
     @State private var showPaywall = false
+    @State private var refundTransactionID: UInt64?
+    @State private var showRefundSheet = false
+    @State private var refundMessage: String?
     @AppStorage("googleCalendarConnected") private var googleCalConnected = false
 
     @AppStorage("useFaceID") private var useFaceID = false
@@ -70,6 +74,15 @@ struct SettingsView: View {
                 PaywallView().environmentObject(api)
             }
             .task { await loadData() }
+            .refundRequestSheet(for: refundTransactionID ?? 0, isPresented: $showRefundSheet)
+            .alert("Refund", isPresented: Binding(
+                get: { refundMessage != nil },
+                set: { if !$0 { refundMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(refundMessage ?? "")
+            }
             .preferredColorScheme(isDarkMode ? .dark : .light)
     }
 
@@ -311,7 +324,7 @@ struct SettingsView: View {
                         Text(usage?.has_paid_plan == true ? "Change Plan" : "View Plans")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.palmText)
-                        Text("Starter, Growth, or Professional")
+                        Text("Starter, Growth, or Enterprise")
                             .font(.system(size: 11))
                             .foregroundColor(.palmSecondary)
                     }
@@ -352,6 +365,41 @@ struct SettingsView: View {
                 .padding(.vertical, 12)
             }
             .accessibilityLabel("Manage subscription in the App Store")
+
+            SettingsDivider()
+
+            Button {
+                Task {
+                    if let txID = await StoreKitService.shared.latestTransactionID() {
+                        refundTransactionID = txID
+                        showRefundSheet = true
+                    } else {
+                        refundMessage = "No App Store purchase was found for this Apple ID."
+                    }
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    SettingsIcon(systemName: "arrow.uturn.left.circle.fill", color: .palmOrange)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Request a Refund")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.palmText)
+                        Text("Handled securely by Apple")
+                            .font(.system(size: 11))
+                            .foregroundColor(.palmSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.palmBorder)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+            }
+            .accessibilityLabel("Request a refund for an App Store purchase")
         }
     }
 

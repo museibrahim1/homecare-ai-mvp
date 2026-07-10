@@ -17,11 +17,22 @@ final class StoreKitService: ObservableObject {
 
     /// Must stay in sync with APPLE_PRODUCT_TIER_MAP on the backend and the
     /// products configured in App Store Connect ("PALM Plans" group).
-    static let productIDs: [String] = [
+    /// The "pro" product IDs are sold as the Enterprise plan (product IDs
+    /// are immutable in App Store Connect).
+    static let monthlyProductIDs: [String] = [
         "com.palmcareai.app.starter.monthly",
         "com.palmcareai.app.growth.monthly",
         "com.palmcareai.app.pro.monthly",
     ]
+
+    /// Annual plans: same tiers billed yearly at a 20% discount.
+    static let annualProductIDs: [String] = [
+        "com.palmcareai.app.starter.annual",
+        "com.palmcareai.app.growth.annual",
+        "com.palmcareai.app.pro.annual",
+    ]
+
+    static let productIDs: [String] = monthlyProductIDs + annualProductIDs
 
     @Published var products: [Product] = []
     @Published var purchasedProductIDs: Set<String> = []
@@ -107,6 +118,18 @@ final class StoreKitService: ObservableObject {
             }
         }
         purchasedProductIDs = found
+    }
+
+    /// The most recent verified transaction ID for any of our products.
+    /// Used by Settings to present Apple's refund request sheet.
+    func latestTransactionID() async -> UInt64? {
+        for await entitlement in Transaction.currentEntitlements {
+            if case .verified(let transaction) = entitlement,
+               Self.productIDs.contains(transaction.productID) {
+                return transaction.id
+            }
+        }
+        return nil
     }
 
     /// AppStore.sync() forces a refresh from the App Store (restore flow).

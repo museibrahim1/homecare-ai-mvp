@@ -8,6 +8,7 @@ import io
 
 from app.core.rate_limit import limiter
 from app.core.deps import get_db, get_current_user
+from app.core.tier_limits import enforce_ai_tier_limit
 from app.models.user import User
 from app.models.visit import Visit
 from app.models.client import Client
@@ -31,7 +32,12 @@ def get_user_visit(db: Session, visit_id: UUID, current_user: User) -> Visit:
     return visit
 
 
-@router.post("/audio", response_model=UploadResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/audio",
+    response_model=UploadResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(enforce_ai_tier_limit)],
+)
 @limiter.limit("30/minute")
 async def upload_audio(
     request: Request,

@@ -19,7 +19,12 @@ router = APIRouter()
 async def get_public_plans(db: Session = Depends(get_db)):
     """Get all active plans (public endpoint for pricing page)."""
     try:
-        plans = db.query(Plan).order_by(Plan.monthly_price).all()
+        plans = (
+            db.query(Plan)
+            .filter(Plan.is_active.is_(True))
+            .order_by(Plan.monthly_price)
+            .all()
+        )
     except Exception as e:
         logger.error(f"Plans query error: {type(e).__name__}: {e}")
         return []
@@ -58,90 +63,98 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
     from app.models.subscription import PlanTier
     import json
 
+    # Annual price = 12 months with a 20% discount. All paid tiers except
+    # Enterprise include a 14 day free trial (granted through Apple IAP
+    # introductory offers on iOS).
     PLANS = [
         {
             "name": "Starter",
             "tier": PlanTier.STARTER,
-            "description": "For small agencies getting started with AI-powered documentation",
-            "monthly_price": 89.99,
-            "annual_price": 899,
+            "description": (
+                "For solo owners and small agencies signing their first contracts "
+                "with AI. Record the visit and PALM writes the notes, the billables, "
+                "and a state compliant service agreement in minutes. Includes a "
+                "14 day free trial."
+            ),
+            "monthly_price": 199,
+            "annual_price": 1910,
             "setup_fee": 0,
             "max_users": 5,
-            "max_clients": 25,
-            "max_visits_per_month": 5,
-            "max_storage_gb": 5,
+            "max_clients": 50,
+            "max_visits_per_month": 20,
+            "max_storage_gb": 10,
             "is_contact_sales": False,
             "is_active": True,
             "features": json.dumps([
-                "5 assessments/month", "5 team members",
-                "AI voice-to-contract", "Smart SOAP notes",
-                "Basic reporting", "Email support", "5 GB storage",
-                "$13/extra assessment",
+                "20 AI assessments a month", "5 team members",
+                "AI voice to contract", "Smart SOAP notes",
+                "Basic reporting", "Email support", "10 GB storage",
+                "14 day free trial",
             ]),
         },
         {
             "name": "Growth",
             "tier": PlanTier.GROWTH,
-            "description": "For growing agencies scaling their documentation workflow",
-            "monthly_price": 179.99,
-            "annual_price": 1799,
+            "description": (
+                "For agencies building a steady client pipeline. Everything in "
+                "Starter plus advanced analytics, custom contract templates, and "
+                "priority support so your team closes contracts faster. Includes "
+                "a 14 day free trial."
+            ),
+            "monthly_price": 699,
+            "annual_price": 6710,
             "setup_fee": 0,
-            "max_users": 15,
-            "max_clients": 100,
-            "max_visits_per_month": 25,
-            "max_storage_gb": 15,
+            "max_users": 20,
+            "max_clients": 200,
+            "max_visits_per_month": 75,
+            "max_storage_gb": 50,
             "is_contact_sales": False,
             "is_active": True,
             "features": json.dumps([
-                "25 assessments/month", "15 team members",
-                "AI voice-to-contract", "Smart SOAP notes",
-                "Advanced analytics & reporting", "Priority support",
-                "15 GB storage", "Custom contract templates",
-                "Team management", "$13/extra assessment",
+                "75 AI assessments a month", "20 team members",
+                "Advanced analytics and reporting", "Custom contract templates",
+                "Team management", "Priority support", "50 GB storage",
+                "14 day free trial",
             ]),
         },
         {
+            # Legacy tier kept for existing rows; superseded by Enterprise.
             "name": "Professional",
             "tier": PlanTier.PROFESSIONAL,
-            "description": "For established agencies that need maximum capacity",
-            "monthly_price": 299.99,
-            "annual_price": 2999,
+            "description": "Legacy plan, replaced by Enterprise.",
+            "monthly_price": 999.99,
+            "annual_price": 9599,
             "setup_fee": 0,
             "max_users": 999,
             "max_clients": 500,
             "max_visits_per_month": 75,
             "max_storage_gb": 50,
             "is_contact_sales": False,
-            "is_active": True,
-            "features": json.dumps([
-                "75 assessments/month", "Unlimited team members",
-                "AI voice-to-contract", "Smart SOAP notes",
-                "Advanced analytics & dashboards", "Priority support",
-                "50 GB storage", "Custom contract templates",
-                "Team management", "50-state compliance engine",
-                "$13/extra assessment",
-            ]),
+            "is_active": False,
+            "features": json.dumps([]),
         },
         {
             "name": "Enterprise",
             "tier": PlanTier.ENTERPRISE,
-            "description": "For large agencies with custom requirements and dedicated support",
-            "monthly_price": 0,
-            "annual_price": 0,
+            "description": (
+                "For established agencies running at scale. Unlimited assessments, "
+                "unlimited team members, a dedicated account manager, and the full "
+                "50 state compliance engine."
+            ),
+            "monthly_price": 1200,
+            "annual_price": 11520,
             "setup_fee": 0,
             "max_users": 999,
             "max_clients": 9999,
             "max_visits_per_month": 99999,
-            "max_storage_gb": 999,
-            "is_contact_sales": True,
+            "max_storage_gb": 250,
+            "is_contact_sales": False,
             "is_active": True,
             "features": json.dumps([
-                "Unlimited assessments", "Unlimited team members",
-                "AI voice-to-contract", "Smart SOAP notes",
-                "Custom analytics & dashboards", "Dedicated account manager",
-                "Unlimited storage", "Custom integrations",
-                "HIPAA BAA included", "On-site training",
-                "SLA guarantee", "No overage fees",
+                "Unlimited AI assessments", "Unlimited team members",
+                "Dedicated account manager", "50 state compliance engine",
+                "Custom analytics and dashboards", "HIPAA BAA included",
+                "SLA guarantee", "250 GB storage",
             ]),
         },
     ]

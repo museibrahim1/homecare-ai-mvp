@@ -1,48 +1,44 @@
 # Pricing — PalmCare AI
 
 PalmCare AI turns a recorded home care assessment into a state-specific service
-contract automatically. Every plan includes a 14-day free trial with no credit
-card required. Subscriptions are purchased and billed through Apple In-App
-Purchase in the PalmCare iOS app (charged to your Apple ID).
+contract automatically. Starter and Growth include a 14-day free trial.
+Subscriptions are purchased and billed through Apple In-App Purchase in the
+PalmCare iOS app (charged to your Apple ID). Annual billing saves 20% on every
+plan.
 
-Last updated: 2026-06-23. Currency: USD.
+Last updated: 2026-07-10. Currency: USD.
 
 ## Starter
-- Price: $89.99/month, or $899/year (≈ $74.92/month billed annually)
-- Assessments: 5/month ($13 per extra assessment)
+- Price: $199/month, or $1,910/year (20% off, ≈ $159/month billed annually)
+- Free trial: 14 days
+- Assessments: 20/month
 - Team members: 5
-- Storage: 5 GB
+- Storage: 10 GB
 - Includes: AI voice-to-contract, smart SOAP notes, basic reporting, email support
-- Best for: small agencies getting started
+- Best for: solo owners and small agencies signing their first contracts with AI
 
 ## Growth (most popular)
-- Price: $179.99/month, or $1,799/year (≈ $149.92/month billed annually)
-- Assessments: 25/month ($13 per extra assessment)
-- Team members: 15
-- Storage: 15 GB
+- Price: $699/month, or $6,710/year (20% off, ≈ $559/month billed annually)
+- Free trial: 14 days
+- Assessments: 75/month
+- Team members: 20
+- Storage: 50 GB
 - Includes: everything in Starter, advanced analytics & reporting, priority
   support, custom contract templates, team management
-- Best for: growing agencies scaling their documentation workflow
-
-## Professional
-- Price: $299.99/month, or $2,999/year (≈ $249.92/month billed annually)
-- Assessments: 75/month ($13 per extra assessment)
-- Team members: unlimited
-- Storage: 50 GB
-- Includes: everything in Growth, advanced dashboards, 50-state compliance engine
-- Best for: established agencies that need maximum capacity
+- Best for: agencies building a steady client pipeline
 
 ## Enterprise
-- Price: Custom — contact sales@palmtai.com
+- Price: $1,200/month, or $11,520/year (20% off, ≈ $960/month billed annually)
 - Assessments: unlimited (no overage fees)
 - Team members: unlimited
-- Storage: unlimited
-- Includes: everything in Professional, dedicated account manager, custom
-  integrations, HIPAA BAA, on-site training, SLA guarantee
-- Best for: large or multi-location agencies
+- Storage: 250 GB
+- Includes: everything in Growth, dedicated account manager, 50-state
+  compliance engine, custom analytics and dashboards, HIPAA BAA, SLA guarantee
+- Best for: established agencies running at scale
 
 ## Add-ons & notes
-- Overage: $13 per assessment beyond the monthly limit (Starter/Growth/Professional)
+- Annual billing: every plan saves 20% versus paying monthly
+- Free trial: 14 days on Starter and Growth (not Enterprise)
 - Billing: handled by Apple In-App Purchase; manage or cancel anytime in iPhone
   Settings > [your name] > Subscriptions; data preserved 30 days after cancellation
 - Security: HIPAA-compliant, AES-256 encryption, role-based access, audit logs

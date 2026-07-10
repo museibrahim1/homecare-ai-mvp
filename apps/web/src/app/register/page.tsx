@@ -206,7 +206,7 @@ function RegisterForm() {
   const planConfig: Record<string, { label: string }> = {
     starter: { label: 'Starter' },
     growth: { label: 'Growth' },
-    professional: { label: 'Professional' },
+    enterprise: { label: 'Enterprise' },
   };
   const activePlan = planConfig[selectedPlan] || planConfig.starter;
   const planLabel = activePlan.label;

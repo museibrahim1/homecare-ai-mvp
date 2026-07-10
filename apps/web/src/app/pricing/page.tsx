@@ -3,109 +3,83 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, ArrowRight, Zap, Building2, Rocket, TrendingUp, Phone, CreditCard, Shield, Clock, AlertTriangle, BadgeCheck } from 'lucide-react';
+import { Check, ArrowRight, Zap, Building2, TrendingUp, Phone, CreditCard, Shield, Clock, BadgeCheck } from 'lucide-react';
 
+// Annual price = 12 months with a 20% discount.
 const PLANS = [
   {
     name: 'Starter',
     tier: 'starter',
-    monthlyPrice: 89.99,
-    annualPrice: 899,
-    description: 'For small agencies getting started with AI-powered documentation',
+    monthlyPrice: 199,
+    annualPrice: 1910,
+    description: 'For solo owners and small agencies signing their first contracts with AI. Record the visit and PALM writes the notes, the billables, and a state compliant service agreement in minutes.',
     icon: Zap,
-    assessments: 5,
+    assessments: 20,
     teamMembers: '5',
     features: [
-      '5 assessments/month',
+      '20 AI assessments a month',
       '5 team members',
-      'AI voice-to-contract',
+      'AI voice to contract',
       'Smart SOAP notes',
       'Basic reporting',
       'Email support',
-      '5 GB storage',
+      '10 GB storage',
     ],
     cta: 'Start Free Trial',
     href: '/register?plan=starter',
     popular: false,
-    hasOverage: true,
+    hasTrial: true,
   },
   {
     name: 'Growth',
     tier: 'growth',
-    monthlyPrice: 179.99,
-    annualPrice: 1799,
-    description: 'For growing agencies scaling their documentation workflow',
+    monthlyPrice: 699,
+    annualPrice: 6710,
+    description: 'For agencies building a steady client pipeline. Everything in Starter plus advanced analytics, custom contract templates, and priority support so your team closes contracts faster.',
     icon: TrendingUp,
-    assessments: 25,
-    teamMembers: '15',
+    assessments: 75,
+    teamMembers: '20',
     features: [
-      '25 assessments/month',
-      '15 team members',
-      'AI voice-to-contract',
+      '75 AI assessments a month',
+      '20 team members',
+      'AI voice to contract',
       'Smart SOAP notes',
-      'Advanced analytics & reporting',
-      'Priority support',
-      '15 GB storage',
+      'Advanced analytics and reporting',
       'Custom contract templates',
       'Team management',
+      'Priority support',
+      '50 GB storage',
     ],
     cta: 'Start Free Trial',
     href: '/register?plan=growth',
     popular: true,
-    hasOverage: true,
-  },
-  {
-    name: 'Professional',
-    tier: 'professional',
-    monthlyPrice: 299.99,
-    annualPrice: 2999,
-    description: 'For established agencies that need maximum capacity',
-    icon: Rocket,
-    assessments: 75,
-    teamMembers: 'Unlimited',
-    features: [
-      '75 assessments/month',
-      'Unlimited team members',
-      'AI voice-to-contract',
-      'Smart SOAP notes',
-      'Advanced analytics & dashboards',
-      'Priority support',
-      '50 GB storage',
-      'Custom contract templates',
-      'Team management',
-      '50-state compliance engine',
-    ],
-    cta: 'Start Free Trial',
-    href: '/register?plan=professional',
-    popular: false,
-    hasOverage: true,
+    hasTrial: true,
   },
   {
     name: 'Enterprise',
     tier: 'enterprise',
-    monthlyPrice: null,
-    annualPrice: null,
-    description: 'For large agencies with custom requirements and dedicated support',
+    monthlyPrice: 1200,
+    annualPrice: 11520,
+    description: 'For established agencies running at scale. Unlimited assessments, unlimited team members, a dedicated account manager, and the full 50 state compliance engine.',
     icon: Building2,
     assessments: null,
     teamMembers: 'Unlimited',
     features: [
-      'Unlimited assessments',
+      'Unlimited AI assessments',
       'Unlimited team members',
-      'AI voice-to-contract',
+      'AI voice to contract',
       'Smart SOAP notes',
-      'Custom analytics & dashboards',
+      'Custom analytics and dashboards',
       'Dedicated account manager',
-      'Unlimited storage',
-      'Custom integrations',
+      '50 state compliance engine',
       'HIPAA BAA included',
-      'On-site training',
       'SLA guarantee',
+      '250 GB storage',
     ],
-    cta: 'Contact Sales',
-    href: '/contact?inquiry=enterprise',
+    cta: 'Get Started',
+    href: '/register?plan=enterprise',
     popular: false,
-    hasOverage: false,
+    hasTrial: false,
   },
 ];
 
@@ -159,7 +133,7 @@ export default function PricingPage() {
           </span>
           {annual && (
             <span className="text-teal-400 text-xs font-semibold bg-teal-400/10 px-2.5 py-1 rounded-full border border-teal-400/20">
-              2 months free
+              Save 20%
             </span>
           )}
         </div>
@@ -167,7 +141,7 @@ export default function PricingPage() {
 
       {/* Plan Cards */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
             const monthlyDisplay = plan.monthlyPrice
@@ -229,11 +203,11 @@ export default function PricingPage() {
 
                 <p className="text-white/50 text-sm mb-4 leading-relaxed">{plan.description}</p>
 
-                {/* Overage / No-overage pill */}
-                {plan.hasOverage ? (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg mb-4 w-fit">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-xs font-medium text-amber-400">$13/extra assessment</span>
+                {/* Trial / No-overage pill */}
+                {plan.hasTrial ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mb-4 w-fit">
+                    <BadgeCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs font-medium text-emerald-400">14 day free trial</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mb-4 w-fit">
@@ -288,22 +262,14 @@ export default function PricingPage() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
-                {plan.monthlyPrice && (
-                  <p className="text-center text-white/30 text-xs mt-3">14-day free trial included</p>
+                {plan.hasTrial && (
+                  <p className="text-center text-white/30 text-xs mt-3">14 day free trial included</p>
                 )}
               </div>
             );
           })}
         </div>
 
-        {/* Extended trial banner */}
-        <div className="mt-8 bg-gradient-to-r from-amber-500/10 to-teal-500/10 border border-white/10 rounded-2xl p-6 text-center">
-          <p className="text-white font-semibold text-sm mb-1">Want more time?</p>
-          <p className="text-white/60 text-sm">
-            Get a <span className="text-amber-400 font-semibold">30-day extended trial</span> for just
-            <span className="text-white font-semibold"> $39.99</span>. Choose this option during signup.
-          </p>
-        </div>
       </div>
 
       {/* FAQ */}
@@ -321,11 +287,19 @@ export default function PricingPage() {
             },
             {
               q: 'What happens after the 14-day trial?',
-              a: 'When your trial ends, subscribe in the PalmCare iOS app to keep full access: Starter ($89.99/mo), Growth ($179.99/mo), or Professional ($299.99/mo). Your data is preserved while you decide.',
+              a: 'When your trial ends, subscribe in the PalmCare iOS app to keep full access: Starter ($199/mo), Growth ($699/mo), or Enterprise ($1,200/mo). Annual billing saves 20% on every plan. Your data is preserved while you decide.',
+            },
+            {
+              q: 'Which plans include the free trial?',
+              a: 'Starter and Growth both include a 14 day free trial through your Apple ID. Enterprise does not include a trial, but you can book a live demo with our team before subscribing.',
+            },
+            {
+              q: 'How does annual billing work?',
+              a: 'Every plan has an annual option that saves 20% versus paying monthly: Starter is $1,910/yr, Growth is $6,710/yr, and Enterprise is $11,520/yr. Annual plans are billed once a year through your Apple ID.',
             },
             {
               q: 'What happens if I exceed my assessment limit?',
-              a: 'On Starter, Growth, and Professional plans, each assessment beyond your monthly limit costs $13. Enterprise plans include unlimited assessments with no overage fees.',
+              a: 'Starter includes 20 assessments a month and Growth includes 75. If you need more, upgrade to the next plan at any time. Enterprise includes unlimited assessments.',
             },
             {
               q: 'Can I change plans later?',
