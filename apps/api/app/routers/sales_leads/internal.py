@@ -566,6 +566,105 @@ async def internal_add_lead_and_email(
     return {"total": len(results), "sent": sent_count, "results": results}
 
 
+def _resolve_window(date_str: Optional[str], since_hours: int):
+    """Resolve a (start, end) UTC window from either a calendar day or a rolling window."""
+    if date_str:
+        try:
+            day = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="date must be YYYY-MM-DD")
+        return day, day + timedelta(days=1)
+    hours = max(1, min(int(since_hours or 48), 24 * 30))
+    end = datetime.now(timezone.utc)
+    return end - timedelta(hours=hours), end
+
+
+@router.get("/leads/internal/emailed-on")
+async def internal_emailed_on(
+    request: Request,
+    date: Optional[str] = None,
+    since_hours: int = 48,
+    audience: str = "both",
+    db: Session = Depends(get_db),
+):
+    """Read-only: list the exact agencies (and/or investors) we emailed in a window.
+
+    - `date=YYYY-MM-DD` targets one UTC calendar day (e.g. yesterday's outreach),
+      or leave it blank to use a rolling `since_hours` window (default 48h).
+    - `audience`: "agencies", "investors", or "both" (default).
+
+    No side effects — safe to call as often as you like.
+    """
+    _require_internal_key(request)
+
+    window_start, window_end = _resolve_window(date, since_hours)
+    audience = (audience or "both").lower().strip()
+    want_agencies = audience in ("agencies", "both")
+    want_investors = audience in ("investors", "both")
+
+    agencies = []
+    if want_agencies:
+        leads = db.query(SalesLead).filter(
+            SalesLead.contact_email.isnot(None),
+            SalesLead.contact_email != "",
+            SalesLead.last_email_sent_at >= window_start,
+            SalesLead.last_email_sent_at < window_end,
+        ).order_by(SalesLead.last_email_sent_at.asc()).all()
+        agencies = [
+            {
+                "provider_name": l.provider_name,
+                "contact_name": l.contact_name,
+                "contact_email": l.contact_email,
+                "city": l.city,
+                "state": l.state,
+                "status": l.status,
+                "email_send_count": l.email_send_count or 0,
+                "last_email_sent_at": l.last_email_sent_at.isoformat() if l.last_email_sent_at else None,
+                "last_email_subject": l.last_email_subject,
+                "last_template_sent": l.last_template_sent,
+                "campaign_tag": l.campaign_tag,
+            }
+            for l in leads
+        ]
+
+    investors = []
+    if want_investors:
+        invs = db.query(Investor).filter(
+            Investor.contact_email.isnot(None),
+            Investor.contact_email != "",
+            Investor.last_email_sent_at >= window_start,
+            Investor.last_email_sent_at < window_end,
+        ).order_by(Investor.last_email_sent_at.asc()).all()
+        investors = [
+            {
+                "fund_name": i.fund_name,
+                "contact_name": i.contact_name,
+                "contact_email": i.contact_email,
+                "location": i.location,
+                "status": i.status,
+                "email_send_count": i.email_send_count or 0,
+                "last_email_sent_at": i.last_email_sent_at.isoformat() if i.last_email_sent_at else None,
+                "last_email_subject": i.last_email_subject,
+                "campaign_tag": i.campaign_tag,
+            }
+            for i in invs
+        ]
+
+    return {
+        "window": {
+            "start": window_start.isoformat(),
+            "end": window_end.isoformat(),
+            "date": date,
+            "since_hours": None if date else (since_hours or 48),
+        },
+        "audience": audience,
+        "agency_count": len(agencies),
+        "investor_count": len(investors),
+        "agencies": agencies,
+        "investors": investors,
+    }
+
+
 class ResendLaunchRequest(BaseModel):
     # Target a specific UTC calendar day (YYYY-MM-DD). If omitted, a rolling
     # window ending "now" is used instead (see since_hours).
@@ -605,17 +704,7 @@ async def internal_resend_launch(
         raise HTTPException(status_code=400, detail=f"Unknown template_id: {body.template_id}")
 
     # Resolve the target time window.
-    if body.date:
-        try:
-            day = datetime.strptime(body.date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        except ValueError:
-            raise HTTPException(status_code=400, detail="date must be YYYY-MM-DD")
-        window_start = day
-        window_end = day + timedelta(days=1)
-    else:
-        hours = max(1, min(int(body.since_hours or 48), 24 * 30))
-        window_end = datetime.now(timezone.utc)
-        window_start = window_end - timedelta(hours=hours)
+    window_start, window_end = _resolve_window(body.date, body.since_hours)
 
     audience = (body.audience or "agencies").lower().strip()
     want_agencies = audience in ("agencies", "both")
@@ -687,13 +776,15 @@ async def internal_resend_launch(
             "audience": audience,
             "window": window,
             "would_send": len(recipients),
-            "sample": [
+            "recipients": [
                 {
                     "kind": kind,
                     "name": getattr(obj, "provider_name", None) or getattr(obj, "fund_name", None),
                     "email": email,
+                    "city": getattr(obj, "city", None) or getattr(obj, "location", None),
+                    "state": getattr(obj, "state", None),
                 }
-                for (kind, obj, email) in recipients[:25]
+                for (kind, obj, email) in recipients
             ],
         }
 
