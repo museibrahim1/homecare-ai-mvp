@@ -744,6 +744,84 @@ async def registration_page_views(
     }
 
 
+@router.get("/registration/sources")
+async def registration_sources(
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_permission("analytics")),
+):
+    """Marketing attribution: which channels bring visitors, and which bring signups.
+
+    Combines `session_start` site events (per-visit channel from UTM/referrer)
+    with `business_registered` audit logs (signup_source + full attribution).
+    """
+    from app.models.audit_log import AuditLog
+
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+
+    # ── Visitor channels (one session_start per visit) ──
+    session_starts = db.query(SiteEvent).filter(
+        SiteEvent.event_type == "session_start",
+        SiteEvent.created_at >= since,
+    ).all()
+
+    visits_by_channel: dict[str, int] = defaultdict(int)
+    for ev in session_starts:
+        channel = (ev.meta or {}).get("channel") or "direct"
+        visits_by_channel[channel] += 1
+
+    # ── Signups (source recorded at registration) ──
+    registrations = db.query(AuditLog).filter(
+        AuditLog.action == "business_registered",
+        AuditLog.created_at >= since,
+    ).order_by(desc(AuditLog.created_at)).all()
+
+    signups_by_channel: dict[str, int] = defaultdict(int)
+    recent_signups = []
+    for log in registrations:
+        changes = log.changes or {}
+        source = changes.get("signup_source") or "direct"
+        signups_by_channel[source] += 1
+
+        attribution = changes.get("attribution") or {}
+        first = attribution.get("first_touch") or {}
+        last = attribution.get("last_touch") or {}
+        recent_signups.append({
+            "registered_at": log.created_at.isoformat() if log.created_at else None,
+            "business": (log.description or "").replace("New business registered ", ""),
+            "signup_source": source,
+            "selected_plan": changes.get("selected_plan"),
+            "first_touch_channel": first.get("channel"),
+            "first_touch_referrer": first.get("referrer"),
+            "landing_page": first.get("landing_page"),
+            "utm_campaign": last.get("utm_campaign") or first.get("utm_campaign"),
+            "last_touch_channel": last.get("channel"),
+        })
+
+    channels = sorted(
+        set(visits_by_channel) | set(signups_by_channel),
+        key=lambda c: (-signups_by_channel.get(c, 0), -visits_by_channel.get(c, 0)),
+    )
+
+    return {
+        "period_days": days,
+        "total_sessions": len(session_starts),
+        "total_signups": len(registrations),
+        "channels": [
+            {
+                "channel": c,
+                "visits": visits_by_channel.get(c, 0),
+                "signups": signups_by_channel.get(c, 0),
+                "conversion_rate": round(
+                    signups_by_channel.get(c, 0) / max(visits_by_channel.get(c, 0), 1) * 100, 1
+                ),
+            }
+            for c in channels
+        ],
+        "recent_signups": recent_signups[:50],
+    }
+
+
 @router.get("/registration/sessions")
 async def registration_sessions(
     days: int = Query(7, ge=1, le=90),

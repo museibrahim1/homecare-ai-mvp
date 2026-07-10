@@ -14,10 +14,28 @@ Sender addresses (via Resend-verified subdomains):
 """
 
 import os
+import base64
 import logging
+from pathlib import Path
 from typing import Optional, List
 
 logger = logging.getLogger(__name__)
+
+# Company brochure bundled with the API (attached to welcome emails).
+BROCHURE_PATH = Path(__file__).resolve().parent.parent / "assets" / "PalmCare-AI-Brochure.pdf"
+
+
+def _brochure_attachment() -> Optional[dict]:
+    """Load the brochure PDF as a Resend attachment (None if missing)."""
+    try:
+        content = BROCHURE_PATH.read_bytes()
+        return {
+            "filename": "PalmCare-AI-Brochure.pdf",
+            "content": base64.b64encode(content).decode("ascii"),
+        }
+    except OSError:
+        logger.warning(f"Brochure PDF not found at {BROCHURE_PATH}; sending without attachment")
+        return None
 
 try:
     import resend
@@ -357,6 +375,35 @@ class EmailService:
                 </a>
             </div>
 
+            <!-- ══ iOS BETA (TestFlight) ══ -->
+            <div style="margin: 0 32px 32px; background: #0f172a; border-radius: 16px; padding: 28px; text-align: center;">
+                <p style="color: #ffffff; margin: 0 0 6px; font-size: 17px; font-weight: 700;">
+                    Get Early Access to the iOS App
+                </p>
+                <p style="color: #94a3b8; margin: 0 0 20px; font-size: 14px; line-height: 1.5;">
+                    Join our TestFlight beta and try new features before anyone else.
+                    Request access and we'll send you a personal TestFlight invite.
+                </p>
+                <a href="{app}/beta"
+                   style="display: inline-block; background: #0d9488; color: #ffffff; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600;">
+                    Join the iOS Beta
+                </a>
+            </div>
+
+            <!-- ══ BROCHURE ══ -->
+            <div style="margin: 0 32px 32px; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; text-align: center;">
+                <p style="color: #0f172a; margin: 0 0 4px; font-size: 15px; font-weight: 700;">
+                    PalmCare AI Brochure
+                </p>
+                <p style="color: #64748b; margin: 0 0 16px; font-size: 13px; line-height: 1.5;">
+                    We've attached our brochure to this email — perfect for sharing with your team.
+                </p>
+                <a href="{app}/brochure/PalmCare-AI-Brochure.pdf"
+                   style="display: inline-block; border: 1px solid #0d9488; color: #0d9488; padding: 11px 28px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 600;">
+                    Download Brochure (PDF)
+                </a>
+            </div>
+
             <!-- ══ QUICK LINKS ══ -->
             <div style="padding: 0 32px 32px;">
                 <table cellpadding="0" cellspacing="0" style="width: 100%;">
@@ -408,10 +455,12 @@ class EmailService:
             </div>
         </div>
         """
+        brochure = _brochure_attachment()
         return self.send_email(
             business_email, subject, html,
             sender=self.from_onboarding,
             reply_to="support@palmcareai.com",
+            attachments=[brochure] if brochure else None,
         )
     
     def send_business_approved(self, business_email: str, business_name: str, login_url: str):
@@ -478,20 +527,161 @@ class EmailService:
     
     # ==================== Admin Notifications ====================
     
-    def send_admin_new_registration(self, admin_email: str, business_name: str, business_id: str):
-        """Notify admin of new business registration."""
-        subject = f"New Registration: {business_name}"
+    def send_admin_new_registration(
+        self,
+        admin_email: str,
+        business_name: str,
+        business_id: str,
+        owner_name: Optional[str] = None,
+        owner_email: Optional[str] = None,
+        signup_source: Optional[str] = None,
+        attribution: Optional[dict] = None,
+        selected_plan: Optional[str] = None,
+    ):
+        """Notify admin of a new signup, including where the user came from."""
+        subject = f"New Signup: {business_name} ({signup_source or 'unknown source'})"
+
+        attribution = attribution or {}
+        first = attribution.get("first_touch") or {}
+        last = attribution.get("last_touch") or {}
+
+        def row(label: str, value) -> str:
+            if not value:
+                return ""
+            return f"""
+            <tr>
+                <td style="padding: 6px 12px 6px 0; color: #64748b; font-size: 13px; white-space: nowrap; vertical-align: top;">{label}</td>
+                <td style="padding: 6px 0; color: #0f172a; font-size: 13px; word-break: break-all;">{value}</td>
+            </tr>"""
+
+        attribution_rows = (
+            row("Signup source", signup_source)
+            + row("First-touch channel", first.get("channel"))
+            + row("First referrer", first.get("referrer"))
+            + row("Landing page", first.get("landing_page"))
+            + row("First seen", first.get("captured_at"))
+            + row("Last-touch channel", last.get("channel"))
+            + row("Last referrer", last.get("referrer"))
+            + row("UTM campaign", last.get("utm_campaign") or first.get("utm_campaign"))
+            + row("UTM source / medium",
+                  " / ".join(filter(None, [
+                      last.get("utm_source") or first.get("utm_source"),
+                      last.get("utm_medium") or first.get("utm_medium"),
+                  ])))
+        )
+        if not attribution_rows:
+            attribution_rows = row("Signup source", signup_source or "unknown (no attribution data)")
+
         html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #6366f1;">New Business Registration</h1>
-            <p>A new business has registered and requires approval:</p>
-            <p><strong>Business Name:</strong> {business_name}</p>
-            <p><strong>Business ID:</strong> {business_id}</p>
-            <p>Please review their application in the admin dashboard.</p>
+        <div style="font-family: -apple-system, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #0d9488; font-size: 22px;">New Signup 🎉</h1>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <table cellpadding="0" cellspacing="0">
+                    {row("Agency", business_name)}
+                    {row("Owner", owner_name)}
+                    {row("Email", owner_email)}
+                    {row("Plan", selected_plan)}
+                    {row("Business ID", business_id)}
+                </table>
+            </div>
+
+            <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 12px; padding: 20px;">
+                <p style="margin: 0 0 8px; color: #0f172a; font-size: 14px; font-weight: 700;">Where they came from</p>
+                <table cellpadding="0" cellspacing="0">
+                    {attribution_rows}
+                </table>
+            </div>
         </div>
         """
         return self.send_email(admin_email, subject, html, sender=self.from_onboarding)
     
+    # ==================== iOS Beta (TestFlight) ====================
+
+    def send_beta_request_admin(
+        self,
+        admin_email: str,
+        requester_name: str,
+        requester_email: str,
+        agency_name: Optional[str] = None,
+        device: Optional[str] = None,
+        note: Optional[str] = None,
+    ):
+        """Notify admin that someone requested TestFlight access.
+
+        The requester's email is what you add to TestFlight → Internal/External
+        Testing in App Store Connect.
+        """
+        subject = f"TestFlight Request: {requester_name} ({requester_email})"
+        note_html = f"""
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px; margin-top: 14px;">
+                <p style="margin: 0; color: #92400e; font-size: 13px;"><strong>Note from requester:</strong> {note}</p>
+            </div>""" if note else ""
+        html = f"""
+        <div style="font-family: -apple-system, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #0d9488; font-size: 22px;">New iOS Beta Request</h1>
+            <p style="color: #475569; font-size: 14px;">
+                Add this tester in <strong>App Store Connect → TestFlight</strong> to send their invite:
+            </p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                <p style="margin: 0 0 8px; font-size: 14px;"><strong>Name:</strong> {requester_name}</p>
+                <p style="margin: 0 0 8px; font-size: 14px;"><strong>Email:</strong>
+                    <a href="mailto:{requester_email}" style="color: #0d9488;">{requester_email}</a></p>
+                {f'<p style="margin: 0 0 8px; font-size: 14px;"><strong>Agency:</strong> {agency_name}</p>' if agency_name else ''}
+                {f'<p style="margin: 0; font-size: 14px;"><strong>Device:</strong> {device}</p>' if device else ''}
+            </div>
+            {note_html}
+            <p style="color: #94a3b8; font-size: 12px; margin-top: 16px;">
+                Reply to this email to reach the requester directly.
+            </p>
+        </div>
+        """
+        return self.send_email(
+            admin_email, subject, html,
+            sender=self.from_onboarding,
+            reply_to=requester_email,
+        )
+
+    def send_beta_request_confirmation(self, requester_email: str, requester_name: str):
+        """Confirm receipt of a TestFlight beta request."""
+        subject = f"You're on the list — {BRAND} iOS Beta"
+        html = f"""
+        <div style="font-family: -apple-system, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+            <div style="background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%); padding: 40px 20px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 26px; font-weight: 700;">PalmCare AI</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0; font-size: 13px; letter-spacing: 0.5px;">iOS BETA PROGRAM</p>
+            </div>
+            <div style="padding: 36px 32px;">
+                <h2 style="color: #0f172a; margin: 0 0 8px; font-size: 20px;">You're on the list, {requester_name}!</h2>
+                <p style="color: #475569; font-size: 15px; line-height: 1.6;">
+                    Thanks for requesting early access to the PalmCare AI iOS app.
+                    We add new testers personally, so keep an eye out for a
+                    <strong>TestFlight invitation</strong> from Apple — it usually arrives within 1&ndash;2 business days.
+                </p>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin: 20px 0;">
+                    <p style="margin: 0 0 8px; color: #0f172a; font-size: 14px; font-weight: 700;">What happens next</p>
+                    <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.7;">
+                        1. You'll get an email from TestFlight with an invite link.<br>
+                        2. Install the free <a href="https://apps.apple.com/app/testflight/id899247664" style="color: #0d9488;">TestFlight app</a> from the App Store.<br>
+                        3. Accept the invite and start Palm-ing your visits.
+                    </p>
+                </div>
+                <p style="color: #94a3b8; font-size: 13px;">
+                    Questions? Just reply to this email — a real person reads it.
+                </p>
+            </div>
+            <div style="background: #f9fafb; padding: 22px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="color: #0d9488; font-weight: 600; margin: 0 0 4px; font-size: 13px;">PalmCare AI</p>
+                <p style="color: #9ca3af; font-size: 11px; margin: 0;">Where care meets intelligence &middot; &copy; 2026 Palm Technologies, INC.</p>
+            </div>
+        </div>
+        """
+        return self.send_email(
+            requester_email, subject, html,
+            sender=self.from_onboarding,
+            reply_to="sales@palmtai.com",
+        )
+
     # ==================== Support Emails ====================
     
     def send_support_request(self, user_email: str, user_name: str, subject: str, message: str):

@@ -108,6 +108,7 @@ from app.routers import (
     team,
     agent,
     resend_webhooks,
+    beta,
     messaging,
     scheduler,
     support,
@@ -247,6 +248,7 @@ app.include_router(gmail.router, prefix="/gmail", tags=["Gmail"])
 app.include_router(email_sender.router, prefix="/email-sender", tags=["Send From My Email"])
 app.include_router(documents.router, prefix="/documents", tags=["Documents"])
 app.include_router(demos.router, prefix="/demos", tags=["Demo Booking"])
+app.include_router(beta.router, prefix="/beta", tags=["iOS Beta (TestFlight)"])
 app.include_router(status.router, prefix="/status", tags=["Status Page"])
 app.include_router(contract_templates.router, prefix="/contract-templates", tags=["Contract Templates"])
 app.include_router(sales_leads.router, prefix="/platform/sales", tags=["Sales Leads (CEO Only)"])

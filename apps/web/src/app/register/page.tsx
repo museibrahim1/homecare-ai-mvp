@@ -8,6 +8,7 @@ import {
   Building2, Shield, Clock, AlertCircle,
 } from 'lucide-react';
 import { trackFunnelStep } from '@/lib/analytics';
+import { getAttribution, getSignupSource } from '@/lib/attribution';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 
@@ -140,10 +141,12 @@ function RegisterForm() {
     setLoading(true);
 
     try {
+      const attribution = getAttribution();
       const payload = {
         ...form,
         email: form.email || form.owner_email,
-        signup_source: 'direct',
+        signup_source: getSignupSource(),
+        attribution,
         selected_plan: selectedPlan,
         accepted_terms: true,
       };
@@ -167,6 +170,15 @@ function RegisterForm() {
       // iOS app, so there is no web checkout step — sign the user straight in.
       const data = await res.json();
       trackFunnelStep(4, 'registration', { plan: selectedPlan });
+      // GA4 conversion event — lets Google Analytics report signups by
+      // source/medium alongside our internal attribution.
+      try {
+        (window as any).gtag?.('event', 'sign_up', {
+          method: 'website',
+          plan: selectedPlan,
+          signup_source: getSignupSource(),
+        });
+      } catch { /* analytics must never break signup */ }
       if (data.access_token) {
         setToken(data.access_token);
         try {

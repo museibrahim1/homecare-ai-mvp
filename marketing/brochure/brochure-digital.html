@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PalmCare AI — Brochure</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --teal: #0d9488;
+    --deep: #0b4a3e;
+    --deeper: #073a30;
+    --mint: #99f6e4;
+    --ink: #0f172a;
+    --slate: #475569;
+    --light: #f8fafc;
+  }
+  html, body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+  @page { size: 8.5in 11in; margin: 0; }
+  .page {
+    width: 8.5in; height: 11in;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  /* ── PAGE 1 ── */
+  .hero {
+    background: linear-gradient(150deg, var(--deep) 0%, var(--deeper) 70%);
+    color: #fff;
+    padding: 0.55in 0.6in 0.5in;
+  }
+  .brand-row { display: flex; align-items: center; gap: 10px; margin-bottom: 0.35in; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: var(--teal);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-mark img { width: 20px; height: 20px; }
+  .brand-name { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
+  .brand-tag { font-size: 10px; color: var(--mint); letter-spacing: 0.14em; text-transform: uppercase; margin-left: auto; font-weight: 600; }
+  .eyebrow { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mint); font-weight: 700; margin-bottom: 12px; }
+  h1 { font-size: 40px; line-height: 1.08; font-weight: 800; letter-spacing: -0.015em; max-width: 6.4in; }
+  h1 em { font-style: italic; color: var(--mint); }
+  .hero p.lede { font-size: 14px; line-height: 1.65; color: rgba(255,255,255,0.85); max-width: 6in; margin-top: 16px; }
+  .chips { display: flex; gap: 8px; margin-top: 20px; }
+  .chip {
+    border: 1px solid rgba(153,246,228,0.55); color: var(--mint);
+    font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 100px;
+  }
+  .how {
+    padding: 0.42in 0.6in 0;
+  }
+  .how h2 { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; margin-bottom: 0.28in; }
+  .steps { display: flex; gap: 0.3in; }
+  .step { flex: 1; }
+  .step .shot {
+    background: var(--light);
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 22px 0;
+    height: 3.35in;
+    overflow: hidden;
+    display: flex; justify-content: center;
+  }
+  .step .shot img {
+    width: 100%;
+    border-radius: 18px 18px 0 0;
+    border: 5px solid #0f172a;
+    border-bottom: none;
+    display: block;
+  }
+  .step .num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--teal); color: #fff;
+    font-size: 12px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin: 14px 0 6px;
+  }
+  .step h3 { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .step p { font-size: 11px; line-height: 1.55; color: var(--slate); }
+  .page1-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--light); border-top: 1px solid #e2e8f0;
+    padding: 14px 0.6in;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 10.5px; color: var(--slate);
+  }
+  .page1-footer strong { color: var(--teal); }
+
+  /* ── PAGE 2 ── */
+  .p2-top { padding: 0.55in 0.6in 0.35in; }
+  .p2-top h2 { font-size: 28px; font-weight: 800; color: var(--ink); letter-spacing: -0.015em; margin-bottom: 0.28in; }
+  .benefits { display: flex; gap: 0.28in; }
+  .benefit {
+    flex: 1; background: var(--light); border: 1px solid #e2e8f0;
+    border-radius: 14px; padding: 18px;
+  }
+  .benefit .ico {
+    width: 30px; height: 30px; border-radius: 8px; background: #ccfbf1;
+    color: var(--teal); font-size: 15px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+  }
+  .benefit h3 { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+  .benefit p { font-size: 11px; line-height: 1.55; color: var(--slate); }
+  .trust-band {
+    margin: 0.35in 0.6in 0;
+    background: var(--deep); border-radius: 16px; color: #fff;
+    padding: 0.32in 0.4in;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .trust-band h3 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+  .trust-band p { font-size: 11px; color: rgba(255,255,255,0.8); max-width: 3.6in; line-height: 1.55; }
+  .badges { display: flex; gap: 8px; }
+  .badge {
+    background: rgba(153,246,228,0.14); border: 1px solid rgba(153,246,228,0.5);
+    color: var(--mint); font-size: 10px; font-weight: 700;
+    padding: 6px 12px; border-radius: 100px; white-space: nowrap;
+  }
+  .facts {
+    margin: 0.35in 0.6in 0;
+    border: 1px solid #e2e8f0; border-radius: 16px;
+    display: flex;
+  }
+  .fact {
+    flex: 1; padding: 20px 18px; text-align: center;
+    border-right: 1px solid #e2e8f0;
+  }
+  .fact:last-child { border-right: none; }
+  .fact .big { font-size: 19px; font-weight: 800; color: var(--teal); margin-bottom: 4px; }
+  .fact .small { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--slate); }
+  .quote {
+    margin: 0.5in 0.6in 0;
+    text-align: center;
+    padding: 0.25in 0.5in;
+  }
+  .quote .mark { font-size: 40px; color: var(--teal); line-height: 0.5; font-family: Georgia, serif; }
+  .quote p.q { font-size: 19px; font-weight: 700; color: var(--ink); line-height: 1.45; letter-spacing: -0.01em; margin-top: 10px; }
+  .quote p.q em { color: var(--teal); font-style: normal; }
+  .quote p.a { font-size: 11px; color: var(--slate); margin-top: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .cta {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(150deg, var(--deep) 0%, var(--deeper) 70%);
+    color: #fff; padding: 0.5in 0.6in;
+  }
+  .cta h2 { font-size: 30px; font-weight: 800; letter-spacing: -0.015em; }
+  .cta h2 em { font-style: italic; color: var(--mint); }
+  .cta p { font-size: 13px; color: rgba(255,255,255,0.82); margin-top: 8px; }
+  .cta .row { display: flex; align-items: center; gap: 14px; margin-top: 20px; }
+  .cta .btn {
+    background: #fff; color: var(--deeper); font-size: 13px; font-weight: 700;
+    padding: 12px 26px; border-radius: 10px;
+  }
+  .cta .url { font-size: 14px; font-weight: 700; color: var(--mint); }
+  .cta .legal { margin-top: 22px; font-size: 9.5px; color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+
+  <!-- ══════════ PAGE 1 ══════════ -->
+  <div class="page">
+    <div class="hero">
+      <div class="brand-row">
+        <div class="brand-mark"><img src="../../apps/web/public/hand-icon-white.png" alt=""></div>
+        <div class="brand-name">PalmCare AI</div>
+        <div class="brand-tag">AI for home care agencies</div>
+      </div>
+      <div class="eyebrow">What is PalmCare AI</div>
+      <h1>Talk through the visit.<br>Walk away with <em>the contract.</em></h1>
+      <p class="lede">
+        PalmCare AI listens to the care assessment and turns it into a transcript, billables,
+        care notes, and a signed service agreement. Caregivers care more and type less.
+        Your agency never loses a client to paperwork.
+      </p>
+      <div class="chips">
+        <div class="chip">Record It</div>
+        <div class="chip">Transcribe It</div>
+        <div class="chip">Contract It</div>
+      </div>
+    </div>
+
+    <div class="how">
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="shot"><img src="../../apps/web/public/screenshots/ios/01_home.png" alt="PalmCare AI home"></div>
+          <div class="num">1</div>
+          <h3>Record</h3>
+          <p>Open the app and tap Palm It. The visit records hands-free while you stay present with your client.</p>
+        </div>
+        <div class="step">
+          <div class="shot"><img src="../../apps/web/public/screenshots/ios/03_record.png" alt="Live transcription"></div>
+          <div class="num">2</div>
+          <h3>Transcribe</h3>
+          <p>AI writes the transcript live and flags vitals, conditions, and care needs as they come up.</p>
+        </div>
+        <div class="step">
+          <div class="shot"><img src="../../apps/web/public/screenshots/ios/07_contract.png" alt="Generated contract"></div>
+          <div class="num">3</div>
+          <h3>Contract</h3>
+          <p>A ready-to-sign service agreement, priced and itemized for you — state-specific for all 50 states.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page1-footer">
+      <span><strong>palmcareai.com</strong> &nbsp;·&nbsp; Where care meets intelligence</span>
+      <span>Android, iOS, and web &nbsp;·&nbsp; PalmCare AI by Palm Technologies Inc.</span>
+    </div>
+  </div>
+
+  <!-- ══════════ PAGE 2 ══════════ -->
+  <div class="page">
+    <div class="p2-top">
+      <h2>Smarter. Safer.</h2>
+      <div class="benefits">
+        <div class="benefit">
+          <div class="ico">&#10003;</div>
+          <h3>Care more, type less</h3>
+          <p>Notes and contracts write themselves. Two hours of nightly paperwork — gone. You get your evenings back.</p>
+        </div>
+        <div class="benefit">
+          <div class="ico">&#9670;</div>
+          <h3>Never miss a detail</h3>
+          <p>Vitals, conditions, and risk surface live during the visit — built from what was actually said.</p>
+        </div>
+        <div class="benefit">
+          <div class="ico">$</div>
+          <h3>Never lose a billable</h3>
+          <p>Every service mentioned becomes revenue. Billables are extracted and itemized automatically.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust-band">
+      <div>
+        <h3>Built on trust</h3>
+        <p>Your data stays yours. Audio, transcripts, and contracts are encrypted in transit and at rest — and you stay in control.</p>
+      </div>
+      <div class="badges">
+        <div class="badge">HIPAA</div>
+        <div class="badge">SOC 2</div>
+        <div class="badge">Encrypted</div>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><div class="big">50</div><div class="small">States covered</div></div>
+      <div class="fact"><div class="big">Minutes</div><div class="small">Per assessment</div></div>
+      <div class="fact"><div class="big">2–3&times;</div><div class="small">ROI at modest use</div></div>
+      <div class="fact"><div class="big">iOS + Web</div><div class="small">Android coming</div></div>
+    </div>
+
+    <div class="quote">
+      <div class="mark">&ldquo;</div>
+      <p class="q">One recording does the whole assessment.<br>From conversation to contract, <em>in seconds.</em></p>
+      <p class="a">Record. Transcribe. Contract.</p>
+    </div>
+
+    <div class="cta">
+      <h2>Ready to <em>Palm It?</em></h2>
+      <p>Care more. Type less. Never lose a client to paperwork. Start your 14-day free trial — no credit card required.</p>
+      <div class="row">
+        <div class="btn">Start free at palmcareai.com</div>
+        <div class="url">sales@palmtai.com</div>
+      </div>
+      <div class="legal">&copy; 2026 Palm Technologies, INC. &nbsp;·&nbsp; PalmCare AI — Where care meets intelligence</div>
+    </div>
+  </div>
+
+</body>
+</html>

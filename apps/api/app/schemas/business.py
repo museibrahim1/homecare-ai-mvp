@@ -78,7 +78,10 @@ class BusinessRegistrationStep1(BaseModel):
     website: Optional[str] = None
 
     # Signup tracking
-    signup_source: Optional[str] = None  # "direct", "demo", "referral"
+    signup_source: Optional[str] = None  # channel, e.g. "google-organic", "chatgpt", "direct"
+    # Full marketing attribution captured client-side:
+    # {first_touch: {channel, referrer, landing_page, utm_*, ...}, last_touch: {...}}
+    attribution: Optional[dict] = None
     selected_plan: Optional[str] = None  # "starter", "growth", "enterprise"
 
     # Consent: user accepted Terms, Privacy Policy, and AI data processing
