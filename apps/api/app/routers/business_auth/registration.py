@@ -5,8 +5,9 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Request
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
+from app.core.cookies import set_session_cookie
 from app.core.rate_limit import limiter
 from sqlalchemy.orm import Session
 from jose import jwt
@@ -52,6 +53,7 @@ router = APIRouter()
 @limiter.limit("5/5minutes")
 async def register_business(
     request: Request,
+    response: Response,
     registration: BusinessRegistrationStep1,
     db: Session = Depends(get_db),
 ):
@@ -200,6 +202,7 @@ async def register_business(
         logger.warning(f"Could not auto-create trial subscription: {e}")
 
     signup_source = getattr(registration, "signup_source", None) or "direct"
+    referral_source = getattr(registration, "referral_source", None) or "not_answered"
     attribution = getattr(registration, "attribution", None) or {}
     accepted_terms = bool(getattr(registration, "accepted_terms", False))
     try:
@@ -210,6 +213,7 @@ async def register_business(
             description=f"New business registered (source: {signup_source})",
             changes={
                 "signup_source": signup_source,
+                "referral_source": referral_source,
                 "attribution": attribution,
                 "selected_plan": registration.selected_plan or "starter",
                 # Consent record: user agreed to ToS, Privacy Policy, and AI
@@ -279,6 +283,7 @@ async def register_business(
             owner_name=registration.owner_name.strip(),
             owner_email=owner_email,
             signup_source=signup_source,
+            referral_source=referral_source,
             attribution=attribution,
             selected_plan=registration.selected_plan or "starter",
         )
@@ -286,6 +291,9 @@ async def register_business(
         pass
 
     logger.info(f"New business registered: business_id={business.id}, source={signup_source}")
+
+    # Web clients authenticate via httpOnly cookie (token never in localStorage)
+    set_session_cookie(response, token)
 
     return BusinessRegistrationResponse(
         business_id=business.id,

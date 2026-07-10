@@ -79,6 +79,9 @@ class BusinessRegistrationStep1(BaseModel):
 
     # Signup tracking
     signup_source: Optional[str] = None  # channel, e.g. "google-organic", "chatgpt", "direct"
+    # Self-reported "Where did you find us?" answer — catches channels the
+    # automatic attribution can't see (AI assistants, word of mouth).
+    referral_source: Optional[str] = Field(default=None, max_length=100)
     # Full marketing attribution captured client-side:
     # {first_touch: {channel, referrer, landing_page, utm_*, ...}, last_touch: {...}}
     attribution: Optional[dict] = None

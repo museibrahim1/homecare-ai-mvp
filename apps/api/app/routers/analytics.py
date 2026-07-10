@@ -777,11 +777,14 @@ async def registration_sources(
     ).order_by(desc(AuditLog.created_at)).all()
 
     signups_by_channel: dict[str, int] = defaultdict(int)
+    signups_by_referral: dict[str, int] = defaultdict(int)
     recent_signups = []
     for log in registrations:
         changes = log.changes or {}
         source = changes.get("signup_source") or "direct"
         signups_by_channel[source] += 1
+        # Self-reported "Where did you find us?" answer
+        signups_by_referral[changes.get("referral_source") or "not_answered"] += 1
 
         attribution = changes.get("attribution") or {}
         first = attribution.get("first_touch") or {}
@@ -790,6 +793,7 @@ async def registration_sources(
             "registered_at": log.created_at.isoformat() if log.created_at else None,
             "business": (log.description or "").replace("New business registered ", ""),
             "signup_source": source,
+            "referral_source": changes.get("referral_source"),
             "selected_plan": changes.get("selected_plan"),
             "first_touch_channel": first.get("channel"),
             "first_touch_referrer": first.get("referrer"),
@@ -817,6 +821,12 @@ async def registration_sources(
                 ),
             }
             for c in channels
+        ],
+        # Self-reported answers to "Where did you find us?" at signup —
+        # catches channels automatic attribution can't see (AI assistants, word of mouth).
+        "self_reported_sources": [
+            {"source": s, "signups": n}
+            for s, n in sorted(signups_by_referral.items(), key=lambda kv: -kv[1])
         ],
         "recent_signups": recent_signups[:50],
     }

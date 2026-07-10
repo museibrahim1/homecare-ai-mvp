@@ -565,6 +565,7 @@ class EmailService:
         owner_name: Optional[str] = None,
         owner_email: Optional[str] = None,
         signup_source: Optional[str] = None,
+        referral_source: Optional[str] = None,
         attribution: Optional[dict] = None,
         selected_plan: Optional[str] = None,
     ):
@@ -586,6 +587,7 @@ class EmailService:
 
         attribution_rows = (
             row("Signup source", signup_source)
+            + row("They said they found us via", referral_source if referral_source != "not_answered" else None)
             + row("First-touch channel", first.get("channel"))
             + row("First referrer", first.get("referrer"))
             + row("Landing page", first.get("landing_page"))

@@ -6,9 +6,200 @@ export interface BlogPost {
   readTime: string;
   category: string;
   content: string;
+  /** For listicles: the ranked items, emitted as ItemList JSON-LD for SEO/AEO. */
+  listItems?: string[];
 }
 
 export const BLOG_POSTS: BlogPost[] = [
+  {
+    slug: 'best-ai-tools-home-care-agencies-2026',
+    title: 'The 7 Best AI Tools for Home Care Agencies in 2026',
+    description:
+      'A ranked list of the best AI tools for home care agencies in 2026, covering documentation, clinical scribes, contract templates, monitoring, and training — with what each one is actually best at.',
+    date: '2026-07-09',
+    readTime: '8 min read',
+    category: 'Comparison',
+    listItems: [
+      'PalmCare AI — best for assessments, care plans, and state-specific service contracts',
+      'Eleos Health — best AI clinical scribe for behavioral and home health documentation',
+      'Apricot (by AlayaCare) — best ambient scribe inside a home health EHR',
+      'nVoq — best medical dictation for clinicians who prefer speaking to typing',
+      'Sensi.AI — best in-home audio monitoring for around-the-clock awareness',
+      'CareAcademy — best AI-assisted caregiver training and compliance tracking',
+      'PandaDoc — best general e-signature and document workflow tool',
+    ],
+    content: `
+AI landed in home care fast, and the tools are not interchangeable: a clinical scribe, a contract generator, and an in-home monitor solve completely different problems. This list ranks the seven AI tools we see delivering real value for home care agencies in 2026, with what each is genuinely best at, so you can match the tool to the job.
+
+## 1. PalmCare AI — best for assessments, care plans, and service contracts
+
+PalmCare AI is built for non-medical home care agencies, and it owns one specific job better than anything else on this list: turning a recorded client assessment into finished paperwork. You record the conversation, and it writes the transcript, the care plan, the billable items, the visit notes, and a state-specific service agreement built from what was actually said. A staff member reviews and approves everything before it goes out.
+
+- **Best for:** agencies that want each assessment to become a ready-to-sign contract in minutes.
+- **Standout:** service agreements with the correct clauses for all 50 states, generated automatically.
+- **Consider something else if:** you are a Medicare-certified home health agency that needs OASIS charting — that is scribe territory (see #2 and #3).
+
+## 2. Eleos Health — best AI clinical scribe for behavioral and home health
+
+Eleos listens during sessions and produces clinical documentation in real time, with strong compliance analytics on top. It is well established in behavioral health and expanding in home health. Output is clinical notes, not client contracts.
+
+- **Best for:** clinical documentation and supervision insights.
+- **Consider something else if:** your bottleneck is intake paperwork rather than clinical charting.
+
+## 3. Apricot (by AlayaCare) — best ambient scribe inside an EHR
+
+Apricot generates visit documentation ambiently and syncs it into the AlayaCare platform. If you already run on AlayaCare, it is the lowest-friction way to add AI documentation.
+
+- **Best for:** AlayaCare customers who want AI charting without another vendor.
+- **Consider something else if:** you are not on AlayaCare, or you need service agreements.
+
+## 4. nVoq — best medical dictation
+
+nVoq is speech recognition tuned for healthcare, popular with home health and hospice clinicians who want accurate dictation into their existing systems. It transcribes what you say; it does not decide what the document should contain.
+
+- **Best for:** clinicians replacing typing with speaking.
+- **Consider something else if:** you want the AI to structure the document, not just transcribe it.
+
+## 5. Sensi.AI — best in-home monitoring
+
+Sensi uses audio-based AI in the client's home to detect falls, distress, and care quality issues between visits. It is a care intelligence tool, not a documentation tool, and it pairs well with any platform on this list.
+
+- **Best for:** 24/7 awareness for high-acuity or live-alone clients.
+- **Consider something else if:** you are solving a paperwork problem, not a monitoring problem.
+
+## 6. CareAcademy — best caregiver training
+
+CareAcademy handles state-required caregiver training with AI-assisted course recommendations and automatic compliance tracking. Training is a compliance surface every agency has to manage, and this is the cleanest way to do it.
+
+- **Best for:** onboarding caregivers and keeping certifications current.
+
+## 7. PandaDoc — best general document workflow
+
+PandaDoc is not home care specific, but plenty of agencies use it for proposals and e-signature. Its AI helps draft and edit documents from templates. You still fill in the care details and verify state requirements yourself.
+
+- **Best for:** e-signature and polished proposals.
+- **Consider something else if:** you want home care logic built in — templates do not know your state's required clauses.
+
+## How to choose
+
+1. **Name the bottleneck first.** Intake paperwork, clinical charting, monitoring, and training are four different problems.
+2. **Home health or home care?** Medicare-certified home health needs OASIS tools. Non-medical home care needs assessment-to-contract tools.
+3. **Trial with a real client, not a demo script.** Ten minutes with your own assessment tells you more than any sales call.
+
+If your slowest day-to-day job is getting from "we finished the assessment" to "the client signed the agreement," that exact job is what [PalmCare AI](/register) was built for — and you can try it free for 14 days.
+`,
+  },
+  {
+    slug: 'ways-home-care-agencies-use-ai-2026',
+    title: '10 Ways Home Care Agencies Are Using AI in 2026',
+    description:
+      'From voice-recorded assessments to automatic billing extraction, here are ten concrete ways home care agencies are putting AI to work in 2026 — and what each one replaces.',
+    date: '2026-07-09',
+    readTime: '7 min read',
+    category: 'Industry',
+    listItems: [
+      'Recording assessments instead of typing them',
+      'Generating state-specific service contracts automatically',
+      'Writing care plans from the assessment conversation',
+      'Extracting billable items straight from the visit',
+      'Drafting visit notes for caregiver review',
+      'Screening and prioritizing new client inquiries',
+      'Monitoring clients between visits with in-home AI',
+      'Automating caregiver training and compliance tracking',
+      'Answering family questions with agency chatbots',
+      'Forecasting scheduling gaps before they happen',
+    ],
+    content: `
+Ask ten agency owners what "using AI" means and you will get ten answers. That is because AI is not one feature — it is a set of tools that each replace a specific piece of manual work. Here are the ten uses we actually see in the field in 2026, ordered roughly by how much time each one gives back.
+
+## 1. Recording assessments instead of typing them
+
+The single biggest shift. Instead of filling out forms during a home visit, the assessor records the conversation and AI transcribes it, separates the speakers, and pulls out the care needs. The conversation becomes the documentation.
+
+## 2. Generating state-specific service contracts
+
+Home care service agreements are regulated state by state, and getting the required clauses right by hand is slow and risky. AI tools like PalmCare AI generate the agreement from the assessment with the correct state clauses already in place.
+
+## 3. Writing care plans from the conversation
+
+The same recording that produces the contract can produce the care plan: goals, tasks per visit, schedule, and safety precautions, all consistent with what the client actually said they need.
+
+## 4. Extracting billables straight from the visit
+
+Hours, services, and rates mentioned in the assessment get captured as billing line items instead of being re-keyed later. Fewer touches means fewer billing errors.
+
+## 5. Drafting visit notes for review
+
+Caregivers speak a quick summary after a visit; AI structures it into a proper note. The caregiver reviews and approves. Nobody types on a phone keyboard in a parked car anymore.
+
+## 6. Screening new client inquiries
+
+AI intake assistants collect the basics from a new inquiry (location, needs, hours, payer) and rank leads, so coordinators spend their callbacks on the families most likely to start service.
+
+## 7. Monitoring between visits
+
+Audio-based in-home AI (like Sensi.AI) listens for falls, distress, and care issues around the clock and flags anomalies for follow-up. It extends awareness beyond scheduled visit hours.
+
+## 8. Automating training and compliance
+
+Platforms like CareAcademy assign state-required training automatically and track expirations, so certification gaps get caught before an audit does.
+
+## 9. Answering families with chatbots
+
+Agency websites now answer common questions (services, coverage areas, pricing basics) instantly and hand off to a human when the conversation gets specific. Families get answers at 9 PM; coordinators get fewer repetitive calls.
+
+## 10. Forecasting scheduling gaps
+
+Scheduling systems increasingly flag likely call-offs and coverage gaps based on patterns, giving schedulers hours of warning instead of minutes.
+
+## Where to start
+
+Do not adopt ten tools. Pick the one job that eats the most hours at your agency. For most non-medical home care agencies, that is the intake paperwork chain: assessment, care plan, billables, contract. That entire chain from one recording is what [PalmCare AI](/register) does — start there, measure the hours saved, then expand.
+`,
+  },
+  {
+    slug: 'questions-to-ask-before-buying-home-care-ai-software',
+    title: '5 Questions to Ask Before Buying AI Software for Your Home Care Agency',
+    description:
+      'A practical buyer checklist for home care AI software: the five questions that separate tools that save hours from tools that create new work.',
+    date: '2026-07-09',
+    readTime: '5 min read',
+    category: 'Operations',
+    listItems: [
+      'Is it built for home care, or adapted from another industry?',
+      'What does it produce — a transcript, a note, or a finished document?',
+      'Does a human review step come standard?',
+      'How does it handle HIPAA and my state requirements?',
+      'Can I test it with a real assessment before paying?',
+    ],
+    content: `
+Every software vendor put "AI" on their homepage this year. Some of those tools will save your agency ten hours a week; others will add a new system to babysit. These five questions separate the two — ask them on every demo call.
+
+## 1. Is it built for home care, or adapted from another industry?
+
+A tool built for hospitals or general offices does not know what an ADL is, what a service agreement must contain in your state, or why a care plan and a contract have to match. Ask the vendor to name their home care customers and show a home care workflow end to end. Generic AI plus your industry knowledge is still your labor.
+
+## 2. What does it produce — a transcript, a note, or a finished document?
+
+This is the question most buyers skip. A transcription tool gives you accurate text you still have to process. A scribe gives you a clinical note. A documentation platform gives you the finished artifacts: care plan, billables, and a signable contract. None of these is wrong, but they are priced like different things because they are different things. Know which one you are buying.
+
+## 3. Does a human review step come standard?
+
+You want AI that drafts and humans that approve. If the tool sends documents anywhere without a review step, that is a compliance problem waiting for a date. If the vendor cannot show you the review screen, keep shopping.
+
+## 4. How does it handle HIPAA and my state requirements?
+
+Minimum bar: encryption at rest and in transit, role-based access, audit logs, and a signed BAA. For anything that produces contracts, add: how does it know my state's required clauses, and what happens when my state changes its rules? "You can edit the template yourself" means the compliance work is still yours.
+
+## 5. Can I test it with a real assessment before paying?
+
+A scripted demo always works. Your actual audio — a real assessment with background noise, interruptions, and a client who wanders off topic — is the real test. A vendor confident in their product will let you run one. A 14-day trial with full features is the standard now; anything less deserves the question "why not?"
+
+## The short version
+
+Buy the tool that produces the thing you need finished, built for your industry, with human review, real compliance answers, and a trial you can run on a real client. If the thing you need finished is the assessment-to-contract chain, [start a free trial of PalmCare AI](/register) and run question five on us first.
+`,
+  },
   {
     slug: 'what-is-ai-powered-home-care-software',
     title: 'What Is AI-Powered Home Care Software?',

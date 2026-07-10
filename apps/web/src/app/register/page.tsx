@@ -30,6 +30,19 @@ const US_STATES = [
   'WI','WY','DC',
 ];
 
+// Self-reported acquisition channel. Answers where the automatic attribution
+// can't see (e.g. a ChatGPT recommendation looks like "direct" traffic).
+const REFERRAL_SOURCES = [
+  { value: 'google', label: 'Google search' },
+  { value: 'ai_assistant', label: 'ChatGPT or another AI assistant' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'facebook_instagram', label: 'Facebook or Instagram' },
+  { value: 'referral', label: 'Referral from a colleague or friend' },
+  { value: 'event', label: 'Industry conference or event' },
+  { value: 'email', label: 'An email from us' },
+  { value: 'other', label: 'Other' },
+];
+
 export default function RegisterPage() {
   return (
     <Suspense fallback={
@@ -103,6 +116,7 @@ function RegisterForm() {
     phone: '',
     email: '',
     website: '',
+    referral_source: '',
   });
 
   const set = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
@@ -177,6 +191,7 @@ function RegisterForm() {
           method: 'website',
           plan: selectedPlan,
           signup_source: getSignupSource(),
+          referral_source: form.referral_source || 'not_answered',
         });
       } catch { /* analytics must never break signup */ }
       if (data.access_token) {
@@ -403,6 +418,13 @@ function RegisterForm() {
                     <label className="block text-sm font-medium text-white/70 mb-1.5">ZIP</label>
                     <input type="text" value={form.zip_code} onChange={e => set('zip_code', e.target.value)} className={inputClass} />
                   </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1.5">Where did you find us?</label>
+                  <select value={form.referral_source} onChange={e => set('referral_source', e.target.value)} className={inputClass}>
+                    <option value="">Select one (optional)</option>
+                    {REFERRAL_SOURCES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
                 </div>
               </div>
 
