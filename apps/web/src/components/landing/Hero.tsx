@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2, FileText, Lock, Shield } from 'lucide-react';
 import { MEDICAL_KEYWORDS, TRANSCRIPT_SEGMENTS } from './data';
+import { Orb } from './Orb';
 
 export function Hero() {
   const [started, setStarted] = useState(false);
@@ -67,11 +68,11 @@ export function Hero() {
               Start your 14-day free trial <ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
             <Link
-              href="/pricing"
-              data-track="hero-cta-pricing"
+              href="/book-demo"
+              data-track="hero-cta-demo"
               className="inline-flex items-center justify-center gap-2 py-3.5 px-7 text-base font-medium rounded-lg text-slate-700 border border-slate-300 hover:border-slate-400 hover:bg-slate-50 transition"
             >
-              View pricing
+              Try the demo
             </Link>
           </div>
 
@@ -103,7 +104,11 @@ export function Hero() {
             )}
           </div>
 
-          <div ref={transcriptRef} className="h-[300px] sm:h-[340px] overflow-y-auto scrollbar-hide px-4 sm:px-5 py-4 space-y-4">
+          <div className="flex justify-center pt-5 pb-1 bg-white">
+            <Orb size={140} active={started && !finished} />
+          </div>
+
+          <div ref={transcriptRef} className="h-[220px] sm:h-[250px] overflow-y-auto scrollbar-hide px-4 sm:px-5 py-4 space-y-4">
             {TRANSCRIPT_SEGMENTS.map((seg, segIdx) => {
               const segStart = wordsBefore;
               wordsBefore += seg.words.length;
