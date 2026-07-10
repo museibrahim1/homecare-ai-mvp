@@ -141,15 +141,22 @@ def _load_apple_root_certs() -> list[bytes]:
     Prefer certs supplied via env var; fall back to package-bundled certs
     if `app-store-server-library` ships them.
     """
-    cert_dir = os.getenv("APPLE_ROOT_CERTS_DIR")
-    if cert_dir and os.path.isdir(cert_dir):
-        certs: list[bytes] = []
-        for name in sorted(os.listdir(cert_dir)):
-            if name.endswith((".cer", ".pem", ".crt")):
-                with open(os.path.join(cert_dir, name), "rb") as fh:
-                    certs.append(fh.read())
-        if certs:
-            return certs
+    # Repo-bundled Apple root CAs (apps/api/certs/apple) are the default;
+    # APPLE_ROOT_CERTS_DIR overrides for custom deployments.
+    bundled_dir = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "certs",
+        "apple",
+    )
+    for cert_dir in (os.getenv("APPLE_ROOT_CERTS_DIR"), bundled_dir):
+        if cert_dir and os.path.isdir(cert_dir):
+            certs: list[bytes] = []
+            for name in sorted(os.listdir(cert_dir)):
+                if name.endswith((".cer", ".pem", ".crt")):
+                    with open(os.path.join(cert_dir, name), "rb") as fh:
+                        certs.append(fh.read())
+            if certs:
+                return certs
     raise HTTPException(
         status_code=503,
         detail="Apple root certificates not configured (set APPLE_ROOT_CERTS_DIR)",
