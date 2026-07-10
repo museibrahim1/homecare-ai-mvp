@@ -293,6 +293,9 @@ def send_custom_email(
     </div>
     """
 
+    # Attach the marketing brochure PNG to every send.
+    attachments = email_service.marketing_attachments() or None
+
     results = []
     for rcpt in recipients:
         result = email_service.send_email(
@@ -302,6 +305,7 @@ def send_custom_email(
             text=body.body,
             sender=email_service.from_sales,
             reply_to="sales@palmcareai.com",
+            attachments=attachments,
         )
         results.append({"to": rcpt, "success": result.get("success", False), "id": result.get("id")})
         logger.info(f"Custom email to {rcpt} by {user.email}: {result.get('success')}")

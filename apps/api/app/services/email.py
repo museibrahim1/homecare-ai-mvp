@@ -21,21 +21,41 @@ from typing import Optional, List
 
 logger = logging.getLogger(__name__)
 
-# Company brochure bundled with the API (attached to welcome emails).
-BROCHURE_PATH = Path(__file__).resolve().parent.parent / "assets" / "PalmCare-AI-Brochure.pdf"
+# Marketing collateral bundled with the API (attached to emails).
+_ASSETS = Path(__file__).resolve().parent.parent / "assets"
+BROCHURE_PATH = _ASSETS / "PalmCare-AI-Brochure.pdf"
+PITCH_DECK_PATH = _ASSETS / "PalmCare_Full_v4.pdf"
+MARKETING_BROCHURE_PNG = _ASSETS / "PalmCare-Trifold-Brochure.png"
+
+
+def _file_attachment(path: Path, filename: str) -> Optional[dict]:
+    """Load a bundled file as a Resend attachment (None if missing)."""
+    try:
+        content = path.read_bytes()
+        return {
+            "filename": filename,
+            "content": base64.b64encode(content).decode("ascii"),
+        }
+    except OSError:
+        logger.warning(f"Attachment not found at {path}; sending without it")
+        return None
 
 
 def _brochure_attachment() -> Optional[dict]:
     """Load the brochure PDF as a Resend attachment (None if missing)."""
-    try:
-        content = BROCHURE_PATH.read_bytes()
-        return {
-            "filename": "PalmCare-AI-Brochure.pdf",
-            "content": base64.b64encode(content).decode("ascii"),
-        }
-    except OSError:
-        logger.warning(f"Brochure PDF not found at {BROCHURE_PATH}; sending without attachment")
-        return None
+    return _file_attachment(BROCHURE_PATH, "PalmCare-AI-Brochure.pdf")
+
+
+def _pitch_deck_attachment() -> Optional[dict]:
+    """Load the pitch deck PDF as a Resend attachment (None if missing)."""
+    return _file_attachment(PITCH_DECK_PATH, "PalmCare-AI-Pitch-Deck.pdf")
+
+
+def _marketing_brochure_png() -> Optional[dict]:
+    """Load the marketing brochure PNG as a Resend attachment (None if missing)."""
+    return _file_attachment(MARKETING_BROCHURE_PNG, "PalmCare-Brochure.png")
+
+
 
 try:
     import resend
@@ -462,7 +482,17 @@ class EmailService:
             reply_to="support@palmcareai.com",
             attachments=[brochure] if brochure else None,
         )
-    
+
+    # ==================== Marketing Studio ====================
+
+    def marketing_attachments(self) -> List[dict]:
+        """Collateral attached to Marketing Studio emails (brochure PNG)."""
+        return [a for a in (_marketing_brochure_png(),) if a]
+
+    def investor_attachments(self) -> List[dict]:
+        """Collateral attached to investor emails (brochure + pitch deck)."""
+        return [a for a in (_brochure_attachment(), _pitch_deck_attachment()) if a]
+
     def send_business_approved(self, business_email: str, business_name: str, login_url: str):
         """Send approval notification with login link."""
         subject = f"Your Account is Approved! - {BRAND}"

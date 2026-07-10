@@ -349,12 +349,13 @@ async def send_investor_email(
 
     html = _investor_email_wrap(data.html_body)
 
-    result = await email_service.send_email(
+    result = email_service.send_email(
         to=to_email,
         subject=data.subject,
         html=html,
-        from_name="Muse Ibrahim | PalmCare AI",
-        reply_to="muse@palmtai.com",
+        sender=email_service.from_investor,
+        reply_to="invest@palmtai.com",
+        attachments=email_service.investor_attachments() or None,
     )
 
     inv.last_email_sent_at = datetime.now(timezone.utc)
@@ -362,8 +363,8 @@ async def send_investor_email(
     inv.email_send_count = (inv.email_send_count or 0) + 1
     if inv.status == "new":
         inv.status = "email_sent"
-    if result and hasattr(result, "id"):
-        inv.resend_email_id = result.id
+    if result and result.get("id"):
+        inv.resend_email_id = result["id"]
 
     log_entry = {
         "type": "email_sent",
@@ -394,6 +395,9 @@ async def send_bulk_investor_email(
     if not investors:
         raise HTTPException(status_code=400, detail="No investors with email addresses found")
 
+    # Build the collateral once; the same brochure and deck go to everyone.
+    attachments = email_service.investor_attachments() or None
+
     sent = 0
     failed = 0
     for inv in investors:
@@ -405,12 +409,13 @@ async def send_bulk_investor_email(
 
             html = _investor_email_wrap(personalized_body)
 
-            result = await email_service.send_email(
+            result = email_service.send_email(
                 to=inv.contact_email,
                 subject=personalized_subject,
                 html=html,
-                from_name="Muse Ibrahim | PalmCare AI",
-                reply_to="muse@palmtai.com",
+                sender=email_service.from_investor,
+                reply_to="invest@palmtai.com",
+                attachments=attachments,
             )
 
             inv.last_email_sent_at = datetime.now(timezone.utc)
@@ -418,8 +423,8 @@ async def send_bulk_investor_email(
             inv.email_send_count = (inv.email_send_count or 0) + 1
             if inv.status in ("new", "researched"):
                 inv.status = "email_sent"
-            if result and hasattr(result, "id"):
-                inv.resend_email_id = result.id
+            if result and result.get("id"):
+                inv.resend_email_id = result["id"]
 
             log_entry = {
                 "type": "bulk_email_sent",
