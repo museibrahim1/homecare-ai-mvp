@@ -73,7 +73,9 @@
 		CB8BFB4C0847725F56BE3B88 /* AssessmentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748C6E60A4F45E08581497C8 /* AssessmentsListView.swift */; };
 		D7ADB4CBA5E29CE2681B99C8 /* ClientPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF2030E920D45AD43C4EF04 /* ClientPickerSheet.swift */; };
 		D7BC1ADD03FE68A611EF1DC2 /* Billing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416BEF412DD2A345AF29F0DA /* Billing.swift */; };
+		DF8CA83F401B0268F58C05AB /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91C5BA6789DF7D7FFA6B55EB /* PaywallView.swift */; };
 		E57895BA529502BEB461F6EC /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35BEA66607E528FB3FADBDF4 /* Client.swift */; };
+		E5D41CF8D6974242651C9676 /* StoreKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDCB9B2E755AB310D6FB414 /* StoreKitService.swift */; };
 		EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEA75021BD113DD86530A11 /* RecordView.swift */; };
 		F23E5D61BCFB2A1E18F6762C /* ClientDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D15C6C3E52AD92EF25A44FBF /* ClientDetailView.swift */; };
 		F550B4192FBBEA3CA2B46F53 /* LiveTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */; };
@@ -123,10 +125,12 @@
 		7FE5716DE1D6F7505F157C68 /* VisitDetailView+Contract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VisitDetailView+Contract.swift"; sourceTree = "<group>"; };
 		805E8A85451B1B1FABD26BEC /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
 		84658C2E024E0F219EEFFA49 /* APIService+AuthClientsVisits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+AuthClientsVisits.swift"; sourceTree = "<group>"; };
+		91C5BA6789DF7D7FFA6B55EB /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		94BA31B4B732B6A4B775BC4C /* AudioFilePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilePicker.swift; sourceTree = "<group>"; };
 		965C098053DF16C330D69A47 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		9955EEED2AEDE41A7C5D2D3A /* PalmAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PalmAlert.swift; sourceTree = "<group>"; };
 		9C94F6F7BFB3DC576CE615EA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		9FDCB9B2E755AB310D6FB414 /* StoreKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitService.swift; sourceTree = "<group>"; };
 		A15DEE24A86CBE6300B1EF89 /* APIService+Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIService+Support.swift"; sourceTree = "<group>"; };
 		A62F08AE1496C16DBFA9D619 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A72217ACB74F974613CD621F /* EmailSenderConnector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailSenderConnector.swift; sourceTree = "<group>"; };
@@ -239,6 +243,7 @@
 				D711F21CC2AD05B3CCF6A697 /* DeleteAccountSheet.swift */,
 				E9F571D0F9C831B327F6C328 /* EditProfileSheet.swift */,
 				2F86448E3F9D8340AD63CE38 /* GoogleCalendarSetupSheet.swift */,
+				91C5BA6789DF7D7FFA6B55EB /* PaywallView.swift */,
 				13FA85219CEFB0BFA3D30AFE /* SettingsComponents.swift */,
 				9C94F6F7BFB3DC576CE615EA /* SettingsView.swift */,
 				B0648ACF01EC24C5F3EB2927 /* SupportView.swift */,
@@ -348,6 +353,7 @@
 				A72217ACB74F974613CD621F /* EmailSenderConnector.swift */,
 				B975E56167E2BC1850E208CD /* LiveTranscriptionService.swift */,
 				E1CC73B9C868A19C347EECD0 /* PushNotifications.swift */,
+				9FDCB9B2E755AB310D6FB414 /* StoreKitService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -487,12 +493,14 @@
 				6699DA1B3C377734838CD895 /* PalmCareAIApp.swift in Sources */,
 				5EA469E56F749FDCF74408EF /* PalmCareTheme.swift in Sources */,
 				022F73AF525AD8FE49B863F9 /* PalmOrbLogo.swift in Sources */,
+				DF8CA83F401B0268F58C05AB /* PaywallView.swift in Sources */,
 				3D2D2E63458DADA4642A6F30 /* PushNotifications.swift in Sources */,
 				09D5105092F5014A092792D9 /* RecordOrbViews.swift in Sources */,
 				EA25CA835C18FE8FF8AE9202 /* RecordView.swift in Sources */,
 				9BEC3A7D5BC102355BA4D5AE /* RegisterView.swift in Sources */,
 				141F927F15C477E97C29E0A1 /* SettingsComponents.swift in Sources */,
 				0B4988B6FD2460A6DC433938 /* SettingsView.swift in Sources */,
+				E5D41CF8D6974242651C9676 /* StoreKitService.swift in Sources */,
 				34EAF2246049B247E38B5FD8 /* Subscription.swift in Sources */,
 				C97516E5CB88F6CE99E52F81 /* SupportView.swift in Sources */,
 				6DAF2292176E3E2ABFF8C93E /* SwipeBackGesture.swift in Sources */,
@@ -549,7 +557,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -568,7 +576,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -632,7 +640,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -645,7 +653,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

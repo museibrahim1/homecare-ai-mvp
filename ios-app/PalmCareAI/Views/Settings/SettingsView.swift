@@ -14,6 +14,7 @@ struct SettingsView: View {
     @State private var showTerms = false
     @State private var showEditProfile = false
     @State private var showDeleteAccount = false
+    @State private var showPaywall = false
     @AppStorage("googleCalendarConnected") private var googleCalConnected = false
 
     @AppStorage("useFaceID") private var useFaceID = false
@@ -62,6 +63,11 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showDeleteAccount) {
                 DeleteAccountSheet().environmentObject(api)
+            }
+            .sheet(isPresented: $showPaywall, onDismiss: {
+                Task { usage = try? await api.fetchUsage() }
+            }) {
+                PaywallView().environmentObject(api)
             }
             .task { await loadData() }
             .preferredColorScheme(isDarkMode ? .dark : .light)
@@ -294,6 +300,32 @@ struct SettingsView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
             }
+
+            SettingsDivider()
+
+            Button { showPaywall = true } label: {
+                HStack(spacing: 12) {
+                    SettingsIcon(systemName: "arrow.up.circle.fill", color: .palmPrimary)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(usage?.has_paid_plan == true ? "Change Plan" : "View Plans")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.palmText)
+                        Text("Starter, Growth, or Professional")
+                            .font(.system(size: 11))
+                            .foregroundColor(.palmSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.palmBorder)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+            }
+            .accessibilityLabel("View subscription plans")
 
             SettingsDivider()
 

@@ -83,6 +83,9 @@ struct PalmCareAIApp: App {
                     // Signed in: request push permission and (re)send the token.
                     PushManager.requestAuthorizationAndRegister()
                     Task { await api.registerStoredDeviceTokenIfPossible() }
+                    // Re-verify App Store entitlements so renewals, refunds,
+                    // and revocations made outside the app are enforced.
+                    Task { await StoreKitService.shared.syncEntitlements() }
                 }
                 registerInteraction()
             }
@@ -143,6 +146,9 @@ struct PalmCareAIApp: App {
                 #if DEBUG
                 api.autoLoginDemoIfNeeded()
                 #endif
+                if api.isAuthenticated {
+                    await StoreKitService.shared.syncEntitlements()
+                }
             }
         }
     }
