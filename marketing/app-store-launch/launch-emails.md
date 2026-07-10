@@ -67,3 +67,19 @@ It reads the `CRON_SECRET` repo secret.
 
 > Note: the endpoint ships in this PR. The production API on Railway must be deployed
 > with it (deploys on merge to `main`) before the workflow/script can reach it.
+
+## Pull the exact list of who we emailed
+
+The exact list of agencies (and investors) emailed on a given day lives only in the
+production CRM (`SalesLead` / `Investor` tables) — the same source the admin
+**Command Center** (`/admin/command-center`) reads. Two ways to get it:
+
+1. **Admin page (no setup):** open Command Center, pick the past day (e.g. Thursday
+   Jul 9). Each emailed agency shows its name, city, state, and email.
+2. **Read-only endpoint / export:** `GET /platform/sales/leads/internal/emailed-on`
+   (`date=YYYY-MM-DD` or `since_hours`, `audience`). No side effects.
+   - `scripts/email/pull_emailed_list.py --date 2026-07-09 --audience agencies --csv out.csv`
+   - or the manual workflow **Pull emailed list** (`.github/workflows/pull-emailed-list.yml`),
+     which prints the list and uploads a CSV artifact. Needs the `CRON_SECRET` repo secret.
+
+The `resend-launch` dry run also returns the full recipient list.
