@@ -1,0 +1,27 @@
+---
+description: Always run subagents on Opus 4.8 (never composer) for sharp, accurate results
+alwaysApply: true
+---
+
+# Subagent Model: Always Opus 4.8
+
+Every time you launch a subagent with the Task tool, set the `model` parameter
+to Opus 4.8 — model slug **`claude-opus-4-8-thinking-high`**. Do NOT let a
+subagent run on a composer model; those are faster but less accurate, and
+subagent work (audits, research, multi-step edits) needs to be sharp.
+
+This applies to ALL subagent types: `generalPurpose`, `explore`, `shell`,
+`bugbot`, `security-review`, `ci-investigator`, etc.
+
+```txt
+✅ Task(subagent_type="generalPurpose", model="claude-opus-4-8-thinking-high", ...)
+❌ Task(subagent_type="generalPurpose", ...)          # inherits parent — may be composer
+❌ Task(subagent_type="generalPurpose", model="composer-2.5-fast", ...)
+```
+
+## Exceptions
+- If the user explicitly names a different model for a subagent, use the model
+  they asked for (their instruction wins).
+- If `claude-opus-4-8-thinking-high` is ever unavailable, tell the user it's
+  unavailable and let them pick from the available Opus/Claude models rather
+  than silently falling back to composer.
