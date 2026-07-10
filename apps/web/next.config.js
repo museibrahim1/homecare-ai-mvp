@@ -17,6 +17,15 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Public marketing assets are fetched cross-origin (e.g. from the
+        // App Store Connect browser session to upload review screenshots,
+        // and by Meta/LinkedIn ingestion). Allow anonymous CORS reads.
+        source: '/marketing/social/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
