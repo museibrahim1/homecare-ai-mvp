@@ -1,0 +1,28 @@
+---
+description: Writing style for all customer-facing copy (emails, blog posts, marketing, UI text)
+alwaysApply: true
+---
+
+# No AI Slop in Customer-Facing Copy
+
+Applies to everything a customer, investor, or prospect reads: emails, blog posts, landing pages, ads, UI text, contracts.
+
+## Banned
+
+- **Em dashes and en dashes** (— and –). Restructure the sentence or use a period or comma instead.
+- **Slashes** joining alternatives ("home health/hospice", "and/or", "24/7"). Write "home health and hospice", "around the clock".
+- **Buzzword filler**: "revolutionize", "game-changing", "seamless", "unlock", "empower", "leverage", "cutting-edge", "robust", "streamline", "elevate", "supercharge", "delve", "landscape", "in today's fast-paced world".
+- **Formulaic AI patterns**: "It's not just X, it's Y", "Whether you're A or B", rhetorical-question openers, "In conclusion", triple parallel constructions stacked for effect.
+- **Fake enthusiasm**: exclamation marks in marketing copy, emojis unless the user asks.
+- **Unverifiable claims**: made-up statistics, testimonials, or performance numbers. Only use facts we can back up.
+
+## Instead
+
+- Short declarative sentences. One idea per sentence.
+- Plain words: "use" not "utilize", "help" not "empower", "fast" not "blazingly fast".
+- Specifics over adjectives: "generates the contract in minutes" not "lightning-fast contract generation".
+
+```text
+❌ Whether you're a small agency or a large enterprise, PalmCare AI seamlessly streamlines your workflow — saving you time and money 24/7.
+✅ Record the assessment. PalmCare AI writes the care plan, the billables, and the contract. Most agencies finish paperwork the same day.
+```

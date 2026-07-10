@@ -12,16 +12,7 @@ import { getAttribution, getSignupSource } from '@/lib/attribution';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 
-const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-
-const ENTITY_TYPES = [
-  { value: 'llc', label: 'LLC' },
-  { value: 'corporation', label: 'Corporation' },
-  { value: 'sole_proprietorship', label: 'Sole Proprietorship' },
-  { value: 'partnership', label: 'Partnership' },
-  { value: 'non_profit', label: 'Non-Profit' },
-  { value: 'other', label: 'Other' },
-];
+const API = '/api';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS',
@@ -46,8 +37,8 @@ const REFERRAL_SOURCES = [
 export default function RegisterPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-teal-400" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
       </div>
     }>
       <RegisterForm />
@@ -106,7 +97,6 @@ function RegisterForm() {
     owner_password: '',
     name: '',
     dba_name: '',
-    entity_type: 'llc',
     state_of_incorporation: '',
     registration_number: '',
     address: '',
@@ -221,227 +211,200 @@ function RegisterForm() {
   const activePlan = planConfig[selectedPlan] || planConfig.starter;
   const planLabel = activePlan.label;
 
-  const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/30 focus:border-teal-500 focus:outline-none transition";
+  const inputClass = "w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-slate-900 text-sm placeholder-slate-400 focus:border-primary-600 focus:ring-2 focus:ring-primary-100 focus:outline-none transition";
+  const labelClass = "block text-sm font-medium text-slate-700 mb-1.5";
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] flex">
-      {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-teal-600 to-teal-800 flex-col justify-between p-12">
-        <div>
-          <Link href="/" className="text-3xl font-bold text-white">
-            <span className="text-white/80">Palm</span>Care AI
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Nav — same bar as the homepage */}
+      <nav className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary-600 rounded-xl flex items-center justify-center overflow-hidden">
+              <img src="/hand-icon-white.png" alt="PalmCare AI" width={28} height={28} className="object-contain" />
+            </div>
+            <span className="text-lg sm:text-xl font-bold text-slate-900">PalmCare AI</span>
           </Link>
-          <div className="mt-16">
-            <h2 className="text-3xl font-bold text-white leading-tight">
-              Start your free trial<br />and transform your agency
-            </h2>
-            <p className="text-white/70 mt-4 text-lg leading-relaxed">
-              Set up your agency in minutes and start a 14-day free trial.
-              No credit card required.
+          <p className="text-sm text-slate-600">
+            Already have an account?{' '}
+            <Link href="/login" className="text-primary-700 hover:text-primary-800 font-medium">Sign in</Link>
+          </p>
+        </div>
+      </nav>
+
+      <main className="flex-1 flex items-start justify-center px-4 sm:px-6 py-10 sm:py-14">
+        <div className="w-full max-w-lg">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              {step === 1 ? 'Start your 14-day free trial' : 'Tell us about your agency'}
+            </h1>
+            <p className="text-slate-600 mt-2">
+              {step === 1
+                ? 'Full access to every feature. No credit card required.'
+                : 'This sets up your contracts with the right state rules.'}
             </p>
           </div>
-          <div className="mt-12 space-y-4">
+
+          {/* Step indicator */}
+          <div className="flex items-center justify-center gap-2 mb-6">
             {[
-              'AI voice-to-contract in 60 seconds',
-              'HIPAA-compliant & secure',
-              'Works across all 50 states',
-              'Cancel anytime — no charge during trial',
-            ].map(f => (
-              <div key={f} className="flex items-center gap-3 text-white/80">
-                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-white" />
+              { n: 1, label: 'Account' },
+              { n: 2, label: 'Agency' },
+            ].map(({ n, label }) => (
+              <div key={n} className="flex items-center gap-2">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                  n === step ? 'bg-primary-600 text-white' :
+                  n < step ? 'bg-primary-50 text-primary-700' :
+                  'bg-slate-200 text-slate-500'
+                }`}>
+                  {n < step ? <Check className="w-3.5 h-3.5" /> : n}
                 </div>
-                <span className="text-sm">{f}</span>
+                <span className={`text-xs font-medium ${n === step ? 'text-slate-900' : 'text-slate-400'}`}>
+                  {label}
+                </span>
+                {n < 2 && <div className="w-8 h-px bg-slate-300 mx-1" />}
               </div>
             ))}
           </div>
 
-          {/* Trust badges */}
-          <div className="mt-12 flex items-center gap-6 text-white/50 text-xs">
-            <div className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> HIPAA Compliant</div>
-            <div className="flex items-center gap-1.5"><Check className="w-4 h-4" /> No Credit Card</div>
-            <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Cancel Anytime</div>
-          </div>
-        </div>
-        <div className="text-white/40 text-xs">
-          &copy; 2026 Palm Technologies, INC. &middot; <Link href="/privacy" className="underline">Privacy Policy</Link>
-        </div>
-      </div>
-
-      {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12 overflow-y-auto">
-        <div className="w-full max-w-lg">
-          {/* Mobile Logo */}
-          <div className="lg:hidden mb-8">
-            <Link href="/" className="text-2xl font-bold text-white">
-              <span className="text-teal-400">Palm</span>Care AI
-            </Link>
-          </div>
-
-          {/* Step Indicators */}
-          {step <= 2 && (
-            <div className="flex items-center gap-2 mb-8">
-              {[
-                { n: 1, label: 'Account' },
-                { n: 2, label: 'Agency' },
-              ].map(({ n, label }) => (
-                <div key={n} className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    n === step ? 'bg-teal-500 text-white' :
-                    n < step ? 'bg-teal-500/20 text-teal-400' :
-                    'bg-white/10 text-white/30'
-                  }`}>
-                    {n < step ? <Check className="w-4 h-4" /> : n}
+          <div className="card p-6 sm:p-8 shadow-lg shadow-slate-900/5">
+            {error && (
+              <div className="mb-5 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                    {errorHint && <p className="text-red-600/80 text-xs mt-1">{errorHint}</p>}
                   </div>
-                  <span className={`text-xs font-medium ${n === step ? 'text-white' : 'text-white/30'}`}>
-                    {label}
-                  </span>
-                  {n < 2 && <div className="w-6 h-px bg-white/10 mx-1" />}
+                  <button onClick={clearError} className="text-red-400 hover:text-red-600 transition shrink-0">
+                    <span className="sr-only">Dismiss</span>&times;
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            )}
 
-          {error && (
-            <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3.5">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-red-400 text-sm font-medium">{error}</p>
-                  {errorHint && <p className="text-red-400/60 text-xs mt-1">{errorHint}</p>}
+            {/* STEP 1: Account */}
+            {step === 1 && (
+              <div>
+                <div className="space-y-4">
+                  <div>
+                    <label className={labelClass}>Full name</label>
+                    <input type="text" value={form.owner_name} onChange={e => set('owner_name', e.target.value)}
+                      placeholder="Jane Smith" className={inputClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Work email</label>
+                    <input type="email" value={form.owner_email} onChange={e => set('owner_email', e.target.value)}
+                      placeholder="jane@agency.com" className={inputClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Password</label>
+                    <div className="relative">
+                      <input type={showPw ? 'text' : 'password'} value={form.owner_password}
+                        onChange={e => set('owner_password', e.target.value)}
+                        placeholder="At least 8 characters" className={`${inputClass} pr-10`} />
+                      <button type="button" onClick={() => setShowPw(!showPw)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <button onClick={clearError} className="text-red-400/40 hover:text-red-400 transition shrink-0">
-                  <span className="sr-only">Dismiss</span>&times;
+
+                <button onClick={handleNext}
+                  className="btn-primary w-full mt-6 py-3 text-sm font-semibold flex items-center justify-center gap-2">
+                  Continue <ArrowRight className="w-4 h-4" />
                 </button>
+
+                <p className="text-center text-slate-500 text-xs mt-4">
+                  Selected plan: <span className="text-primary-700 font-semibold">{planLabel}</span>
+                </p>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* STEP 1: Account */}
-          {step === 1 && (
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-1">Create your account</h1>
-              <p className="text-white/50 text-sm mb-6">
-                Selected plan: <span className="text-teal-400 font-semibold">{planLabel}</span>
-              </p>
+            {/* STEP 2: Agency */}
+            {step === 2 && (
+              <div>
+                <button onClick={() => { setStep(1); clearError(); }}
+                  className="flex items-center gap-1 text-slate-500 hover:text-slate-700 text-sm mb-5 transition">
+                  <ArrowLeft className="w-4 h-4" /> Back
+                </button>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">Full Name</label>
-                  <input type="text" value={form.owner_name} onChange={e => set('owner_name', e.target.value)}
-                    placeholder="Jane Smith" className={inputClass} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
-                  <input type="email" value={form.owner_email} onChange={e => set('owner_email', e.target.value)}
-                    placeholder="jane@agency.com" className={inputClass} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">Password</label>
-                  <div className="relative">
-                    <input type={showPw ? 'text' : 'password'} value={form.owner_password}
-                      onChange={e => set('owner_password', e.target.value)}
-                      placeholder="Min 8 characters" className={`${inputClass} pr-10`} />
-                    <button type="button" onClick={() => setShowPw(!showPw)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-                      {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <button onClick={handleNext}
-                className="w-full mt-6 bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2">
-                Continue <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <p className="text-center text-white/30 text-xs mt-4">
-                Already have an account? <Link href="/login" className="text-teal-400 hover:text-teal-300">Sign in</Link>
-              </p>
-            </div>
-          )}
-
-          {/* STEP 2: Agency */}
-          {step === 2 && (
-            <div>
-              <button onClick={() => { setStep(1); clearError(); }}
-                className="flex items-center gap-1 text-white/40 hover:text-white/70 text-sm mb-4 transition">
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <h1 className="text-2xl font-bold text-white mb-1">Agency Details</h1>
-              <p className="text-white/50 text-sm mb-6">Tell us about your home care agency</p>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">Agency Name</label>
+                <div className="space-y-4">
+                  <div>
+                    <label className={labelClass}>Agency name</label>
                     <input type="text" value={form.name} onChange={e => set('name', e.target.value)}
                       placeholder="ABC Home Care LLC" className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">Entity Type</label>
-                    <select value={form.entity_type} onChange={e => set('entity_type', e.target.value)} className={inputClass}>
-                      {ENTITY_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">State</label>
+                    <label className={labelClass}>State of incorporation</label>
                     <select value={form.state_of_incorporation} onChange={e => set('state_of_incorporation', e.target.value)} className={inputClass}>
-                      <option value="">Select State</option>
-                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">Phone</label>
-                  <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
-                    placeholder="(555) 000-0000" className={inputClass} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">Address</label>
-                  <input type="text" value={form.address} onChange={e => set('address', e.target.value)}
-                    placeholder="123 Main St" className={inputClass} />
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">City</label>
-                    <input type="text" value={form.city} onChange={e => set('city', e.target.value)} className={inputClass} />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">State</label>
-                    <select value={form.state} onChange={e => set('state', e.target.value)} className={inputClass}>
-                      <option value="">State</option>
+                      <option value="">Select state</option>
                       {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">ZIP</label>
-                    <input type="text" value={form.zip_code} onChange={e => set('zip_code', e.target.value)} className={inputClass} />
+                    <label className={labelClass}>Phone</label>
+                    <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
+                      placeholder="(555) 000-0000" className={inputClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Address</label>
+                    <input type="text" value={form.address} onChange={e => set('address', e.target.value)}
+                      placeholder="123 Main St" className={inputClass} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className={labelClass}>City</label>
+                      <input type="text" value={form.city} onChange={e => set('city', e.target.value)} className={inputClass} />
+                    </div>
+                    <div>
+                      <label className={labelClass}>State</label>
+                      <select value={form.state} onChange={e => set('state', e.target.value)} className={inputClass}>
+                        <option value="">State</option>
+                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>ZIP</label>
+                      <input type="text" value={form.zip_code} onChange={e => set('zip_code', e.target.value)} className={inputClass} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Where did you find us?</label>
+                    <select value={form.referral_source} onChange={e => set('referral_source', e.target.value)} className={inputClass}>
+                      <option value="">Select one (optional)</option>
+                      {REFERRAL_SOURCES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1.5">Where did you find us?</label>
-                  <select value={form.referral_source} onChange={e => set('referral_source', e.target.value)} className={inputClass}>
-                    <option value="">Select one (optional)</option>
-                    {REFERRAL_SOURCES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                  </select>
-                </div>
+
+                <button onClick={handleRegister} disabled={loading}
+                  className="btn-primary w-full mt-6 py-3 text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</> :
+                    <><Building2 className="w-4 h-4" /> Create account and start free trial</>}
+                </button>
               </div>
+            )}
+          </div>
 
-              <button onClick={handleRegister} disabled={loading}
-                className="w-full mt-6 bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-xl text-sm font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2">
-                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</> :
-                  <><Building2 className="w-4 h-4" /> Create Account & Start Free Trial</>}
-              </button>
+          {/* Trust row — mirrors homepage hero */}
+          <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-slate-500">
+            <span className="inline-flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary-600" /> HIPAA compliant
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary-600" /> Cancel anytime
+            </span>
+            <span>No charge until the trial ends</span>
+          </div>
 
-              <p className="text-center text-white/30 text-xs mt-4">
-                14-day free trial &middot; No credit card required
-              </p>
-            </div>
-          )}
-
+          <p className="text-center text-slate-400 text-xs mt-8">
+            &copy; 2026 Palm Technologies, Inc. &middot;{' '}
+            <Link href="/privacy" className="hover:text-slate-600 underline underline-offset-2">Privacy Policy</Link>
+          </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
