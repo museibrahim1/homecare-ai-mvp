@@ -265,7 +265,13 @@ def send_custom_email(
     user: User = Depends(require_permission("sales_leads")),
 ):
     """Send a custom email to any recipient(s) from sales@palmcareai.com."""
-    from app.services.email import email_service
+    try:
+        from app.services.email import email_service
+    except ImportError:
+        raise HTTPException(503, "Email sending unavailable — email service not installed")
+
+    if not email_service.enabled:
+        raise HTTPException(503, "Email sending unavailable — Resend is not configured")
 
     recipients = [e.strip() for e in body.to if e.strip()]
     if not recipients:
