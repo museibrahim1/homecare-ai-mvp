@@ -43,6 +43,8 @@ SIGNUP = "palmcareai.com/register"
 # --------------------------------------------------------------------------- Meta
 # date -> caption (posted to FB + IG + Threads with {s} = signup link).
 META = {
+    "2026-07-10": ("gap-friday-done.png",
+        "Leaving on time on a Friday? Groundbreaking. \U0001F334\n\nYour visit notes, billables, and service agreements were done before you left the last house today. The weekend starts when you clock out \u2014 not after three more hours of charting at the kitchen table.\n\nTag the coworker who's still doing their notes after dinner.\n\nStart free, no card: {s}\n#homecare #caregiverlife #homecareagency #nurselife"),
     "2026-07-13": ("w1-imsg-contract.png",
         "The group chat when the contract goes out before lunch \U0001F334\n\n\"Already sent it\" is a real thing now. PALM listens to the assessment, writes the notes and billables, and drafts the state-compliant agreement while you drive to the next visit. You read it, you hit send.\n\nStart free, no card: {s}\n#homecare #homecareagency #privateduty #healthtech"),
     "2026-07-15": ("w1-phone-record.png",
