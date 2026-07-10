@@ -43,6 +43,9 @@ _SLATE_200 = "#e2e8f0"
 _SLATE_100 = "#f1f5f9"
 _GH_MARKETING = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing"
 
+# PALM is live on the App Store (approved Jul 10, 2026).
+_APP_STORE = "https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
+
 
 def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> str:
     """Apple-style clean email wrapper with PALM IT branding."""
@@ -91,10 +94,14 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         'border-radius: 12px; padding: 28px 32px; text-align: center;">'
         f'<p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>'
         '<p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">'
-        'Record it. Transcribe it. Contract it. All in your palm.</p>'
-        f'<a href="{_SITE}/#book-demo" style="display: inline-block; background-color: #ffffff; '
+        'Now live on the App Store. Record it. Transcribe it. Contract it. All in your palm.</p>'
+        f'<a href="{_APP_STORE}" style="display: inline-block; background-color: #ffffff; '
         f'color: {_TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 600; '
-        'padding: 12px 28px; border-radius: 8px;">Sign Up for Your 14 Day Free Trial</a>'
+        'padding: 12px 28px; border-radius: 8px; margin: 0 6px 8px;">Download on the App Store</a>'
+        f'<a href="{_SITE}/#book-demo" style="display: inline-block; background-color: transparent; '
+        'color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; '
+        'padding: 12px 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.5); '
+        'margin: 0 6px 8px;">Start Your 14 Day Free Trial</a>'
         '</div>'
         # Footer
         f'<div style="padding: 24px 40px; background-color: {_SLATE_100}; '
@@ -151,6 +158,35 @@ _P_MUTED = f"margin: 0 0 16px 0; color: {_SLATE_600}; font-size: 14px;"
 
 
 EMAIL_TEMPLATES = {
+    "app_live_launch": {
+        "id": "app_live_launch",
+        "name": "App Store Launch",
+        "subject": "PALM is live on the App Store",
+        "sequence_day": 0,
+        "description": "One-off announcement: the PALM iOS app is live on the App Store. Download CTA.",
+        "body": _email_wrap(
+            f'<p style="{_P}">Hi,</p>'
+            + _section(
+                "The app is live",
+                "PALM is now on the App Store. It is the fastest way to turn a home care "
+                "assessment into finished paperwork, right from your phone."
+            )
+            + _section(
+                "Four documents from one recording",
+                "Record the assessment. PALM writes the transcript, the care plan, the billable "
+                "items, and a state-specific service contract. Minutes, not days, and it works in "
+                "all 50 states."
+            )
+            + '<div style="text-align: center; margin: 28px 0;">'
+            f'<a href="{_APP_STORE}" style="display: inline-block; '
+            f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
+            'text-decoration: none; font-size: 16px; font-weight: 700; padding: 16px 40px; '
+            'border-radius: 10px;">Download PALM on the App Store</a></div>'
+            + f'<p style="{_P_MUTED}">Free to download. Set up your agency in a few minutes and '
+            'run your first assessment today.</p>',
+            "{provider_name}",
+        ),
+    },
     "warm_open": {
         "id": "warm_open",
         "name": "The Warm Open",
