@@ -6,9 +6,12 @@ due and hasn't been published yet, it posts to the right platforms and records i
 in scripts/social/.posted_log.json so it never double-posts.
 
 Platforms per the approved plan:
-  - Meta days (Mon/Wed/Fri): Facebook + Instagram + Threads, link in the caption.
-  - LinkedIn days (Tue/Thu):  LinkedIn image or PDF document carousel, with the
-    signup link posted as the FIRST COMMENT (LinkedIn suppresses in-body links).
+  - Meta days (Mon/Wed/Fri): Instagram + Threads day-of (link in the caption).
+    Facebook is scheduled NATIVELY via schedule_meta_fb.py so it appears in Meta
+    Business Suite's planner and posts even if this machine is asleep. The API
+    can't pre-schedule IG or Threads, so those publish day-of from here.
+  - LinkedIn days (Tue/Thu):  LinkedIn image or PDF document carousel, value in
+    the body, signup link kept in the FIRST COMMENT.
 
 Manual usage:
   python3 scripts/social/run_scheduled_posts.py                    # post what's due today
@@ -26,7 +29,6 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from post_to_meta import (  # noqa: E402
-    fb_post_photo,
     ig_publish_image,
     threads_post,
     require_env as require_meta_env,
@@ -112,25 +114,43 @@ def save_log(log: dict) -> None:
     LOG_FILE.write_text(json.dumps(log, indent=2))
 
 
+def threads_safe(caption: str, limit: int = 500) -> str:
+    """Threads caps posts at 500 chars (FB/IG don't). Trim safely if needed:
+    first drop the trailing hashtag line, then hard-truncate at a word boundary."""
+    if len(caption) <= limit:
+        return caption
+    lines = caption.rstrip().split("\n")
+    while lines and lines[-1].lstrip().startswith("#"):
+        lines.pop()
+    trimmed = "\n".join(lines).rstrip()
+    if len(trimmed) <= limit:
+        return trimmed
+    cut = trimmed[: limit - 1]
+    if " " in cut:
+        cut = cut[: cut.rfind(" ")]
+    return cut.rstrip()
+
+
 def run_meta(date: str, dry: bool) -> dict | None:
+    """Publish the day-of IG + Threads posts. Facebook is NOT posted here: it is
+    scheduled natively via schedule_meta_fb.py so it shows up in Meta Business
+    Suite's planner and publishes even if this machine is asleep. IG and Threads
+    can't be pre-scheduled through the API, so they run day-of from here."""
     entry = META.get(date)
     if entry is None:
         return None
     image, caption = entry
     caption = caption.format(s=SIGNUP)
     if dry:
-        print(f"{date}: WOULD post {image} to FB + IG + Threads:\n---\n{caption}\n---")
+        print(f"{date}: WOULD post {image} to IG + Threads (FB is natively scheduled):\n---\n{caption}\n---")
         return {"dry": True}
     require_meta_env()
     results = {}
-    fb = fb_post_photo(image, caption)
-    results["fb"] = fb.get("post_id") or fb.get("id")
-    print(f"FB OK: {results['fb']}")
     ig = ig_publish_image(image, caption)
     results["ig"] = ig.get("id")
     print(f"IG OK: {results['ig']}")
     try:
-        th = threads_post(caption, image=image)
+        th = threads_post(threads_safe(caption), image=image)
         results["th"] = th.get("id")
         print(f"Threads OK: {results['th']}")
     except Exception as e:  # Threads is best-effort; don't fail the whole run
