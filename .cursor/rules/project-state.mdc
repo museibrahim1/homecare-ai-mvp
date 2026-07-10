@@ -6,8 +6,12 @@ alwaysApply: true
 # PalmCare AI — Project State (March 2026)
 
 ## Apple Subscriptions (Jul 10, 2026)
-- Version **1.1 (build 10)** submitted for review with all 3 subscriptions attached; review submission `d55767df-aae1-4c7c-9ee1-daf66cef1d67`, state WAITING_FOR_REVIEW.
-- Products (group 22222636, all monthly auto-renew): `com.palmcareai.app.starter.monthly` $89.99, `com.palmcareai.app.growth.monthly` $349.99, `com.palmcareai.app.pro.monthly` $999.99. Priced in all 175 territories.
+- **DO NOT SUBMIT v1.1 to App Review** until the user gives an explicit green light. The earlier review submission was cancelled (v1.1 state: DEVELOPER_REJECTED); there are no active review submissions.
+- New pricing (group 22222636): Starter $199/mo, Growth $699/mo, Enterprise $1,200/mo (Enterprise = `pro` product IDs). Annual = 20% off: $1,910 / $6,710 / $11,520. 14-day free trial on Starter + Growth (monthly AND annual) via introductory offers in all 175 territories; no trial on Enterprise.
+- Product IDs: `com.palmcareai.app.{starter,growth,pro}.{monthly,annual}` — 6 total. Monthly are priced in all territories ($199/$699/$1,000) and READY. Annual products created (localizations + review screenshots done) but **unpriced** — blocked by Apple's $1,000 price cap.
+- **Higher price points request SUBMITTED** (Jul 10) via developer.apple.com/contact/request/app-store-higher-price-points — Apple will review. When approved: reprice Enterprise Monthly $1,000 → $1,200 and price the annuals. NOTE: Enterprise Annual $11,520 exceeds even the extended $10,000 cap — needs user decision ($10,000 flat or lower).
+- In-app refund requests implemented (`beginRefundRequest(in:)` in SettingsView) — was required for the higher price points form.
+- Per-tier AI rate limits: `apps/api/app/core/tier_limits.py` (free 5, starter 15, growth 40, enterprise 120 req/min) enforced on pipeline + uploads routers.
 - iOS: `StoreKitService.swift` (StoreKit 2) + `PaywallView.swift`, entry via Settings → Your Plan. Backend verify endpoint: `POST /billing/apple/verify`; server notifications: `POST /billing/apple/notifications`.
 - Apple root CAs bundled at `apps/api/certs/apple/` (loader falls back to this path; `APPLE_ROOT_CERTS_DIR` overrides).
 - Upload signing: App Store Connect API key `AuthKey_N5LFW2CYVG.p8`, issuer `18430c66-4e0a-4733-8058-efaef5e61ce0` — use with `xcodebuild -exportArchive -authenticationKeyID N5LFW2CYVG ...` for cloud signing (local keychain has no distribution cert).
