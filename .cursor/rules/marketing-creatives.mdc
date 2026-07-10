@@ -1,0 +1,46 @@
+---
+description: How PalmCare AI creates marketing creatives (images, video, social posts) and publishes content
+alwaysApply: true
+---
+
+# Marketing Creatives and Posting
+
+Full voice guide: `marketing/PALM_BRAND_VOICE.md`. Writing style: follow the no-ai-slop rule. Brand color teal `#0d9488`. Brand mark is PALM or Palm. CTA verb is "Palm It". Site palmcareai.com, ads contact demo@palmtai.com.
+
+## Images
+
+- Generate with Nano Banana 2 via WaveSpeed. Never Pillow or PIL for mockups.
+- iPhone mockup prompt pattern: "Photorealistic iPhone 15 Pro in Space Black, [angle], [background]. Screen shows [PalmCare AI UI: teal #0d9488, stat cards, tab bar]."
+- Aspect ratios supported: 1:1, 16:9, 9:16, 4:3, 21:9 and more. 3:1 is not supported, use 21:9.
+
+## Video pipeline (TikTok, Reels, Facebook, YouTube Shorts)
+
+1. **Stills**: Nano Banana 2 for product-accurate frames.
+2. **Motion**: Kling O3 Pro on fal.ai (`FAL_KEY` in `.env`), prefer image-to-video from a designed start frame. Shots of 5 to 8 seconds, 1080p, extend only after motion looks right.
+3. **Voiceover**: ElevenLabs v3 via WaveSpeed (voice: Alice) for finals. OpenAI TTS (nova) for drafts.
+4. **Assembly**: Remotion in `/videos/` for captions, timing, logo lockup, CTA end card.
+5. Details in `.cursor/skills/kling-remotion-nano-banana/SKILL.md`.
+
+## Platform specs
+
+- Vertical platforms (TikTok, Reels, FB Reels, Shorts): 9:16, 1080x1920, 15 to 35 seconds.
+- Hook must land in the first 3 seconds. No logo intro.
+- Burned-in captions always. Most viewers watch muted.
+- Keep text inside center safe area. Platform UI covers the edges.
+- CTA end card visible at least 1.2 seconds: "Palm It. palmcareai.com".
+- Cross-post: 1:1 for feed, 16:9 for LinkedIn and web.
+
+## Testimonials and claims (hard rules)
+
+- Never fabricate a customer testimonial. No AI actor may claim to be a customer or state results we cannot back up.
+- Allowed formats: real customer clips with written permission, founder-voice videos (Muse on camera or his cloned avatar with his consent), POV workflow dramatizations ("POV: the visit is over and the contract is already written") that show the product doing the work.
+- If a scene uses actors or AI-generated people, it may show the workflow but not deliver first-person customer claims. Label dramatizations as such when they could be mistaken for real customers.
+- No invented statistics. Product facts only: 4 documents from one recording, 50-state contract rules, minutes not hours.
+
+## Posting
+
+- Every post belongs to exactly one pillar: How it works, Time and relief, Trust and accuracy, Proof.
+- Tone per channel is in the brand voice guide. TikTok and Reels are punchy and real. LinkedIn is founder-voice and insight-led.
+- One deliberate next step per post: palmcareai.com organic, demo@palmtai.com for ads.
+- Save finished assets in `marketing/` by campaign (see `marketing/asset-overview.md`). Calendars: `marketing/content-calendar-week.md` and `content-calendar-month-*.md`.
+- Run the pre-publish checklist at the bottom of `PALM_BRAND_VOICE.md` before anything ships.
