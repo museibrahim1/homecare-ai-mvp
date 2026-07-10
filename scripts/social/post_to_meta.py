@@ -223,7 +223,12 @@ def _th_wait_ready(creation_id: str, timeout_s: int = 300) -> None:
     raise PostError("Threads container did not finish processing in time")
 
 
-def threads_post(caption: str, image: str | None = None, video: str | None = None) -> dict:
+def threads_post(
+    caption: str,
+    image: str | None = None,
+    video: str | None = None,
+    reply_to_id: str | None = None,
+) -> dict:
     if not THREADS_TOKEN:
         raise PostError("META_THREADS_USER_TOKEN not set (complete Threads OAuth first)")
     data = {"text": caption, "access_token": THREADS_TOKEN}
@@ -235,6 +240,8 @@ def threads_post(caption: str, image: str | None = None, video: str | None = Non
         data["video_url"] = public_url_for(video)
     else:
         data["media_type"] = "TEXT"
+    if reply_to_id:
+        data["reply_to_id"] = reply_to_id
     r = requests.post(f"{GRAPH_THREADS}/{THREADS_USER_ID}/threads", data=data, timeout=120)
     container = _check(r, "Threads container")
     creation_id = container["id"]
@@ -246,6 +253,70 @@ def threads_post(caption: str, image: str | None = None, video: str | None = Non
         timeout=120,
     )
     return _check(r2, "Threads publish")
+
+
+THREADS_LIMIT = 500
+
+
+def split_for_threads(text: str, limit: int = THREADS_LIMIT) -> list[str]:
+    """Split text into <=limit chunks on paragraph, then sentence, boundaries.
+
+    Threads caps a single post at 500 chars. Long-form text is posted as a chain
+    (see threads_post_chain) instead of being truncated. When more than one chunk
+    results, each is tagged with an "(n/N)" marker so it reads as a thread.
+    """
+    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+    chunks: list[str] = []
+    for para in paragraphs:
+        if len(para) <= limit:
+            chunks.append(para)
+            continue
+        current = ""
+        for sentence in para.replace(". ", ".\n").split("\n"):
+            sentence = sentence.strip()
+            if not sentence:
+                continue
+            candidate = f"{current} {sentence}".strip()
+            if len(candidate) <= limit:
+                current = candidate
+            else:
+                if current:
+                    chunks.append(current)
+                current = sentence
+        if current:
+            chunks.append(current)
+    total = len(chunks)
+    if total > 1:
+        # Reserve room for the " (n/N)" marker so tagged chunks stay under limit.
+        marker_len = len(f" ({total}/{total})")
+        if any(len(c) + marker_len > limit for c in chunks):
+            chunks = split_for_threads(text, limit - marker_len) if limit - marker_len > 0 else chunks
+            total = len(chunks)
+        chunks = [f"{c} ({i}/{total})" for i, c in enumerate(chunks, 1)]
+    return chunks
+
+
+def threads_post_chain(text: str, image: str | None = None) -> list[dict]:
+    """Publish long text as a Threads chain (each part replies to the previous).
+
+    If an image is given it rides on the first post only. Returns the list of
+    publish responses, first = root post.
+    """
+    chunks = split_for_threads(text)
+    results: list[dict] = []
+    reply_to = None
+    for i, chunk in enumerate(chunks):
+        res = threads_post(
+            chunk,
+            image=image if (i == 0 and image) else None,
+            reply_to_id=reply_to,
+        )
+        results.append(res)
+        reply_to = res.get("id")
+        print(f"  Threads {i + 1}/{len(chunks)} OK: {reply_to}")
+        if i < len(chunks) - 1:
+            time.sleep(3)
+    return results
 
 
 # -------------------------------------------------------------------------- CLI
