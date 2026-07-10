@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; padding: 0; background: #0e0e12; }
+  svg { display: block; }
+  text { font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const W = 1170, H = 2532;
+const CORE = { x: 585, y: 1300 };
+
+const C = {
+  bg: "#0e0e12",
+  text: "#E4E4E4EB",
+  text2: "#E4E4E48D",
+  text3: "#E4E4E45E",
+  text4: "#E4E4E442",
+  stroke1: "#E4E4E433",
+  stroke2: "#E4E4E41F",
+  accent: "#599CE7",
+  purple: "#9386F2",
+  green: "#3FA266",
+  yellow: "#F1B467",
+  cyan: "#81A1C1",
+  pink: "#B48EAD",
+  blue: "#7BAFE9",
+  orange: "#DD7F76",
+};
+
+const REGIONS = [
+  { id: "core", name: "API Core", sub: "46 routers", color: C.accent,
+    x: CORE.x, y: CORE.y, r: 130, sats: [] },
+  { id: "pipeline", name: "AI Cortex", sub: "Deepgram + Claude", color: C.purple,
+    x: 585, y: 620, r: 112,
+    sats: ["Transcribe", "Billables", "SOAP Note", "Contract"] },
+  { id: "care", name: "Care Heart", sub: "clients & visits", color: C.green,
+    x: 290, y: 905, r: 100, satAngle: -2.3,
+    sats: ["Visits", "Clients", "Caregivers", "Contracts"] },
+  { id: "growth", name: "Growth Lobe", sub: "sales & admin", color: C.pink,
+    x: 885, y: 905, r: 96, satAngle: -1.1, satDist: -24,
+    sats: ["Leads", "Investors", "Outreach", "Admin"] },
+  { id: "knowledge", name: "Knowledge Base", sub: "docs + compliance", color: C.yellow,
+    x: 300, y: 1560, r: 112, satAngle: 1.9, satSpread: 0.42,
+    sats: ["51-state rules", "docs \u00d722", "HIPAA \u00d79", "blog \u00d710"] },
+  { id: "memory", name: "Memory", sub: "37 tables", color: C.cyan,
+    x: 895, y: 1560, r: 106, satAngle: 1.57, satSpread: 0.7,
+    sats: ["Redis", "Postgres \u00d737", "S3 audio"] },
+  { id: "billing", name: "Metabolism", sub: "Stripe + IAP", color: C.orange,
+    x: 585, y: 1690, r: 72, sats: [] },
+  { id: "ios", name: "iOS Sense", sub: "45 views", color: C.blue,
+    x: 350, y: 1985, r: 92, satAngle: 2.6, satDist: -14,
+    sats: ["Live Transcribe", "Record Orb"] },
+  { id: "web", name: "Web Sense", sub: "69 routes", color: C.blue,
+    x: 825, y: 1985, r: 92, satAngle: 0.55, satDist: -14,
+    sats: ["Dashboard \u00d725", "Marketing \u00d715"] },
+];
+
+const EDGES = [
+  { from: "ios", to: "core", bend: 0.12 },
+  { from: "web", to: "core", bend: -0.12 },
+  { from: "core", to: "pipeline", bend: 0.1 },
+  { from: "core", to: "care", bend: 0.12 },
+  { from: "core", to: "growth", bend: -0.12 },
+  { from: "core", to: "memory", bend: -0.1 },
+  { from: "core", to: "knowledge", bend: 0.1 },
+  { from: "core", to: "billing", bend: 0 },
+  { from: "knowledge", to: "pipeline", bend: 0.3 },
+  { from: "pipeline", to: "memory", bend: 0.3 },
+];
+
+const EXTERNALS = [
+  { name: "Deepgram Nova-3", x: 240, y: 360, to: "pipeline", anchor: "middle" },
+  { name: "Claude Sonnet 4.6", x: 930, y: 360, to: "pipeline", anchor: "middle" },
+  { name: "Stripe", x: 1090, y: 1250, to: "billing", anchor: "end" },
+  { name: "Apple IAP", x: 1080, y: 1420, to: "billing", anchor: "end" },
+  { name: "Google OAuth", x: 80, y: 1250, to: "core", anchor: "start" },
+];
+
+function byId(id) { return REGIONS.find(r => r.id === id); }
+
+function edgePath(a, b, bend) {
+  const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+  const dx = b.x - a.x, dy = b.y - a.y;
+  return `M ${a.x} ${a.y} Q ${mx - dy * bend} ${my + dx * bend} ${b.x} ${b.y}`;
+}
+
+function satPositions(region) {
+  const n = region.sats.length;
+  const away = region.satAngle !== undefined
+    ? region.satAngle
+    : Math.atan2(region.y - CORE.y, region.x - CORE.x);
+  const spread = region.satSpread || 0.5;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const angle = away + (i - (n - 1) / 2) * spread;
+    const dist = region.r + 60 + (i % 2) * 46 + (region.satDist || 0);
+    const x = region.x + Math.cos(angle) * dist;
+    const y = region.y + Math.sin(angle) * dist;
+    const ux = Math.cos(angle), uy = Math.sin(angle);
+    let anchor = "middle", lx = x + ux * 22, ly = y + uy * 22 + 8;
+    if (ux > 0.4) anchor = "start";
+    else if (ux < -0.4) anchor = "end";
+    else ly += uy < 0 ? -14 : 20;
+    out.push({ x, y, lx, ly, anchor });
+  }
+  return out;
+}
+
+let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+s += `<rect width="${W}" height="${H}" fill="${C.bg}"/>`;
+
+// Title
+s += `<text x="${W/2}" y="150" text-anchor="middle" font-size="64" font-weight="700" fill="${C.text}">PalmCare AI</text>`;
+s += `<text x="${W/2}" y="210" text-anchor="middle" font-size="30" fill="${C.text2}">the living system</text>`;
+
+// Membrane
+s += `<ellipse cx="${W/2}" cy="1310" rx="545" ry="1010" fill="none" stroke="${C.stroke2}" stroke-width="2" stroke-dasharray="6 16"/>`;
+s += `<text x="${W/2}" y="278" text-anchor="middle" font-size="22" fill="${C.text4}">the PalmCare organism</text>`;
+
+// Edges
+for (const e of EDGES) {
+  const a = byId(e.from), b = byId(e.to);
+  s += `<path d="${edgePath(a, b, e.bend)}" fill="none" stroke="${C.stroke1}" stroke-width="2.4" opacity="0.8"/>`;
+}
+
+// Externals
+for (const ext of EXTERNALS) {
+  const t = byId(ext.to);
+  s += `<path d="${edgePath(ext, t, 0.06)}" fill="none" stroke="${C.stroke2}" stroke-width="2" stroke-dasharray="4 10"/>`;
+  s += `<circle cx="${ext.x}" cy="${ext.y}" r="8" fill="#E4E4E430" stroke="${C.stroke1}" stroke-width="2"/>`;
+  const tx = ext.anchor === "middle" ? ext.x : ext.anchor === "start" ? ext.x + 18 : ext.x - 18;
+  const ty = ext.anchor === "middle" ? ext.y - 22 : ext.y + 8;
+  s += `<text x="${tx}" y="${ty}" text-anchor="${ext.anchor}" font-size="24" fill="${C.text3}">${ext.name}</text>`;
+}
+
+// Regions
+for (const region of REGIONS) {
+  const sats = satPositions(region);
+  for (const p of sats) {
+    s += `<line x1="${region.x}" y1="${region.y}" x2="${p.x}" y2="${p.y}" stroke="${C.stroke2}" stroke-width="1.8"/>`;
+  }
+  if (region.id === "pipeline") {
+    for (let i = 1; i < sats.length; i++) {
+      s += `<line x1="${sats[i-1].x}" y1="${sats[i-1].y}" x2="${sats[i].x}" y2="${sats[i].y}" stroke="${region.color}" stroke-width="2" opacity="0.55"/>`;
+    }
+  }
+  sats.forEach((p, i) => {
+    s += `<circle cx="${p.x}" cy="${p.y}" r="8" fill="${region.color}" fill-opacity="0.85"/>`;
+    s += `<text x="${p.lx}" y="${p.ly}" text-anchor="${p.anchor}" font-size="24" fill="${C.text3}">${region.sats[i]}</text>`;
+  });
+
+  s += `<circle cx="${region.x}" cy="${region.y}" r="${region.r}" fill="${region.color}" fill-opacity="0.12" stroke="${region.color}" stroke-opacity="0.7" stroke-width="3"/>`;
+  s += `<circle cx="${region.x}" cy="${region.y}" r="9" fill="${region.color}" fill-opacity="0.9"/>`;
+  s += `<text x="${region.x}" y="${region.y - 22}" text-anchor="middle" font-size="${region.r < 90 ? 27 : 31}" font-weight="600" fill="${C.text}">${region.name}</text>`;
+  s += `<text x="${region.x}" y="${region.y + 42}" text-anchor="middle" font-size="23" fill="${C.text2}">${region.sub}</text>`;
+}
+
+// Heartbeat pipeline
+const steps = ["Voice", "Transcript", "Billables", "SOAP note", "Contract"];
+const stepY = 2260;
+let sx = 108;
+s += `<text x="${W/2}" y="${stepY - 52}" text-anchor="middle" font-size="24" fill="${C.text3}">one heartbeat</text>`;
+const widths = steps.map(t => t.length * 13.5 + 48);
+const totalW = widths.reduce((a, b) => a + b, 0) + (steps.length - 1) * 46;
+sx = (W - totalW) / 2;
+steps.forEach((t, i) => {
+  const w = widths[i];
+  const last = i === steps.length - 1;
+  s += `<rect x="${sx}" y="${stepY - 30}" width="${w}" height="52" rx="26" fill="${last ? C.accent : "none"}" fill-opacity="${last ? 0.9 : 0}" stroke="${last ? C.accent : C.stroke1}" stroke-width="2"/>`;
+  s += `<text x="${sx + w/2}" y="${stepY + 5}" text-anchor="middle" font-size="24" fill="${last ? "#141414" : C.text2}">${t}</text>`;
+  if (!last) s += `<text x="${sx + w + 23}" y="${stepY + 4}" text-anchor="middle" font-size="26" fill="${C.text4}">\u2192</text>`;
+  sx += w + 46;
+});
+
+// Stats
+const stats = [["46","routers"],["69","routes"],["45","iOS views"],["37","tables"],["51","states"]];
+const cellW = W / stats.length;
+stats.forEach(([v, l], i) => {
+  const cx = cellW * i + cellW / 2;
+  s += `<text x="${cx}" y="2408" text-anchor="middle" font-size="46" font-weight="650" fill="${C.text}">${v}</text>`;
+  s += `<text x="${cx}" y="2450" text-anchor="middle" font-size="22" fill="${C.text3}">${l}</text>`;
+});
+
+s += `</svg>`;
+document.getElementById("root").innerHTML = s;
+</script>
+</body>
+</html>

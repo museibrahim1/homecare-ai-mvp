@@ -37,6 +37,10 @@ ENV/
 # Xcode preview snapshots
 ios-app/preview_*.png
 
+# Xcode per-user state (editor UI state, scheme management) — not source
+**/xcuserdata/
+*.xcuserstate
+
 # Build outputs
 dist/
 build/

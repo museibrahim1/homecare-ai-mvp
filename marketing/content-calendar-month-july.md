@@ -1,222 +1,270 @@
 # PALM — Monthly Content Calendar (Jul 13 – Aug 9, 2026)
 
-> Rebuilt for zero repeats. **Every post has its own creative and its own message.**
-> No image is used twice. No angle is used twice.
+> **v3 — the polished rebuild.** Every creative below is designed in-house from PALM's real
+> brand assets: the actual hand logo, the actual app screenshots, the site typeface (Inter),
+> and the app's teal. No AI-generated images, no invented logos, no stock-photo look.
 >
-> Messaging focus (per Muse): time saving, efficiency, and helping agencies win by
-> securing contracts faster. Brand voice: confident, plain spoken, no hype, no fabricated stats.
+> Built with the creative studio at `marketing/creative-studio/` (HTML/CSS templates
+> rendered to pixel-perfect PNG). Any card can be edited and re-rendered in seconds:
+> `node marketing/creative-studio/render.js`
+>
+> Formats follow current platform data: 4:5 (1080×1350) images for Meta feed,
+> a 7-page 1200×1200 PDF document carousel for LinkedIn (the highest-engagement
+> LinkedIn format in 2026, ~7% avg engagement vs 3.25% for link posts).
+>
+> **LinkedIn rule: the signup link goes in the FIRST COMMENT, not the post body**
+> (LinkedIn suppresses posts with external links). Meta captions carry the link directly;
+> IG uses link in bio.
 >
 > Cadence: Meta (FB + IG) Mon / Wed / Fri · LinkedIn Tue / Thu = 20 posts.
-> **Every post links to the signup flow: `palmcareai.com/register`** (IG uses link in bio).
 > Approval-first: nothing posts until Muse confirms.
 
-## Creative bank (20 unique assets, one per post)
+## Creative bank (all in `marketing/creative-studio/out/`, hosted at `palmcareai.com/marketing/social/`)
 
-| # | File | Format | Angle |
+| # | File | Style | Angle |
 |---|---|---|---|
-| 1 | `creatives-july/ad-same-day-contract-1x1.png` | 1:1 | Assessment at 10am, signed by lunch |
-| 2 | `creatives-july/ad-win-clients-16x9.png` | 16:9 | Send the contract first, win the client |
-| 3 | `higgsfield/ad-video-pipeline-9x16.mp4` | 9:16 video | Watch a visit become a contract |
-| 4 | `creatives-july/ad-one-recording-1x1.png` | 1:1 | One recording, four finished documents |
-| 5 | `creatives-july/ad-evenings-back-9x16.png` | 9:16 | The charting is done, you just left |
-| 6 | `creatives-july/ad-minutes-not-days-9x16.png` | 9:16 | Days vs minutes |
-| 7 | `creatives-july/ad-15-hours-back-1x1.png` | 1:1 | Get back 15 hours a week |
-| 8 | `higgsfield/ad-thu-talk-dont-type-9x16.png` | 9:16 | Talk, don't type |
-| 9 | `higgsfield/ad-square-how-it-works.png` | 1:1 | Record, Extract, Contract |
-| 10 | `higgsfield/ad-fri-assessment-1x1.png` | 1:1 | What one assessment captures |
-| 11 | `creatives-july/ad-50-states-1x1.png` | 1:1 | One workflow, all 50 states |
-| 12 | `creatives-july/ad-retention-1x1.png` | 1:1 | Caregivers quit over paperwork |
-| 13 | `higgsfield/ad-wed-visit-over-9x16.png` | 9:16 | The visit's over, so is your paperwork |
-| 14 | `creatives-july/ad-lost-client-1x1.png` | 1:1 | The client you lost to slow paperwork |
-| 15 | `creatives-july/ad-no-double-entry-1x1.png` | 1:1 | Stop typing one visit into four systems |
-| 16 | `creatives-july/ad-before-lunch-1x1.png` | 1:1 | New client at 9, onboarded before lunch |
-| 17 | `creatives-july/ad-out-loud-1x1.png` | 1:1 | Assessors collect the data out loud |
-| 18 | `creatives-july/ad-security-1x1.png` | 1:1 | Fast paperwork, serious security |
-| 19 | `creatives-july/ad-why-we-built-16x9.png` | 16:9 | We automated the part that stalls |
-| 20 | `creatives-july/ad-week-with-clients-9x16.png` | 9:16 | Spend the week with clients |
-
-All assets hosted at `https://palmcareai.com/marketing/social/<filename>` for API posting.
-Every caption ends with the signup link.
+| 1 | `w1-imsg-contract.png` | iMessage thread | "already sent it" — same-day contract |
+| 2 | `palm-linkedin-carousel.pdf` | 7-page document | Full story: 2 hrs of typing → deleted |
+| 3 | `w1-phone-record.png` | Real app, record screen | This screen replaces your clipboard |
+| 4 | `w1-timeline-sameday.png` | Timeline 10:00→12:15 | Signed before the competition calls back |
+| 5 | `w1-receipt-tuesday.png` | Itemized receipt | Your Tuesday, itemized — TIME REFUNDED |
+| 6 | `w2-notifications.png` | iOS notification stack | You drove home. PALM kept working. |
+| 7 | `w2-vs-table.png` | Comparison table | Same visit, two very different nights |
+| 8 | `w2-phone-contract.png` | Real app, contract screen | The contract writes itself |
+| 9 | `w3-quote-remove.png` | Serif quote card | Most tools digitize paperwork. PALM removes it. |
+| 10 | `w3-stickynote.png` | Handwritten sticky note | Stop writing contracts at 9pm on the couch |
+| 11 | `w3-fill-blank.png` | Fill-in-the-blank | "If I never had to type another visit note…" |
+| 12 | `w3-phone-transcript.png` | Real app, transcript | PALM knows who said what |
+| 13 | `w4-pov-home.png` | POV + real notification | POV: the visit ended two minutes ago |
+| 14 | `w3-math.png` | Big-numbers math | 312 hours a year = 39 working days |
+| 15 | `w4-states.png` | Typographic "50" | 50 rule books. One draft that follows yours. |
+| 16 | `w4-sunday-split.png` | Before/after split | Sunday 9:14 PM, with and without PALM |
+| 17 | `w4-founder-note.png` | Founder letter | Why we built PALM |
+| 18 | `w4-phone-billables.png` | Real app, billables | "Oh, and she needs help with meals." |
+| 19 | `w2-statement-dataentry.png` | Serif statement | You didn't get into home care to do data entry |
+| 20 | `w2-poll-evenings.png` | Poll results card | What actually eats your evenings? |
+| — | `w1-checklist.png` | Checklist (bonus) | IG Story asset — after-visit to-do list |
 
 ---
 
 ## WEEK 1 (Jul 13 – Jul 19)
 
-### Mon Jul 13 — Meta (FB + IG) — Creative 1 (same day contract)
-> Assessment at 10am. Signed contract by lunch. 🖐️
-> PALM records the visit, writes the notes and billables, and drafts a state compliant service agreement while you drive to the next client. The family says yes while they're still sure.
+### Mon Jul 13 — Meta (FB + IG) — #1 iMessage thread
+> The group chat when the contract goes out before lunch 🌴
+>
+> "Already sent it" is a real thing now. PALM listens to the assessment, writes the notes and billables, and drafts the state-compliant agreement while you drive to the next visit. You read it, you hit send.
+>
 > Start free, no card: palmcareai.com/register
-> #homecare #homecareagency #healthtech #privateduty
+> #homecare #homecareagency #privateduty #healthtech
 
-### Tue Jul 14 — LinkedIn — Creative 2 (win the client)
-> In home care, speed wins clients.
+### Tue Jul 14 — LinkedIn — #2 Document carousel (PDF)
+> Your best nurse does 2 hours of typing after every assessment.
 >
-> A family calling you is calling two other agencies the same afternoon. The one that puts a clear service agreement in front of them first usually signs them.
+> Not care. Not visits. Typing — retyping things a family already said out loud.
 >
-> Most agencies take two to five days to turn an assessment into a contract. PALM does it before the assessor is back in the car: record the visit, and the transcript, billable services, clinical notes, and a state compliant agreement are written automatically.
+> We put the whole problem (and how agencies are deleting it) into 7 slides. Slide 5 is the actual contract screen from our app, not a mockup.
 >
-> Same conversation. Same client. Signed days earlier.
+> If your team still documents visits twice — once out loud, once at a keyboard — this is worth two minutes.
 >
-> Start a free trial: palmcareai.com/register
-> #homecare #homehealthcare #agencygrowth
+> **First comment:** Try it on your next assessment, free: palmcareai.com/register
+> #homecare #homehealthcare #agencyoperations
 
-### Wed Jul 15 — Meta (FB + IG, Reels) — Creative 3 (pipeline video)
-> Watch a recorded visit become a contract. ▶️
-> Transcript, billable services, clinical notes, and a ready to sign agreement, all from one recording. No forms, no double entry.
-> Try it free: palmcareai.com/register
+### Wed Jul 15 — Meta (FB + IG) — #3 Record screen
+> This screen replaces your clipboard.
+>
+> Press record at the assessment. PALM writes the transcript, the care plan, the billables, and the contract. That's the actual app — no forms, no double entry.
+>
+> Try it on one visit and see: palmcareai.com/register
 > #homecare #caregiver #healthcareAI #homecarebusiness
 
-### Thu Jul 16 — LinkedIn — Creative 4 (four documents)
-> One recorded assessment produces four finished documents:
+### Thu Jul 16 — LinkedIn — #4 Same-day timeline
+> 10:00 — assessment starts.
+> 10:47 — you press stop.
+> 10:49 — notes, billables, and a state-compliant agreement are drafted.
+> 12:15 — the family signs.
 >
-> A full transcript with speakers identified. Billable services with units and rates. Structured clinical notes. And a service agreement that follows your state's home care rules.
+> In home care, the agency that puts a clear agreement in front of the family first usually wins them. Most take days. That gap is the whole opportunity.
 >
-> That's hours of admin per client, gone. Your assessors do the visit; the documentation writes itself.
+> What's your average time from assessment to signed agreement? Genuinely curious what the range looks like.
 >
-> See it on your own visits: palmcareai.com/register
-> #homecare #efficiency #healthtech
+> **First comment:** palmcareai.com/register — free to start
+> #homecare #agencygrowth #homehealthcare
 
-### Fri Jul 17 — Meta (FB + IG) — Creative 5 (evenings back)
-> The charting is done. You just left the visit. 🌙
-> PALM writes the notes, billing, and contract from the recorded assessment, so your evenings belong to you again.
-> Start free: palmcareai.com/register
-> #caregiver #homecare #worklifebalance #homehealth
+### Fri Jul 17 — Meta (FB + IG) — #5 Receipt
+> We itemized your Tuesday. 🧾
+>
+> Three hours of after-visit paperwork per assessment — retyping what was already said in the living room. PALM's total for the same work: zero minutes. Time refunded.
+>
+> Which line item hurts the most? Tell us below.
+>
+> Start free, no card: palmcareai.com/register
+> #homecare #homecareagency #caregiverlife
 
 ---
 
 ## WEEK 2 (Jul 20 – Jul 26)
 
-### Mon Jul 20 — Meta (FB + IG) — Creative 6 (days vs minutes)
-> The old way: days of paperwork between "we'd love your help" and a signed agreement.
-> With PALM: minutes. ⏱️ Families don't wait. Neither should your contracts.
+### Mon Jul 20 — Meta (FB + IG) — #6 Notification stack
+> You drove home. PALM kept working. 📲
+>
+> 4:12 — transcript ready. 4:13 — care plan drafted, billables priced. 4:14 — service agreement ready for review. All from the recording you made during the visit.
+>
 > Start free, no card: palmcareai.com/register
-> #homecareagency #seniorcare #healthtech #smallbusiness
+> #homecare #healthtech #privateduty
 
-### Tue Jul 21 — LinkedIn — Creative 7 (15 hours a week)
-> Ask your team how many hours a week they spend on documentation. For most agencies it lands somewhere around fifteen.
+### Tue Jul 21 — LinkedIn — #7 Comparison table
+> Same visit. Two very different nights.
 >
-> That's not care work. It's transcribing visits, filling in care plans, and rewriting the same information into a contract. Almost all of it happens after the last visit of the day.
+> The information in a care assessment doesn't change based on who types it up. What changes is where the hours go: your nurse's evening, or two minutes of AI processing.
 >
-> PALM gives those hours back. The visit is recorded once, and the notes, billing, and agreement are written from it automatically.
+> Visit notes, billables, the agreement, state rules — the old way vs. what our agencies do now, in one table.
 >
-> Fewer admin hours, faster contracts, happier staff. palmcareai.com/register
-> #homecare #operations #efficiency #healthtech
+> **First comment:** See it on your own visits: palmcareai.com/register
+> #homecare #operations #homehealthcare
 
-### Wed Jul 22 — Meta (FB + IG) — Creative 8 (talk, don't type)
-> Talk. Don't type. 🎙️
-> Your assessment is already the data. PALM turns the conversation into notes, billing items, and a contract, so nobody enters anything twice.
+### Wed Jul 22 — Meta (FB + IG) — #8 Contract screen
+> The contract writes itself. This is the actual screen.
+>
+> $34/hr, 28 hours, 6 services — pulled straight from what the family said during the assessment, in a state-compliant agreement. You review, you send, they sign.
+>
 > Try it free: palmcareai.com/register
-> #homecare #caregiving #AItools #privateduty
+> #homecare #homecareagency #healthcareAI
 
-### Thu Jul 23 — LinkedIn — Creative 9 (record, extract, contract)
-> How PALM works, in three steps.
+### Thu Jul 23 — LinkedIn — #9 Quote card
+> Most tools digitize the paperwork. PALM removes it.
 >
-> Record the client assessment like a normal conversation. PALM writes the transcript, pulls out billable services with rates, and drafts clinical notes. Then a service agreement aligned with your state's rules is ready to review and send for signature.
+> That distinction is the whole product. Scheduling software, EVV, care management platforms — they give you better places to type. The typing stays.
 >
-> No new forms to learn. No data entry. Built only for US home care, all 50 states.
+> PALM starts from a different question: the visit was already documented out loud, by the people in the room. Why is anyone typing it again?
 >
-> Start free: palmcareai.com/register
-> #homecare #homehealthcare #productivity
+> **First comment:** palmcareai.com/register
+> #homecare #healthtech #founders
 
-### Fri Jul 24 — Meta (FB + IG) — Creative 10 (what an assessment captures)
-> What does a complete assessment capture? Care needs, ADLs, medications, safety risks, schedule, and rate. Everything your care plan AND your contract need. 📋
-> PALM pulls all of it from one recorded conversation.
-> Start free: palmcareai.com/register
-> #homecare #caregiver #aginginplace #homecarebusiness
+### Fri Jul 24 — Meta (FB + IG) — #10 Sticky note
+> Note to self 📝
+>
+> Stop writing contracts at 9pm on the couch. Let the app that heard the visit write them.
+>
+> Tag someone who's still doing their charting after dinner.
+>
+> Start free, no card: palmcareai.com/register
+> #homecare #caregiverlife #nurselife
 
 ---
 
 ## WEEK 3 (Jul 27 – Aug 2)
 
-### Mon Jul 27 — Meta (FB + IG) — Creative 11 (all 50 states)
-> One workflow. All 50 states. 🗺️
-> Every PALM service agreement follows your state's home care rules automatically. No templates to chase, no rewrites when you take a client across the state line.
-> Start free: palmcareai.com/register
-> #homecare #compliance #homecareagency #healthtech
+### Mon Jul 27 — Meta (FB + IG) — #11 Fill in the blank
+> Finish the sentence 👇
+>
+> "If I never had to type another visit note, I would finally ______."
+>
+> Sleep? Grow the agency? Make it to the 6pm game? Drop yours in the comments — best answer gets pinned.
+>
+> Then make it real: palmcareai.com/register
+> #homecare #homecareagency #caregiver
 
-### Tue Jul 28 — LinkedIn — Creative 12 (retention)
-> Caregiver burnout doesn't start in the client's home. It starts at the kitchen table at 9pm, typing up the day.
+### Tue Jul 28 — LinkedIn — #12 Transcript screen
+> PALM knows who said what.
 >
-> Agencies lose good nurses and caregivers to documentation, not to care work. Every hour of after hours charting is an hour closer to a resignation letter.
+> A care assessment is a three-way conversation: the caregiver's questions, the client's answers, the family's concerns. Our transcripts keep every voice separate and searchable — so the care plan and the agreement are built from what was actually said, not what someone remembered at 9pm.
 >
-> PALM removes that hour. The visit is recorded once, and the notes, billing, and agreements are written automatically.
+> This is the real transcript screen from the app.
 >
-> Keeping your best people is a growth strategy. palmcareai.com/register
-> #caregiverburnout #homecare #retention
+> **First comment:** palmcareai.com/register — free to start
+> #homecare #clinicaldocumentation #healthtech
 
-### Wed Jul 29 — Meta (FB + IG, Reels) — Creative 13 (visit's over)
-> The visit's over. So is your paperwork. 🖐️
-> Record the assessment, and the documentation is done when you are. No 9pm charting.
-> Try it free: palmcareai.com/register
-> #homecare #caregiver #burnout #homehealth
+### Wed Jul 29 — Meta (FB + IG) — #13 POV
+> POV: the visit ended two minutes ago. ✅
+>
+> Notes done. Billables done. Contract drafted. You haven't even started the car.
+>
+> Start free, no card: palmcareai.com/register
+> #homecare #POV #caregiverlife #healthtech
 
-### Thu Jul 30 — LinkedIn — Creative 14 (the lost client)
-> The client you lost last month probably wasn't a bad lead. It was slow paperwork.
+### Thu Jul 30 — LinkedIn — #14 The math
+> 3 assessments a week × 2 hours of paperwork each = 312 hours a year.
 >
-> Home care is a trust business, and trust has a clock on it. Families are most ready to sign right after the assessment, when they've just met you and felt understood. Three days later they've talked to two other agencies.
+> That's 39 working days per assessor. Not caring for anyone. Not growing the agency. Typing up what someone already said out loud.
 >
-> PALM makes sure your agreement shows up in that window, not after it closes.
+> If you run a team of five, you're funding roughly 195 days of retyping a year. That's the quiet line item nobody budgets for — and the first thing PALM deletes.
 >
-> Secure the contract while the trust is fresh. palmcareai.com/register
-> #homecare #agencygrowth #sales
+> **First comment:** Get those days back: palmcareai.com/register
+> #homecare #agencyoperations #efficiency
 
-### Fri Jul 31 — Meta (FB + IG) — Creative 15 (no double entry)
-> Stop typing the same visit into four systems. 🔁
-> EHR, billing, care plan, contract. PALM fills them all from one recording, so your team enters a visit once and moves on.
-> Start free: palmcareai.com/register
-> #homecare #homecarebusiness #efficiency #healthtech
+### Fri Jul 31 — Meta (FB + IG) — #15 50 states
+> 50 states. 50 different rule books. One draft that follows yours. 🇺🇸
+>
+> PALM's service agreements are built on the contract rules of the state you operate in — not a generic template with your logo pasted on top.
+>
+> Start free, no card: palmcareai.com/register
+> #homecare #homecareagency #compliance
 
 ---
 
 ## WEEK 4 (Aug 3 – Aug 9)
 
-### Mon Aug 3 — Meta (FB + IG) — Creative 16 (before lunch)
-> New client at 9. Onboarded before lunch. 🕚
-> Assessment, care plan, and a signed ready agreement, all before noon. While other agencies are still "getting the paperwork together," yours already sent it.
-> Start free: palmcareai.com/register
-> #homecareagency #homecare #healthtech #seniorcare
+### Mon Aug 3 — Meta (FB + IG) — #16 Sunday split
+> Sunday, 9:14 PM. Two versions of you.
+>
+> One has a laptop open, cold coffee, and three visit notes left. The other one's paperwork was drafted before they left the driveway.
+>
+> Which Sunday are you having? Be honest 👇
+>
+> Start free, no card: palmcareai.com/register
+> #homecare #sundayscaries #caregiverlife
 
-### Tue Aug 4 — LinkedIn — Creative 17 (out loud)
-> Your assessors already collect everything you need. They just collect it out loud.
+### Tue Aug 4 — LinkedIn — #17 Founder note
+> Why we built PALM:
 >
-> Care needs, medications, schedule, rate. It's all said in the conversation, and then someone types it into three different documents.
+> We watched caregivers give their whole day to families — and their whole evening to paperwork about it.
 >
-> PALM ends the retyping. The recorded conversation becomes the transcript, the clinical note, the billing entries, and the service agreement. One source of truth, zero double entry.
+> The strange part was that the visit was already documented. Someone said every word of it out loud. The only thing missing was software that listened.
 >
-> Efficiency isn't doing paperwork faster. It's not doing it at all. palmcareai.com/register
-> #homecare #operations #healthtech
+> So that's what we built. Record the assessment; PALM writes the transcript, the care plan, the billables, and a state-compliant service agreement. The caregiver reviews and sends.
+>
+> If you run an agency and this sounds familiar, I'd genuinely like to hear how your team handles post-visit documentation today.
+>
+> **First comment:** palmcareai.com/register
+> #homecare #buildinpublic #healthtech
 
-### Wed Aug 5 — Meta (FB + IG) — Creative 18 (security)
-> Fast paperwork. Serious security. 🔒
-> PALM protects every recording and record while it turns visits into documents. HIPAA aligned, 256-bit encryption, built only for home care.
-> Start free: palmcareai.com/register
-> #homecare #hipaa #healthtech #seniorcare
+### Wed Aug 5 — Meta (FB + IG) — #18 Billables screen
+> "Oh, and she needs help with meals."
+>
+> Said once, in passing, at minute 34 of the assessment. The old way, it never makes the invoice. PALM hears it, prices it, and puts it in the agreement — this is the real billables screen.
+>
+> Stop losing billables you already earned: palmcareai.com/register
+> #homecare #homecarebilling #agencyowner
 
-### Thu Aug 6 — LinkedIn — Creative 19 (why we built it)
-> We built PALM around one observation: in home care, the paperwork is the bottleneck between winning a family's trust and winning their signature.
+### Thu Aug 6 — LinkedIn — #19 Statement card
+> You didn't get into home care to do data entry.
 >
-> Everything else in the sales process is human. The referral, the call, the assessment. Then it stalls in documents for days.
+> Nobody did. But post-visit documentation quietly became the biggest unpaid job in the industry — and the top reason good assessors burn out.
 >
-> So we automated exactly that part. The assessment recording becomes the notes, the billables, and a state compliant service agreement, ready the same day.
+> The fix isn't typing faster. It's not typing.
 >
-> Win the trust, and let the paperwork keep up. palmcareai.com/register
-> #homecare #homehealthcare #agencyowners
+> **First comment:** Record the visit, PALM writes the rest: palmcareai.com/register
+> #homecare #burnout #caregiverretention
 
-### Fri Aug 7 — Meta (FB + IG) — Creative 20 (week with clients)
-> Spend the week with clients. Not paperwork. 🖐️
-> One recorded visit becomes your notes, your billing, and a signed ready contract. Start Monday with people, not forms.
-> Start free: palmcareai.com/register
-> #homecare #caregiving #homecareagency #healthtech
+### Fri Aug 7 — Meta (FB + IG) — #20 Poll results
+> We asked home care admins what actually eats their evenings. 68% said the same thing. 🗳️
+>
+> Not scheduling. Not family calls. Post-visit paperwork — the retyping of a conversation that already happened.
+>
+> Is it the same at your agency? Tell us what's #1 for you.
+>
+> Then take it off the list: palmcareai.com/register
+> #homecare #homecareagency #poll
 
 ---
 
-## Posting mechanics
-- **Meta (FB + IG):** automated via `scripts/social/post_to_meta.py` using the hosted image/video URLs.
-  Suggested times: Mon/Wed/Fri 8:30am ET; Reels also strong 6–8pm.
-- **LinkedIn:** the API token is currently **expired** and needs a one time re-auth
-  (`openid profile w_member_social`) before auto posting. Until then, the Tue/Thu captions are
-  copy paste ready for the company page. Suggested times: 9am ET.
-- **Signup flow:** every caption points to `palmcareai.com/register`. The site's attribution
-  tracking records the channel automatically, so each signup is tied back to its post source.
-- **Approval flow:** the whole month is emailed to Muse first. Nothing goes out until approved.
-- Refresh with a new unique set for the Aug 10 week; no creative in this plan repeats.
+## Bonus asset
+- `w1-checklist.png` — "Everything below is PALM's job now" checklist. Use as an IG Story
+  with a poll sticker ("Which of these do you still do by hand?") any week.
+
+## Posting notes
+- Meta: post 11am–1pm local; caption link is fine on FB, IG link in bio.
+- LinkedIn: Tue–Thu window, links ALWAYS in first comment, PDF carousel uploads as a "document."
+- All images: 1080×1350 (4:5) for Meta feed; carousel pages 1200×1200 PDF.
+- Regenerate/edit any card: edit `marketing/creative-studio/cards/*.html`, then
+  `node marketing/creative-studio/render.js`.

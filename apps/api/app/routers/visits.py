@@ -183,14 +183,24 @@ async def create_visit(
     
     # Use current user as caregiver if not provided
     caregiver_id = visit_in.caregiver_id or current_user.id
-    
-    # Verify caregiver exists
-    caregiver = db.query(User).filter(User.id == caregiver_id).first()
-    if not caregiver:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Caregiver not found",
+
+    # A caregiver must be the caller themselves or a teammate in the same
+    # company — never an arbitrary user id (prevents cross-tenant info leak
+    # via the joinedloaded caregiver on visit reads).
+    if caregiver_id == current_user.id:
+        caregiver = current_user
+    else:
+        caregiver = db.query(User).filter(User.id == caregiver_id).first()
+        same_company = (
+            caregiver is not None
+            and current_user.company_name is not None
+            and caregiver.company_name == current_user.company_name
         )
+        if not caregiver or not same_company:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Caregiver not found",
+            )
     
     visit_data = visit_in.model_dump()
     visit_data['caregiver_id'] = caregiver_id  # Ensure caregiver_id is set

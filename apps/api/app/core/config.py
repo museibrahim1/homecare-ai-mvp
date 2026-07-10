@@ -49,10 +49,6 @@ class Settings(BaseSettings):
     # Base URL used to build email-verification links (falls back to APP_URL env).
     app_url: str = "https://palmcareai.com"
     
-    # ASR
-    asr_model_size: str = "medium"
-    use_gpu: bool = False
-    
     # Application
     debug: bool = False
     log_level: str = "INFO"

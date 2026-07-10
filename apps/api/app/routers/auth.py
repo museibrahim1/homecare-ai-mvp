@@ -527,8 +527,13 @@ async def reset_password(
         )
     
     # Same complexity policy as registration/change-password — a reset must
-    # not be a path to a weaker password.
-    is_valid, policy_error = validate_password(request.new_password)
+    # not be a path to a weaker password. Includes the breach (HIBP) check so a
+    # reset can't set a known-compromised password.
+    from fastapi.concurrency import run_in_threadpool
+    from app.core.security import validate_password_secure
+    is_valid, policy_error = await run_in_threadpool(
+        validate_password_secure, request.new_password
+    )
     if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

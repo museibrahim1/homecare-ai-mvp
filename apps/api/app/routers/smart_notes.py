@@ -316,14 +316,10 @@ async def complete_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    is_admin = current_user.role in ("admin", "admin_team")
-    if is_admin:
-        task = db.query(Task).filter(Task.id == task_id).first()
-    else:
-        task = db.query(Task).filter(
-            Task.id == task_id,
-            or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
-        ).first()
+    task = db.query(Task).filter(
+        Task.id == task_id,
+        or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
+    ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -340,10 +336,11 @@ async def purge_tasks_by_title(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Admin-only: delete all tasks matching a title substring."""
-    if current_user.role not in ("admin", "admin_team"):
-        raise HTTPException(status_code=403, detail="Admin access required")
-    tasks = db.query(Task).filter(Task.title.ilike(f"%{q}%")).all()
+    """Delete the caller's own tasks matching a title substring."""
+    tasks = db.query(Task).filter(
+        Task.title.ilike(f"%{q}%"),
+        Task.user_id == current_user.id,
+    ).all()
     count = len(tasks)
     for t in tasks:
         db.delete(t)
@@ -357,14 +354,10 @@ async def delete_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    is_admin = current_user.role in ("admin", "admin_team")
-    if is_admin:
-        task = db.query(Task).filter(Task.id == task_id).first()
-    else:
-        task = db.query(Task).filter(
-            Task.id == task_id,
-            or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
-        ).first()
+    task = db.query(Task).filter(
+        Task.id == task_id,
+        or_(Task.user_id == current_user.id, Task.assigned_to_id == current_user.id),
+    ).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     db.delete(task)

@@ -6,6 +6,7 @@ Public endpoints for scheduling product demo calls via Google Meet.
 
 import os
 import time
+import html as html_lib
 import logging
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
@@ -358,7 +359,17 @@ async def book_demo(
 
     verified_sender = "Muse Ibrahim <sales@palmcareai.com>"
 
-    services_list = ', '.join(booking.services or []) or 'Not specified'
+    # Escape all prospect-supplied values before interpolating into email HTML.
+    # This endpoint is public and unauthenticated, so raw interpolation would
+    # let a booking inject markup into our team's inbox (phishing vector).
+    name_e = html_lib.escape(booking.name or "")
+    company_e = html_lib.escape(booking.company_name or "")
+    email_e = html_lib.escape(booking.email or "")
+    phone_e = html_lib.escape(booking.phone or "") or "N/A"
+    state_e = html_lib.escape(booking.state or "") or "N/A"
+    clients_e = html_lib.escape(str(booking.estimated_clients or "")) or "N/A"
+    referral_e = html_lib.escape(booking.referral_source or "") or "N/A"
+    services_list = html_lib.escape(', '.join(booking.services or [])) or 'Not specified'
 
     # Confirmation email to prospect
     if has_schedule and formatted_date:
@@ -374,12 +385,12 @@ async def book_demo(
                     <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #0d9488; letter-spacing: -0.5px;">PalmCare AI</h1>
                 </div>
                 <div style="background: #ffffff; border-radius: 8px; padding: 40px 40px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #333333; line-height: 1.5;">Hi {booking.name},</p>
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #333333; line-height: 1.5;">Hi {name_e},</p>
                     <p style="margin: 0 0 28px 0; font-size: 15px; color: #333333; line-height: 1.5;">Your demo with PalmCare AI has been confirmed:</p>
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 28px;">
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0; width: 140px;">Topic</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">PalmCare AI Demo — {booking.company_name}</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">PalmCare AI Demo — {company_e}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td>
@@ -410,8 +421,8 @@ async def book_demo(
                     <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #0d9488; letter-spacing: -0.5px;">PalmCare AI</h1>
                 </div>
                 <div style="background: #ffffff; border-radius: 8px; padding: 40px 40px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #333333; line-height: 1.5;">Hi {booking.name},</p>
-                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #333333; line-height: 1.5;">We&rsquo;ve received your demo request for <strong>{booking.company_name}</strong>. Our team will reach out within 1 business day to schedule your personalized demo.</p>
+                    <p style="margin: 0 0 24px 0; font-size: 15px; color: #333333; line-height: 1.5;">Hi {name_e},</p>
+                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #333333; line-height: 1.5;">We&rsquo;ve received your demo request for <strong>{company_e}</strong>. Our team will reach out within 1 business day to schedule your personalized demo.</p>
                     <p style="margin: 0 0 0 0; font-size: 14px; color: #747487; line-height: 1.5;">Thank you for choosing PalmCare AI.<br>-The PalmCare Team</p>
                 </div>
                 <div style="text-align: center; padding-top: 24px;">
@@ -446,27 +457,27 @@ async def book_demo(
                 </div>
                 <div style="background: #ffffff; border-radius: 8px; padding: 40px 40px 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
                     <p style="margin: 0 0 24px 0; font-size: 15px; color: #333333; line-height: 1.5;">Hi Muse,</p>
-                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #333333; line-height: 1.5;">{booking.name} from <strong>{booking.company_name}</strong> has {'booked a demo' if has_schedule else 'requested a demo'}:</p>
+                    <p style="margin: 0 0 28px 0; font-size: 15px; color: #333333; line-height: 1.5;">{name_e} from <strong>{company_e}</strong> has {'booked a demo' if has_schedule else 'requested a demo'}:</p>
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 28px;">
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0; width: 140px;">Name</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.name}</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{name_e}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Email</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;"><a href="mailto:{booking.email}" style="color: #0d9488; text-decoration: none;">{booking.email}</a></td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;"><a href="mailto:{email_e}" style="color: #0d9488; text-decoration: none;">{email_e}</a></td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Company</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.company_name}</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{company_e}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Phone</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.phone or 'N/A'}</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{phone_e}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">State</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.state or 'N/A'}</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{state_e}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Services</td>
@@ -474,11 +485,11 @@ async def book_demo(
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Clients</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.estimated_clients or 'N/A'}</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{clients_e}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Heard About Us</td>
-                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{booking.referral_source or 'N/A'}</td>
+                            <td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">{referral_e}</td>
                         </tr>
                         {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487; border-bottom: 1px solid #ededf0;">Date</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600; border-bottom: 1px solid #ededf0;">' + (formatted_date or '') + ' at ' + (formatted_time or '') + ' ET</td></tr>' if has_schedule else ''}
                         {'<tr><td style="padding: 10px 0; font-size: 14px; color: #747487;">Zoom Link</td><td style="padding: 10px 0; font-size: 14px; color: #232333; font-weight: 600;"><a href="' + (meeting_link or '') + '" style="color: #0d9488; text-decoration: none;">Join Meeting</a></td></tr>' if meeting_link else ''}
