@@ -249,6 +249,70 @@ actual stack: **Supabase + FastAPI + Next.js (web) + SwiftUI (iOS) + RevenueCat/
 
 ---
 
+## 6. SOCIAL DISTRIBUTION — post to win the 2026 algorithms (added 2026-07-09)
+
+> Learned from 2026 platform-algorithm guides (Hootsuite, Sprout, Later, Buffer,
+> Sprout/SocialPilot, LinkedIn deep-dives, Postory/Monolit for Threads, Reddit
+> self-promo guides). Applied to PALM's Jul 13–Aug 9 plan + Thu/Fri gap posts.
+
+### Cross-platform truths (all of Meta + LinkedIn)
+- [ ] **Saves + sends (DM shares) now beat likes** everywhere. Design posts people
+      *bookmark* or *send to a coworker* ("tag someone who…", itemized/checklist/
+      how-to formats). Likes are the weakest signal in 2026.
+- [ ] **Substantive comments > reactions.** End every post with ONE specific,
+      answerable question. Threads with 4+ back-and-forth replies get big reach
+      boosts (FB cites up to +300%).
+- [ ] **The first 30–60 min decide reach.** Be present in the golden hour: reply to
+      every comment fast (that reply is a fresh engagement event and extends the
+      scoring window). Don't post-and-leave.
+- [ ] **Originality wins; reposts are penalized.** Meta/IG demote aggregator/reposted
+      content and can swap in the original. Our in-house creative studio (real logo,
+      real app screens) is the right approach — never fake logos or stock-look AI.
+- [ ] **Niche consistency** so the interest model can classify the account: stay on
+      home-care/agency-ops topics; occasional off-topic is fine, scattered is not.
+- [ ] **Engagement bait is down-ranked** ("like if you agree", "comment YES"). Ask a
+      *real* question instead.
+
+### Instagram / Facebook (Meta)
+- [ ] **Video = Reels = the discovery engine.** ~50% of feed is now recommended
+      (non-followers). Static/carousel still work in-feed, but short vertical video
+      (hook in 3s, on-screen captions, aim 50% mid-video retention) reaches new people.
+- [ ] **SEO over hashtags:** put the searched keyword phrase in the FIRST line of the
+      caption + profile; use 3–5 niche hashtags, not big stacks. Add alt text.
+- [ ] **Stories daily** with polls/questions/quizzes; repost feed posts to Story
+      (Story views count toward Reel views). Link stays in bio for IG.
+- [ ] Post 1–2×/day, consistent cadence > bursts.
+
+### Threads
+- [ ] **Replies outrank likes ~10×; engagement velocity in the first hour is the #1
+      signal.** Write conversational, personal, opinion/hot-take posts (not brand copy).
+- [ ] **Keep links OUT of the post body** (in-body links suppress reach) — put the link
+      in your own **first reply**. Post 5–7×/week; reply to every reply with substance.
+- [ ] Activate the IG audience; spend 10–15 min/day replying on other niche accounts.
+
+### LinkedIn — 2026 "Authenticity Update" (BIG CHANGE)
+- [ ] **Depth Score rules:** dwell time + saves + substantive comments, read by an LLM
+      that scores original insight. Surface-level/reshared content is throttled.
+- [ ] **⚠️ The link-in-first-comment trick is now PENALIZED too** (was our plan's default).
+      External links in body OR first comment cut reach 50–80%. New rule: **deliver full
+      value in the post, keep the URL on the image/in bio**, or accept the trade-off.
+      (Our poster still supports a first-comment link, but prefer link-free.)
+- [ ] **Document carousels (PDF) + multi-image carousels = highest dwell time** → best
+      reach. Hook <140 chars, short 1–3 sentence paragraphs, then deliver.
+- [ ] 2–4 posts/week (quality > volume); comment on others' posts 10–15 min BEFORE you
+      post (highest-ROI activity); reply to every comment within the golden hour.
+
+### Reddit (and it feeds Google + LLM answers)
+- [ ] **9:1 (better 19:1) rule:** ≤10% of activity self-promotional. Age the account,
+      earn karma first, read each subreddit's rules, use the sanctioned "Show/Feedback"
+      threads.
+- [ ] **Reply-marketing > link posts:** answer the person's question, disclose you built
+      it ("full disclosure, I made this"), mention the product as one option, often skip
+      the link entirely (people Google the name; links raise spam-filter risk).
+- [ ] No sales jargon ("revolutionary/game-changing"); no multi-account voting (perma-ban).
+
+---
+
 ## How to use this playbook
 - Treat the **ship-gates** as a pre-release checklist for every project.
 - When implementing auth, DB access, storage, billing, or onboarding, re-read the
@@ -270,6 +334,9 @@ Distilled from Instagram reels (Jun 2026):
 - (11) Free SEO: real questions → helpful blog posts — instagram.com/reels/DRHy1evjTZM
 - (12) Apple's 90-second app review — how not to get rejected — instagram.com/reels/DXVBU_fk5ZG
 - (13) Scaling 100→10k users (cache, async, indexes, k6, horizontal) — instagram.com/reels/DY8DcYZyAaB
+- (14) 2026 social algorithms (IG/FB/Threads/LinkedIn/Reddit) — Hootsuite, Sprout Social,
+  Later, Buffer, SocialPilot, Postory, Monolit, teract.ai, contentdrips, redship,
+  growreddit (web research, 2026-07-09). Summarized in §6 above.
 
 > Installed agent skills are documented in `docs/AGENT_SKILLS.md` (and the
 > `agent-skills` project rule). Use the marketing/SEO skills for growth work.
