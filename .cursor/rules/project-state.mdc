@@ -23,7 +23,12 @@ App ID `6766371988` ("PALM – Home Care Contracts"), Team `BM5U63WP92`. App Sto
 - Note: The local `aitask` daemon + email/social subagent scripts were removed on 2026-05-19. All outreach is now manual or backend-driven.
 
 ## Automated Social Posting (Jul 13 – Aug 9 plan)
-- `scripts/social/run_scheduled_posts.py` runs daily 11:30 AM via launchd `com.palmcareai.socialposts`. Meta days (Mon/Wed/Fri) → FB + IG + Threads (link in caption). LinkedIn days (Tue/Thu) → image or PDF document carousel, signup link posted as the FIRST COMMENT.
+- Social posting is FULLY CLOUD-BASED (no local machine needed), set up 2026-07-09:
+  - **Facebook**: all 13 posts natively scheduled inside Meta Business Suite via `scripts/social/schedule_meta_fb.py` (11:30 AM local, log in `scripts/social/.scheduled_fb.json`).
+  - **IG + Threads (Mon/Wed/Fri) and LinkedIn (Tue/Thu)**: GitHub Actions workflow `.github/workflows/social-posts.yml` runs `run_scheduled_posts.py` daily at 15:30 UTC (11:30 AM ET). Secrets (META_*, LINKEDIN_*) are set on the `museibrahim1/homecare-ai-mvp` repo. The workflow commits `.posted_log.json` back to main as a double-post guard. Manual trigger: `gh workflow run social-posts.yml -f date=YYYY-MM-DD -f dry_run=true`.
+  - The old local launchd agent `com.palmcareai.socialposts` was REMOVED (plist deleted) — don't recreate it.
+  - Threads caps captions at 500 chars; the runner auto-trims via `threads_safe()`.
+  - ⚠️ Tokens expire ~Sep 8, 2026 (LinkedIn + Threads 60-day). Refresh and update BOTH `.env` and the GitHub repo secrets.
 - Posters: `scripts/social/post_to_meta.py` (fb/ig/th) and `scripts/social/post_to_linkedin.py` (image/document + first comment). Dedupe via `scripts/social/.posted_log.json`.
 - Creatives + captions: `marketing/content-calendar-month-july.md`; assets in `apps/web/public/marketing/social/` (served at `palmcareai.com/marketing/social/`).
 
