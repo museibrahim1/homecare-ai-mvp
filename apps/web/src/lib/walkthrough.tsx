@@ -27,7 +27,9 @@ function isAuthenticated(): boolean {
     const raw = localStorage.getItem('palmcare-auth');
     if (!raw) return false;
     const parsed = JSON.parse(raw);
-    return !!parsed?.state?.token;
+    // Session presence = persisted user (the token itself lives in an
+    // httpOnly cookie now). Legacy sessions may still have a token.
+    return !!(parsed?.state?.user || parsed?.state?.token);
   } catch {
     return false;
   }

@@ -20,7 +20,7 @@ import BarChart from '@/components/charts/BarChart';
 import Sparkline from '@/components/charts/Sparkline';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = '/api';
 
 /* ─── Pipeline stage config ─── */
 const PIPELINE_STAGES = [

@@ -8,7 +8,7 @@ import {
   ChevronDown, ChevronUp, Activity, Wrench, ArrowLeft, Bell
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = '/api';
 const POLL_INTERVAL = 30_000;
 
 interface IncidentUpdate {

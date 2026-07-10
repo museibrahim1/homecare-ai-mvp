@@ -5,8 +5,9 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Request
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
+from app.core.cookies import set_session_cookie
 from app.core.rate_limit import limiter
 from sqlalchemy.orm import Session
 from jose import jwt
@@ -54,6 +55,7 @@ router = APIRouter()
 @limiter.limit("10/minute")
 async def login(
     request: Request,
+    response: Response,
     credentials: BusinessLoginRequest,
     db: Session = Depends(get_db),
 ):
@@ -170,7 +172,10 @@ async def login(
         "business_id": str(business.id),
         "business_user_id": str(user.id),
     })
-    
+
+    # Web clients authenticate via httpOnly cookie (token never in localStorage)
+    set_session_cookie(response, token)
+
     return BusinessLoginResponse(
         access_token=token,
         token_type="bearer",

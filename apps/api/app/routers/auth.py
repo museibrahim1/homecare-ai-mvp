@@ -4,12 +4,14 @@ import logging
 import time
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 import pyotp
 
+from app.core.cookies import set_session_cookie, clear_session_cookie
+from app.core.rate_limit import get_client_ip
 from app.core.deps import get_db, get_current_user
 from app.core.security import (
     verify_password, create_access_token, get_password_hash,
@@ -97,7 +99,7 @@ router = APIRouter()
 
 
 @router.post("/login", response_model=Token)
-async def login(request: LoginRequest, req: Request, db: Session = Depends(get_db)):
+async def login(request: LoginRequest, req: Request, response: Response, db: Session = Depends(get_db)):
     """
     Authenticate user and return JWT token.
     
@@ -107,7 +109,7 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
     - Generic error messages to prevent user enumeration
     """
     email = request.email.lower().strip()
-    client_ip = req.client.host if req.client else "unknown"
+    client_ip = get_client_ip(req)
 
     # Hash for audit log JSON so we never persist the raw email in structured
     # fields, but still allow correlation across failed-login records.
@@ -220,6 +222,9 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
         except Exception as e:
             logger.warning(f"Failed to notify CEO of team login: {e}")
     
+    # Web clients authenticate via httpOnly cookie (token never in localStorage)
+    max_age = int(expires.total_seconds()) if expires else None
+    set_session_cookie(response, access_token, max_age_seconds=max_age)
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -227,6 +232,7 @@ async def login(request: LoginRequest, req: Request, db: Session = Depends(get_d
 async def refresh_session(
     request: RefreshRequest,
     req: Request,
+    response: Response,
     db: Session = Depends(get_db),
 ):
     """
@@ -235,7 +241,7 @@ async def refresh_session(
     The refresh token is rotated on every use. Used by the mobile app so
     Face ID users stay signed in without long-lived access tokens.
     """
-    client_ip = req.client.host if req.client else "unknown"
+    client_ip = get_client_ip(req)
     _check_rate_limit(f"refresh:{client_ip}")
 
     token_hash = _hash_refresh_token(request.refresh_token)
@@ -264,6 +270,8 @@ async def refresh_session(
     user.last_active = datetime.now(timezone.utc)
     db.commit()
 
+    max_age = int(expires.total_seconds()) if expires else None
+    set_session_cookie(response, access_token, max_age_seconds=max_age)
     return Token(access_token=access_token, refresh_token=new_refresh)
 
 
@@ -299,12 +307,26 @@ async def update_current_user_info(
     return current_user
 
 
+@router.post("/session/clear")
+async def clear_session(response: Response):
+    """Clear the httpOnly session cookie only.
+
+    Used for implicit logouts (inactivity timeout, visiting /login while
+    signed in). Unlike /auth/logout it does NOT revoke the refresh token or
+    disconnect integrations. No auth required — clearing a cookie is harmless.
+    """
+    clear_session_cookie(response)
+    return {"message": "Session cleared"}
+
+
 @router.post("/logout")
 async def logout(
+    response: Response,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """Logout current user. Admin Google Calendar stays connected for demo booking."""
+    clear_session_cookie(response)
     is_platform_admin = (
         getattr(current_user, 'role', '') == 'admin'
         and (current_user.email or '').endswith('@palmtai.com')
@@ -324,6 +346,7 @@ async def logout(
 
 @router.post("/logout-all-devices")
 async def logout_all_devices(
+    response: Response,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -334,6 +357,7 @@ async def logout_all_devices(
     will be rejected by get_current_user, forcing re-authentication on
     every device.
     """
+    clear_session_cookie(response)
     current_user.force_logout_at = datetime.now(timezone.utc)
     current_user.refresh_token_hash = None
     current_user.refresh_token_expires_at = None
@@ -367,7 +391,7 @@ async def forgot_password(
     
     Always returns success to prevent email enumeration attacks.
     """
-    client_ip = req.client.host if req.client else "unknown"
+    client_ip = get_client_ip(req)
     _check_rate_limit(f"forgot:{client_ip}")
     
     email = request.email.lower().strip()
@@ -410,6 +434,7 @@ async def forgot_password(
 async def mfa_login(
     request: MFALoginRequest,
     req: Request,
+    response: Response,
     db: Session = Depends(get_db),
 ):
     """
@@ -419,7 +444,7 @@ async def mfa_login(
     must submit email + password + mfa_code to this endpoint.
     """
     email = request.email.lower().strip()
-    client_ip = req.client.host if req.client else "unknown"
+    client_ip = get_client_ip(req)
 
     _check_rate_limit(f"mfa_login:{client_ip}")
 
@@ -479,6 +504,7 @@ async def mfa_login(
         ip_address=client_ip,
     )
 
+    set_session_cookie(response, access_token)
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -491,7 +517,7 @@ async def reset_password(
     """
     Reset password using a valid reset token.
     """
-    client_ip = req.client.host if req.client else "unknown"
+    client_ip = get_client_ip(req)
     _check_rate_limit(f"reset:{client_ip}")
     
     # Use row-level lock to prevent race condition (token reuse)

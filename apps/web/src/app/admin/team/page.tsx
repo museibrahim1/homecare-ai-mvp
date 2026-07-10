@@ -11,7 +11,7 @@ import {
   Plus, X, Phone, Target,
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API = '/api';
 
 const PERMISSION_OPTIONS = [
   { key: 'command_center', label: 'Command Center', desc: 'Weekly outreach, email drafts, calls' },

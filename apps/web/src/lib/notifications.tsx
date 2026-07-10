@@ -396,9 +396,7 @@ function formatTime12(t: string): string {
   return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
-const API_URL = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
-  : 'http://localhost:8000';
+const API_URL = '/api';
 
 /* ─── Provider ─── */
 export function NotificationProvider({ children }: { children: ReactNode }) {

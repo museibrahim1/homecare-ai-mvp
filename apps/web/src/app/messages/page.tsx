@@ -5,7 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import { MessageSquare, Search, Send, Paperclip, Phone, Video, MessagesSquare, Plus, Loader2, Users, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = '/api';
 
 type Conversation = {
   id: string;

@@ -5,7 +5,7 @@ import {
   CheckCircle2, X, Clock, Zap, Sparkles, Send,
 } from 'lucide-react';
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE = '/api';
 
 export const STATE_OPTIONS = [
   { value: '', label: 'All States' },

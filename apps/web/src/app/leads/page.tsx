@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import { Plus, Phone, Mail, MoreVertical, Search, Filter, X, User, Globe, MessageSquare, Loader2, UserPlus, Trash2, Building2, Shield, Heart, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = '/api';
 
 type Lead = {
   id: string;

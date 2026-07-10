@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = '/api';
 
 interface Business {
   id: string;

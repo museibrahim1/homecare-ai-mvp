@@ -16,7 +16,7 @@ import { useRequireAuth } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = '/api';
 
 interface SubscriptionData {
   id: string;

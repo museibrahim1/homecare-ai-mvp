@@ -11,7 +11,7 @@ import {
   Sparkles, MessageSquare, ChevronDown, Flame, Award
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API = '/api';
 
 interface Goal {
   id: string; user_id: string; user_name: string;

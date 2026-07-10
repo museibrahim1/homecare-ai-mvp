@@ -15,7 +15,7 @@ import TopBar from '@/components/TopBar';
 // Formspree form ID for support tickets
 const FORMSPREE_SUPPORT_ID = process.env.NEXT_PUBLIC_FORMSPREE_SUPPORT_ID || '';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = '/api';
 
 const TICKET_CATEGORIES = [
   { id: 'technical', label: 'Technical Issue', icon: Bug, description: 'App not working, errors, bugs' },

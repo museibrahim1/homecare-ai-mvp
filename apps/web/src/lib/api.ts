@@ -1,4 +1,8 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+// All browser API calls go through the same-origin /api proxy (next.config.js
+// rewrite) so the httpOnly session cookie is first-party and sent by every
+// browser. The absolute NEXT_PUBLIC_API_URL is only a fallback for local dev
+// setups without the rewrite.
+export const API_BASE = '/api';
 
 /** Format a Date to YYYY-MM-DD string in LOCAL timezone (avoids UTC shift bugs) */
 export function formatLocalDate(date: Date): string {
@@ -40,6 +44,10 @@ class ApiClient {
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
+    // Send the httpOnly session cookie (primary web credential). The
+    // Authorization header above is only populated while the in-memory token
+    // exists; after a page refresh the cookie alone authenticates.
+    const credentials: RequestCredentials = 'include';
 
     const isGet = !options.method || options.method === 'GET';
     const cacheKey = isGet ? `${endpoint}|${token || ''}` : '';
@@ -58,6 +66,7 @@ class ApiClient {
         const response = await fetch(`${API_BASE}${endpoint}`, {
           ...options,
           headers,
+          credentials,
           signal: controller.signal,
         });
 
@@ -329,6 +338,7 @@ class ApiClient {
       const response = await fetch(`${API_BASE}/contract-templates/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
         body: formData,
         signal: controller.signal,
       });
@@ -395,6 +405,7 @@ class ApiClient {
       const response = await fetch(`${API_BASE}/visits/contracts/${contractId}/export-template${params}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
         signal: controller.signal,
       });
       clearTimeout(timeout);
@@ -426,6 +437,7 @@ class ApiClient {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        credentials: 'include',
         body: formData,
         signal: controller.signal,
       });

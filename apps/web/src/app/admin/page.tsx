@@ -13,7 +13,7 @@ import {
   ChevronRight, RefreshCw, Clock, CheckCircle, XCircle, AlertCircle
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = '/api';
 
 interface PlatformStats {
   total_businesses: number;

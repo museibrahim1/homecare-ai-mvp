@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Mic, Loader2 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = '/api';
 
 interface AudioPlayerProps {
   visitId: string;
@@ -25,10 +25,9 @@ export default function AudioPlayer({ visitId, onTimeUpdate }: AudioPlayerProps)
       setLoadingAudio(true);
       setAudioUrl(null);
       try {
-        const token = JSON.parse(localStorage.getItem('palmcare-auth') || '{}')?.state?.token;
-        if (!token) { setLoadingAudio(false); return; }
+        // Authenticated by the httpOnly session cookie (same-origin /api)
         const res = await fetch(`${API_BASE}/visits/${visitId}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
+          credentials: 'include',
         });
         if (res.ok) {
           const visit = await res.json();

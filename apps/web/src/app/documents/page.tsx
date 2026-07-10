@@ -5,7 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import { FolderOpen, FileText, Upload, Search, Filter, Download, Trash2, Eye, Grid, List, X, Plus, File, Cloud, Check, Loader2, RefreshCw, Link2, Mic, FileCheck, Play, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = '/api';
 
 type Document = {
   id: string;

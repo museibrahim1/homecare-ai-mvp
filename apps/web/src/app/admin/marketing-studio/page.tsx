@@ -12,7 +12,7 @@ import {
   Paintbrush, Monitor, Printer
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API = '/api';
 
 interface MarketingAsset {
   id: string; asset_type: string; title: string; content: string;

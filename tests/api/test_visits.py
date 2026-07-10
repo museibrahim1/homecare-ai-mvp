@@ -93,6 +93,9 @@ class TestVisitCreate:
 
     def test_create_visit_unauthorized(self, client, test_client_data, test_caregiver):
         """Test creating a visit without authentication."""
+        # Login fixtures leave an httpOnly session cookie on the shared test
+        # client; clear it so this request is genuinely unauthenticated.
+        client.cookies.clear()
         response = client.post(
             "/visits",
             json={

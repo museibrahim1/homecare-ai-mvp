@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Loader2, Check, Smartphone, ArrowLeft } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API = '/api';
 
 const DEVICES = ['iPhone', 'iPad', 'Both'];
 

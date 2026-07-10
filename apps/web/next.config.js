@@ -47,10 +47,16 @@ const nextConfig = {
     ];
   },
   async rewrites() {
+    // The browser talks to same-origin /api/* (so the httpOnly session cookie
+    // is first-party); this rewrite proxies those calls to the real backend.
+    // Must be an absolute URL — NEXT_PUBLIC_* vars are '/api' and would loop.
+    const defaultApi = process.env.NODE_ENV === 'development'
+      ? 'http://localhost:8000'
+      : 'https://api-production-a0a2.up.railway.app';
     const apiUrl =
-      process.env.API_URL ||
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      'https://api-production-a0a2.up.railway.app';
+      process.env.API_URL && !process.env.API_URL.startsWith('/')
+        ? process.env.API_URL
+        : defaultApi;
     return [
       {
         source: '/api/:path*',

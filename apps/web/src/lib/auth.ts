@@ -37,6 +37,14 @@ interface AuthState {
   logout: () => void;
 }
 
+// Security: the real JWT lives in an httpOnly cookie set by the API (immune
+// to XSS exfiltration) and is NEVER persisted to localStorage. In-memory we
+// keep the token for the current tab session; after a page refresh the store
+// rehydrates with this placeholder so existing `if (!token)` guards still
+// pass — the cookie (sent automatically on same-origin /api calls)
+// authenticates the requests.
+export const COOKIE_SESSION_TOKEN = 'cookie-session';
+
 const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -46,11 +54,35 @@ const useAuthStore = create<AuthState>()(
       setToken: (token) => set({ token, lastActivity: Date.now() }),
       setUser: (user) => set({ user }),
       updateLastActivity: () => set({ lastActivity: Date.now() }),
-      logout: () => set({ token: null, user: null, lastActivity: null }),
+      logout: () => {
+        // Best-effort: tell the server to clear the httpOnly session cookie
+        // so no live credential outlasts the client-side logout (e.g. on
+        // HIPAA inactivity timeout). Cookie-only — full credential revocation
+        // (refresh token, integrations) stays on the explicit /auth/logout.
+        if (typeof window !== 'undefined') {
+          fetch('/api/auth/session/clear', { method: 'POST', credentials: 'include' }).catch(() => {});
+        }
+        set({ token: null, user: null, lastActivity: null });
+      },
     }),
     {
       name: 'palmcare-auth',
       storage: createJSONStorage(() => localStorage),
+      // Never write the token to localStorage — only non-secret session state.
+      partialize: (state) => ({
+        user: state.user,
+        lastActivity: state.lastActivity,
+      }) as AuthState,
+      merge: (persisted, current) => {
+        const merged = { ...current, ...(persisted as Partial<AuthState>) };
+        // Rehydrated with a user but no in-memory token → the httpOnly
+        // cookie is the credential; use the placeholder to signal
+        // "logged in" to the rest of the app.
+        if (merged.user && !merged.token) {
+          merged.token = COOKIE_SESSION_TOKEN;
+        }
+        return merged;
+      },
     }
   )
 );
@@ -70,7 +102,9 @@ function hasStoredTokenCached(): boolean {
     const data = localStorage.getItem('palmcare-auth');
     if (data) {
       const parsed = JSON.parse(data);
-      _cachedHasToken = !!parsed?.state?.token;
+      // Session presence is signaled by the persisted user (token itself is
+      // in the httpOnly cookie). Legacy sessions may still have a token.
+      _cachedHasToken = !!(parsed?.state?.user || parsed?.state?.token);
     } else {
       _cachedHasToken = false;
     }
@@ -81,17 +115,12 @@ function hasStoredTokenCached(): boolean {
   return _cachedHasToken;
 }
 
-// Helper to get token directly from localStorage (for non-hook contexts)
+// Helper to get the session token for non-hook contexts. Returns the
+// in-memory token (real after login, placeholder after refresh) — requests
+// are actually authenticated by the httpOnly cookie either way.
 export function getStoredToken(): string | null {
   if (typeof window === 'undefined') return null;
-  try {
-    const data = localStorage.getItem('palmcare-auth');
-    if (!data) return null;
-    const parsed = JSON.parse(data);
-    return parsed?.state?.token || null;
-  } catch {
-    return null;
-  }
+  return useAuthStore.getState().token;
 }
 
 // HIPAA Compliance: Check if session has timed out
@@ -265,7 +294,7 @@ export function useTeamActivityTracker(pageName: string) {
     if (!token || !user) return;
     if (user.role !== 'admin' && user.role !== 'admin_team') return;
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    const API_BASE = '/api';
 
     const sendHeartbeat = () => {
       fetch(`${API_BASE}/admin/team/log-action`, {

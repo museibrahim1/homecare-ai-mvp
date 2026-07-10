@@ -11,7 +11,7 @@ import {
   Video, ArrowRight, AlertCircle, Star, ExternalLink
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API = '/api';
 
 interface CrmResult {
   id: string; type: 'lead' | 'investor'; name: string;

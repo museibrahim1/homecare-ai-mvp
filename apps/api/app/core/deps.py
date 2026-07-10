@@ -1,15 +1,18 @@
 import uuid
 from typing import Generator, Optional
 from datetime import datetime, timezone
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
 from app.core.security import decode_access_token
+from app.core.cookies import SESSION_COOKIE_NAME
 from app.models.user import User
 
-security = HTTPBearer()
+# auto_error=False so a missing Authorization header falls through to the
+# httpOnly session cookie (web) instead of an immediate 403.
+security = HTTPBearer(auto_error=False)
 
 
 def get_db() -> Generator:
@@ -22,13 +25,29 @@ def get_db() -> Generator:
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    request: Request,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
-    """Get the current authenticated user from JWT token."""
-    token = credentials.credentials
-    
-    payload = decode_access_token(token)
+    """Get the current authenticated user.
+
+    Accepts the JWT from either the Authorization: Bearer header (iOS app,
+    API clients) or the httpOnly session cookie (web app). The header is
+    tried first; if it's absent or doesn't decode, the cookie is tried.
+    """
+    payload = None
+    candidates = []
+    if credentials and credentials.credentials:
+        candidates.append(credentials.credentials)
+    cookie_token = request.cookies.get(SESSION_COOKIE_NAME)
+    if cookie_token:
+        candidates.append(cookie_token)
+
+    for token in candidates:
+        payload = decode_access_token(token)
+        if payload is not None:
+            break
+
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

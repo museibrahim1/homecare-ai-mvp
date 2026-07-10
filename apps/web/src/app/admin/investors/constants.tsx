@@ -2,7 +2,7 @@
 import React from 'react';
 import { Circle, Eye, Mail, Send, MailOpen, Calendar, CheckCircle2, X, DollarSign } from 'lucide-react';
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE = '/api';
 
 export const STATUS_OPTIONS = [
   'new', 'researched', 'contacted', 'email_sent', 'responded',

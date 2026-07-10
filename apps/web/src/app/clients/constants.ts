@@ -1,6 +1,6 @@
 // Shared constants for the Clients page.
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE = '/api';
 
 export const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
   intake: { label: 'Intake', color: 'text-blue-700', bgColor: 'bg-blue-50', borderColor: 'border-l-blue-500' },

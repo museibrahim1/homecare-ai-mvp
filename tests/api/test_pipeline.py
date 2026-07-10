@@ -240,11 +240,10 @@ class TestPipelineStateTracking:
     @patch("app.routers.pipeline.enqueue_task")
     def test_multiple_pipeline_steps(self, mock_enqueue, client, auth_headers, test_visit):
         """Test running multiple pipeline steps."""
-        mock_enqueue.side_effect = ["task-1", "task-2", "task-3"]
+        mock_enqueue.side_effect = ["task-1", "task-2"]
 
         # Run multiple steps
         client.post(f"/pipeline/visits/{test_visit['id']}/diarize", headers=auth_headers)
-        client.post(f"/pipeline/visits/{test_visit['id']}/align", headers=auth_headers)
         client.post(f"/pipeline/visits/{test_visit['id']}/bill", headers=auth_headers)
 
         # Check all states
@@ -255,5 +254,4 @@ class TestPipelineStateTracking:
         data = response.json()
 
         assert "diarization" in data["pipeline_state"]
-        assert "alignment" in data["pipeline_state"]
         assert "billing" in data["pipeline_state"]

@@ -19,7 +19,7 @@ const QUICK_PROMPTS = [
 ];
 
 export default function ChatWidget() {
-  const API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+  const API = '/api';
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: GREETING },

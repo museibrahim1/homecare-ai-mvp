@@ -1,6 +1,6 @@
 // Shared constants for the Visits page.
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE = '/api';
 
 export const SAMPLE_TRANSCRIPT_TEXT = `Caregiver: Hello Mrs. Johnson, how are you feeling today? I'm here to help you with your morning routine and assess your care needs for home care services.
 

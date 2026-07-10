@@ -218,15 +218,9 @@ export default function Sidebar() {
 
   const handleLogout = useCallback(async () => {
     try {
-      const authData = localStorage.getItem('palmcare-auth');
-      if (authData) {
-        const parsed = JSON.parse(authData);
-        const token = parsed?.state?.token;
-        if (token) {
-          const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-          await fetch(`${API_BASE}/auth/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-        }
-      }
+      // The httpOnly session cookie authenticates this call and the server
+      // clears it (Set-Cookie) in the response.
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     } catch { /* Best-effort */ }
     logout();
     router.push('/login', { scroll: false });

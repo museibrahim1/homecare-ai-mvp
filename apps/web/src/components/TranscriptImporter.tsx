@@ -6,7 +6,7 @@ import {
   FileUp, ClipboardPaste, Sparkles, Wand2
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = '/api';
 
 interface TranscriptImporterProps {
   visitId: string;

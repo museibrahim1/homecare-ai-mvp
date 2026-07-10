@@ -56,13 +56,18 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
         # Record start time
         start_time = time.time()
         
-        # Extract user info from authorization header if present
+        # Extract user info from the Authorization header (iOS) or the
+        # httpOnly session cookie (web) if present.
         user_id = None
+        token = None
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+        if not token:
+            token = request.cookies.get("palm_session")
+        if token:
             try:
                 from app.core.security import decode_access_token
-                token = auth_header[7:]
                 payload = decode_access_token(token)
                 if payload:
                     user_id = payload.get("sub")

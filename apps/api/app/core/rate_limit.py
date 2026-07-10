@@ -17,14 +17,35 @@ from starlette.responses import JSONResponse
 logger = logging.getLogger(__name__)
 
 
+def get_client_ip(request: Request) -> str:
+    """Best-effort real client IP.
+
+    Web traffic reaches the API through the Next.js same-origin proxy, so the
+    socket peer is the web server — the original client IP is in
+    X-Forwarded-For (set by the Railway edge / Next proxy).
+    """
+    xff = request.headers.get("X-Forwarded-For", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return get_remote_address(request)
+
+
 def _get_key(request: Request) -> str:
-    """Per-user key if auth header present, otherwise IP."""
+    """Per-user key if a session credential is present, otherwise IP.
+
+    Web clients authenticate with the httpOnly session cookie, iOS with the
+    Authorization header — prefer the cookie so each web user gets their own
+    bucket (the web's Authorization header is a non-unique placeholder).
+    """
+    import hashlib
+    cookie = request.cookies.get("palm_session", "")
+    if len(cookie) > 20:
+        return "user:" + hashlib.sha256(cookie.encode()).hexdigest()[:16]
     auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer ") and len(auth) > 20:
         # Hash the token to avoid storing it in Redis
-        import hashlib
         return "user:" + hashlib.sha256(auth.encode()).hexdigest()[:16]
-    return get_remote_address(request)
+    return get_client_ip(request)
 
 
 def _build_limiter() -> Limiter:
