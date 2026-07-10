@@ -14,6 +14,7 @@ from pydantic import BaseModel, EmailStr
 from app.core.deps import get_db, get_current_user, require_permission
 from app.models.user import User, UserRole
 from app.models.sales_lead import SalesLead, LeadStatus
+from app.models.investor import Investor
 from app.models.analytics import EmailCampaignEvent
 from app.services.email import email_service
 
@@ -563,6 +564,321 @@ async def internal_add_lead_and_email(
     db.commit()
     sent_count = sum(1 for r in results if r["status"] == "sent")
     return {"total": len(results), "sent": sent_count, "results": results}
+
+
+def _resolve_window(date_str: Optional[str], since_hours: int):
+    """Resolve a (start, end) UTC window from either a calendar day or a rolling window."""
+    if date_str:
+        try:
+            day = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="date must be YYYY-MM-DD")
+        return day, day + timedelta(days=1)
+    hours = max(1, min(int(since_hours or 48), 24 * 30))
+    end = datetime.now(timezone.utc)
+    return end - timedelta(hours=hours), end
+
+
+@router.get("/leads/internal/emailed-on")
+async def internal_emailed_on(
+    request: Request,
+    date: Optional[str] = None,
+    since_hours: int = 48,
+    audience: str = "both",
+    db: Session = Depends(get_db),
+):
+    """Read-only: list the exact agencies (and/or investors) we emailed in a window.
+
+    - `date=YYYY-MM-DD` targets one UTC calendar day (e.g. yesterday's outreach),
+      or leave it blank to use a rolling `since_hours` window (default 48h).
+    - `audience`: "agencies", "investors", or "both" (default).
+
+    No side effects — safe to call as often as you like.
+    """
+    _require_internal_key(request)
+
+    window_start, window_end = _resolve_window(date, since_hours)
+    audience = (audience or "both").lower().strip()
+    want_agencies = audience in ("agencies", "both")
+    want_investors = audience in ("investors", "both")
+
+    agencies = []
+    if want_agencies:
+        leads = db.query(SalesLead).filter(
+            SalesLead.contact_email.isnot(None),
+            SalesLead.contact_email != "",
+            SalesLead.last_email_sent_at >= window_start,
+            SalesLead.last_email_sent_at < window_end,
+        ).order_by(SalesLead.last_email_sent_at.asc()).all()
+        agencies = [
+            {
+                "provider_name": l.provider_name,
+                "contact_name": l.contact_name,
+                "contact_email": l.contact_email,
+                "city": l.city,
+                "state": l.state,
+                "status": l.status,
+                "email_send_count": l.email_send_count or 0,
+                "last_email_sent_at": l.last_email_sent_at.isoformat() if l.last_email_sent_at else None,
+                "last_email_subject": l.last_email_subject,
+                "last_template_sent": l.last_template_sent,
+                "campaign_tag": l.campaign_tag,
+            }
+            for l in leads
+        ]
+
+    investors = []
+    if want_investors:
+        invs = db.query(Investor).filter(
+            Investor.contact_email.isnot(None),
+            Investor.contact_email != "",
+            Investor.last_email_sent_at >= window_start,
+            Investor.last_email_sent_at < window_end,
+        ).order_by(Investor.last_email_sent_at.asc()).all()
+        investors = [
+            {
+                "fund_name": i.fund_name,
+                "contact_name": i.contact_name,
+                "contact_email": i.contact_email,
+                "location": i.location,
+                "status": i.status,
+                "email_send_count": i.email_send_count or 0,
+                "last_email_sent_at": i.last_email_sent_at.isoformat() if i.last_email_sent_at else None,
+                "last_email_subject": i.last_email_subject,
+                "campaign_tag": i.campaign_tag,
+            }
+            for i in invs
+        ]
+
+    return {
+        "window": {
+            "start": window_start.isoformat(),
+            "end": window_end.isoformat(),
+            "date": date,
+            "since_hours": None if date else (since_hours or 48),
+        },
+        "audience": audience,
+        "agency_count": len(agencies),
+        "investor_count": len(investors),
+        "agencies": agencies,
+        "investors": investors,
+    }
+
+
+class ResendLaunchRequest(BaseModel):
+    # Target a specific UTC calendar day (YYYY-MM-DD). If omitted, a rolling
+    # window ending "now" is used instead (see since_hours).
+    date: Optional[str] = None
+    since_hours: int = 48
+    audience: str = "agencies"  # agencies | investors | both
+    dry_run: bool = True
+    campaign_name: str = "app-store-launch-2026-07"
+    template_id: str = "app_live_launch"
+    limit: Optional[int] = None  # safety cap on number of sends
+
+
+@router.post("/leads/internal/resend-launch")
+async def internal_resend_launch(
+    request: Request,
+    body: ResendLaunchRequest,
+    db: Session = Depends(get_db),
+):
+    """Resend the App Store launch email to everyone we emailed recently.
+
+    Finds leads (and optionally investors) whose last outreach email went out in
+    the target window and sends them the `app_live_launch` announcement. Runs as
+    a DRY RUN by default (returns who would be contacted, sends nothing).
+
+    - Set `date` to target one UTC calendar day (e.g. "2026-07-09"), or leave it
+      unset to use a rolling `since_hours` window (default 48h) ending now.
+    - `audience`: "agencies" (default), "investors", or "both".
+    - Set `dry_run=false` to actually send.
+
+    Deduplicates against prior sends of the same template+campaign, so it is safe
+    to run more than once.
+    """
+    _require_internal_key(request)
+
+    tmpl = EMAIL_TEMPLATES.get(body.template_id)
+    if not tmpl:
+        raise HTTPException(status_code=400, detail=f"Unknown template_id: {body.template_id}")
+
+    # Resolve the target time window.
+    window_start, window_end = _resolve_window(body.date, body.since_hours)
+
+    audience = (body.audience or "agencies").lower().strip()
+    want_agencies = audience in ("agencies", "both")
+    want_investors = audience in ("investors", "both")
+    if not (want_agencies or want_investors):
+        raise HTTPException(status_code=400, detail="audience must be agencies, investors, or both")
+
+    now = datetime.now(timezone.utc)
+
+    # Leads/investors already sent this exact launch template+campaign — skip them.
+    already_sent_ids = set()
+    for (lid,) in db.query(EmailCampaignEvent.lead_id).filter(
+        EmailCampaignEvent.template_id == body.template_id,
+        EmailCampaignEvent.campaign_tag == body.campaign_name,
+        EmailCampaignEvent.lead_id.isnot(None),
+    ).all():
+        already_sent_ids.add(str(lid))
+
+    seen_emails: set = set()
+    recipients = []  # (kind, obj, email)
+
+    if want_agencies:
+        leads = db.query(SalesLead).filter(
+            SalesLead.contact_email.isnot(None),
+            SalesLead.contact_email != "",
+            SalesLead.last_email_sent_at >= window_start,
+            SalesLead.last_email_sent_at < window_end,
+            SalesLead.status.notin_(["not_interested", "converted", "responded"]),
+        ).order_by(SalesLead.last_email_sent_at.asc()).all()
+        for lead in leads:
+            email = (lead.contact_email or "").lower().strip()
+            if not email or email in seen_emails:
+                continue
+            if str(lead.id) in already_sent_ids:
+                continue
+            seen_emails.add(email)
+            recipients.append(("agency", lead, lead.contact_email))
+
+    if want_investors:
+        investors = db.query(Investor).filter(
+            Investor.contact_email.isnot(None),
+            Investor.contact_email != "",
+            Investor.last_email_sent_at >= window_start,
+            Investor.last_email_sent_at < window_end,
+            Investor.status.notin_(["passed", "not_relevant", "committed", "responded"]),
+        ).order_by(Investor.last_email_sent_at.asc()).all()
+        for inv in investors:
+            email = (inv.contact_email or "").lower().strip()
+            if not email or email in seen_emails:
+                continue
+            seen_emails.add(email)
+            recipients.append(("investor", inv, inv.contact_email))
+
+    if body.limit is not None:
+        recipients = recipients[: max(0, int(body.limit))]
+
+    window = {
+        "start": window_start.isoformat(),
+        "end": window_end.isoformat(),
+        "date": body.date,
+        "since_hours": None if body.date else (body.since_hours or 48),
+    }
+
+    if body.dry_run:
+        return {
+            "dry_run": True,
+            "template_id": body.template_id,
+            "campaign_name": body.campaign_name,
+            "audience": audience,
+            "window": window,
+            "would_send": len(recipients),
+            "recipients": [
+                {
+                    "kind": kind,
+                    "name": getattr(obj, "provider_name", None) or getattr(obj, "fund_name", None),
+                    "email": email,
+                    "city": getattr(obj, "city", None) or getattr(obj, "location", None),
+                    "state": getattr(obj, "state", None),
+                }
+                for (kind, obj, email) in recipients
+            ],
+        }
+
+    subject_tmpl = tmpl["subject"]
+    body_tmpl = tmpl["body"]
+    sent = 0
+    failed = 0
+    errors = []
+
+    for kind, obj, to_email in recipients:
+        if kind == "agency":
+            data = {
+                "provider_name": obj.provider_name,
+                "city": obj.city or "your area",
+                "state": obj.state,
+                "state_full": STATE_NAMES.get(obj.state, obj.state),
+            }
+            sender = email_service.from_sales
+            reply_to = "sales@palmtai.com"
+        else:
+            data = {
+                "provider_name": obj.fund_name,
+                "city": obj.location or "",
+                "state": "",
+                "state_full": "",
+            }
+            sender = email_service.from_investor
+            reply_to = "invest@palmtai.com"
+
+        subject = _render_template(subject_tmpl, data)
+        html = _render_template(body_tmpl, data)
+
+        result = email_service.send_email(
+            to=to_email,
+            subject=subject,
+            sender=sender,
+            html=html,
+            reply_to=reply_to,
+        )
+
+        if result.get("success"):
+            obj.last_email_sent_at = now
+            obj.last_email_subject = subject
+            obj.email_send_count = (obj.email_send_count or 0) + 1
+            obj.campaign_tag = body.campaign_name
+            if hasattr(obj, "last_template_sent"):
+                obj.last_template_sent = body.template_id
+            if result.get("id"):
+                obj.resend_email_id = result["id"]
+
+            activity = obj.activity_log or []
+            activity.append({
+                "action": "App Store launch email sent",
+                "campaign": body.campaign_name,
+                "template": body.template_id,
+                "subject": subject,
+                "to": to_email,
+                "resend_id": result.get("id"),
+                "at": now.isoformat(),
+            })
+            obj.activity_log = activity
+
+            if kind == "agency":
+                db.add(EmailCampaignEvent(
+                    lead_id=obj.id,
+                    template_id=body.template_id,
+                    campaign_tag=body.campaign_name,
+                    event_type="sent",
+                    resend_email_id=result.get("id"),
+                    subject=subject,
+                    to_email=to_email,
+                    created_at=now,
+                ))
+            sent += 1
+        else:
+            failed += 1
+            errors.append({
+                "name": data.get("provider_name"),
+                "error": result.get("error"),
+            })
+
+    db.commit()
+
+    return {
+        "dry_run": False,
+        "template_id": body.template_id,
+        "campaign_name": body.campaign_name,
+        "audience": audience,
+        "window": window,
+        "eligible": len(recipients),
+        "sent": sent,
+        "failed": failed,
+        "errors": errors[:10],
+    }
 
 
 @router.post("/leads/internal/start-recent-sequences")

@@ -1,0 +1,68 @@
+name: Resend App Store launch email
+
+# Manually resend the "PALM is live on the App Store" email to everyone we
+# emailed recently (e.g. yesterday's outreach cohort). The send happens
+# server-side on Railway via the internal endpoint, so this only needs the
+# CRON_SECRET repo secret. Dry run by default — flip dry_run to false to send.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (preview recipients, send nothing)"
+        type: boolean
+        default: true
+      date:
+        description: "Target one UTC day (YYYY-MM-DD). Leave blank to use since_hours."
+        type: string
+        default: ""
+      since_hours:
+        description: "Rolling window in hours (used when date is blank)"
+        type: string
+        default: "48"
+      audience:
+        description: "Who to resend to"
+        type: choice
+        options:
+          - agencies
+          - investors
+          - both
+        default: agencies
+      limit:
+        description: "Safety cap on number of sends (blank = no cap)"
+        type: string
+        default: ""
+
+jobs:
+  resend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resend launch email
+        env:
+          API_BASE_URL: https://api-production-a0a2.up.railway.app
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::error::CRON_SECRET repo secret is not set. Add it in repo Settings → Secrets → Actions."
+            exit 1
+          fi
+          ARGS="--audience ${{ github.event.inputs.audience }}"
+          if [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
+            ARGS="$ARGS --send"
+          fi
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            ARGS="$ARGS --date ${{ github.event.inputs.date }}"
+          else
+            ARGS="$ARGS --since-hours ${{ github.event.inputs.since_hours }}"
+          fi
+          if [ -n "${{ github.event.inputs.limit }}" ]; then
+            ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"
+          fi
+          echo "Running: python3 scripts/email/resend_launch_to_yesterday.py $ARGS"
+          python3 scripts/email/resend_launch_to_yesterday.py $ARGS

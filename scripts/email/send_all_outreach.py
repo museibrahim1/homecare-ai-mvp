@@ -31,8 +31,15 @@ AGENCY_SUBJECT_HOOKS = [
     "Saw you're in {state}, thought this might help",
 ]
 
-AGENCY_FOOTER = """
-<div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;">
+APP_STORE_URL = "https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
+
+AGENCY_FOOTER = f"""
+<div style="margin-top:28px;padding:16px 20px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:10px;">
+<p style="font-size:14px;color:#0f172a;margin:0 0 6px 0;font-weight:600;">PALM is now live on the App Store.</p>
+<p style="font-size:13px;color:#334155;margin:0 0 10px 0;">Record the assessment and get the transcript, care plan, billables, and contract in minutes.</p>
+<a href="{APP_STORE_URL}" style="display:inline-block;background:#0d9488;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;padding:10px 20px;border-radius:8px;">Download on the App Store</a>
+</div>
+<div style="margin-top:24px;padding-top:20px;border-top:1px solid #e5e7eb;">
 <p style="font-size:14px;color:#1a1a1a;margin:0 0 2px 0;font-weight:600;">Muse Ibrahim</p>
 <p style="font-size:13px;color:#6b7280;margin:0 0 2px 0;">Founder &amp; CEO, PalmCare AI</p>
 <p style="font-size:13px;color:#6b7280;margin:0 0 8px 0;">213-569-7693 &middot; sales@palmtai.com</p>
