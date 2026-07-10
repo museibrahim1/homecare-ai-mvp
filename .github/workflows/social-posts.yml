@@ -7,13 +7,22 @@ name: Daily social posts
 
 on:
   schedule:
-    # 15:30 UTC = 11:30 AM Eastern during daylight time (Mar-Nov).
+    # 15:30 UTC = 11:30 AM Eastern during daylight time (Mar-Nov). The day's
+    # Meta (IG+Threads) and LinkedIn posts (the "main" slot).
     # After the November clock change this fires at 10:30 AM ET, which is fine.
     - cron: "30 15 * * *"
+    # 13:00 UTC Mondays = 9:00 AM ET. The earlier "early" slot for long-form
+    # text posts (LinkedIn text + Threads thread) so they land before the
+    # 11:30 AM Meta post that stays at its usual time.
+    - cron: "0 13 * * 1"
   workflow_dispatch:
     inputs:
       date:
         description: "Force a date (YYYY-MM-DD). Leave empty for today."
+        required: false
+        default: ""
+      slot:
+        description: "Slot to run: main (11:30 posts) or early (text posts). Empty = main."
         required: false
         default: ""
       dry_run:
@@ -57,9 +66,20 @@ jobs:
           if [ -n "${{ github.event.inputs.date }}" ]; then
             ARGS="$ARGS --date ${{ github.event.inputs.date }}"
           fi
+          # Pick the slot: the 13:00 Monday cron runs the early text posts;
+          # everything else runs the main slot. A manual dispatch can override.
+          SLOT="main"
+          if [ "${{ github.event.schedule }}" = "0 13 * * 1" ]; then
+            SLOT="early"
+          fi
+          if [ -n "${{ github.event.inputs.slot }}" ]; then
+            SLOT="${{ github.event.inputs.slot }}"
+          fi
+          ARGS="$ARGS --slot $SLOT"
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
+          echo "Running slot=$SLOT args:$ARGS"
           python3 scripts/social/run_scheduled_posts.py $ARGS
 
       - name: Commit posted log (double-post guard)

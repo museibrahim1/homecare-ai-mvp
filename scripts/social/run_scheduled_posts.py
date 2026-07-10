@@ -13,9 +13,17 @@ Platforms per the approved plan:
   - LinkedIn days (Tue/Thu):  LinkedIn image or PDF document carousel, value in
     the body, signup link kept in the FIRST COMMENT.
 
+Slots let a single day carry more than one posting time:
+  - --slot main  (default): the day's Meta (IG+Threads) and LinkedIn posts, run
+    by the 11:30 AM ET cron. Logged under the bare date key.
+  - --slot early: long-form, text-only posts (TEXT_POSTS) that go to LinkedIn as
+    a text post and Threads as a reply-chained thread. Run by an earlier Monday
+    cron. Logged under "<date>#early" so it never collides with the main run.
+
 Manual usage:
   python3 scripts/social/run_scheduled_posts.py                    # post what's due today
   python3 scripts/social/run_scheduled_posts.py --date 2026-07-14  # force a date
+  python3 scripts/social/run_scheduled_posts.py --slot early --date 2026-07-13
   python3 scripts/social/run_scheduled_posts.py --dry-run          # show what would post
 """
 from __future__ import annotations
@@ -31,11 +39,14 @@ sys.path.insert(0, str(HERE))
 from post_to_meta import (  # noqa: E402
     ig_publish_image,
     threads_post,
+    threads_post_chain,
+    split_for_threads,
     require_env as require_meta_env,
 )
 from post_to_linkedin import (  # noqa: E402
     post_image as li_post_image,
     post_document as li_post_document,
+    post_text as li_post_text,
     require_env as require_li_env,
 )
 
@@ -104,6 +115,38 @@ LINKEDIN = {
 }
 
 
+# ------------------------------------------------------------------ Text posts
+# Long-form, text-only posts that go to LinkedIn (as a text post) and Threads
+# (as a reply-chained thread, since Threads caps a single post at 500 chars).
+# These run in the "early" slot so they publish before the day's Meta/LinkedIn
+# scheduled posts. date -> {"text": str, "platforms": [..], "comment": str|None}.
+TEXT_POSTS = {
+    "2026-07-13": {
+        "platforms": ["li", "th"],
+        "comment": None,
+        "text": (
+            "That is the whole reason Palm exists. Our ethos is not a slide in a "
+            "deck. It shows up in what we refuse to build. We will not add features "
+            "that make the product look bigger while making the owner's job harder "
+            "to understand. We will not promise things we cannot deliver. No EVV. "
+            "No billing processing. No scheduling. We do one job and we do it clean. "
+            "Record the assessment. Generate the care plan and billables. Generate "
+            "the contract.\n\n"
+            "Integrity to me means the customer's win has to be our win, in that "
+            "order. If an agency grows because Palm gave their nurses back hours in "
+            "the field instead of hours at a keyboard, we grew for the right reason. "
+            "If we ever grow because we confused someone into paying for something "
+            "they did not need, we failed no matter what the revenue chart says.\n\n"
+            "Our goals and our customers' goals are the same sentence. Less time on "
+            "documentation. More time on the client in front of them. That alignment "
+            "is not a marketing angle. It is the only reason I get out of bed to keep "
+            "building this thing.\n\n"
+            "Where care meets intelligence. Built for care professionals."
+        ),
+    },
+}
+
+
 def load_log() -> dict:
     if LOG_FILE.is_file():
         return json.loads(LOG_FILE.read_text())
@@ -159,6 +202,45 @@ def run_meta(date: str, dry: bool) -> dict | None:
     return results
 
 
+def run_text_posts(date: str, dry: bool) -> dict | None:
+    """Publish the day's long-form text post to LinkedIn + Threads.
+
+    LinkedIn gets the full body as a text-only post. Threads gets the same body
+    as a reply-chained thread so nothing is truncated at the 500-char cap.
+    """
+    entry = TEXT_POSTS.get(date)
+    if entry is None:
+        return None
+    text = entry["text"]
+    platforms = entry.get("platforms", ["li", "th"])
+    comment = entry.get("comment")
+    if dry:
+        chunks = split_for_threads(text)
+        print(f"{date}: WOULD post text-only to {platforms}:")
+        print(f"--- LinkedIn body ({len(text)} chars) ---\n{text}\n")
+        print(f"--- Threads chain ({len(chunks)} posts) ---")
+        for i, c in enumerate(chunks, 1):
+            print(f"  [{i}] ({len(c)} chars) {c}")
+        if comment:
+            print(f"[first comment] {comment}")
+        return {"dry": True}
+    results: dict = {}
+    if "li" in platforms:
+        require_li_env()
+        results["linkedin"] = li_post_text(text, comment)
+        print(f"LinkedIn OK: {results['linkedin']}")
+    if "th" in platforms:
+        require_meta_env()
+        try:
+            chain = threads_post_chain(text)
+            results["threads"] = [c.get("id") for c in chain]
+            print(f"Threads OK: {results['threads']}")
+        except Exception as e:  # Threads is best-effort; don't fail the run
+            results["threads_error"] = str(e)[:200]
+            print(f"Threads WARN: {e}", file=sys.stderr)
+    return results
+
+
 def run_linkedin(date: str, dry: bool) -> dict | None:
     entry = LINKEDIN.get(date)
     if entry is None:
@@ -179,31 +261,47 @@ def run_linkedin(date: str, dry: bool) -> dict | None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="YYYY-MM-DD (default: today)")
+    ap.add_argument("--slot", default="main", choices=["main", "early"],
+                    help="'main' = the day's Meta/LinkedIn posts (default 11:30 ET run); "
+                         "'early' = long-form text posts that go out earlier in the day")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
     date = args.date or dt.date.today().isoformat()
-    if date not in META and date not in LINKEDIN:
+    # Slot-aware log key so multiple runs on the same day never collide. The
+    # "main" slot keeps the bare-date key for backward compatibility.
+    log_key = date if args.slot == "main" else f"{date}#{args.slot}"
+
+    if args.slot == "early":
+        if date not in TEXT_POSTS:
+            print(f"{date}: nothing scheduled in the early slot. Nothing to do.")
+            return 0
+    elif date not in META and date not in LINKEDIN:
         print(f"{date}: nothing scheduled. Nothing to do.")
         return 0
 
     log = load_log()
-    if date in log and not args.dry_run:
-        print(f"{date}: already posted ({log[date]}). Skipping.")
+    if log_key in log and not args.dry_run:
+        print(f"{date} [{args.slot}]: already posted ({log[log_key]}). Skipping.")
         return 0
 
     results: dict = {}
-    meta_res = run_meta(date, args.dry_run)
-    if meta_res is not None:
-        results["meta"] = meta_res
-    li_res = run_linkedin(date, args.dry_run)
-    if li_res is not None:
-        results["linkedin"] = li_res
+    if args.slot == "early":
+        text_res = run_text_posts(date, args.dry_run)
+        if text_res is not None:
+            results["text"] = text_res
+    else:
+        meta_res = run_meta(date, args.dry_run)
+        if meta_res is not None:
+            results["meta"] = meta_res
+        li_res = run_linkedin(date, args.dry_run)
+        if li_res is not None:
+            results["linkedin"] = li_res
 
     if not args.dry_run:
-        log[date] = results
+        log[log_key] = results
         save_log(log)
-        print(f"{date}: done, logged.")
+        print(f"{date} [{args.slot}]: done, logged.")
     return 0
 
 
