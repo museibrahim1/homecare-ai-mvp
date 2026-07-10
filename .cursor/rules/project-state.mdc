@@ -16,11 +16,16 @@ App ID `6766371988` ("PALM – Home Care Contracts"), Team `BM5U63WP92`. App Sto
 7. External testers must be **INVITED** (POST `betaTesterInvitations`) — adding them to a group does NOT send the invite. `info@patronseniorliving.com` (id `28eae6dc-6d92-482b-963c-23afbb855a12`) is in the Agencies group.
 
 ## Social Media Accounts
-- **LinkedIn**: Access token configured, Person ID `1034844126`, "Share on LinkedIn" product enabled. Posting needs re-auth with correct scopes.
-- **Facebook**: "Palm Technologies" page exists. Need Meta Developer App + Page Access Token.
-- **Instagram**: `@palmcareai` — needs conversion to Business account, link to Facebook Page.
+- **LinkedIn**: RE-AUTHED 2026-07-09. App "PalmcareAi" client ID `86gmdw2m7aqp7g`; member token (`w_member_social`, 60-day, expires ~Sep 8) in `.env` as `LINKEDIN_ACCESS_TOKEN`, Person `sub` `dGjGZTEMkJ` (`LINKEDIN_PERSON_ID`). Re-auth flow: OAuth authorize URL with redirect `https://www.linkedin.com/developers/tools/oauth/redirect`, grab `code`, exchange at `/oauth/v2/accessToken`.
+- **Facebook + Instagram**: Meta app "PALM Social Publisher" (`1572111384543106`). Page + IG business tokens in `.env` (`META_PAGE_ID/META_PAGE_ACCESS_TOKEN/META_IG_BUSINESS_ID`).
+- **Threads**: WORKING 2026-07-09. Threads app `5302490696643280`, account `@palmcareai` (user id `27968324992825390`). Long-lived token (60-day) in `.env` as `META_THREADS_USER_TOKEN`. Token generated via Meta dev dashboard "User Token Generator" (redirect to `palmcareai.com/threads/callback` on the OAuth authorize path is NOT whitelisted / Save silently fails — instead use the in-dashboard **Generate Access Token** button, approve the Threads consent popup, then read the long-lived `TH...` token from the token_generator popup's page HTML and `th_refresh_token` it).
 - **Twitter/X**: API key/secret in `.env`, access token/secret still needed.
 - Note: The local `aitask` daemon + email/social subagent scripts were removed on 2026-05-19. All outreach is now manual or backend-driven.
+
+## Automated Social Posting (Jul 13 – Aug 9 plan)
+- `scripts/social/run_scheduled_posts.py` runs daily 11:30 AM via launchd `com.palmcareai.socialposts`. Meta days (Mon/Wed/Fri) → FB + IG + Threads (link in caption). LinkedIn days (Tue/Thu) → image or PDF document carousel, signup link posted as the FIRST COMMENT.
+- Posters: `scripts/social/post_to_meta.py` (fb/ig/th) and `scripts/social/post_to_linkedin.py` (image/document + first comment). Dedupe via `scripts/social/.posted_log.json`.
+- Creatives + captions: `marketing/content-calendar-month-july.md`; assets in `apps/web/public/marketing/social/` (served at `palmcareai.com/marketing/social/`).
 
 ## Backend API
 - FastAPI on Railway: `https://api-production-a0a2.up.railway.app`
