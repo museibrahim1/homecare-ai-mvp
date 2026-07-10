@@ -62,7 +62,6 @@ app = Celery(
     include=[
         "tasks.transcribe",
         "tasks.diarize",
-        "tasks.align",
         "tasks.bill",
         "tasks.generate_note",
         "tasks.generate_contract",

@@ -29,7 +29,6 @@ def enqueue_task(task_name: str, **kwargs) -> str:
     task_mapping = {
         "transcribe": "tasks.transcribe.transcribe_visit",
         "diarize": "tasks.diarize.diarize_visit",
-        "align": "tasks.align.align_visit",
         "bill": "tasks.bill.generate_billables",
         "generate_note": "tasks.generate_note.generate_visit_note",
         "generate_contract": "tasks.generate_contract.generate_service_contract",

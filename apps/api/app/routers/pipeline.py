@@ -127,7 +127,11 @@ async def start_diarization(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Start diarization job for a visit (data isolation enforced)."""
+    """Identify speaker names from the transcript (data isolation enforced).
+
+    Deepgram already separates speakers during transcription; this resolves the
+    generic SPEAKER_n labels to real names using the transcript content.
+    """
     visit = get_user_visit(db, visit_id, current_user)
     
     task_id = enqueue_task("diarize", visit_id=str(visit_id))
@@ -138,29 +142,7 @@ async def start_diarization(
     }
     db.commit()
     
-    return {"message": "Diarization job queued", "task_id": task_id}
-
-
-@router.post("/visits/{visit_id}/align")
-@limiter.limit(AI_RATE_LIMIT)
-async def start_alignment(
-    request: Request,
-    visit_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Align transcription with diarization (data isolation enforced)."""
-    visit = get_user_visit(db, visit_id, current_user)
-    
-    task_id = enqueue_task("align", visit_id=str(visit_id))
-    
-    visit.pipeline_state = {
-        **visit.pipeline_state,
-        "alignment": {"status": "queued", "task_id": task_id}
-    }
-    db.commit()
-    
-    return {"message": "Alignment job queued", "task_id": task_id}
+    return {"message": "Speaker identification job queued", "task_id": task_id}
 
 
 @router.post("/visits/{visit_id}/bill")

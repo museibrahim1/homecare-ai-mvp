@@ -43,9 +43,6 @@ class Settings(BaseSettings):
     llm_model: str = "claude-3-haiku-20240307"
     llm_temperature: float = 0.7
     
-    # Pipeline Configuration
-    parallel_pipeline: bool = True  # Run independent steps in parallel
-    
     class Config:
         env_file = ".env"
         case_sensitive = False

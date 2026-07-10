@@ -1,23 +1,21 @@
 """
 Full Pipeline Task - Runs all processing steps automatically.
 
-Optimized for speed:
-- Phase 1: Transcription + Diarization run in PARALLEL
-- Phase 2: Alignment (needs both transcription + diarization)
-- Phase 3: Billing then Contract (sequential - contract needs billables)
+Steps:
+- Transcription (Deepgram Nova-3, which also separates speakers inline)
+- Billing, Note, then Contract (sequential - contract needs billables)
+
+Speaker-name identification is an opt-in step (the "Speakers" action), not part
+of the automatic pipeline.
 """
 
 import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from worker import app as celery_app
 from db import get_db_session
 from models import Visit
-from config import settings
 
 # Import all task functions
 from tasks.transcribe import transcribe_visit
-from tasks.diarize import diarize_visit
-from tasks.align import align_visit
 from tasks.bill import generate_billables
 from tasks.generate_note import generate_visit_note
 from tasks.generate_contract import generate_service_contract
@@ -59,19 +57,6 @@ def run_step(visit_id: str, state_key: str, step_name: str, task_func):
         return (state_key, False, error_msg)
 
 
-def run_steps_parallel(visit_id: str, steps: list):
-    """Run multiple steps in parallel using ThreadPoolExecutor."""
-    results = []
-    with ThreadPoolExecutor(max_workers=len(steps)) as executor:
-        futures = {
-            executor.submit(run_step, visit_id, state_key, step_name, task_func): state_key
-            for state_key, step_name, task_func in steps
-        }
-        for future in as_completed(futures):
-            results.append(future.result())
-    return results
-
-
 @celery_app.task(
     name="tasks.full_pipeline.run_full_pipeline",
     bind=True,
@@ -81,18 +66,12 @@ def run_steps_parallel(visit_id: str, steps: list):
 )
 def run_full_pipeline(self, visit_id: str):
     """
-    Run the complete processing pipeline for a visit with parallel optimization:
-    
-    PHASE 1 (Parallel): Transcribe + Diarize
-    PHASE 2 (Sequential): Align (needs both phase 1 outputs)
-    PHASE 3 (Parallel): Bill + Note + Contract
+    Run the complete processing pipeline for a visit:
+
+    1. Transcribe (Deepgram Nova-3 — separates speakers inline)
+    2. Bill, then Note, then Contract (sequential — contract uses billables)
     """
-    logger.info(f"Starting optimized full pipeline for visit {visit_id}")
-    
-    use_parallel = settings.parallel_pipeline
-    # Diarization is now handled by Deepgram during transcription (diarize=True),
-    # so the separate pyannote diarization step is always skipped.
-    skip_diarization = True
+    logger.info(f"Starting full pipeline for visit {visit_id}")
     
     # =========================================================================
     # CLEAR OLD DATA - Ensure fresh processing for this visit
@@ -119,8 +98,6 @@ def run_full_pipeline(self, visit_id: str):
                 visit.pipeline_state = {
                     "full_pipeline": {"status": "processing"},
                     "transcription": {"status": "pending"},
-                    "diarization": {"status": "pending"},
-                    "alignment": {"status": "pending"},
                     "billing": {"status": "pending"},
                     "note": {"status": "pending"},
                     "contract": {"status": "pending"},
@@ -132,39 +109,14 @@ def run_full_pipeline(self, visit_id: str):
         logger.warning(f"Failed to clear old data (continuing anyway): {e}")
     
     # =========================================================================
-    # PHASE 1: Transcription + Diarization (can run in parallel)
+    # TRANSCRIPTION (Deepgram diarizes speakers inline)
     # =========================================================================
-    logger.info(f"Phase 1: Audio processing for visit {visit_id}")
-    
-    logger.info(f"Running transcription for visit {visit_id}")
-    phase1_steps = [("transcription", "transcribe", transcribe_visit)]
-    
-    if not skip_diarization:
-        phase1_steps.append(("diarization", "diarize", diarize_visit))
-    else:
-        update_pipeline_state(visit_id, "diarization", "skipped")
-    
-    if use_parallel and len(phase1_steps) > 1:
-        run_steps_parallel(visit_id, phase1_steps)
-    else:
-        for state_key, step_name, task_func in phase1_steps:
-            run_step(visit_id, state_key, step_name, task_func)
+    run_step(visit_id, "transcription", "transcribe", transcribe_visit)
     
     # =========================================================================
-    # PHASE 2: Alignment (needs transcription + diarization)
+    # Billing then Note then Contract (sequential - contract uses billables)
     # =========================================================================
-    logger.info(f"Phase 2: Alignment for visit {visit_id}")
-    
-    if not skip_diarization:
-        run_step(visit_id, "alignment", "align", align_visit)
-    else:
-        logger.info(f"Skipping alignment (diarization skipped)")
-        update_pipeline_state(visit_id, "alignment", "skipped")
-    
-    # =========================================================================
-    # PHASE 3: Billing then Contract (sequential - contract uses billables)
-    # =========================================================================
-    logger.info(f"Phase 3: Billing & contract generation for visit {visit_id}")
+    logger.info(f"Billing & contract generation for visit {visit_id}")
     
     # Run billing first
     run_step(visit_id, "billing", "bill", generate_billables)

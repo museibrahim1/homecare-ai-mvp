@@ -159,24 +159,6 @@ class TestDiarizationPipeline:
         assert response.status_code == 404
 
 
-class TestAlignmentPipeline:
-    """Tests for alignment pipeline step."""
-
-    @patch("app.routers.pipeline.enqueue_task")
-    def test_align(self, mock_enqueue, client, auth_headers, test_visit):
-        """Test starting alignment."""
-        mock_enqueue.return_value = "align-task-id"
-
-        response = client.post(
-            f"/pipeline/visits/{test_visit['id']}/align",
-            headers=auth_headers,
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["task_id"] == "align-task-id"
-        mock_enqueue.assert_called_once_with("align", visit_id=test_visit["id"])
-
-
 class TestBillingPipeline:
     """Tests for billing pipeline step."""
 
