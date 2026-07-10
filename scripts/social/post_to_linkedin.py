@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import urllib.parse
 from pathlib import Path
 
 import requests
@@ -135,8 +136,9 @@ def _create_ugc(text: str, asset: str, media_category: str, title: str | None) -
 
 def _comment(post_urn: str, text: str) -> dict:
     body = {"actor": _author(), "object": post_urn, "message": {"text": text}}
+    encoded = urllib.parse.quote(post_urn, safe="")
     r = requests.post(
-        f"{API}/socialActions/{post_urn}/comments", headers=_headers(), json=body, timeout=60
+        f"{API}/socialActions/{encoded}/comments", headers=_headers(), json=body, timeout=60
     )
     return _check(r, "first comment")
 
@@ -147,10 +149,15 @@ def post_image(text: str, image: str, comment: str | None = None) -> dict:
     upload_url, asset = _register_upload("urn:li:digitalmediaRecipe:feedshare-image")
     _upload_bytes(upload_url, path, ct)
     urn = _create_ugc(text, asset, "IMAGE", None)
+    print(f"  post URN: {urn}")
     result = {"post_urn": urn}
     if comment:
-        _comment(urn, comment)
-        result["comment"] = "posted"
+        try:
+            _comment(urn, comment)
+            result["comment"] = "posted"
+        except PostError as e:
+            result["comment_error"] = str(e)
+            print(f"  first-comment WARN (post is live): {e}", file=sys.stderr)
     return result
 
 
@@ -159,10 +166,15 @@ def post_document(text: str, document: str, title: str, comment: str | None = No
     upload_url, asset = _register_upload("urn:li:digitalmediaRecipe:feedshare-document")
     _upload_bytes(upload_url, path, "application/pdf")
     urn = _create_ugc(text, asset, "DOCUMENT", title)
+    print(f"  post URN: {urn}")
     result = {"post_urn": urn}
     if comment:
-        _comment(urn, comment)
-        result["comment"] = "posted"
+        try:
+            _comment(urn, comment)
+            result["comment"] = "posted"
+        except PostError as e:
+            result["comment_error"] = str(e)
+            print(f"  first-comment WARN (post is live): {e}", file=sys.stderr)
     return result
 
 
