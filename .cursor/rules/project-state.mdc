@@ -19,7 +19,7 @@ alwaysApply: true
 
 ## App Launch + ASO (Jul 10, 2026)
 - **App is LIVE on the App Store** (v1.0 READY_FOR_SALE): https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988
-- **New ASO metadata STAGED on v1.1** (goes live when v1.1 is approved — still awaiting user green light to submit): title `PALM: Home Health Care Agency`, subtitle `AI Notes, Billing & Contracts`, keyword field `caregiver,nurse,aide,hha,private,duty,visit,documentation,soap,intake,transcription,scheduling`, plus new promotional text. Full rationale in `marketing/appstore-metadata.md`.
+- **New ASO metadata STAGED on v1.1** (goes live when v1.1 is approved — still awaiting user green light to submit): title `PALM Home Care` (short/clean; "PALM" and "PALM Care" are trademark-locked to other accounts), subtitle `AI for Home Care Agencies`, keyword field `caregiver,nurse,aide,hha,private,duty,visit,documentation,soap,intake,transcription,scheduling`, plus new promotional text. Full rationale in `marketing/appstore-metadata.md`.
 - Launch emails sent Jul 10 to 8 recipients (Fortcom/Shola signed up Jul 10, Robin Phillips, shwedone4, Family Love Behavioral/Nurdennis, AccentCare/Ken, Mission HHA/Heather, Covenant/Patricia, Prime Care/Mona) via `scripts/email/send_app_launch_emails.py` (brochure PDF attached, App Store CTA).
 - Launch assets hosted: `palmcareai.com/launch/palm-app-launch.mp4` (7s launch video) + `palm-launch-email-hero.png` (email banner).
 

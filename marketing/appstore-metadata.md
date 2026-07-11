@@ -4,15 +4,17 @@
 > until v1.1 is approved. New metadata is staged on v1.1 in App Store Connect.
 
 ## App Name
-**PALM: Home Health Care Agency** (29/30 chars)
-Rationale: "home health", "health care", "home care", and "agency" are the
-highest-intent App Store search terms for our buyer. "Contracts" has near-zero
-search volume, which is why the old title ranked poorly.
+**PALM Home Care** (14/30 chars)
+Short, clean, brand-first. "Home care" is the single highest-intent search
+term for our buyer; "Contracts" (old title) had near-zero search volume.
+Note: "PALM" and "PALM Care" alone are trademark-locked to other accounts,
+so "PALM Home Care" is the shortest available clean title.
 
 ## Subtitle
-**AI Notes, Billing & Contracts** (29/30 chars)
-No word repeats from the title (Apple indexes each word once across
-title + subtitle + keyword field).
+**AI for Home Care Agencies** (25/30 chars)
+Carries "AI" and "agencies"; "home care" repeats intentionally is avoided in
+the keyword field. Apple indexes each word once across title + subtitle +
+keyword field.
 
 ## Keyword Field (hidden, 100 bytes)
 `caregiver,nurse,aide,hha,private,duty,visit,documentation,soap,intake,transcription,scheduling` (95 bytes)
