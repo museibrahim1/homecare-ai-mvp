@@ -6,7 +6,10 @@ alwaysApply: true
 # PalmCare AI — Project State (March 2026)
 
 ## Apple Subscriptions (Jul 10, 2026)
-- **DO NOT SUBMIT v1.1 to App Review** until the user gives an explicit green light. The earlier review submission was cancelled (v1.1 state: DEVELOPER_REJECTED); there are no active review submissions.
+- **SUBMITTED Jul 10, 2026** (user gave green light). Review submission `cecbb382-a217-4dd3-8ba1-bb026388012e` — v1.1 (build 10) + the 3 MONTHLY subs are WAITING_FOR_REVIEW.
+- ⚠️ The 3 ANNUAL subs stayed READY_TO_SUBMIT — Apple's API has NO valid `reviewSubmissionItems` relationship for subscriptions ("subscription is not a relationship"), and version-only submissions do not auto-bundle later-created IAPs. To get the annuals reviewed, submit them from the **ASC UI** (each subscription page → Submit for Review, or add to the in-flight submission), or submit after v1.1 is approved. Monthly tiers cover the full offering in the meantime.
+- Before submitting, the review notes were REWRITTEN to describe the subscription model (the old notes said "no in-app purchases, no paywall" which was now false and would have caused a rejection). Paywall UI (`PaywallView.swift`) is 3.1.2-compliant: price, billing period, 14-day trial terms, auto-renew disclosure, Restore Purchases, Terms + Privacy links.
+- Prior Apple rejection was **Guideline 2.2 – Performance (Beta Testing)** (app looked like a demo); already addressed by review notes emphasizing it's a production app with self-serve registration.
 - Final pricing (group 22222636, all set in all 175 territories, Enterprise = `pro` product IDs): Starter $199/mo + $1,899.99/yr, Growth $699/mo + $6,699.99/yr, Enterprise $1,199.99/mo + $10,000/yr (Apple's absolute max — works out to ~30% off; $11,520 was impossible). 14-day free trial on Starter + Growth (monthly AND annual) via introductory offers; no trial on Enterprise. All 6 subscriptions are READY_TO_SUBMIT / WAITING_FOR_REVIEW.
 - Product IDs: `com.palmcareai.app.{starter,growth,pro}.{monthly,annual}`.
 - **Higher price points APPROVED** (Jul 10) — catalog now goes to $10,000. Note: available points are like $1,199.99/$1,899.99/$6,699.99, not round numbers.

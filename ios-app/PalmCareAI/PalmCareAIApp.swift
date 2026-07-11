@@ -43,6 +43,8 @@ struct PalmCareAIApp: App {
         DispatchQueue.global(qos: .utility).async {
             AudioRecorderService.purgeStaleRecordings()
         }
+
+        PostHogService.shared.capture("app_launched")
     }
 
     var body: some Scene {
@@ -80,12 +82,17 @@ struct PalmCareAIApp: App {
             .onChange(of: api.isAuthenticated) { newValue in
                 if !newValue { isBiometricUnlocked = false }
                 if newValue {
+                    PostHogService.shared.capture("auth_login_success")
                     // Signed in: request push permission and (re)send the token.
                     PushManager.requestAuthorizationAndRegister()
                     Task { await api.registerStoredDeviceTokenIfPossible() }
                     // Re-verify App Store entitlements so renewals, refunds,
                     // and revocations made outside the app are enforced.
                     Task { await StoreKitService.shared.syncEntitlements() }
+                    Task { await syncAnalyticsIdentity() }
+                } else {
+                    PostHogService.shared.capture("auth_logout")
+                    PostHogService.shared.reset()
                 }
                 registerInteraction()
             }
@@ -111,8 +118,10 @@ struct PalmCareAIApp: App {
 
                 switch newPhase {
                 case .background:
+                    PostHogService.shared.capture("app_backgrounded")
                     enteredBackgroundAt = Date()
                 case .active:
+                    PostHogService.shared.capture("app_foregrounded")
                     guard let enteredBackgroundAt else { return }
                     let elapsed = Date().timeIntervalSince(enteredBackgroundAt)
                     if elapsed >= sessionReauthTimeout, !assessmentInProgress {
@@ -174,6 +183,22 @@ struct PalmCareAIApp: App {
             api.logout()
         }
         registerInteraction()
+    }
+
+    private func syncAnalyticsIdentity() async {
+        do {
+            let user = try await api.fetchUser(forceRefresh: true)
+            PostHogService.shared.identify(
+                userId: user.id,
+                properties: [
+                    "email": user.email,
+                    "role": user.role ?? "unknown",
+                    "is_active": user.is_active,
+                ]
+            )
+        } catch {
+            // Keep anonymous tracking even when identity refresh fails.
+        }
     }
 }
 

@@ -60,6 +60,7 @@ final class StoreKitService: ObservableObject {
 
     func loadProducts() async {
         guard products.isEmpty else { return }
+        PostHogService.shared.capture("subscription_products_load_started")
         isLoadingProducts = true
         defer { isLoadingProducts = false }
         do {
@@ -68,7 +69,11 @@ final class StoreKitService: ObservableObject {
             products = Self.productIDs.compactMap { id in
                 storeProducts.first(where: { $0.id == id })
             }
+            PostHogService.shared.capture("subscription_products_load_succeeded", properties: [
+                "count": products.count,
+            ])
         } catch {
+            PostHogService.shared.capture("subscription_products_load_failed")
             lastError = "Couldn't load plans from the App Store. Please try again."
         }
     }
@@ -78,6 +83,9 @@ final class StoreKitService: ObservableObject {
     /// Runs the App Store purchase sheet and activates the plan on our backend.
     /// Returns true when the subscription is active.
     func purchase(_ product: Product) async -> Bool {
+        PostHogService.shared.capture("subscription_purchase_started", properties: [
+            "product_id": product.id,
+        ])
         purchaseInFlight = true
         lastError = nil
         defer { purchaseInFlight = false }
@@ -86,18 +94,34 @@ final class StoreKitService: ObservableObject {
             let result = try await product.purchase()
             switch result {
             case .success(let verification):
-                return await handle(transactionResult: verification)
+                let ok = await handle(transactionResult: verification)
+                PostHogService.shared.capture(ok ? "subscription_purchase_succeeded" : "subscription_purchase_failed", properties: [
+                    "product_id": product.id,
+                ])
+                return ok
             case .userCancelled:
+                PostHogService.shared.capture("subscription_purchase_cancelled", properties: [
+                    "product_id": product.id,
+                ])
                 return false
             case .pending:
                 // Ask to Buy / deferred — the Transaction.updates listener
                 // will pick it up when it completes.
+                PostHogService.shared.capture("subscription_purchase_pending", properties: [
+                    "product_id": product.id,
+                ])
                 lastError = "Your purchase is pending approval."
                 return false
             @unknown default:
+                PostHogService.shared.capture("subscription_purchase_failed", properties: [
+                    "product_id": product.id,
+                ])
                 return false
             }
         } catch {
+            PostHogService.shared.capture("subscription_purchase_failed", properties: [
+                "product_id": product.id,
+            ])
             lastError = error.palmFriendlyMessage
             return false
         }
@@ -118,6 +142,9 @@ final class StoreKitService: ObservableObject {
             }
         }
         purchasedProductIDs = found
+        PostHogService.shared.capture("subscription_entitlements_synced", properties: [
+            "active_products": found.count,
+        ])
     }
 
     /// The most recent verified transaction ID for any of our products.
@@ -134,13 +161,16 @@ final class StoreKitService: ObservableObject {
 
     /// AppStore.sync() forces a refresh from the App Store (restore flow).
     func restorePurchases() async -> Bool {
+        PostHogService.shared.capture("subscription_restore_started")
         do {
             try await AppStore.sync()
         } catch {
             // User cancelled the App Store sign-in — not an error worth showing.
         }
         await syncEntitlements()
-        return !purchasedProductIDs.isEmpty
+        let restored = !purchasedProductIDs.isEmpty
+        PostHogService.shared.capture(restored ? "subscription_restore_succeeded" : "subscription_restore_empty")
+        return restored
     }
 
     // MARK: - Internals

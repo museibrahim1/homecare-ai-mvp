@@ -64,6 +64,9 @@ targets:
         # Backend base URL. Empty falls back to the production Railway URL
         # in code, so this can be overridden by a build configuration.
         API_BASE_URL: ""
+        # PostHog (optional override). If empty, app falls back to defaults.
+        POSTHOG_API_KEY: ""
+        POSTHOG_HOST: "https://us.i.posthog.com"
         # Google OAuth client ID for Calendar/Gmail/Drive integrations.
         # Leave blank in source — set via build configuration / xcconfig.
         GOOGLE_CLIENT_ID: ""

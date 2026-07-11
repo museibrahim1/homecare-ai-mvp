@@ -65,6 +65,9 @@ final class AssessmentSession: ObservableObject {
         liveTranscription.segments = []
         try recorder.startRecording()
         activeClient = client
+        PostHogService.shared.capture("assessment_recording_started", properties: [
+            "has_client": client != nil,
+        ])
         if let url = recorder.recordingURL {
             liveTranscription.startTranscribing(recordingURL: url)
         }
@@ -75,8 +78,13 @@ final class AssessmentSession: ObservableObject {
     /// otherwise the audio is held in `pendingAudioURL` until one is chosen.
     func stopRecording(client explicitClient: Client?) {
         let client = explicitClient ?? activeClient
+        let durationSeconds = Int(recorder.duration.rounded())
         activeClient = nil
         let url = recorder.stopRecording()
+        PostHogService.shared.capture("assessment_recording_stopped", properties: [
+            "has_client": client != nil,
+            "duration_seconds": durationSeconds,
+        ])
         liveTranscription.stopTranscribing()
         liveTranscription.segments = []
 
@@ -129,6 +137,9 @@ final class AssessmentSession: ObservableObject {
     // MARK: - Upload + pipeline
 
     func process(audioURL: URL, clientId: String, clientName: String?) {
+        PostHogService.shared.capture("assessment_process_started", properties: [
+            "source": "recording",
+        ])
         withAnimation {
             isProcessing = true
             uploadProgress = "Creating assessment..."
@@ -139,15 +150,22 @@ final class AssessmentSession: ObservableObject {
         processingTask = Task {
             do {
                 let visit = try await api.createVisit(clientId: clientId)
+                PostHogService.shared.capture("assessment_visit_created")
                 let data = try Data(contentsOf: audioURL)
 
                 uploadProgress = "Uploading audio..."
                 _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: audioURL.lastPathComponent, autoProcess: true)
+                PostHogService.shared.capture("assessment_upload_succeeded", properties: [
+                    "source": "recording",
+                ])
                 try? FileManager.default.removeItem(at: audioURL)
 
                 uploadProgress = "Pipeline running..."
                 await pollPipeline(visitId: visit.id, clientName: clientName)
             } catch {
+                PostHogService.shared.capture("assessment_upload_failed", properties: [
+                    "source": "recording",
+                ])
                 // Minimize PHI retention on device when upload/processing fails.
                 try? FileManager.default.removeItem(at: audioURL)
                 withAnimation { isProcessing = false }
@@ -161,6 +179,9 @@ final class AssessmentSession: ObservableObject {
 
     /// Upload an audio file picked from Files (security-scoped URL).
     func processPickedFile(url: URL, clientId: String, clientName: String?) {
+        PostHogService.shared.capture("assessment_process_started", properties: [
+            "source": "file_upload",
+        ])
         withAnimation {
             isProcessing = true
             uploadProgress = "Uploading audio file..."
@@ -178,13 +199,20 @@ final class AssessmentSession: ObservableObject {
 
                 uploadProgress = "Creating assessment..."
                 let visit = try await api.createVisit(clientId: clientId)
+                PostHogService.shared.capture("assessment_visit_created")
 
                 uploadProgress = "Uploading audio..."
                 _ = try await api.uploadAudio(visitId: visit.id, audioData: data, filename: filename, autoProcess: true)
+                PostHogService.shared.capture("assessment_upload_succeeded", properties: [
+                    "source": "file_upload",
+                ])
 
                 uploadProgress = "Pipeline running..."
                 await pollPipeline(visitId: visit.id, clientName: clientName)
             } catch {
+                PostHogService.shared.capture("assessment_upload_failed", properties: [
+                    "source": "file_upload",
+                ])
                 withAnimation { isProcessing = false }
                 uploadProgress = nil
                 pipelineSteps = []
@@ -232,7 +260,12 @@ final class AssessmentSession: ObservableObject {
                 // processing screen until the 4-minute timeout.
                 let visitStatus = status.status?.lowercased() ?? ""
                 if visitStatus == "pipeline_failed" || visitStatus == "pending_review" {
-                    finishProcessing(visitId: visitId, clientName: clientName, failed: visitStatus == "pipeline_failed")
+                    finishProcessing(
+                        visitId: visitId,
+                        clientName: clientName,
+                        failed: visitStatus == "pipeline_failed",
+                        result: visitStatus
+                    )
                     return
                 }
 
@@ -267,7 +300,12 @@ final class AssessmentSession: ObservableObject {
                 }
 
                 if allTerminal && !steps.isEmpty {
-                    finishProcessing(visitId: visitId, clientName: clientName, failed: anyFailed)
+                    finishProcessing(
+                        visitId: visitId,
+                        clientName: clientName,
+                        failed: anyFailed,
+                        result: anyFailed ? "step_failed" : "completed"
+                    )
                     return
                 }
             } catch {
@@ -280,12 +318,16 @@ final class AssessmentSession: ObservableObject {
 
         // Timed out — still surface the visit, but flag it so RecordView
         // lands on Overview: the pipeline may not have a contract yet.
-        finishProcessing(visitId: visitId, clientName: clientName, failed: true)
+        finishProcessing(visitId: visitId, clientName: clientName, failed: true, result: "timeout")
     }
 
-    private func finishProcessing(visitId: String, clientName: String?, failed: Bool) {
+    private func finishProcessing(visitId: String, clientName: String?, failed: Bool, result: String) {
         pipelineFailed = failed
         completedClientName = clientName
+        PostHogService.shared.capture("assessment_pipeline_finished", properties: [
+            "result": result,
+            "failed": failed,
+        ])
         withAnimation {
             isProcessing = false
             uploadProgress = nil

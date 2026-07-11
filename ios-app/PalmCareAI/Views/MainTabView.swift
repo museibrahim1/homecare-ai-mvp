@@ -42,6 +42,11 @@ struct MainTabView: View {
             PalmAgentSheet(isPresented: $palmAgentOpen, isAdmin: false)
                 .environmentObject(api)
         }
+        .onChange(of: selectedTab) { newTab in
+            PostHogService.shared.capture("tab_selected", properties: [
+                "tab_index": newTab,
+            ])
+        }
     }
 
     // MARK: - Caregiver Layout

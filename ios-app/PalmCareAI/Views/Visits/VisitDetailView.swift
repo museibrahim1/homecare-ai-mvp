@@ -90,11 +90,16 @@ struct VisitDetailView: View {
         }
         .palmErrorAlert(message: $actionError, isPresented: $showActionError)
         .task {
+            PostHogService.shared.capture("visit_detail_opened")
             if initialTab != 0 { activeTab = initialTab }
             await loadVisit()
             await pollPipelineUntilComplete()
         }
         .onChange(of: activeTab) { _ in
+            PostHogService.shared.capture("visit_detail_tab_viewed", properties: [
+                "tab_index": activeTab,
+                "tab_name": tabs[activeTab],
+            ])
             Task { await loadTabDataIfNeeded() }
         }
         #if DEBUG

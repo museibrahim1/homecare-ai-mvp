@@ -1,6 +1,70 @@
 import Foundation
 import Security
 
+/// Lightweight PostHog client for iOS without extra SDK dependencies.
+final class PostHogService {
+    static let shared = PostHogService()
+
+    private let session = URLSession(configuration: .ephemeral)
+    private let host: String
+    private let apiKey: String
+    private var distinctId: String
+
+    private init() {
+        let info = Bundle.main.infoDictionary
+        let configuredHost = (info?["POSTHOG_HOST"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let configuredKey = (info?["POSTHOG_API_KEY"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        host = (configuredHost?.isEmpty == false ? configuredHost! : "https://us.i.posthog.com")
+            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        apiKey = (configuredKey?.isEmpty == false ? configuredKey! : "phc_Aohy9CxFfE8Qi3z2GF7mTWzgQLZTCs6vXfsTNGKCZEar")
+        distinctId = "ios-\(UUID().uuidString)"
+    }
+
+    func setDistinctId(_ id: String) {
+        guard !id.isEmpty else { return }
+        distinctId = id
+    }
+
+    func identify(userId: String, properties: [String: Any] = [:]) {
+        setDistinctId(userId)
+        capture("$identify", properties: ["$set": properties])
+    }
+
+    func reset() {
+        distinctId = "ios-\(UUID().uuidString)"
+    }
+
+    func capture(_ event: String, properties: [String: Any] = [:]) {
+        guard !apiKey.isEmpty else { return }
+        guard let url = URL(string: "\(host)/capture/") else { return }
+
+        var merged = properties
+        merged["$lib"] = "swift-native"
+        merged["$lib_version"] = "1.0.0"
+        merged["platform"] = "ios"
+
+        let payload: [String: Any] = [
+            "api_key": apiKey,
+            "event": event,
+            "distinct_id": distinctId,
+            "properties": merged,
+            "timestamp": ISO8601DateFormatter().string(from: Date()),
+        ]
+
+        guard JSONSerialization.isValidJSONObject(payload),
+              let body = try? JSONSerialization.data(withJSONObject: payload) else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body
+        request.timeoutInterval = 10
+
+        session.dataTask(with: request).resume()
+    }
+}
+
 class APIService: ObservableObject {
     static let shared = APIService()
     let baseURL: String = {

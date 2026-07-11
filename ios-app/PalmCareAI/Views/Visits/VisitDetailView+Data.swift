@@ -136,6 +136,9 @@ extension VisitDetailView {
     }
 
     func exportFile(type: String) async {
+        PostHogService.shared.capture("visit_export_started", properties: [
+            "type": type,
+        ])
         do {
             let localURL = try await api.downloadFile(
                 path: "/exports/visits/\(visitId)/\(type)",
@@ -167,7 +170,13 @@ extension VisitDetailView {
                 }
                 topVC.present(activityVC, animated: true)
             }
+            PostHogService.shared.capture("visit_export_succeeded", properties: [
+                "type": type,
+            ])
         } catch {
+            PostHogService.shared.capture("visit_export_failed", properties: [
+                "type": type,
+            ])
             await MainActor.run {
                 actionError = "Export failed: \(error.localizedDescription)"
                 showActionError = true
@@ -176,6 +185,7 @@ extension VisitDetailView {
     }
 
     func restartAssessment() async {
+        PostHogService.shared.capture("assessment_restart_started")
         do {
             try await api.restartVisit(visitId: visitId)
             let v = try await api.fetchVisit(id: visitId)
@@ -190,7 +200,9 @@ extension VisitDetailView {
             // The pipeline is running again — resume the auto-refresh loop so
             // the processing banner clears and tabs fill in on their own.
             await pollPipelineUntilComplete()
+            PostHogService.shared.capture("assessment_restart_succeeded")
         } catch {
+            PostHogService.shared.capture("assessment_restart_failed")
             await MainActor.run {
                 actionError = "Restart failed: \(error.localizedDescription)"
                 showActionError = true
