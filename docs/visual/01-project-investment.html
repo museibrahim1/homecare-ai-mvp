@@ -74,7 +74,7 @@
   <h2>The headline numbers</h2>
   <div class="h2sub">Your total investment at a glance.</div>
   <div class="grid4">
-    <div class="kpi"><div class="num" style="color:var(--green)">~$1,070</div><div class="lbl">Total cash spent (midpoint)</div><div class="note">Range $740 to $1,400. Breakdown below.</div></div>
+    <div class="kpi"><div class="num" style="color:var(--green)">~$2,580</div><div class="lbl">Total cash spent (midpoint)</div><div class="note">Range $2,480 to $2,675, including your real subscriptions. Breakdown below.</div></div>
     <div class="kpi"><div class="num" style="color:var(--teal)">~230 hrs</div><div class="lbl">Hands-on build time</div><div class="note">From clustering 1,043 commit timestamps into work sessions.</div></div>
     <div class="kpi"><div class="num" style="color:var(--blue)">173,547</div><div class="lbl">Lines of code in the repo today</div><div class="note">704 source files, excluding data dumps and media.</div></div>
     <div class="kpi"><div class="num" style="color:var(--purple)">2.69M</div><div class="lbl">Lines written across history</div><div class="note">Total insertions over 1,043 commits, including rewrites.</div></div>
@@ -82,32 +82,35 @@
 
   <div class="callout">
     <div class="big">A dev agency would have quoted $150,000 to $400,000 for this.</div>
-    <p>A HIPAA-aware backend, a 58-route web platform, a native iOS app in the App Store, an AI pipeline covering all 51 US jurisdictions, plus CI, tests, and compliance docs. You built it for about $1,100 in cash and your own time. That is roughly a 99.5% discount on market rate.</p>
+    <p>A HIPAA-aware backend, a 58-route web platform, a native iOS app in the App Store, an AI pipeline covering all 51 US jurisdictions, plus CI, tests, and compliance docs. You built it for about $2,580 in cash, most of it your existing Cursor, Claude, and creative tool subscriptions, plus your own time. That is still roughly a 99% discount on market rate.</p>
   </div>
 
   <!-- ============ MONEY ============ -->
   <h2>Where the money went</h2>
-  <div class="h2sub">Known figures come from your own docs and public pricing. Estimates are marked and use conservative ranges, since provider billing dashboards are not readable from here.</div>
+  <div class="h2sub">Corrected with your actual subscription plans. Known figures are your real monthly rate multiplied by the months you've had each one, based on when they first show up in the repo. Estimates are marked and use conservative ranges for the pay-as-you-go services, since those billing dashboards aren't readable from here.</div>
   <div class="card">
     <table>
       <tr><th>Item</th><th>Basis</th><th class="right">Spend</th><th style="width:90px"></th></tr>
+      <tr><td><strong>Cursor Ultra</strong><br><span style="color:var(--faint);font-size:12px">Your primary build tool, every line of this project</span></td><td>$200/mo × 6 billing months (Jan to Jun, active into Jul)</td><td class="right"><strong>$1,200</strong></td><td><span class="tag known">Known</span></td></tr>
+      <tr><td><strong>Claude subscription</strong><br><span style="color:var(--faint);font-size:12px">Personal plan, separate from the production API below</span></td><td>$100/mo × 6 billing months</td><td class="right"><strong>$600</strong></td><td><span class="tag known">Known</span></td></tr>
       <tr><td><strong>Railway hosting</strong><br><span style="color:var(--faint);font-size:12px">API, worker, Postgres, Redis in production</span></td><td>~$35/mo for ~5.5 months (figure from your investor memo)</td><td class="right"><strong>~$190</strong></td><td><span class="tag known">Known</span></td></tr>
-      <tr><td><strong>Cursor subscription</strong><br><span style="color:var(--faint);font-size:12px">Your primary build tool</span></td><td>Pro at $20/mo for ~5.5 months</td><td class="right"><strong>~$110</strong></td><td><span class="tag est">Estimate</span></td></tr>
       <tr><td><strong>Apple Developer Program</strong><br><span style="color:var(--faint);font-size:12px">Required for the App Store</span></td><td>Annual membership</td><td class="right"><strong>$99</strong></td><td><span class="tag known">Known</span></td></tr>
-      <tr><td><strong>Anthropic Claude API</strong><br><span style="color:var(--faint);font-size:12px">Contracts, notes, billables, landing chat, 51-state test runs</span></td><td>~$0.14 of Claude per assessment; heavy dev testing plus full-state validation runs</td><td class="right"><strong>$75 to $200</strong></td><td><span class="tag est">Estimate</span></td></tr>
-      <tr><td><strong>Resend email</strong><br><span style="color:var(--faint);font-size:12px">Investor waves, outreach, digests, transactional</span></td><td>Pro at $20/mo for the months with 500+ email campaigns</td><td class="right"><strong>$40 to $80</strong></td><td><span class="tag est">Estimate</span></td></tr>
-      <tr><td><strong>Higgsfield AI</strong><br><span style="color:var(--faint);font-size:12px">Marketing image and video generation</span></td><td>Creator-tier subscription during campaign months</td><td class="right"><strong>$30 to $100</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>Resend email</strong><br><span style="color:var(--faint);font-size:12px">Investor waves, outreach, digests, transactional</span></td><td>$20/mo flat × 6 billing months, active since Jan 27</td><td class="right"><strong>$120</strong></td><td><span class="tag known">Known</span></td></tr>
+      <tr><td><strong>ElevenLabs</strong><br><span style="color:var(--faint);font-size:12px">Premium AI voiceovers for marketing videos</span></td><td>$20/mo × 5 billing months, active since Feb 1</td><td class="right"><strong>$100</strong></td><td><span class="tag known">Known</span></td></tr>
+      <tr><td><strong>Higgsfield AI</strong><br><span style="color:var(--faint);font-size:12px">Marketing image and video generation</span></td><td>$60/mo, one billing cycle since Jun 24</td><td class="right"><strong>$60</strong></td><td><span class="tag known">Known</span></td></tr>
+      <tr><td><strong>Anthropic Claude API</strong><br><span style="color:var(--faint);font-size:12px">Metered production usage: contracts, notes, billables, landing chat, 51-state test runs</span></td><td>~$0.14 of Claude per assessment; heavy dev testing plus full-state validation runs. Separate from the $100/mo personal plan above</td><td class="right"><strong>$75 to $200</strong></td><td><span class="tag est">Estimate</span></td></tr>
       <tr><td><strong>Domains</strong><br><span style="color:var(--faint);font-size:12px">palmtai.com and palmcareai.com</span></td><td>Two registrations at ~$13/yr each</td><td class="right"><strong>~$26</strong></td><td><span class="tag est">Estimate</span></td></tr>
       <tr><td><strong>Deepgram transcription</strong><br><span style="color:var(--faint);font-size:12px">Nova-3 with speaker diarization</span></td><td>$0.0077/min; Deepgram includes $200 in free credit, so most or all testing was covered</td><td class="right"><strong>$0 to $20</strong></td><td><span class="tag est">Estimate</span></td></tr>
-      <tr><td><strong>WaveSpeed and misc AI credits</strong><br><span style="color:var(--faint);font-size:12px">Voiceovers and image generation for videos</span></td><td>Pay-per-use credits</td><td class="right"><strong>$10 to $50</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>WaveSpeed and misc AI credits</strong><br><span style="color:var(--faint);font-size:12px">Extra voiceovers and image generation for videos</span></td><td>Pay-per-use credits</td><td class="right"><strong>$10 to $50</strong></td><td><span class="tag est">Estimate</span></td></tr>
       <tr><td><strong>OpenAI API</strong><br><span style="color:var(--faint);font-size:12px">Fallback only, rarely triggered</span></td><td>Minimal usage</td><td class="right"><strong>$0 to $10</strong></td><td><span class="tag est">Estimate</span></td></tr>
-      <tr class="total-row"><td>Total</td><td></td><td class="right" style="color:var(--green)">$740 to $1,400</td><td></td></tr>
+      <tr class="total-row"><td>Total</td><td></td><td class="right" style="color:var(--green)">$2,480 to $2,675</td><td></td></tr>
     </table>
   </div>
   <div class="split">
-    <div class="mini"><div class="t">Ongoing monthly burn right now</div><div class="v">~$75 to $95/mo</div></div>
-    <div class="mini"><div class="t">One Starter subscription ($199/mo) covers</div><div class="v">2x your entire monthly burn</div></div>
+    <div class="mini"><div class="t">Ongoing monthly burn right now</div><div class="v">~$375/mo</div></div>
+    <div class="mini"><div class="t">A single Growth subscriber ($699/mo) covers</div><div class="v">your entire monthly burn, with room to spare</div></div>
   </div>
+  <p style="color:var(--faint); font-size:12px; margin-top:10px">Monthly burn = Cursor Ultra $200 + Claude $100 + Resend $20 + ElevenLabs $20 + Railway ~$35. Higgsfield is treated as a one-time charge, not recurring, since you no longer have that plan. A Starter subscriber at $199/mo covers about half of this on their own.</p>
 
   <!-- ============ TIME ============ -->
   <h2>Where the time went</h2>
@@ -169,7 +172,7 @@
   </div>
 
   <div class="foot">
-    Generated July 10, 2026 from the PALM git repository (1,043 commits, Jan 24 to Jul 10, 2026), docs/API_COST_MODEL.md, docs/INVESTOR_MEMO.md, and public service pricing. Cash figures marked Estimate use conservative ranges; check the Anthropic, Railway, Resend, and Apple billing dashboards for exact invoices.
+    Generated July 10, 2026, corrected same day with your actual subscription rates (Cursor Ultra $200/mo, Claude $100/mo, Higgsfield $60/mo, ElevenLabs $20/mo, Resend $20/mo). Sourced from the PALM git repository (1,043 commits, Jan 24 to Jul 10, 2026), docs/API_COST_MODEL.md, docs/INVESTOR_MEMO.md, and public service pricing (Cursor Ultra confirmed at cursor.com/pricing). Billing-month counts are estimated from each service's first appearance in git history. Cash figures marked Estimate use conservative ranges for pay-as-you-go services; check the Anthropic and Railway billing dashboards for exact invoices.
   </div>
 </div>
 </body>
