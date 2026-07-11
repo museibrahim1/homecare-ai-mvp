@@ -18,6 +18,7 @@
     "edge >= 91"
   ],
   "dependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
@@ -28,11 +29,11 @@
     "lucide-react": "^1.16.0",
     "next": "^16.2.6",
     "postcss": "^8.5.15",
+    "posthog-js": "^1.399.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.3.0",
-    "@tailwindcss/postcss": "^4.3.0",
     "typescript": "^6.0.3",
     "zustand": "^5.0.13"
   },

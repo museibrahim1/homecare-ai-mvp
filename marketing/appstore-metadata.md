@@ -1,10 +1,24 @@
 # PalmCare AI — App Store Metadata
 
+> Updated Jul 10, 2026 (ASO pass). Live listing still shows the v1.0 title
+> until v1.1 is approved. New metadata is staged on v1.1 in App Store Connect.
+
 ## App Name
-**PalmCare AI** (30 character limit: "PalmCare AI")
+**PALM: Home Health Care Agency** (29/30 chars)
+Rationale: "home health", "health care", "home care", and "agency" are the
+highest-intent App Store search terms for our buyer. "Contracts" has near-zero
+search volume, which is why the old title ranked poorly.
 
 ## Subtitle
-**AI Home Care Assessments** (30 character limit)
+**AI Notes, Billing & Contracts** (29/30 chars)
+No word repeats from the title (Apple indexes each word once across
+title + subtitle + keyword field).
+
+## Keyword Field (hidden, 100 bytes)
+`caregiver,nurse,aide,hha,private,duty,visit,documentation,soap,intake,transcription,scheduling` (95 bytes)
+
+## Promotional Text (170 chars, updatable without release)
+"Record the visit. PALM writes the transcript, care notes, billables, and a ready to sign service contract in minutes. Start your 14 day free trial."
 
 ## Category
 Primary: **Medical**
