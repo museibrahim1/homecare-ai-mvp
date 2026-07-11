@@ -63,9 +63,10 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
     from app.models.subscription import PlanTier
     import json
 
-    # Annual price = 12 months with a 20% discount. All paid tiers except
-    # Enterprise include a 14 day free trial (granted through Apple IAP
-    # introductory offers on iOS).
+    # Prices match Apple's App Store price points exactly. Annual = at least
+    # 20% off monthly (Enterprise Annual is capped at Apple's $10,000 max,
+    # which works out to ~30% off). All paid tiers except Enterprise include
+    # a 14 day free trial (granted through Apple IAP introductory offers).
     PLANS = [
         {
             "name": "Starter",
@@ -77,7 +78,7 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
                 "14 day free trial."
             ),
             "monthly_price": 199,
-            "annual_price": 1910,
+            "annual_price": 1899.99,
             "setup_fee": 0,
             "max_users": 5,
             "max_clients": 50,
@@ -102,7 +103,7 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
                 "a 14 day free trial."
             ),
             "monthly_price": 699,
-            "annual_price": 6710,
+            "annual_price": 6699.99,
             "setup_fee": 0,
             "max_users": 20,
             "max_clients": 200,
@@ -141,8 +142,8 @@ async def seed_plans(request: Request, db: Session = Depends(get_db)):
                 "unlimited team members, a dedicated account manager, and the full "
                 "50 state compliance engine."
             ),
-            "monthly_price": 1200,
-            "annual_price": 11520,
+            "monthly_price": 1199.99,
+            "annual_price": 10000,
             "setup_fee": 0,
             "max_users": 999,
             "max_clients": 9999,

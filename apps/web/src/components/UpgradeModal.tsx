@@ -47,7 +47,7 @@ const PLANS = [
   },
   {
     name: 'Enterprise',
-    price: 1200,
+    price: 1199.99,
     period: '/mo',
     description: 'Unlimited everything, no overage fees',
     features: [

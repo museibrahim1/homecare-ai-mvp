@@ -581,16 +581,17 @@ async def seed_database():
             from app.models.subscription import Plan, PlanTier
             import json as _json
 
-            # Annual price = 12 months with a 20% discount.
+            # Prices match Apple App Store price points. Annual = at least 20%
+            # off monthly (Enterprise Annual capped at Apple's $10,000 max).
             _plan_defs = [
                 dict(name="Starter", tier=PlanTier.STARTER,
                      description="For solo owners and small agencies signing their first contracts with AI. Record the visit and PALM writes the notes, the billables, and a state compliant service agreement in minutes. Includes a 14 day free trial.",
-                     monthly_price=199, annual_price=1910, max_users=5, max_clients=50,
+                     monthly_price=199, annual_price=1899.99, max_users=5, max_clients=50,
                      max_visits_per_month=20, max_storage_gb=10, is_active=True, is_contact_sales=False,
                      features=_json.dumps(["20 AI assessments a month","5 team members","AI voice to contract","Smart SOAP notes","Basic reporting","Email support","10 GB storage","14 day free trial"])),
                 dict(name="Growth", tier=PlanTier.GROWTH,
                      description="For agencies building a steady client pipeline. Everything in Starter plus advanced analytics, custom contract templates, and priority support so your team closes contracts faster. Includes a 14 day free trial.",
-                     monthly_price=699, annual_price=6710, max_users=20, max_clients=200,
+                     monthly_price=699, annual_price=6699.99, max_users=20, max_clients=200,
                      max_visits_per_month=75, max_storage_gb=50, is_active=True, is_contact_sales=False,
                      features=_json.dumps(["75 AI assessments a month","20 team members","Advanced analytics and reporting","Custom contract templates","Team management","Priority support","50 GB storage","14 day free trial"])),
                 dict(name="Professional", tier=PlanTier.PROFESSIONAL,
@@ -600,7 +601,7 @@ async def seed_database():
                      features=_json.dumps([])),
                 dict(name="Enterprise", tier=PlanTier.ENTERPRISE,
                      description="For established agencies running at scale. Unlimited assessments, unlimited team members, a dedicated account manager, and the full 50 state compliance engine.",
-                     monthly_price=1200, annual_price=11520, max_users=999, max_clients=9999,
+                     monthly_price=1199.99, annual_price=10000, max_users=999, max_clients=9999,
                      max_visits_per_month=99999, max_storage_gb=250, is_active=True, is_contact_sales=False,
                      features=_json.dumps(["Unlimited AI assessments","Unlimited team members","Dedicated account manager","50 state compliance engine","Custom analytics and dashboards","HIPAA BAA included","SLA guarantee","250 GB storage"])),
             ]

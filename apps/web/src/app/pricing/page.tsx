@@ -5,13 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Check, ArrowRight, Zap, Building2, TrendingUp, Phone, CreditCard, Shield, Clock, BadgeCheck } from 'lucide-react';
 
-// Annual price = 12 months with a 20% discount.
+// Prices match Apple's App Store price points exactly. Annual saves at least
+// 20% versus monthly (Enterprise Annual is capped at Apple's $10,000 max,
+// which works out to about 30% off).
 const PLANS = [
   {
     name: 'Starter',
     tier: 'starter',
     monthlyPrice: 199,
-    annualPrice: 1910,
+    annualPrice: 1899.99,
     description: 'For solo owners and small agencies signing their first contracts with AI. Record the visit and PALM writes the notes, the billables, and a state compliant service agreement in minutes.',
     icon: Zap,
     assessments: 20,
@@ -34,7 +36,7 @@ const PLANS = [
     name: 'Growth',
     tier: 'growth',
     monthlyPrice: 699,
-    annualPrice: 6710,
+    annualPrice: 6699.99,
     description: 'For agencies building a steady client pipeline. Everything in Starter plus advanced analytics, custom contract templates, and priority support so your team closes contracts faster.',
     icon: TrendingUp,
     assessments: 75,
@@ -58,8 +60,8 @@ const PLANS = [
   {
     name: 'Enterprise',
     tier: 'enterprise',
-    monthlyPrice: 1200,
-    annualPrice: 11520,
+    monthlyPrice: 1199.99,
+    annualPrice: 10000,
     description: 'For established agencies running at scale. Unlimited assessments, unlimited team members, a dedicated account manager, and the full 50 state compliance engine.',
     icon: Building2,
     assessments: null,
@@ -295,7 +297,7 @@ export default function PricingPage() {
             },
             {
               q: 'How does annual billing work?',
-              a: 'Every plan has an annual option that saves 20% versus paying monthly: Starter is $1,910/yr, Growth is $6,710/yr, and Enterprise is $11,520/yr. Annual plans are billed once a year through your Apple ID.',
+              a: 'Every plan has an annual option that saves at least 20% versus paying monthly: Starter is $1,899.99/yr, Growth is $6,699.99/yr, and Enterprise is $10,000/yr (about 30% off). Annual plans are billed once a year through your Apple ID.',
             },
             {
               q: 'What happens if I exceed my assessment limit?',

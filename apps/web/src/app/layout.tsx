@@ -132,13 +132,13 @@ const jsonLd = {
       offers: {
         '@type': 'AggregateOffer',
         lowPrice: '199',
-        highPrice: '1200',
+        highPrice: '1199.99',
         priceCurrency: 'USD',
         offerCount: 3,
         offers: [
           { '@type': 'Offer', name: 'Starter', price: '199', priceCurrency: 'USD' },
           { '@type': 'Offer', name: 'Growth', price: '699', priceCurrency: 'USD' },
-          { '@type': 'Offer', name: 'Enterprise', price: '1200', priceCurrency: 'USD' },
+          { '@type': 'Offer', name: 'Enterprise', price: '1199.99', priceCurrency: 'USD' },
         ],
       },
       featureList: [
