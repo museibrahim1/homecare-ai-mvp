@@ -9,7 +9,8 @@ import { captureAttribution, getAttribution } from '@/lib/attribution';
 let _initialized = false;
 let _posthogInitialized = false;
 
-const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+const DEFAULT_POSTHOG_KEY = 'phc_Aohy9CxFfE8Qi3z2GF7mTWzgQLZTCs6vXfsTNGKCZEar';
+const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY || DEFAULT_POSTHOG_KEY;
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
 
 export default function SiteAnalytics() {

@@ -9,9 +9,11 @@ Short, clean brand name. (Note: "PALM" and "PALM Care" alone are
 trademark-locked to other accounts.)
 
 ## Subtitle
-**Notes, Billing & Contracts** (26/30 chars)
-Fresh words only — no repeat of "AI"/"Care" from the title. Apple indexes each
-word once across title + subtitle + keyword field, so repeats are wasted.
+**Plans, Assessments & Contracts** (30/30 chars)
+Reads as "Care Plans, Assessments & Contracts" — the word "Care" is dropped
+because (a) it's already in the title and Apple indexes each word once, and
+(b) the full phrase is 35 chars, over Apple's 30-char limit. Fresh words only,
+no repeats across title + subtitle + keyword field.
 
 ## Keyword Field (hidden, 100 bytes)
 `home,caregiver,nurse,aide,hha,agency,visit,documentation,soap,intake,transcription,scheduling` (93 bytes)
