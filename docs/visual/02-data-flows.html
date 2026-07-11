@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PALM | Data Flows</title>
+<style>
+  :root {
+    --bg: #0a0a1a; --card: #12122a; --card2: #171735;
+    --teal: #14b8a6; --teal-dim: rgba(20,184,166,.15);
+    --text: #e8e8f2; --muted: #8b8ba3; --faint: #55556e;
+    --green: #34d399; --amber: #fbbf24; --blue: #60a5fa; --pink: #f472b6; --purple: #a78bfa;
+    --border: rgba(255,255,255,.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, "SF Pro Display", Segoe UI, sans-serif; line-height: 1.5; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 48px 28px 80px; }
+  .eyebrow { color: var(--teal); font-size: 13px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; }
+  h1 { font-size: 40px; font-weight: 800; margin: 10px 0 6px; letter-spacing: -1px; }
+  .sub { color: var(--muted); font-size: 16px; max-width: 680px; }
+  h2 { font-size: 22px; font-weight: 700; margin: 56px 0 6px; }
+  .h2sub { color: var(--muted); font-size: 14px; margin-bottom: 20px; max-width: 720px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 26px; }
+
+  /* Flow steps */
+  .flow { display: flex; flex-wrap: wrap; gap: 0; align-items: stretch; }
+  .step { flex: 1 1 150px; min-width: 150px; background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 16px 15px; position: relative; margin: 0 22px 14px 0; }
+  .step:last-child { margin-right: 0; }
+  .step::after { content: "→"; position: absolute; right: -19px; top: 50%; transform: translateY(-50%); color: var(--teal); font-size: 18px; font-weight: 800; }
+  .step:last-child::after { content: ""; }
+  .step .n { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: var(--teal-dim); color: var(--teal); font-size: 12px; font-weight: 800; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .step .t { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+  .step .d { color: var(--muted); font-size: 12px; }
+  .step .svc { display: inline-block; margin-top: 8px; font-size: 10.5px; font-weight: 700; padding: 2.5px 8px; border-radius: 999px; }
+  .svc.dg { background: rgba(96,165,250,.14); color: var(--blue); }
+  .svc.cl { background: rgba(167,139,250,.14); color: var(--purple); }
+  .svc.s3 { background: rgba(251,191,36,.13); color: var(--amber); }
+  .svc.db { background: rgba(52,211,153,.14); color: var(--green); }
+  .svc.ap { background: rgba(244,114,182,.14); color: var(--pink); }
+  .svc.rs { background: rgba(20,184,166,.15); color: var(--teal); }
+
+  .timing { display: inline-block; margin-top: 16px; background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.25); color: var(--green); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+
+  /* Architecture diagram */
+  .arch { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 800px) { .arch { grid-template-columns: 1fr; } }
+  .layer { background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .layer .lt { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; }
+  .node { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
+  .node b { display: block; font-size: 13.5px; }
+  .node span { color: var(--muted); font-size: 11.5px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; padding: 0 12px 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .lock { color: var(--green); }
+  .foot { color: var(--faint); font-size: 12px; margin-top: 60px; border-top: 1px solid var(--border); padding-top: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Palm Technologies Inc</div>
+  <h1>How Data Moves Through PALM</h1>
+  <p class="sub">Every major flow in the product, from the moment a caregiver taps record to the moment a signed contract lands in an inbox. Built from the live codebase, July 2026.</p>
+
+  <!-- ============ THE BIG PICTURE ============ -->
+  <h2>The system at a glance</h2>
+  <div class="h2sub">Three client apps talk to one FastAPI backend on Railway. Heavy AI work runs on a background worker so the apps never freeze.</div>
+  <div class="arch">
+    <div class="layer">
+      <div class="lt" style="color:var(--pink)">Client apps</div>
+      <div class="node"><b>iOS app (SwiftUI)</b><span>Recording, clients, paywall, live in the App Store</span></div>
+      <div class="node"><b>Web app (Next.js)</b><span>58 routes: dashboard, pipeline, admin, marketing site</span></div>
+      <div class="node"><b>Expo mobile app</b><span>Live transcription streaming over WebSocket</span></div>
+    </div>
+    <div class="layer">
+      <div class="lt" style="color:var(--teal)">Backend on Railway</div>
+      <div class="node"><b>FastAPI API</b><span>35+ routers, JWT auth, audit logging on all PHI routes, tier rate limits</span></div>
+      <div class="node"><b>Celery worker</b><span>Runs the AI pipeline off the request thread via Redis queue</span></div>
+      <div class="node"><b>PostgreSQL</b><span>21 models; EIN and voiceprint encrypted at the field level</span></div>
+      <div class="node"><b>Redis + MinIO (S3)</b><span>Task queue, cache, audio and document storage</span></div>
+    </div>
+    <div class="layer">
+      <div class="lt" style="color:var(--purple)">External services</div>
+      <div class="node"><b>Deepgram Nova-3</b><span>Speech to text with speaker labels, $0.0077/min</span></div>
+      <div class="node"><b>Anthropic Claude</b><span>Billables, SOAP notes, contracts, landing chat</span></div>
+      <div class="node"><b>Apple App Store</b><span>All subscription billing, verified server side</span></div>
+      <div class="node"><b>Resend</b><span>Transactional and outreach email</span></div>
+    </div>
+  </div>
+
+  <!-- ============ FLOW 1 ============ -->
+  <h2>Flow 1. Voice to contract, the core pipeline</h2>
+  <div class="h2sub">This is the product. A caregiver records a home visit and PALM turns it into billing, notes, and a state-compliant service agreement.</div>
+  <div class="card">
+    <div class="flow">
+      <div class="step"><span class="n">1</span><div class="t">Record</div><div class="d">Caregiver records the assessment visit on their phone</div><span class="svc ap">iOS / Expo</span></div>
+      <div class="step"><span class="n">2</span><div class="t">Upload</div><div class="d">Audio goes to the API and lands in S3 storage</div><span class="svc s3">MinIO / S3</span></div>
+      <div class="step"><span class="n">3</span><div class="t">Transcribe</div><div class="d">Speech to text with speaker labels in one pass</div><span class="svc dg">Deepgram Nova-3</span></div>
+      <div class="step"><span class="n">4</span><div class="t">Extract billables</div><div class="d">Rules engine plus AI find every billable block of care</div><span class="svc cl">Claude</span></div>
+    </div>
+    <div class="flow" style="margin-top:2px">
+      <div class="step"><span class="n">5</span><div class="t">Write SOAP note</div><div class="d">Clinical visit note generated and stored for approval</div><span class="svc cl">Claude</span></div>
+      <div class="step"><span class="n">6</span><div class="t">Generate contract</div><div class="d">Service agreement built with the right rules for all 51 US jurisdictions</div><span class="svc cl">Claude + templates</span></div>
+      <div class="step"><span class="n">7</span><div class="t">Review + approve</div><div class="d">Agency reviews billables, note, and contract in the dashboard</div><span class="svc db">Web app</span></div>
+      <div class="step"><span class="n">8</span><div class="t">Export + send</div><div class="d">PDF or DOCX exported and emailed to the client to sign</div><span class="svc rs">Resend</span></div>
+    </div>
+    <div class="timing">Total cost per assessment: about $0.37. Time: minutes, not the 2 to 3 hours it takes by hand.</div>
+  </div>
+
+  <!-- ============ FLOW 2 ============ -->
+  <h2>Flow 2. Money, Apple subscriptions</h2>
+  <div class="h2sub">All billing runs through Apple In-App Purchase. The server never trusts the phone; every purchase is cryptographically verified.</div>
+  <div class="card">
+    <div class="flow">
+      <div class="step"><span class="n">1</span><div class="t">Paywall</div><div class="d">User picks Starter, Growth, or Enterprise, monthly or annual</div><span class="svc ap">iOS StoreKit 2</span></div>
+      <div class="step"><span class="n">2</span><div class="t">Apple charges</div><div class="d">Payment handled entirely by Apple; PALM never sees card data</div><span class="svc ap">App Store</span></div>
+      <div class="step"><span class="n">3</span><div class="t">Server verifies</div><div class="d">Signed transaction (JWS) validated against Apple root certificates</div><span class="svc db">POST /billing/apple/verify</span></div>
+      <div class="step"><span class="n">4</span><div class="t">Entitlement on</div><div class="d">Subscription row updated: tier, trial status, billing cycle, expiry</div><span class="svc db">PostgreSQL</span></div>
+      <div class="step"><span class="n">5</span><div class="t">Stays in sync</div><div class="d">Renewals, refunds, and cancellations arrive as signed server notifications</div><span class="svc ap">Notifications V2</span></div>
+    </div>
+    <div class="timing">14-day free trials on Starter and Growth are granted by Apple introductory offers and mirrored server side.</div>
+  </div>
+
+  <!-- ============ FLOW 3 ============ -->
+  <h2>Flow 3. Sign-up and login</h2>
+  <div class="h2sub">Agencies register as a business, get verified, and every user action on patient data is audit-logged for HIPAA.</div>
+  <div class="card">
+    <div class="flow">
+      <div class="step"><span class="n">1</span><div class="t">Register</div><div class="d">Agency signs up with business details on web or iOS</div><span class="svc db">/auth/business/register</span></div>
+      <div class="step"><span class="n">2</span><div class="t">Verify</div><div class="d">Email verification plus business approval queue in admin</div><span class="svc rs">Resend</span></div>
+      <div class="step"><span class="n">3</span><div class="t">Login</div><div class="d">Bcrypt password check, optional MFA, account lockout on brute force</div><span class="svc db">JWT issued</span></div>
+      <div class="step"><span class="n">4</span><div class="t">Every request</div><div class="d">JWT checked, role checked, tier rate limit applied, PHI access audit-logged</div><span class="svc db">Middleware</span></div>
+    </div>
+    <div class="timing">Data isolation: users can only ever read their own agency's clients, visits, and contracts.</div>
+  </div>
+
+  <!-- ============ FLOW 4 ============ -->
+  <h2>Flow 4. Growth engine, outreach and social</h2>
+  <div class="h2sub">The marketing side runs on the same repo: lead data in, personalized email out, and social posts published on a schedule without your laptop being awake.</div>
+  <div class="card">
+    <div class="flow">
+      <div class="step"><span class="n">1</span><div class="t">Lead sourcing</div><div class="d">CMS agency database imported and enriched with contact emails</div><span class="svc db">scripts/data</span></div>
+      <div class="step"><span class="n">2</span><div class="t">Email campaigns</div><div class="d">Outreach waves, demo confirmations, and digests sent and tracked</div><span class="svc rs">Resend</span></div>
+      <div class="step"><span class="n">3</span><div class="t">Creatives</div><div class="d">On-brand images and videos generated with the code-based creative studio</div><span class="svc cl">Playwright + AI</span></div>
+      <div class="step"><span class="n">4</span><div class="t">Auto-posting</div><div class="d">GitHub Actions publishes to Instagram, Threads, and LinkedIn on schedule; Facebook uses native scheduling</div><span class="svc dg">GitHub Actions</span></div>
+    </div>
+  </div>
+
+  <!-- ============ SECURITY TABLE ============ -->
+  <h2>What protects the data along the way</h2>
+  <div class="h2sub">The controls that sit inside every flow above.</div>
+  <div class="card">
+    <table>
+      <tr><th>Layer</th><th>Protection</th></tr>
+      <tr><td><b class="lock">In transit</b></td><td>HTTPS everywhere; WebSocket streams authenticated with the same JWT</td></tr>
+      <tr><td><b class="lock">At rest</b></td><td>Postgres with field-level Fernet encryption on sensitive fields (EIN, voiceprint); audio in access-controlled S3</td></tr>
+      <tr><td><b class="lock">Identity</b></td><td>JWT with short sessions, MFA support, bcrypt with password history, lockout after failed attempts, 15-minute web session timeout</td></tr>
+      <tr><td><b class="lock">Authorization</b></td><td>Role checks server side; agency data isolation on every query; admin routes require admin role at the API, never the client</td></tr>
+      <tr><td><b class="lock">Abuse</b></td><td>Rate limits on auth and AI endpoints, plus per-tier AI limits (Starter 15, Growth 40, Enterprise 120 requests per minute)</td></tr>
+      <tr><td><b class="lock">Payments</b></td><td>Apple handles all card data; server-side JWS verification against Apple root certificates before any entitlement</td></tr>
+      <tr><td><b class="lock">Compliance</b></td><td>HIPAA audit logging middleware on every PHI route; BAAs and compliance docs in the repo; CI runs Trivy, Gitleaks, and CodeQL on every push</td></tr>
+    </table>
+  </div>
+
+  <div class="foot">
+    Generated July 10, 2026 from the live PALM codebase: apps/api, apps/worker, apps/web, ios-app, scripts, and .github/workflows. Companion file: 01-project-investment.html.
+  </div>
+</div>
+</body>
+</html>

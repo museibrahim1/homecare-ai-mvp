@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PALM | Project Investment Report</title>
+<style>
+  :root {
+    --bg: #0a0a1a; --card: #12122a; --card2: #171735;
+    --teal: #14b8a6; --teal-dim: rgba(20,184,166,.15);
+    --text: #e8e8f2; --muted: #8b8ba3; --faint: #55556e;
+    --green: #34d399; --amber: #fbbf24; --blue: #60a5fa; --pink: #f472b6; --purple: #a78bfa;
+    --border: rgba(255,255,255,.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, "SF Pro Display", Segoe UI, sans-serif; line-height: 1.5; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 48px 28px 80px; }
+  .eyebrow { color: var(--teal); font-size: 13px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; }
+  h1 { font-size: 40px; font-weight: 800; margin: 10px 0 6px; letter-spacing: -1px; }
+  .sub { color: var(--muted); font-size: 16px; max-width: 640px; }
+  .period { display: inline-block; margin-top: 14px; background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(20,184,166,.3); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  h2 { font-size: 22px; font-weight: 700; margin: 56px 0 6px; }
+  .h2sub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 800px) { .grid4, .grid3, .grid2 { grid-template-columns: 1fr 1fr; } }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px 20px; }
+  .kpi .num { font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+  .kpi .lbl { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .kpi .note { color: var(--faint); font-size: 11.5px; margin-top: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 26px; }
+  .bar-row { display: grid; grid-template-columns: 190px 1fr 90px; align-items: center; gap: 14px; margin-bottom: 13px; font-size: 14px; }
+  .bar-track { background: rgba(255,255,255,.05); border-radius: 6px; height: 22px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; }
+  .bar-val { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bar-lbl { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; padding: 0 12px 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 13px 12px; border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .right { text-align: right; font-variant-numeric: tabular-nums; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  .tag.known { background: rgba(52,211,153,.15); color: var(--green); }
+  .tag.est { background: rgba(251,191,36,.13); color: var(--amber); }
+  .total-row td { border-top: 2px solid var(--border); font-weight: 800; font-size: 16px; padding-top: 18px; }
+  .months { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end; height: 190px; padding-top: 10px; }
+  .mcol { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; height: 100%; }
+  .mbar { width: 100%; max-width: 62px; background: linear-gradient(180deg, var(--teal), #0d9488); border-radius: 8px 8px 3px 3px; }
+  .mnum { font-size: 13px; font-weight: 700; }
+  .mlbl { color: var(--muted); font-size: 11.5px; }
+  .callout { background: linear-gradient(135deg, rgba(20,184,166,.12), rgba(96,165,250,.08)); border: 1px solid rgba(20,184,166,.25); border-radius: 16px; padding: 26px 28px; margin-top: 20px; }
+  .callout .big { font-size: 26px; font-weight: 800; }
+  .callout p { color: var(--muted); font-size: 14px; margin-top: 6px; max-width: 720px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+  @media (max-width: 800px) { .split { grid-template-columns: 1fr; } }
+  .mini { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .mini .t { font-size: 13px; color: var(--muted); }
+  .mini .v { font-size: 22px; font-weight: 800; margin-top: 3px; }
+  .foot { color: var(--faint); font-size: 12px; margin-top: 60px; border-top: 1px solid var(--border); padding-top: 18px; }
+  .legend { display: flex; gap: 18px; margin: 4px 0 18px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Palm Technologies Inc</div>
+  <h1>Project Investment Report</h1>
+  <p class="sub">Everything you have put into PALM so far: money, time, and code. Built from the full git history, the repo itself, and your service stack.</p>
+  <div class="period">January 24, 2026 to July 10, 2026 &nbsp;|&nbsp; 167 days</div>
+
+  <!-- ============ HEADLINE KPIS ============ -->
+  <h2>The headline numbers</h2>
+  <div class="h2sub">Your total investment at a glance.</div>
+  <div class="grid4">
+    <div class="kpi"><div class="num" style="color:var(--green)">~$1,070</div><div class="lbl">Total cash spent (midpoint)</div><div class="note">Range $740 to $1,400. Breakdown below.</div></div>
+    <div class="kpi"><div class="num" style="color:var(--teal)">~230 hrs</div><div class="lbl">Hands-on build time</div><div class="note">From clustering 1,043 commit timestamps into work sessions.</div></div>
+    <div class="kpi"><div class="num" style="color:var(--blue)">173,547</div><div class="lbl">Lines of code in the repo today</div><div class="note">704 source files, excluding data dumps and media.</div></div>
+    <div class="kpi"><div class="num" style="color:var(--purple)">2.69M</div><div class="lbl">Lines written across history</div><div class="note">Total insertions over 1,043 commits, including rewrites.</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="big">A dev agency would have quoted $150,000 to $400,000 for this.</div>
+    <p>A HIPAA-aware backend, a 58-route web platform, a native iOS app in the App Store, an AI pipeline covering all 51 US jurisdictions, plus CI, tests, and compliance docs. You built it for about $1,100 in cash and your own time. That is roughly a 99.5% discount on market rate.</p>
+  </div>
+
+  <!-- ============ MONEY ============ -->
+  <h2>Where the money went</h2>
+  <div class="h2sub">Known figures come from your own docs and public pricing. Estimates are marked and use conservative ranges, since provider billing dashboards are not readable from here.</div>
+  <div class="card">
+    <table>
+      <tr><th>Item</th><th>Basis</th><th class="right">Spend</th><th style="width:90px"></th></tr>
+      <tr><td><strong>Railway hosting</strong><br><span style="color:var(--faint);font-size:12px">API, worker, Postgres, Redis in production</span></td><td>~$35/mo for ~5.5 months (figure from your investor memo)</td><td class="right"><strong>~$190</strong></td><td><span class="tag known">Known</span></td></tr>
+      <tr><td><strong>Cursor subscription</strong><br><span style="color:var(--faint);font-size:12px">Your primary build tool</span></td><td>Pro at $20/mo for ~5.5 months</td><td class="right"><strong>~$110</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>Apple Developer Program</strong><br><span style="color:var(--faint);font-size:12px">Required for the App Store</span></td><td>Annual membership</td><td class="right"><strong>$99</strong></td><td><span class="tag known">Known</span></td></tr>
+      <tr><td><strong>Anthropic Claude API</strong><br><span style="color:var(--faint);font-size:12px">Contracts, notes, billables, landing chat, 51-state test runs</span></td><td>~$0.14 of Claude per assessment; heavy dev testing plus full-state validation runs</td><td class="right"><strong>$75 to $200</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>Resend email</strong><br><span style="color:var(--faint);font-size:12px">Investor waves, outreach, digests, transactional</span></td><td>Pro at $20/mo for the months with 500+ email campaigns</td><td class="right"><strong>$40 to $80</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>Higgsfield AI</strong><br><span style="color:var(--faint);font-size:12px">Marketing image and video generation</span></td><td>Creator-tier subscription during campaign months</td><td class="right"><strong>$30 to $100</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>Domains</strong><br><span style="color:var(--faint);font-size:12px">palmtai.com and palmcareai.com</span></td><td>Two registrations at ~$13/yr each</td><td class="right"><strong>~$26</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>Deepgram transcription</strong><br><span style="color:var(--faint);font-size:12px">Nova-3 with speaker diarization</span></td><td>$0.0077/min; Deepgram includes $200 in free credit, so most or all testing was covered</td><td class="right"><strong>$0 to $20</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>WaveSpeed and misc AI credits</strong><br><span style="color:var(--faint);font-size:12px">Voiceovers and image generation for videos</span></td><td>Pay-per-use credits</td><td class="right"><strong>$10 to $50</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr><td><strong>OpenAI API</strong><br><span style="color:var(--faint);font-size:12px">Fallback only, rarely triggered</span></td><td>Minimal usage</td><td class="right"><strong>$0 to $10</strong></td><td><span class="tag est">Estimate</span></td></tr>
+      <tr class="total-row"><td>Total</td><td></td><td class="right" style="color:var(--green)">$740 to $1,400</td><td></td></tr>
+    </table>
+  </div>
+  <div class="split">
+    <div class="mini"><div class="t">Ongoing monthly burn right now</div><div class="v">~$75 to $95/mo</div></div>
+    <div class="mini"><div class="t">One Starter subscription ($199/mo) covers</div><div class="v">2x your entire monthly burn</div></div>
+  </div>
+
+  <!-- ============ TIME ============ -->
+  <h2>Where the time went</h2>
+  <div class="h2sub">Hours are estimated by clustering the 1,043 commit timestamps into work sessions (a gap of more than an hour starts a new session).</div>
+  <div class="grid4">
+    <div class="kpi"><div class="num">70</div><div class="lbl">Days you actively built</div><div class="note">Out of 167 calendar days. That is 42% of all days.</div></div>
+    <div class="kpi"><div class="num">127</div><div class="lbl">Distinct work sessions</div><div class="note">About 1.8 sessions per active day.</div></div>
+    <div class="kpi"><div class="num">~230</div><div class="lbl">Estimated hours</div><div class="note">Roughly 3.3 hours per active day, often late nights.</div></div>
+    <div class="kpi"><div class="num">29</div><div class="lbl">AI agent chat sessions</div><div class="note">21 MB of build transcripts in this project alone.</div></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div style="font-weight:700; margin-bottom:4px">Commits by month</div>
+    <div class="h2sub" style="margin-bottom:10px">Jan to Mar was the heavy build. Apr to Jul shifted to launch work: App Store, marketing, and pricing, where each commit represents much bigger chunks of work.</div>
+    <div class="months">
+      <div class="mcol"><div class="mnum">130</div><div class="mbar" style="height:34%"></div><div class="mlbl">Jan</div></div>
+      <div class="mcol"><div class="mnum">379</div><div class="mbar" style="height:100%"></div><div class="mlbl">Feb</div></div>
+      <div class="mcol"><div class="mnum">381</div><div class="mbar" style="height:100%"></div><div class="mlbl">Mar</div></div>
+      <div class="mcol"><div class="mnum">15</div><div class="mbar" style="height:5%"></div><div class="mlbl">Apr</div></div>
+      <div class="mcol"><div class="mnum">43</div><div class="mbar" style="height:12%"></div><div class="mlbl">May</div></div>
+      <div class="mcol"><div class="mnum">95</div><div class="mbar" style="height:26%"></div><div class="mlbl">Jun + Jul</div></div>
+    </div>
+  </div>
+
+  <!-- ============ CODE ============ -->
+  <h2>The code you shipped</h2>
+  <div class="h2sub">173,547 lines across 704 source files, live in the repo today. Data dumps, images, and lock files excluded.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:16px">By language</div>
+      <div class="bar-row"><span class="bar-lbl">Python</span><div class="bar-track"><div class="bar-fill" style="width:100%; background:var(--teal)"></div></div><span class="bar-val">69,681</span></div>
+      <div class="bar-row"><span class="bar-lbl">TypeScript + React</span><div class="bar-track"><div class="bar-fill" style="width:88%; background:var(--blue)"></div></div><span class="bar-val">61,188</span></div>
+      <div class="bar-row"><span class="bar-lbl">Swift</span><div class="bar-track"><div class="bar-fill" style="width:24%; background:var(--pink)"></div></div><span class="bar-val">16,567</span></div>
+      <div class="bar-row"><span class="bar-lbl">Markdown docs</span><div class="bar-track"><div class="bar-fill" style="width:18%; background:var(--purple)"></div></div><span class="bar-val">12,621</span></div>
+      <div class="bar-row"><span class="bar-lbl">Config</span><div class="bar-track"><div class="bar-fill" style="width:8.6%; background:var(--amber)"></div></div><span class="bar-val">6,015</span></div>
+      <div class="bar-row"><span class="bar-lbl">HTML + CSS</span><div class="bar-track"><div class="bar-fill" style="width:7.8%; background:var(--green)"></div></div><span class="bar-val">5,428</span></div>
+      <div class="bar-row"><span class="bar-lbl">Everything else</span><div class="bar-track"><div class="bar-fill" style="width:2.9%; background:var(--faint)"></div></div><span class="bar-val">2,047</span></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:16px">By part of the product</div>
+      <div class="bar-row"><span class="bar-lbl">Web app (Next.js)</span><div class="bar-track"><div class="bar-fill" style="width:100%; background:var(--blue)"></div></div><span class="bar-val">55,488</span></div>
+      <div class="bar-row"><span class="bar-lbl">Backend API (FastAPI)</span><div class="bar-track"><div class="bar-fill" style="width:78%; background:var(--teal)"></div></div><span class="bar-val">43,192</span></div>
+      <div class="bar-row"><span class="bar-lbl">iOS app (SwiftUI)</span><div class="bar-track"><div class="bar-fill" style="width:30%; background:var(--pink)"></div></div><span class="bar-val">16,672</span></div>
+      <div class="bar-row"><span class="bar-lbl">Automation scripts</span><div class="bar-track"><div class="bar-fill" style="width:29%; background:var(--amber)"></div></div><span class="bar-val">15,866</span></div>
+      <div class="bar-row"><span class="bar-lbl">Marketing videos</span><div class="bar-track"><div class="bar-fill" style="width:22%; background:var(--purple)"></div></div><span class="bar-val">12,089</span></div>
+      <div class="bar-row"><span class="bar-lbl">AI worker (Celery)</span><div class="bar-track"><div class="bar-fill" style="width:14%; background:var(--green)"></div></div><span class="bar-val">7,563</span></div>
+      <div class="bar-row"><span class="bar-lbl">Docs, tests, compliance</span><div class="bar-track"><div class="bar-fill" style="width:25%; background:var(--faint)"></div></div><span class="bar-val">13,677</span></div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:14px">
+    <div class="kpi"><div class="num">1,043</div><div class="lbl">Git commits</div></div>
+    <div class="kpi"><div class="num">58</div><div class="lbl">Web app routes</div></div>
+    <div class="kpi"><div class="num">35+</div><div class="lbl">Backend API routers</div></div>
+    <div class="kpi"><div class="num">21</div><div class="lbl">Database models</div></div>
+    <div class="kpi"><div class="num">51/51</div><div class="lbl">State compliance tests passing</div></div>
+    <div class="kpi"><div class="num">6</div><div class="lbl">App Store subscription products live</div></div>
+  </div>
+
+  <div class="foot">
+    Generated July 10, 2026 from the PALM git repository (1,043 commits, Jan 24 to Jul 10, 2026), docs/API_COST_MODEL.md, docs/INVESTOR_MEMO.md, and public service pricing. Cash figures marked Estimate use conservative ranges; check the Anthropic, Railway, Resend, and Apple billing dashboards for exact invoices.
+  </div>
+</div>
+</body>
+</html>
