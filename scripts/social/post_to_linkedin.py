@@ -161,6 +161,49 @@ def post_image(text: str, image: str, comment: str | None = None) -> dict:
     return result
 
 
+def _wait_asset_ready(asset: str, timeout_s: int = 300) -> None:
+    """Poll a video asset until LinkedIn finishes processing it."""
+    import time
+    asset_id = asset.split(":")[-1]
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        r = requests.get(
+            f"{API}/assets/{asset_id}",
+            headers={"Authorization": f"Bearer {TOKEN}"},
+            timeout=30,
+        )
+        data = _check(r, "asset status")
+        statuses = [
+            v.get("status")
+            for v in (data.get("recipes") or [])
+        ]
+        if statuses and all(s == "AVAILABLE" for s in statuses):
+            return
+        if "PROCESSING_FAILED" in statuses:
+            raise PostError(f"LinkedIn video processing failed: {data}")
+        time.sleep(5)
+    # Fall through: LinkedIn often keeps processing after the post is created,
+    # so we do not hard-fail here.
+
+
+def post_video(text: str, video: str, comment: str | None = None) -> dict:
+    path = _resolve(video)
+    upload_url, asset = _register_upload("urn:li:digitalmediaRecipe:feedshare-video")
+    _upload_bytes(upload_url, path, "video/mp4")
+    _wait_asset_ready(asset)
+    urn = _create_ugc(text, asset, "VIDEO", None)
+    print(f"  post URN: {urn}")
+    result = {"post_urn": urn}
+    if comment:
+        try:
+            _comment(urn, comment)
+            result["comment"] = "posted"
+        except PostError as e:
+            result["comment_error"] = str(e)
+            print(f"  first-comment WARN (post is live): {e}", file=sys.stderr)
+    return result
+
+
 def post_document(text: str, document: str, title: str, comment: str | None = None) -> dict:
     path = _resolve(document)
     upload_url, asset = _register_upload("urn:li:digitalmediaRecipe:feedshare-document")
@@ -197,6 +240,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Publish to PALM LinkedIn")
     ap.add_argument("--text", required=True, help="Post body (no external link)")
     ap.add_argument("--image", help="Image filename/path")
+    ap.add_argument("--video", help="Video filename/path (native MP4)")
     ap.add_argument("--document", help="PDF filename/path (document carousel)")
     ap.add_argument("--title", default="", help="Title for a document post")
     ap.add_argument("--comment", help="Text posted as the first comment (put the link here)")
@@ -204,14 +248,15 @@ def main() -> int:
     args = ap.parse_args()
 
     require_env()
-    if args.image and args.document:
-        raise SystemExit("Provide only one of --image or --document")
-    if not args.image and not args.document:
-        raise SystemExit("Provide --image or --document")
+    chosen = [m for m in (args.image, args.video, args.document) if m]
+    if len(chosen) > 1:
+        raise SystemExit("Provide only one of --image, --video, or --document")
+    if not chosen:
+        raise SystemExit("Provide --image, --video, or --document")
 
     if args.dry_run:
         info = verify_token()
-        media = args.image or args.document
+        media = args.image or args.video or args.document
         print("DRY RUN — nothing posted.")
         print(f"  token member: {info.get('name')} ({info.get('sub')})")
         print(f"  author urn  : {_author()}")
@@ -223,6 +268,8 @@ def main() -> int:
     try:
         if args.image:
             res = post_image(args.text, args.image, args.comment)
+        elif args.video:
+            res = post_video(args.text, args.video, args.comment)
         else:
             res = post_document(args.text, args.document, args.title or "PALM", args.comment)
     except PostError as e:
