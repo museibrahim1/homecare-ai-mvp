@@ -42,8 +42,12 @@ class Settings(BaseSettings):
 
     # Email verification. The full flow (send / verify / resend) always runs;
     # this flag controls whether an UNVERIFIED account is BLOCKED at login.
-    # Security default is ON; only disable explicitly in dev/test when needed.
-    require_email_verification: bool = True
+    # Default is OFF (non-blocking): we still send the verification email and
+    # let users confirm via /verify-email, but we never lock a paying customer
+    # out of their account over an unclicked link. Flip to true (env
+    # REQUIRE_EMAIL_VERIFICATION=true) only once the verify UX is proven end to
+    # end and you're ready to hard-gate.
+    require_email_verification: bool = False
     # Base URL used to build email-verification links (falls back to APP_URL env).
     app_url: str = "https://palmcareai.com"
     

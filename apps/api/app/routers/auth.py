@@ -56,11 +56,6 @@ RATE_LIMIT_MAX = 10  # max requests per window
 _rate_limit_store: dict[str, list[float]] = defaultdict(list)
 
 
-def _requires_mfa(user: User) -> bool:
-    """Privileged accounts must have MFA enabled before login."""
-    return bool(os.getenv("RAILWAY_ENVIRONMENT")) and getattr(user, "role", "") in {"admin", "admin_team"}
-
-
 def _check_rate_limit(key: str) -> None:
     """Raise 429 if rate limit exceeded. Uses Redis when available."""
     r = _get_redis()
@@ -181,14 +176,11 @@ async def login(request: LoginRequest, req: Request, response: Response, db: Ses
     
     # Clear failed attempts on successful login
     clear_login_attempts(email)
-    
-    if _requires_mfa(user) and not (getattr(user, "mfa_enabled", False) and user.mfa_secret):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="MFA is required for this account. Please set up MFA before signing in.",
-        )
 
-    # HIPAA: If MFA is enabled, require a second factor before issuing a token
+    # MFA is OPTIONAL: any account that has turned it on gets a second-factor
+    # challenge below. We never block a login just because MFA isn't set up —
+    # that created a dead-end (you can't reach the setup screen without first
+    # signing in). Accounts opt into MFA from Settings once they're in.
     if getattr(user, "mfa_enabled", False) and user.mfa_secret:
         log_action(
             db=db, user_id=user.id, action="login_mfa_required",
@@ -591,7 +583,20 @@ async def reset_password(
     user.password_reset_token = None
     user.password_reset_expires = None
     user.force_logout_at = datetime.now(timezone.utc)
-    
+
+    # Keep the linked business login in sync. Business/mobile login verifies
+    # against BusinessUser.password_hash — without this mirror, a reset done
+    # through the User table would leave those logins on the OLD password.
+    try:
+        from app.models.business import BusinessUser
+        biz = db.query(BusinessUser).filter(BusinessUser.email == user.email).first()
+        if biz:
+            biz.password_hash = new_hash
+            biz.password_reset_token = None
+            biz.password_reset_expires = None
+    except Exception as e:
+        logger.warning(f"Could not mirror password reset to BusinessUser: {e}")
+
     db.commit()
     
     logger.info(f"Password successfully reset for user {user.id}")
