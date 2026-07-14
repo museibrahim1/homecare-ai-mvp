@@ -568,6 +568,7 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
     consecutive_fail = 0
     per_template: dict[str, int] = {}
     sample: list[dict] = []
+    sent_ids: list[dict] = []
     stopped_reason = None
 
     for lead in candidates:
@@ -652,6 +653,12 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
         })
         lead.activity_log = activity
         per_template[template_id] = per_template.get(template_id, 0) + 1
+        if result.get("id"):
+            sent_ids.append({
+                "lead_id": str(lead.id),
+                "email": lead.contact_email,
+                "resend_email_id": result["id"],
+            })
         sent += 1
         time.sleep(0.55)  # stay under Resend's 2 req/sec
 
@@ -669,6 +676,7 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
         "skipped": skipped,
         "stopped_reason": stopped_reason,
         "sample": sample if dry_run else None,
+        "sent_ids": None if dry_run else sent_ids,
     }
 
 

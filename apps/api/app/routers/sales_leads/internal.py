@@ -614,6 +614,81 @@ async def internal_resend_marketing(
     return result
 
 
+@router.get("/leads/internal/campaign-send-ids")
+async def internal_campaign_send_ids(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Export (lead_id, email, resend_email_id) for every 'sent' event in a campaign,
+    so delivery can be verified with a full-access Resend key off-server. Query params:
+      tag=<campaign_tag>  (default marketing-resend-2026)
+      limit, offset       paging (default 1000 / 0)
+    """
+    _require_internal_key(request)
+    tag = request.query_params.get("tag", "marketing-resend-2026")
+    limit = max(1, min(int(request.query_params.get("limit", "1000")), 5000))
+    offset = max(0, int(request.query_params.get("offset", "0")))
+
+    q = db.query(
+        EmailCampaignEvent.lead_id,
+        EmailCampaignEvent.to_email,
+        EmailCampaignEvent.resend_email_id,
+    ).filter(
+        EmailCampaignEvent.campaign_tag == tag,
+        EmailCampaignEvent.event_type == "sent",
+        EmailCampaignEvent.resend_email_id.isnot(None),
+    ).order_by(EmailCampaignEvent.created_at.asc())
+
+    total = q.count()
+    rows = q.offset(offset).limit(limit).all()
+    return {
+        "tag": tag,
+        "total": total,
+        "offset": offset,
+        "returned": len(rows),
+        "items": [
+            {"lead_id": str(r[0]), "email": r[1], "resend_email_id": r[2]}
+            for r in rows
+        ],
+    }
+
+
+@router.post("/leads/internal/delete-leads")
+async def internal_delete_leads(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Delete specific leads by id (used to remove bounced addresses). Body:
+      {"lead_ids": ["uuid", ...], "dry_run": true}
+    Cascade removes their email_campaign_events. Defaults to a dry run.
+    """
+    _require_internal_key(request)
+    body = await request.json()
+    lead_ids = body.get("lead_ids") or []
+    dry_run = bool(body.get("dry_run", True))
+    if not lead_ids:
+        return {"dry_run": dry_run, "requested": 0, "deleted": 0, "matched": 0}
+
+    matched = db.query(SalesLead).filter(SalesLead.id.in_(lead_ids)).all()
+    sample = [
+        {"provider": l.provider_name, "email": l.contact_email, "state": l.state}
+        for l in matched[:25]
+    ]
+    deleted = 0
+    if not dry_run:
+        for lead in matched:
+            db.delete(lead)
+            deleted += 1
+        db.commit()
+    return {
+        "dry_run": dry_run,
+        "requested": len(lead_ids),
+        "matched": len(matched),
+        "deleted": deleted,
+        "sample": sample,
+    }
+
+
 def _resend_last_event(email_id: str, api_key: str) -> tuple[Optional[str], int]:
     """Fetch a sent email's latest delivery state from the Resend API.
 
