@@ -182,49 +182,95 @@ LINKEDIN = {
 _CAMPAIGN_START = dt.date(2026, 7, 14)
 _CAMPAIGN_END = dt.date(2026, 9, 11)
 
-_PM_IMAGES = [
-    "palm-it-cta-1x1.png",
-    "download-today-1x1.png",
-    "appstore-download-1x1.png",
-    "palm-it-cta-9x16.png",
-    "appstore-download-9x16.png",
-]
-
-_PM_CAPTIONS = [
-    (
-        "Just PALM IT.\n\n"
-        "PALM is on the App Store. Record the assessment and it writes the care plan, "
-        "finds the billable items, and builds the contract. You review and sign.\n\n"
-        "Download today: {a}\n"
-        "#homecare #homecareagency #caregiver"
-    ),
-    (
-        "Download PALM today.\n\n"
-        "One recording turns into the transcript, the care plan, the billables, and a "
-        "state specific contract. The paperwork that used to take hours now takes minutes.\n\n"
-        "Free for 14 days: {a}\n"
-        "#homecare #homecareagency #healthtech"
-    ),
-    (
-        "Stop typing what was already said out loud.\n\n"
-        "PALM sits in on the assessment and hands you the documentation before you start "
-        "the car. On the App Store now.\n\n"
-        "Just PALM IT. {a}\n"
-        "#homecare #caregiverlife #agencyowner"
-    ),
-    (
-        "Your iPhone is the fastest way to end paperwork nights.\n\n"
-        "Record the visit. PALM writes the care plan, prices the billables, and drafts "
-        "the contract. You review and send.\n\n"
-        "Get the app: {a}\n"
-        "#homecare #homecareagency #nurselife"
-    ),
-    (
-        "POV: the visit ended and the contract is already written.\n\n"
-        "PALM is live on the App Store. Try it free on your next assessment.\n\n"
-        "Download today: {a}\n"
-        "#homecare #POV #homecareagency"
-    ),
+# Evening (PM) library: 28 unique Just PALM IT / Download Today creatives so every
+# day of the campaign window (Jul 14 - Aug 9) posts a distinct graphic before any
+# repeat. Each entry: (image_1x1, meta_caption, linkedin_body). LinkedIn body
+# carries no link; the app link goes in the first comment (palmcareai.com/app).
+_PM_DAILY = [
+    ("palm-just-palm-it-1x1.png",
+     "Just PALM IT.\n\nPALM is on the App Store. Record the assessment and it writes the care plan, finds the billable items, and builds the contract. You review and sign.\n\nDownload today: {a}\n#homecare #homecareagency #caregiver",
+     "Just PALM IT.\n\nPALM is on the App Store. Record the client assessment and it writes the care plan, the billables, and a state specific contract. A coordinator reviews and signs.\n\nThat is the whole product. We kept the scope narrow on purpose."),
+    ("palm-download-today-qr-1x1.png",
+     "Download PALM today.\n\nScan the code with your iPhone camera. One recording becomes the transcript, the care plan, the billables, and a state specific contract.\n\nFree for 14 days: {a}\n#homecare #homecareagency #healthtech",
+     "Download PALM today.\n\nMost home care software gives your team a better place to type. PALM removes the typing. The visit was documented out loud in the room. PALM listens and drafts the paperwork."),
+    ("palm-four-documents-1x1.png",
+     "Four documents. Zero typing.\n\nTranscript, care plan, billable items, and a state specific contract, all from one recorded assessment. On the App Store now.\n\nDownload today: {a}\n#homecare #homecareagency #caregiverlife",
+     "One recording. Four documents you never type again.\n\nTranscript. Care plan. Billables. Contract. All drafted from the assessment you were already doing. Your team reviews instead of types."),
+    ("palm-stat-four-1x1.png",
+     "One visit. Four finished documents.\n\nRecord the assessment and PALM drafts the transcript, the care plan, the billables, and the contract. You review and send.\n\nGet the app: {a}\n#homecare #homecareagency #agencyowner",
+     "Four documents from a single recording.\n\nThe information in a care assessment does not change based on who types it up. What changes is where the hours go: your nurse's evening, or two minutes of AI drafting plus a human review."),
+    ("palm-visit-ends-qr-1x1.png",
+     "The visit ends. The contract is already written.\n\nScan the code to download PALM. It sits in on the assessment and drafts the care plan, the billables, and the agreement.\n\n{a}\n#homecare #homecareagency #caregiver",
+     "The visit ends and the contract is already written.\n\nPALM agencies put a clear agreement in front of the family the same day as the assessment. In home care, the first clear agreement usually wins the client. Speed here is revenue."),
+    ("palm-evenings-back-1x1.png",
+     "Your evenings, returned.\n\nThe visit was documented out loud. PALM writes it up so your team does not spend the night at a keyboard. On the App Store now.\n\nDownload today: {a}\n#homecare #caregiverlife #nurselife",
+     "The real product is the evening back.\n\nWe built the care plan generation, the billable detection, and the 50 state contract engine. But what owners tell me is that their assessors stopped dreading the nights. The visit ends and the paperwork is drafted."),
+    ("palm-same-day-contract-1x1.png",
+     "The family signed before dinner.\n\nPALM drafts the service agreement before your assessor leaves the driveway. Same visit, same conversation, ready to sign.\n\nJust PALM IT: {a}\n#homecare #homecareagency #agencyowner",
+     "Assessment to signature, the same day.\n\nMost agencies take days to get an agreement in front of a family. PALM agencies do it before they leave the driveway. What is your average time from assessment to signed agreement? The range I hear is wider than you would think."),
+    ("palm-one-recording-qr-1x1.png",
+     "One recording. The whole assessment, done.\n\nScan the code to download PALM. Care plan, billables, and a state specific contract, drafted from what was actually said.\n\n{a}\n#homecare #homecareagency #healthtech",
+     "The most expensive part of a care assessment is the second time it gets documented.\n\nThe first time is free. Everyone says it out loud in the room. The second time costs your best nurse her evening. PALM keeps the first and deletes the second."),
+    ("palm-fifty-states-1x1.png",
+     "50 states. 50 rule books. One draft that follows yours.\n\nPALM builds the service agreement on the contract rules of the state you operate in, not a generic template.\n\nDownload today: {a}\n#homecare #homecareagency #compliance",
+     "50 states. 50 different rule books for home care service agreements.\n\nMost software handles this with one template and a logo swap. PALM drafts on the rules of the state you actually operate in, from the assessment you actually recorded. Compliance is the reason agencies trust the draft enough to send it the same day."),
+    ("palm-scan-hero-1x1.png",
+     "Point your iPhone camera here.\n\nDownload PALM, record your next assessment, and watch the care plan, the billables, and the contract write themselves.\n\nFirst 14 days free: {a}\n#homecare #homecareagency #caregiverlife",
+     "The best product demo we have is 30 seconds long and happens on your own visit.\n\nDownload PALM, record your next client assessment, and watch it hand you the care plan, the billables, and the state specific contract. No sales call required."),
+    ("palm-stop-9pm-1x1.png",
+     "Stop writing contracts at 9pm.\n\nLet the app that heard the visit write them. PALM is on the App Store and free for 14 days.\n\nDownload today: {a}\n#homecare #caregiverlife #agencyowner",
+     "You did not get into home care to do data entry.\n\nNobody did. But post visit documentation quietly became the biggest unpaid job in the industry, and the top reason good assessors burn out. The fix is not typing faster. It is not typing."),
+    ("palm-record-review-sign-1x1.png",
+     "Record. Review. Sign.\n\nThat is the entire workflow. PALM does the drafting in between: care plan, billables, and the contract.\n\nJust PALM IT: {a}\n#homecare #homecareagency #caregiver",
+     "Record. Review. Sign.\n\nThat is the entire workflow with PALM. The app drafts fast. Your people stay accountable. Nothing ships without a human sign off, and that review step is deliberate."),
+    ("palm-14-days-free-qr-1x1.png",
+     "14 days free. No card. One visit to judge.\n\nScan the code to download PALM. Try it on your next assessment and compare the output to three hours at a keyboard.\n\n{a}\n#homecare #homecareagency #healthtech",
+     "The trial is free and the first contract usually settles the argument.\n\nDownload PALM, record one assessment, and compare the output to your current evening. Fourteen days, no card. It takes a single visit to judge."),
+    ("palm-app-that-listens-1x1.png",
+     "The app that finally listens.\n\nA care assessment is already documented out loud. PALM drafts the care plan, the billables, and the contract from what was actually said.\n\nDownload today: {a}\n#homecare #healthcareAI #homecareagency",
+     "PALM knows who said what.\n\nA care assessment is a three way conversation: the caregiver's questions, the client's answers, the family's concerns. PALM keeps every voice separate, so the care plan and the agreement are built from what was actually said, not what someone remembered at 9pm."),
+    ("palm-conversation-to-contract-1x1.png",
+     "From conversation to contract.\n\nIn minutes, not days. A staff member reviews everything before it goes out. PALM is on the App Store now.\n\nGet the app: {a}\n#homecare #homecareagency #agencyowner",
+     "From conversation to contract, in minutes.\n\nThe assessment is a conversation. The contract is a document. The gap between them used to be your best nurse's evening. PALM closes it in minutes, with a human review before anything is final."),
+    ("palm-billables-qr-1x1.png",
+     "The billables you already earned.\n\nSaid once at minute 34: she needs help with meals. The old way it never makes the invoice. PALM hears it, prices it, bills it.\n\nDownload: {a}\n#homecare #homecarebilling #agencyowner",
+     "How many billables slipped through your last month?\n\nSaid once, in passing, at minute 34 of the assessment. The old way, it never makes the invoice. PALM hears it, prices it, and puts it in the agreement. You will never know what you missed. Your app would."),
+    ("palm-two-minutes-1x1.png",
+     "Two minutes, not two hours.\n\nThe information does not change based on who types it. PALM just types it in two minutes instead of your evening.\n\nDownload today: {a}\n#homecare #homecareagency #caregiverlife",
+     "Same visit. Two very different nights.\n\nThe information in a care assessment does not change based on who types it up. What changes is where the hours go: your nurse's evening, or two minutes of AI drafting plus a human review."),
+    ("palm-just-palm-it-mint-1x1.png",
+     "Don't type it. Just PALM IT.\n\nPALM is on the App Store. Record the visit, get the documentation. Care plan, billables, and a state specific contract.\n\nDownload today: {a}\n#homecare #homecareagency #caregiver",
+     "Don't type it. Just PALM IT.\n\nRecord the visit, get the documentation. Care plan, billables, and a state specific contract, drafted from the assessment and reviewed by your team before it goes out."),
+    ("palm-download-qr-2-1x1.png",
+     "Get PALM on your iPhone.\n\nScan the code. Record your next assessment and watch the care plan, the billables, and the contract draft themselves.\n\n{a}\n#homecare #homecareagency #healthtech",
+     "PALM is on the App Store.\n\nIt does one job. It sits in on the client assessment, then writes the care plan, finds the billable items, and builds a contract on your state's rules. Record the visit, get the documentation."),
+    ("palm-clipboard-dead-1x1.png",
+     "The clipboard is retired.\n\nPress record at the assessment. PALM writes the care plan, the billables, and the contract while you drive to the next visit.\n\nDownload today: {a}\n#homecare #caregiverlife #homecareagency",
+     "This app replaces the clipboard, the forms, and the Sunday night charting.\n\nPress record at the assessment. PALM writes the care plan, prices the billables, and drafts the contract while you drive to the next visit. Your team reviews and sends."),
+    ("palm-three-outputs-1x1.png",
+     "Care plan. Billables. Contract.\n\nAll from the assessment you were already doing. PALM is on the App Store and free for 14 days.\n\nJust PALM IT: {a}\n#homecare #homecareagency #agencyowner",
+     "Care plan. Billables. Contract.\n\nThree documents your team used to build by hand, all drafted from the assessment you were already doing. PALM writes the first draft. Your people approve it."),
+    ("palm-before-the-car-1x1.png",
+     "Done before you start the car.\n\nNotes, billables, and the contract drafted while the visit is still fresh. PALM sits in on the assessment.\n\nDownload today: {a}\n#homecare #POV #caregiverlife",
+     "The paperwork finished when the visit did.\n\nPALM sits in on the assessment and hands your team the care plan, the billables, and the contract before they start the car. The review takes minutes. The typing takes zero."),
+    ("palm-tuesday-nights-qr-1x1.png",
+     "Your Tuesday nights, back.\n\nScan the code to download PALM. Stop retyping what a family already said out loud. The app writes it. You review it.\n\n{a}\n#homecare #homecareagency #nurselife",
+     "312 hours a year. That is 3 assessments a week at 2 hours of paperwork each.\n\n39 working days per assessor, spent retyping conversations that already happened. PALM's pitch is not that AI is impressive. It is that this line item can go to zero."),
+    ("palm-scan-download-hero-1x1.png",
+     "Free on the App Store.\n\nScan the code to download PALM. Record one assessment and let the care plan, the billables, and the contract write themselves.\n\n{a}\n#homecare #homecareagency #smallbusiness",
+     "One download. Four documents you never type again.\n\nTranscript, care plan, billables, and a state specific contract, all drafted from the assessment you were already doing. The trial is free and setup is one login."),
+    ("palm-different-evening-1x1.png",
+     "Same visit. Different evening.\n\nOne agency retypes the assessment at 9pm. The other had the contract drafted before they left. PALM is on the App Store.\n\nDownload today: {a}\n#homecare #homecareagency #agencyowner",
+     "Same visit. Different evening.\n\nOne agency retypes the assessment at 9pm. The other had the contract drafted before they left the driveway. The only difference is whether the software listened to the visit or just gave you a new place to type it."),
+    ("palm-whole-assessment-1x1.png",
+     "The whole assessment, handled.\n\nRecord it once. Review the draft. Send it to sign. PALM writes the care plan, the billables, and the contract in between.\n\nJust PALM IT: {a}\n#homecare #homecareagency #caregiver",
+     "The whole assessment, handled.\n\nRecord it once. Review the draft. Send it to sign. PALM writes the care plan, the billables, and the state specific contract in between, and a human approves everything before it ships."),
+    ("palm-finale-qr-1x1.png",
+     "Download PALM today.\n\nScan the code. It sits in on the assessment, writes the care plan, finds the billables, and builds the contract. You review and sign.\n\n{a}\n#homecare #homecareagency #healthcareAI",
+     "Download PALM today.\n\nIt sits in on the assessment, writes the care plan, finds the billable items, and builds the state specific contract. Your team reviews and signs. Free for 14 days, and it takes one visit to judge."),
+    ("palm-not-typing-1x1.png",
+     "The fix isn't typing faster. It's not typing.\n\nPALM records the assessment and drafts the documentation. On the App Store now, free for 14 days.\n\nDownload today: {a}\n#homecare #homecareagency #nurselife",
+     "The fix is not typing faster. It is not typing.\n\nEvery scheduling tool, EVV system, and care platform gives your team a better place to type. PALM starts from a different question: the visit was already documented out loud, so why is anyone typing it again?"),
 ]
 
 _AM_FILLER_IMAGES = [
@@ -265,22 +311,6 @@ _AM_FILLER_CAPTIONS = [
     ),
 ]
 
-_LI_PM_BODIES = [
-    "Just PALM IT.\n\nPALM is on the App Store. Record the client assessment and it writes the care plan, the billables, and a state specific service contract. You review and sign.\n\nThat is the whole product.",
-    "Download PALM today.\n\nMost home care software gives you a better place to type. PALM removes the typing. The visit was documented out loud. PALM listens and drafts the paperwork.",
-    "One visit. Four documents you never type again.\n\nTranscript. Care plan. Billables. Contract. All from the assessment you were already doing. On the App Store now.",
-    "The contract before you leave the driveway.\n\nPALM agencies put a clear agreement in front of the family the same day as the assessment. Speed here is revenue.",
-    "Try it on one visit.\n\nDownload PALM, record your next assessment, and compare the output to three hours at a keyboard. The trial is free.",
-]
-
-_LI_PM_IMAGES = [
-    "palm-it-cta-1x1.png",
-    "download-today-1x1.png",
-    "appstore-download-1x1.png",
-    "iphone_mockup_contract.png",
-    "palm-it-cta-1x1.png",
-]
-
 _LI_AM_FILLER = [
     ("palm-it-cta-1x1.png",
      "Just PALM IT.\n\nPALM turns a recorded care visit into the care plan, the billables, and a state specific contract. On the App Store now.\n\nIf your team still documents every visit twice, try it on one assessment.",
@@ -316,8 +346,8 @@ def get_meta_am(date: str) -> tuple[str, str] | None:
 def get_meta_pm(date: str) -> tuple[str, str] | None:
     if not _in_campaign(date):
         return None
-    i = _day_index(date)
-    return _PM_IMAGES[i % len(_PM_IMAGES)], _PM_CAPTIONS[i % len(_PM_CAPTIONS)]
+    img, caption, _ = _PM_DAILY[_day_index(date) % len(_PM_DAILY)]
+    return img, caption
 
 
 def get_linkedin_am(date: str) -> tuple[str, str, str, str] | None:
@@ -333,8 +363,8 @@ def get_linkedin_am(date: str) -> tuple[str, str, str, str] | None:
 def get_linkedin_pm(date: str) -> tuple[str, str, str] | None:
     if not _in_campaign(date):
         return None
-    i = _day_index(date)
-    return _LI_PM_IMAGES[i % len(_LI_PM_IMAGES)], _LI_PM_BODIES[i % len(_LI_PM_BODIES)], "palmcareai.com/app"
+    img, _, li_body = _PM_DAILY[_day_index(date) % len(_PM_DAILY)]
+    return img, li_body, "palmcareai.com/app"
 
 
 def load_log() -> dict:
