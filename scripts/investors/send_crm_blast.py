@@ -34,7 +34,7 @@ resend.api_key = os.getenv("RESEND_API_KEY", "").strip()
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
 
-SKIP_STATUSES = {"passed", "not_relevant", "committed"}
+SKIP_STATUSES = {"passed", "not_relevant", "committed", "email_bounced"}
 SKIP_EMAILS = {
     "jamie@thecreatorfund.com",
 }
