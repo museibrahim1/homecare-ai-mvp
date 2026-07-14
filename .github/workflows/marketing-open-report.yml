@@ -1,0 +1,28 @@
+name: Marketing open report
+
+# Emails Muse a morning summary of how many of the new app-download marketing
+# emails (to home care agencies) were opened. Runs at 10:15 AM ET so opens from
+# the overnight/morning send have time to register.
+
+on:
+  schedule:
+    - cron: "15 14 * * *"   # 10:15 AM ET (EDT, UTC-4)
+  workflow_dispatch:
+    inputs:
+      since_hours:
+        description: "Look-back window in hours"
+        default: "34"
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Send open report
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          python scripts/email/marketing_open_report.py --since-hours "${{ github.event.inputs.since_hours || '34' }}"
