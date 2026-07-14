@@ -565,6 +565,7 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
     failed = 0
     skipped = 0
     exhausted = 0
+    consecutive_fail = 0
     per_template: dict[str, int] = {}
     sample: list[dict] = []
     stopped_reason = None
@@ -612,12 +613,18 @@ def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True
 
         if not result.get("success"):
             err = (result.get("error") or "").lower()
-            if any(k in err for k in ("rate", "quota", "limit", "daily", "429", "too many")):
+            if any(k in err for k in ("rate", "quota", "limit", "daily", "429", "too many",
+                                      "unauthorized", "api key", "api_key", "invalid", "forbidden", "401", "403")):
                 stopped_reason = result.get("error")
                 break
             failed += 1
+            consecutive_fail += 1
+            if consecutive_fail >= 5:
+                stopped_reason = f"stopped after 5 consecutive send failures: {result.get('error')}"
+                break
             continue
 
+        consecutive_fail = 0
         lead.last_email_sent_at = now
         lead.last_email_subject = subject
         lead.email_send_count = (lead.email_send_count or 0) + 1

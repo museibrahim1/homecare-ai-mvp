@@ -2,6 +2,7 @@ import logging
 import os
 import json
 import urllib.request
+import urllib.error
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from uuid import UUID
@@ -613,8 +614,12 @@ async def internal_resend_marketing(
     return result
 
 
-def _resend_last_event(email_id: str, api_key: str) -> Optional[str]:
-    """Fetch a sent email's latest delivery state from the Resend API."""
+def _resend_last_event(email_id: str, api_key: str) -> tuple[Optional[str], int]:
+    """Fetch a sent email's latest delivery state from the Resend API.
+
+    Returns (last_event, http_status). http_status: 200 ok, 404 purged/not found,
+    401/403 key lacks read access, 0 network error.
+    """
     req = urllib.request.Request(
         f"https://api.resend.com/emails/{email_id}",
         headers={"Authorization": f"Bearer {api_key}"},
@@ -622,10 +627,12 @@ def _resend_last_event(email_id: str, api_key: str) -> Optional[str]:
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode())
-        return data.get("last_event")
+        return data.get("last_event"), 200
+    except urllib.error.HTTPError as e:
+        return None, e.code
     except Exception as e:  # noqa: BLE001
         logger.warning(f"Resend lookup failed for {email_id}: {e}")
-        return None
+        return None, 0
 
 
 @router.post("/leads/internal/sync-bounces")
@@ -668,9 +675,14 @@ async def internal_sync_bounces(
     polled_bounced_ids: set = set()
     checked = 0
     delivered_ok = 0
+    http_breakdown: dict = {}
+    event_breakdown: dict = {}
     for lead in to_poll:
-        ev = _resend_last_event(lead.resend_email_id, api_key)
+        ev, code = _resend_last_event(lead.resend_email_id, api_key)
         checked += 1
+        http_breakdown[str(code)] = http_breakdown.get(str(code), 0) + 1
+        if ev:
+            event_breakdown[ev] = event_breakdown.get(ev, 0) + 1
         if ev in ("bounced", "failed"):
             polled_bounced_ids.add(lead.id)
         elif ev:
@@ -696,6 +708,8 @@ async def internal_sync_bounces(
         "delete_requested": do_delete,
         "polled_this_call": checked,
         "delivered_or_ok": delivered_ok,
+        "http_breakdown": http_breakdown,
+        "event_breakdown": event_breakdown,
         "webhook_known_bounces": len(webhook_bounced_ids),
         "polled_bounces_this_call": len(polled_bounced_ids),
         "total_bounced_leads_matched": len(bounced_leads),
