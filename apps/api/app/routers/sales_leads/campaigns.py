@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+import time
 import urllib.request
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
@@ -20,7 +21,7 @@ from app.services.email import email_service
 from .common import (
     ALL_US_STATES, STATE_NAMES, EMAIL_TEMPLATES, SEQUENCE_ORDER, SEQUENCE_DAYS,
     OPENED_REENGAGE_ORDER, REENGAGE_CAMPAIGN_TAG, REENGAGE_MIN_DAYS_BETWEEN,
-    REENGAGE_DAILY_CAP,
+    REENGAGE_DAILY_CAP, MARKETING_RESEND_TAG,
     _render_template, _auto_start_sequence,
 )
 from .schemas import (
@@ -525,6 +526,142 @@ def _process_opened_reengagement(db: Session) -> dict:
         "skipped": skipped,
         "exhausted_all_templates": exhausted,
         "daily_cap": REENGAGE_DAILY_CAP,
+    }
+
+
+def _marketing_templates_sent(lead_id, db: Session) -> set[str]:
+    """The new-marketing template IDs already sent to this lead, across ANY campaign
+    (reengage or broad resend), so a lead never receives the same email twice."""
+    rows = db.query(EmailCampaignEvent.template_id).filter(
+        EmailCampaignEvent.lead_id == lead_id,
+        EmailCampaignEvent.template_id.in_(OPENED_REENGAGE_ORDER),
+        EmailCampaignEvent.event_type == "sent",
+    ).all()
+    return {r[0] for r in rows if r[0]}
+
+
+def _process_marketing_resend(db: Session, limit: int = 50, dry_run: bool = True) -> dict:
+    """Resend the new app-download marketing emails to every agency contacted before
+    today. Rotates the 7 standalone templates, one unsent template per lead per run,
+    engaged leads first. Stops cleanly if Resend returns a rate/quota error so we send
+    as many as the plan allows without erroring out.
+    """
+    now = datetime.now(timezone.utc)
+    start_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    candidates = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+        SalesLead.email_send_count > 0,
+        SalesLead.last_email_sent_at < start_today,
+        SalesLead.status.notin_(["not_interested", "converted", "responded"]),
+    ).order_by(
+        SalesLead.email_open_count.desc(),
+        SalesLead.last_email_sent_at.asc(),
+    ).all()
+
+    total_matching = len(candidates)
+    sent = 0
+    failed = 0
+    skipped = 0
+    exhausted = 0
+    per_template: dict[str, int] = {}
+    sample: list[dict] = []
+    stopped_reason = None
+
+    for lead in candidates:
+        if sent >= limit:
+            break
+
+        template_id = _next_reengage_template(_marketing_templates_sent(lead.id, db))
+        if not template_id:
+            exhausted += 1
+            continue
+        tmpl = EMAIL_TEMPLATES.get(template_id)
+        if not tmpl:
+            skipped += 1
+            continue
+
+        data = {
+            "provider_name": lead.provider_name,
+            "city": lead.city or "your area",
+            "state": lead.state,
+            "state_full": STATE_NAMES.get(lead.state, lead.state),
+        }
+        subject = _render_template(tmpl["subject"], data)
+        body = _render_template(tmpl["body"], data)
+
+        if dry_run:
+            per_template[template_id] = per_template.get(template_id, 0) + 1
+            if len(sample) < 15:
+                sample.append({
+                    "provider": lead.provider_name,
+                    "email": lead.contact_email,
+                    "state": lead.state,
+                    "template": template_id,
+                })
+            sent += 1
+            continue
+
+        result = email_service.send_email(
+            to=lead.contact_email,
+            subject=subject,
+            sender=email_service.from_sales,
+            html=body,
+        )
+
+        if not result.get("success"):
+            err = (result.get("error") or "").lower()
+            if any(k in err for k in ("rate", "quota", "limit", "daily", "429", "too many")):
+                stopped_reason = result.get("error")
+                break
+            failed += 1
+            continue
+
+        lead.last_email_sent_at = now
+        lead.last_email_subject = subject
+        lead.email_send_count = (lead.email_send_count or 0) + 1
+        lead.campaign_tag = MARKETING_RESEND_TAG
+        lead.last_template_sent = template_id
+        if result.get("id"):
+            lead.resend_email_id = result["id"]
+
+        db.add(EmailCampaignEvent(
+            lead_id=lead.id,
+            template_id=template_id,
+            campaign_tag=MARKETING_RESEND_TAG,
+            event_type="sent",
+            resend_email_id=result.get("id"),
+            subject=subject,
+            to_email=lead.contact_email,
+            created_at=now,
+        ))
+        activity = lead.activity_log or []
+        activity.append({
+            "action": f"Marketing resend sent ({template_id})",
+            "campaign": MARKETING_RESEND_TAG,
+            "subject": subject,
+            "at": now.isoformat(),
+        })
+        lead.activity_log = activity
+        per_template[template_id] = per_template.get(template_id, 0) + 1
+        sent += 1
+        time.sleep(0.55)  # stay under Resend's 2 req/sec
+
+    if not dry_run:
+        db.commit()
+
+    return {
+        "dry_run": dry_run,
+        "total_already_emailed_before_today": total_matching,
+        "limit": limit,
+        ("would_send" if dry_run else "sent"): sent,
+        "per_template": per_template,
+        "exhausted_all_7_templates": exhausted,
+        "failed": failed,
+        "skipped": skipped,
+        "stopped_reason": stopped_reason,
+        "sample": sample if dry_run else None,
     }
 
 

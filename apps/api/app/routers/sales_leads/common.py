@@ -539,6 +539,11 @@ REENGAGE_CAMPAIGN_TAG = "opened-reengage-2026"
 REENGAGE_MIN_DAYS_BETWEEN = 4
 REENGAGE_DAILY_CAP = 40
 
+# Broad resend: send the new app-download marketing emails to EVERY agency we have
+# already contacted before today (not just openers). Rotates the same 7 standalone
+# templates, tracked cross-campaign so no lead ever gets the same email twice.
+MARKETING_RESEND_TAG = "marketing-resend-2026"
+
 
 
 

@@ -591,6 +591,119 @@ async def internal_reengage_opened(
     return result
 
 
+@router.post("/leads/internal/resend-marketing")
+async def internal_resend_marketing(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Resend the new app-download marketing emails to every agency contacted before
+    today. Defaults to a DRY RUN. Query params:
+      dry_run=false  actually send
+      limit=N        max emails this call (default 50; keep small so the request
+                     finishes well within the proxy timeout, call repeatedly)
+    Rotates the 7 standalone templates, one unsent per lead per run, stops cleanly on
+    a Resend rate/quota error.
+    """
+    _require_internal_key(request)
+    dry_run = request.query_params.get("dry_run", "true").lower() != "false"
+    limit = max(1, min(int(request.query_params.get("limit", "50")), 200))
+    from .campaigns import _process_marketing_resend
+    result = _process_marketing_resend(db, limit=limit, dry_run=dry_run)
+    logger.info(f"Internal marketing resend (dry_run={dry_run}): {result}")
+    return result
+
+
+def _resend_last_event(email_id: str, api_key: str) -> Optional[str]:
+    """Fetch a sent email's latest delivery state from the Resend API."""
+    req = urllib.request.Request(
+        f"https://api.resend.com/emails/{email_id}",
+        headers={"Authorization": f"Bearer {api_key}"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode())
+        return data.get("last_event")
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"Resend lookup failed for {email_id}: {e}")
+        return None
+
+
+@router.post("/leads/internal/sync-bounces")
+async def internal_sync_bounces(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Check delivery status via the Resend API and (optionally) delete bounced leads.
+
+    Combines two bounce sources: webhook-recorded events (event_type='bounced') and a
+    live poll of each lead's most recent Resend message. Query params:
+      dry_run=false  commit deletions (default true, read only)
+      delete=true    delete the bounced leads from the CRM (cascade removes events)
+      limit=N        how many recent sends to poll live this call (default 40)
+    Poll is rate-limited; call repeatedly to walk the whole list.
+    """
+    _require_internal_key(request)
+    dry_run = request.query_params.get("dry_run", "true").lower() != "false"
+    do_delete = request.query_params.get("delete", "false").lower() == "true"
+    limit = max(1, min(int(request.query_params.get("limit", "40")), 200))
+
+    import time as _time
+    api_key = os.getenv("RESEND_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="RESEND_API_KEY not configured")
+
+    # 1) Bounces already recorded by the Resend webhook
+    webhook_bounced_ids = {
+        r[0] for r in db.query(EmailCampaignEvent.lead_id).filter(
+            EmailCampaignEvent.event_type.in_(["bounced", "complained"])
+        ).all()
+    }
+
+    # 2) Live poll of the most recent sends (catches historical + fresh hard bounces)
+    to_poll = db.query(SalesLead).filter(
+        SalesLead.resend_email_id.isnot(None),
+        SalesLead.resend_email_id != "",
+    ).order_by(SalesLead.last_email_sent_at.desc().nullslast()).limit(limit).all()
+
+    polled_bounced_ids: set = set()
+    checked = 0
+    delivered_ok = 0
+    for lead in to_poll:
+        ev = _resend_last_event(lead.resend_email_id, api_key)
+        checked += 1
+        if ev in ("bounced", "failed"):
+            polled_bounced_ids.add(lead.id)
+        elif ev:
+            delivered_ok += 1
+        _time.sleep(0.55)  # stay under Resend's 2 req/sec
+
+    bounced_ids = webhook_bounced_ids | polled_bounced_ids
+    bounced_leads = db.query(SalesLead).filter(SalesLead.id.in_(bounced_ids)).all() if bounced_ids else []
+    sample = [
+        {"provider": l.provider_name, "email": l.contact_email, "state": l.state}
+        for l in bounced_leads[:25]
+    ]
+
+    deleted = 0
+    if do_delete and not dry_run and bounced_leads:
+        for lead in bounced_leads:
+            db.delete(lead)  # email_campaign_events cascade on delete
+            deleted += 1
+        db.commit()
+
+    return {
+        "dry_run": dry_run,
+        "delete_requested": do_delete,
+        "polled_this_call": checked,
+        "delivered_or_ok": delivered_ok,
+        "webhook_known_bounces": len(webhook_bounced_ids),
+        "polled_bounces_this_call": len(polled_bounced_ids),
+        "total_bounced_leads_matched": len(bounced_leads),
+        "deleted": deleted,
+        "sample": sample,
+    }
+
+
 @router.post("/leads/internal/start-recent-sequences")
 async def internal_start_recent_sequences(
     request: Request,
