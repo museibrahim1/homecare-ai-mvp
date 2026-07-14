@@ -210,9 +210,9 @@ async def launch_email_sequence(
     db: Session = Depends(get_db),
     admin: User = Depends(require_permission("sales_leads")),
 ):
-    """Launch the full 5-email sequence for matching leads.
+    """Launch the full drip sequence for matching leads.
 
-    Sends Email 1 (warm_open) immediately and schedules the remaining 4
+    Sends Email 1 immediately and schedules the rest
     using the sequence_step / next_email_scheduled_at fields.
     """
     query = db.query(SalesLead).filter(
@@ -237,7 +237,7 @@ async def launch_email_sequence(
         raise HTTPException(status_code=400, detail="No eligible leads match the filters")
 
     now = datetime.now(timezone.utc)
-    tmpl = EMAIL_TEMPLATES["warm_open"]
+    tmpl = EMAIL_TEMPLATES[SEQUENCE_ORDER[0]]
     sent = 0
     failed = 0
 
@@ -267,8 +267,8 @@ async def launch_email_sequence(
             lead.sequence_step = 1
             lead.sequence_started_at = now
             lead.sequence_completed = False
-            lead.last_template_sent = "warm_open"
-            lead.next_email_scheduled_at = now + timedelta(days=SEQUENCE_DAYS["pattern_interrupt"])
+            lead.last_template_sent = SEQUENCE_ORDER[0]
+            lead.next_email_scheduled_at = now + timedelta(days=SEQUENCE_DAYS[SEQUENCE_ORDER[1]])
 
             if lead.status == LeadStatus.new.value:
                 lead.status = LeadStatus.email_sent.value
@@ -277,7 +277,7 @@ async def launch_email_sequence(
 
             db.add(EmailCampaignEvent(
                 lead_id=lead.id,
-                template_id="warm_open",
+                template_id=SEQUENCE_ORDER[0],
                 campaign_tag=req.campaign_name,
                 event_type="sent",
                 resend_email_id=result.get("id"),
@@ -288,9 +288,9 @@ async def launch_email_sequence(
 
             activity = lead.activity_log or []
             activity.append({
-                "action": "Sequence started (Email 1/5)",
+                "action": f"Sequence started (Email 1/{len(SEQUENCE_ORDER)})",
                 "campaign": req.campaign_name,
-                "template": "warm_open",
+                "template": SEQUENCE_ORDER[0],
                 "subject": subject,
                 "at": now.isoformat(),
             })
@@ -306,7 +306,7 @@ async def launch_email_sequence(
         "sent": sent,
         "failed": failed,
         "total_eligible": len(leads),
-        "next_batch": "pattern_interrupt in 2 days",
+        "next_batch": f"{SEQUENCE_ORDER[1]} in {SEQUENCE_DAYS[SEQUENCE_ORDER[1]]} days",
     }
 
 
@@ -328,7 +328,21 @@ def _process_due_sequence_emails(db: Session) -> dict:
 
     for lead in due:
         step = lead.sequence_step or 1
+
+        # Never send the same template twice to a lead, no matter which engine
+        # sent it (sequence, opened-reengage, or the broad resend). Skip forward
+        # over any step whose template this lead already received.
+        already = {
+            r[0] for r in db.query(EmailCampaignEvent.template_id).filter(
+                EmailCampaignEvent.lead_id == lead.id,
+                EmailCampaignEvent.event_type == "sent",
+            ).all() if r[0]
+        }
+        while step < len(SEQUENCE_ORDER) and SEQUENCE_ORDER[step] in already:
+            step += 1
+
         if step >= len(SEQUENCE_ORDER):
+            lead.sequence_step = step
             lead.sequence_completed = True
             lead.next_email_scheduled_at = None
             completed += 1
@@ -390,7 +404,7 @@ def _process_due_sequence_emails(db: Session) -> dict:
 
             activity = lead.activity_log or []
             activity.append({
-                "action": f"Sequence email {step + 1}/5 sent",
+                "action": f"Sequence email {step + 1}/{len(SEQUENCE_ORDER)} sent",
                 "template": template_id,
                 "subject": subject,
                 "at": now.isoformat(),
@@ -688,7 +702,7 @@ async def process_scheduled_emails(
     """Process all leads that have a scheduled next email due now or in the past.
 
     Call this endpoint periodically (cron, manual, or on-demand) to advance
-    leads through the 5-email sequence.
+    leads through the drip sequence.
     """
     return _process_due_sequence_emails(db)
 

@@ -509,7 +509,7 @@ async def internal_add_lead_and_email(
                 "state": lead.state,
                 "state_full": STATE_NAMES.get(lead.state, lead.state),
             }
-            tmpl = EMAIL_TEMPLATES["warm_open"]
+            tmpl = EMAIL_TEMPLATES[SEQUENCE_ORDER[0]]
             subject = _render_template(tmpl["subject"], data)
             body = _render_template(tmpl["body"], data)
 
