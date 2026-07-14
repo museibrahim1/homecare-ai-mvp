@@ -1,0 +1,16 @@
+---
+description: Where to deliver user-facing documents (decks, PDFs, docx, xlsx, etc.)
+alwaysApply: true
+---
+
+# Deliverables go to the Desktop folder
+
+Every user-facing document the agent produces (pitch decks, PDFs, PPTX, DOCX,
+XLSX, brochures, reports, exports) MUST be copied to:
+
+`/Users/musaibrahim/Desktop/PalmCare Documents/`
+
+- Keep the working/source files in the repo as usual (e.g. `marketing/...`),
+  but always place a copy of the final artifact in that Desktop folder.
+- Use clear versioned filenames (e.g. `PalmCare_Deck_v5.pdf`).
+- If the folder is missing, create it.

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PalmCare AI — Seed Deck v5</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0c1211; font-family: 'Inter', -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  .stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px 72px; min-height: 0; }
+  .stage img { max-width: 100%; max-height: 100%; border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,0.55); }
+  .bar { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 14px 0 22px; }
+  button {
+    background: #131a19; color: #e6ece9; border: 1px solid #223029; border-radius: 10px;
+    font-size: 15px; font-weight: 700; padding: 10px 22px; cursor: pointer; font-family: inherit;
+  }
+  button:hover { background: #1a2320; border-color: #2dd4bf; }
+  .count { color: #8fa39c; font-size: 15px; font-weight: 600; min-width: 130px; text-align: center; }
+  .title { color: #2dd4bf; font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+  .nav-zone { position: fixed; top: 0; bottom: 70px; width: 30%; cursor: pointer; }
+  .nav-zone.left { left: 0; } .nav-zone.right { right: 0; }
+</style>
+</head>
+<body>
+  <div class="stage"><img id="slide" src="" alt="slide"></div>
+  <div class="bar">
+    <span class="title">PalmCare AI · Seed $250K</span>
+    <button onclick="go(-1)">← Prev</button>
+    <span class="count" id="count"></span>
+    <button onclick="go(1)">Next →</button>
+  </div>
+  <div class="nav-zone left" onclick="go(-1)"></div>
+  <div class="nav-zone right" onclick="go(1)"></div>
+<script>
+  const slides = [
+    'out/s01-title.png','out/s02-problem.png','out/s03-solution.png','out/s04-launched.png',
+    'out/s05-how.png','out/s06-crm.png','out/s07-market.png','out/s08-competition.png',
+    'out/s09-model.png','out/s10-whynow.png','out/s11-financials.png','out/s12-roadmap.png',
+    'out/s13-ask.png','out/s14-team.png','out/s15-close.png',
+  ];
+  const names = ['Title','Problem','Solution','Launched','How it works','Web CRM','Market','Competition','Business model','Why now','Projections','Roadmap','The Ask','Team','Close'];
+  let i = 0;
+  function show() {
+    document.getElementById('slide').src = slides[i];
+    document.getElementById('count').textContent = (i+1) + ' / ' + slides.length + ' · ' + names[i];
+  }
+  function go(d) { i = Math.min(slides.length-1, Math.max(0, i+d)); show(); }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') go(1);
+    if (e.key === 'ArrowLeft') go(-1);
+  });
+  slides.forEach((s) => { const im = new Image(); im.src = s; });
+  show();
+</script>
+</body>
+</html>
