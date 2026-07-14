@@ -1,0 +1,27 @@
+name: Daily drip emails
+
+# Processes due drip-sequence emails and resends unique Just PALM IT templates
+# to leads who opened but did not convert. Runs against the production API.
+
+on:
+  schedule:
+    - cron: "0 14 * * *"   # 9:00 AM ET
+  workflow_dispatch:
+
+jobs:
+  drip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Process drip sequences
+        run: |
+          curl -sf -X POST \
+            "https://api-production-a0a2.up.railway.app/platform/sales/leads/internal/process-sequences" \
+            -H "X-Internal-Key: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
+
+      - name: Reengage opened leads
+        run: |
+          curl -sf -X POST \
+            "https://api-production-a0a2.up.railway.app/platform/sales/leads/internal/reengage-opened" \
+            -H "X-Internal-Key: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"

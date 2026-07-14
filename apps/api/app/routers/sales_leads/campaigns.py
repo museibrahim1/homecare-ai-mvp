@@ -19,6 +19,8 @@ from app.services.email import email_service
 
 from .common import (
     ALL_US_STATES, STATE_NAMES, EMAIL_TEMPLATES, SEQUENCE_ORDER, SEQUENCE_DAYS,
+    OPENED_REENGAGE_ORDER, REENGAGE_CAMPAIGN_TAG, REENGAGE_MIN_DAYS_BETWEEN,
+    REENGAGE_DAILY_CAP,
     _render_template, _auto_start_sequence,
 )
 from .schemas import (
@@ -307,16 +309,9 @@ async def launch_email_sequence(
     }
 
 
-@router.post("/leads/campaigns/sequence/process")
-async def process_scheduled_emails(
-    db: Session = Depends(get_db),
-    admin: User = Depends(require_permission("sales_leads")),
-):
-    """Process all leads that have a scheduled next email due now or in the past.
-
-    Call this endpoint periodically (cron, manual, or on-demand) to advance
-    leads through the 5-email sequence.
-    """
+def _process_due_sequence_emails(db: Session) -> dict:
+    """Advance every lead whose next sequence email is due. Shared by the
+    admin endpoint and the internal cron endpoint."""
     now = datetime.now(timezone.utc)
 
     due = db.query(SalesLead).filter(
@@ -412,6 +407,147 @@ async def process_scheduled_emails(
         "skipped": skipped,
         "sequences_completed": completed,
     }
+
+
+def _reengage_templates_sent(lead_id, db: Session) -> set[str]:
+    """Template IDs already sent in the opened-reengage campaign for this lead."""
+    rows = db.query(EmailCampaignEvent.template_id).filter(
+        EmailCampaignEvent.lead_id == lead_id,
+        EmailCampaignEvent.campaign_tag == REENGAGE_CAMPAIGN_TAG,
+        EmailCampaignEvent.event_type == "sent",
+    ).all()
+    return {r[0] for r in rows if r[0]}
+
+
+def _next_reengage_template(sent_ids: set[str]) -> str | None:
+    for tid in OPENED_REENGAGE_ORDER:
+        if tid not in sent_ids:
+            return tid
+    return None
+
+
+def _process_opened_reengagement(db: Session) -> dict:
+    """Send the next unique Just PALM IT template to leads who opened but did not convert.
+
+    Picks leads with at least one open, spaces sends REENGAGE_MIN_DAYS_BETWEEN apart,
+    rotates through OPENED_REENGAGE_ORDER so every resend is a different email.
+    """
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=REENGAGE_MIN_DAYS_BETWEEN)
+
+    candidates = db.query(SalesLead).filter(
+        SalesLead.contact_email.isnot(None),
+        SalesLead.contact_email != "",
+        SalesLead.status.notin_(["not_interested", "converted", "responded"]),
+        or_(
+            SalesLead.email_open_count >= 1,
+            SalesLead.status == LeadStatus.email_opened.value,
+        ),
+        or_(
+            SalesLead.last_email_sent_at.is_(None),
+            SalesLead.last_email_sent_at <= cutoff,
+        ),
+    ).order_by(SalesLead.last_email_opened_at.desc().nullslast()).all()
+
+    sent = 0
+    skipped = 0
+    exhausted = 0
+
+    for lead in candidates:
+        if sent >= REENGAGE_DAILY_CAP:
+            break
+
+        sent_ids = _reengage_templates_sent(lead.id, db)
+        template_id = _next_reengage_template(sent_ids)
+        if not template_id:
+            exhausted += 1
+            continue
+
+        tmpl = EMAIL_TEMPLATES.get(template_id)
+        if not tmpl:
+            skipped += 1
+            continue
+
+        data = {
+            "provider_name": lead.provider_name,
+            "city": lead.city or "your area",
+            "state": lead.state,
+            "state_full": STATE_NAMES.get(lead.state, lead.state),
+        }
+        subject = _render_template(tmpl["subject"], data)
+        body = _render_template(tmpl["body"], data)
+
+        result = email_service.send_email(
+            to=lead.contact_email,
+            subject=subject,
+            sender=email_service.from_sales,
+            html=body,
+        )
+
+        if not result.get("success"):
+            skipped += 1
+            continue
+
+        lead.last_email_sent_at = now
+        lead.last_email_subject = subject
+        lead.email_send_count = (lead.email_send_count or 0) + 1
+        lead.last_template_sent = template_id
+        if result.get("id"):
+            lead.resend_email_id = result["id"]
+        if lead.status == LeadStatus.email_sent.value:
+            lead.status = LeadStatus.email_opened.value
+
+        db.add(EmailCampaignEvent(
+            lead_id=lead.id,
+            template_id=template_id,
+            campaign_tag=REENGAGE_CAMPAIGN_TAG,
+            event_type="sent",
+            resend_email_id=result.get("id"),
+            subject=subject,
+            to_email=lead.contact_email,
+            created_at=now,
+        ))
+
+        activity = lead.activity_log or []
+        activity.append({
+            "action": f"Opened-lead reengage sent ({template_id})",
+            "campaign": REENGAGE_CAMPAIGN_TAG,
+            "subject": subject,
+            "at": now.isoformat(),
+        })
+        lead.activity_log = activity
+        sent += 1
+
+    db.commit()
+    return {
+        "candidates": len(candidates),
+        "sent": sent,
+        "skipped": skipped,
+        "exhausted_all_templates": exhausted,
+        "daily_cap": REENGAGE_DAILY_CAP,
+    }
+
+
+@router.post("/leads/campaigns/sequence/process")
+async def process_scheduled_emails(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_permission("sales_leads")),
+):
+    """Process all leads that have a scheduled next email due now or in the past.
+
+    Call this endpoint periodically (cron, manual, or on-demand) to advance
+    leads through the 5-email sequence.
+    """
+    return _process_due_sequence_emails(db)
+
+
+@router.post("/leads/campaigns/reengage-opened")
+async def reengage_opened_leads(
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_permission("sales_leads")),
+):
+    """Send the next unique Just PALM IT email to leads who opened but did not convert."""
+    return _process_opened_reengagement(db)
 
 
 @router.get("/leads/campaigns/sequence/status")

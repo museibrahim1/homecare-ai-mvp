@@ -33,14 +33,19 @@ with QR download cards and real app screens between runs.
 
 ## Schedule
 
-Lives in `scripts/social/run_scheduled_posts.py` (`META` and `LINKEDIN` dicts).
+Lives in `scripts/social/run_scheduled_posts.py`.
 
-- Jul 18 – Aug 8: Saturday download posts layered on top of the already-approved
-  M/W/F plan (those FB photos were natively scheduled and are left untouched).
-- Aug 10 – Sep 11: M/W/F Meta posts + Tue/Thu LinkedIn posts, all download-focused,
-  CTA `palmcareai.com/app`. LinkedIn keeps the link in the first comment.
-- Videos publish day-of from the runner (Graph API can't pre-schedule Reels).
-  FB photos are pre-scheduled with `schedule_meta_fb.py` (skips .mp4 entries).
+**Twice daily (Jul 14 – Sep 11, 2026):**
+- **AM slot (11:30 AM ET):** original approved plan on its dates; Just PALM IT fillers on gap days so Meta + LinkedIn always get a morning post.
+- **PM slot (6:30 PM ET):** rotating Just PALM IT / Download Today creatives on IG, Threads, Facebook, and LinkedIn every day.
+
+GitHub Actions: `.github/workflows/social-posts.yml` (two cron times). Dedupes per `date-slot` in `.posted_log.json`.
+
+**Email automation:** `.github/workflows/drip-emails.yml` runs daily:
+1. Drip sequence advance (`/internal/process-sequences`)
+2. Opened-lead reengage with 7 unique Just PALM IT templates (`/internal/reengage-opened`)
+
+Requires `CRON_SECRET` in GitHub repo secrets (same value as Railway `CRON_SECRET` or `INTERNAL_API_KEY`).
 
 ## Email updates shipped with this campaign
 

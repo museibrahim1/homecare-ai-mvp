@@ -204,10 +204,16 @@ def compose_custom_email(
         system_prompt = f"""You write real emails for Muse Ibrahim, founder of PalmCare AI.
 
 ABOUT PALMCARE AI:
-Software for home care agencies. A caregiver records the client visit by voice and the
-platform writes the transcript, care notes, billable items, and a state compliant service
+Software for home care agencies. A caregiver records the client visit by voice and PALM
+writes the transcript, care notes, billable items, and a state compliant service
 agreement that is ready to sign. Agencies put contracts in front of clients the same day.
+The PALM iPhone app is live on the App Store: palmcareai.com/app redirects to the listing.
 14 day free trial, no card required. Website: palmcareai.com. Sender: sales@palmcareai.com.
+
+THE ASK:
+Unless the prompt says otherwise, the one clear ask is to download the PALM app at
+palmcareai.com/app. The brand CTA phrase is "Just PALM IT." Use it at most once, near
+the ask, never as a greeting.
 
 HARD RULES:
 - Write like a competent human, never like marketing AI. No hype words, no "revolutionize",
@@ -287,9 +293,33 @@ def send_custom_email(
         for p in body.body.split("\n\n") if p.strip()
     )
     html_body = f"""
-    <div style="font-family: 'Segoe UI', -apple-system, Arial, sans-serif; max-width: 560px;
-                margin: 0 auto; color: #222; font-size: 15px; line-height: 1.6;">
+    <div style="font-family: -apple-system, 'Segoe UI', Arial, sans-serif; max-width: 560px;
+                margin: 0 auto; color: #0f172a; font-size: 15px; line-height: 1.6;">
+        <div style="background: linear-gradient(135deg, #0d9488, #0891b2); padding: 24px 28px;
+                    border-radius: 12px 12px 0 0; text-align: center;">
+            <p style="margin: 0; font-size: 18px; font-weight: 700; color: #ffffff;">PALM</p>
+            <p style="margin: 4px 0 0; font-size: 12px; color: rgba(255,255,255,0.85);">
+                Where care meets intelligence
+            </p>
+        </div>
+        <div style="padding: 28px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
         {paragraphs}
+        <div style="text-align: center; margin: 28px 0 20px;">
+            <p style="margin: 0 0 12px; font-size: 20px; font-weight: 800; color: #0d9488;">Just PALM IT.</p>
+            <a href="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
+               style="display: inline-block; background: #0d9488; color: #ffffff; padding: 14px 32px;
+                      border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 700;">
+                Download PALM Today
+            </a>
+        </div>
+        <div style="text-align: center; margin-top: 16px;">
+            <a href="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988">
+                <img src="https://palmcareai.com/launch/palm-appstore-qr.png" alt="Scan to download PALM"
+                     width="96" height="96" style="border-radius: 10px; border: 1px solid #e2e8f0;" />
+            </a>
+            <p style="margin: 8px 0 0; font-size: 12px; color: #64748b;">Or scan with your iPhone camera</p>
+        </div>
+        </div>
     </div>
     """
 

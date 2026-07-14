@@ -565,6 +565,32 @@ async def internal_add_lead_and_email(
     return {"total": len(results), "sent": sent_count, "results": results}
 
 
+@router.post("/leads/internal/process-sequences")
+async def internal_process_sequences(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Send every due drip email. Called daily by cron with X-Internal-Key."""
+    _require_internal_key(request)
+    from .campaigns import _process_due_sequence_emails
+    result = _process_due_sequence_emails(db)
+    logger.info(f"Internal sequence processing: {result}")
+    return result
+
+
+@router.post("/leads/internal/reengage-opened")
+async def internal_reengage_opened(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Resend unique Just PALM IT emails to opened leads. Called daily by cron."""
+    _require_internal_key(request)
+    from .campaigns import _process_opened_reengagement
+    result = _process_opened_reengagement(db)
+    logger.info(f"Internal opened reengage: {result}")
+    return result
+
+
 @router.post("/leads/internal/start-recent-sequences")
 async def internal_start_recent_sequences(
     request: Request,

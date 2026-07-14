@@ -156,6 +156,15 @@ _P = f"margin: 0 0 16px 0; color: {_SLATE_900};"
 _P_MUTED = f"margin: 0 0 16px 0; color: {_SLATE_600}; font-size: 14px;"
 
 
+_PALM_IT_BTN = (
+    f'<div style="text-align: center; margin: 24px 0;">'
+    f'<p style="margin: 0 0 12px; font-size: 22px; font-weight: 800; color: {_TEAL};">Just PALM IT.</p>'
+    f'<a href="{_APP_STORE}" style="display: inline-block; '
+    f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
+    'text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 32px; '
+    'border-radius: 10px;">Download PALM Today</a></div>'
+)
+
 _DOWNLOAD_BTN = (
     f'<div style="text-align: center; margin: 24px 0;">'
     f'<a href="{_APP_STORE}" style="display: inline-block; '
@@ -279,6 +288,172 @@ EMAIL_TEMPLATES = {
             "{provider_name}",
         ),
     },
+    # ─── Standalone marketing sends (not part of the drip sequence) ───
+    "just_palm_it": {
+        "id": "just_palm_it",
+        "name": "Just PALM IT",
+        "subject": "stop typing what was already said out loud",
+        "description": "Standalone — punchy download push. The Just PALM IT ask.",
+        "body": _email_wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">Every care assessment at {{provider_name}} gets documented twice. '
+            'Once out loud in the living room, and once again at a keyboard that night.</p>'
+            f'<p style="{_P}">PALM keeps the first one and deletes the second. Record the visit '
+            'on your iPhone and it writes the care plan, prices the billables, and builds a '
+            'contract on your state\'s rules. You review and sign.</p>'
+            + '<div style="text-align: center; margin: 24px 0;">'
+            + _stat_block("1", "Recording")
+            + _stat_block("4", "Documents")
+            + _stat_block("0", "Evenings lost")
+            + '</div>'
+            + f'<p style="{_P}" align="center"><strong>Don\'t type it. Just PALM IT.</strong></p>'
+            + _DOWNLOAD_BTN,
+            "{provider_name}",
+        ),
+    },
+    "app_qr_download": {
+        "id": "app_qr_download",
+        "name": "The QR Download",
+        "subject": "point your iPhone camera at this email",
+        "description": "Standalone — QR-first. The fastest path from inbox to install.",
+        "body": _email_wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">This is the shortest software pitch you will get this year. '
+            'Point your iPhone camera at the code below.</p>'
+            + '<div style="text-align: center; margin: 24px 0;">'
+            f'<a href="{_APP_STORE}" style="text-decoration: none;">'
+            f'<img src="{_QR_APP}" alt="Scan to download PALM" '
+            'style="width: 160px; height: 160px; border-radius: 12px; '
+            f'border: 1px solid {_SLATE_200};" /></a>'
+            f'<p style="margin: 8px 0 0; font-size: 13px; color: {_SLATE_600};">'
+            'Scan to download PALM from the App Store</p>'
+            '</div>'
+            + _section(
+                "What happens next",
+                "Record your next client assessment in the app. PALM writes the transcript, "
+                "the care plan, the billable items, and a service contract built on "
+                "{state_full} rules. A staff member reviews before anything is final."
+            )
+            + f'<p style="{_P_MUTED}">The first 14 days are free, no card. '
+            f'Prefer a link? <a href="{_APP_STORE}" style="color: {_TEAL}; font-weight: 600;">'
+            'Download PALM here</a>. Just PALM IT.</p>',
+            "{provider_name}",
+        ),
+    },
+    "seven_second_demo": {
+        "id": "seven_second_demo",
+        "name": "The 7 Second Demo",
+        "subject": "a 7 second demo of your evenings coming back",
+        "description": "Standalone — launch video lead. Show, then download.",
+        "body": _email_wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">We made the product demo 7 seconds long because that is honestly '
+            'all there is to show. '
+            f'<a href="{_LAUNCH_VIDEO}" style="color: {_TEAL}; font-weight: 600;">Watch it here</a>.</p>'
+            + _section(
+                "What you are watching",
+                "A recorded assessment turning into the care plan, the billable items, and a "
+                "signed service contract. No forms. No retyping. The visit was already "
+                "documented out loud, and PALM was listening."
+            )
+            + _section(
+                "Why agencies keep it",
+                "The contract is drafted before the assessor leaves the driveway, so the "
+                "family signs the same day. In home care, the first clear agreement on the "
+                "table usually wins the client."
+            )
+            + _DOWNLOAD_BTN
+            + f'<p style="{_P_MUTED}" align="center">Free for 14 days. Just PALM IT.</p>',
+            "{provider_name}",
+        ),
+    },
+    "evenings_back": {
+        "id": "evenings_back",
+        "name": "Your Evenings Back",
+        "subject": "what would you do with Tuesday nights again",
+        "description": "Standalone — emotional relief angle. Just PALM IT download push.",
+        "body": _email_wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">Most assessors at agencies like {{provider_name}} finish the visit at 4pm '
+            'and start the paperwork at 8pm. The visit was already documented out loud. '
+            'PALM was just not in the room yet.</p>'
+            + _section(
+                "What changes with one download",
+                "Record the assessment on your iPhone. PALM writes the care plan, finds the "
+                "billable items, and builds the contract on your state's rules. You review "
+                "and sign before you leave the driveway."
+            )
+            + _PALM_IT_BTN,
+            "{provider_name}",
+        ),
+    },
+    "same_day_contract": {
+        "id": "same_day_contract",
+        "name": "Same Day Contract",
+        "subject": "the family signed before dinner",
+        "description": "Standalone — speed to signature. Just PALM IT.",
+        "body": _email_wrap(
+            f'<p style="{_P}">Hi,</p>'
+            + _section(
+                "The agency that wins the client",
+                "In home care, the first clear service agreement in front of the family "
+                "usually wins them. Most agencies take days. The ones running PALM put the "
+                "contract on the table the same afternoon as the assessment."
+            )
+            + _section(
+                "How",
+                "PALM sits in on the visit, drafts the care plan and billables from what was "
+                "said, and builds a contract on {state_full} rules. A coordinator reviews, "
+                "the family signs. Same day."
+            )
+            + _PALM_IT_BTN,
+            "{provider_name}",
+        ),
+    },
+    "one_visit_proof": {
+        "id": "one_visit_proof",
+        "name": "One Visit Proof",
+        "subject": "try it on one visit, then decide",
+        "description": "Standalone — low commitment proof. Just PALM IT.",
+        "body": _email_wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">You do not need to switch your whole workflow to judge PALM. '
+            'Run it on one assessment and compare the output to what your team produces '
+            'after three hours at a keyboard.</p>'
+            + '<div style="text-align: center; margin: 24px 0;">'
+            + _stat_block("1", "Visit recorded")
+            + _stat_block("4", "Documents drafted")
+            + _stat_block("14", "Day free trial")
+            + '</div>'
+            + f'<p style="{_P}">Record the visit. Read the care plan, the billables, and the '
+            'contract PALM hands back. If it is not better than your current process, delete '
+            'the app and we will not follow up.</p>'
+            + _PALM_IT_BTN,
+            "{provider_name}",
+        ),
+    },
+    "download_today": {
+        "id": "download_today",
+        "name": "Download Today",
+        "subject": "PALM is on your App Store, download today",
+        "description": "Standalone — direct urgency. QR + Just PALM IT.",
+        "body": _email_wrap(
+            f'<p style="{_P}">Hi,</p>'
+            f'<p style="{_P}">PALM is live on the App Store. It sits in on the client assessment, '
+            'writes the care plan, finds the billable items, and builds the service contract. '
+            'Your team reviews and signs.</p>'
+            + '<div style="text-align: center; margin: 24px 0;">'
+            f'<a href="{_APP_STORE}" style="text-decoration: none;">'
+            f'<img src="{_QR_APP}" alt="Scan to download PALM" '
+            'style="width: 140px; height: 140px; border-radius: 12px; '
+            f'border: 1px solid {_SLATE_200};" /></a>'
+            f'<p style="margin: 8px 0 0; font-size: 13px; color: {_SLATE_600};">'
+            'Scan with your iPhone camera</p>'
+            '</div>'
+            + _PALM_IT_BTN,
+            "{provider_name}",
+        ),
+    },
     "graceful_exit": {
         "id": "graceful_exit",
         "name": "The Graceful Exit",
@@ -348,6 +523,21 @@ SEQUENCE_DAYS = {
     "proof_point": 13,
     "graceful_exit": 27,
 }
+
+# Rotating templates for leads who opened but did not convert. Each lead gets the
+# next template they have not received yet. Sent by the daily reengage cron.
+OPENED_REENGAGE_ORDER = [
+    "just_palm_it",
+    "app_qr_download",
+    "seven_second_demo",
+    "evenings_back",
+    "same_day_contract",
+    "one_visit_proof",
+    "download_today",
+]
+REENGAGE_CAMPAIGN_TAG = "opened-reengage-2026"
+REENGAGE_MIN_DAYS_BETWEEN = 4
+REENGAGE_DAILY_CAP = 40
 
 
 

@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
-"""Daily runner for the approved Jul 13 - Aug 9 social plan.
+"""Twice-daily social runner (AM + PM slots).
 
-Run once a day (launchd/cron). It looks up today's date in SCHEDULE; if a post is
-due and hasn't been published yet, it posts to the right platforms and records it
-in scripts/social/.posted_log.json so it never double-posts.
+AM slot (11:30 AM ET): the approved original plan through Sep 11, 2026.
+PM slot (6:30 PM ET): Just PALM IT / Download Today creatives on every platform.
 
-Platforms per the approved plan:
-  - Meta days (Mon/Wed/Fri): Instagram + Threads day-of (link in the caption).
-    Facebook is scheduled NATIVELY via schedule_meta_fb.py so it appears in Meta
-    Business Suite's planner and posts even if this machine is asleep. The API
-    can't pre-schedule IG or Threads, so those publish day-of from here.
-  - LinkedIn days (Tue/Thu):  LinkedIn image or PDF document carousel, value in
-    the body, signup link kept in the FIRST COMMENT.
+Run via GitHub Actions twice daily. Dedupes per date+slot in .posted_log.json.
 
 Manual usage:
-  python3 scripts/social/run_scheduled_posts.py                    # post what's due today
-  python3 scripts/social/run_scheduled_posts.py --date 2026-07-14  # force a date
-  python3 scripts/social/run_scheduled_posts.py --dry-run          # show what would post
+  python3 scripts/social/run_scheduled_posts.py --slot am
+  python3 scripts/social/run_scheduled_posts.py --slot pm --dry-run
+  python3 scripts/social/run_scheduled_posts.py --date 2026-07-14 --slot pm
 """
 from __future__ import annotations
 
@@ -29,6 +22,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from post_to_meta import (  # noqa: E402
+    fb_post_photo,
     fb_post_video,
     ig_publish_image,
     ig_publish_reel,
@@ -183,6 +177,166 @@ LINKEDIN = {
 }
 
 
+# ------------------------------------------------------------------ PM rotation
+# Evening slot: Just PALM IT + Download Today on every platform, every day.
+_CAMPAIGN_START = dt.date(2026, 7, 14)
+_CAMPAIGN_END = dt.date(2026, 9, 11)
+
+_PM_IMAGES = [
+    "palm-it-cta-1x1.png",
+    "download-today-1x1.png",
+    "appstore-download-1x1.png",
+    "palm-it-cta-9x16.png",
+    "appstore-download-9x16.png",
+]
+
+_PM_CAPTIONS = [
+    (
+        "Just PALM IT.\n\n"
+        "PALM is on the App Store. Record the assessment and it writes the care plan, "
+        "finds the billable items, and builds the contract. You review and sign.\n\n"
+        "Download today: {a}\n"
+        "#homecare #homecareagency #caregiver"
+    ),
+    (
+        "Download PALM today.\n\n"
+        "One recording turns into the transcript, the care plan, the billables, and a "
+        "state specific contract. The paperwork that used to take hours now takes minutes.\n\n"
+        "Free for 14 days: {a}\n"
+        "#homecare #homecareagency #healthtech"
+    ),
+    (
+        "Stop typing what was already said out loud.\n\n"
+        "PALM sits in on the assessment and hands you the documentation before you start "
+        "the car. On the App Store now.\n\n"
+        "Just PALM IT. {a}\n"
+        "#homecare #caregiverlife #agencyowner"
+    ),
+    (
+        "Your iPhone is the fastest way to end paperwork nights.\n\n"
+        "Record the visit. PALM writes the care plan, prices the billables, and drafts "
+        "the contract. You review and send.\n\n"
+        "Get the app: {a}\n"
+        "#homecare #homecareagency #nurselife"
+    ),
+    (
+        "POV: the visit ended and the contract is already written.\n\n"
+        "PALM is live on the App Store. Try it free on your next assessment.\n\n"
+        "Download today: {a}\n"
+        "#homecare #POV #homecareagency"
+    ),
+]
+
+_AM_FILLER_IMAGES = [
+    "iphone_mockup_recording.png",
+    "iphone_mockup_contract.png",
+    "ig_square_palm_app.png",
+    "palm-it-cta-1x1.png",
+]
+
+_AM_FILLER_CAPTIONS = [
+    (
+        "Just PALM IT.\n\n"
+        "Press record at the assessment. PALM writes the care plan, the billables, and "
+        "the contract while you drive to the next visit.\n\n"
+        "Download today: {a}\n"
+        "#homecare #homecareagency #caregiver"
+    ),
+    (
+        "The visit was already documented. Out loud. In the living room.\n\n"
+        "PALM is the app that finally listens. Care plan, billables, contract. "
+        "You review and sign.\n\n"
+        "{a}\n"
+        "#homecare #healthcareAI"
+    ),
+    (
+        "Same visit. Different evening.\n\n"
+        "One agency retypes the assessment at 9pm. The other had the contract drafted "
+        "before they left the driveway. PALM is on the App Store.\n\n"
+        "Just PALM IT. {a}\n"
+        "#homecare #agencyowner"
+    ),
+    (
+        "Download PALM today.\n\n"
+        "It sits in on the assessment, writes the care plan, finds the billables, and "
+        "builds the contract. Free for 14 days.\n\n"
+        "{a}\n"
+        "#homecare #homecareagency #caregiverlife"
+    ),
+]
+
+_LI_PM_BODIES = [
+    "Just PALM IT.\n\nPALM is on the App Store. Record the client assessment and it writes the care plan, the billables, and a state specific service contract. You review and sign.\n\nThat is the whole product.",
+    "Download PALM today.\n\nMost home care software gives you a better place to type. PALM removes the typing. The visit was documented out loud. PALM listens and drafts the paperwork.",
+    "One visit. Four documents you never type again.\n\nTranscript. Care plan. Billables. Contract. All from the assessment you were already doing. On the App Store now.",
+    "The contract before you leave the driveway.\n\nPALM agencies put a clear agreement in front of the family the same day as the assessment. Speed here is revenue.",
+    "Try it on one visit.\n\nDownload PALM, record your next assessment, and compare the output to three hours at a keyboard. The trial is free.",
+]
+
+_LI_PM_IMAGES = [
+    "palm-it-cta-1x1.png",
+    "download-today-1x1.png",
+    "appstore-download-1x1.png",
+    "iphone_mockup_contract.png",
+    "palm-it-cta-1x1.png",
+]
+
+_LI_AM_FILLER = [
+    ("palm-it-cta-1x1.png",
+     "Just PALM IT.\n\nPALM turns a recorded care visit into the care plan, the billables, and a state specific contract. On the App Store now.\n\nIf your team still documents every visit twice, try it on one assessment.",
+     "palmcareai.com/app"),
+    ("download-today-1x1.png",
+     "Download PALM today.\n\nIt sits in on the assessment and writes the documentation before your assessor gets home. Free for 14 days.\n\nOne recording. The whole assessment, done.",
+     "palmcareai.com/app, free to start"),
+    ("iphone_mockup_recording.png",
+     "This button replaces your clipboard.\n\nRecord the visit on your iPhone. PALM writes the transcript, the care plan, the billables, and the contract. You review and sign.",
+     "Download PALM: palmcareai.com/app"),
+]
+
+
+def _day_index(date_str: str) -> int:
+    d = dt.date.fromisoformat(date_str)
+    return (d - _CAMPAIGN_START).days
+
+
+def _in_campaign(date_str: str) -> bool:
+    d = dt.date.fromisoformat(date_str)
+    return _CAMPAIGN_START <= d <= _CAMPAIGN_END
+
+
+def get_meta_am(date: str) -> tuple[str, str] | None:
+    if date in META:
+        return META[date]
+    if _in_campaign(date):
+        i = _day_index(date)
+        return _AM_FILLER_IMAGES[i % len(_AM_FILLER_IMAGES)], _AM_FILLER_CAPTIONS[i % len(_AM_FILLER_CAPTIONS)]
+    return None
+
+
+def get_meta_pm(date: str) -> tuple[str, str] | None:
+    if not _in_campaign(date):
+        return None
+    i = _day_index(date)
+    return _PM_IMAGES[i % len(_PM_IMAGES)], _PM_CAPTIONS[i % len(_PM_CAPTIONS)]
+
+
+def get_linkedin_am(date: str) -> tuple[str, str, str, str] | None:
+    if date in LINKEDIN:
+        kind, media, title, body, comment = LINKEDIN[date]
+        return kind, media, body, comment
+    if _in_campaign(date):
+        img, body, comment = _LI_AM_FILLER[_day_index(date) % len(_LI_AM_FILLER)]
+        return "image", img, body, comment
+    return None
+
+
+def get_linkedin_pm(date: str) -> tuple[str, str, str] | None:
+    if not _in_campaign(date):
+        return None
+    i = _day_index(date)
+    return _LI_PM_IMAGES[i % len(_LI_PM_IMAGES)], _LI_PM_BODIES[i % len(_LI_PM_BODIES)], "palmcareai.com/app"
+
+
 def load_log() -> dict:
     if LOG_FILE.is_file():
         return json.loads(LOG_FILE.read_text())
@@ -210,67 +364,64 @@ def threads_safe(caption: str, limit: int = 500) -> str:
     return cut.rstrip()
 
 
-def run_meta(date: str, dry: bool) -> dict | None:
-    """Publish the day-of IG + Threads posts. Facebook photos are NOT posted
-    here: they are scheduled natively via schedule_meta_fb.py so they show up in
-    Meta Business Suite's planner and publish even if this machine is asleep.
-    IG and Threads can't be pre-scheduled through the API, so they run day-of.
-    Videos (.mp4) also run fully day-of: IG Reel + FB video + Threads video."""
-    entry = META.get(date)
+def run_meta(date: str, slot: str, dry: bool) -> dict | None:
+    """Publish IG + Threads (+ FB for PM slot and videos). AM FB photos stay natively scheduled."""
+    entry = get_meta_pm(date) if slot == "pm" else get_meta_am(date)
     if entry is None:
         return None
     media, caption = entry
     caption = caption.format(s=SIGNUP, a=APP)
     is_video = media.endswith(".mp4")
+    post_fb = slot == "pm" or is_video
     if dry:
-        kind = "IG Reel + FB video + Threads" if is_video else "IG + Threads (FB is natively scheduled)"
-        print(f"{date}: WOULD post {media} to {kind}:\n---\n{caption}\n---")
+        platforms = ["IG Reel" if is_video else "IG", "Threads"]
+        if post_fb:
+            platforms.append("FB")
+        print(f"{date} {slot}: WOULD post {media} to {' + '.join(platforms)}:\n---\n{caption}\n---")
         return {"dry": True}
     require_meta_env()
-    results = {}
+    results: dict = {}
     if is_video:
         ig = ig_publish_reel(media, caption)
         results["ig"] = ig.get("id")
         print(f"IG Reel OK: {results['ig']}")
+    else:
+        ig = ig_publish_image(media, caption)
+        results["ig"] = ig.get("id")
+        print(f"IG OK: {results['ig']}")
+    if post_fb:
         try:
-            fb = fb_post_video(media, caption)
+            fb = fb_post_video(media, caption) if is_video else fb_post_photo(media, caption)
             results["fb"] = fb.get("id")
-            print(f"FB video OK: {results['fb']}")
+            print(f"FB OK: {results['fb']}")
         except Exception as e:
             results["fb_error"] = str(e)[:200]
             print(f"FB WARN: {e}", file=sys.stderr)
-        try:
-            th = threads_post(threads_safe(caption), video=media)
-            results["th"] = th.get("id")
-            print(f"Threads OK: {results['th']}")
-        except Exception as e:
-            results["th_error"] = str(e)[:200]
-            print(f"Threads WARN: {e}", file=sys.stderr)
-        return results
-    ig = ig_publish_image(media, caption)
-    results["ig"] = ig.get("id")
-    print(f"IG OK: {results['ig']}")
     try:
-        th = threads_post(threads_safe(caption), image=media)
+        th = threads_post(threads_safe(caption), video=media) if is_video else threads_post(threads_safe(caption), image=media)
         results["th"] = th.get("id")
         print(f"Threads OK: {results['th']}")
-    except Exception as e:  # Threads is best-effort; don't fail the whole run
+    except Exception as e:
         results["th_error"] = str(e)[:200]
         print(f"Threads WARN: {e}", file=sys.stderr)
     return results
 
 
-def run_linkedin(date: str, dry: bool) -> dict | None:
-    entry = LINKEDIN.get(date)
+def run_linkedin(date: str, slot: str, dry: bool) -> dict | None:
+    entry = get_linkedin_pm(date) if slot == "pm" else get_linkedin_am(date)
     if entry is None:
         return None
-    kind, media, title, body, comment = entry
+    if slot == "pm":
+        media, body, comment = entry
+        kind = "image"
+    else:
+        kind, media, body, comment = entry
     if dry:
-        print(f"{date}: WOULD post {media} ({kind}) to LinkedIn:\n---\n{body}\n[first comment] {comment}\n---")
+        print(f"{date} {slot}: WOULD post {media} ({kind}) to LinkedIn:\n---\n{body}\n[first comment] {comment}\n---")
         return {"dry": True}
     require_li_env()
     if kind == "document":
-        res = li_post_document(body, media, title or "PALM", comment)
+        res = li_post_document(body, media, "PALM", comment)
     else:
         res = li_post_image(body, media, comment)
     print(f"LinkedIn OK: {res}")
@@ -280,31 +431,35 @@ def run_linkedin(date: str, dry: bool) -> dict | None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="YYYY-MM-DD (default: today)")
+    ap.add_argument("--slot", choices=["am", "pm"], default="am", help="AM = original plan, PM = Just PALM IT")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
     date = args.date or dt.date.today().isoformat()
-    if date not in META and date not in LINKEDIN:
-        print(f"{date}: nothing scheduled. Nothing to do.")
+    log_key = f"{date}-{args.slot}"
+    has_meta = (get_meta_pm(date) if args.slot == "pm" else get_meta_am(date)) is not None
+    has_li = (get_linkedin_pm(date) if args.slot == "pm" else get_linkedin_am(date)) is not None
+    if not has_meta and not has_li:
+        print(f"{log_key}: nothing scheduled. Nothing to do.")
         return 0
 
     log = load_log()
-    if date in log and not args.dry_run:
-        print(f"{date}: already posted ({log[date]}). Skipping.")
+    if log_key in log and not args.dry_run:
+        print(f"{log_key}: already posted ({log[log_key]}). Skipping.")
         return 0
 
     results: dict = {}
-    meta_res = run_meta(date, args.dry_run)
+    meta_res = run_meta(date, args.slot, args.dry_run)
     if meta_res is not None:
         results["meta"] = meta_res
-    li_res = run_linkedin(date, args.dry_run)
+    li_res = run_linkedin(date, args.slot, args.dry_run)
     if li_res is not None:
         results["linkedin"] = li_res
 
     if not args.dry_run:
-        log[date] = results
+        log[log_key] = results
         save_log(log)
-        print(f"{date}: done, logged.")
+        print(f"{log_key}: done, logged.")
     return 0
 
 

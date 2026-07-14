@@ -38,6 +38,13 @@ export const TEMPLATE_ICONS: Record<string, React.ComponentType<{ className?: st
   aspiration: Sparkles,
   proof_point: TrendingUp,
   graceful_exit: Send,
+  just_palm_it: Zap,
+  app_qr_download: MailOpen,
+  seven_second_demo: Eye,
+  evenings_back: Clock,
+  same_day_contract: CheckCircle2,
+  one_visit_proof: TrendingUp,
+  download_today: Send,
 };
 
 export const TEMPLATE_COLORS: Record<string, string> = {
@@ -46,6 +53,13 @@ export const TEMPLATE_COLORS: Record<string, string> = {
   aspiration: 'from-indigo-500 to-purple-500',
   proof_point: 'from-emerald-500 to-cyan-500',
   graceful_exit: 'from-slate-500 to-gray-500',
+  just_palm_it: 'from-teal-500 to-emerald-500',
+  app_qr_download: 'from-cyan-500 to-blue-500',
+  seven_second_demo: 'from-purple-500 to-pink-500',
+  evenings_back: 'from-orange-500 to-amber-500',
+  same_day_contract: 'from-green-500 to-teal-500',
+  one_visit_proof: 'from-blue-500 to-indigo-500',
+  download_today: 'from-teal-600 to-cyan-600',
 };
 
 export const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {

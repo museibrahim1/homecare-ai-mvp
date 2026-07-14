@@ -1,21 +1,23 @@
-name: Daily social posts
+name: Twice-daily social posts
 
-# Posts the day's approved content to Instagram + Threads (Mon/Wed/Fri) and
-# LinkedIn (Tue/Thu) from the cloud, so no local machine needs to be awake.
-# Facebook is NOT posted here: all FB posts are natively scheduled inside
-# Meta Business Suite via scripts/social/schedule_meta_fb.py.
+# AM slot (11:30 AM ET): original approved plan + AM fillers through Sep 11.
+# PM slot (6:30 PM ET): Just PALM IT / Download Today on every platform.
+# AM Facebook photos are still pre-scheduled via schedule_meta_fb.py.
 
 on:
   schedule:
-    # 15:30 UTC = 11:30 AM Eastern during daylight time (Mar-Nov).
-    # After the November clock change this fires at 10:30 AM ET, which is fine.
-    - cron: "30 15 * * *"
+    - cron: "30 15 * * *"   # 11:30 AM ET (AM slot)
+    - cron: "30 22 * * *"   # 6:30 PM ET (PM slot)
   workflow_dispatch:
     inputs:
       date:
         description: "Force a date (YYYY-MM-DD). Leave empty for today."
         required: false
         default: ""
+      slot:
+        description: "am or pm (default am)"
+        required: false
+        default: "am"
       dry_run:
         description: "Dry run (show what would post, post nothing)"
         type: boolean
@@ -25,7 +27,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: social-posts
+  group: social-posts-${{ github.event.schedule || github.event.inputs.slot || 'manual' }}
   cancel-in-progress: false
 
 jobs:
@@ -43,6 +45,17 @@ jobs:
       - name: Install dependencies
         run: pip install requests python-dotenv
 
+      - name: Determine slot
+        id: slot
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.slot || 'am' }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "30 22 * * *" ]; then
+            echo "value=pm" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=am" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run scheduled posts
         env:
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
@@ -53,7 +66,7 @@ jobs:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_ID: ${{ secrets.LINKEDIN_PERSON_ID }}
         run: |
-          ARGS=""
+          ARGS="--slot ${{ steps.slot.outputs.value }}"
           if [ -n "${{ github.event.inputs.date }}" ]; then
             ARGS="$ARGS --date ${{ github.event.inputs.date }}"
           fi
@@ -69,7 +82,7 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add -f scripts/social/.posted_log.json || true
           if ! git diff --cached --quiet; then
-            git commit -m "social: record posted log $(date -u +%F) [skip ci]"
+            git commit -m "social: record posted log $(date -u +%F) ${{ steps.slot.outputs.value }} [skip ci]"
             git pull --rebase origin main
             git push origin main
           fi
