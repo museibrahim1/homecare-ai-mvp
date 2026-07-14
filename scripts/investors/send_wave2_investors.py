@@ -17,7 +17,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Full_v4.pdf"
+PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Deck_v5.pdf"
 DATA_DIR = PROJECT_ROOT / "scripts" / "data"
 DRAFTS_DIR = Path.home() / ".palmcare" / "email-drafts"
 
@@ -26,37 +26,12 @@ SKIP_EMAILS = {
 }
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from email_template import build_email as build_template_email
+
+
 def build_email(fund_name, contact_name):
-    first_name = contact_name.split()[0] if contact_name and "Team" not in contact_name and "General" not in contact_name and "Inquir" not in contact_name else ""
-    greeting = f"Hi {first_name}" if first_name else f"Hi {fund_name} Team"
-
-    subject = "Pre-Seed: Defining the Future of Home Care Operations"
-
-    body = f"""{greeting},
-
-I hope you're well. I'm reaching out to share what we're building at Palm Technologies Inc, a Nebraska-based C-Corp developing an AI-powered platform that automates the patient assessment, care planning, and contracting workflow for home care agencies.
-
-One of the strongest signals that this market is ready for disruption is how little has changed. Home care is a $343B industry processing millions of Medicaid and private-pay assessments every year, and nearly all of it still happens on paper, spreadsheets, and legacy software built two decades ago.
-
-We are raising a $450K seed round via SAFE or convertible note at a $1.8M pre-money valuation.
-
-PalmCare AI Highlights:
-- Full platform built and live today
-- $399/mo blended ARPU
-- 82% gross margin
-- Founder with software engineering, B2B sales, and home care experience
-- Clean cap table, 100% bootstrapped
-
-Deck: {PITCH_DECK_URL}
-Visit: palmcareai.com
-
-Warm regards,
-Muse Ibrahim
-Founder & CEO, Palm Technologies Inc.
-213-569-7693 | invest@palmtai.com"""
-
-    html = f'<pre style="font-family:-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;">{body}</pre>'
-    return subject, html, body
+    return build_template_email(fund_name, contact_name)
 
 
 def main():

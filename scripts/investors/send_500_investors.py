@@ -22,7 +22,7 @@ import resend
 resend.api_key = os.getenv("RESEND_API_KEY", "").strip()
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Full_v4.pdf"
+PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Deck_v5.pdf"
 DATA_DIR = PROJECT_ROOT / "scripts" / "data"
 
 INLINE_INVESTORS = [
@@ -90,39 +90,14 @@ INLINE_INVESTORS = [
 ]
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from email_template import build_email as build_template_email, deck_attachment
+
+
 def build_email(fund_name, contact_name, focus_stages):
-    first_name = contact_name.split()[0] if contact_name and "Team" not in contact_name and "General" not in contact_name else ""
-    greeting = f"Hi {first_name}," if first_name else f"Hi {fund_name} Team,"
-    stage = ", ".join(focus_stages[:2]) if focus_stages else "early-stage"
-
-    body = f"""{greeting}
-
-I'm Muse Ibrahim, founder of PalmCare AI — we're building the operating system for home care agencies.
-
-Home care is a $343B industry where millions of assessments still happen on paper and legacy software. PalmCare AI changes that: record a patient assessment by voice, and our AI generates the care plan, clinical notes, billable items, and service contract — in seconds.
-
-Given {fund_name}'s focus on {stage} investments, here are the highlights:
-
-- Full platform live (iOS + web CRM + AI pipeline)
-- $92K ARR, $399/mo ARPU, 82% gross margin
-- 163 agencies across 48 states
-- 50-state compliance knowledge base
-- Raising $450K SAFE at $2.25M post-money
-- Solo technical founder — built the entire stack
-
-Pitch deck: {PITCH_DECK_URL}
-
-Would you have 15 minutes this week for a quick call?
-
-Warm regards,
-Muse Ibrahim
-Founder & CEO, Palm Technologies Inc.
-213-569-7693 | invest@palmtai.com
-palmcareai.com"""
-
-    html = f'<pre style="font-family:-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;color:#1a1a1a;">{body}</pre>'
-    subject = f"{fund_name} x PalmCare AI — AI for Home Care Operations"
-    return subject, html, body
+    stage = ", ".join(focus_stages[:2]) if focus_stages else "early stage"
+    focus_line = f"You invest in {stage.lower()} vertical software, so this should be relevant."
+    return build_template_email(fund_name, contact_name, focus_line)
 
 
 def main():
@@ -240,6 +215,7 @@ def main():
                 "html": html,
                 "text": text,
                 "reply_to": "invest@palmtai.com",
+                "attachments": [deck_attachment()],
             })
             eid = resp.get("id") if isinstance(resp, dict) else getattr(resp, "id", None)
             print(f"  [{i+1}/{len(unique)}] SENT: {fund} -> {email_addr}")
