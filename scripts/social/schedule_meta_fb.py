@@ -28,7 +28,7 @@ import requests
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from run_scheduled_posts import META, SIGNUP  # noqa: E402
+from run_scheduled_posts import META, SIGNUP, APP  # noqa: E402
 from post_to_meta import (  # noqa: E402
     GRAPH,
     PAGE_ID,
@@ -94,7 +94,10 @@ def main() -> int:
     scheduled, skipped = 0, 0
     for date in sorted(META):
         image, caption = META[date]
-        caption = caption.format(s=SIGNUP)
+        if image.endswith(".mp4"):
+            # Videos post day-of from run_scheduled_posts (IG Reel + FB video).
+            continue
+        caption = caption.format(s=SIGNUP, a=APP)
         run_at = when(date, args.hour, args.minute)
         if run_at < cutoff:
             print(f"{date}: too soon / in the past ({run_at:%Y-%m-%d %H:%M}). Skipping.")

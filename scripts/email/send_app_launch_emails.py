@@ -24,6 +24,7 @@ REPLY_TO = "sales@palmtai.com"
 APP_STORE_URL = "https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
 HERO_IMG = "https://palmcareai.com/launch/palm-launch-email-hero.png"
 VIDEO_URL = "https://palmcareai.com/launch/palm-app-launch.mp4"
+QR_IMG = "https://palmcareai.com/launch/palm-appstore-qr.png"
 BROCHURE_PATH = os.path.join(
     os.path.dirname(__file__), "..", "..", "apps", "web", "public", "brochure",
     "PalmCare-AI-Brochure.pdf",
@@ -92,6 +93,13 @@ def build_html(first_name, company, variant):
            style="display:inline-block;background:#0d9488;color:#ffffff;padding:16px 40px;border-radius:12px;font-size:17px;font-weight:700;text-decoration:none;">
           {cta_label}
         </a>
+        <div style="margin-top:18px;">
+          <a href="{APP_STORE_URL}">
+            <img src="{QR_IMG}" alt="Scan to download PALM" width="104" height="104"
+                 style="border:1px solid #e2e8f0;border-radius:10px;" />
+          </a>
+          <p style="font-size:12px;color:#64748b;margin:6px 0 0;">Or point your iPhone camera at the code</p>
+        </div>
       </div>
 
       <table style="width:100%;font-size:14px;color:#334155;line-height:1.7;border-collapse:collapse;">

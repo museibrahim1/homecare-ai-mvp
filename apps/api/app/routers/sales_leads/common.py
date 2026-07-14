@@ -42,6 +42,9 @@ _SLATE_600 = "#475569"
 _SLATE_200 = "#e2e8f0"
 _SLATE_100 = "#f1f5f9"
 _GH_MARKETING = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing"
+_APP_STORE = "https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
+_QR_APP = f"{_GH_MARKETING}/social/palm-appstore-qr.png"
+_LAUNCH_VIDEO = f"{_SITE}/launch/palm-app-launch.mp4"
 
 
 def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> str:
@@ -86,24 +89,27 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         f'<img src="{_GH_MARKETING}/iphone_clients.png" alt="Clients" '
         'style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
         '</div>'
-        # CTA banner
+        # CTA banner — the app download is the ask
         '<div style="margin: 0 40px 32px; background: linear-gradient(135deg, #0d9488, #0f766e); '
         'border-radius: 12px; padding: 28px 32px; text-align: center;">'
-        f'<p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>'
+        f'<p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM is on the App Store.</p>'
         '<p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">'
-        'Record it. Transcribe it. Contract it. All in your palm.</p>'
-        f'<a href="{_SITE}/#book-demo" style="display: inline-block; background-color: #ffffff; '
-        f'color: {_TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 600; '
-        'padding: 12px 28px; border-radius: 8px;">Sign Up for Your 14 Day Free Trial</a>'
+        'It sits in on the assessment, writes the care plan, finds the billables, and builds the contract.</p>'
+        f'<a href="{_APP_STORE}" style="display: inline-block; background-color: #ffffff; '
+        f'color: {_TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 700; '
+        'padding: 12px 28px; border-radius: 8px;">Download PALM for iPhone</a>'
+        '<p style="margin: 12px 0 0; font-size: 12px;">'
+        f'<a href="{_SITE}/register" style="color: rgba(255,255,255,0.9); text-decoration: underline;">'
+        'Start your 14 day free trial</a></p>'
         '</div>'
         # Footer
         f'<div style="padding: 24px 40px; background-color: {_SLATE_100}; '
         f'border-top: 1px solid {_SLATE_200}; text-align: center;">'
-        f'<a href="{_SITE}" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">'
-        f'<img src="{_SITE}/qr-code.png" alt="Scan to visit palmcareai.com" '
-        'style="width: 72px; height: 72px; border-radius: 8px; border: 1px solid #e2e8f0;" />'
+        f'<a href="{_APP_STORE}" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">'
+        f'<img src="{_QR_APP}" alt="Scan to download PALM on the App Store" '
+        'style="width: 88px; height: 88px; border-radius: 8px; border: 1px solid #e2e8f0;" />'
         '</a><br>'
-        f'<p style="margin: 0 0 4px; font-size: 11px; color: #94a3b8;">Scan to visit palmcareai.com</p>'
+        f'<p style="margin: 0 0 4px; font-size: 11px; color: #94a3b8;">Scan with your iPhone camera to download PALM</p>'
         f'<p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: {_SLATE_900};">'
         'PalmCare AI</p>'
         f'<p style="margin: 0 0 12px; font-size: 12px; color: {_SLATE_600};">'
@@ -150,60 +156,63 @@ _P = f"margin: 0 0 16px 0; color: {_SLATE_900};"
 _P_MUTED = f"margin: 0 0 16px 0; color: {_SLATE_600}; font-size: 14px;"
 
 
+_DOWNLOAD_BTN = (
+    f'<div style="text-align: center; margin: 24px 0;">'
+    f'<a href="{_APP_STORE}" style="display: inline-block; '
+    f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
+    'text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 32px; '
+    'border-radius: 10px;">Download PALM on the App Store</a></div>'
+)
+
 EMAIL_TEMPLATES = {
     "warm_open": {
         "id": "warm_open",
         "name": "The Warm Open",
-        "subject": "{provider_name}, how many systems is your team using?",
+        "subject": "{provider_name}, the assessment can write its own contract now",
         "sequence_day": 1,
-        "description": "Day 1 — CRM-focused intro. Discovery question about their current tools.",
+        "description": "Day 1 — App-first intro. What PALM does, one download CTA.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
             + _section(
-                "Quick question",
-                "How many different systems is {provider_name} using right now to manage client intake, "
-                "assessments, documentation, and billing? If it's more than one, things are probably "
-                "falling through the cracks."
+                "One recording, four documents",
+                "PALM is an iPhone app for home care agencies. It sits in on the client "
+                "assessment, then writes the care plan, finds the billable items, and builds "
+                "a service contract based on your state's rules. Your team reviews and signs. "
+                "The paperwork that used to take hours after every visit takes minutes."
             )
             + _section(
-                "One platform for everything",
-                "PalmCare AI is a single platform built for home care agencies. Client CRM, "
-                "assessment pipeline, automated care plans, contract generation, billing reports, "
-                "and a mobile app for field staff. Everything your team needs, in one place."
+                "Nothing changes about the visit",
+                "Your assessor talks with the client the way they always have. PALM listens, "
+                "and the documentation is drafted before they leave the driveway."
             )
-            + f'<p style="{_P_MUTED}">Agencies using PalmCare are cutting onboarding time from days '
-            'to minutes and saving 15+ hours a week on documentation.</p>',
+            + _DOWNLOAD_BTN
+            + f'<p style="{_P_MUTED}">The first 14 days are free. No card required.</p>',
             "{provider_name}",
         ),
     },
     "pattern_interrupt": {
         "id": "pattern_interrupt",
         "name": "The Pattern Interrupt",
-        "subject": "what agencies in {state_full} are replacing first",
+        "subject": "the visit was already documented out loud",
         "sequence_day": 3,
-        "description": "Day 3 — CRM-focused stat punch. Shows what agencies are actually switching from.",
+        "description": "Day 3 — Reframe: stop retyping the conversation. Product facts, download CTA.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
-            f'<p style="{_P}">The #1 thing agencies replace first is not their scheduling tool. '
-            'It is the patchwork of spreadsheets, paper forms, and disconnected systems they use '
-            'for client intake and documentation.</p>'
+            f'<p style="{_P}">Every care assessment is already documented. Someone said every '
+            'word of it out loud, in the client\'s living room. The only reason your evenings '
+            'go to paperwork is that nothing was listening.</p>'
             + '<div style="text-align: center; margin: 24px 0;">'
-            + _stat_block("80%", "Less onboarding time")
-            + _stat_block("15hrs", "Saved per week")
-            + _stat_block("1", "Platform for everything")
+            + _stat_block("1", "Recording")
+            + _stat_block("4", "Documents drafted")
+            + _stat_block("50", "States covered")
             + '</div>'
             + _section(
-                "What PalmCare replaces",
-                "Client management, assessments, care plans, contracts, billing reports, and field "
-                "documentation, all in one platform with a mobile app. No more copying data "
-                "between systems."
+                "What PALM drafts from one recording",
+                "The transcript, the care plan, the billable items, and a service contract "
+                "built on your state's rules. You review and send. No forms, no double entry."
             )
-            + f'<p style="{_P}">Try the full platform free for 14 days.</p>'
-            + f'<div style="text-align: center; margin: 24px 0;">'
-            f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
-            f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
-            'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Sign Up and Get Your 14 Day Free Trial</a></div>',
+            + _DOWNLOAD_BTN
+            + f'<p style="{_P_MUTED}">Try it on one visit and compare it to your current process.</p>',
             "{provider_name}",
         ),
     },
@@ -212,76 +221,61 @@ EMAIL_TEMPLATES = {
         "name": "The Aspiration",
         "subject": "close clients before you leave their home",
         "sequence_day": 7,
-        "description": "Day 7 — Paints the picture. Shows the workflow transformation. Identity-driven.",
+        "description": "Day 7 — Paints the picture, links the 7 second launch video, download CTA.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
             + _section(
                 "Picture this",
-                "You sit down with a new client. You talk through the assessment on your phone "
-                "for a few minutes. Before you leave their home, a complete care plan, "
-                "assessment, and service contract are ready to sign."
+                "You sit down with a new client. You talk through the assessment the way you "
+                "always do. Before you leave their home, the care plan, the billables, and the "
+                "service contract are drafted and ready for review."
             )
             + _section(
                 "How it works",
-                "<strong>1.</strong> Record the assessment interview on your phone<br>"
-                "<strong>2.</strong> AI transcribes everything in real time<br>"
-                "<strong>3.</strong> AI generates the care plan + service agreement<br>"
-                "<strong>4.</strong> Contract sent to client, ready to sign"
+                "<strong>1.</strong> Record the assessment on your iPhone<br>"
+                "<strong>2.</strong> PALM transcribes it and keeps every voice separate<br>"
+                "<strong>3.</strong> It writes the care plan and prices the billables<br>"
+                "<strong>4.</strong> It builds a contract on your state's rules, ready to sign"
             )
             + '<div style="text-align: center; margin: 24px 0;">'
             f'<img src="{_GH_MARKETING}/fb_ad.png" '
-            'alt="Before and After PalmCare AI" '
+            'alt="Before and After PALM" '
             f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
             '</div>'
-            + f'<p style="{_P}">No training manuals. No data entry. No delays.<br>'
-            '<strong>Just tap, talk, and Palm It.</strong></p>'
-            + '<p style="' + _P_MUTED + '">Want to see it work with your actual workflow?</p>'
-            + f'<div style="text-align: center; margin: 24px 0;">'
-            f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
-            f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
-            'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Start Your 14 Day Free Trial</a></div>',
+            + _DOWNLOAD_BTN
+            + f'<p style="{_P_MUTED}" align="center">Seven seconds is all it takes to see it: '
+            f'<a href="{_LAUNCH_VIDEO}" style="color: {_TEAL}; font-weight: 600;">watch the launch video</a>.</p>',
             "{provider_name}",
         ),
     },
     "proof_point": {
         "id": "proof_point",
         "name": "The Proof Point",
-        "subject": "never lose a client to paperwork again",
+        "subject": "the billables you already earned but never invoiced",
         "sequence_day": 14,
-        "description": "Day 14 — Data-driven with traction proof. Stats in their language. Competitive edge.",
+        "description": "Day 14 — Concrete product proof: billables caught, state rules. Download CTA.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
             + _section(
-                "The paperwork problem",
-                "The average home care agency spends <strong>15+ hours per week</strong> on "
-                "documentation alone. That's time that should go to client visits, "
-                "caregiver training, or honestly just getting home at a reasonable hour."
+                "The line you never invoice",
+                '"Oh, and she needs help with meals." Said once, in passing, at minute 34 of '
+                "the assessment. The old way, it never makes the invoice. PALM hears it, "
+                "prices it, and puts it in the agreement."
             )
-            + '<div style="text-align: center; margin: 24px 0;">'
-            + _stat_block("15hrs", "Typical weekly docs")
-            + _stat_block("3hrs", "With PalmCare AI")
-            + _stat_block("12hrs", "Back every week")
-            + '</div>'
             + _section(
-                "Why agencies are switching",
-                "<strong>60+ agencies</strong> on the waitlist. "
-                "<strong>24 active pilot users.</strong> "
-                "<strong>300+ assessments</strong> generated with 68% accuracy improvement. "
-                "No other platform does AI assessment generation, AI contract creation, "
-                "and voice-to-contract. We're the first."
+                "Built on your state's rules",
+                "PALM's service agreements follow the contract rules of the state you operate "
+                "in, all 50 of them. Not a generic template with your logo pasted on top. "
+                "A staff member reviews and approves before anything is final."
             )
             + '<div style="text-align: center; margin: 24px 0;">'
             f'<img src="{_GH_MARKETING}/linkedin_crm.png" '
-            'alt="PalmCare AI CRM Dashboard, Pipeline, Mobile App" '
+            'alt="PALM dashboard, pipeline, and mobile app" '
             f'style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {_SLATE_200};" />'
             '</div>'
-            + '<p style="' + _P + '">For {provider_name}, that could mean 12 hours back. Every single week.</p>'
-            + f'<div style="text-align: center; margin: 24px 0;">'
-            f'<a href="{_SITE}/#book-demo" style="display: inline-block; '
-            f'background: linear-gradient(135deg, {_TEAL}, {_TEAL_DARK}); color: #ffffff; '
-            'text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 32px; '
-            'border-radius: 10px;">Start Your 14 Day Free Trial</a></div>',
+            + f'<p style="{_P}">For {{provider_name}}, that is fewer missed billables and same day '
+            'contracts, starting with the next visit.</p>'
+            + _DOWNLOAD_BTN,
             "{provider_name}",
         ),
     },
@@ -290,7 +284,7 @@ EMAIL_TEMPLATES = {
         "name": "The Graceful Exit",
         "subject": "closing the loop, {provider_name}",
         "sequence_day": 28,
-        "description": "Day 28 — Short, confident, respectful. Restraint signals strength. Door stays open.",
+        "description": "Day 28 — Short, confident, respectful. Door stays open. App link stays.",
         "body": _email_wrap(
             f'<p style="{_P}">Hi,</p>'
             f'<p style="{_P}">We have reached out a few times and know you are busy. '
@@ -298,8 +292,10 @@ EMAIL_TEMPLATES = {
             f'<p style="{_P}">We will not keep filling your inbox.</p>'
             + _section(
                 "When you are ready",
-                "If the timing is ever right for a faster way to handle assessments, contracts, "
-                "and documentation, we are here. One tap, AI handles the rest."
+                "PALM is on the App Store whenever the timing is right. Record the assessment, "
+                "and it writes the care plan, the billables, and the contract. "
+                f'<a href="{_APP_STORE}" style="color: {_TEAL}; font-weight: 600;">Download it here</a> '
+                "and try it on one visit."
             )
             + f'<p style="{_P_MUTED}">Your next client is waiting. So are we.</p>',
             "{provider_name}",

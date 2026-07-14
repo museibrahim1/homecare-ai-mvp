@@ -29,7 +29,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from post_to_meta import (  # noqa: E402
+    fb_post_video,
     ig_publish_image,
+    ig_publish_reel,
     threads_post,
     require_env as require_meta_env,
 )
@@ -41,9 +43,12 @@ from post_to_linkedin import (  # noqa: E402
 
 LOG_FILE = HERE / ".posted_log.json"
 SIGNUP = "palmcareai.com/register"
+APP = "palmcareai.com/app"  # redirects to the App Store listing
 
 # --------------------------------------------------------------------------- Meta
-# date -> caption (posted to FB + IG + Threads with {s} = signup link).
+# date -> (media, caption). Caption placeholders: {s} = signup link, {a} = app link.
+# Media ending in .mp4 posts as an IG Reel + FB video + Threads video, all day-of
+# (videos can't be pre-scheduled like FB photos).
 META = {
     "2026-07-10": ("gap-friday-done.png",
         "Leaving on time on a Friday? Groundbreaking. \U0001F334\n\nYour visit notes, billables, and service agreements were done before you left the last house today. The weekend starts when you clock out, not after three more hours of charting at the kitchen table.\n\nTag the coworker who's still doing their notes after dinner.\n\nStart free, no card: {s}\n#homecare #caregiverlife #homecareagency #nurselife"),
@@ -71,6 +76,48 @@ META = {
         "\"Oh, and she needs help with meals.\"\n\nSaid once, in passing, at minute 34 of the assessment. The old way, it never makes the invoice. PALM hears it, prices it, and puts it in the agreement. This is the real billables screen.\n\nStop losing billables you already earned: {s}\n#homecare #homecarebilling #agencyowner"),
     "2026-08-07": ("w2-poll-evenings.png",
         "We asked home care admins what actually eats their evenings. 68% said the same thing. \U0001F5F3\uFE0F\n\nNot scheduling. Not family calls. Post-visit paperwork. The retyping of a conversation that already happened.\n\nIs it the same at your agency? Tell us what's number one for you.\n\nThen take it off the list: {s}\n#homecare #homecareagency #poll"),
+
+    # ------------------- "Get the app" download campaign (Jul 18 - Sep 11) ----
+    # Video posts lead: our 3 highest-engagement IG posts to date are all videos.
+    # Saturdays carry the download push so the approved M/W/F plan stays intact.
+    "2026-07-18": ("palm-app-launch-9x16.mp4",
+        "The visit ends. The contract is already written.\n\nPALM is on the App Store. It sits in on the assessment, writes the care plan, finds the billable items, and builds the contract. You review and sign.\n\nWhat would you do with your evenings back? Tell us below.\n\nGet the app: {a}\n#homecare #homecareagency #caregiver #newapp #iosapp"),
+    "2026-07-25": ("appstore-download-1x1.png",
+        "Your iPhone camera is the fastest way to end paperwork nights. \U0001F4F1\n\nPoint it at the code. Download PALM. Record your next assessment and watch the care plan, the billables, and the contract write themselves.\n\nFirst 14 days free, no card.\n\nOr tap here: {a}\n#homecare #homecareagency #caregiverlife #healthtech"),
+    "2026-08-01": ("palm-app-launch-9x16.mp4",
+        "7 seconds. That's the whole pitch.\n\nRecord the client assessment on your iPhone. PALM writes the transcript, the care plan, the billables, and a contract built on your state's rules. You review, you send, they sign.\n\nTag an agency owner who is still typing visit notes at 9pm.\n\nGet the app: {a}\n#homecare #homecareagency #agencyowner #caregiver"),
+    "2026-08-08": ("appstore-download-1x1.png",
+        "Every home care assessment already writes itself. Out loud. In the living room.\n\nPALM is the app that finally listens. Care plan, billables, and a state specific contract, drafted from what was actually said.\n\nScan the code with your iPhone or tap the link. Free to try on your next visit.\n\n{a}\n#homecare #homecareagency #healthcareAI"),
+    "2026-08-10": ("iphone_mockup_recording.png",
+        "This button replaces your clipboard, your forms, and your Sunday night charting. \U0001F334\n\nPress record at the assessment. PALM writes the care plan, prices the billables, and drafts the contract while you drive to the next visit.\n\nWhat's the last thing you want to be doing at 9pm? Wrong answers only.\n\nGet the app: {a}\n#homecare #caregiver #homecareagency"),
+    "2026-08-12": ("palm-app-launch-9x16.mp4",
+        "POV: you just finished the assessment and the paperwork finished with you. \u2705\n\nPALM sits in on the visit and hands you the care plan, the billables, and the contract before you start the car.\n\nOn the App Store now. Free for 14 days.\n\n{a}\n#homecare #POV #caregiverlife #homecareagency"),
+    "2026-08-14": ("ig_square_contract_signing.png",
+        "The agency that puts a clear agreement in front of the family first usually wins them.\n\nMost agencies take days. PALM agencies do it before they leave the driveway. Same visit, same conversation, contract drafted and ready to sign.\n\nHow long does assessment-to-signature take at your agency? Be honest \U0001F447\n\nGet the app: {a}\n#homecare #homecareagency #agencyowner"),
+    "2026-08-17": ("appstore-download-9x16.png",
+        "Saturday errand for agency owners: 30 seconds, one download. \U0001F4F2\n\nPALM turns your recorded assessments into care plans, billables, and state specific contracts. The trial is free and the setup is one login.\n\nScan the code or tap: {a}\n#homecare #homecareagency #smallbusiness"),
+    "2026-08-19": ("w4-phone-billables.png",
+        "\"Oh, and she needs help with meals.\"\n\nSaid once, at minute 34. The old way, it never makes the invoice. PALM hears it, prices it, and puts it in the agreement.\n\nHow many billables slipped through your last month? You'll never know. Your app would.\n\nDownload PALM: {a}\n#homecare #homecarebilling #agencyowner"),
+    "2026-08-21": ("palm-app-launch-9x16.mp4",
+        "Home care paperwork used to eat your evenings. Not anymore.\n\nPALM is on the App Store. One recording becomes the care plan, the billables, the visit notes, and the contract. A human reviews everything before it goes out.\n\nSend this to the coworker who's still charting after dinner.\n\n{a}\n#homecare #caregiverlife #nurselife #homecareagency"),
+    "2026-08-24": ("ig_square_stats_infographic.png",
+        "3 assessments a week. 2 hours of paperwork each. 312 hours a year.\n\nThat's 39 working days per assessor spent retyping what someone already said out loud. PALM deletes that line item.\n\nRun your own numbers in the comments: visits per week times hours of paperwork.\n\nGet the app: {a}\n#homecare #homecareagency #agencyowner"),
+    "2026-08-26": ("appstore-download-1x1.png",
+        "The QR code that gives you your evenings back. \U0001F334\n\nPALM listens to the assessment and writes the care plan, the billables, and a contract built on your state's rules. All 50 states covered.\n\nPoint your iPhone camera at the code. Free for 14 days.\n\n{a}\n#homecare #homecareagency #healthtech"),
+    "2026-08-28": ("iphone_mockup_contract.png",
+        "This contract was drafted by the visit itself.\n\n$34 an hour, 28 hours, 6 services. Pulled straight from what the family said during the assessment, in a state compliant agreement. You review, you send, they sign.\n\nWould your team trust it? Try it on one visit and judge for yourself.\n\nDownload PALM: {a}\n#homecare #homecareagency #healthcareAI"),
+    "2026-08-31": ("palm-app-launch-9x16.mp4",
+        "September resolution for agency owners: stop typing what was already said out loud.\n\nPALM records the assessment and writes the care plan, the billables, and the contract. On the App Store now, free for 14 days.\n\nWhat would your team do with 12 extra hours a week? \U0001F447\n\n{a}\n#homecare #homecareagency #agencyowner #caregiver"),
+    "2026-09-02": ("w1-timeline-sameday.png",
+        "10:00, the assessment starts. 10:47, you press stop. 10:49, the care plan, billables, and contract are drafted. 12:15, the family signs.\n\nThat timeline is the whole product. Same day, every time.\n\nWhat does that timeline look like at your agency today?\n\nGet the app: {a}\n#homecare #homecareagency #privateduty"),
+    "2026-09-04": ("appstore-download-9x16.png",
+        "One scan. Four documents you never type again. \U0001F4F1\n\nTranscript. Care plan. Billables. Contract. All drafted from the assessment you were already doing.\n\nPoint your iPhone camera at the code and try it free.\n\n{a}\n#homecare #homecareagency #caregiverlife"),
+    "2026-09-07": ("gap-myth-reality.png",
+        "\"AI is going to replace the caregivers.\" It's the fear we hear most, and it's backwards.\n\nPALM doesn't touch the caring. It deletes the typing about the caring. Your nurse runs the visit. The app writes the paperwork. A human approves everything.\n\nWhat's your take? Genuinely curious \U0001F447\n\nGet the app: {a}\n#homecare #caregiver #healthcareAI"),
+    "2026-09-09": ("palm-app-launch-9x16.mp4",
+        "The 7 second demo that ends 2 hour paperwork nights.\n\nPALM sits in on the assessment, writes the care plan, finds the billables, and builds the contract. On the App Store, free for 14 days.\n\nTag the most overworked admin you know.\n\n{a}\n#homecare #homecareagency #nurselife"),
+    "2026-09-11": ("appstore-download-1x1.png",
+        "Friday checkpoint: did your paperwork leave when you did? \U0001F334\n\nPALM agencies close the week with the contracts already drafted, the billables already priced, and the evenings already theirs.\n\nScan the code. Next Friday can feel like this.\n\n{a}\n#homecare #homecareagency #caregiverlife"),
 }
 
 # --------------------------------------------------------------------- LinkedIn
@@ -101,6 +148,38 @@ LINKEDIN = {
     "2026-08-06": ("image", "w2-statement-dataentry.png", "",
         "You didn't get into home care to do data entry.\n\nNobody did. But post-visit documentation quietly became the biggest unpaid job in the industry, and the top reason good assessors burn out.\n\nThe fix isn't typing faster. It's not typing.",
         "Record the visit, PALM writes the rest: palmcareai.com/register"),
+
+    # ------------------- "Get the app" download campaign (Aug 11 - Sep 10) ----
+    "2026-08-11": ("image", "appstore-download-1x1.png", "",
+        "PALM is on the App Store.\n\nIt does one job. It sits in on the client assessment, then writes the care plan, finds the billable items, and builds a service contract on your state's rules. A coordinator reviews and signs.\n\nWe kept the scope narrow on purpose. No EVV, no scheduling, no billing processing. Record the visit, get the documentation.\n\nIf your team still documents every visit twice, once out loud and once at a keyboard, the trial is free and it takes one visit to judge.",
+        "Download PALM for iPhone: palmcareai.com/app"),
+    "2026-08-13": ("image", "w3-phone-transcript.png", "",
+        "The most expensive part of a care assessment is the second time it gets documented.\n\nThe first time is free. The client, the family, and the assessor say everything out loud, in the room. The second time costs your best nurse her evening.\n\nPALM keeps the first documentation and deletes the second. The app records the visit, separates the voices, and drafts the care plan, the billables, and the contract from what was actually said.",
+        "On the App Store: palmcareai.com/app"),
+    "2026-08-18": ("image", "iphone_mockup_contract.png", "",
+        "This service agreement was drafted before the assessor left the driveway.\n\nRate, hours, services, and state specific terms, pulled from the assessment conversation itself. The coordinator reviewed it, the family signed it the same day.\n\nIn home care, the first clear agreement in front of the family usually wins the client. Speed here isn't a vanity metric. It's revenue.\n\nWhat's your average time from assessment to signature? The range I hear from owners is wider than you'd think.",
+        "Try it on one visit, free: palmcareai.com/app"),
+    "2026-08-20": ("image", "w4-founder-note.png", "",
+        "A month after putting PALM on the App Store, the feedback that sticks with me isn't about the AI.\n\nIt's owners telling me their assessors stopped dreading the evenings. The visit ends and the paperwork is drafted. They review it, send it, and go home.\n\nWe built the care plan generation, the billable detection, and the 50-state contract engine. But the product, the real one, is the evening back.",
+        "PALM for iPhone: palmcareai.com/app"),
+    "2026-08-25": ("image", "w3-math.png", "",
+        "312 hours a year. That's 3 assessments a week at 2 hours of paperwork each.\n\n39 working days per assessor, spent retyping conversations that already happened. For a team of five, roughly 195 days a year of pure transcription labor, unbudgeted and unpaid.\n\nPALM's pitch is not that AI is impressive. It's that this line item can go to zero. The app listens to the assessment and drafts the care plan, the billables, and the contract. Your team approves instead of types.",
+        "Run it on your next visit: palmcareai.com/app"),
+    "2026-08-27": ("image", "linkedin_crm_showcase.png", "",
+        "The iPhone app is where PALM starts. It isn't where it ends.\n\nEvery recorded assessment lands in your agency dashboard: the transcript, the care plan, the priced billables, and the contract, organized by client and ready for review. Owners see the pipeline. Coordinators approve documents. Nothing ships without a human sign-off.\n\nThat review step is deliberate. AI drafts fast. Your people stay accountable.",
+        "Start with the app: palmcareai.com/app"),
+    "2026-09-01": ("image", "w2-vs-table.png", "",
+        "Same visit. Two very different nights.\n\nThe information in a care assessment doesn't change based on who types it up. What changes is where the hours go: your nurse's evening, or two minutes of AI processing plus a human review.\n\nSeptember is a good month to run the comparison on your own visits. The trial is free and the first contract usually settles the argument.",
+        "PALM on the App Store: palmcareai.com/app"),
+    "2026-09-03": ("image", "w4-states.png", "",
+        "50 states. 50 different rule books for home care service agreements.\n\nMost software handles this with one template and a logo swap. PALM drafts the agreement on the contract rules of the state you actually operate in, from the assessment you actually recorded.\n\nCompliance isn't a feature we bolted on. It's the reason agencies trust the draft enough to send it the same day.",
+        "Download PALM: palmcareai.com/app"),
+    "2026-09-08": ("image", "appstore-download-1x1.png", "",
+        "The best product demo we have is 30 seconds long and happens on your own visit.\n\nDownload PALM, record your next client assessment, and watch it hand you the care plan, the billables, and the state specific contract. Then compare that to your current evening.\n\nNo sales call required. The App Store link is in the comments.",
+        "palmcareai.com/app, free for 14 days"),
+    "2026-09-10": ("image", "w1-timeline-sameday.png", "",
+        "10:00, the assessment starts.\n10:47, you press stop.\n10:49, the care plan, billables, and agreement are drafted.\n12:15, the family signs.\n\nTwo months ago this timeline was our launch promise. Now it's the daily rhythm for the agencies running PALM.\n\nIf your assessment-to-signature time is still measured in days, the gap is the opportunity.",
+        "PALM for iPhone: palmcareai.com/app"),
 }
 
 
@@ -132,25 +211,47 @@ def threads_safe(caption: str, limit: int = 500) -> str:
 
 
 def run_meta(date: str, dry: bool) -> dict | None:
-    """Publish the day-of IG + Threads posts. Facebook is NOT posted here: it is
-    scheduled natively via schedule_meta_fb.py so it shows up in Meta Business
-    Suite's planner and publishes even if this machine is asleep. IG and Threads
-    can't be pre-scheduled through the API, so they run day-of from here."""
+    """Publish the day-of IG + Threads posts. Facebook photos are NOT posted
+    here: they are scheduled natively via schedule_meta_fb.py so they show up in
+    Meta Business Suite's planner and publish even if this machine is asleep.
+    IG and Threads can't be pre-scheduled through the API, so they run day-of.
+    Videos (.mp4) also run fully day-of: IG Reel + FB video + Threads video."""
     entry = META.get(date)
     if entry is None:
         return None
-    image, caption = entry
-    caption = caption.format(s=SIGNUP)
+    media, caption = entry
+    caption = caption.format(s=SIGNUP, a=APP)
+    is_video = media.endswith(".mp4")
     if dry:
-        print(f"{date}: WOULD post {image} to IG + Threads (FB is natively scheduled):\n---\n{caption}\n---")
+        kind = "IG Reel + FB video + Threads" if is_video else "IG + Threads (FB is natively scheduled)"
+        print(f"{date}: WOULD post {media} to {kind}:\n---\n{caption}\n---")
         return {"dry": True}
     require_meta_env()
     results = {}
-    ig = ig_publish_image(image, caption)
+    if is_video:
+        ig = ig_publish_reel(media, caption)
+        results["ig"] = ig.get("id")
+        print(f"IG Reel OK: {results['ig']}")
+        try:
+            fb = fb_post_video(media, caption)
+            results["fb"] = fb.get("id")
+            print(f"FB video OK: {results['fb']}")
+        except Exception as e:
+            results["fb_error"] = str(e)[:200]
+            print(f"FB WARN: {e}", file=sys.stderr)
+        try:
+            th = threads_post(threads_safe(caption), video=media)
+            results["th"] = th.get("id")
+            print(f"Threads OK: {results['th']}")
+        except Exception as e:
+            results["th_error"] = str(e)[:200]
+            print(f"Threads WARN: {e}", file=sys.stderr)
+        return results
+    ig = ig_publish_image(media, caption)
     results["ig"] = ig.get("id")
     print(f"IG OK: {results['ig']}")
     try:
-        th = threads_post(threads_safe(caption), image=image)
+        th = threads_post(threads_safe(caption), image=media)
         results["th"] = th.get("id")
         print(f"Threads OK: {results['th']}")
     except Exception as e:  # Threads is best-effort; don't fail the whole run

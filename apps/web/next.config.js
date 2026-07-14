@@ -55,6 +55,17 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        // Short, caption-friendly link to the iOS app. Used on social posts,
+        // the QR code campaign, and emails.
+        source: '/app',
+        destination: 'https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988',
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     // The browser talks to same-origin /api/* (so the httpOnly session cookie
     // is first-party); this rewrite proxies those calls to the real backend.

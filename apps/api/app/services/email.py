@@ -395,19 +395,34 @@ class EmailService:
                 </a>
             </div>
 
-            <!-- ══ iOS BETA (TestFlight) ══ -->
+            <!-- ══ DOWNLOAD THE APP ══ -->
             <div style="margin: 0 32px 32px; background: #0f172a; border-radius: 16px; padding: 28px; text-align: center;">
                 <p style="color: #ffffff; margin: 0 0 6px; font-size: 17px; font-weight: 700;">
-                    Get Early Access to the iOS App
+                    PALM Is on the App Store
                 </p>
                 <p style="color: #94a3b8; margin: 0 0 20px; font-size: 14px; line-height: 1.5;">
-                    Join our TestFlight beta and try new features before anyone else.
-                    Request access and we'll send you a personal TestFlight invite.
+                    The app is where the work happens. It sits in on the assessment, writes the
+                    care plan, finds the billable items, and builds the contract. Download it
+                    now and record your first visit today.
                 </p>
-                <a href="{app}/beta"
-                   style="display: inline-block; background: #0d9488; color: #ffffff; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 600;">
-                    Join the iOS Beta
+                <a href="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
+                   style="display: inline-block; background: #0d9488; color: #ffffff; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 700;">
+                    Download PALM for iPhone
                 </a>
+                <div style="margin-top: 20px;">
+                    <a href="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988" style="text-decoration: none;">
+                        <img src="{app}/launch/palm-appstore-qr.png" alt="Scan to download PALM"
+                             width="96" height="96" style="border-radius: 10px; background: #ffffff; padding: 6px;">
+                    </a>
+                    <p style="color: #64748b; margin: 8px 0 0; font-size: 12px;">
+                        Or point your iPhone camera at the code
+                    </p>
+                </div>
+                <p style="margin: 16px 0 0; font-size: 13px;">
+                    <a href="{app}/launch/palm-app-launch.mp4" style="color: #2dd4bf; text-decoration: none; font-weight: 600;">
+                        Watch the 7 second launch video
+                    </a>
+                </p>
             </div>
 
             <!-- ══ BROCHURE ══ -->
@@ -507,10 +522,13 @@ class EmailService:
                 <li>Generate service contracts</li>
                 <li>Manage your clients and caregivers</li>
             </ul>
-            <p style="margin: 30px 0;">
-                <a href="{login_url}" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
-                    Log In Now
+            <p style="margin: 30px 0 12px;">
+                <a href="https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988" style="background-color: #0d9488; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 700;">
+                    Download PALM for iPhone
                 </a>
+            </p>
+            <p style="margin: 0 0 30px;">
+                <a href="{login_url}" style="color: #0d9488;">Or log in on the web</a>
             </p>
             <p>If you have any questions, please contact our support team.</p>
             <br>

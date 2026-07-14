@@ -143,6 +143,40 @@ def _comment(post_urn: str, text: str) -> dict:
     return _check(r, "first comment")
 
 
+def _create_text_ugc(text: str) -> str:
+    body = {
+        "author": _author(),
+        "lifecycleState": "PUBLISHED",
+        "specificContent": {
+            "com.linkedin.ugc.ShareContent": {
+                "shareCommentary": {"text": text},
+                "shareMediaCategory": "NONE",
+            }
+        },
+        "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"},
+    }
+    r = requests.post(f"{API}/ugcPosts", headers=_headers(), json=body, timeout=60)
+    data = _check(r, "ugcPosts create (text)")
+    urn = data.get("id") or r.headers.get("x-restli-id")
+    if not urn:
+        raise PostError(f"no post URN returned: {data} / headers={dict(r.headers)}")
+    return urn
+
+
+def post_text(text: str, comment: str | None = None) -> dict:
+    urn = _create_text_ugc(text)
+    print(f"  post URN: {urn}")
+    result = {"post_urn": urn}
+    if comment:
+        try:
+            _comment(urn, comment)
+            result["comment"] = "posted"
+        except PostError as e:
+            result["comment_error"] = str(e)
+            print(f"  first-comment WARN (post is live): {e}", file=sys.stderr)
+    return result
+
+
 def post_image(text: str, image: str, comment: str | None = None) -> dict:
     path = _resolve(image)
     ct = "image/png" if path.suffix.lower() == ".png" else "image/jpeg"
@@ -251,8 +285,6 @@ def main() -> int:
     chosen = [m for m in (args.image, args.video, args.document) if m]
     if len(chosen) > 1:
         raise SystemExit("Provide only one of --image, --video, or --document")
-    if not chosen:
-        raise SystemExit("Provide --image, --video, or --document")
 
     if args.dry_run:
         info = verify_token()
@@ -260,7 +292,7 @@ def main() -> int:
         print("DRY RUN — nothing posted.")
         print(f"  token member: {info.get('name')} ({info.get('sub')})")
         print(f"  author urn  : {_author()}")
-        print(f"  media       : {media} -> {_resolve(media)}")
+        print(f"  media       : {media + ' -> ' + str(_resolve(media)) if media else '(text-only)'}")
         print(f"  body        : {args.text[:80]}...")
         print(f"  first comment: {args.comment}")
         return 0
@@ -270,8 +302,10 @@ def main() -> int:
             res = post_image(args.text, args.image, args.comment)
         elif args.video:
             res = post_video(args.text, args.video, args.comment)
-        else:
+        elif args.document:
             res = post_document(args.text, args.document, args.title or "PALM", args.comment)
+        else:
+            res = post_text(args.text, args.comment)
     except PostError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 1
