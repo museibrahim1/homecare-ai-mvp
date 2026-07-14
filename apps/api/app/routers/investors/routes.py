@@ -133,6 +133,35 @@ def list_investors(
     ) for i in investors]
 
 
+@router.get("/internal-export")
+def internal_export_investors(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Export all investors with a contact email via internal API key.
+    Used by outreach scripts to email the full CRM list.
+    Must be defined before /{investor_id} so the path is not shadowed.
+    """
+    from app.core.internal_auth import require_internal_key
+    require_internal_key(request)
+
+    investors = db.query(Investor).filter(
+        Investor.contact_email.isnot(None), Investor.contact_email != ""
+    ).all()
+    return [{
+        "fund_name": i.fund_name,
+        "contact_name": i.contact_name or "",
+        "contact_email": i.contact_email,
+        "focus_stages": i.focus_stages or [],
+        "focus_sectors": i.focus_sectors or [],
+        "description": i.description or "",
+        "status": i.status,
+        "priority": i.priority,
+        "email_send_count": i.email_send_count or 0,
+        "last_email_sent_at": i.last_email_sent_at.isoformat() if i.last_email_sent_at else None,
+    } for i in investors]
+
+
 @router.get("/{investor_id}", response_model=InvestorDetail)
 def get_investor(investor_id: UUID, db: Session = Depends(get_db), user: User = Depends(require_permission("investors"))):
     inv = db.query(Investor).filter(Investor.id == investor_id).first()
