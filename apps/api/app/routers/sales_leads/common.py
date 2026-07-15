@@ -75,18 +75,18 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         # Product showcase — iPhone + CRM
         '<div style="padding: 0 40px 32px; text-align: center;">'
         f'<a href="{_SITE}" style="text-decoration: none;">'
-        f'<img src="{_GH_MARKETING}/hero_banner.png" '
-        'alt="PalmCare AI iPhone App and CRM Dashboard" '
+        f'<img src="{_GH_MARKETING}/social/palm-hero-16x9.png" '
+        'alt="PALM: record the visit, get the notes, billables, and contract" '
         'style="max-width: 520px; width: 100%; border-radius: 12px; '
         f'border: 1px solid {_SLATE_200};" />'
         '</a></div>'
         # iPhone app previews
         '<div style="padding: 0 40px 24px; text-align: center;">'
-        f'<img src="{_GH_MARKETING}/iphone_home.png" alt="Home" '
+        f'<img src="{_GH_MARKETING}/social/iphone_mockup_home.png" alt="Home" '
         'style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
-        f'<img src="{_GH_MARKETING}/iphone_record.png" alt="Palm It" '
+        f'<img src="{_GH_MARKETING}/social/iphone_mockup_recording.png" alt="Record the visit" '
         'style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
-        f'<img src="{_GH_MARKETING}/iphone_clients.png" alt="Clients" '
+        f'<img src="{_GH_MARKETING}/social/iphone_mockup_contract.png" alt="The contract, ready to sign" '
         'style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />'
         '</div>'
         # CTA banner — the app download is the ask
