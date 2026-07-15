@@ -289,7 +289,7 @@ export default function PricingPage() {
             },
             {
               q: 'What happens after the 14-day trial?',
-              a: 'When your trial ends, subscribe in the PalmCare iOS app to keep full access: Starter ($199/mo), Growth ($699/mo), or Enterprise ($1,200/mo). Annual billing saves 20% on every plan. Your data is preserved while you decide.',
+              a: 'When your trial ends, subscribe in the PalmCare iOS app to keep full access: Starter ($199/mo), Growth ($699/mo), or Enterprise ($1,199.99/mo). Annual billing saves 20% on every plan. Your data is preserved while you decide.',
             },
             {
               q: 'Which plans include the free trial?',

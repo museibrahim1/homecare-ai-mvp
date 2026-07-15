@@ -350,7 +350,7 @@ struct PaywallView: View {
             .accessibilityLabel("Restore previous purchases")
 
             HStack(spacing: 16) {
-                Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                Link("Terms of Use", destination: URL(string: "https://palmcareai.com/terms")!)
                 Link("Privacy Policy", destination: URL(string: "https://palmcareai.com/privacy")!)
             }
             .font(.system(size: 11))
