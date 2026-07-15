@@ -94,7 +94,7 @@ const ASSETS: Asset[] = [
   { src: '/screenshots/ios/07_contract.png', title: 'iOS — Contract', category: 'ios', use: 'Mobile contract view' },
 
   // Branding
-  { src: '/PalmCare_Full_v4.pdf', title: 'Pitch Deck (PDF)', category: 'branding', use: 'Investor outreach, meetings' },
+  { src: '/PalmCare_Deck_v5.pdf', title: 'Pitch Deck v5 (PDF)', category: 'branding', use: 'Investor outreach, meetings' },
 ];
 
 const CATEGORIES: { key: Category; label: string; icon: typeof Layers }[] = [

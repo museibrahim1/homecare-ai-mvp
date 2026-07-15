@@ -17,7 +17,7 @@ import resend
 
 resend.api_key = os.getenv("RESEND_API_KEY", "").strip()
 
-PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Full_v4.pdf"
+PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Deck_v5.pdf"
 
 SKIP_EMAILS = {
     "jamie@thecreatorfund.com",

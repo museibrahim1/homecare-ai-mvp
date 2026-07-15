@@ -1,7 +1,7 @@
 """Shared brand constants, email wrapper, and templates for the investors package."""
 
 _SITE = "https://palmcareai.com"
-_DECK_URL = "https://palmcareai.com/PalmCare_Full_v4.pdf"
+_DECK_URL = "https://palmcareai.com/PalmCare_Deck_v5.pdf"
 _TEAL = "#0d9488"
 _TEAL_DARK = "#0f766e"
 _SLATE_900 = "#0f172a"

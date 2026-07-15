@@ -29,7 +29,7 @@ import resend
 resend.api_key = os.getenv("RESEND_API_KEY", "").strip()
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Full_v4.pdf"
+PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Deck_v5.pdf"
 
 MEGA_INVESTORS = [
     # ─── HEALTHCARE / HEALTHTECH VCs ───────────────────────────────────

@@ -24,8 +24,7 @@ logger = logging.getLogger(__name__)
 # Marketing collateral bundled with the API (attached to emails).
 _ASSETS = Path(__file__).resolve().parent.parent / "assets"
 BROCHURE_PATH = _ASSETS / "PalmCare-AI-Brochure.pdf"
-PITCH_DECK_PATH = _ASSETS / "PalmCare_Full_v4.pdf"
-MARKETING_BROCHURE_PNG = _ASSETS / "PalmCare-Trifold-Brochure.png"
+PITCH_DECK_PATH = _ASSETS / "PalmCare_Deck_v5.pdf"
 
 
 def _file_attachment(path: Path, filename: str) -> Optional[dict]:
@@ -47,13 +46,8 @@ def _brochure_attachment() -> Optional[dict]:
 
 
 def _pitch_deck_attachment() -> Optional[dict]:
-    """Load the pitch deck PDF as a Resend attachment (None if missing)."""
-    return _file_attachment(PITCH_DECK_PATH, "PalmCare-AI-Pitch-Deck.pdf")
-
-
-def _marketing_brochure_png() -> Optional[dict]:
-    """Load the marketing brochure PNG as a Resend attachment (None if missing)."""
-    return _file_attachment(MARKETING_BROCHURE_PNG, "PalmCare-Brochure.png")
+    """Load the pitch deck PDF (v5) as a Resend attachment (None if missing)."""
+    return _file_attachment(PITCH_DECK_PATH, "PalmCare_Deck_v5.pdf")
 
 
 
@@ -501,12 +495,12 @@ class EmailService:
     # ==================== Marketing Studio ====================
 
     def marketing_attachments(self) -> List[dict]:
-        """Collateral attached to Marketing Studio emails (brochure PNG)."""
-        return [a for a in (_marketing_brochure_png(),) if a]
+        """Collateral attached to Marketing Studio emails (brochure PDF)."""
+        return [a for a in (_brochure_attachment(),) if a]
 
     def investor_attachments(self) -> List[dict]:
-        """Collateral attached to investor emails (brochure + pitch deck)."""
-        return [a for a in (_brochure_attachment(), _pitch_deck_attachment()) if a]
+        """Collateral attached to investor emails (pitch deck v5)."""
+        return [a for a in (_pitch_deck_attachment(),) if a]
 
     def send_business_approved(self, business_email: str, business_name: str, login_url: str):
         """Send approval notification with login link."""

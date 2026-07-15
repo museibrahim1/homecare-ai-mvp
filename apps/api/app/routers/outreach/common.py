@@ -230,7 +230,7 @@ def _build_agency_html(provider_name: str, city: str, state: str) -> tuple[str, 
     return subject, body
 
 
-PITCH_DECK_URL = f"{SITE_URL}/PalmCare_Full_v4.pdf"
+PITCH_DECK_URL = f"{SITE_URL}/PalmCare_Deck_v5.pdf"
 
 
 def _build_investor_text(fund_name: str, contact_name: str, focus_areas: str) -> tuple[str, str]:
