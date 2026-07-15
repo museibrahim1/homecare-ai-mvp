@@ -78,12 +78,12 @@ def build_warm_open(provider_name, city, state, state_full):
 </div>
 <div style="padding: 0 40px 32px; text-align: center;">
 <a href="{SITE}" style="text-decoration: none;">
-<img src="{GH_MARKETING}/social/palm-hero-16x9.png" alt="PALM: record the visit, get the notes, billables, and contract" style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {SLATE_200};" />
+<img src="{GH_MARKETING}/social/w1-phone-record.png" alt="This screen replaces your clipboard. Press record at the assessment." style="max-width: 520px; width: 100%; border-radius: 12px; border: 1px solid {SLATE_200};" />
 </a></div>
 <div style="padding: 0 40px 24px; text-align: center;">
-<img src="{GH_MARKETING}/social/iphone_mockup_home.png" alt="Home" style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />
-<img src="{GH_MARKETING}/social/iphone_mockup_recording.png" alt="Record the visit" style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />
-<img src="{GH_MARKETING}/social/iphone_mockup_contract.png" alt="The contract, ready to sign" style="width: 30%; max-width: 150px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />
+<img src="{GH_MARKETING}/social/w3-phone-transcript.png" alt="PALM knows who said what" style="width: 30%; max-width: 165px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />
+<img src="{GH_MARKETING}/social/w4-phone-billables.png" alt="Billables, caught live" style="width: 30%; max-width: 165px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />
+<img src="{GH_MARKETING}/social/w2-phone-contract.png" alt="The contract writes itself" style="width: 30%; max-width: 165px; margin: 0 4px; border-radius: 8px; vertical-align: top;" />
 </div>
 <div style="margin: 0 40px 32px; background: linear-gradient(135deg, {TEAL}, {TEAL_DARK}); border-radius: 12px; padding: 28px 32px; text-align: center;">
 <p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>
