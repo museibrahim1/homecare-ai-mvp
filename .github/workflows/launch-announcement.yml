@@ -1,0 +1,70 @@
+name: App Store launch announcement
+
+# One-shot launch posts for Jul 10, 2026 (App Store approval day).
+# Runs on push to the launch branch so it fires the moment the announcement
+# lands, using the repo's social secrets. scripts/social/.launch_posted.json
+# (committed back to the branch) guarantees each post publishes exactly once.
+
+on:
+  push:
+    branches:
+      - cursor/app-store-launch-announcement-ddb8
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (show what would post, post nothing)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: launch-announcement
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pick up any .launch_posted.json committed by an earlier run, even if
+      # this run was triggered by an older push (dedupe must see the log).
+      - name: Sync to branch tip
+        run: git pull --rebase origin ${{ github.ref_name }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests python-dotenv
+
+      - name: Post launch announcement
+        env:
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+          META_IG_BUSINESS_ID: ${{ secrets.META_IG_BUSINESS_ID }}
+          META_THREADS_USER_TOKEN: ${{ secrets.META_THREADS_USER_TOKEN }}
+          META_THREADS_USER_ID: ${{ secrets.META_THREADS_USER_ID }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_ID: ${{ secrets.LINKEDIN_PERSON_ID }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          python3 scripts/social/launch_announcement.py $ARGS
+
+      - name: Commit posted log (double-post guard)
+        if: ${{ always() && github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "palm-social-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -f scripts/social/.launch_posted.json || true
+          if ! git diff --cached --quiet; then
+            git commit -m "social: record launch announcement log [skip ci]"
+            git pull --rebase origin ${{ github.ref_name }}
+            git push origin HEAD:${{ github.ref_name }}
+          fi
