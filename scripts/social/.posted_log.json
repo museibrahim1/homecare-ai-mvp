@@ -411,5 +411,16 @@
       "post_urn": "urn:li:share:7489718736296300544",
       "comment": "posted"
     }
+  },
+  "2026-08-02-pm": {
+    "meta": {
+      "ig": "18098868512249675",
+      "fb": "122121961995024569",
+      "th_error": "Threads publish failed: {'message': 'The requested resource does not exist', 'type': 'OAuthException', 'code': 24, 'error_subcode': 4279009, 'is_transient': False, 'error_user_title': 'Media Not Found"
+    },
+    "linkedin": {
+      "post_urn": "urn:li:share:7489825043644825604",
+      "comment": "posted"
+    }
   }
 }
