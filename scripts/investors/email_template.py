@@ -45,6 +45,8 @@ def build_email(fund_name, contact_name="", focus_line=""):
 
 We just launched. The iOS app and web CRM are live, subscriptions run $199 to $1,200 per month through the App Store, and the contract engine is validated in all 50 states plus DC.
 
+Since launch I've been driving distribution myself. The app is live for download on the App Store, and I run direct outreach to agencies across email and social every day to land the first paying customers.
+
 I built the platform solo after 9 years in home care. I'm raising $250K on a SAFE to fund the first sales, marketing, and engineering hires. The deck is attached.
 
 Worth a look?
