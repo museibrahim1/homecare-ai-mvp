@@ -36,7 +36,14 @@ if not resend.api_key:
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
 HEADERS = {"X-Internal-Key": os.getenv("CRON_SECRET", ""), "Content-Type": "application/json"}
-SITE = "https://palmcareai.com"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from lib.utm import site  # noqa: E402
+
+SITE = site("/", source="email", medium="email", campaign="agency_outreach", content="footer")
+SITE_HOME = site("/", source="email", medium="email", campaign="agency_outreach", content="hero")
+BOOK_DEMO = site("/book-demo", source="email", medium="email", campaign="agency_outreach", content="cta")
+PRIVACY = site("/privacy", source="email", medium="email", campaign="agency_outreach", content="footer")
+UNSUB = site("/unsubscribe", source="email", medium="email", campaign="agency_outreach", content="footer")
 GH_MARKETING = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing"
 
 TEAL = "#0d9488"
@@ -88,20 +95,20 @@ def build_warm_open(provider_name, city, state, state_full):
 <div style="margin: 0 40px 32px; background: linear-gradient(135deg, {TEAL}, {TEAL_DARK}); border-radius: 12px; padding: 28px 32px; text-align: center;">
 <p style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #ffffff;">PALM IT.</p>
 <p style="margin: 0 0 16px; font-size: 13px; color: rgba(255,255,255,0.85);">Record it. Transcribe it. Contract it. All in your palm.</p>
-<a href="{SITE}/#book-demo" style="display: inline-block; background-color: #ffffff; color: {TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">See It In Action</a>
+<a href="{BOOK_DEMO}" style="display: inline-block; background-color: #ffffff; color: {TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px;">See It In Action</a>
 </div>
 <div style="padding: 24px 40px; background-color: {SLATE_100}; border-top: 1px solid {SLATE_200}; text-align: center;">
-<a href="{SITE}" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">
-<img src="{SITE}/qr-code.png" alt="Scan to visit palmcareai.com" style="width: 72px; height: 72px; border-radius: 8px; border: 1px solid #e2e8f0;" />
+<a href="{SITE_HOME}" style="text-decoration: none; display: inline-block; margin-bottom: 12px;">
+<img src="https://palmcareai.com/qr-code.png" alt="Scan to visit palmcareai.com" style="width: 72px; height: 72px; border-radius: 8px; border: 1px solid #e2e8f0;" />
 </a><br>
 <p style="margin: 0 0 4px; font-size: 11px; color: #94a3b8;">Scan to visit palmcareai.com</p>
 <p style="margin: 0 0 4px; font-size: 13px; font-weight: 600; color: {SLATE_900};">PalmCare AI</p>
 <p style="margin: 0 0 12px; font-size: 12px; color: {SLATE_600};">Built for care professionals</p>
 <p style="margin: 0 0 12px; font-size: 11px; color: #94a3b8;">Palm Technologies, Inc. &middot; Omaha, NE<br>You received this because {provider_name} is listed in public agency directories.</p>
 <p style="margin: 0;">
-<a href="{SITE}/privacy" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Privacy</a>
+<a href="{PRIVACY}" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Privacy</a>
 &nbsp;&middot;&nbsp;
-<a href="{SITE}/unsubscribe" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a>
+<a href="{UNSUB}" style="color: #94a3b8; text-decoration: underline; font-size: 11px;">Unsubscribe</a>
 </p></div>
 </div>"""
     return subject, body

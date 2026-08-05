@@ -17,7 +17,7 @@ RESEND_API_KEY = os.environ["RESEND_API_KEY"]
 FROM = "PALM Marketing <sales@send.palmtai.com>"
 
 HOST = "https://palmcareai.com/marketing/social"
-SIGNUP = "palmcareai.com/register"
+SIGNUP = "palmcareai.com/r/meta"
 
 # Each post: (date, platform, image_filename, angle_label, caption)
 POSTS = [

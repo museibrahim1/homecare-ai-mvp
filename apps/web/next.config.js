@@ -56,13 +56,63 @@ const nextConfig = {
     ];
   },
   async redirects() {
+    // /app is a real page (client-side hop that fires GA4 app_store_click).
+    // Short /a/* and /r/* paths bake UTMs so social captions stay short while
+    // every click is attributable in Analytics.
     return [
       {
-        // Short, caption-friendly link to the iOS app. Used on social posts,
-        // the QR code campaign, and emails.
-        source: '/app',
-        destination: 'https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988',
+        source: '/a/meta',
+        destination:
+          '/app?utm_source=meta&utm_medium=social&utm_campaign=content_calendar&utm_content=shortlink',
         permanent: false,
+      },
+      {
+        source: '/a/li',
+        destination:
+          '/app?utm_source=linkedin&utm_medium=social&utm_campaign=content_calendar&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/a/email',
+        destination:
+          '/app?utm_source=email&utm_medium=email&utm_campaign=agency_outreach&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/a/qr',
+        destination:
+          '/app?utm_source=qr&utm_medium=qr&utm_campaign=print_materials&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/r/meta',
+        destination:
+          '/register?utm_source=meta&utm_medium=social&utm_campaign=content_calendar&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/r/li',
+        destination:
+          '/register?utm_source=linkedin&utm_medium=social&utm_campaign=content_calendar&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/r/email',
+        destination:
+          '/register?utm_source=email&utm_medium=email&utm_campaign=agency_outreach&utm_content=shortlink',
+        permanent: false,
+      },
+      // App Store metadata and old emails pointed here; help center is auth-only.
+      {
+        source: '/support',
+        destination: '/contact?inquiry=support',
+        permanent: true,
+      },
+      // Legacy email CTAs used /#book-demo; that anchor never existed on the homepage.
+      {
+        source: '/book-a-demo',
+        destination: '/book-demo',
+        permanent: true,
       },
     ];
   },

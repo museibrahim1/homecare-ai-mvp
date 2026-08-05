@@ -8,6 +8,7 @@ outreach package imports it directly.
 
 import logging
 from datetime import datetime, timezone, timedelta
+from urllib.parse import urlencode
 
 from sqlalchemy.orm import Session
 
@@ -16,6 +17,19 @@ from app.models.analytics import EmailCampaignEvent
 from app.services.email import email_service
 
 logger = logging.getLogger(__name__)
+
+
+def _utm(path: str = "", *, content: str | None = None, campaign: str = "agency_outreach") -> str:
+    """Build a palmcareai.com URL with standard email UTMs."""
+    base = "https://palmcareai.com" + (path if path.startswith("/") else f"/{path}" if path else "")
+    params = {
+        "utm_source": "email",
+        "utm_medium": "email",
+        "utm_campaign": campaign,
+    }
+    if content:
+        params["utm_content"] = content
+    return f"{base}?{urlencode(params)}"
 
 # ─── US states for bulk import ───
 
@@ -34,6 +48,7 @@ ALL_US_STATES = [
 # ─── Brand colors, email wrapper, templates & state names ───
 
 _SITE = "https://palmcareai.com"
+_SITE_LINK = _utm("/", content="signature")
 _TEAL = "#0d9488"
 _TEAL_DARK = "#0f766e"
 _CYAN = "#0891b2"
@@ -42,9 +57,13 @@ _SLATE_600 = "#475569"
 _SLATE_200 = "#e2e8f0"
 _SLATE_100 = "#f1f5f9"
 _GH_MARKETING = "https://raw.githubusercontent.com/museibrahim1/homecare-ai-mvp/main/apps/web/public/marketing"
-_APP_STORE = "https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
+# Hop through /app so GA4 attributes the click before the App Store redirect.
+_APP_STORE = _utm("/app", content="cta_button", campaign="app_download")
+_REGISTER = _utm("/register", content="cta_trial")
+_PRIVACY = _utm("/privacy", content="footer")
+_UNSUB = _utm("/unsubscribe", content="footer")
 _QR_APP = f"{_GH_MARKETING}/social/palm-appstore-qr.png"
-_LAUNCH_VIDEO = f"{_SITE}/launch/palm-app-launch.mp4"
+_LAUNCH_VIDEO = _utm("/launch/palm-app-launch.mp4", content="launch_video", campaign="app_download")
 
 
 def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> str:
@@ -68,13 +87,13 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         f'<div style="padding: 0 40px 32px; border-top: 1px solid {_SLATE_200}; padding-top: 24px;">'
         f'<p style="margin: 0; font-weight: 700; font-size: 15px; color: {_SLATE_900};">The PalmCare AI Team</p>'
         f'<p style="margin: 2px 0 0; font-size: 13px; color: {_TEAL};">Palm Technologies, Inc.</p>'
-        f'<p style="margin: 6px 0 0;"><a href="{_SITE}" '
+        f'<p style="margin: 6px 0 0;"><a href="{_SITE_LINK}" '
         f'style="color: {_TEAL}; text-decoration: none; font-size: 13px; font-weight: 500;">'
         f'palmcareai.com</a></p>'
         '</div>'
         # Product showcase — iPhone + CRM
         '<div style="padding: 0 40px 32px; text-align: center;">'
-        f'<a href="{_SITE}" style="text-decoration: none;">'
+        f'<a href="{_SITE_LINK}" style="text-decoration: none;">'
         f'<img src="{_GH_MARKETING}/social/w1-phone-record.png" '
         'alt="This screen replaces your clipboard. Press record at the assessment." '
         'style="max-width: 520px; width: 100%; border-radius: 12px; '
@@ -99,7 +118,7 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         f'color: {_TEAL_DARK}; text-decoration: none; font-size: 14px; font-weight: 700; '
         'padding: 12px 28px; border-radius: 8px;">Download PALM for iPhone</a>'
         '<p style="margin: 12px 0 0; font-size: 12px;">'
-        f'<a href="{_SITE}/register" style="color: rgba(255,255,255,0.9); text-decoration: underline;">'
+        f'<a href="{_REGISTER}" style="color: rgba(255,255,255,0.9); text-decoration: underline;">'
         'Start your 14 day free trial</a></p>'
         '</div>'
         # Footer
@@ -118,10 +137,10 @@ def _email_wrap(body_sections: str, provider_name: str = "{provider_name}") -> s
         f'Palm Technologies, Inc. &middot; Omaha, NE<br>'
         f'You received this because {provider_name} is listed in public agency directories.</p>'
         '<p style="margin: 0;">'
-        f'<a href="{_SITE}/privacy" style="color: #94a3b8; text-decoration: underline; '
+        f'<a href="{_PRIVACY}" style="color: #94a3b8; text-decoration: underline; '
         'font-size: 11px;">Privacy</a>'
         '&nbsp;&middot;&nbsp;'
-        f'<a href="{_SITE}/unsubscribe" style="color: #94a3b8; text-decoration: underline; '
+        f'<a href="{_UNSUB}" style="color: #94a3b8; text-decoration: underline; '
         'font-size: 11px;">Unsubscribe</a>'
         '</p></div>'
         '</div>'

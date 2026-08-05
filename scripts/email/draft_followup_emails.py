@@ -15,8 +15,13 @@ load_dotenv(PROJECT_ROOT / ".env")
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 CEO_EMAIL = "museibrahim@palmtai.com"
-SITE_URL = "https://palmcareai.com"
-IMG = f"{SITE_URL}/screenshots"
+import sys
+sys.path.insert(0, str(PROJECT_ROOT))
+from lib.utm import site  # noqa: E402
+
+SITE_URL = site("/", source="email", medium="email", campaign="followup", content="footer")
+BOOK_DEMO = site("/book-demo", source="email", medium="email", campaign="followup", content="cta")
+IMG = "https://palmcareai.com/screenshots"
 _S = "border-radius:8px;border:1px solid #e5e7eb;"
 
 FOLLOWUPS = [
@@ -88,7 +93,7 @@ def build_followup_html(f):
 </table>
 
 <p style="margin:0 0 24px;">
-<a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book Your Demo →</a>
+<a href="{BOOK_DEMO}" style="display:inline-block;background:#0d9488;color:#ffffff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book Your Demo →</a>
 </p>
 
 <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 16px;">
@@ -128,7 +133,7 @@ def build_followup_html(f):
 <p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Would you like to see a quick 15-minute demo? I can walk you through exactly how it works for your agency.</p>
 
 <p style="margin:0 0 24px;">
-<a href="{SITE_URL}/#book-demo" style="display:inline-block;background:#0d9488;color:#ffffff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book a Demo →</a>
+<a href="{BOOK_DEMO}" style="display:inline-block;background:#0d9488;color:#ffffff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book a Demo →</a>
 </p>"""
 
     footer = f"""\

@@ -15,8 +15,11 @@ resend.api_key = os.getenv("RESEND_API_KEY", "").strip()
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
 INTERNAL_KEY = os.getenv("CRON_SECRET", "")
-SITE_URL = "https://palmcareai.com"
-PITCH_DECK_URL = f"{SITE_URL}/PalmCare_Deck_v5.pdf"
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from lib.utm import site, deck_link  # noqa: E402
+
+SITE_URL = site("/", source="email", medium="email", campaign="agency_outreach", content="footer")
+PITCH_DECK_URL = deck_link(source="email", medium="email", campaign="agency_outreach", content="deck")
 
 AGENCY_SUBJECT_HOOKS = [
     "How much time does your team spend on documentation?",
@@ -31,12 +34,12 @@ AGENCY_SUBJECT_HOOKS = [
     "Saw you're in {state}, thought this might help",
 ]
 
-AGENCY_FOOTER = """
+AGENCY_FOOTER = f"""
 <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;">
 <p style="font-size:14px;color:#1a1a1a;margin:0 0 2px 0;font-weight:600;">Muse Ibrahim</p>
 <p style="font-size:13px;color:#6b7280;margin:0 0 2px 0;">Founder &amp; CEO, PalmCare AI</p>
 <p style="font-size:13px;color:#6b7280;margin:0 0 8px 0;">213-569-7693 &middot; sales@palmtai.com</p>
-<a href="https://palmcareai.com" style="font-size:12px;color:#0d9488;text-decoration:none;">palmcareai.com</a>
+<a href="{SITE_URL}" style="font-size:12px;color:#0d9488;text-decoration:none;">palmcareai.com</a>
 </div>
 """
 

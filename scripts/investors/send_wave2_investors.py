@@ -17,7 +17,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Deck_v5.pdf"
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from lib.utm import deck_link  # noqa: E402
+PITCH_DECK_URL = deck_link(campaign="investor_seed", content="deck_link")
 DATA_DIR = PROJECT_ROOT / "scripts" / "data"
 DRAFTS_DIR = Path.home() / ".palmcare" / "email-drafts"
 

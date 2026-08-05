@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { trackFunnelStep } from '@/lib/analytics';
 import { getAttribution, getSignupSource } from '@/lib/attribution';
+import { trackSignUp } from '@/lib/ga';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 
@@ -177,8 +178,7 @@ function RegisterForm() {
       // GA4 conversion event — lets Google Analytics report signups by
       // source/medium alongside our internal attribution.
       try {
-        (window as any).gtag?.('event', 'sign_up', {
-          method: 'website',
+        trackSignUp({
           plan: selectedPlan,
           signup_source: getSignupSource(),
           referral_source: form.referral_source || 'not_answered',

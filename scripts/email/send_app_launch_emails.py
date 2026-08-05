@@ -15,16 +15,24 @@ import time
 import requests
 from dotenv import load_dotenv
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from lib.utm import app_link, site, with_utm  # noqa: E402
+
 load_dotenv()
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 FROM = "Muse Ibrahim <sales@send.palmtai.com>"
 REPLY_TO = "sales@palmtai.com"
 
-APP_STORE_URL = "https://apps.apple.com/us/app/palm-home-care-contracts/id6766371988"
+# Hop through /app so GA4 attributes the click (never link straight to Apple).
+APP_STORE_URL = app_link(source="email", medium="email", campaign="app_launch", content="cta_button")
 HERO_IMG = "https://palmcareai.com/launch/palm-launch-email-hero.png"
-VIDEO_URL = "https://palmcareai.com/launch/palm-app-launch.mp4"
+VIDEO_URL = with_utm(
+    "https://palmcareai.com/launch/palm-app-launch.mp4",
+    source="email", medium="email", campaign="app_launch", content="launch_video",
+)
 QR_IMG = "https://palmcareai.com/launch/palm-appstore-qr.png"
+SITE_URL = site("/", source="email", medium="email", campaign="app_launch", content="footer")
 BROCHURE_PATH = os.path.join(
     os.path.dirname(__file__), "..", "..", "apps", "web", "public", "brochure",
     "PalmCare-AI-Brochure.pdf",
@@ -117,7 +125,7 @@ def build_html(first_name, company, variant):
       <p style="font-size:14px;color:#334155;margin:20px 0 0;">
         Muse Ibrahim<br/>
         Founder, PALM by Palm Technologies<br/>
-        <a href="https://palmcareai.com" style="color:#0d9488;">palmcareai.com</a>
+        <a href="{SITE_URL}" style="color:#0d9488;">palmcareai.com</a>
       </p>
     </div>
 

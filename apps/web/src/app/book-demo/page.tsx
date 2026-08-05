@@ -8,6 +8,7 @@ import {
   Loader2, User, Building2, Mail, Phone, ArrowRight,
   Video, Shield, Sparkles, ArrowLeft,
 } from 'lucide-react';
+import { trackGenerateLead } from '@/lib/ga';
 
 const API = '/api';
 
@@ -109,6 +110,9 @@ export default function BookDemoPage() {
       if (!res.ok) throw new Error(data.detail || data.message || 'Booking failed');
       setResult(data);
       setStep('done');
+      try {
+        trackGenerateLead({ lead_type: 'demo_booking', company: company.trim() || undefined });
+      } catch { /* analytics must never break booking */ }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
     } finally {

@@ -24,7 +24,11 @@ import resend
 resend.api_key = os.getenv("RESEND_API_KEY", "").strip()
 
 API_BASE = "https://api-production-a0a2.up.railway.app"
-PITCH_DECK_URL = "https://palmcareai.com/PalmCare_Deck_v5.pdf"
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from lib.utm import deck_link  # noqa: E402
+PITCH_DECK_URL = deck_link(campaign="investor_seed", content="deck_link")
 
 NEW_INVESTORS = [
     {

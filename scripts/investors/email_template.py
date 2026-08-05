@@ -11,11 +11,16 @@ prose, no buzzwords, no unverifiable claims.
 """
 
 import base64
+import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+from lib.utm import deck_link, site  # noqa: E402
+
 DECK_PATH = PROJECT_ROOT / "marketing" / "pitch-deck-v5" / "PalmCare_Deck_v5.pdf"
-DECK_URL = "https://palmcareai.com/PalmCare_Deck_v5.pdf"
+DECK_URL = deck_link(campaign="investor_seed", content="deck_link")
+SITE_URL = site("/", source="email", medium="investor", campaign="investor_seed", content="signature")
 
 SUBJECT = "Seed round: home care AI, live on the App Store"
 
@@ -51,7 +56,7 @@ Worth a look?
 
 Muse Ibrahim
 Founder and CEO, PalmCare AI
-invest@palmtai.com | palmcareai.com | 213-569-7693"""
+invest@palmtai.com | {SITE_URL} | 213-569-7693"""
 
     html = (
         '<pre style="font-family:-apple-system,BlinkMacSystemFont,Roboto,Arial,'

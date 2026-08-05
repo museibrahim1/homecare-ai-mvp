@@ -110,7 +110,7 @@ Record home care assessments with AI — real-time transcription, automated clin
 ---
 
 ## Support URL
-https://palmcareai.com/support
+https://palmcareai.com/contact?inquiry=support
 
 ## Marketing URL
 https://palmcareai.com
