@@ -94,7 +94,7 @@ export default function PrivacyPolicyPage() {
             </ul>
           </Section>
 
-          <Section title="4. Healthcare Data & HIPAA">
+          <Section id="hipaa" title="4. Healthcare Data & HIPAA">
             <p className="text-dark-300 mb-4">We recognize that the Service may be used to process Protected Health Information (PHI) as defined under the Health Insurance Portability and Accountability Act (HIPAA). We implement the following safeguards:</p>
             <ul className="list-disc list-inside space-y-2 text-dark-300">
               <li><strong className="text-white">Encryption:</strong> All data is encrypted in transit (TLS 1.2+) and at rest (AES-256).</li>
@@ -312,9 +312,17 @@ export default function PrivacyPolicyPage() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  id,
+  children,
+}: {
+  title: string;
+  id?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <section>
+    <section id={id}>
       <h2 className="text-xl font-bold text-white mb-4">{title}</h2>
       {children}
     </section>

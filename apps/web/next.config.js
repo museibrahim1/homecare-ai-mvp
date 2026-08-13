@@ -114,6 +114,12 @@ const nextConfig = {
         destination: '/book-demo',
         permanent: true,
       },
+      // Old GA/bookmarks hit /hipaa; HIPAA content lives on the privacy policy.
+      {
+        source: '/hipaa',
+        destination: '/privacy#hipaa',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
