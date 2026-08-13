@@ -70,6 +70,17 @@ export function Orb({ size = 200, active = false, className }: OrbProps) {
 
       ctx!.clearRect(0, 0, size, size);
 
+      // Ambient radial glow behind the orb so it reads as a light source.
+      ctx!.save();
+      const halo = ctx!.createRadialGradient(cx, cy, 40 * scale, cx, cy, 150 * scale);
+      const haloA = (isActive ? 0.22 : 0.12) + glow * 0.06;
+      halo.addColorStop(0, `rgba(45,212,191,${haloA})`);
+      halo.addColorStop(0.5, `rgba(13,148,136,${haloA * 0.5})`);
+      halo.addColorStop(1, 'rgba(13,148,136,0)');
+      ctx!.fillStyle = halo;
+      ctx!.fillRect(0, 0, size, size);
+      ctx!.restore();
+
       const rings = [
         { r: 130 * scale, rot: rot, po: 1.4, op: isActive ? 0.35 : 0.16, lw: 1.5 },
         { r: 115 * scale, rot: -rot * 0.8, po: 0.7, op: isActive ? 0.26 : 0.12, lw: 1.5 },
@@ -98,11 +109,29 @@ export function Orb({ size = 200, active = false, className }: OrbProps) {
       orbPath(cx, cy, 70 * scale, phase, audio);
       ctx!.clip();
       const hl = ctx!.createRadialGradient(cx - 20 * scale, cy - 20 * scale, 0, cx, cy, 80 * scale);
-      hl.addColorStop(0, 'rgba(255,255,255,0.25)');
+      hl.addColorStop(0, 'rgba(255,255,255,0.28)');
+      hl.addColorStop(0.6, 'rgba(255,255,255,0.05)');
       hl.addColorStop(1, 'transparent');
       ctx!.fillStyle = hl;
       ctx!.fillRect(0, 0, size, size);
       ctx!.restore();
+
+      // Orbiting light specks for a sense of depth and motion.
+      const specks = 5;
+      for (let i = 0; i < specks; i++) {
+        const base = (i / specks) * Math.PI * 2;
+        const spd = 0.35 + (i % 3) * 0.12;
+        const a = base + t * spd;
+        const orbit = (92 + (i % 3) * 14) * scale;
+        const px = cx + Math.cos(a) * orbit;
+        const py = cy + Math.sin(a) * orbit * 0.72;
+        const tw = (Math.sin(t * 2 + i) + 1) / 2;
+        const rad = (1.1 + tw * 1.6) * scale;
+        ctx!.beginPath();
+        ctx!.arc(px, py, rad, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(${i % 2 ? '178,245,234' : '255,255,255'},${0.25 + tw * 0.5})`;
+        ctx!.fill();
+      }
 
       frameRef.current = requestAnimationFrame(draw);
     }

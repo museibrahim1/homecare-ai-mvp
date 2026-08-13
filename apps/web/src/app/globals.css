@@ -646,6 +646,40 @@ html {
 .stagger-children > *:nth-child(7) { animation-delay: 300ms; }
 .stagger-children > *:nth-child(8) { animation-delay: 350ms; }
 
+/* ── Launch Intro (splash) ── */
+@keyframes li-aurora {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  33%  { transform: translate3d(7%, -5%, 0) scale(1.15); }
+  66%  { transform: translate3d(-6%, 6%, 0) scale(0.92); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes li-ripple {
+  0%   { transform: scale(0.82); opacity: 0.55; }
+  100% { transform: scale(2.25); opacity: 0; }
+}
+@keyframes li-shimmer {
+  0%       { transform: translateX(-130%) skewX(-18deg); }
+  55%,100% { transform: translateX(320%) skewX(-18deg); }
+}
+@keyframes li-caret { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes li-float {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(-140px) translateX(14px); opacity: 0; }
+}
+@keyframes li-rise {
+  from { opacity: 0; transform: translateY(18px); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes li-spin-slow { to { transform: rotate(360deg); } }
+
+.li-rise { animation: li-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.li-ripple { animation: li-ripple 3.4s ease-out infinite; }
+.li-shimmer { animation: li-shimmer 4.2s ease-in-out infinite; }
+.li-caret { animation: li-caret 1s step-end infinite; }
+.li-spin-slow { animation: li-spin-slow 26s linear infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
