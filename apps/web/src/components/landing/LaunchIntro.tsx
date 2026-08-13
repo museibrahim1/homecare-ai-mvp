@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, FileText, Mic, Sparkles, Zap } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, FileText, Mic, Zap } from 'lucide-react';
 import { Orb } from './Orb';
 import { TRANSCRIPT_SEGMENTS } from './data';
 
@@ -28,18 +29,6 @@ const INTRO_WORDS = INTRO_LINES.reduce((sum, seg) => sum + seg.words.length, 0);
 
 // Reactive waveform bar count (driven live, not looped CSS).
 const WAVE_BARS = Array.from({ length: 28 });
-
-// Deterministic ambient particles (positions/sizes/timing).
-const PARTICLES = [
-  { left: '12%', top: '72%', size: 3, dur: 15, delay: 0 },
-  { left: '22%', top: '40%', size: 2, dur: 19, delay: 3 },
-  { left: '34%', top: '84%', size: 4, dur: 17, delay: 6 },
-  { left: '48%', top: '30%', size: 2, dur: 21, delay: 2 },
-  { left: '61%', top: '78%', size: 3, dur: 16, delay: 5 },
-  { left: '73%', top: '46%', size: 2, dur: 20, delay: 1 },
-  { left: '82%', top: '68%', size: 4, dur: 18, delay: 7 },
-  { left: '90%', top: '36%', size: 2, dur: 22, delay: 4 },
-];
 
 /**
  * Full-screen launch splash: a cinematic hook that introduces the product.
@@ -206,21 +195,6 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
           className="absolute bottom-[-120px] right-[-80px] h-[460px] w-[460px] rounded-full blur-[120px]"
           style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.32), transparent 65%)', animation: 'li-aurora 19s ease-in-out infinite', animationDelay: '-11s' }}
         />
-        {/* Floating specks */}
-        {PARTICLES.map((p, i) => (
-          <span
-            key={i}
-            className="absolute rounded-full bg-teal-200/80 shadow-[0_0_6px_rgba(153,246,228,0.6)]"
-            style={{
-              left: p.left,
-              top: p.top,
-              width: p.size,
-              height: p.size,
-              animation: `li-float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-            }}
-          />
-        ))}
         {/* Fine grain to kill gradient banding */}
         <div
           className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
@@ -239,8 +213,8 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
       {/* ── Top bar ── */}
       <div className="relative z-10 flex items-center justify-between px-5 sm:px-8 py-5">
         <div className="li-rise flex items-center gap-2.5" style={{ animationDelay: '60ms' }}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-sm">
-            <Sparkles className="h-4 w-4 text-teal-200" />
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-primary-600">
+            <Image src="/hand-icon-white.png" alt="PalmCare AI" width={22} height={22} className="object-contain" />
           </div>
           <span className="text-[15px] font-semibold tracking-wide text-white">PalmCare AI</span>
         </div>
