@@ -1,45 +1,28 @@
 # Pricing — PalmCare AI
 
 PalmCare AI turns a recorded home care assessment into a state-specific service
-contract automatically. Starter and Growth include a 14-day free trial.
-Subscriptions are purchased and billed through Apple In-App Purchase in the
-PalmCare iOS app (charged to your Apple ID). Annual billing saves at least 20%
-on every plan (about 30% on Enterprise).
+contract automatically. There is one plan with everything included, and it comes
+with a 14-day free trial. Subscriptions are purchased and billed through Apple
+In-App Purchase in the PalmCare iOS app (charged to your Apple ID).
 
-Last updated: 2026-07-11. Currency: USD.
+Last updated: 2026-08-13. Currency: USD.
 
-## Starter
-- Price: $199/month, or $1,899.99/year (20% off, ≈ $158/month billed annually)
+## PalmCare AI
+- Price: $199/month
 - Free trial: 14 days
-- Assessments: 20/month
-- Team members: 5
-- Storage: 10 GB
-- Includes: AI voice-to-contract, smart SOAP notes, basic reporting, email support
-- Best for: solo owners and small agencies signing their first contracts with AI
-
-## Growth (most popular)
-- Price: $699/month, or $6,699.99/year (20% off, ≈ $558/month billed annually)
-- Free trial: 14 days
-- Assessments: 75/month
-- Team members: 20
-- Storage: 50 GB
-- Includes: everything in Starter, advanced analytics & reporting, priority
-  support, custom contract templates, team management
-- Best for: agencies building a steady client pipeline
-
-## Enterprise
-- Price: $1,199.99/month, or $10,000/year (about 30% off, ≈ $833/month billed annually)
 - Assessments: unlimited (no overage fees)
 - Team members: unlimited
 - Storage: 250 GB
-- Includes: everything in Growth, dedicated account manager, 50-state
-  compliance engine, custom analytics and dashboards, HIPAA BAA, SLA guarantee
-- Best for: established agencies running at scale
+- Includes: AI voice-to-contract, smart SOAP notes, advanced analytics and
+  reporting, custom contract templates, 50-state compliance engine, HIPAA BAA,
+  priority support
+- Best for: any in-home care agency that wants to turn recorded visits into
+  state-specific service contracts
 
-## Add-ons & notes
-- Annual billing: every plan saves at least 20% versus paying monthly
-  (Enterprise saves about 30%)
-- Free trial: 14 days on Starter and Growth (not Enterprise)
+## Notes
+- One plan, one price: $199/month with everything included. No tiers, no add-ons,
+  no overage fees.
+- Free trial: 14 days
 - Billing: handled by Apple In-App Purchase; manage or cancel anytime in iPhone
   Settings > [your name] > Subscriptions; data preserved 30 days after cancellation
 - Security: HIPAA-compliant, AES-256 encryption, role-based access, audit logs

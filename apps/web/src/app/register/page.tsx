@@ -204,9 +204,9 @@ function RegisterForm() {
   };
 
   const planConfig: Record<string, { label: string }> = {
-    starter: { label: 'Starter' },
-    growth: { label: 'Growth' },
-    enterprise: { label: 'Enterprise' },
+    starter: { label: 'PalmCare AI' },
+    growth: { label: 'PalmCare AI' },
+    enterprise: { label: 'PalmCare AI' },
   };
   const activePlan = planConfig[selectedPlan] || planConfig.starter;
   const planLabel = activePlan.label;

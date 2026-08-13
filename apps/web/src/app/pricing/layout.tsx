@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pricing — Plans for Every Home Care Agency',
+  title: 'Pricing — One Plan for Every Home Care Agency',
   description:
-    'Transparent pricing for PalmCare AI. Choose Starter ($380/mo), Growth ($640/mo), or Pro ($1,299/mo). Record. Transcribe. Contract. Built for home care agencies.',
+    'Simple pricing for PalmCare AI. One plan, $199/mo, everything included: unlimited assessments, unlimited team members, 50 state contracts. Start with a 14-day free trial.',
   openGraph: {
-    title: 'PalmCare AI Pricing — Plans for Every Agency',
+    title: 'PalmCare AI Pricing — One Plan, $199/mo',
     description:
-      'Start with a free trial. Close faster, document smarter. Plans from $380/mo.',
+      'Start with a free trial. Everything included for a flat $199 a month.',
   },
 };
 

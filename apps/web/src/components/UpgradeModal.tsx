@@ -12,55 +12,25 @@ interface UpgradeModalProps {
 
 const PLANS = [
   {
-    name: 'Starter',
+    name: 'PalmCare AI',
     price: 199,
     period: '/mo',
-    description: '20 assessments, 5 team members, 14 day free trial',
-    features: [
-      '20 AI assessments a month',
-      '5 team members',
-      'AI voice to contract',
-      'Smart SOAP notes',
-      'Email support',
-    ],
-    overage: '14 day free trial',
-    popular: false,
-    color: 'from-blue-500 to-cyan-500',
-    borderColor: 'border-blue-200',
-  },
-  {
-    name: 'Growth',
-    price: 699,
-    period: '/mo',
-    description: '75 assessments, 20 team members, 14 day free trial',
-    features: [
-      '75 AI assessments a month',
-      '20 team members',
-      'Advanced analytics',
-      'Custom contract templates',
-      'Priority support',
-    ],
-    overage: '14 day free trial',
-    popular: true,
-    color: 'from-primary-500 to-purple-500',
-    borderColor: 'border-primary-500/50',
-  },
-  {
-    name: 'Enterprise',
-    price: 1199.99,
-    period: '/mo',
-    description: 'Unlimited everything, no overage fees',
+    description: 'Everything included, one flat price, 14 day free trial',
     features: [
       'Unlimited AI assessments',
       'Unlimited team members',
-      'Dedicated account manager',
+      'AI voice to contract',
+      'Smart SOAP notes',
+      'Advanced analytics and reporting',
+      'Custom contract templates',
       '50 state compliance engine',
       'HIPAA BAA included',
+      'Priority support',
     ],
-    overage: null,
+    overage: '14 day free trial',
     popular: false,
-    color: 'from-amber-500 to-orange-500',
-    borderColor: 'border-amber-200',
+    color: 'from-primary-500 to-purple-500',
+    borderColor: 'border-primary-500/50',
   },
 ];
 
@@ -127,7 +97,7 @@ export default function UpgradeModal({ isOpen, onClose, usedCount, maxCount }: U
 
         {/* Plans */}
         <div className="p-8 pt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
             {PLANS.map((plan) => (
               <div
                 key={plan.name}

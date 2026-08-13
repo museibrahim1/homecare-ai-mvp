@@ -1,22 +1,15 @@
 import SwiftUI
 import StoreKit
 
-/// Subscription paywall: three auto-renewable plans (Starter, Growth,
-/// Enterprise) purchased through Apple In-App Purchase, each available
-/// monthly or annually (annual saves 20%). Starter and Growth include a
+/// Subscription paywall: one auto-renewable plan (PalmCare AI, $199/month,
+/// everything included) purchased through Apple In-App Purchase, with a
 /// 14 day free trial through an Apple introductory offer.
 struct PaywallView: View {
     @EnvironmentObject var api: APIService
     @StateObject private var store = StoreKitService.shared
     @Environment(\.dismiss) private var dismiss
 
-    enum BillingPeriod: String, CaseIterable {
-        case monthly = "Monthly"
-        case annual = "Annual"
-    }
-
-    @State private var billingPeriod: BillingPeriod = .monthly
-    @State private var selectedProductID: String = "com.palmcareai.app.growth.monthly"
+    @State private var selectedProductID: String = "com.palmcareai.app.starter.monthly"
     @State private var showSuccess = false
     @State private var restoreMessage: String?
 
@@ -24,45 +17,24 @@ struct PaywallView: View {
         let assessments: String
         let team: String
         let highlights: [String]
-        let badge: String?
         let hasTrial: Bool
     }
 
-    /// Keyed by the base product family ("starter", "growth", "pro").
-    private let planDetails: [String: PlanInfo] = [
-        "starter": PlanInfo(
-            assessments: "20 AI assessments a month",
-            team: "5 team members",
-            highlights: ["AI voice to contract", "Smart SOAP notes", "Basic reporting", "Email support"],
-            badge: nil,
-            hasTrial: true
-        ),
-        "growth": PlanInfo(
-            assessments: "75 AI assessments a month",
-            team: "20 team members",
-            highlights: ["Everything in Starter", "Advanced analytics", "Custom contract templates", "Team management", "Priority support"],
-            badge: "MOST POPULAR",
-            hasTrial: true
-        ),
-        "pro": PlanInfo(
-            assessments: "Unlimited AI assessments",
-            team: "Unlimited team members",
-            highlights: ["Everything in Growth", "Dedicated account manager", "50-state compliance engine", "Custom dashboards", "HIPAA BAA included"],
-            badge: "FULL SCALE",
-            hasTrial: false
-        ),
-    ]
-
-    private func planFamily(_ productID: String) -> String {
-        if productID.contains(".starter.") { return "starter" }
-        if productID.contains(".growth.") { return "growth" }
-        return "pro"
-    }
-
-    private var visibleProducts: [Product] {
-        let suffix = billingPeriod == .monthly ? ".monthly" : ".annual"
-        return store.products.filter { $0.id.hasSuffix(suffix) }
-    }
+    /// The single plan. Everything is included for one flat price.
+    private let planInfo = PlanInfo(
+        assessments: "Unlimited AI assessments",
+        team: "Unlimited team members",
+        highlights: [
+            "AI voice to contract",
+            "Smart SOAP notes",
+            "Advanced analytics and reporting",
+            "Custom contract templates",
+            "50-state compliance engine",
+            "HIPAA BAA included",
+            "Priority support",
+        ],
+        hasTrial: true
+    )
 
     var body: some View {
         NavigationStack {
@@ -71,16 +43,12 @@ struct PaywallView: View {
                     header
 
                     if store.isLoadingProducts {
-                        ProgressView("Loading plans…")
+                        ProgressView("Loading plan…")
                             .padding(.vertical, 40)
                     } else if store.products.isEmpty {
                         loadFailedView
                     } else {
-                        if !store.products.filter({ $0.id.hasSuffix(".annual") }).isEmpty {
-                            billingToggle
-                        }
-
-                        ForEach(visibleProducts, id: \.id) { product in
+                        ForEach(store.products, id: \.id) { product in
                             planCard(product)
                         }
 
@@ -92,20 +60,17 @@ struct PaywallView: View {
                 .padding(.bottom, 40)
             }
             .background(Color.palmBackground)
-            .navigationTitle("Plans")
+            .navigationTitle("Plan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
             }
-            .task { await store.loadProducts() }
-            .onChange(of: billingPeriod) { newPeriod in
-                // Keep the same plan family selected when switching periods.
-                let family = planFamily(selectedProductID)
-                let suffix = newPeriod == .monthly ? ".monthly" : ".annual"
-                if let match = store.products.first(where: { $0.id.contains(".\(family).") && $0.id.hasSuffix(suffix) }) {
-                    selectedProductID = match.id
+            .task {
+                await store.loadProducts()
+                if let first = store.products.first {
+                    selectedProductID = first.id
                 }
             }
             .alert("You're all set", isPresented: $showSuccess) {
@@ -139,7 +104,7 @@ struct PaywallView: View {
             PalmOrbLogo(size: 64, animated: false)
                 .padding(.top, 8)
 
-            Text("Pick the plan that fits your agency")
+            Text("One plan. Everything included.")
                 .font(.system(size: 19, weight: .bold))
                 .foregroundColor(.palmText)
                 .multilineTextAlignment(.center)
@@ -149,23 +114,6 @@ struct PaywallView: View {
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 12)
-        }
-    }
-
-    private var billingToggle: some View {
-        VStack(spacing: 6) {
-            Picker("Billing period", selection: $billingPeriod) {
-                ForEach(BillingPeriod.allCases, id: \.self) { period in
-                    Text(period.rawValue).tag(period)
-                }
-            }
-            .pickerStyle(.segmented)
-
-            if billingPeriod == .annual {
-                Text("Save 20% with annual billing")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.palmGreen)
-            }
         }
     }
 
@@ -193,13 +141,11 @@ struct PaywallView: View {
     }
 
     private func planCard(_ product: Product) -> some View {
-        let info = planDetails[planFamily(product.id)]
         let isSelected = selectedProductID == product.id
         let isOwned = store.purchasedProductIDs.contains(product.id)
-        let isAnnual = product.id.hasSuffix(".annual")
         // Only show the trial pill when Apple actually has the intro offer
         // configured for this product.
-        let hasTrialOffer = (info?.hasTrial ?? false) && product.subscription?.introductoryOffer != nil
+        let hasTrialOffer = planInfo.hasTrial && product.subscription?.introductoryOffer != nil
 
         return Button {
             selectedProductID = product.id
@@ -211,15 +157,6 @@ struct PaywallView: View {
                             Text(product.displayName)
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.palmText)
-                            if let badge = info?.badge {
-                                Text(badge)
-                                    .font(.system(size: 9, weight: .heavy))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 7)
-                                    .padding(.vertical, 3)
-                                    .background(Color.palmPrimary)
-                                    .cornerRadius(6)
-                            }
                             if isOwned {
                                 Text("CURRENT")
                                     .font(.system(size: 9, weight: .heavy))
@@ -230,11 +167,9 @@ struct PaywallView: View {
                                     .cornerRadius(6)
                             }
                         }
-                        if let info {
-                            Text("\(info.assessments) · \(info.team)")
-                                .font(.system(size: 12))
-                                .foregroundColor(.palmSecondary)
-                        }
+                        Text("\(planInfo.assessments) · \(planInfo.team)")
+                            .font(.system(size: 12))
+                            .foregroundColor(.palmSecondary)
                         if hasTrialOffer {
                             Text("14 day free trial")
                                 .font(.system(size: 10, weight: .heavy))
@@ -253,27 +188,25 @@ struct PaywallView: View {
                         Text(product.displayPrice)
                             .font(.system(size: 18, weight: .heavy))
                             .foregroundColor(.palmText)
-                        Text(isAnnual ? "per year" : "per month")
+                        Text("per month")
                             .font(.system(size: 10))
                             .foregroundColor(.palmSecondary)
                     }
                 }
 
-                if isSelected, let info {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(info.highlights, id: \.self) { line in
-                            HStack(spacing: 8) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.palmGreen)
-                                Text(line)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.palmText)
-                            }
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(planInfo.highlights, id: \.self) { line in
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.palmGreen)
+                            Text(line)
+                                .font(.system(size: 12))
+                                .foregroundColor(.palmText)
                         }
                     }
-                    .padding(.top, 2)
                 }
+                .padding(.top, 2)
             }
             .padding(14)
             .background(Color(UIColor.secondarySystemGroupedBackground))
@@ -284,14 +217,13 @@ struct PaywallView: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(product.displayName), \(product.displayPrice) \(isAnnual ? "per year" : "per month")")
+        .accessibilityLabel("\(product.displayName), \(product.displayPrice) per month")
     }
 
     private var purchaseButton: some View {
-        let selectedHasTrial = visibleProducts.first(where: { $0.id == selectedProductID })
+        let selectedHasTrial = store.products.first(where: { $0.id == selectedProductID })
             .flatMap { product -> Bool? in
-                (planDetails[planFamily(product.id)]?.hasTrial ?? false)
-                    && product.subscription?.introductoryOffer != nil
+                planInfo.hasTrial && product.subscription?.introductoryOffer != nil
             } ?? false
 
         return VStack(spacing: 10) {
@@ -322,11 +254,9 @@ struct PaywallView: View {
                 .cornerRadius(14)
             }
             .disabled(store.purchaseInFlight || store.purchasedProductIDs.contains(selectedProductID))
-            .accessibilityLabel(selectedHasTrial ? "Start 14 day free trial" : "Subscribe to selected plan")
+            .accessibilityLabel(selectedHasTrial ? "Start 14 day free trial" : "Subscribe to the plan")
 
-            Text(billingPeriod == .annual
-                 ? "Billed yearly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime."
-                 : "Billed monthly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime.")
+            Text("Billed monthly to your Apple ID. Renews automatically until cancelled in Settings. Cancel anytime.")
                 .font(.system(size: 11))
                 .foregroundColor(.palmSecondary)
                 .multilineTextAlignment(.center)

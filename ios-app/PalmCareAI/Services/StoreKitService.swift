@@ -1,10 +1,10 @@
 import Foundation
 import StoreKit
 
-/// StoreKit 2 purchase layer for PALM's auto-renewable subscriptions.
+/// StoreKit 2 purchase layer for PALM's single auto-renewable subscription.
 ///
 /// Flow:
-///  1. `loadProducts()` fetches the three plans from the App Store.
+///  1. `loadProducts()` fetches the plan from the App Store.
 ///  2. `purchase(_:)` runs the native purchase sheet, then sends the signed
 ///     transaction (JWS) to our backend at `/billing/apple/verify`, which
 ///     validates it against Apple's CAs and activates the plan server-side.
@@ -15,22 +15,16 @@ import StoreKit
 final class StoreKitService: ObservableObject {
     static let shared = StoreKitService()
 
-    /// Must stay in sync with APPLE_PRODUCT_TIER_MAP on the backend and the
-    /// products configured in App Store Connect ("PALM Plans" group).
-    /// The "pro" product IDs are sold as the Enterprise plan (product IDs
-    /// are immutable in App Store Connect).
+    /// PALM sells a single $199/month plan. Must stay in sync with
+    /// APPLE_PRODUCT_TIER_MAP on the backend and the product configured in
+    /// App Store Connect ("PALM Plans" group). Legacy Growth/Pro product IDs
+    /// are no longer sold.
     static let monthlyProductIDs: [String] = [
         "com.palmcareai.app.starter.monthly",
-        "com.palmcareai.app.growth.monthly",
-        "com.palmcareai.app.pro.monthly",
     ]
 
-    /// Annual plans: same tiers billed yearly at a 20% discount.
-    static let annualProductIDs: [String] = [
-        "com.palmcareai.app.starter.annual",
-        "com.palmcareai.app.growth.annual",
-        "com.palmcareai.app.pro.annual",
-    ]
+    /// No annual plan is sold under the single-price model.
+    static let annualProductIDs: [String] = []
 
     static let productIDs: [String] = monthlyProductIDs + annualProductIDs
 

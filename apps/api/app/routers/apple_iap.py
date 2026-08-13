@@ -17,12 +17,11 @@ Why this exists separate from `stripe_billing.py`:
 
 Set up in App Store Connect:
   1. Create a Subscription Group (e.g. "PalmCare Plans").
-  2. Add three auto-renewing subscriptions with these product IDs (must
-     match `APPLE_PRODUCT_TIER_MAP` below):
+  2. Add the single auto-renewing subscription with this product ID (must
+     match `APPLE_PRODUCT_TIER_MAP` below), priced at $199/month with a
+     14 day introductory free-trial offer:
         com.palmcareai.app.starter.monthly
-        com.palmcareai.app.growth.monthly
-        com.palmcareai.app.pro.monthly
-  3. Add the same products to the App Store Connect API Issuer with a
+  3. Add the same product to the App Store Connect API Issuer with a
      "Customer Communications" key so refund / cancel webhooks work.
 
 Env vars:
@@ -61,24 +60,19 @@ router = APIRouter()
 
 # Map App Store Connect product IDs → internal plan tier.
 # Must stay in sync with the iOS `StoreKitService.productIDs` list.
-# The "pro" product IDs are sold as the Enterprise plan (product IDs are
-# immutable in App Store Connect, display names are not).
+#
+# PalmCare now sells a single $199/month plan, backed by the one existing
+# product ID `com.palmcareai.app.starter.monthly` (already priced at $199 in
+# App Store Connect). The old Growth / Pro product IDs are intentionally no
+# longer accepted. Legacy subscribers keep their access via their existing
+# Subscription row; the app just stops selling those products.
 APPLE_PRODUCT_TIER_MAP: dict[str, PlanTier] = {
     "com.palmcareai.app.starter.monthly": PlanTier.STARTER,
-    "com.palmcareai.app.growth.monthly": PlanTier.GROWTH,
-    "com.palmcareai.app.pro.monthly": PlanTier.ENTERPRISE,
-    "com.palmcareai.app.starter.annual": PlanTier.STARTER,
-    "com.palmcareai.app.growth.annual": PlanTier.GROWTH,
-    "com.palmcareai.app.pro.annual": PlanTier.ENTERPRISE,
 }
 
 # Products granting a 14 day free trial through an Apple introductory offer.
-# Enterprise is excluded deliberately.
 APPLE_TRIAL_PRODUCT_IDS = {
     "com.palmcareai.app.starter.monthly",
-    "com.palmcareai.app.growth.monthly",
-    "com.palmcareai.app.starter.annual",
-    "com.palmcareai.app.growth.annual",
 }
 
 
