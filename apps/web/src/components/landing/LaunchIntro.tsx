@@ -53,6 +53,7 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [orbSize, setOrbSize] = useState(200);
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const leavingRef = useRef(false);
 
   // Live audio energy (0..1+) shared by the orb and the waveform.
   const pulseRef = useRef(0);
@@ -92,21 +93,27 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
     return () => window.removeEventListener('resize', sync);
   }, []);
 
-  // Stream the transcript word by word.
+  // Stream the transcript word by word. The interval is tracked in the closure
+  // so it is always cleared on unmount (e.g. if the visitor hits Enter mid-stream),
+  // preventing a state update on an unmounted component.
   useEffect(() => {
     if (reducedMotion) return;
+    let interval: ReturnType<typeof setInterval> | undefined;
     const start = setTimeout(() => {
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         setVisibleWords(prev => {
           if (prev >= INTRO_WORDS) {
-            clearInterval(interval);
+            if (interval) clearInterval(interval);
             return prev;
           }
           return prev + 1;
         });
       }, 90);
     }, 900);
-    return () => clearTimeout(start);
+    return () => {
+      clearTimeout(start);
+      if (interval) clearInterval(interval);
+    };
   }, [reducedMotion]);
 
   // Each transcribed word gives the shared pulse a kick.
@@ -149,6 +156,8 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
   }, [visibleWords]);
 
   function handleEnter() {
+    if (leavingRef.current) return; // guard against double dismiss (rapid keys/clicks)
+    leavingRef.current = true;
     setLeaving(true);
     window.setTimeout(onEnter, 500);
   }
