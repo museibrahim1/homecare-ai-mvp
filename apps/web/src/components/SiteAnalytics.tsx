@@ -5,9 +5,11 @@ import { usePathname } from 'next/navigation';
 import posthog from 'posthog-js';
 import { trackPageView, trackEvent, initClickTracking, initBeforeUnload } from '@/lib/analytics';
 import { captureAttribution, getAttribution } from '@/lib/attribution';
+import { trackMetaPageView } from '@/lib/meta-pixel';
 
 let _initialized = false;
 let _posthogInitialized = false;
+let _metaPageViewReady = false;
 
 const DEFAULT_POSTHOG_KEY = 'phc_Aohy9CxFfE8Qi3z2GF7mTWzgQLZTCs6vXfsTNGKCZEar';
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY || DEFAULT_POSTHOG_KEY;
@@ -53,6 +55,12 @@ export default function SiteAnalytics() {
 
   useEffect(() => {
     trackPageView(pathname);
+    // Skip the first SPA tick — layout already fired Meta PageView on load.
+    if (_metaPageViewReady) {
+      trackMetaPageView();
+    } else {
+      _metaPageViewReady = true;
+    }
     if (_posthogInitialized) {
       posthog.capture('$pageview', {
         pathname,
