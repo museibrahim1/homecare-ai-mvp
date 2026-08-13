@@ -7,15 +7,23 @@ interface OrbProps {
   size?: number;
   active?: boolean;
   className?: string;
+  /**
+   * Optional live-level source (0..1). When provided, the orb's motion and glow
+   * react to it every frame — e.g. spiking as each transcribed word lands — so
+   * it reads as actively listening rather than looping a canned animation.
+   */
+  getLevel?: () => number;
 }
 
 /** PalmCare brand orb — animated teal canvas sphere with orbiting rings. */
-export function Orb({ size = 200, active = false, className }: OrbProps) {
+export function Orb({ size = 200, active = false, className, getLevel }: OrbProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const activeRef = useRef(active);
+  const getLevelRef = useRef(getLevel);
   const frameRef = useRef<number>(0);
 
   useEffect(() => { activeRef.current = active; }, [active]);
+  useEffect(() => { getLevelRef.current = getLevel; }, [getLevel]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -65,7 +73,9 @@ export function Orb({ size = 200, active = false, className }: OrbProps) {
       const rot = t * (Math.PI * 2 / 20);
       const glow = (Math.sin(t * Math.PI * 2 / 3) + 1) / 2;
       const isActive = activeRef.current;
-      const audio = isActive ? 0.4 + glow * 0.3 : 0;
+      const level = getLevelRef.current ? Math.max(0, Math.min(1, getLevelRef.current())) : 0;
+      // Base breathing when active, plus a live spike from the transcription.
+      const audio = (isActive ? 0.4 + glow * 0.3 : 0) + level * 0.9;
       const cx = size / 2, cy = size / 2;
 
       ctx!.clearRect(0, 0, size, size);
@@ -73,7 +83,7 @@ export function Orb({ size = 200, active = false, className }: OrbProps) {
       // Ambient radial glow behind the orb so it reads as a light source.
       ctx!.save();
       const halo = ctx!.createRadialGradient(cx, cy, 40 * scale, cx, cy, 150 * scale);
-      const haloA = (isActive ? 0.22 : 0.12) + glow * 0.06;
+      const haloA = (isActive ? 0.22 : 0.12) + glow * 0.06 + level * 0.18;
       halo.addColorStop(0, `rgba(45,212,191,${haloA})`);
       halo.addColorStop(0.5, `rgba(13,148,136,${haloA * 0.5})`);
       halo.addColorStop(1, 'rgba(13,148,136,0)');

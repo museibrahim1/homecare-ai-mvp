@@ -59,7 +59,7 @@ export function Hero() {
           </h1>
           <p className="text-lg sm:text-xl text-slate-600 mt-5 max-w-xl leading-relaxed">
             Record the assessment. PALM writes the care plan, the billables, and a
-            state-specific service contract — built from what was actually said.
+            state-specific service contract, built from what was actually said.
             Minutes, not hours of paperwork.
           </p>
 
