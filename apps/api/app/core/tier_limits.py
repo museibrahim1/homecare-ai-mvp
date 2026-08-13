@@ -2,13 +2,15 @@
 Per-plan-tier rate limits for expensive AI endpoints.
 
 The global slowapi limiter caps raw request volume per user/IP; this module
-adds a second, plan-aware cap so higher tiers get more AI throughput:
+adds a second, plan-aware cap on AI throughput. PalmCare now sells a single
+paid plan (the STARTER tier, $199/month, everything included), so paid users
+get a generous cap while the free trial stays limited:
 
-    free          5 AI requests / minute
-    starter      15 AI requests / minute
-    growth       40 AI requests / minute
-    professional 40 AI requests / minute (legacy tier)
-    enterprise  120 AI requests / minute
+    free        5 AI requests / minute
+    starter   120 AI requests / minute (the single paid plan)
+    growth    120 AI requests / minute (legacy tier)
+    professional 120 AI requests / minute (legacy tier)
+    enterprise  120 AI requests / minute (legacy tier)
 
 Counters live in Redis when REDIS_URL is configured (multi-worker safe),
 otherwise in process memory.
@@ -29,9 +31,9 @@ logger = logging.getLogger(__name__)
 
 TIER_AI_LIMITS_PER_MINUTE: dict[str, int] = {
     "free": 5,
-    "starter": 15,
-    "growth": 40,
-    "professional": 40,
+    "starter": 120,
+    "growth": 120,
+    "professional": 120,
     "enterprise": 120,
 }
 

@@ -180,13 +180,12 @@ async def register_business(
     except Exception as e:
         logger.warning(f"Could not auto-create AgencySettings on registration: {e}")
     
-    # Create 14-day trial subscription on the user's chosen plan (or Starter).
+    # Create the 14-day trial subscription. There is a single plan now
+    # (the STARTER tier, $199/month), so every new agency starts there.
     try:
         from app.models.subscription import Plan, Subscription, SubscriptionStatus
-        tier_map = {"starter": "STARTER", "growth": "PROFESSIONAL", "professional": "PROFESSIONAL"}
-        plan_tier = tier_map.get((registration.selected_plan or "starter").lower(), "STARTER")
-        plan = db.query(Plan).filter(Plan.tier == plan_tier).first() or \
-            db.query(Plan).order_by(Plan.monthly_price).first()
+        plan = db.query(Plan).filter(Plan.tier == "STARTER", Plan.is_active.is_(True)).first() or \
+            db.query(Plan).filter(Plan.is_active.is_(True)).order_by(Plan.monthly_price).first()
         if plan:
             trial_end = datetime.now(timezone.utc) + timedelta(days=14)
             db.add(Subscription(
