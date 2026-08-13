@@ -22,8 +22,11 @@ import {
 } from 'lucide-react';
 
 import { Hero } from '@/components/landing/Hero';
+import { LaunchIntro } from '@/components/landing/LaunchIntro';
 import { FaqItem } from '@/components/landing/FaqItem';
 import { FEATURES_TABS, SOLUTIONS, FAQ_ITEMS } from '@/components/landing/data';
+
+const LAUNCH_SEEN_KEY = 'palm_launch_intro_seen';
 
 const OLD_WAY = [
   'Type the assessment into forms — during or after the visit',
@@ -85,17 +88,36 @@ export default function LandingPage() {
   const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [activeFeatureTab, setActiveFeatureTab] = useState('ai');
   const [navDropdown, setNavDropdown] = useState<string | null>(null);
+  const [showLaunch, setShowLaunch] = useState(false);
 
-  // Lock body scroll while the mobile menu is open
+  // Show the launch splash once per browser session (respect return visits
+  // within the same session so it never gets in the way).
   useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    try {
+      if (!sessionStorage.getItem(LAUNCH_SEEN_KEY)) setShowLaunch(true);
+    } catch {
+      // Private mode or storage disabled — skip the intro rather than break.
+    }
+  }, []);
+
+  const dismissLaunch = () => {
+    setShowLaunch(false);
+    try { sessionStorage.setItem(LAUNCH_SEEN_KEY, '1'); } catch { /* ignore */ }
+  };
+
+  // Lock body scroll while the mobile menu or launch splash is open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen || showLaunch ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, showLaunch]);
 
   const closeMobileMenu = () => { setMobileMenuOpen(false); setMobileSection(null); };
 
   return (
     <div className="min-h-screen bg-white">
+      {/* ── LAUNCH SPLASH (first visit per session) ── */}
+      {showLaunch && <LaunchIntro onEnter={dismissLaunch} />}
+
       {/* ── NAVIGATION ── */}
       <nav aria-label="Main navigation" className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
