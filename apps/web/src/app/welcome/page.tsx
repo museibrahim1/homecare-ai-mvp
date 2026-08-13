@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  MapPin, DollarSign, Mic, CheckCircle, ArrowRight, ArrowLeft,
-  Building2, Sparkles, Loader2, AlertCircle, ChevronRight,
-  FileCheck, Users, Play, Mail, Settings, Calendar, FileText
+  MapPin, DollarSign, CheckCircle, ArrowRight, ArrowLeft,
+  Sparkles, Loader2, AlertCircle, Play, Settings, Download,
 } from 'lucide-react';
 import { useRequireAuth } from '@/lib/auth';
+import { trackAppStoreClick } from '@/lib/ga';
 
 const API_BASE = '/api';
+const APP_DOWNLOAD_URL =
+  '/app?utm_source=website&utm_medium=signup&utm_campaign=onboarding&utm_content=welcome_complete';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -174,7 +176,8 @@ export default function WelcomePage() {
       setStep(s => s + 1);
     } else {
       await saveProgress(true);
-      router.push('/visits');
+      trackAppStoreClick('welcome_complete');
+      window.location.href = APP_DOWNLOAD_URL;
     }
   };
 
@@ -456,18 +459,42 @@ export default function WelcomePage() {
           </div>
         )}
 
-        {/* Step 2: Ready */}
+        {/* Step 2: Ready — ends with App Store download */}
         {step === 2 && (
           <div className="space-y-6">
             <div className="text-center mb-4">
               <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-emerald-500" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">You're all set!</h2>
+              <h2 className="text-2xl font-bold text-slate-900">You&apos;re all set!</h2>
               <p className="text-slate-500 mt-2 max-w-md mx-auto">
-                The AI now knows your location, services, and billing rates. Every contract will be tailored to your agency.
+                Your agency is configured. Download the iPhone app to record your next assessment and get the contract.
               </p>
             </div>
+
+            {/* Primary: Download the app */}
+            <a
+              href={APP_DOWNLOAD_URL}
+              onClick={() => {
+                void saveProgress(true);
+                trackAppStoreClick('welcome_step_cta');
+              }}
+              className="block bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl p-6 text-white shadow-sm hover:from-primary-600 hover:to-primary-700 transition"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/15 rounded-2xl flex items-center justify-center shrink-0">
+                  <Download className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-white/80 mb-0.5">Next step</p>
+                  <p className="text-lg font-bold">Download PALM on the App Store</p>
+                  <p className="text-sm text-white/85 mt-0.5">
+                    Record a visit on your iPhone. PALM writes the notes, billables, and contract.
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-white/80 shrink-0" />
+              </div>
+            </a>
 
             {/* Summary card */}
             <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-3">
@@ -488,31 +515,12 @@ export default function WelcomePage() {
               </div>
             </div>
 
-            {/* Quick start actions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { icon: Users, title: 'Add Your First Client', href: '/clients?action=new', desc: 'Create a client profile' },
-                { icon: Mic, title: 'Record an Assessment', href: '/visits/new', desc: 'AI transcribes everything' },
-                { icon: FileCheck, title: 'Generate a Contract', href: '/contracts', desc: 'AI fills your rates in automatically' },
-                { icon: Settings, title: 'Agency Settings', href: '/settings', desc: 'Adjust branding & templates' },
-              ].map(item => {
-                const Icon = item.icon;
-                return (
-                  <Link key={item.title} href={item.href} className="bg-white rounded-xl border border-slate-200 p-4 hover:border-primary-300 transition group">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-primary-50 rounded-lg flex items-center justify-center">
-                        <Icon className="w-4 h-4 text-primary-500" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900 group-hover:text-primary-600 transition">{item.title}</p>
-                        <p className="text-xs text-slate-400">{item.desc}</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary-400 transition" />
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+            <p className="text-center text-xs text-slate-400">
+              Prefer the web for now?{' '}
+              <Link href="/visits" className="text-primary-600 hover:underline" onClick={() => void saveProgress(true)}>
+                Open the dashboard
+              </Link>
+            </p>
           </div>
         )}
 
@@ -531,8 +539,16 @@ export default function WelcomePage() {
             className="flex items-center gap-2 bg-primary-500 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-primary-600 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            {step === 2 ? 'Go to Dashboard' : 'Continue'}
-            <ArrowRight className="w-4 h-4" />
+            {step === 2 ? (
+              <>
+                <Download className="w-4 h-4" /> Download the App
+              </>
+            ) : (
+              <>
+                Continue
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </main>
@@ -570,14 +586,25 @@ function CompletedWalkthrough({ token }: { token: string | null }) {
           <CheckCircle className="w-8 h-8 text-emerald-500" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Agency Setup Complete</h1>
-        <p className="text-slate-500 mb-8">Your agency is configured. The AI is ready to generate contracts with your rates.</p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/visits" className="inline-flex items-center justify-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-600 transition">
-            <Play className="w-5 h-5" /> Go to Dashboard
-          </Link>
-          <Link href="/settings" className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-medium hover:bg-slate-50 transition">
-            <Settings className="w-5 h-5" /> Edit Settings
-          </Link>
+        <p className="text-slate-500 mb-8">
+          Your agency is configured. Download the iPhone app to record assessments and generate contracts in the field.
+        </p>
+        <div className="flex flex-col gap-3">
+          <a
+            href={APP_DOWNLOAD_URL}
+            onClick={() => trackAppStoreClick('welcome_returning')}
+            className="inline-flex items-center justify-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-600 transition"
+          >
+            <Download className="w-5 h-5" /> Download PALM on the App Store
+          </a>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/visits" className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-medium hover:bg-slate-50 transition">
+              <Play className="w-5 h-5" /> Open Dashboard
+            </Link>
+            <Link href="/settings" className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-medium hover:bg-slate-50 transition">
+              <Settings className="w-5 h-5" /> Edit Settings
+            </Link>
+          </div>
         </div>
       </div>
     </div>

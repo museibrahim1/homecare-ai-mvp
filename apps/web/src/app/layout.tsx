@@ -164,6 +164,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="facebook-domain-verification" content="hkazhx0494p0cm9n7un1xynw0r516k" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGH98SJBTX" />
         <script
           dangerouslySetInnerHTML={{
