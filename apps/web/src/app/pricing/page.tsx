@@ -1,93 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, ArrowRight, Zap, Building2, TrendingUp, Phone, CreditCard, Shield, Clock, BadgeCheck } from 'lucide-react';
+import Link from 'next/link';
+import { Check, ArrowRight, Zap, Phone, CreditCard, Shield, Clock, BadgeCheck } from 'lucide-react';
 
-// Prices match Apple's App Store price points exactly. Annual saves at least
-// 20% versus monthly (Enterprise Annual is capped at Apple's $10,000 max,
-// which works out to about 30% off).
-const PLANS = [
-  {
-    name: 'Starter',
-    tier: 'starter',
-    monthlyPrice: 199,
-    annualPrice: 1899.99,
-    description: 'For solo owners and small agencies signing their first contracts with AI. Record the visit and PALM writes the notes, the billables, and a state compliant service agreement in minutes.',
-    icon: Zap,
-    assessments: 20,
-    teamMembers: '5',
-    features: [
-      '20 AI assessments a month',
-      '5 team members',
-      'AI voice to contract',
-      'Smart SOAP notes',
-      'Basic reporting',
-      'Email support',
-      '10 GB storage',
-    ],
-    cta: 'Start Free Trial',
-    href: '/register?plan=starter',
-    popular: false,
-    hasTrial: true,
-  },
-  {
-    name: 'Growth',
-    tier: 'growth',
-    monthlyPrice: 699,
-    annualPrice: 6699.99,
-    description: 'For agencies building a steady client pipeline. Everything in Starter plus advanced analytics, custom contract templates, and priority support so your team closes contracts faster.',
-    icon: TrendingUp,
-    assessments: 75,
-    teamMembers: '20',
-    features: [
-      '75 AI assessments a month',
-      '20 team members',
-      'AI voice to contract',
-      'Smart SOAP notes',
-      'Advanced analytics and reporting',
-      'Custom contract templates',
-      'Team management',
-      'Priority support',
-      '50 GB storage',
-    ],
-    cta: 'Start Free Trial',
-    href: '/register?plan=growth',
-    popular: true,
-    hasTrial: true,
-  },
-  {
-    name: 'Enterprise',
-    tier: 'enterprise',
-    monthlyPrice: 1199.99,
-    annualPrice: 10000,
-    description: 'For established agencies running at scale. Unlimited assessments, unlimited team members, a dedicated account manager, and the full 50 state compliance engine.',
-    icon: Building2,
-    assessments: null,
-    teamMembers: 'Unlimited',
-    features: [
-      'Unlimited AI assessments',
-      'Unlimited team members',
-      'AI voice to contract',
-      'Smart SOAP notes',
-      'Custom analytics and dashboards',
-      'Dedicated account manager',
-      '50 state compliance engine',
-      'HIPAA BAA included',
-      'SLA guarantee',
-      '250 GB storage',
-    ],
-    cta: 'Get Started',
-    href: '/register?plan=enterprise',
-    popular: false,
-    hasTrial: false,
-  },
-];
+// One plan, one price. $199/month, everything included, 14 day free trial.
+// Priced to match Apple's App Store price point exactly.
+const PLAN = {
+  name: 'PalmCare AI',
+  tier: 'starter',
+  monthlyPrice: 199,
+  description:
+    'One plan. Everything included. Record the visit and PALM writes the notes, the billables, and a state compliant service agreement in minutes.',
+  features: [
+    'Unlimited AI assessments',
+    'Unlimited team members',
+    'AI voice to contract',
+    'Smart SOAP notes',
+    'Advanced analytics and reporting',
+    'Custom contract templates',
+    '50 state compliance engine',
+    'HIPAA BAA included',
+    'Priority support',
+    '250 GB storage',
+  ],
+  href: '/register',
+};
 
 export default function PricingPage() {
   const router = useRouter();
-  const [annual, setAnnual] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#0a0a1a]">
@@ -109,169 +50,56 @@ export default function PricingPage() {
       {/* Hero */}
       <div className="max-w-7xl mx-auto px-6 pt-20 pb-12 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Simple, transparent pricing
+          One plan. One price.
         </h1>
         <p className="text-lg text-white/60 max-w-2xl mx-auto mb-2">
-          Start with a 14-day free trial. Cancel anytime before your trial ends.
+          Everything PalmCare does, for a flat $199 a month. Start with a 14-day free trial. Cancel anytime before it ends.
         </p>
-        <p className="text-sm text-white/40 max-w-xl mx-auto mb-8">
+        <p className="text-sm text-white/40 max-w-xl mx-auto mb-4">
           No credit card required to start. Subscriptions are purchased and managed in the PalmCare iOS app via your Apple ID.
         </p>
-
-        {/* Billing Toggle */}
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <span className={`text-sm font-semibold transition ${!annual ? 'text-white' : 'text-white/40'}`}>Monthly</span>
-          <button
-            onClick={() => setAnnual(!annual)}
-            className={`relative w-14 h-7 rounded-full transition-colors ${annual ? 'bg-teal-500' : 'bg-white/20'}`}
-            aria-label="Toggle annual billing"
-          >
-            <span
-              className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${annual ? 'translate-x-7' : 'translate-x-0'}`}
-            />
-          </button>
-          <span className={`text-sm font-semibold transition ${annual ? 'text-white' : 'text-white/40'}`}>
-            Annual
-          </span>
-          {annual && (
-            <span className="text-teal-400 text-xs font-semibold bg-teal-400/10 px-2.5 py-1 rounded-full border border-teal-400/20">
-              Save 20%
-            </span>
-          )}
-        </div>
       </div>
 
-      {/* Plan Cards */}
-      <div className="max-w-7xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {PLANS.map((plan) => {
-            const Icon = plan.icon;
-            const monthlyDisplay = plan.monthlyPrice
-              ? annual
-                ? ((plan.annualPrice ?? 0) / 12).toFixed(2)
-                : plan.monthlyPrice.toFixed(2)
-              : null;
-            const annualTotal = plan.annualPrice;
-            const monthlySavings = plan.monthlyPrice && plan.annualPrice
-              ? (plan.monthlyPrice * 12 - plan.annualPrice).toFixed(0)
-              : null;
+      {/* Plan Card */}
+      <div className="max-w-md mx-auto px-6 pb-20">
+        <div className="relative rounded-2xl border border-teal-500/50 bg-gradient-to-b from-teal-500/10 to-transparent shadow-lg shadow-teal-500/10 p-8 flex flex-col">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-teal-500/20">
+              <Zap className="w-5 h-5 text-teal-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white">{PLAN.name}</h3>
+          </div>
 
-            return (
-              <div
-                key={plan.name}
-                className={`relative rounded-2xl border p-6 flex flex-col ${
-                  plan.popular
-                    ? 'border-teal-500/50 bg-gradient-to-b from-teal-500/10 to-transparent shadow-lg shadow-teal-500/10'
-                    : 'border-white/10 bg-white/[0.02]'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    MOST POPULAR
-                  </div>
-                )}
+          <div className="mb-2 flex items-baseline gap-1">
+            <span className="text-5xl font-bold text-white">${PLAN.monthlyPrice}</span>
+            <span className="text-white/40 text-base">/mo</span>
+          </div>
 
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    plan.popular ? 'bg-teal-500/20' : 'bg-white/10'
-                  }`}>
-                    <Icon className={`w-5 h-5 ${plan.popular ? 'text-teal-400' : 'text-white/60'}`} />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mb-4 w-fit">
+            <BadgeCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-xs font-medium text-emerald-400">14 day free trial</span>
+          </div>
 
-                <div className="mb-1">
-                  {monthlyDisplay !== null ? (
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-white">${monthlyDisplay}</span>
-                      <span className="text-white/40 text-sm">/mo</span>
-                    </div>
-                  ) : (
-                    <div className="text-3xl font-bold text-white">Custom</div>
-                  )}
-                </div>
+          <p className="text-white/50 text-sm mb-6 leading-relaxed">{PLAN.description}</p>
 
-                {annual && monthlySavings && annualTotal ? (
-                  <p className="text-teal-400 text-xs font-medium mb-4">
-                    ${annualTotal.toLocaleString()}/yr — save ${monthlySavings}/yr
-                  </p>
-                ) : plan.monthlyPrice ? (
-                  <p className="text-white/30 text-xs mb-4">
-                    {annual ? '' : `$${((plan.annualPrice ?? 0) / 12).toFixed(2)}/mo billed annually`}
-                  </p>
-                ) : (
-                  <p className="text-white/30 text-xs mb-4">Tailored to your needs</p>
-                )}
+          <ul className="space-y-2.5 mb-8 flex-1">
+            {PLAN.features.map((f) => (
+              <li key={f} className="flex items-start gap-2 text-sm text-white/70">
+                <Check className="w-4 h-4 text-teal-400 mt-0.5 shrink-0" />
+                {f}
+              </li>
+            ))}
+          </ul>
 
-                <p className="text-white/50 text-sm mb-4 leading-relaxed">{plan.description}</p>
-
-                {/* Trial / No-overage pill */}
-                {plan.hasTrial ? (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mb-4 w-fit">
-                    <BadgeCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-xs font-medium text-emerald-400">14 day free trial</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg mb-4 w-fit">
-                    <BadgeCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-xs font-medium text-emerald-400">No overage fees</span>
-                  </div>
-                )}
-
-                {/* Key metrics */}
-                {plan.assessments !== null ? (
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="bg-white/5 rounded-lg px-3 py-2 text-center">
-                      <p className="text-lg font-bold text-white">{plan.assessments}</p>
-                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Assessments</p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg px-3 py-2 text-center">
-                      <p className="text-lg font-bold text-white">{plan.teamMembers}</p>
-                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Team Members</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="bg-white/5 rounded-lg px-3 py-2 text-center">
-                      <p className="text-lg font-bold text-white">∞</p>
-                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Assessments</p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg px-3 py-2 text-center">
-                      <p className="text-lg font-bold text-white">∞</p>
-                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Team Members</p>
-                    </div>
-                  </div>
-                )}
-
-                <ul className="space-y-2.5 mb-6 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-white/70">
-                      <Check className="w-4 h-4 text-teal-400 mt-0.5 shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => router.push(plan.href)}
-                  className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition ${
-                    plan.popular
-                      ? 'bg-teal-500 hover:bg-teal-600 text-white'
-                      : 'bg-white/10 hover:bg-white/15 text-white border border-white/10'
-                  }`}
-                >
-                  {plan.cta}
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-
-                {plan.hasTrial && (
-                  <p className="text-center text-white/30 text-xs mt-3">14 day free trial included</p>
-                )}
-              </div>
-            );
-          })}
+          <button
+            onClick={() => router.push(PLAN.href)}
+            className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition bg-teal-500 hover:bg-teal-600 text-white"
+          >
+            Start Free Trial
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          <p className="text-center text-white/30 text-xs mt-3">14 day free trial included</p>
         </div>
-
       </div>
 
       {/* FAQ */}
@@ -281,7 +109,7 @@ export default function PricingPage() {
           {[
             {
               q: 'Do I need a credit card for the free trial?',
-              a: 'No. You can create your account and start a 14-day free trial with full access — no credit card required. When you\'re ready to subscribe, you do so in the PalmCare iOS app through your Apple ID.',
+              a: 'No. You can create your account and start a 14-day free trial with full access, no credit card required. When you\'re ready to subscribe, you do so in the PalmCare iOS app through your Apple ID.',
             },
             {
               q: 'How do subscriptions and payments work?',
@@ -289,23 +117,15 @@ export default function PricingPage() {
             },
             {
               q: 'What happens after the 14-day trial?',
-              a: 'When your trial ends, subscribe in the PalmCare iOS app to keep full access: Starter ($199/mo), Growth ($699/mo), or Enterprise ($1,199.99/mo). Annual billing saves 20% on every plan. Your data is preserved while you decide.',
+              a: 'When your trial ends, subscribe in the PalmCare iOS app to keep full access for $199 a month. Everything is included, so there are no tiers to compare or upgrades to buy. Your data is preserved while you decide.',
             },
             {
-              q: 'Which plans include the free trial?',
-              a: 'Starter and Growth both include a 14 day free trial through your Apple ID. Enterprise does not include a trial, but you can book a live demo with our team before subscribing.',
+              q: 'What do I get for $199 a month?',
+              a: 'Everything. Unlimited AI assessments, unlimited team members, AI voice to contract, smart SOAP notes, advanced analytics, custom contract templates, the 50 state compliance engine, a HIPAA BAA, and priority support. One price, no add-ons, no overage fees.',
             },
             {
-              q: 'How does annual billing work?',
-              a: 'Every plan has an annual option that saves at least 20% versus paying monthly: Starter is $1,899.99/yr, Growth is $6,699.99/yr, and Enterprise is $10,000/yr (about 30% off). Annual plans are billed once a year through your Apple ID.',
-            },
-            {
-              q: 'What happens if I exceed my assessment limit?',
-              a: 'Starter includes 20 assessments a month and Growth includes 75. If you need more, upgrade to the next plan at any time. Enterprise includes unlimited assessments.',
-            },
-            {
-              q: 'Can I change plans later?',
-              a: 'Yes. You can upgrade or downgrade anytime in the iOS app under Settings → Subscription. Plan changes are handled by Apple and take effect per Apple\'s billing rules.',
+              q: 'Are there any usage limits?',
+              a: 'No overage fees and no assessment caps. The $199 plan includes unlimited assessments and unlimited team members so your whole agency can use PalmCare.',
             },
             {
               q: 'How do I cancel?',

@@ -86,11 +86,11 @@ const FAQ_CATEGORIES = [
     faqs: [
       {
         q: 'How much does PalmCare AI cost?',
-        a: 'We offer three plans designed for different agency sizes: Starter (up to 30 clients), Growth (30–200 clients), and Enterprise (200+ clients). All plans include the core AI features. Book a demo for a personalized quote based on your agency\'s needs.',
+        a: 'One plan, one price: $199 a month with everything included. That covers unlimited assessments, unlimited team members, AI voice to contract, smart SOAP notes, advanced analytics, custom contract templates, the 50 state compliance engine, and a HIPAA BAA. Every agency gets the full product, and you can start with a 14-day free trial.',
       },
       {
         q: 'What support is included?',
-        a: 'All plans include email support with same-day response. Growth and Enterprise plans include priority live chat and phone support with average response times under 15 minutes. Enterprise customers get a dedicated account manager and custom SLA.',
+        a: 'Every subscription includes priority support and a HIPAA BAA. There is one plan, so there are no support tiers to compare. Reach the team by email and in-app, with same-day response.',
       },
       {
         q: 'Can I cancel anytime?',
