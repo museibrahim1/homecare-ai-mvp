@@ -321,10 +321,10 @@ struct SettingsView: View {
                     SettingsIcon(systemName: "arrow.up.circle.fill", color: .palmPrimary)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(usage?.has_paid_plan == true ? "Change Plan" : "View Plans")
+                        Text(usage?.has_paid_plan == true ? "Manage Plan" : "View Plan")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.palmText)
-                        Text("Starter, Growth, or Enterprise")
+                        Text("$199/mo · everything included")
                             .font(.system(size: 11))
                             .foregroundColor(.palmSecondary)
                     }
