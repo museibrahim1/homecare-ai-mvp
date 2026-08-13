@@ -26,7 +26,7 @@ export const FEATURES_TABS = [
       {
         icon: Zap,
         title: 'Data Extraction',
-        description: 'Billables, care needs, medications, and safety risks are pulled from the conversation — nothing re-typed.',
+        description: 'Billables, care needs, medications, and safety risks are pulled from the conversation. Nothing re-typed.',
         color: 'from-yellow-500 to-orange-500',
         image: '/screenshots/transcript.png',
       },
@@ -53,7 +53,7 @@ export const FEATURES_TABS = [
       {
         icon: ClipboardList,
         title: 'Documents',
-        description: 'Contracts, assessments, recordings, and notes — searchable in one place.',
+        description: 'Contracts, assessments, recordings, and notes, searchable in one place.',
         color: 'from-teal-500 to-cyan-500',
         image: '/screenshots/contract-form.png',
       },
@@ -80,7 +80,7 @@ export const FEATURES_TABS = [
       {
         icon: BarChart3,
         title: 'Billing Extraction',
-        description: 'Hours, rates, and services come straight from the assessment — fewer billing errors.',
+        description: 'Hours, rates, and services come straight from the assessment, so fewer billing errors.',
         color: 'from-green-500 to-emerald-500',
         image: '/screenshots/smart-contract.png',
       },
@@ -135,7 +135,7 @@ export const FEATURES_TABS = [
       {
         icon: Headphones,
         title: 'Visit Workflow',
-        description: 'Schedules, visit tracking, and documentation — no trip back to the office.',
+        description: 'Schedules, visit tracking, and documentation. No trip back to the office.',
         color: 'from-amber-500 to-yellow-500',
         image: '/screenshots/voice-assessment.png',
       },
@@ -180,11 +180,11 @@ export const SOLUTIONS = [
 export const FAQ_ITEMS = [
   {
     q: 'What makes PalmCare AI different from other home care software?',
-    a: 'PalmCare AI is the first AI-native documentation platform built specifically for home care. Our competitors — AxisCare, WellSky, CareTime — are legacy scheduling and billing systems. They are not AI-first. PalmCare AI was built from the ground up with voice-powered assessments, automatic contract generation, and OCR — your data flows from recording to signed contract without manual re-entry.',
+    a: 'PalmCare AI is the first AI-native documentation platform built specifically for home care. Competitors like AxisCare, WellSky, and CareTime are legacy scheduling and billing systems. They are not AI-first. PalmCare AI was built from the ground up with voice-powered assessments, automatic contract generation, and OCR, so your data flows from recording to signed contract without manual re-entry.',
   },
   {
     q: 'How does the voice assessment feature work?',
-    a: 'One tap to start. Staff records a client assessment on their phone — in person, over the phone, or by uploading an audio file. AI transcribes the conversation, identifies who is speaking, and extracts care needs, services, medications, and billing items automatically. No forms to fill, no clicks to learn — just record and review.',
+    a: 'One tap to start. Staff records a client assessment on their phone, in person, over the phone, or by uploading an audio file. AI transcribes the conversation, identifies who is speaking, and extracts care needs, services, medications, and billing items automatically. No forms to fill, no clicks to learn. Just record and review.',
   },
   {
     q: 'Is PalmCare AI HIPAA compliant?',
@@ -204,11 +204,11 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Can caregivers use PalmCare AI on their phones?',
-    a: 'Yes. Our companion mobile app lets caregivers clock in/out via GPS, log Activities of Daily Living (ADLs), view their schedule, and receive real-time updates. Agencies can track all caregiver activity from the admin dashboard.',
+    a: 'Yes. Our companion mobile app lets caregivers clock in and out via GPS, log Activities of Daily Living (ADLs), view their schedule, and receive real-time updates. Agencies can track all caregiver activity from the admin dashboard.',
   },
   {
     q: 'Do you offer a free trial?',
-    a: 'Yes — every plan comes with a 14-day free trial with full access to all features. No credit card required to start. When you\'re ready, subscriptions are purchased in the PalmCare iOS app via your Apple ID, and you can cancel anytime.',
+    a: 'Yes. Every plan comes with a 14-day free trial with full access to all features. No credit card required to start. When you\'re ready, subscriptions are purchased in the PalmCare iOS app via your Apple ID, and you can cancel anytime.',
   },
 ];
 
@@ -240,13 +240,13 @@ export const CLIENT_RANGES = ['1-10', '11-25', '26-50', '51-100', '101-250', '25
 
 export const SOFTWARE_OPTIONS = ['None / Pen & Paper', 'AxisCare', 'ClearCare / WellSky', 'Alora', 'HHAeXchange', 'Axxess', 'MatrixCare', 'KanTime', 'Sandata', 'Other'];
 
-export const REFERRAL_SOURCES = ['Google Search', 'LinkedIn', 'Facebook', 'Instagram', 'Referral from a Friend/Colleague', 'Industry Conference/Event', 'Email', 'Phone Call', 'Other'];
+export const REFERRAL_SOURCES = ['Google Search', 'LinkedIn', 'Facebook', 'Instagram', 'Referral from a Friend or Colleague', 'Industry Conference or Event', 'Email', 'Phone Call', 'Other'];
 
 export const DEMO_STEPS = [
-  { title: 'Step 1: Record It', description: 'Staff records the client assessment on their phone — one tap to start', duration: 5000 },
+  { title: 'Step 1: Record It', description: 'Staff records the client assessment on their phone. One tap to start', duration: 5000 },
   { title: 'Step 2: Transcribe It', description: 'AI transcribes the conversation and identifies who is speaking', duration: 4000 },
   { title: 'Step 3: Extract It', description: 'AI captures care needs, services, schedule, and billable items', duration: 4000 },
-  { title: 'Step 4: Contract It', description: 'Complete care plan and service agreement — ready to sign', duration: 5000 },
+  { title: 'Step 4: Contract It', description: 'Complete care plan and service agreement, ready to sign', duration: 5000 },
 ];
 
 /* ───────────────────── DEMO MODAL ───────────────────── */
@@ -280,7 +280,7 @@ export const TRANSCRIPT_SEGMENTS: TranscriptSegment[] = [
   {
     speaker: 'nurse',
     label: 'Nurse Sarah',
-    words: 'I understand. And how about your medication — are you currently taking anything for the diabetes and hypertension?'.split(' '),
+    words: 'I understand. And how about your medication, are you currently taking anything for the diabetes and hypertension?'.split(' '),
   },
   {
     speaker: 'client',

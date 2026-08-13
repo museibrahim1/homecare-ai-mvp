@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, FileText, Mic, Sparkles, Zap } from 'lucide-react';
 import { Orb } from './Orb';
 import { TRANSCRIPT_SEGMENTS } from './data';
@@ -26,6 +26,9 @@ const STEP_CAPTIONS = [
 const INTRO_LINES = TRANSCRIPT_SEGMENTS.slice(0, 3);
 const INTRO_WORDS = INTRO_LINES.reduce((sum, seg) => sum + seg.words.length, 0);
 
+// Reactive waveform bar count (driven live, not looped CSS).
+const WAVE_BARS = Array.from({ length: 28 });
+
 // Deterministic ambient particles (positions/sizes/timing).
 const PARTICLES = [
   { left: '12%', top: '72%', size: 3, dur: 15, delay: 0 },
@@ -40,9 +43,9 @@ const PARTICLES = [
 
 /**
  * Full-screen launch splash: a cinematic hook that introduces the product.
- * The PALM orb reverberates as it "records" a live assessment, a three-step
- * pipeline fills in, then the visitor is handed to the hero page. Shown once
- * per browser session and respects reduced-motion.
+ * A live "pulse" spikes as each word is transcribed and drives BOTH the orb and
+ * the waveform, so the orb reads as actively listening rather than looping a
+ * canned animation. Shown once per browser session and respects reduced-motion.
  */
 export function LaunchIntro({ onEnter }: LaunchIntroProps) {
   const [leaving, setLeaving] = useState(false);
@@ -51,12 +54,28 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
   const [orbSize, setOrbSize] = useState(200);
   const transcriptRef = useRef<HTMLDivElement>(null);
 
+  // Live audio energy (0..1+) shared by the orb and the waveform.
+  const pulseRef = useRef(0);
+  const waveRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
   const finished = visibleWords >= INTRO_WORDS;
 
   // Which step is lit: Record from the start, Transcribe once words flow,
   // Contract once the snippet completes.
   const activeStep = finished ? 2 : visibleWords > 0 ? 1 : 0;
   const progress = activeStep / (STEPS.length - 1);
+
+  // Current speaker (so the caption reads as a live turn, not a script).
+  let acc = 0;
+  let currentSeg = 0;
+  for (let i = 0; i < INTRO_LINES.length; i++) {
+    acc += INTRO_LINES[i].words.length;
+    if (visibleWords <= acc) { currentSeg = i; break; }
+    currentSeg = i;
+  }
+  const speakerLabel = finished ? 'Assessment complete' : INTRO_LINES[currentSeg].label;
+
+  const getLevel = useCallback(() => Math.min(1, pulseRef.current), []);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -73,6 +92,7 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
     return () => window.removeEventListener('resize', sync);
   }, []);
 
+  // Stream the transcript word by word.
   useEffect(() => {
     if (reducedMotion) return;
     const start = setTimeout(() => {
@@ -84,9 +104,42 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
           }
           return prev + 1;
         });
-      }, 80);
+      }, 90);
     }, 900);
     return () => clearTimeout(start);
+  }, [reducedMotion]);
+
+  // Each transcribed word gives the shared pulse a kick.
+  useEffect(() => {
+    if (reducedMotion || finished || visibleWords === 0) return;
+    pulseRef.current = Math.min(1.15, pulseRef.current + 0.8);
+  }, [visibleWords, reducedMotion, finished]);
+
+  // One animation loop decays the pulse and paints the waveform. The orb reads
+  // the same pulse via getLevel, so the two move together.
+  useEffect(() => {
+    if (reducedMotion) return;
+    let raf = 0;
+    const loop = () => {
+      pulseRef.current *= 0.9;
+      const p = pulseRef.current;
+      const now = performance.now() / 1000;
+      const bars = waveRefs.current;
+      const n = bars.length;
+      const half = (n - 1) / 2;
+      for (let i = 0; i < n; i++) {
+        const el = bars[i];
+        if (!el) continue;
+        const center = 1 - Math.abs(i - half) / half; // taller in the middle
+        const idle = 0.12 + 0.1 * (Math.sin(now * 4 + i * 0.55) * 0.5 + 0.5);
+        const amp = Math.min(1, idle + p * (0.3 + center * 0.7));
+        el.style.transform = `scaleY(${amp})`;
+        el.style.opacity = String(0.35 + amp * 0.55);
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
   }, [reducedMotion]);
 
   useEffect(() => {
@@ -205,7 +258,7 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
           AI documentation for home care agencies
         </div>
 
-        {/* Orb with reverberation ripples + halo */}
+        {/* Orb with reverberation ripples + halo, driven by the live pulse */}
         <div className="animate-orb-scale-in relative flex items-center justify-center">
           {!reducedMotion && [0, 1, 2].map(i => (
             <span
@@ -214,7 +267,7 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
               style={{ width: orbSize, height: orbSize, animationDelay: `${i * 1.13}s` }}
             />
           ))}
-          <Orb size={orbSize} active={!finished} />
+          <Orb size={orbSize} active={!finished} getLevel={reducedMotion ? undefined : getLevel} />
         </div>
 
         {/* Headline */}
@@ -238,57 +291,70 @@ export function LaunchIntro({ onEnter }: LaunchIntroProps) {
           state-specific service contract from what was actually said. Minutes, not hours.
         </p>
 
-        {/* Live assessment card */}
+        {/* Live transcription — the orb hears it, the waveform shows it */}
         <div
           className="li-rise mt-9 w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] text-left shadow-2xl shadow-teal-950/40 backdrop-blur-md"
           style={{ animationDelay: '380ms' }}
         >
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <div className="flex items-center gap-2">
-              {/* Equalizer bars */}
-              <div className="flex items-end gap-[3px]" aria-hidden="true">
-                {[0, 1, 2, 3].map(i => (
-                  <span
-                    key={i}
-                    className={finished ? 'w-[3px] rounded-full bg-teal-300/40' : 'w-[3px] rounded-full bg-teal-300 animate-orb-bar'}
-                    style={{ height: 12, animationDelay: `${i * 120}ms`, animationDuration: `${0.7 + i * 0.1}s` }}
-                  />
-                ))}
-              </div>
-              <span className="text-xs font-medium text-white/70">Live assessment</span>
+          <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3">
+            {/* Reactive waveform (shares the orb's live pulse) */}
+            <div className="flex h-6 flex-1 items-center justify-between overflow-hidden" aria-hidden="true">
+              {WAVE_BARS.map((_, i) => (
+                <span
+                  key={i}
+                  ref={el => { waveRefs.current[i] = el; }}
+                  className="h-6 w-[3px] rounded-full"
+                  style={{
+                    transformOrigin: '50% 50%',
+                    transform: 'scaleY(0.2)',
+                    background: 'linear-gradient(to top, #0d9488, #5eead4)',
+                  }}
+                />
+              ))}
             </div>
             {finished ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-400/15 px-2.5 py-1 text-xs font-medium text-teal-200">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-teal-400/15 px-2.5 py-1 text-xs font-medium text-teal-200">
                 <FileText className="h-3.5 w-3.5" /> Contract generated
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white/70">
+              <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-white/70">
                 <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" /> Recording
               </span>
             )}
           </div>
-          <div ref={transcriptRef} className="scrollbar-hide h-[112px] space-y-3 overflow-y-auto px-4 py-3.5">
+
+          {/* Speaker chip that updates with the turn */}
+          <div className="flex items-center gap-2 px-4 pt-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-teal-100">
+              <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
+              {speakerLabel}
+            </span>
+          </div>
+
+          <div ref={transcriptRef} className="scrollbar-hide h-[96px] space-y-2 overflow-y-auto px-4 pb-3.5 pt-2">
             {INTRO_LINES.map((seg, segIdx) => {
               const segStart = wordsBefore;
               wordsBefore += seg.words.length;
               const wordsToShow = Math.min(seg.words.length, Math.max(0, visibleWords - segStart));
               if (wordsToShow === 0) return null;
-              const isLastVisible =
-                !finished && segStart + wordsToShow === visibleWords;
+              const isLastVisible = !finished && segStart + wordsToShow === visibleWords;
+              const isActiveTurn = segIdx === currentSeg && !finished;
               return (
-                <div key={segIdx}>
-                  <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-teal-200/70">{seg.label}</p>
-                  <p className="text-sm leading-relaxed text-white/90">
-                    {seg.words.slice(0, wordsToShow).join(' ')}
-                    {isLastVisible && (
-                      <span className="li-caret ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-teal-300" />
-                    )}
-                  </p>
-                </div>
+                <p
+                  key={segIdx}
+                  className={`text-sm leading-relaxed transition-colors duration-300 ${
+                    isActiveTurn ? 'text-white' : 'text-white/55'
+                  }`}
+                >
+                  {seg.words.slice(0, wordsToShow).join(' ')}
+                  {isLastVisible && (
+                    <span className="li-caret ml-0.5 inline-block h-[1em] w-[2px] translate-y-[2px] bg-teal-300" />
+                  )}
+                </p>
               );
             })}
             {visibleWords === 0 && (
-              <p className="text-sm text-white/45">Starting assessment…</p>
+              <p className="text-sm text-white/45">Listening for the assessment…</p>
             )}
           </div>
         </div>

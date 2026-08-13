@@ -29,22 +29,22 @@ import { FEATURES_TABS, SOLUTIONS, FAQ_ITEMS } from '@/components/landing/data';
 const LAUNCH_SEEN_KEY = 'palm_launch_intro_seen';
 
 const OLD_WAY = [
-  'Type the assessment into forms — during or after the visit',
+  'Type the assessment into forms, during or after the visit',
   'Re-key the same data into a care plan, then again into a contract',
   'Hunt down the right state-specific clauses for every agreement',
   'Hours of nightly paperwork, where billing errors creep in',
 ];
 
 const PALM_WAY = [
-  'Record the visit — in person or over the phone',
+  'Record the visit, in person or over the phone',
   'AI writes the transcript, care plan, billables, and visit notes',
   'State-specific service contracts, built from what was actually said',
-  'Review, send, and sign — minutes, not hours',
+  'Review, send, and sign in minutes, not hours',
 ];
 
 // Honest product facts (not performance claims) — proof density without fabrication.
 const PROOF_STATS = [
-  { stat: '4-in-1', label: 'Care plan, visit notes, billables & service contract — from one recording' },
+  { stat: '4-in-1', label: 'Care plan, visit notes, billables, and service contract from one recording' },
   { stat: '50 states', label: 'State-specific contract rules built in' },
   { stat: 'Minutes', label: 'From a recorded assessment to a ready-to-sign contract' },
   { stat: 'HIPAA', label: '256-bit encryption, audit logs, BAA available' },
@@ -52,7 +52,7 @@ const PROOF_STATS = [
 
 // Honest competitive comparison (validated against live competitor sites, Jun 2026).
 const COMPARE_ROWS = [
-  { label: 'Built for', palm: 'Home care agencies', scribes: 'Medicare home health', templates: 'General documents', manual: '—' },
+  { label: 'Built for', palm: 'Home care agencies', scribes: 'Medicare home health', templates: 'General documents', manual: 'No focus' },
   { label: 'Captures the visit by voice', palm: 'Yes', scribes: 'Yes', templates: 'No', manual: 'No' },
   { label: 'State-specific service contract', palm: 'Automatic (50 states)', scribes: 'No', templates: 'Manual editing', manual: 'Manual' },
   { label: 'Care plan, notes & billables', palm: 'Yes', scribes: 'Clinical notes only', templates: 'No', manual: 'Manual' },
@@ -78,9 +78,9 @@ const NAV_RESOURCES = [
 ];
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Record', description: 'Staff records the client assessment on their phone — in person or over the phone. One tap to start.', icon: Mic },
+  { step: '01', title: 'Record', description: 'Staff records the client assessment on their phone, in person or over the phone. One tap to start.', icon: Mic },
   { step: '02', title: 'Transcribe', description: 'AI transcribes the conversation, identifies speakers, and extracts care needs and billable items.', icon: Zap },
-  { step: '03', title: 'Contract', description: 'A complete assessment, care plan, and service agreement is generated — ready to send and sign.', icon: FileText },
+  { step: '03', title: 'Contract', description: 'A complete assessment, care plan, and service agreement is generated, ready to send and sign.', icon: FileText },
 ];
 
 export default function LandingPage() {
@@ -163,7 +163,7 @@ export default function LandingPage() {
                     <div className="bg-white border border-slate-200 rounded-xl shadow-xl p-2">
                       {[
                         { label: 'Small Agencies', desc: 'Up to 30 clients', href: '#solutions' },
-                        { label: 'Medium Agencies', desc: '30–200 clients', href: '#solutions' },
+                        { label: 'Medium Agencies', desc: '30 to 200 clients', href: '#solutions' },
                         { label: 'Enterprise', desc: '200+ clients', href: '#solutions' },
                       ].map(item => (
                         <a key={item.label} href={item.href} onClick={() => setNavDropdown(null)} className="block p-3 rounded-lg hover:bg-slate-50 transition">
@@ -282,7 +282,7 @@ export default function LandingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">What is PalmCare AI?</h2>
           <p className="text-lg text-slate-600 mt-4 leading-relaxed">
             PalmCare AI is documentation software for home care agencies that turns a
-            recorded client assessment into a state-specific service contract —
+            recorded client assessment into a state-specific service contract
             automatically. Record the visit, and the AI writes the transcript, care
             plan, billable items, and visit notes, then generates a ready-to-sign
             agreement in minutes instead of hours.
@@ -344,7 +344,7 @@ export default function LandingPage() {
           <div className="max-w-2xl mb-10 sm:mb-12">
             <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">Platform</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Everything you need to run your agency</h2>
-            <p className="text-lg text-slate-600 mt-4">Built for care professionals — not retrofitted from generic software.</p>
+            <p className="text-lg text-slate-600 mt-4">Built for care professionals, not retrofitted from generic software.</p>
           </div>
 
           {/* Tabs: swipeable on mobile */}
@@ -464,7 +464,7 @@ export default function LandingPage() {
           <div className="max-w-2xl mb-10 sm:mb-12">
             <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider mb-3">How PALM compares</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">The only tool that turns the assessment into a contract</h2>
-            <p className="text-lg text-slate-600 mt-4">AI clinical scribes chart OASIS notes for Medicare home health. Template tools hand you a blank form. PALM is built for home care — and produces the whole packet from one recording.</p>
+            <p className="text-lg text-slate-600 mt-4">AI clinical scribes chart OASIS notes for Medicare home health. Template tools hand you a blank form. PALM is built for home care, and produces the whole packet from one recording.</p>
           </div>
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full min-w-[640px] border-collapse text-sm">
@@ -505,7 +505,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="bg-slate-900 rounded-2xl px-6 sm:px-12 py-12 sm:py-16 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Spend your time on care, not paperwork</h2>
-            <p className="text-lg text-slate-300 mt-4 max-w-2xl mx-auto">Start your 14-day free trial today. Full access to every feature — cancel anytime.</p>
+            <p className="text-lg text-slate-300 mt-4 max-w-2xl mx-auto">Start your 14-day free trial today. Full access to every feature. Cancel anytime.</p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 mt-8">
               <Link href="/register" data-track="final-cta-trial" className="btn-primary inline-flex items-center justify-center gap-2 py-3.5 px-7 text-base">
                 Start free trial <ArrowRight className="w-4 h-4 shrink-0" />
