@@ -130,6 +130,37 @@ def build_html(date: str, picks: list[dict]) -> str:
     """
 
 
+def _resolve_preview_dir() -> Path:
+    """Pick a writable directory for the local HTML copy.
+
+    1. ENGAGEMENT_PREVIEW_DIR env override.
+    2. The Mac deliverables folder, but only when its parent already exists
+       (i.e. we're actually on that Mac) — never create /Users on Linux.
+    3. A repo-relative fallback that always works (CI, servers).
+    """
+    override = os.environ.get("ENGAGEMENT_PREVIEW_DIR")
+    if override:
+        return Path(override)
+
+    mac_dir = Path("/Users/musaibrahim/Desktop/PalmCare Documents/Marketing/Sep-2026-traffic")
+    if mac_dir.parent.parent.is_dir():  # ".../PalmCare Documents" exists
+        return mac_dir
+
+    return HERE / "previews"
+
+
+def _write_preview(date: str, body: str) -> None:
+    """Best-effort local HTML copy; never fail the send over a file write."""
+    try:
+        out = _resolve_preview_dir()
+        out.mkdir(parents=True, exist_ok=True)
+        html_path = out / f"engagement-preview-{date}.html"
+        html_path.write_text(body)
+        print("wrote", html_path)
+    except OSError as e:
+        print(f"skip local preview copy ({type(e).__name__}: {e})")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="YYYY-MM-DD (default: today if weekday, else next Monday)")
@@ -156,11 +187,10 @@ def main() -> int:
     picks = pick_options(date)
     body = build_html(date, picks)
 
-    out = Path("/Users/musaibrahim/Desktop/PalmCare Documents/Marketing/Sep-2026-traffic")
-    out.mkdir(parents=True, exist_ok=True)
-    html_path = out / f"engagement-preview-{date}.html"
-    html_path.write_text(body)
-    print("wrote", html_path)
+    # Write a local HTML copy of the preview. Prefer an explicit override, then
+    # the Mac deliverables folder when it exists (local runs), otherwise fall
+    # back to a repo-relative dir so this never crashes in CI on Linux.
+    _write_preview(date, body)
 
     if args.dry_run:
         print("dry-run: not sending")

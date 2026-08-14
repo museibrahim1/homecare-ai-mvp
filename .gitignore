@@ -75,6 +75,9 @@ model_cache/
 tmp/
 temp/
 *.tmp
+
+# Local engagement-preview HTML copies (CI fallback dir)
+scripts/social/previews/
 mobile/ios/
 ios-app/preview_*.png
 .wrangler/
