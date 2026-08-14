@@ -99,18 +99,19 @@ def build_html(date: str, picks: list[dict]) -> str:
     <div style="font-family:'Segoe UI',-apple-system,Arial,sans-serif;max-width:680px;margin:0 auto;color:#0f172a;">
       <h2 style="color:#0d9488;margin-bottom:6px;">Engagement picks for {label}</h2>
       <p style="font-size:14px;color:#475569;line-height:1.6;">
-        LinkedIn and Threads talking points only. Each one ends in a real question.
+        Written in your voice. First person. Short. Home care specific.
         <strong>I will not post these unless you reply with what you want.</strong>
+        Edit freely before I post. Kill anything that still sounds off.
       </p>
       <p style="font-size:14px;color:#475569;line-height:1.6;">
         Reply like this:<br>
         <code>LI: A</code> or <code>LI: A,C</code><br>
         <code>TH: B</code> or <code>TH: none</code><br>
-        Optional note: tweak wording, or skip.
+        Optional: paste a rewrite and I will use your words.
       </p>
       <p style="font-size:13px;color:#64748b;line-height:1.5;">
-        Marketing posts (product creatives, QR, Trust and Safety campaign assets) still auto-post on the
-        Aug 14 to Sep 13 calendar. This email is only for engagement conversation posts.
+        Product marketing creatives still auto-post on the Aug 14 to Sep 13 calendar.
+        This email is only for LinkedIn and Threads conversation posts.
       </p>
 
       <h3 style="margin-top:28px;">LinkedIn options</h3>

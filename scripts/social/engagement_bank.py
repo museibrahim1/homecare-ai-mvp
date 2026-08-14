@@ -1,240 +1,232 @@
 """Engagement talking points for LinkedIn + Threads.
 
-APPROVAL ONLY. Never wire these into run_scheduled_posts.py.
-Muse picks which ones to post. Marketing automation stays separate.
+APPROVAL ONLY. Never auto-post.
+Written in Muse's voice: first person, short sentences, home care specifics.
+Inspired by live founder discourse (YC RFS themes: aging care, trust, earnest building).
+Not copied from anyone. No AI filler.
 
-Rules:
-- End with ONE specific, answerable question
-- No engagement bait ("like if you agree", "comment YES")
-- No em dashes, no slash-joined alternatives, no unverifiable claims
-- LinkedIn: founder voice, depth, no link in body
-- Threads: shorter, conversational, no link in body (link only if Muse asks, as first reply)
+Voice rules:
+- I / we when it is Muse speaking
+- One idea per sentence
+- Concrete home care detail, not abstract AI talk
+- End with one real question he would actually ask an owner
+- No em dashes, no slash bait, no "like if you agree", no numbered vendor quizzes
 """
 from __future__ import annotations
 
-# id, topic, pillar, linkedin body, threads body
 ENGAGEMENT: list[dict[str, str]] = [
     {
         "id": "e01",
-        "topic": "Second documentation",
-        "pillar": "Time and relief",
+        "topic": "The visit was already written",
+        "pillar": "Why I built this",
         "linkedin": (
-            "The most expensive part of a care assessment is the second time it gets documented.\n\n"
-            "The first time is free. Client, family, and assessor say everything out loud in the room. "
-            "The second time costs your best nurse her evening.\n\n"
-            "At your agency, how many hours per week still go into that second pass?"
+            "I keep coming back to the same weird fact.\n\n"
+            "The assessment was already documented. Out loud. In the room. "
+            "Then we make a nurse type it again at night.\n\n"
+            "If you run an agency, does that second pass still own your evenings?"
         ),
         "threads": (
-            "Home care assessments get documented twice.\n\n"
-            "Once out loud in the living room. Once again at a keyboard.\n\n"
-            "How many hours a week does the second pass still take at your agency?"
+            "Weird fact I cannot shake:\n\n"
+            "The visit was already written out loud. Then we type it again at night.\n\n"
+            "Does that second pass still own your evenings?"
         ),
     },
     {
         "id": "e02",
-        "topic": "AI safety review step",
+        "topic": "Human before the family",
         "pillar": "Trust and safety",
         "linkedin": (
-            "The trust question for AI in home care is simple.\n\n"
-            "Does anything reach a family before a human on your team reviews it?\n\n"
-            "If you are evaluating tools right now, what is your hard rule on that?"
+            "I will not ship a tool that sends a care plan or a contract to a family "
+            "before someone on your team reads it.\n\n"
+            "AI can draft. A person still decides.\n\n"
+            "Where do you draw that line at your agency?"
         ),
         "threads": (
-            "Quick AI safety check for home care tools:\n\n"
-            "Does anything reach a family before a human on your team reviews it?\n\n"
-            "What is your hard rule?"
+            "My hard line: nothing hits a family before a human on your team reads it.\n\n"
+            "Where do you draw that line?"
         ),
     },
     {
         "id": "e03",
-        "topic": "Build together",
+        "topic": "Ask owners, not the timeline",
         "pillar": "Build together",
         "linkedin": (
-            "I am building documentation AI with agency owners, not for them in private.\n\n"
-            "If you could require one safety rule before any AI-generated care plan or contract "
-            "reaches a family, what would it be?\n\n"
-            "I read every reply."
+            "I am not interested in performing founder content.\n\n"
+            "I am interested in what broke in your paperwork this week. "
+            "Wrong template. Missed billable. Notes finished on Sunday.\n\n"
+            "What failed on your team lately that still makes you mad?"
         ),
         "threads": (
-            "Building home care AI in public.\n\n"
-            "One rule you would require before an AI draft reaches a family?\n\n"
-            "I am collecting these."
+            "Skip the founder theater.\n\n"
+            "What paperwork failure on your team still makes you mad?"
         ),
     },
     {
         "id": "e04",
-        "topic": "Evenings",
-        "pillar": "Time and relief",
+        "topic": "Aging care is the job",
+        "pillar": "Why this market",
         "linkedin": (
-            "Most home care software fights for the daytime. Scheduling. EVV. Payroll.\n\n"
-            "The unpaid shift is still the evening: retyping the visit into notes, billables, and a service agreement.\n\n"
-            "What eats more nights on your team right now, scheduling problems or post-visit paperwork?"
+            "Home care is not a side quest for AI. It is the work.\n\n"
+            "More older adults. Not enough caregivers. Families already doing unpaid coordination. "
+            "And the software still asks nurses to retype the visit.\n\n"
+            "What part of that stack hurts your agency most right now?"
         ),
         "threads": (
-            "What burns more evenings on your home care team?\n\n"
-            "A) Scheduling chaos\n"
-            "B) Post-visit paperwork\n\n"
-            "Curious which one wins."
+            "More older adults. Not enough caregivers. Software that still makes you retype the visit.\n\n"
+            "What hurts most at your agency right now?"
         ),
     },
     {
         "id": "e05",
-        "topic": "Who said what",
+        "topic": "Three voices",
         "pillar": "Trust and safety",
         "linkedin": (
-            "A care assessment is three voices in one room.\n\n"
-            "The caregiver's questions. The client's answers. The family's concerns.\n\n"
-            "If your notes flatten that into one anonymous block of text, you lose accountability.\n\n"
-            "Do your transcripts keep speakers separate today, or is it one merged paragraph?"
+            "A good assessment has three voices.\n\n"
+            "The nurse asking. The client answering. The family adding what they are scared of.\n\n"
+            "If your notes mash that into one anonymous block, you lose the thread.\n\n"
+            "Do your notes keep speakers separate today?"
         ),
         "threads": (
-            "Care assessments have three voices.\n\n"
-            "Caregiver. Client. Family.\n\n"
-            "Do your notes keep them separate, or merge everything into one blob?"
+            "Nurse. Client. Family.\n\n"
+            "Do your notes keep those voices separate, or mash them together?"
         ),
     },
     {
         "id": "e06",
-        "topic": "Speed to signature",
-        "pillar": "Proof",
+        "topic": "First agreement wins",
+        "pillar": "Agency ops",
         "linkedin": (
-            "In private duty, the agency that puts a clear agreement in front of the family first "
-            "usually wins the client.\n\n"
-            "Speed-to-signature is not a vanity metric. It is revenue.\n\n"
-            "What is your average time from assessment to signed agreement right now?"
+            "In private duty, the first clear agreement in front of the family usually wins them.\n\n"
+            "I hear owners say they lost clients while the packet was still sitting in a Word doc.\n\n"
+            "How long does assessment to signature take for you right now?"
         ),
         "threads": (
-            "Honest question for agency owners:\n\n"
-            "How long from assessment to signed agreement at your shop?\n\n"
-            "Hours, days, or weeks?"
+            "Private duty question:\n\n"
+            "How long from assessment to signed agreement at your shop?"
         ),
     },
     {
         "id": "e07",
-        "topic": "Lost billables",
-        "pillar": "How it works",
+        "topic": "Said once",
+        "pillar": "Billables",
         "linkedin": (
-            "The billable that gets mentioned once, late in the visit, is the one that never makes the invoice.\n\n"
-            "Bathing help. Transportation. A meal reminder said in passing.\n\n"
-            "Which service do you suspect slips through most often on your team?"
+            "The line that gets said once near the end of the visit is the one that never hits the invoice.\n\n"
+            "I have watched that happen with bathing help, transportation, meals said in passing.\n\n"
+            "Which one do you think your team loses most?"
         ),
         "threads": (
-            "Which billable slips through most often when someone is writing notes from memory?\n\n"
-            "Bathing, meals, transportation, or something else?"
+            "Said once at the end of the visit. Gone from the invoice.\n\n"
+            "What do you lose most: bathing, transport, meals, or something else?"
         ),
     },
     {
         "id": "e08",
-        "topic": "New hire burnout",
-        "pillar": "Time and relief",
+        "topic": "New nurses and forms",
+        "pillar": "Hiring",
         "linkedin": (
-            "New assessors rarely burn out on the visits.\n\n"
-            "They burn out learning your forms, your templates, and your after-hours typing habit.\n\n"
-            "When you onboard a new nurse, what takes longer to teach: the clinical judgment or the paperwork stack?"
+            "New nurses do not quit because of the visits.\n\n"
+            "They quit because week two is forms, templates, and nights of typing what they already said out loud.\n\n"
+            "When you hire, what takes longer to teach: the clinical judgment or your paperwork?"
         ),
         "threads": (
-            "Onboarding a new home care assessor:\n\n"
-            "What is harder to teach, clinical judgment or your paperwork stack?"
+            "New hire reality:\n\n"
+            "Harder to teach, clinical judgment or your paperwork stack?"
         ),
     },
     {
         "id": "e09",
-        "topic": "State rules",
+        "topic": "State rules are not a logo swap",
         "pillar": "Trust and safety",
         "linkedin": (
-            "50 states plus DC means a lot of different expectations for a home care service agreement.\n\n"
-            "Generic templates fail quietly. The draft looks fine until someone checks the wrong clause.\n\n"
-            "How do you handle state specific language today: lawyer review, shared template, or something else?"
+            "I do not trust a home care contract that is just last year's Word doc with a new logo.\n\n"
+            "States do not share one rule book. Agencies that pretend they do get surprised later.\n\n"
+            "How do you handle state specific language today?"
         ),
         "threads": (
-            "Home care contracts across states:\n\n"
-            "How do you handle state specific language today?\n\n"
-            "Lawyer review, shared template, or something else?"
+            "Hot take: a logo-swapped contract template is a quiet risk.\n\n"
+            "How do you handle state specific language today?"
         ),
     },
     {
         "id": "e10",
         "topic": "Typing is not care",
-        "pillar": "Time and relief",
+        "pillar": "Caregiver first",
         "linkedin": (
             "Typing is not care.\n\n"
-            "Families pay for the human work. The after-hours keyboard is the unpaid job that burns good people out.\n\n"
-            "If you could delete one documentation task from your team's week without touching care quality, which task goes first?"
+            "Families pay for the human work. The keyboard shift after the visit is the unpaid job.\n\n"
+            "If you could cut one paperwork task this month and keep care the same, what goes?"
         ),
         "threads": (
-            "If you could delete one paperwork task from your week without hurting care quality, which one goes first?"
+            "Typing is not care.\n\n"
+            "One paperwork task you would cut tomorrow if care quality stayed the same?"
         ),
     },
     {
         "id": "e11",
-        "topic": "AI drafts humans decide",
+        "topic": "Do not build on a model trick",
         "pillar": "Trust and safety",
         "linkedin": (
-            "AI drafts. Caregivers decide.\n\n"
-            "That sentence is the whole safety model I will defend in public.\n\n"
-            "Where do you still want a human mandatory checkpoint in your documentation flow?"
+            "If the next model update makes your product weaker, you built on a trick.\n\n"
+            "If it makes you stronger, you built on a real workflow.\n\n"
+            "For me that workflow is record, draft, human review, send.\n\n"
+            "What part of your stack would still matter if the models got twice as good tomorrow?"
         ),
         "threads": (
-            "AI drafts. Caregivers decide.\n\n"
-            "Where should a human checkpoint stay mandatory in your documentation flow?"
+            "If models got twice as good tomorrow, what part of your agency stack would still matter?"
         ),
     },
     {
         "id": "e12",
-        "topic": "Sunday nights",
+        "topic": "Sunday laptop",
         "pillar": "Time and relief",
         "linkedin": (
-            "Sunday night is still a documentation shift for too many home care teams.\n\n"
-            "Laptop open. Cold coffee. Notes that should have been finished after the visit.\n\n"
-            "What does your team's typical Sunday night look like right now?"
+            "Sunday night with a laptop open is not culture. It is unfinished documentation from the week.\n\n"
+            "I built PALM so that pile can shrink before the weekend starts.\n\n"
+            "What does Sunday look like on your team right now?"
         ),
         "threads": (
-            "Home care folks:\n\n"
-            "What does Sunday night look like on your team right now?\n\n"
-            "Done, or still catching up on notes?"
+            "Sunday night laptop open: culture, or unfinished notes from the week?\n\n"
+            "What does yours look like?"
         ),
     },
     {
         "id": "e13",
-        "topic": "Phone assessments",
-        "pillar": "How it works",
+        "topic": "Phone visits count",
+        "pillar": "How the work happens",
         "linkedin": (
-            "Not every assessment happens on a couch.\n\n"
-            "Phone intakes and reassessments are real. The paperwork pile after them is the same.\n\n"
-            "What share of your assessments happen by phone versus in the home?"
+            "Not every assessment is on a couch.\n\n"
+            "Phone intakes and reassessments are real. The paperwork after them is the same mess.\n\n"
+            "What share of your assessments are phone versus in the home?"
         ),
         "threads": (
-            "Rough split at your agency:\n\n"
-            "What percent of assessments are phone versus in-home?"
+            "Rough split:\n\n"
+            "Phone assessments versus in-home at your agency?"
         ),
     },
     {
         "id": "e14",
-        "topic": "EHR companion",
-        "pillar": "How it works",
+        "topic": "Better place to type",
+        "pillar": "Product thesis",
         "linkedin": (
-            "Most home care software gives your team a better place to type.\n\n"
-            "Scheduling. EVV. Care management. Useful tools. The typing stays.\n\n"
-            "Are you looking for another system of record, or something that removes a documentation step?"
+            "Most home care software sells you a better place to type.\n\n"
+            "Schedulers. EVV. Dashboards. Useful. The typing stays.\n\n"
+            "I am building the opposite: delete the retyping.\n\n"
+            "Are you shopping for another system of record, or for fewer hours after the visit?"
         ),
         "threads": (
-            "When you shop home care software, are you hunting for:\n\n"
-            "A) Another place to type\n"
-            "B) A way to delete a documentation step\n\n"
-            "Which one?"
+            "Are you shopping for another place to type, or for fewer hours after the visit?"
         ),
     },
     {
         "id": "e15",
-        "topic": "Owner math",
-        "pillar": "Proof",
+        "topic": "312 hours",
+        "pillar": "Owner math",
         "linkedin": (
-            "3 assessments a week at 2 hours of paperwork each is 312 hours a year.\n\n"
-            "That is 39 working days per assessor spent retyping conversations that already happened.\n\n"
-            "If you ran that math on your team last month, what number did you get?"
+            "3 assessments a week. 2 hours of paperwork each. That is 312 hours a year.\n\n"
+            "I run that math with owners because nobody budgets for it, and it still shows up in burnout.\n\n"
+            "If you did that math last month, what number did you get?"
         ),
         "threads": (
-            "Do the math for your team:\n\n"
             "Assessments per week times hours of after-visit paperwork.\n\n"
             "What yearly number do you land on?"
         ),
@@ -242,82 +234,81 @@ ENGAGEMENT: list[dict[str, str]] = [
     {
         "id": "e16",
         "topic": "Family waiting",
-        "pillar": "Proof",
+        "pillar": "Agency ops",
         "linkedin": (
             "A delayed contract is not just a slow PDF.\n\n"
-            "It is a family comparing you to the agency that already put a clear agreement in their hands.\n\n"
-            "When families wait on paperwork, what usually causes the delay on your side?"
+            "It is a family still calling other agencies while your packet sits unfinished.\n\n"
+            "When paperwork lags on your side, what usually causes it?"
         ),
         "threads": (
-            "When a family waits on the agreement, what usually causes the delay?\n\n"
-            "Staffing, templates, review, or something else?"
+            "When the family is waiting on the agreement, what usually causes the delay?"
         ),
     },
     {
         "id": "e17",
-        "topic": "Control",
+        "topic": "Edit before send",
         "pillar": "Trust and safety",
         "linkedin": (
-            "You stay in control is not a slogan. It is a product requirement.\n\n"
-            "Edit the draft. Reject a line. Send only when it matches the visit you ran.\n\n"
-            "Which edit do coordinators make most often on AI-assisted drafts in your world: services, hours, rates, or language?"
+            "You stay in control means you can change the draft before it leaves.\n\n"
+            "Hours. Services. Rate. Wording. Reject the whole thing if it is wrong.\n\n"
+            "On AI-assisted drafts, what do your coordinators change most?"
         ),
         "threads": (
-            "If AI drafts a care packet, what do coordinators edit most?\n\n"
-            "Services, hours, rates, or wording?"
+            "On AI-assisted drafts, what do coordinators change most: hours, services, rate, or wording?"
         ),
     },
     {
         "id": "e18",
-        "topic": "Reassessments",
-        "pillar": "How it works",
+        "topic": "Reassessment pile",
+        "pillar": "How the work happens",
         "linkedin": (
-            "Reassessments create the same paperwork pile as first visits, then people treat them like busywork.\n\n"
-            "That is how plans drift away from what the client actually needs.\n\n"
-            "How often do you reassess, and what is the hardest part of that cycle?"
+            "Reassessments create the same paperwork pile as first visits.\n\n"
+            "Then people treat them like busywork, and the plan drifts away from the client.\n\n"
+            "What is harder for you: getting the reassessment scheduled, or finishing the packet after?"
         ),
         "threads": (
-            "Reassessment cycle question:\n\n"
-            "What is the hardest part, scheduling the visit or finishing the paperwork after?"
+            "Reassessments:\n\n"
+            "Harder to schedule the visit, or finish the packet after?"
         ),
     },
     {
         "id": "e19",
-        "topic": "Fear of AI",
+        "topic": "Wrong fear",
         "pillar": "Trust and safety",
         "linkedin": (
             "The fear I hear most is that AI will replace caregivers.\n\n"
-            "That fear is pointed at the wrong job. Caregiving is the human work families pay for. "
+            "I think that fear is pointed at the wrong job. Care is the work families pay for. "
             "The replaceable job is retyping the visit.\n\n"
-            "What is the real AI fear inside your agency right now: job loss, wrong documents, or something else?"
+            "What is the real AI fear inside your agency: job loss, wrong documents, or something else?"
         ),
         "threads": (
-            "Honest AI fear check for home care teams:\n\n"
-            "Is it job loss, wrong documents, or something else?"
+            "Real AI fear at your agency:\n\n"
+            "Job loss, wrong documents, or something else?"
         ),
     },
     {
         "id": "e20",
-        "topic": "Intake day",
+        "topic": "Intake week",
         "pillar": "Time and relief",
         "linkedin": (
-            "Intake day is loud. The paperwork after it does not have to be.\n\n"
-            "The bottleneck is rarely the conversation. It is turning that conversation into a packet someone can send.\n\n"
-            "On a busy intake week, where does work pile up first for you?"
+            "Intake week is loud.\n\n"
+            "The bottleneck is rarely the conversation. It is turning that conversation into a packet "
+            "someone can send without staying up late.\n\n"
+            "On a busy week, where does work pile up first for you?"
         ),
         "threads": (
             "Busy intake week:\n\n"
-            "Where does work pile up first, the visits or the paperwork after?"
+            "Does work pile up on the visits, or on the paperwork after?"
         ),
     },
     {
         "id": "e21",
-        "topic": "Coordinator queue",
+        "topic": "Who approves",
         "pillar": "Trust and safety",
         "linkedin": (
-            "A review queue is how you keep speed and accountability in the same product.\n\n"
-            "AI can draft fast. Your people still own what leaves the building.\n\n"
-            "Who should own final approval at your agency: the assessor, a coordinator, or an owner?"
+            "Speed is useless if the wrong person is accountable.\n\n"
+            "I want a review queue. A named human. Then send.\n\n"
+            "At your agency, who should own final approval: assessor, coordinator, or owner?"
         ),
         "threads": (
             "Who should own final approval before a packet goes to a family?\n\n"
@@ -326,134 +317,126 @@ ENGAGEMENT: list[dict[str, str]] = [
     },
     {
         "id": "e22",
-        "topic": "Vendor questions",
-        "pillar": "Trust and safety",
+        "topic": "Talk to users",
+        "pillar": "Build together",
         "linkedin": (
-            "Five questions I would ask any home care AI vendor:\n\n"
-            "1. What reaches a family before human review?\n"
-            "2. Can I see who said what in the source transcript?\n"
-            "3. How do you handle state specific contract language?\n"
-            "4. What can a coordinator edit before send?\n"
-            "5. What data stays under the agency's control?\n\n"
-            "Which question would you add as number six?"
+            "YC-style advice that actually stuck with me: talk to users constantly.\n\n"
+            "So I am asking you, not a slide deck.\n\n"
+            "If you tried AI for documentation and bounced, what made you stop?"
         ),
         "threads": (
-            "What is the one question you always ask AI vendors in home care before you trust a draft?"
+            "If you tried AI for documentation and bounced, what made you stop?"
         ),
     },
     {
         "id": "e23",
-        "topic": "Same day proposal",
-        "pillar": "Proof",
+        "topic": "Lost to paperwork speed",
+        "pillar": "Agency ops",
         "linkedin": (
-            "Same-day proposal ready used to sound aggressive. Now it sounds like competitive hygiene.\n\n"
-            "Families do not pause their search because your team needs two more nights with a laptop.\n\n"
-            "Have you ever lost a client mainly because another agency got the paperwork there first?"
+            "I have heard owners say they lost a client because another agency got the agreement there first.\n\n"
+            "Same visit quality. Slower packet.\n\n"
+            "Has that happened to you?"
         ),
         "threads": (
-            "Have you ever lost a client mainly because another agency got the paperwork there first?\n\n"
-            "Yes, no, or not sure?"
+            "Have you lost a client mainly because another agency got the paperwork there first?"
         ),
     },
     {
         "id": "e24",
-        "topic": "Build with us feedback",
+        "topic": "Ugly version",
         "pillar": "Build together",
         "linkedin": (
-            "Tell me what broke in your paperwork week.\n\n"
-            "Not the polished version. The ugly version. Wrong template. Missed billable. Sunday catch-up. "
-            "A draft that felt unsafe to send.\n\n"
-            "What is the one paperwork failure that still happens too often on your team?"
+            "Tell me the ugly version of your paperwork week.\n\n"
+            "Not the polished ops story. The one with sticky notes, shared drives, and a nurse texting "
+            "a rate at 8pm.\n\n"
+            "What still happens too often on your team?"
         ),
         "threads": (
-            "Ugly paperwork question:\n\n"
-            "What failure still happens too often on your team?\n\n"
-            "Wrong template, missed billable, Sunday catch-up, or unsafe-feeling draft?"
+            "Ugly paperwork week. No polish.\n\n"
+            "What still happens too often on your team?"
         ),
     },
     {
         "id": "e25",
-        "topic": "Minutes not hours",
-        "pillar": "Proof",
+        "topic": "Minutes after the visit",
+        "pillar": "Product bar",
         "linkedin": (
-            "Minutes, not hours, is the only documentation claim that matters after a real visit.\n\n"
+            "Minutes after the visit is the only documentation bar I respect.\n\n"
             "If a tool still leaves your nurse with an evening of cleanup, it did not solve the job.\n\n"
-            "What is a realistic target for post-visit documentation time on your team?"
+            "What target would you set for post-visit documentation time?"
         ),
         "threads": (
-            "Realistic target for post-visit documentation time on your team?\n\n"
-            "Under 15 minutes, under an hour, or still measured in hours?"
+            "What target would you set for post-visit documentation time?\n\n"
+            "Be honest."
         ),
     },
     {
         "id": "e26",
-        "topic": "Multi location",
+        "topic": "Multi office",
         "pillar": "Build together",
         "linkedin": (
-            "Multi-location agencies do not need another slide deck.\n\n"
-            "They need one live workflow that coordinators in every office can trust, with the same review rules.\n\n"
-            "If you run more than one office, what breaks first when you try to standardize documentation?"
+            "Multi-office agencies do not need another pitch deck from me.\n\n"
+            "They need one workflow every coordinator can trust, with the same review rules.\n\n"
+            "If you run more than one location, what breaks first when you try to standardize documentation?"
         ),
         "threads": (
-            "Multi-office home care:\n\n"
-            "What breaks first when you try to standardize documentation across locations?"
+            "Multi-office:\n\n"
+            "What breaks first when you try to standardize documentation?"
         ),
     },
     {
         "id": "e27",
-        "topic": "Never auto send",
+        "topic": "Never auto-send",
         "pillar": "Trust and safety",
         "linkedin": (
-            "I keep a public list of things that should never auto-send in home care AI.\n\n"
-            "Contracts. Care plans. Anything with hours and rates. Anything a family will sign.\n\n"
-            "What else belongs on that never-auto-send list?"
+            "My never-auto-send list is short on purpose.\n\n"
+            "Care plans. Contracts. Anything with hours and rates. Anything a family signs.\n\n"
+            "What else belongs on that list for you?"
         ),
         "threads": (
-            "Never auto-send list for home care AI:\n\n"
-            "Contracts and care plans are already on mine.\n\n"
-            "What else belongs there?"
+            "Never auto-send: care plans, contracts, hours, rates, anything a family signs.\n\n"
+            "What else belongs on your list?"
         ),
     },
     {
         "id": "e28",
-        "topic": "Audit ready",
-        "pillar": "Trust and safety",
+        "topic": "Find the packet",
+        "pillar": "Ops reality",
         "linkedin": (
-            "When someone asks for the packet, you should not dig through three folders and a text thread.\n\n"
-            "Transcript, plan, billables, agreement. One client. One place.\n\n"
-            "How long does it take your team to pull a complete assessment packet today?"
+            "When someone asks for the packet, you should not dig through email, Drive, and a text thread.\n\n"
+            "Transcript. Plan. Billables. Agreement. One client.\n\n"
+            "How long does that hunt take on your team today?"
         ),
         "threads": (
-            "How long to pull a complete assessment packet when someone asks for it?\n\n"
-            "Minutes, hours, or it depends who is in the office?"
+            "How long to pull a complete assessment packet when someone asks for it?"
         ),
     },
     {
         "id": "e29",
-        "topic": "Founder evenings",
-        "pillar": "Build together",
+        "topic": "Why I started",
+        "pillar": "Why I built this",
         "linkedin": (
-            "I did not start PALM because documentation software was missing a feature.\n\n"
+            "I did not start PALM because documentation software needed another feature.\n\n"
             "I started it because good caregivers were losing evenings to work that was already spoken out loud.\n\n"
             "If you built tools for home care, what problem would you refuse to ignore?"
         ),
         "threads": (
-            "If you built tools for home care, what problem would you refuse to ignore?"
+            "I started PALM because evenings were getting eaten by typing what was already said.\n\n"
+            "What problem in home care would you refuse to ignore?"
         ),
     },
     {
         "id": "e30",
-        "topic": "Friday clock out",
+        "topic": "Friday leave",
         "pillar": "Time and relief",
         "linkedin": (
-            "Friday clock-out is a culture test.\n\n"
-            "If the packet is unfinished, the weekend is unfinished. If review happened during the week, "
-            "people leave on time.\n\n"
+            "Friday clock-out is a test.\n\n"
+            "If the packet is unfinished, the weekend is unfinished.\n\n"
             "Did your team's paperwork leave when they did last Friday?"
         ),
         "threads": (
-            "Last Friday check:\n\n"
-            "Did your team's paperwork leave when they did, or did it follow them home?"
+            "Last Friday:\n\n"
+            "Did paperwork leave when your team did, or follow them home?"
         ),
     },
 ]
