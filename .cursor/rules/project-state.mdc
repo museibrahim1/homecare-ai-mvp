@@ -45,7 +45,7 @@ App ID `6766371988` ("PALM – Home Care Contracts"), Team `BM5U63WP92`. App Sto
 
 ## Automated Social Posting (Jul 13 – Aug 9 plan)
 - Social posting is FULLY CLOUD-BASED (no local machine needed), set up 2026-07-09:
-  - **Facebook**: all 13 posts natively scheduled inside Meta Business Suite via `scripts/social/schedule_meta_fb.py` (11:30 AM local, log in `scripts/social/.scheduled_fb.json`).
+  - **Facebook**: as of 2026-08-14, AM photos are posted by `run_scheduled_posts.py` itself unless the Page already has a natively scheduled/published post that day (`fb_page_has_post_on` guard). The old local-Mac `schedule_meta_fb.py` native-scheduling flow was only ever run for the Jul 13–Aug 9 plan (its `.scheduled_fb.json` log lived on the Mac, never committed) and is retired.
   - **IG + Threads (Mon/Wed/Fri) and LinkedIn (Tue/Thu)**: GitHub Actions workflow `.github/workflows/social-posts.yml` runs `run_scheduled_posts.py` daily at 15:30 UTC (11:30 AM ET). Secrets (META_*, LINKEDIN_*) are set on the `museibrahim1/homecare-ai-mvp` repo. The workflow commits `.posted_log.json` back to main as a double-post guard. Manual trigger: `gh workflow run social-posts.yml -f date=YYYY-MM-DD -f dry_run=true`.
   - The old local launchd agent `com.palmcareai.socialposts` was REMOVED (plist deleted) — don't recreate it.
   - Threads caps captions at 500 chars; the runner auto-trims via `threads_safe()`.
