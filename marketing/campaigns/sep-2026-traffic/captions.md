@@ -1,20 +1,15 @@
 # Captions + CTA map — Sep 2026 Traffic Month
 
-Placeholders resolved by the runner:
-- `{a}` → palmcareai.com/a/meta (App Store hop)
-- `{s}` → palmcareai.com/r/meta (register / trial)
-- `{d}` → palmcareai.com/d/meta (book demo)
-- `{w}` → palmcareai.com/w/meta (features)
-- `{b}` → palmcareai.com/b/meta (blog hub)
+Placeholders:
+- `{a}` app · `{s}` signup · `{d}` demo · `{w}` features · `{b}` blog
 
-Deep SEO links used in-caption (full paths):
-- palmcareai.com/blog/how-to-write-home-care-service-agreement
-- palmcareai.com/blog/how-to-do-home-care-client-assessment
-- palmcareai.com/blog/home-care-care-plan-template
-- palmcareai.com/blog/best-ai-tools-home-care-agencies-2026
-- palmcareai.com/blog/how-much-does-home-care-software-cost
-- palmcareai.com/roi-calculator
+On-image QR points to App Store via `palmcareai.com/app`. Captions always include the download shortlink when a QR card runs.
 
-LinkedIn first-comment CTAs use `/a/li`, `/d/li`, `/w/li`.
+Trust and Safety themes this month:
+- Nothing leaves without a human
+- Built from what was actually said
+- You stay in control
+- AI drafts, caregivers decide
+- Build together with agency owners
 
-Full caption text lives in `scripts/social/sep2026_calendar.py` (source of truth for posting).
+Full caption text: `scripts/social/sep2026_calendar.py`
