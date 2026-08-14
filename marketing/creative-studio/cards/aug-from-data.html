@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="../studio.css">
+  <style>
+    .hook {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 72px;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-top: 56px;
+    }
+    .hook.sm { font-size: 58px; }
+    .support {
+      font-size: 28px;
+      line-height: 1.45;
+      opacity: 0.78;
+      margin-top: 28px;
+      max-width: 860px;
+      font-weight: 500;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 40px; }
+    .pill {
+      font-size: 22px; font-weight: 700; padding: 14px 22px;
+      border-radius: 999px; background: rgba(13,148,136,0.12); color: var(--teal-deep);
+    }
+    .card.dark .pill { background: rgba(255,255,255,0.1); color: #fff; }
+    .card.teal .pill { background: rgba(255,255,255,0.18); color: #fff; }
+    .phone-wrap {
+      margin-top: auto; display: flex; justify-content: center; align-items: flex-end;
+      padding-bottom: 0;
+    }
+    .phone-wrap img {
+      width: 520px; height: auto; border-radius: 48px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.28);
+      object-fit: cover; object-position: center top;
+    }
+    .doc-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 48px;
+    }
+    .doc-card {
+      background: #fff; border-radius: 24px; padding: 28px 30px;
+      box-shadow: 0 10px 30px rgba(16,24,40,0.08);
+    }
+    .doc-card .n {
+      font-size: 18px; font-weight: 800; letter-spacing: 0.12em;
+      color: var(--teal); text-transform: uppercase; margin-bottom: 10px;
+    }
+    .doc-card .t { font-size: 30px; font-weight: 800; color: var(--ink); }
+    .big-stat {
+      font-size: 120px; font-weight: 900; letter-spacing: -0.04em;
+      line-height: 0.95; margin-top: 48px; color: var(--teal);
+    }
+    .quote-mark {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 120px; line-height: 0.7; color: var(--teal); opacity: 0.45;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 1. Evenings back — #1 winner pattern -->
+<div class="card feed light" id="aug-evenings-back">
+  <div class="pad" style="padding-bottom:0;">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook sm">I used to lose every evening to paperwork.</div>
+    <div class="support">Now I just talk. PALM writes the transcript, the care plan, the billables, and the contract.</div>
+    <div class="pill-row">
+      <span class="pill">Record once</span>
+      <span class="pill">Review</span>
+      <span class="pill">Send</span>
+    </div>
+    <div class="phone-wrap" style="margin-top:36px;">
+      <img src="../assets/08_recording_active.png" alt="Recording screen" style="max-height:640px;">
+    </div>
+  </div>
+</div>
+
+<!-- 2. Drive back rebuild -->
+<div class="card feed dark" id="aug-drive-back">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook sm" style="color:#f3f6f5;">Visit done. Drive back. Rebuild it all by hand.</div>
+    <div class="support" style="color:#c8d0ce;">Care plan. Service contract. Billables. Every client. Every night.</div>
+    <div class="big-stat" style="color:#14b8a6; font-size:58px; margin-top:48px; max-width:900px;">PALM ends the second job.</div>
+    <div class="pill-row">
+      <span class="pill">Record once</span>
+      <span class="pill">No rebuild at the desk</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com/app</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Visit over POV + real phone -->
+<div class="card feed teal" id="aug-visit-over">
+  <div class="pad" style="padding-bottom:0;">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+    </div>
+    <div class="hook sm" style="margin-top:40px;">POV: the visit just ended.</div>
+    <div class="support" style="color:rgba(255,255,255,0.9);">Notes. Billables. Contract. Already drafted. You have not started the car.</div>
+    <div class="phone-wrap">
+      <img src="../assets/14_contract.png" alt="Contract screen" style="max-height:720px;">
+    </div>
+  </div>
+</div>
+
+<!-- 4. Four documents -->
+<div class="card square light" id="aug-four-docs">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">How it works</span>
+    </div>
+    <div class="hook sm">One recording. Four documents.</div>
+    <div class="doc-grid">
+      <div class="doc-card"><div class="n">01</div><div class="t">Transcript</div></div>
+      <div class="doc-card"><div class="n">02</div><div class="t">Care plan</div></div>
+      <div class="doc-card"><div class="n">03</div><div class="t">Billables</div></div>
+      <div class="doc-card"><div class="n">04</div><div class="t">Contract</div></div>
+    </div>
+    <div class="support">Built from what was actually said. Validated across 50 states plus DC.</div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com/app</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Myth bust -->
+<div class="card square light" id="aug-myth-bust">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="quote-mark">“</div>
+    <div class="hook sm" style="margin-top:8px;">AI is going to replace the caregivers.</div>
+    <div class="support" style="font-size:32px; color:var(--ink); opacity:1; font-weight:700; margin-top:36px;">
+      That is the fear we hear most. It is also wrong.
+    </div>
+    <div class="support">
+      Caregiving is the human work families pay for. PALM replaces the two hours of typing after the visit, not the care.
+    </div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com/app</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Friday clock-out -->
+<div class="card square teal" id="aug-friday">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook" style="margin-top:72px;">Leaving on time on a Friday.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92); font-size:32px;">
+      Visit notes, billables, and the service agreement were done before you left the last house. The weekend starts when you clock out.
+    </div>
+    <div class="pill-row">
+      <span class="pill">No kitchen-table charting</span>
+      <span class="pill">Free to try</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com/app</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
