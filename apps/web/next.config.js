@@ -102,6 +102,43 @@ const nextConfig = {
           '/register?utm_source=email&utm_medium=email&utm_campaign=agency_outreach&utm_content=shortlink',
         permanent: false,
       },
+      // Demo + site shortlinks for social CTAs (Sep 2026 traffic month).
+      {
+        source: '/d/meta',
+        destination:
+          '/book-demo?utm_source=meta&utm_medium=social&utm_campaign=sep2026_traffic&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/d/li',
+        destination:
+          '/book-demo?utm_source=linkedin&utm_medium=social&utm_campaign=sep2026_traffic&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/w/meta',
+        destination:
+          '/features?utm_source=meta&utm_medium=social&utm_campaign=sep2026_traffic&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/w/li',
+        destination:
+          '/features?utm_source=linkedin&utm_medium=social&utm_campaign=sep2026_traffic&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/b/meta',
+        destination:
+          '/blog?utm_source=meta&utm_medium=social&utm_campaign=sep2026_traffic&utm_content=shortlink',
+        permanent: false,
+      },
+      {
+        source: '/b/li',
+        destination:
+          '/blog?utm_source=linkedin&utm_medium=social&utm_campaign=sep2026_traffic&utm_content=shortlink',
+        permanent: false,
+      },
       // App Store metadata and old emails pointed here; help center is auth-only.
       {
         source: '/support',

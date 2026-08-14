@@ -63,7 +63,8 @@ CTA for ads: demo@palmtai.com
 - `captions.md` — ready-to-post Reels + feed copy
 - `reel-scripts.md` — 7 to 15s shot lists + on-screen text
 - `generated/` — brand cards rendered from creative-studio (real app screens where relevant)
-- Note: WaveSpeed Nano Banana key in `.env` returned 401 Invalid API key. Refresh `WAVESPEED_API_KEY`, then run `python3 scripts/marketing/gen_aug2026_from_data.py` for photoreal lifestyle start frames.
+- `higgsfield/` — photoreal stills (GPT Image 2) + silent 8s motion plates (Seedance 2.0 Mini) for Remotion captions
+- Desktop copies: `PALM Social Creatives (Jul 13 - Aug 9)/Aug 13 Data Pack/higgsfield/` and `PalmCare Documents/Marketing/Aug-2026-from-data/higgsfield/`
 - Iteration log below for the next cycle
 
 ## Iteration log
@@ -74,3 +75,6 @@ CTA for ads: demo@palmtai.com
 - New variations: 6 angles, captions + stills
 - New angles tested: four-documents product proof (under-tested in winners list)
 - Angles retired as primary: QR-only download cards, abstract one-liners without story
+- Round: 1b (Higgsfield)
+- Date: 2026-08-13
+- Added 6× 9:16 photoreal stills + 4× 8s video plates (evenings, drive-back, visit-over, four-docs). Captions still need Remotion burn-in.

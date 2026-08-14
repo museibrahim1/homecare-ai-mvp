@@ -1,0 +1,22 @@
+[
+  {
+    "id": "6f9d3eca-1d15-4f31-a134-e5ec7df94f57",
+    "status": "completed",
+    "display_name": "GPT Image 2",
+    "job_set_type": "gpt_image_2",
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3F9AviGmEM8gKCWjLWCbFstSG1F/hf_20260814_031042_6f9d3eca-1d15-4f31-a134-e5ec7df94f57.png",
+    "created_at": 1786677042.719302,
+    "params": {
+      "width": 1520,
+      "height": 2688,
+      "prompt": "Photorealistic home care nurse in navy coat still wearing it indoors just after arriving, holding iPhone 15 Pro Space Black showing teal #0d9488 PalmCare completed document list. Soft entryway light, documentary style, vertical 9:16, no marketing slogans, no QR.",
+      "medias": [],
+      "aspect_ratio": "9:16",
+      "quality": "high",
+      "resolution": "2k",
+      "model": "videotape-alpha",
+      "remove_bg": false,
+      "reference_elements": []
+    }
+  }
+]

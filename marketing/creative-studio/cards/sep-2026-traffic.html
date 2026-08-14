@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="../studio.css">
+  <style>
+    .hook {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 72px;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-top: 56px;
+    }
+    .hook.sm { font-size: 58px; }
+    .hook.xs { font-size: 50px; }
+    .support {
+      font-size: 28px;
+      line-height: 1.45;
+      opacity: 0.78;
+      margin-top: 28px;
+      max-width: 860px;
+      font-weight: 500;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 40px; }
+    .pill {
+      font-size: 22px; font-weight: 700; padding: 14px 22px;
+      border-radius: 999px; background: rgba(13,148,136,0.12); color: var(--teal-deep);
+    }
+    .card.dark .pill { background: rgba(255,255,255,0.1); color: #fff; }
+    .card.teal .pill { background: rgba(255,255,255,0.18); color: #fff; }
+    .phone-wrap {
+      margin-top: auto; display: flex; justify-content: center; align-items: flex-end;
+      padding-bottom: 0;
+    }
+    .phone-wrap img {
+      width: 520px; height: auto; border-radius: 48px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.28);
+      object-fit: cover; object-position: center top;
+    }
+    .doc-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 48px;
+    }
+    .doc-card {
+      background: #fff; border-radius: 24px; padding: 28px 30px;
+      box-shadow: 0 10px 30px rgba(16,24,40,0.08);
+    }
+    .doc-card .n {
+      font-size: 18px; font-weight: 800; letter-spacing: 0.12em;
+      color: var(--teal); text-transform: uppercase; margin-bottom: 10px;
+    }
+    .doc-card .t { font-size: 30px; font-weight: 800; color: var(--ink); }
+    .big-stat {
+      font-size: 120px; font-weight: 900; letter-spacing: -0.04em;
+      line-height: 0.95; margin-top: 48px; color: var(--teal);
+    }
+    .quote-mark {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 120px; line-height: 0.7; color: var(--teal); opacity: 0.45;
+      margin-top: 40px;
+    }
+    .card.dark .quote-mark, .card.teal .quote-mark { color: #5eead4; opacity: 0.85; }
+    .math-line { display: flex; align-items: baseline; gap: 24px; margin-top: 16px; }
+    .math-line .big { font-size: 96px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
+    .math-line .lbl { font-size: 30px; font-weight: 600; opacity: 0.72; }
+    .math-rule { width: 100%; height: 4px; background: rgba(255,255,255,0.22); margin: 36px 0; }
+  </style>
+</head>
+<body>
+
+<!-- 1. Coat still on -->
+<div class="card feed teal" id="sep-coat-on">
+  <div class="pad" style="padding-bottom:0;">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook sm" style="margin-top:44px;">Coat still on. Packet already drafted.</div>
+    <div class="support" style="color:rgba(255,255,255,0.9);">You have not sat down yet. PALM already wrote the transcript, the care plan, the billables, and the contract.</div>
+    <div class="phone-wrap">
+      <img src="../assets/14_contract.png" alt="Contract screen" style="max-height:700px;">
+    </div>
+  </div>
+</div>
+
+<!-- 2. Speed of signature -->
+<div class="card feed light" id="sep-speed-signature">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Proof</span>
+    </div>
+    <div class="hook sm">The first clear agreement usually wins the client.</div>
+    <div class="support">Families choose the agency that hands them a complete service agreement first. PALM has yours ready before you leave the visit.</div>
+    <div class="pill-row">
+      <span class="pill">Same-day proposal</span>
+      <span class="pill">Clear terms</span>
+      <span class="pill">Built from the visit</span>
+    </div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/14_contract.png" alt="Contract screen" style="max-height:600px;">
+    </div>
+  </div>
+</div>
+
+<!-- 3. The lost billable -->
+<div class="card square dark" id="sep-lost-billable">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="hook sm" style="margin-top:56px;">Said once. Almost never invoiced.</div>
+    <div class="support" style="color:#c8d0ce;">A client mentions help with bathing partway through the assessment. It is easy to lose when you write the plan from memory that evening. PALM captures every billable service from what was actually said.</div>
+    <div class="pill-row">
+      <span class="pill">Bathing assistance</span>
+      <span class="pill">Captured, not recalled</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Who said what -->
+<div class="card feed teal" id="sep-who-said-what">
+  <div class="pad" style="padding-bottom:0;">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div style="margin-top:48px; display:flex; gap:48px; align-items:flex-start;">
+      <div style="flex:1; padding-top:24px;">
+        <div class="eyebrow">Speaker-separated transcripts</div>
+        <div class="hook sm" style="margin-top:0;">PALM knows who said what.</div>
+        <div class="support" style="color:rgba(255,255,255,0.9);">The caregiver's questions. The client's answers. The family's concerns. Every word attributed and searchable.</div>
+      </div>
+      <div class="phone" style="width:420px; flex-shrink:0;">
+        <img class="screen" src="../assets/11_transcript.png">
+      </div>
+    </div>
+    <div class="footerbar" style="margin-top:auto; padding-bottom:0;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Owner math -->
+<div class="card square dark" id="sep-owner-math">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="eyebrow" style="margin-top:48px;">Do the math with us</div>
+    <div class="math-line">
+      <span class="big">3</span>
+      <span class="lbl">assessments a week</span>
+    </div>
+    <div class="math-line">
+      <span class="big" style="color:#5eead4;">2 hrs</span>
+      <span class="lbl">of retyping each</span>
+    </div>
+    <div class="math-rule"></div>
+    <div class="math-line">
+      <span class="big" style="color:#5eead4;">312 hrs</span>
+      <span class="lbl">a year at the keyboard</span>
+    </div>
+    <div class="support" style="color:#c8d0ce; margin-top:36px;">That is roughly 39 working days of typing up what someone already said out loud.</div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 6. New hire -->
+<div class="card feed light" id="sep-new-hire">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">How it works</span>
+    </div>
+    <div class="hook sm">A new assessor should learn care, not your paperwork.</div>
+    <div class="support">New hires spend their first weeks fighting templates and formatting instead of clients. With PALM they record the visit and the documents come back ready to review.</div>
+    <div class="pill-row">
+      <span class="pill">Faster onboarding</span>
+      <span class="pill">Consistent output</span>
+    </div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/10_assessment_overview.png" alt="Assessment overview" style="max-height:620px;">
+    </div>
+  </div>
+</div>
+
+<!-- 7. Phone visit -->
+<div class="card feed light" id="sep-phone-visit">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">How it works</span>
+    </div>
+    <div class="hook sm">The intake was over the phone. The packet still wrote itself.</div>
+    <div class="support">Not every assessment happens at the kitchen table. Record the call and PALM builds the same care plan, billables, and contract from what was said.</div>
+    <div class="pill-row">
+      <span class="pill">In person</span>
+      <span class="pill">Over the phone</span>
+      <span class="pill">Same documents</span>
+    </div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/08_recording_active.png" alt="Recording screen" style="max-height:600px;">
+    </div>
+  </div>
+</div>
+
+<!-- 8. Audit ready -->
+<div class="card square light" id="sep-audit-ready">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="hook sm" style="margin-top:52px;">Audit-ready the moment the visit ends.</div>
+    <div class="doc-grid">
+      <div class="doc-card"><div class="n">01</div><div class="t">Transcript</div></div>
+      <div class="doc-card"><div class="n">02</div><div class="t">Care plan</div></div>
+      <div class="doc-card"><div class="n">03</div><div class="t">Billables</div></div>
+      <div class="doc-card"><div class="n">04</div><div class="t">Contract</div></div>
+    </div>
+    <div class="support">Every client folder holds the full record in one place. When a review comes, nothing has to be reconstructed.</div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 9. EHR companion -->
+<div class="card square dark" id="sep-ehr-companion">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">How it works</span>
+    </div>
+    <div class="hook sm" style="margin-top:56px;">PALM writes the documents. It does not run your schedule.</div>
+    <div class="support" style="color:#c8d0ce;">Keep the system you already use for scheduling and billing. PALM sits beside it and turns the recorded visit into the paperwork.</div>
+    <div class="pill-row">
+      <span class="pill">Records the visit</span>
+      <span class="pill">Drafts the packet</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Intake chaos -->
+<div class="card feed light" id="sep-intake-chaos">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook sm">Intake day, minus the scramble.</div>
+    <div class="support">Six assessments, a stack of forms, and everyone waiting on you. Record each visit and end the day with every packet already drafted.</div>
+    <div class="pill-row">
+      <span class="pill">Loud day</span>
+      <span class="pill">Calm packet</span>
+    </div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/13_clinical_notes.png" alt="Clinical notes screen" style="max-height:600px;">
+    </div>
+  </div>
+</div>
+
+<!-- 11. Reassessment -->
+<div class="card square teal" id="sep-reassessment">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook sm" style="margin-top:64px;">Reassessments come around fast.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92);">Every renewal means another care plan and another agreement. Record the check-in and PALM refreshes the documents from what changed.</div>
+    <div class="pill-row">
+      <span class="pill">Record the check-in</span>
+      <span class="pill">Updated in minutes</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 12. Review queue -->
+<div class="card feed light" id="sep-review-queue">
+  <div class="pad" style="padding-bottom:0;">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">How it works</span>
+    </div>
+    <div class="hook sm">The review queue is the whole job now.</div>
+    <div class="support">PALM drafts. Your coordinator reads, edits, and approves. The work moves from typing for hours to reviewing in minutes.</div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/12_billables.png" alt="Billables screen" style="max-height:640px;">
+    </div>
+  </div>
+</div>
+
+<!-- 13. Delayed cost -->
+<div class="card square dark" id="sep-delayed-cost">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Proof</span>
+    </div>
+    <div class="hook sm" style="margin-top:56px;">Every day without an agreement is a day the client can still walk.</div>
+    <div class="support" style="color:#c8d0ce;">The longer the contract sits unwritten, the more time a family has to second-guess. PALM closes the gap between the visit and the signature.</div>
+    <div class="big-stat" style="color:#5eead4; font-size:64px; margin-top:44px;">Visit to signature, same day.</div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 14. Checklist -->
+<div class="card feed dark" id="sep-checklist">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">How it works</span>
+    </div>
+    <div style="margin-top:72px; margin-bottom:48px;">
+      <div class="eyebrow">One recording covers all four</div>
+      <div class="hook sm" style="margin-top:0;">Press stop. Read four finished documents.</div>
+    </div>
+    <div>
+      <div class="check-row done"><div class="box"></div><span class="txt">Transcript, speaker by speaker</span></div>
+      <div class="check-row done"><div class="box"></div><span class="txt">Care plan from what was said</span></div>
+      <div class="check-row done"><div class="box"></div><span class="txt">Billable services captured</span></div>
+      <div class="check-row done"><div class="box"></div><span class="txt">State-specific service contract</span></div>
+      <div class="check-row"><div class="box" style="opacity:1; border-color:#5eead4;"></div><span style="color:#5eead4;">Your part: review and send</span></div>
+    </div>
+    <div class="footerbar">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 15. Typing is not care -->
+<div class="card square teal" id="sep-typing-not-care">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook" style="margin-top:96px;">Typing is not care.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92); font-size:32px;">The value you deliver is in the room with the client. PALM takes the two hours of paperwork so your time goes back to people.</div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 16. Founder review -->
+<div class="card feed dark" id="sep-founder-review">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="quote-mark">&ldquo;</div>
+    <div class="h-serif" style="font-size:92px; line-height:1.1; letter-spacing:-0.02em; margin-top:8px;">
+      Nothing leaves PALM until a person reads it.<br>
+      <span style="color:#5eead4;">The AI drafts. You decide.</span>
+    </div>
+    <div style="margin-top:60px; display:flex; align-items:center; gap:24px;">
+      <div style="width:64px; height:4px; background:#5eead4;"></div>
+      <div style="font-size:29px; font-weight:600; opacity:.8;">The rule behind PALM</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="footerbar">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 17. Blog: service agreement -->
+<div class="card square light" id="sep-blog-agreement">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Guide</span>
+    </div>
+    <div class="hook sm" style="margin-top:60px;">How to write a home care service agreement.</div>
+    <div class="support">A plain guide to the terms every agreement should cover, with a checklist you can keep and reuse.</div>
+    <div class="pill-row">
+      <span class="pill">Free checklist on the blog</span>
+    </div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com/blog</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 18. Blog: assessments -->
+<div class="card square light" id="sep-blog-assessment">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Guide</span>
+    </div>
+    <div class="hook sm" style="margin-top:60px;">The complete guide to client assessments.</div>
+    <div class="support">What to ask, what to capture, and how to turn the visit into documentation without retyping it later.</div>
+    <div class="pill-row">
+      <span class="pill">Read on the blog</span>
+    </div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com/blog</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 19. Blog: care plan template -->
+<div class="card square teal" id="sep-blog-care-plan">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Guide</span>
+    </div>
+    <div class="hook sm" style="margin-top:60px;">A care plan template that writes itself.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92);">See the structure of a strong home care plan, then let PALM build one from your recorded visit.</div>
+    <div class="pill-row">
+      <span class="pill">Template on the blog</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com/blog</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 20. Demo for teams -->
+<div class="card feed dark" id="sep-demo-team">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">For agencies</span>
+    </div>
+    <div class="hook sm">Running care across several locations?</div>
+    <div class="support" style="color:#c8d0ce;">See how PALM keeps documentation consistent for every assessor on every team. Book a walkthrough and bring your questions.</div>
+    <div class="pill-row">
+      <span class="pill">Multi-location teams</span>
+      <span class="pill">Consistent packets</span>
+    </div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/10_assessment_overview.png" alt="Assessment overview" style="max-height:560px;">
+    </div>
+    <div class="footerbar">
+      <span class="url">demo@palmtai.com</span>
+      <span class="steps">Book a demo</span>
+    </div>
+  </div>
+</div>
+
+<!-- 21. Soft app ask -->
+<div class="card square teal" id="sep-app-soft">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">How it works</span>
+    </div>
+    <div class="hook sm" style="margin-top:64px;">PALM lives on your phone.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92);">The same app that records the visit drafts the documents before you reach the car. Ready when your next assessment is.</div>
+    <div class="pill-row">
+      <span class="pill">On the App Store</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com/app</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 22. Sunday without the laptop -->
+<div class="card feed light" id="sep-sunday-alt">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook sm">Sunday night, and the laptop stays shut.</div>
+    <div class="support">No catching up on last week's notes. The documents were done the day each visit happened, so the weekend is yours.</div>
+    <div class="pill-row">
+      <span class="pill">No catch-up charting</span>
+      <span class="pill">Evenings back</span>
+    </div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/14_contract.png" alt="Contract screen" style="max-height:600px;">
+    </div>
+  </div>
+</div>
+
+<!-- 23. Same-day proposal -->
+<div class="card square teal" id="sep-same-day">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Proof</span>
+    </div>
+    <div class="hook" style="margin-top:80px;">Same-day proposal, every time.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92); font-size:32px;">Record the assessment in the morning and hand the family a complete service agreement the same afternoon.</div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 24. 50-state rules -->
+<div class="card feed dark" id="sep-fifty-states">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="hook sm">Not a template with your logo dropped on top.</div>
+    <div class="support" style="color:#c8d0ce;">PALM applies real service-contract rules for all 50 states plus DC, built from what was actually said in the visit.</div>
+    <div class="big-stat" style="color:#5eead4; font-size:96px;">50 states<span style="font-size:44px; opacity:.7; font-weight:700;"> plus DC</span></div>
+    <div class="pill-row">
+      <span class="pill">State-specific</span>
+      <span class="pill">From the recording</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 25. Stop retyping the living room -->
+<div class="card square light" id="sep-stop-retype">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook" style="margin-top:72px;">Stop retyping the living room.</div>
+    <div class="support" style="font-size:32px;">You already had the conversation on the couch. PALM turns that recording into the notes, the billables, and the contract.</div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 26. Minutes not hours -->
+<div class="card feed teal" id="sep-minutes">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Time and relief</span>
+    </div>
+    <div class="hook" style="margin-top:64px;">Minutes, not hours.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92);">The paperwork that used to eat your evening now takes the time it takes to read it and approve it.</div>
+    <div class="big-stat" style="color:#fff; font-size:150px; margin-top:56px;">Minutes.</div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 27. Family waiting -->
+<div class="card square light" id="sep-family-wait">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Proof</span>
+    </div>
+    <div class="hook sm" style="margin-top:60px;">The family is ready. Do not make them wait on paper.</div>
+    <div class="support">They decided during the visit. PALM has the agreement drafted before the moment passes, so you can move while they are sure.</div>
+    <div class="pill-row">
+      <span class="pill">Ready to sign</span>
+      <span class="pill">No delay</span>
+    </div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 28. Clean download -->
+<div class="card square dark" id="sep-download-clean">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Get started</span>
+    </div>
+    <div class="hook" style="margin-top:80px;">Record your next assessment with PALM.</div>
+    <div class="support" style="color:#c8d0ce; font-size:32px;">Get the app, press record at the visit, and review the documents when it ends.</div>
+    <div class="pill-row">
+      <span class="pill">On the App Store</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com/app</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 29. PM rotation: record -->
+<div class="card square teal" id="sep-pm-record">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Step one</span>
+    </div>
+    <div class="big-stat" style="color:rgba(255,255,255,0.55); font-size:96px; margin-top:auto;">01</div>
+    <div class="hook" style="margin-top:12px;">Record the visit.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92); font-size:32px;">Press record at the assessment. That is the only new habit to learn.</div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 30. PM rotation: review -->
+<div class="card square light" id="sep-pm-review">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Step two</span>
+    </div>
+    <div class="big-stat" style="color:rgba(13,148,136,0.3); font-size:96px; margin-top:auto;">02</div>
+    <div class="hook" style="margin-top:12px;">Review the draft.</div>
+    <div class="support" style="font-size:32px;">PALM writes the transcript, care plan, billables, and contract. You read and edit.</div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 31. PM rotation: send -->
+<div class="card square dark" id="sep-pm-send">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Step three</span>
+    </div>
+    <div class="big-stat" style="color:rgba(94,234,212,0.4); font-size:96px; margin-top:auto;">03</div>
+    <div class="hook" style="margin-top:12px; color:#f3f6f5;">Send it.</div>
+    <div class="support" style="color:#c8d0ce; font-size:32px;">Approve the agreement and hand it to the family the same day.</div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 32. PM rotation: evenings -->
+<div class="card square teal" id="sep-pm-evenings">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">The result</span>
+    </div>
+    <div class="hook" style="margin-top:auto;">Keep your evenings.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92); font-size:32px;">The paperwork finished when the visit did. The rest of the night is yours.</div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
