@@ -125,6 +125,42 @@ def fb_post_photo(image: str, caption: str) -> dict:
     return _check(r, "FB photo post")
 
 
+def fb_page_has_post_on(date_str: str) -> bool:
+    """True if the Page already has a scheduled or published post for the given
+    ET date. Used by the AM runner so it only posts the day's Facebook photo
+    when no natively scheduled post (Meta Business Suite) covers that day.
+    On any API error this returns True (skip posting) so a broken check can
+    never cause a double post."""
+    import datetime as dt
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("America/New_York")
+    day = dt.date.fromisoformat(date_str)
+    start = int(dt.datetime.combine(day, dt.time.min, tz).timestamp())
+    end = start + 86400
+    try:
+        r = requests.get(
+            f"{GRAPH}/{PAGE_ID}/scheduled_posts",
+            params={"fields": "id,scheduled_publish_time", "limit": 50,
+                    "access_token": PAGE_TOKEN},
+            timeout=60,
+        )
+        for post in _check(r, "FB scheduled_posts").get("data", []):
+            ts = post.get("scheduled_publish_time")
+            if ts and start <= int(ts) < end:
+                return True
+        r = requests.get(
+            f"{GRAPH}/{PAGE_ID}/published_posts",
+            params={"since": start, "until": end, "fields": "id,created_time",
+                    "limit": 10, "access_token": PAGE_TOKEN},
+            timeout=60,
+        )
+        return bool(_check(r, "FB published_posts").get("data"))
+    except (PostError, requests.RequestException) as e:
+        print(f"FB schedule check WARN (assuming a post exists): {e}", file=sys.stderr)
+        return True
+
+
 def fb_post_video(video: str, caption: str) -> dict:
     local = resolve_local(video)
     data = {"description": caption, "access_token": PAGE_TOKEN}

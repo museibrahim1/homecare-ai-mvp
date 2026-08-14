@@ -7,7 +7,12 @@ Old Jul–Aug campaign calendars are retired.
 AM slot (11:30 AM ET): date-specific Meta posts + LinkedIn on scheduled days.
 PM slot (6:30 PM ET): rotating sep-pm library on Meta + LinkedIn.
 
-Run via GitHub Actions twice daily. Dedupes per date+slot in .posted_log.json.
+AM Facebook photos: posted by this runner unless the Page already has a
+natively scheduled (Meta Business Suite) or published post for the day. The
+old local-Mac schedule_meta_fb.py flow is retired, so this is the default path.
+
+Run via GitHub Actions twice daily. Dedupes per platform per date+slot in
+.posted_log.json; re-running a partial day fills only the missing platforms.
 
 Manual usage:
   python3 scripts/social/run_scheduled_posts.py --slot am
@@ -25,6 +30,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from post_to_meta import (  # noqa: E402
+    fb_page_has_post_on,
     fb_post_photo,
     fb_post_video,
     ig_publish_image,
@@ -126,53 +132,72 @@ def threads_safe(caption: str, limit: int = 500) -> str:
     return cut.rstrip()
 
 
-def run_meta(date: str, slot: str, dry: bool) -> dict | None:
-    """Publish IG + Threads (+ FB for PM slot and videos). AM FB photos stay natively scheduled."""
+def run_meta(date: str, slot: str, dry: bool, prior: dict | None = None) -> dict | None:
+    """Publish IG + FB + Threads. FB photos in the AM slot are only posted when
+    the Page has no natively scheduled post for the day (Meta Business Suite
+    scheduling was retired with the local Mac flow, so the runner is now the
+    default FB path). Platforms already recorded in `prior` are skipped, so a
+    re-run of a partial day fills the gaps without double-posting."""
     entry = get_meta_pm(date) if slot == "pm" else get_meta_am(date)
     if entry is None:
         return None
     media, caption = entry
     caption = _fmt_meta(caption)
     is_video = media.endswith(".mp4")
-    post_fb = slot == "pm" or is_video
     if dry:
         platforms = ["IG Reel" if is_video else "IG", "Threads"]
-        if post_fb:
-            platforms.append("FB")
+        platforms.append("FB" if (slot == "pm" or is_video) else "FB (if no native post that day)")
         print(f"{date} {slot}: WOULD post {media} to {' + '.join(platforms)}:\n---\n{caption}\n---")
         return {"dry": True}
     require_meta_env()
-    results: dict = {}
-    if is_video:
-        ig = ig_publish_reel(media, caption)
-        results["ig"] = ig.get("id")
-        print(f"IG Reel OK: {results['ig']}")
+    results: dict = dict(prior or {})
+    if "ig" not in results:
+        if is_video:
+            ig = ig_publish_reel(media, caption)
+            results["ig"] = ig.get("id")
+            print(f"IG Reel OK: {results['ig']}")
+        else:
+            ig = ig_publish_image(media, caption)
+            results["ig"] = ig.get("id")
+            print(f"IG OK: {results['ig']}")
     else:
-        ig = ig_publish_image(media, caption)
-        results["ig"] = ig.get("id")
-        print(f"IG OK: {results['ig']}")
-    if post_fb:
+        print(f"IG already posted ({results['ig']}), skipping")
+    if "fb" not in results:
+        post_fb = slot == "pm" or is_video or not fb_page_has_post_on(date)
+        if post_fb:
+            try:
+                fb = fb_post_video(media, caption) if is_video else fb_post_photo(media, caption)
+                results["fb"] = fb.get("id")
+                results.pop("fb_error", None)
+                print(f"FB OK: {results['fb']}")
+            except Exception as e:
+                results["fb_error"] = str(e)[:200]
+                print(f"FB WARN: {e}", file=sys.stderr)
+        else:
+            print("FB: page already has a post for this day, skipping AM photo")
+    else:
+        print(f"FB already posted ({results['fb']}), skipping")
+    if "th" not in results:
         try:
-            fb = fb_post_video(media, caption) if is_video else fb_post_photo(media, caption)
-            results["fb"] = fb.get("id")
-            print(f"FB OK: {results['fb']}")
+            th = threads_post(threads_safe(caption), video=media) if is_video else threads_post(threads_safe(caption), image=media)
+            results["th"] = th.get("id")
+            results.pop("th_error", None)
+            print(f"Threads OK: {results['th']}")
         except Exception as e:
-            results["fb_error"] = str(e)[:200]
-            print(f"FB WARN: {e}", file=sys.stderr)
-    try:
-        th = threads_post(threads_safe(caption), video=media) if is_video else threads_post(threads_safe(caption), image=media)
-        results["th"] = th.get("id")
-        print(f"Threads OK: {results['th']}")
-    except Exception as e:
-        results["th_error"] = str(e)[:200]
-        print(f"Threads WARN: {e}", file=sys.stderr)
+            results["th_error"] = str(e)[:200]
+            print(f"Threads WARN: {e}", file=sys.stderr)
+    else:
+        print(f"Threads already posted ({results['th']}), skipping")
     return results
 
 
-def run_linkedin(date: str, slot: str, dry: bool) -> dict | None:
+def run_linkedin(date: str, slot: str, dry: bool, prior: dict | None = None) -> dict | None:
     entry = get_linkedin_pm(date) if slot == "pm" else get_linkedin_am(date)
     if entry is None:
         return None
+    if prior and prior.get("post_urn"):
+        print(f"LinkedIn already posted ({prior['post_urn']}), skipping")
+        return prior
     if slot == "pm":
         media, body, comment = entry
         kind = "image"
@@ -206,15 +231,15 @@ def main() -> int:
         return 0
 
     log = load_log()
-    if log_key in log and not args.dry_run:
-        print(f"{log_key}: already posted ({log[log_key]}). Skipping.")
-        return 0
+    prior = log.get(log_key, {}) if not args.dry_run else {}
+    if prior:
+        print(f"{log_key}: partial or prior entry found, resuming (already posted platforms are skipped).")
 
     results: dict = {}
-    meta_res = run_meta(date, args.slot, args.dry_run)
+    meta_res = run_meta(date, args.slot, args.dry_run, prior.get("meta"))
     if meta_res is not None:
         results["meta"] = meta_res
-    li_res = run_linkedin(date, args.slot, args.dry_run)
+    li_res = run_linkedin(date, args.slot, args.dry_run, prior.get("linkedin"))
     if li_res is not None:
         results["linkedin"] = li_res
 
