@@ -76,12 +76,14 @@ def build_html(date: str, picks: list[dict]) -> str:
     letters = "ABC"
     for i, row in enumerate(picks):
         letter = letters[i]
+        li_words = len(row["linkedin"].split())
+        th_words = len(row["threads"].split())
         li_blocks += f"""
         <div style="border:1px solid #e2e8f0;border-radius:12px;margin:0 0 14px;overflow:hidden;">
           <div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;">
             <strong>LinkedIn option {letter}</strong>
             <span style="color:#0d9488;margin-left:8px;">{html.escape(row['topic'])}</span>
-            <span style="color:#94a3b8;font-size:12px;margin-left:8px;">{html.escape(row['pillar'])} · {row['id']}</span>
+            <span style="color:#94a3b8;font-size:12px;margin-left:8px;">{html.escape(row['pillar'])} · {row['id']} · {li_words} words</span>
           </div>
           <div style="padding:14px;font-size:14px;line-height:1.55;color:#334155;">{esc(row['linkedin'])}</div>
         </div>"""
@@ -90,7 +92,7 @@ def build_html(date: str, picks: list[dict]) -> str:
           <div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;">
             <strong>Threads option {letter}</strong>
             <span style="color:#0d9488;margin-left:8px;">{html.escape(row['topic'])}</span>
-            <span style="color:#94a3b8;font-size:12px;margin-left:8px;">{row['id']}</span>
+            <span style="color:#94a3b8;font-size:12px;margin-left:8px;">{row['id']} · {th_words} words</span>
           </div>
           <div style="padding:14px;font-size:14px;line-height:1.55;color:#334155;">{esc(row['threads'])}</div>
         </div>"""
@@ -99,9 +101,10 @@ def build_html(date: str, picks: list[dict]) -> str:
     <div style="font-family:'Segoe UI',-apple-system,Arial,sans-serif;max-width:680px;margin:0 auto;color:#0f172a;">
       <h2 style="color:#0d9488;margin-bottom:6px;">Engagement picks for {label}</h2>
       <p style="font-size:14px;color:#475569;line-height:1.6;">
-        Written in your voice. First person. Short. Home care specific.
-        <strong>I will not post these unless you reply with what you want.</strong>
-        Edit freely before I post. Kill anything that still sounds off.
+        Full LinkedIn posts in your voice. Multi-paragraph. Specific. One real question at the end.
+        Modeled on your live LinkedIn writing, not short punchy captions.
+        <strong>I will not post these unless you reply.</strong>
+        Edit freely, or paste a rewrite and I will use your words.
       </p>
       <p style="font-size:14px;color:#475569;line-height:1.6;">
         Reply like this:<br>
