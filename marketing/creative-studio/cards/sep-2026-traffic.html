@@ -63,6 +63,15 @@
     .math-line .big { font-size: 96px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
     .math-line .lbl { font-size: 30px; font-weight: 600; opacity: 0.72; }
     .math-rule { width: 100%; height: 4px; background: rgba(255,255,255,0.22); margin: 36px 0; }
+    .qr-row { display: flex; align-items: center; gap: 32px; margin-top: 40px; }
+    .qr-box {
+      width: 220px; height: 220px; background: #fff; border-radius: 24px;
+      padding: 18px; box-shadow: 0 16px 40px rgba(0,0,0,0.18); flex-shrink: 0;
+    }
+    .qr-box.lg { width: 300px; height: 300px; }
+    .qr-box img { width: 100%; height: 100%; display: block; }
+    .qr-text { font-size: 32px; font-weight: 700; line-height: 1.25; }
+    .qr-text .sub { font-size: 26px; font-weight: 500; opacity: 0.7; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -115,11 +124,18 @@
       <span class="div"></span>
       <span class="tag">Trust and accuracy</span>
     </div>
-    <div class="hook sm" style="margin-top:56px;">Said once. Almost never invoiced.</div>
-    <div class="support" style="color:#c8d0ce;">A client mentions help with bathing partway through the assessment. It is easy to lose when you write the plan from memory that evening. PALM captures every billable service from what was actually said.</div>
-    <div class="pill-row">
-      <span class="pill">Bathing assistance</span>
-      <span class="pill">Captured, not recalled</span>
+    <div style="margin-top:52px; display:flex; gap:44px; align-items:center;">
+      <div style="flex:1;">
+        <div class="hook sm" style="margin-top:0;">Said once. Almost never invoiced.</div>
+        <div class="support" style="color:#c8d0ce;">A client mentions help with bathing partway through the assessment. It is easy to lose when you write the plan from memory that evening. PALM captures every billable service from what was actually said.</div>
+        <div class="pill-row">
+          <span class="pill">Bathing assistance</span>
+          <span class="pill">Captured, not recalled</span>
+        </div>
+      </div>
+      <div class="phone" style="width:320px; flex-shrink:0;">
+        <img class="screen" src="../assets/12_billables.png">
+      </div>
     </div>
     <div class="footerbar" style="margin-top:auto;">
       <span class="url">palmcareai.com</span>
@@ -520,10 +536,16 @@
       <span class="div"></span>
       <span class="tag">How it works</span>
     </div>
-    <div class="hook sm" style="margin-top:64px;">PALM lives on your phone.</div>
+    <div class="hook sm" style="margin-top:44px;">PALM lives on your phone.</div>
     <div class="support" style="color:rgba(255,255,255,0.92);">The same app that records the visit drafts the documents before you reach the car. Ready when your next assessment is.</div>
-    <div class="pill-row">
-      <span class="pill">On the App Store</span>
+    <div style="margin-top:auto; display:flex; align-items:center; gap:44px;">
+      <div class="phone" style="width:300px; flex-shrink:0;">
+        <img class="screen" src="../assets/03_record.png">
+      </div>
+      <div class="qr-row" style="margin-top:0;">
+        <div class="qr-box"><img src="../assets/palm-appstore-qr.png"></div>
+        <div class="qr-text">Scan to download<div class="sub">palmcareai.com/app</div></div>
+      </div>
     </div>
     <div class="footerbar" style="margin-top:auto;">
       <span class="url">palmcareai.com/app</span>
@@ -662,10 +684,11 @@
       <span class="div"></span>
       <span class="tag">Get started</span>
     </div>
-    <div class="hook" style="margin-top:80px;">Record your next assessment with PALM.</div>
+    <div class="hook" style="margin-top:64px;">Record your next assessment with PALM.</div>
     <div class="support" style="color:#c8d0ce; font-size:32px;">Get the app, press record at the visit, and review the documents when it ends.</div>
-    <div class="pill-row">
-      <span class="pill">On the App Store</span>
+    <div class="qr-row" style="margin-top:auto;">
+      <div class="qr-box lg"><img src="../assets/palm-appstore-qr.png"></div>
+      <div class="qr-text">Scan to download<div class="sub">palmcareai.com/app · 14 days free</div></div>
     </div>
     <div class="footerbar" style="margin-top:auto;">
       <span class="url">palmcareai.com/app</span>
@@ -683,9 +706,16 @@
       <span class="div"></span>
       <span class="tag">Step one</span>
     </div>
-    <div class="big-stat" style="color:rgba(255,255,255,0.55); font-size:96px; margin-top:auto;">01</div>
-    <div class="hook" style="margin-top:12px;">Record the visit.</div>
-    <div class="support" style="color:rgba(255,255,255,0.92); font-size:32px;">Press record at the assessment. That is the only new habit to learn.</div>
+    <div style="margin-top:44px; display:flex; gap:40px; align-items:center;">
+      <div style="flex:1;">
+        <div class="big-stat" style="color:rgba(255,255,255,0.55); font-size:88px; margin-top:0;">01</div>
+        <div class="hook" style="margin-top:8px;">Record the visit.</div>
+        <div class="support" style="color:rgba(255,255,255,0.92); font-size:30px;">Press record at the assessment. That is the only new habit to learn.</div>
+      </div>
+      <div class="phone" style="width:300px; flex-shrink:0;">
+        <img class="screen" src="../assets/08_recording_active.png">
+      </div>
+    </div>
     <div class="footerbar" style="margin-top:auto;">
       <span class="url">palmcareai.com</span>
       <span class="steps">Palm It</span>
@@ -702,9 +732,16 @@
       <span class="div"></span>
       <span class="tag">Step two</span>
     </div>
-    <div class="big-stat" style="color:rgba(13,148,136,0.3); font-size:96px; margin-top:auto;">02</div>
-    <div class="hook" style="margin-top:12px;">Review the draft.</div>
-    <div class="support" style="font-size:32px;">PALM writes the transcript, care plan, billables, and contract. You read and edit.</div>
+    <div style="margin-top:44px; display:flex; gap:40px; align-items:center;">
+      <div style="flex:1;">
+        <div class="big-stat" style="color:rgba(13,148,136,0.3); font-size:88px; margin-top:0;">02</div>
+        <div class="hook" style="margin-top:8px;">Review the draft.</div>
+        <div class="support" style="font-size:30px;">PALM writes the transcript, care plan, billables, and contract. You read and edit.</div>
+      </div>
+      <div class="phone" style="width:300px; flex-shrink:0;">
+        <img class="screen" src="../assets/06_visit_overview.png">
+      </div>
+    </div>
     <div class="footerbar" style="color:var(--ink); margin-top:auto;">
       <span class="url">palmcareai.com</span>
       <span class="steps">Palm It</span>
@@ -721,9 +758,16 @@
       <span class="div"></span>
       <span class="tag">Step three</span>
     </div>
-    <div class="big-stat" style="color:rgba(94,234,212,0.4); font-size:96px; margin-top:auto;">03</div>
-    <div class="hook" style="margin-top:12px; color:#f3f6f5;">Send it.</div>
-    <div class="support" style="color:#c8d0ce; font-size:32px;">Approve the agreement and hand it to the family the same day.</div>
+    <div style="margin-top:44px; display:flex; gap:40px; align-items:center;">
+      <div style="flex:1;">
+        <div class="big-stat" style="color:rgba(94,234,212,0.4); font-size:88px; margin-top:0;">03</div>
+        <div class="hook" style="margin-top:8px; color:#f3f6f5;">Send it.</div>
+        <div class="support" style="color:#c8d0ce; font-size:30px;">Approve the agreement and hand it to the family the same day.</div>
+      </div>
+      <div class="phone" style="width:300px; flex-shrink:0;">
+        <img class="screen" src="../assets/14_contract.png">
+      </div>
+    </div>
     <div class="footerbar" style="margin-top:auto;">
       <span class="url">palmcareai.com</span>
       <span class="steps">Palm It</span>
@@ -745,6 +789,153 @@
     <div class="footerbar" style="margin-top:auto;">
       <span class="url">palmcareai.com</span>
       <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 33. Trust: nothing leaves without a human -->
+<div class="card feed dark" id="sep-trust-review">
+  <div class="pad" style="padding-bottom:0;">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="hook sm" style="margin-top:44px;">Nothing leaves without a human.</div>
+    <div class="support" style="color:#c8d0ce;">AI drafts. Your coordinator approves. That is how we keep families safe.</div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/06_visit_overview.png" alt="Visit overview screen" style="max-height:640px;">
+    </div>
+  </div>
+</div>
+
+<!-- 34. Trust: built from what was actually said -->
+<div class="card feed light" id="sep-trust-said">
+  <div class="pad" style="padding-bottom:0;">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="hook sm">Built from what was actually said.</div>
+    <div class="support">Speaker-separated transcript. No guessing from memory at 9pm.</div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/11_transcript.png" alt="Transcript screen" style="max-height:640px;">
+    </div>
+  </div>
+</div>
+
+<!-- 35. Trust: you stay in control -->
+<div class="card square teal" id="sep-trust-control">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="hook" style="margin-top:88px;">You stay in control.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92); font-size:32px;">Edit before send. Reject a draft. Your judgment stays the last step.</div>
+    <div class="pill-row">
+      <span class="pill">Edit before send</span>
+      <span class="pill">Reject a draft</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 36. Build together with agency owners -->
+<div class="card feed light" id="sep-build-together">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Proof</span>
+    </div>
+    <div class="hook sm" style="margin-top:56px;">We build PALM with agency owners.</div>
+    <div class="support">Tell us what broke in your paperwork week. Your feedback shapes the next release.</div>
+    <div class="pill-row">
+      <span class="pill">Owner feedback</span>
+      <span class="pill">Shipped, not shelved</span>
+    </div>
+    <div class="phone-wrap" style="margin-top:44px;">
+      <img src="../assets/10_assessment_overview.png" alt="Assessment overview" style="max-height:560px;">
+    </div>
+    <div class="footerbar" style="color:var(--ink);">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">demo@palmtai.com</span>
+    </div>
+  </div>
+</div>
+
+<!-- 37. Safety: AI drafts, caregivers decide -->
+<div class="card square dark" id="sep-safety-draft">
+  <div class="pad">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="hook" style="margin-top:88px;">AI drafts. Caregivers decide.</div>
+    <div class="support" style="color:#c8d0ce; font-size:32px;">Safety is not a slogan. It is a review queue before anything reaches a family.</div>
+    <div class="pill-row">
+      <span class="pill">Review queue</span>
+      <span class="pill">Human approval</span>
+    </div>
+    <div class="footerbar" style="margin-top:auto;">
+      <span class="url">palmcareai.com</span>
+      <span class="steps">Palm It</span>
+    </div>
+  </div>
+</div>
+
+<!-- 38. QR: scan, download, record -->
+<div class="card square light" id="sep-qr-download">
+  <div class="pad">
+    <div class="brandbar" style="color:var(--ink)">
+      <img class="hand" src="../assets/logo-black.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Get started</span>
+    </div>
+    <div class="hook sm" style="margin-top:44px;">Scan. Download. Record your next visit.</div>
+    <div style="margin-top:auto; display:flex; align-items:center; gap:44px;">
+      <div class="qr-box lg"><img src="../assets/palm-appstore-qr.png"></div>
+      <div class="phone" style="width:300px; flex-shrink:0;">
+        <img class="screen" src="../assets/03_record.png">
+      </div>
+    </div>
+    <div class="footerbar" style="color:var(--ink); margin-top:auto;">
+      <span class="url">palmcareai.com/app</span>
+      <span class="steps">14 days free</span>
+    </div>
+  </div>
+</div>
+
+<!-- 39. QR: try it on one visit -->
+<div class="card feed teal" id="sep-qr-trust">
+  <div class="pad" style="padding-bottom:0;">
+    <div class="brandbar">
+      <img class="hand" src="../assets/hand-white.png">
+      <span class="name">PALM</span>
+      <span class="div"></span>
+      <span class="tag">Trust and accuracy</span>
+    </div>
+    <div class="hook sm" style="margin-top:44px;">Try it on one visit. Keep the review step.</div>
+    <div class="support" style="color:rgba(255,255,255,0.92);">Download on iPhone. Judge the draft yourself.</div>
+    <div class="qr-row" style="margin-top:36px;">
+      <div class="qr-box"><img src="../assets/palm-appstore-qr.png"></div>
+      <div class="qr-text" style="color:#fff;">Scan to download<div class="sub" style="opacity:0.85;">palmcareai.com/app</div></div>
+    </div>
+    <div class="phone-wrap" style="margin-top:36px;">
+      <img src="../assets/14_contract.png" alt="Contract screen" style="max-height:440px;">
     </div>
   </div>
 </div>
